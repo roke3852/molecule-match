@@ -46,14 +46,23 @@ h2{font-size:15px;color:var(--mute);margin:18px 2px 8px;font-weight:600}
 .mv button{width:32px;height:28px;border:1px solid var(--line);background:#faf6f0;border-radius:8px;font-size:13px;cursor:pointer}
 .mv button:disabled{opacity:.3}
 .editing .app{padding-right:52px}
-.empty{color:var(--mute);font-size:13px;padding:6px 2px}
+.empty{color:var(--mute);font-size:14px;padding:28px 12px;text-align:center;background:var(--card);border:1px dashed var(--line);border-radius:16px;line-height:1.6}
+.tabs{display:flex;gap:4px;background:#ebe2d6;padding:4px;border-radius:12px;margin-bottom:12px}
+.tabs button{flex:1;font:inherit;font-size:15px;font-weight:600;border:0;background:none;color:var(--mute);padding:9px 6px;border-radius:9px;cursor:pointer}
+.tabs button.on{background:var(--card);color:var(--ink);box-shadow:0 1px 3px rgba(59,42,32,.15)}
+.tabs .cnt{font-size:12px;font-weight:500;margin-left:4px;opacity:.7}
 footer{margin-top:28px;font-size:12px;color:var(--mute);text-align:center;line-height:1.6}
 </style>
 </head>
 <body>
 <main>
   <h1>Roke 的 App</h1>
-  <div class="sub">點一下就能打開・點 ☆ 加入我的最愛</div>
+  <div class="sub">點一下就能打開・點 ☆ 加入我的最愛分頁</div>
+
+  <div class="tabs" id="tabs">
+    <button data-tab="all">全部 App<span class="cnt" id="cntAll"></span></button>
+    <button data-tab="fav">⭐ 我的最愛<span class="cnt" id="cntFav"></span></button>
+  </div>
 
   <div class="bar">
     <label for="sort">排序</label>
@@ -99,7 +108,7 @@ function load(){ try{ return JSON.parse(localStorage.getItem(KEY)) || null }catc
 function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)) }catch(e){} }
 let S = load();
 if(!S){ /* 第一次打開：把目前版本都當成看過，不要整頁都是「新版」 */
-  S = { fav:[], sort:"default", order:[], seen:{}, opens:{}, last:{}, hideNotice:"" };
+  S = { fav:[], tab:"all", sort:"default", order:[], seen:{}, opens:{}, last:{}, hideNotice:"" };
   APPS.forEach(a => S.seen[a.path] = a.ver);
   save();
 }
@@ -157,10 +166,7 @@ function card(a, i, n){
   </div>`;
 }
 
-function section(title, list){
-  if(!list.length) return "";
-  return `<h2>${title}</h2><div class="grid">${list.map((a,i)=>card(a,i,list.length)).join("")}</div>`;
-}
+const visible = () => sorted(APPS).filter(a => S.tab !== "fav" || isFav(a));
 
 function render(){
   document.getElementById("sort").value = S.sort;
@@ -176,19 +182,24 @@ function render(){
     ? `<div class="notice">🔔<div><b>${news.length} 個 App 有新版</b>：${news.map(a=>`${a.name} v${a.ver}`).join("、")}</div><button class="x" id="closeNotice" aria-label="關閉">✕</button></div>`
     : "";
 
-  const all = sorted(APPS);
-  const favs = all.filter(isFav), rest = all.filter(a=>!isFav(a));
+  /* 分頁 */
+  if(S.tab !== "fav") S.tab = "all";
+  document.querySelectorAll("#tabs button").forEach(b => b.classList.toggle("on", b.dataset.tab === S.tab));
+  document.getElementById("cntAll").textContent = APPS.length;
+  document.getElementById("cntFav").textContent = APPS.filter(isFav).length;
+
+  const list = visible();
   const el = document.getElementById("list");
   el.className = editing ? "editing" : "";
-  el.innerHTML = favs.length
-    ? section("⭐ 我的最愛", favs) + section("全部 App", rest)
-    : section("全部 App", rest);
+  el.innerHTML = list.length
+    ? `<div class="grid">${list.map((a,i)=>card(a,i,list.length)).join("")}</div>`
+    : `<div class="empty">還沒有最愛的 App<br>到「全部 App」點卡片右上角的 ☆ 就會加進來</div>`;
 }
 
-/* 在自訂順序中移動（只在同一區塊內跟上下一個交換） */
+/* 在自訂順序中移動（跟目前分頁裡的上下一個交換） */
 function move(path, dir){
   const all = sorted(APPS);
-  const group = all.filter(a => isFav(a) === S.fav.includes(path));
+  const group = visible();
   const i = group.findIndex(a=>a.path===path), j = i + dir;
   if(j<0 || j>=group.length) return;
   const order = all.map(a=>a.path);
@@ -202,6 +213,10 @@ document.getElementById("sort").addEventListener("change", e=>{
   if(S.sort === "custom" && !S.order.length) S.order = APPS.map(a=>a.path);
   if(S.sort !== "custom") editing = false;
   save(); render();
+});
+document.getElementById("tabs").addEventListener("click", e=>{
+  const b = e.target.closest("[data-tab]"); if(!b) return;
+  S.tab = b.dataset.tab; save(); render(); window.scrollTo(0,0);
 });
 document.getElementById("editBtn").addEventListener("click", ()=>{ editing = !editing; render(); });
 
