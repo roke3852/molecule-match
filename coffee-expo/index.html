@@ -101,7 +101,7 @@ nav.tabs button.on{color:var(--accent);border-color:var(--accent);font-weight:70
 </head>
 <body>
 <header id="hdr">
-  <h1>☕ 2026 台灣咖啡展 · 南港1館 4F <span id="ver" style="font-size:11px;font-weight:600;background:rgba(255,255,255,.22);padding:2px 7px;border-radius:8px;vertical-align:2px">v1.5</span></h1>
+  <h1>☕ 2026 台灣咖啡展 · 南港1館 4F <span id="ver" style="font-size:11px;font-weight:600;background:rgba(255,255,255,.22);padding:2px 7px;border-radius:8px;vertical-align:2px">v1.6</span></h1>
   <div class="sub">雙指縮放地圖 · 點展位看介紹 · 打勾記錄已逛 · 深咖啡底＝名店；靛藍粗框＋★＝我的重點／知名品牌</div>
   <div class="prog"><span id="progtx">已逛 0 / 0</span><div class="bar"><i id="progbar"></i></div></div>
 </header>
@@ -136,7 +136,7 @@ nav.tabs button.on{color:var(--accent);border-color:var(--accent);font-weight:70
 
 <section class="view" id="v-list">
   <div class="listtools">
-    <input id="q" placeholder="搜尋廠商名稱或攤位號，例如 RUFOUS、M330">
+    <input id="q" placeholder="搜尋廠商、攤位號或品牌型號，例如 M330、Fellow、LELIT">
     <div class="chips">
       <button class="chip on" data-lf="all">全部</button>
       <button class="chip" data-lf="feat">名店</button>
@@ -148,6 +148,10 @@ nav.tabs button.on{color:var(--accent);border-color:var(--accent);font-weight:70
       <button class="chip" data-lf="N">N 區</button>
       <button class="chip" data-lf="k">可可</button>
       <button class="chip" data-lf="i">國際館</button>
+      <button class="chip" data-lf="tg">🫖 手沖器材</button>
+      <button class="chip" data-lf="te">⚙️ 義式・烘豆</button>
+      <button class="chip" data-lf="tb">🌱 生豆・產區</button>
+      <button class="chip" data-lf="tw">💧 水・保鮮・吧台</button>
     </div>
   </div>
   <div id="list"></div>
@@ -162,6 +166,10 @@ nav.tabs button.on{color:var(--accent);border-color:var(--accent);font-weight:70
     • M1309 Thanaka Coffee：緬甸豆限時杯測會（時段依攤位當日公告）<br>
     <b>💡 逛展小提醒</b><br>
     • 手沖器材順路：1Zpresso M1120 → Femobook N1106 → Brewista N1114，都在上方走道，可以和冠軍市集 L1108 排同一條動線。<br>
+    • 器材第二圈：咖啡地圖 L202 → CAFEC M607 → 十億國際 M520（Fellow Opus 2）→ 泰摩 N624 → 奧利×陶作坊 N914；手搖磨豆機再看 iOmill M1327、醇鮮 M1204。<br>
+    • 想自己烘豆：愛利奧 N524（Bullet R2 Pro）、喜奈而 N1405（家用烘豆機＋色度儀）、OLOMO M1326、墨人 M1330；生豆找圓石 L518、守成 N606、萬友 M1314、團咖啡 N1026、捷可星 N1325。<br>
+    • 台灣產區：阿里山特富野 N1330、嘉義縣政府 M208、灣豆福 I1010、屏東 L106、花蓮 I204（I 區不在平面圖上）。<br>
+    • 廠商列表可以用「🫖 手沖器材／⚙️ 義式・烘豆／🌱 生豆・產區／💧 水・保鮮・吧台」主題篩選，也能搜尋型號（例如 Opus、K-Ultra）。<br>
     • L 區最左側一排連著逛：艾緹 L008 → 金果 L009 → 走走 L010 → 緩緩 L011 → 樂波波 L012。<br>
     • 有香咖啡 M1308（藝伎日曬／水洗對照）和 Thanaka Coffee M1309（緬甸豆限時杯測）相鄰，一次逛完。<br>
     • 日本名店集合在 N806 根本在旅行，旁邊 N901 若水有現烤鯛魚燒。<br>
@@ -436,7 +444,13 @@ const EXTRA = [
 ["M330","RUFOUS COFFEE ROASTERS","c","M320"],
 ["M908","Ten Past Ten","c","M904"],
 ["N901","若水（現烤鯛魚燒）","c","N806"],
-["I1010","灣豆福工作室","c",null]
+["I1010","灣豆福工作室","c",null],
+["M607","三洋產業 CAFEC","c","M608"],
+["M710","KOGA 許家陶藝","c","M820"],
+["M803","OATLY!","c","M832"],
+["N1405","喜奈而","c","N1403"],
+["L1125","全華商行","c","L1126"],
+["I204","花蓮咖啡","c",null]
 ];
 const NEAR = {};
 EXTRA.forEach(([code,name,cat,near])=>{
@@ -494,6 +508,63 @@ const FEAT = {
 "I1010":"灣豆福工作室：主打台灣「阿里山藝伎」，一次展出四個莊園、三種處理法的阿里山藝伎，適合對台灣高海拔精品豆有興趣的人。可以和嘉義縣政府阿里山產區館（M208）一起逛。（攤位號 I1010 不在 4F 平面圖的 L／M／N 區，請到現場依大會指標或服務台確認位置）"
 };
 
+// 一般攤位介紹（不算名店，只補充資料）
+const INFO = {
+"M1120":"",
+"M520":"",
+"N624":"",
+"M607":"三洋產業 CAFEC：日本濾杯與濾紙品牌，主打依烘焙度／流速分開的專用濾紙（淺焙用、深焙用）與花瓣濾杯。（平面圖上沒標出，大約在 M608 紅琉璃附近，以現場為準）",
+"N914":"",
+"N1114":"",
+"L202":"咖啡地圖：TCOD 台中原創品牌獎，主打鑽石手沖壺、五芯／六芯手搖磨豆機、方鏡電子秤。",
+"M1204":"醇鮮磨豆機（鑪集國際）：電動磨豆機品牌。（平面圖上寫「鐘集國際」，同一攤）",
+"M1327":"iOmill 初元：Solo、Concerto 手搖磨豆機。",
+"M710":"KOGA 許家陶藝：陶瓷濾杯，展出「醜小鴨濾杯 4.0」。（平面圖上沒標出，大約在 M 區中段、M820 自家附近，以現場為準）",
+"N214":"梅珍香：玩家級家用與小型商用義式設備代理，LELIT MaraX3、ROCKET 義式機，EUREKA ORO Zeus 磨豆機。",
+"M820":"自家 CICA Group：代理瑞士 FRANKE 全自動咖啡機、義大利 LaCimbali、Faemina、Casadio 義式機與 Eureka 磨豆機。",
+"N524":"愛利奧 Aillio：丹麥研發、台灣製造的電磁感應（無明火）烘豆機 Bullet R2 Pro，適合家裡或工作室精準控溫烘豆。",
+"M1326":"OLOMO 巨格科技：台灣研發製造的專業烘豆機品牌。",
+"M1330":"墨人：台灣研發的 GoGoLEE AI 全自動瓦斯咖啡烘豆機。",
+"N1405":"喜奈而：Caterjoy 家用咖啡烘焙機、COFFLOL 咖啡豆色度儀。（平面圖上沒標出，在 N1403 附近，以現場為準）",
+"L1125":"全華商行：烘豆後燃機（高溫二次燃燒，處理烘豆油煙與異味）。（平面圖上沒標出，在 L1126 附近，以現場為準）",
+"M1227":"良記造機：烘豆後燃機（處理烘豆油煙與異味）。就在 1Zpresso（M1120）旁邊。",
+"L518":"圓石國際：精品生豆進口商，每年產季親赴產地挑微批次，世界各產區都有。旁邊還有蟲子咖啡、KaKaLove、西當普利斯。",
+"N606":"守成咖啡 Haru Coffee：精品莊園豆、COE 競標豆與商用生豆。",
+"M1314":"萬友咖啡國際：台灣主力精品生豆進口批發商，衣索比亞、肯亞、中南美洲各產區。",
+"N1026":"團咖啡：台灣主力精品生豆進口批發商，衣索比亞、肯亞、中南美洲各產區。（平面圖上寫「圍咖啡」，同一攤）",
+"N1325":"捷可星：印度精品羅布斯塔／阿拉比卡，以及肯亞、衣索比亞生豆。",
+"N1330":"阿里山鄒族特富野咖啡：嘉義阿里山特富野社區合作社，高海拔精品水洗與蜜處理豆。可以和嘉義縣政府（M208）、灣豆福（I1010）一起比較阿里山豆。",
+"I204":"花蓮咖啡：地方政府與花蓮產區農友聯合展出台灣東部產區豆。（攤位號 I204 不在 4F 平面圖的 L／M／N 區，請到現場依大會指標或服務台確認位置）",
+"L106":"",
+"N1208":"海諾帝（溢泰實業）：咖啡萃取用水的淨水設備與 TDS 礦物質調整方案。",
+"L1228":"台灣愛惠浦：咖啡用水淨水設備與 TDS／礦物質水質調整方案。",
+"N230":"ANKOMN 因益達：台灣專利旋鈕式真空／氣密保鮮罐，熟豆排氣、防潮儲存。",
+"M803":"OATLY!：經典燕麥奶，吧台植物奶原料。（平面圖上沒標出，大約在 M832 附近，以現場為準）",
+"N204":"台灣麥斯馬汀：歐瑞仕咖啡師植物奶（燕麥奶、椰奶、榛果飲）與開心果醬等吧台原料。"
+};
+// 名店已有介紹的，補一段新資料
+const ADD = {
+"M1120":"本屆展出：手沖淺焙用 ZP6 S、全能型 K-Ultra、義式微調 J-Ultra、Diamond A 等全系列。",
+"M520":"十億國際代理 Fellow（年度新品 Opus 2 錐刀磨豆機）、ORIGAMI 摺紙濾杯、STTOKE 陶瓷保溫杯。",
+"N624":"本屆展出：栗子系列手搖磨豆機、黑鏡電子秤、魚系列溫控手沖壺。",
+"N914":"本屆展出台灣專利「老岩泥流轉 360 濾杯」與「懷汝 U360／U70 濾杯」，用螺旋肋骨與材質特性調整萃取層次。",
+"N1114":"現場有多款新色與限量版手沖壺。",
+"N1106":"Femobook：可拆洗、磁吸結構的錐刀電動磨豆機（充電式／插電式），主力 A4Z、A5、A68。",
+"L106":"另有資料把屏東咖啡列在 L207，以現場為準。"
+};
+for(const k in ADD){ if(!ADD[k]) continue; if(FEAT[k]) FEAT[k]+="\n\n"+ADD[k]; else INFO[k]=(INFO[k]?INFO[k]+"\n\n":"")+ADD[k]; }
+for(const k in INFO){ if(!INFO[k]) delete INFO[k]; }
+
+// 主題：g＝手沖器材、e＝義式／烘豆、b＝生豆／產區、w＝水・保鮮・吧台
+const TOPIC = {g:"🫖 手沖器材",e:"⚙️ 義式・烘豆",b:"🌱 生豆・產區",w:"💧 水・保鮮・吧台"};
+const TOP = {
+g:["M1120","N1106","M520","N624","M607","N914","N1114","L202","M1204","M1327","M710","L701","L1324"],
+e:["N214","M820","N524","M1326","M1330","N1405","L1125","M1227","L928","M1336","M1008"],
+b:["L518","N606","M1314","N1026","N1325","N1330","I204","L106","M208","I1010","M402","M308","M114"],
+w:["N1208","L1228","N230","M803","N204"]
+};
+const topicOf = {}; for(const t in TOP) TOP[t].forEach(c=>{ (topicOf[c]=topicOf[c]||[]).push(t); });
+
 const CAT = {c:"咖啡",k:"可可專區",i:"國際館",e:"大會活動"};
 const COL = {c:"var(--coffee)",k:"var(--cocoa)",i:"var(--intl)",e:"var(--event)"};
 const zoneOf = code => code[0];
@@ -510,6 +581,7 @@ let zoom = 1, mapFilter = "all", selCode = null;
 
 function introOf(b){
   if(FEAT[b[0]]) return FEAT[b[0]];
+  if(INFO[b[0]]) return INFO[b[0]];
   const base = {c:"咖啡相關參展商",k:"可可專區參展商（巧克力／可可製品）",i:"國際館參展商",e:"大會活動"}[b[6]];
   return base + "，攤位 " + b[0] + "。目前沒有更多資料，逛完可在下方寫筆記。";
 }
@@ -674,7 +746,7 @@ function rowHTML(b){
   return `<div class="item ${f?"feat":""} ${s?"star":""} ${v?"done":""}" data-code="${code}">
     <div class="sw" style="background:${COL[cat]}"></div>
     <div class="tx"><div class="nm">${name}${f?'<span class="badge b-gold">名店</span>':""}${s?'<span class="badge b-star">★ 我的重點</span>':""}</div>
-    <div class="meta">${code} · ${zoneOf(code)} 區 · ${CAT[cat]}${b[7]?(NEAR[code]?" · 圖上沒標，在 "+NEAR[code]+" 附近":" · 平面圖上沒有位置"):""}${S.n[code]?" · 📝 "+esc(S.n[code]):""}</div></div>
+    <div class="meta">${code} · ${zoneOf(code)} 區 · ${CAT[cat]}${(topicOf[code]||[]).map(t=>" · "+TOPIC[t]).join("")}${b[7]?(NEAR[code]?" · 圖上沒標，在 "+NEAR[code]+" 附近":" · 平面圖上沒有位置"):""}${S.n[code]?" · 📝 "+esc(S.n[code]):""}</div></div>
     <button class="chk ${v?"on":""}" data-chk="${code}">✓</button></div>`;
 }
 function esc(s){return s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
@@ -684,13 +756,14 @@ function renderList(){
   const qq=q.trim().toLowerCase();
   let arr=B.filter(b=>{
     const c=b[0];
-    if(qq && !(b[1].toLowerCase().includes(qq)||c.toLowerCase().includes(qq)||(S.n[c]||"").toLowerCase().includes(qq))) return false;
+    if(qq && !(b[1].toLowerCase().includes(qq)||c.toLowerCase().includes(qq)||(S.n[c]||"").toLowerCase().includes(qq)||(FEAT[c]||INFO[c]||"").toLowerCase().includes(qq))) return false;
     switch(lf){
       case "feat":return !!FEAT[c];case "star":return !!S.s[c];case "todo":return !S.v[c];case "done":return !!S.v[c];
-      case "L":case "M":case "N":return c[0]===lf;case "k":case "i":return b[6]===lf;default:return true;
+      case "L":case "M":case "N":return c[0]===lf;case "k":case "i":return b[6]===lf;
+      case "tg":case "te":case "tb":case "tw":return (topicOf[c]||[]).includes(lf[1]);default:return true;
     }
   });
-  arr.sort((a,b)=>(FEAT[b[0]]?1:0)-(FEAT[a[0]]?1:0) || cmp(a,b));
+  if(lf[0]==="t") arr.sort(cmp); else arr.sort((a,b)=>(FEAT[b[0]]?1:0)-(FEAT[a[0]]?1:0) || cmp(a,b));
   document.getElementById("list").innerHTML = arr.length? arr.map(rowHTML).join("") : '<div class="empty">沒有符合的廠商</div>';
 }
 function renderMust(){
