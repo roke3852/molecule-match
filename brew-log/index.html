@@ -10,7 +10,7 @@
 :root{
   --bg:#121a2a; --panel:#1c2638; --panel2:#253048; --line:#34405a; --ink:#e9edf4; --muted:#93a0b8; --faint:#5d6a83;
   --teal:#7ccbb9; --teal-soft:rgba(124,203,185,.14); --gold:#f2cf6b; --lilac:#b3a3e6;
-  --hot:#ef8a5b; --warm:#7ccbb9;
+  --hot:#ef8a5b; --warm:#7ccbb9; --room:#b3a3e6;
   --acid:#e8c547; --sweet:#ef8a5b; --bitter:#9c7bd6; --body:#5fa8e0; --astr:#c96a7a; --finish:#7ccbb9; --aroma:#e3a3c9;
   --f-body:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
   --f-mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
@@ -128,7 +128,37 @@ const SEED = [{
          finishNote:"明亮酸值、甜回甘", desc:"甜感下降後，酸苦風味加上圓潤口感，像葡萄柚"}
   },
   summary:"整體酸甜平衡，TDS 偏高，帶來一點後段負面風味。可能因為注水不穩定，悶蒸偏離預期，產生些微苦味。"
+},{
+  id:"2026-11-14-a", date:"2026-11-14", title:"布爾 29cl 60-40 96", recipe:"60-40",
+  bean:"衣索比亞 西達摩 布爾薩 蒙塔莎處理廠 萊吉斯 74185", process:"日曬",
+  roast:"淺", agtron:80,
+  grinder:"Comandante C40 MK4", clicks:29, micron:870,
+  temp:96, dripper:"Orea Brewer（OREA-O）", filter:"93 蛋糕濾紙",
+  dose:12, water:200.5, yield:178.9, tds:1.29, ey:19.2, time:149,
+  goal:"60-40 降一格到 29 格，看能否維持高度酸甜平衡並增加濃郁度",
+  pours:[
+    {ml:60, rate:4, wait:40, style:"繞"},
+    {ml:40, rate:4, wait:30, style:"繞"},
+    {ml:50, rate:4, wait:30, style:"中"},
+    {ml:50, rate:4, wait:30, style:"中"}
+  ],
+  endNote:"2:29 流乾",
+  potAroma:"甜、藥草（比 30 格 60-40 更沉一點）",
+  taste:{
+    hot:{aroma:1, aromaNote:"前：柑橘甜香", aromaBack:1, aromaBackNote:"柑橘香", acid:3.5, sweet:4, bitter:0.5, body:2.5, astr:1, finish:1,
+         finishNote:"酸 1、甘 1、苦 1、澀 1", score:3.5,
+         desc:"相較 30 格口感濃郁很多，甜度上升，平衡度不錯，甜味稍高於酸味。酸味在舌頭兩側呈現明亮卻持久的酸值，有點後段風味。偏正面。"},
+    warm:{label:"中溫", aroma:1, aromaNote:"前：焦糖香", aromaBack:0, acid:3.5, sweet:3.5, bitter:1, body:2, astr:1, finish:null,
+         finishNote:"舌頭兩側微酸", score:3,
+         desc:"Body 明顯下降，酸值依舊明亮，舌頭兩側明顯感受到尾韻悠長的酸感。酸甜平衡度高，但帶一點後段苦味，變成橘子皮＋橘子汁感。正面偏中性。"},
+    room:{aroma:1, aromaNote:"前：焦糖", aromaBack:0, acid:4, sweet:3, bitter:null, body:2, astr:1, finish:null,
+         finishNote:"無特別尾韻", score:2.5,
+         desc:"濃郁檸檬酸感（對比 30 格 60-40 的清爽檸檬酸），些微後段風味，偏中性。"}
+  },
+  summary:"高溫風味偏正向，常溫偏中性。60-40 酸甜平衡的特性還在，但後段風味增加，稍微降低了整體風味的乾淨度。",
+  next:["調整回 30 格，維持 60-40","注水由「繞繞中中」改為「繞繞繞中」，增加中間的擾動度，看能否增加一點 body"]
 }];
+SEED[0].recipe="60-40"; SEED[0].title="布爾 30cl 60-40 96"; SEED[0].taste.warm.label="中常溫";
 
 const LS = "roke-brewlog-v1";
 let store = {added:[], deleted:[], edited:{}};
@@ -145,6 +175,7 @@ function derive(b){
   if(r.ey == null && b.yield && b.tds && b.dose) r.ey = b.yield*b.tds/b.dose;
   r.nPours = (b.pours||[]).length;
   r.bloom = (b.pours||[])[0]?.ml ?? null;
+  r.pourStyle = (b.pours||[]).every(p=>p.style) && (b.pours||[]).length ? b.pours.map(p=>p.style).join("") : null;
   return r;
 }
 
@@ -171,6 +202,14 @@ const FLAVORS = [
   {k:"finish", n:"韻",   c:"var(--finish)"},
   {k:"aroma",  n:"嗅(前)", c:"var(--aroma)"}
 ];
+const STAGES = [
+  {k:"hot",  n:"高溫",   c:"var(--hot)"},
+  {k:"warm", n:"中溫",   c:"var(--warm)"},
+  {k:"room", n:"常溫",   c:"var(--room)"}
+];
+const stageName = (b,st) => b.taste?.[st.k]?.label || st.n;
+const stagesOf = b => STAGES.filter(st => b.taste?.[st.k] && Object.values(b.taste[st.k]).some(v=>v!=null&&v!==""));
+const YOPTS = FLAVORS.concat([{k:"score", n:"整體分數", c:"var(--gold)"}]);
 const PARAMS = [
   {k:"clicks", n:"研磨格數", u:"格", f:v=>v},
   {k:"micron", n:"粒徑", u:"µm", f:v=>v},
@@ -209,7 +248,7 @@ function controlChart(list, opts={}){
     const hl = opts.focus===b.id;
     if(hl) s+=`<line x1="${L}" x2="${px}" y1="${py}" y2="${py}" stroke="#fff" stroke-dasharray="3 3" opacity=".7"/><line x1="${px}" x2="${px}" y1="${py}" y2="${T+ph}" stroke="#fff" stroke-dasharray="3 3" opacity=".7"/>`;
     s+=`<g data-open="${b.id}" style="cursor:pointer"><circle cx="${px}" cy="${py}" r="16" fill="transparent"/><circle cx="${px}" cy="${py}" r="${hl?8:7}" fill="${beanColor(b.bean)}" stroke="#121a2a" stroke-width="2"/></g>`;
-    if(!opts.focus) s+=`<text class="ax" x="${px}" y="${py+20}" text-anchor="middle" style="fill:var(--ink)">${b.date.slice(5).replace("-","/")}</text>`;
+    if(!opts.focus) s+=`<text class="ax" x="${px}" y="${py+20}" text-anchor="middle" style="fill:var(--ink)">${b.date.slice(5).replace("-","/")}${b.clicks!=null?` ${b.clicks}格`:""}</text>`;
   });
   return s+`</svg>`;
 }
@@ -234,10 +273,10 @@ function viewMap(){
 }
 
 /* ================= 參數 × 風味 ================= */
-let corrX="ey", corrY="acid";
+let corrX="clicks", corrY="sweet";
 function viewCorr(){
   const list=brews();
-  const P=PARAMS.find(p=>p.k===corrX), F=FLAVORS.find(f=>f.k===corrY);
+  const P=PARAMS.find(p=>p.k===corrX), F=YOPTS.find(f=>f.k===corrY);
   const pts=list.filter(b=>b[corrX]!=null);
   const vals=pts.map(b=>+b[corrX]);
   let lo=Math.min(...vals), hi=Math.max(...vals);
@@ -248,33 +287,32 @@ function viewCorr(){
   let s=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${P.n}與${F.n}的關係">`;
   s+=`<rect x="${L}" y="${T}" width="${pw}" height="${ph}" fill="#172034" stroke="var(--line)" rx="6"/>`;
   for(let v=0;v<=5;v++) s+=`<line x1="${L}" x2="${L+pw}" y1="${Y(v)}" y2="${Y(v)}" stroke="#25304a"/><text class="ax" x="${L-6}" y="${Y(v)+4}" text-anchor="end">${v}</text>`;
-  for(let i=0;i<=4;i++){ const v=lo+(hi-lo)*i/4; s+=`<text class="ax" x="${X(v)}" y="${H-B+16}" text-anchor="middle">${P.f(v)}</text>`; }
+  for(let i=0;i<=4;i++){ const v=lo+(hi-lo)*i/4; s+=`<text class="ax" x="${X(v)}" y="${H-B+16}" text-anchor="middle">${+v.toFixed(hi-lo<1?2:1)}</text>`; }
   s+=`<text class="ax" x="${L+pw/2}" y="${H-2}" text-anchor="middle" style="font-family:var(--f-body)">${P.n}${P.u?` (${P.u})`:""}</text>`;
   pts.forEach(b=>{
-    const x=X(+b[corrX]), h=b.taste?.hot?.[corrY], w=b.taste?.warm?.[corrY], c=beanColor(b.bean);
+    const x=X(+b[corrX]), c=beanColor(b.bean);
+    const vs=STAGES.map(st=>[st,b.taste?.[st.k]?.[corrY]]).filter(([,v])=>v!=null);
     s+=`<g data-open="${b.id}" style="cursor:pointer">`;
-    if(h!=null&&w!=null) s+=`<line x1="${x}" x2="${x}" y1="${Y(h)}" y2="${Y(w)}" stroke="${c}" stroke-width="2" opacity=".6"/>`;
-    if(h!=null) s+=`<circle cx="${x}" cy="${Y(h)}" r="7" fill="var(--hot)" stroke="#121a2a" stroke-width="2"/>`;
-    if(w!=null) s+=`<circle cx="${x}" cy="${Y(w)}" r="6" fill="#121a2a" stroke="var(--warm)" stroke-width="2.5"/>`;
+    if(vs.length>1){ const ys=vs.map(([,v])=>Y(v)); s+=`<line x1="${x}" x2="${x}" y1="${Math.min(...ys)}" y2="${Math.max(...ys)}" stroke="${c}" stroke-width="2" opacity=".6"/>`; }
+    vs.slice().reverse().forEach(([st,v],i)=>{ s+= st.k==="hot" ? `<circle cx="${x}" cy="${Y(v)}" r="7" fill="${st.c}" stroke="#121a2a" stroke-width="2"/>` : `<circle cx="${x}" cy="${Y(v)}" r="6" fill="#121a2a" stroke="${st.c}" stroke-width="2.5"/>`; });
     s+=`<rect x="${x-14}" y="${T}" width="28" height="${ph}" fill="transparent"/></g>`;
   });
   s+=`</svg>`;
   const opt=(arr,cur)=>arr.map(a=>`<option value="${a.k}" ${a.k===cur?"selected":""}>${a.n}</option>`).join("");
 
   /* 熱圖：每一杯 × 每種風味（高溫） */
-  const heat = list.length ? `<div class="card"><h2>每杯風味一覽 <small>高溫 / 中常溫</small></h2>
-    <table class="tt sm"><tr><th>日期</th>${FLAVORS.slice(0,6).map(f=>`<th>${f.n}</th>`).join("")}<th>${P.n}</th></tr>
-    ${list.map(b=>`<tr data-open="${b.id}" style="cursor:pointer"><td>${b.date.slice(5)}</td>${FLAVORS.slice(0,6).map(f=>{
-      const h=b.taste?.hot?.[f.k], w=b.taste?.warm?.[f.k];
-      const a=Math.max(h??0,w??0)/5;
-      return `<td style="background:rgba(124,203,185,${(a*0.45).toFixed(2)})">${h??"—"}<span style="color:var(--muted)">/</span>${w??"—"}</td>`;}).join("")}<td>${b[corrX]!=null?P.f(b[corrX]):"—"}</td></tr>`).join("")}
-    </table></div>` : "";
+  const heat = list.length ? `<div class="card"><h2>每杯風味一覽 <small>高溫 / 中溫 / 常溫，顏色越深分數越高</small></h2>
+    <div style="overflow-x:auto"><table class="tt sm"><tr><th>杯</th><th></th>${FLAVORS.slice(0,6).map(f=>`<th style="color:${f.c}">${f.n}</th>`).join("")}<th style="color:var(--gold)">整體</th><th>${P.n}</th></tr>
+    ${list.map(b=>{ const sts=stagesOf(b); return sts.map((st,i)=>`<tr data-open="${b.id}" style="cursor:pointer">${i===0?`<td rowspan="${sts.length}" style="font-family:var(--f-body);white-space:nowrap">${b.date.slice(5).replace("-","/")}${b.clicks!=null?`<br><span style="color:var(--muted)">${b.clicks}格</span>`:""}</td>`:""}<td style="color:${st.c};font-family:var(--f-body);white-space:nowrap">${stageName(b,st)}</td>${FLAVORS.slice(0,6).concat([{k:"score"}]).map(f=>{
+      const v=b.taste[st.k][f.k];
+      return `<td style="background:rgba(124,203,185,${((v??0)/5*0.5).toFixed(2)})">${v??"—"}</td>`;}).join("")}${i===0?`<td rowspan="${sts.length}">${b[corrX]!=null?P.f(b[corrX]):"—"}</td>`:""}</tr>`).join(""); }).join("")}
+    </table></div></div>` : "";
 
   return `<div class="card">
     <h2>參數 × 風味</h2>
-    <div class="row" style="margin-bottom:10px"><select id="cx">${opt(PARAMS,corrX)}</select><span style="color:var(--muted)">對</span><select id="cy">${opt(FLAVORS,corrY)}</select></div>
+    <div class="row" style="margin-bottom:10px"><select id="cx">${opt(PARAMS,corrX)}</select><span style="color:var(--muted)">對</span><select id="cy">${opt(YOPTS,corrY)}</select></div>
     ${s}
-    <div class="legend"><span><i style="background:var(--hot)"></i>高溫</span><span><i style="background:#121a2a;border:2px solid var(--warm)"></i>中常溫</span><span>直線 = 放涼後的變化</span></div>
+    <div class="legend"><span><i style="background:var(--hot)"></i>高溫</span><span><i style="background:#121a2a;border:2px solid var(--warm)"></i>中溫</span><span><i style="background:#121a2a;border:2px solid var(--room)"></i>常溫</span><span>直線 = 放涼後的變化</span></div>
     <p class="hint">${pts.length<3?`目前只有 ${pts.length} 杯，紀錄累積到 5 杯以上就看得出趨勢。`:`每個圓點是一杯，點一下看詳情。`}</p>
   </div>${heat}`;
 }
@@ -285,8 +323,9 @@ function viewList(){
   if(!list.length) return `<div class="empty">還沒有紀錄，到「＋ 新增」輸入第一杯</div>`;
   return `<div class="list">${list.map(b=>`
     <button class="item" data-open="${b.id}">
-      <div class="t"><span>${b.date}</span><span>${esc(b.dripper||"")}</span></div>
+      <div class="t"><span>${b.date}${b.title?`・${esc(b.title)}`:""}</span><span>${b.taste?.hot?.score!=null?`整體 ${b.taste.hot.score}`:""}</span></div>
       <div class="b"><span style="color:${beanColor(b.bean)}">●</span> ${esc(b.bean)}</div>
+      ${b.goal?`<div style="font-size:13px;color:var(--muted);margin:-2px 0 6px">🎯 ${esc(b.goal)}</div>`:""}
       <div class="chips">
         <span class="chip"><i>比例</i>1:${f1(b.ratio)}</span>
         <span class="chip"><i>水溫</i>${b.temp??"—"}°</span>
@@ -320,14 +359,15 @@ function pourChart(b){
   if(b.time) s+=`<line x1="${X(b.time)}" x2="${X(b.time)}" y1="${T}" y2="${T+ph}" stroke="var(--teal)" stroke-dasharray="4 3"/><text class="ax" x="${X(b.time)-4}" y="${T+ph-6}" text-anchor="end" style="fill:var(--teal)">流乾 ${fmtT(b.time)}</text>`;
   return s+`</svg>`;
 }
-function radar(b){
+function radar(b,opts={}){
   const keys=FLAVORS, N=keys.length, W=300,H=250, cx=W/2, cy=H/2+4, R=88;
   const pt=(i,v)=>{ const a=-Math.PI/2+i*2*Math.PI/N; return [cx+Math.cos(a)*R*v/5, cy+Math.sin(a)*R*v/5]; };
   let s=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="風味雷達圖" style="max-width:340px;margin:0 auto">`;
   for(let r=1;r<=5;r++) s+=`<polygon points="${keys.map((_,i)=>pt(i,r).join(",")).join(" ")}" fill="none" stroke="#2a3550"/>`;
   keys.forEach((k,i)=>{ const [x,y]=pt(i,5); const [lx,ly]=pt(i,6.1); s+=`<line x1="${cx}" y1="${cy}" x2="${x}" y2="${y}" stroke="#2a3550"/><text x="${lx}" y="${ly+4}" text-anchor="middle" style="fill:${k.c};font-size:12px;font-weight:700">${k.n}</text>`; });
-  [["warm","var(--warm)",.18,"6 4"],["hot","var(--hot)",.22,""]].forEach(([w,c,op,da])=>{
-    const t=b.taste?.[w]; if(!t) return;
+  const layers = opts.layers || [["room","var(--room)",.12,"2 3"],["warm","var(--warm)",.16,"6 4"],["hot","var(--hot)",.22,""]].map(([w,c,op,da])=>[b.taste?.[w],c,op,da]);
+  layers.forEach(([t,c,op,da])=>{
+    if(!t) return;
     const ps=keys.map((k,i)=>pt(i,t[k.k]??0));
     s+=`<polygon points="${ps.map(p=>p.join(",")).join(" ")}" fill="${c}" fill-opacity="${op}" stroke="${c}" stroke-width="2" ${da?`stroke-dasharray="${da}"`:""}/>`;
     keys.forEach((k,i)=>{ if(t[k.k]!=null){ const [x,y]=ps[i]; s+=`<circle cx="${x}" cy="${y}" r="3" fill="${c}"/>`; } });
@@ -335,19 +375,47 @@ function radar(b){
   return s+`</svg>`;
 }
 function tasteTable(b){
-  const h=b.taste?.hot||{}, w=b.taste?.warm||{};
-  return `<table class="tt"><tr><th></th>${FLAVORS.map(f=>`<th style="color:${f.c}">${f.n.replace("(前)","")}</th>`).join("")}</tr>
-  <tr><td style="color:var(--hot);font-family:var(--f-body)">高溫</td>${FLAVORS.map(f=>`<td>${h[f.k]??"—"}</td>`).join("")}</tr>
-  <tr><td style="color:var(--warm);font-family:var(--f-body)">中常溫</td>${FLAVORS.map(f=>`<td>${w[f.k]??"—"}</td>`).join("")}</tr></table>`;
+  const cols=FLAVORS.concat([{k:"score",n:"整體",c:"var(--gold)"}]);
+  return `<div style="overflow-x:auto"><table class="tt sm"><tr><th></th>${cols.map(f=>`<th style="color:${f.c}">${f.n.replace("(前)","")}</th>`).join("")}</tr>
+  ${stagesOf(b).map(st=>`<tr><td style="color:${st.c};font-family:var(--f-body);white-space:nowrap">${stageName(b,st)}</td>${cols.map(f=>`<td>${b.taste[st.k][f.k]??"—"}</td>`).join("")}</tr>`).join("")}</table></div>`;
 }
-function detail(id){
+function stageNote(b,st){
+  const t=b.taste[st.k]; if(!(t.desc||t.aromaNote||t.finishNote)) return "";
+  const back = t.aromaBack!=null||t.aromaBackNote ? `，後 ${t.aromaBack??""}${t.aromaBackNote?` ${esc(t.aromaBackNote)}`:""}` : "";
+  return `<div class="note"><b style="color:${st.c}">${stageName(b,st)}${t.score!=null?`・整體 ${t.score}`:""}</b>${esc(t.desc||"")}
+    ${t.aromaNote?`<br><span style="color:var(--muted)">嗅 ${t.aroma??""} ${esc(t.aromaNote)}${back}</span>`:""}
+    ${t.finishNote?`<br><span style="color:var(--muted)">韻 ${esc(t.finishNote)}</span>`:""}</div>`;
+}
+const CMP_FIELDS=[["clicks","研磨",v=>v+" 格"],["micron","粒徑",v=>v+" µm"],["temp","水溫",v=>v+"°"],["dose","粉重",f1],["water","水量",f1],["ratio","比例",v=>"1:"+f1(v)],
+  ["pourStyle","手法",v=>v],["time","時間",fmtT],["yield","液重",f1],["tds","TDS",f2],["ey","萃取率",f1]];
+let cmpState={id:null,with:null,stage:"hot"};
+function compareCard(b){
+  const others=brews().filter(x=>x.id!==b.id); if(!others.length) return "";
+  if(cmpState.id!==b.id){ const same=others.filter(x=>x.bean===b.bean); const prev=same.find(x=>x.date<=b.date&&x.id!==b.id)||same[0]||others[0]; cmpState={id:b.id,with:prev.id,stage:"hot"}; }
+  const o=others.find(x=>x.id===cmpState.with)||others[0];
+  const rows=CMP_FIELDS.map(([k,n,f])=>{ const va=b[k], vb=o[k]; if(va==null&&vb==null) return ""; const diff=String(va)!==String(vb);
+    return `<tr style="${diff?"":"opacity:.45"}"><td style="font-family:var(--f-body)">${n}</td><td>${vb!=null?f(vb):"—"}</td><td style="${diff?"color:var(--gold)":""}">${va!=null?f(va):"—"}</td></tr>`; }).join("");
+  const st=STAGES.find(x=>x.k===cmpState.stage);
+  const ta=b.taste?.[st.k], tb=o.taste?.[st.k];
+  const scoreRows=STAGES.map(x=>{ const sa=b.taste?.[x.k]?.score, sb=o.taste?.[x.k]?.score; if(sa==null&&sb==null) return ""; return `<tr><td style="font-family:var(--f-body);color:${x.c}">${x.n}整體</td><td>${sb??"—"}</td><td>${sa??"—"}</td></tr>`; }).join("");
+  return `<div class="card"><h2>兩杯對比</h2>
+    <div class="row" style="margin-bottom:10px"><span style="color:var(--muted);font-size:13px">對比</span><select id="cmpWith">${others.map(x=>`<option value="${x.id}" ${x.id===o.id?"selected":""}>${x.date}${x.title?" "+esc(x.title):""}</option>`).join("")}</select></div>
+    <table class="tt sm"><tr><th></th><th style="color:var(--lilac)">${o.date.slice(5)}</th><th style="color:var(--teal)">這杯</th></tr>${rows}${scoreRows}</table>
+    <div class="row" style="margin:12px 0 0;gap:6px">${STAGES.map(x=>`<button class="btn" data-cmpst="${x.k}" style="flex:1;${x.k===st.k?"border-color:var(--teal);color:var(--teal)":""}">${x.n}</button>`).join("")}</div>
+    ${radar(b,{layers:[[tb,"var(--lilac)",.15,"6 4"],[ta,"var(--teal)",.22,""]]})}
+    <div class="legend" style="justify-content:center"><span><i style="background:var(--lilac)"></i>${o.date.slice(5)}（虛線）</span><span><i style="background:var(--teal)"></i>這杯</span></div>
+    ${!ta||!tb?`<p class="hint" style="text-align:center">其中一杯沒有${st.n}的紀錄</p>`:""}
+  </div>`;
+}
+function detail(id, keepScroll){
   const b=brews().find(x=>x.id===id); if(!b) return;
-  const h=b.taste?.hot||{}, w=b.taste?.warm||{};
+  const sc=$("#sheetIn").scrollTop;
   const P=(n,v,txt)=>`<div><span>${n}</span><b class="${txt?"txt":""}">${v??"—"}</b></div>`;
   $("#sheetIn").innerHTML=`
-  <div class="bar"><b>${b.date}</b><button class="btn" id="closeS">關閉</button></div>
+  <div class="bar"><b>${b.date}${b.title?`・${esc(b.title)}`:""}</b><button class="btn" id="closeS">關閉</button></div>
+  ${b.goal?`<div class="card" style="border-color:rgba(242,207,107,.4)"><h2 style="color:var(--gold)">🎯 測試目的</h2><div style="font-size:14px">${esc(b.goal)}</div></div>`:""}
   <div class="card"><h2><span style="color:${beanColor(b.bean)}">●</span>${esc(b.bean)}</h2>
-    <div class="chips" style="margin-bottom:10px">${b.process?`<span class="chip">${esc(b.process)}</span>`:""}${b.roast?`<span class="chip">${esc(b.roast)}焙${b.agtron?` · 色值 ${b.agtron}`:""}</span>`:""}</div>
+    <div class="chips" style="margin-bottom:10px">${b.process?`<span class="chip">${esc(b.process)}</span>`:""}${b.roast?`<span class="chip">${esc(b.roast)}焙${b.agtron?` · 色值 ${b.agtron}`:""}</span>`:""}${b.recipe?`<span class="chip"><i>配方</i>${esc(b.recipe)}</span>`:""}${b.pourStyle?`<span class="chip"><i>手法</i>${esc(b.pourStyle)}</span>`:""}</div>
     <div class="params">
       ${P("粉重 g",f1(b.dose))}${P("水量 g",f1(b.water))}${P("液重 g",f1(b.yield))}
       ${P("比例",b.ratio?"1:"+f1(b.ratio):"—")}${P("TDS %",f2(b.tds))}${P("萃取率 %",f1(b.ey))}
@@ -357,23 +425,28 @@ function detail(id){
     ${b.grinder?`<p class="hint">${esc(b.grinder)}</p>`:""}
   </div>
   <div class="card"><h2>注水 <small>累積水量 (g) × 時間</small></h2>${pourChart(b)}
-    <table class="tt" style="margin-top:8px"><tr><th>段</th><th>水量</th><th>流速</th><th>間隔</th><th style="text-align:left">備註</th></tr>
-    ${(b.pours||[]).map((p,i)=>`<tr><td style="white-space:nowrap;font-family:var(--f-body)">${i===0?"悶蒸":i}</td><td>${p.ml}</td><td>${p.rate??"—"}</td><td>${p.wait!=null?p.wait+"s":"—"}</td><td style="text-align:left;font-family:var(--f-body);color:#f19a9a">${esc(p.note||"")}</td></tr>`).join("")}</table>
+    <table class="tt" style="margin-top:8px"><tr><th>段</th><th>水量</th><th>流速</th><th>間隔</th><th>手法</th><th style="text-align:left">備註</th></tr>
+    ${(b.pours||[]).map((p,i)=>`<tr><td style="white-space:nowrap;font-family:var(--f-body)">${i===0?"悶蒸":i}</td><td>${p.ml}</td><td>${p.rate??"—"}</td><td>${p.wait!=null?p.wait+"s":"—"}</td><td style="font-family:var(--f-body)">${esc(p.style||"—")}</td><td style="text-align:left;font-family:var(--f-body);color:#f19a9a">${esc(p.note||"")}</td></tr>`).join("")}</table>
     ${b.endNote?`<p class="hint">${esc(b.endNote)}</p>`:""}
   </div>
-  <div class="card"><h2>風味 <small>0–5 分</small></h2>${radar(b)}
-    <div class="legend" style="justify-content:center"><span><i style="background:var(--hot)"></i>高溫</span><span><i style="background:var(--warm)"></i>中常溫（虛線）</span></div>
+  <div class="card"><h2>風味 <small>0–5 分</small></h2>
+    ${b.potAroma?`<div class="note" style="margin:0 0 6px"><b style="color:var(--aroma)">壺香</b>${esc(b.potAroma)}</div>`:""}
+    ${radar(b)}
+    <div class="legend" style="justify-content:center">${stagesOf(b).map(st=>`<span><i style="background:${st.c}"></i>${stageName(b,st)}</span>`).join("")}</div>
     <div style="margin-top:10px">${tasteTable(b)}</div>
-    ${h.desc||h.aromaNote||h.finishNote?`<div class="note"><b style="color:var(--hot)">高溫</b>${esc(h.desc||"")}${h.aromaNote?`<br><span style="color:var(--muted)">嗅 ${esc(h.aromaNote)}${h.aromaBack!=null?`，後 ${h.aromaBack}`:""}</span>`:""}${h.finishNote?`<br><span style="color:var(--muted)">韻 ${esc(h.finishNote)}</span>`:""}</div>`:""}
-    ${w.desc||w.aromaNote||w.finishNote?`<div class="note"><b>中常溫</b>${esc(w.desc||"")}${w.aromaNote?`<br><span style="color:var(--muted)">嗅 ${esc(w.aromaNote)}${w.aromaBack!=null?`，後 ${w.aromaBack}`:""}</span>`:""}${w.finishNote?`<br><span style="color:var(--muted)">韻 ${esc(w.finishNote)}</span>`:""}</div>`:""}
+    ${stagesOf(b).map(st=>stageNote(b,st)).join("")}
   </div>
   ${b.summary?`<div class="card"><h2>整體</h2><div style="font-size:14px">${esc(b.summary)}</div></div>`:""}
+  ${b.next&&b.next.length?`<div class="card"><h2>➡️ 下次調整方向</h2><ol style="margin:0;padding-left:20px;font-size:14px">${b.next.map(n=>`<li>${esc(n)}</li>`).join("")}</ol></div>`:""}
+  ${compareCard(b)}
   <div class="card"><h2>在控制圖上的位置</h2>${controlChart(brews(),{focus:b.id})}</div>
   <div class="row"><button class="btn" id="editB" style="flex:1">編輯</button><button class="btn" id="dupB" style="flex:1">複製參數沖下一杯</button><button class="btn danger" id="delB">刪除</button></div>`;
-  $("#sheet").classList.add("on"); $("#sheetIn").scrollTop=0;
+  $("#sheet").classList.add("on"); $("#sheetIn").scrollTop= keepScroll? sc : 0;
   $("#closeS").onclick=closeSheet;
+  if($("#cmpWith")) $("#cmpWith").onchange=e=>{ cmpState.with=e.target.value; detail(id,true); };
+  document.querySelectorAll("[data-cmpst]").forEach(el=>el.onclick=()=>{ cmpState.stage=el.dataset.cmpst; detail(id,true); });
   $("#editB").onclick=()=>{ closeSheet(); formState={mode:"edit",b:JSON.parse(JSON.stringify(rawById(id)))}; go("add"); };
-  $("#dupB").onclick=()=>{ closeSheet(); const c=JSON.parse(JSON.stringify(rawById(id))); c.date=today(); c.taste={hot:{},warm:{}}; c.summary=""; c.tds=null; c.ey=null; c.yield=null; c.endNote=""; formState={mode:"new",b:c}; go("add"); };
+  $("#dupB").onclick=()=>{ closeSheet(); const c=JSON.parse(JSON.stringify(rawById(id))); delete c.id; c.date=today(); c.taste={hot:{},warm:{},room:{}}; c.summary=""; c.tds=null; c.ey=null; c.yield=null; c.time=null; c.endNote=""; c.potAroma=""; c.goal=(c.next||[]).join("；"); c.next=[]; c.title=""; (c.pours||[]).forEach(p=>delete p.note); formState={mode:"new",b:c}; go("add"); };
   $("#delB").onclick=()=>{ if(!confirm("確定刪除這筆紀錄？")) return; delBrew(id); closeSheet(); render(); toast("已刪除"); };
 }
 function closeSheet(){ $("#sheet").classList.remove("on"); }
@@ -388,19 +461,22 @@ const today=()=>{ const d=new Date(Date.now()+8*3600e3); return d.toISOString().
 
 /* ================= 新增 / 編輯 ================= */
 let formState=null;
-function blank(){ return {date:today(), bean:"", process:"", roast:"淺", agtron:null, grinder:"Comandante C40 MK4", clicks:30, micron:null, temp:96, dripper:"Orea Brewer（OREA-O）", filter:"93 蛋糕濾紙", dose:12, water:200, yield:null, tds:null, ey:null, time:null, pours:[{ml:60,rate:4,wait:40},{ml:40,rate:4,wait:30},{ml:50,rate:4,wait:30},{ml:50,rate:4,wait:null}], endNote:"", taste:{hot:{},warm:{}}, summary:""}; }
+function blank(){ return {date:today(), bean:"", process:"", roast:"淺", agtron:null, grinder:"Comandante C40 MK4", clicks:30, micron:null, temp:96, dripper:"Orea Brewer（OREA-O）", filter:"93 蛋糕濾紙", dose:12, water:200, yield:null, tds:null, ey:null, time:null, pours:[{ml:60,rate:4,wait:40},{ml:40,rate:4,wait:30},{ml:50,rate:4,wait:30},{ml:50,rate:4,wait:null}], endNote:"", taste:{hot:{},warm:{},room:{}}, summary:"", title:"", recipe:"", goal:"", potAroma:"", next:[]}; }
 function viewAdd(){
-  if(!formState){ const last=brews()[0]; const b=blank(); if(last){ ["bean","process","roast","agtron","grinder","clicks","micron","temp","dripper","filter","dose","water"].forEach(k=>b[k]=last[k]??b[k]); b.pours=JSON.parse(JSON.stringify(last.pours||b.pours)).map(p=>({ml:p.ml,rate:p.rate,wait:p.wait})); } formState={mode:"new",b}; }
+  if(!formState){ const last=brews()[0]; const b=blank(); if(last){ ["bean","process","roast","agtron","grinder","clicks","micron","temp","dripper","filter","dose","water","recipe"].forEach(k=>b[k]=last[k]??b[k]); b.pours=JSON.parse(JSON.stringify(last.pours||b.pours)).map(p=>({ml:p.ml,rate:p.rate,wait:p.wait,style:p.style})); } formState={mode:"new",b}; }
   const b=formState.b; const I=(k,lab,type="number",step="any")=>`<label class="f">${lab}<input data-k="${k}" type="${type}" step="${step}" value="${esc(b[k]??"")}" inputmode="${type==="number"?"decimal":"text"}"></label>`;
   const slider=(w,f)=>{ const v=b.taste?.[w]?.[f.k]; return `<div class="slider"><span style="color:${f.c}">${f.n.replace("(前)","")}</span><input type="range" min="-0.5" max="5" step="0.5" data-t="${w}.${f.k}" value="${v??-0.5}"><output>${v??"—"}</output></div>`; };
   const tBlock=(w,lab,col)=>{ const t=b.taste?.[w]||{}; return `<div class="card" style="margin:0;background:var(--panel2)"><h2 style="color:${col}">${lab}</h2>
-     ${FLAVORS.map(f=>slider(w,f)).join("")}
-     <label class="f" style="margin-top:6px">嗅（前/後）描述<input data-tt="${w}.aromaNote" value="${esc(t.aromaNote||"")}" placeholder="前：焦糖"></label>
+     ${FLAVORS.concat([{k:"score",n:"整體",c:"var(--gold)"}]).map(f=>slider(w,f)).join("")}
+     <label class="f" style="margin-top:6px">嗅・前 描述<input data-tt="${w}.aromaNote" value="${esc(t.aromaNote||"")}" placeholder="前：焦糖"></label>
+     <div class="grid2" style="margin-top:6px"><label class="f">嗅・後 分數<input data-tn="${w}.aromaBack" type="number" step="0.5" value="${t.aromaBack??""}" inputmode="decimal"></label><label class="f">嗅・後 描述<input data-tt="${w}.aromaBackNote" value="${esc(t.aromaBackNote||"")}"></label></div>
      <label class="f" style="margin-top:6px">韻 描述<input data-tt="${w}.finishNote" value="${esc(t.finishNote||"")}" placeholder="舌上回甘"></label>
      <label class="f" style="margin-top:6px">口感描述<textarea data-tt="${w}.desc" rows="2">${esc(t.desc||"")}</textarea></label></div>`; };
   return `<div class="card"><h2>${formState.mode==="edit"?"編輯紀錄":"新增一杯"}</h2>
     <div class="grid2">${I("date","日期","date")}${I("bean","豆子","text")}</div>
     <div class="grid3" style="margin-top:10px">${I("process","處理法","text")}${I("roast","烘焙度","text")}${I("agtron","色值")}</div>
+    <div class="grid2" style="margin-top:10px">${I("title","紀錄名稱","text")}${I("recipe","配方（如 60-40）","text")}</div>
+    <label class="f" style="margin-top:10px">🎯 測試目的<textarea data-k="goal" rows="2">${esc(b.goal||"")}</textarea></label>
   </div>
   <div class="card"><h2>器材與參數</h2>
     <div class="grid2">${I("grinder","磨豆機","text")}${I("dripper","濾杯","text")}</div>
@@ -408,10 +484,11 @@ function viewAdd(){
     <div class="grid3" style="margin-top:10px">${I("filter","濾紙","text")}${I("dose","粉重 g")}${I("water","水量 g")}</div>
   </div>
   <div class="card"><h2>注水 <small>第 1 段為悶蒸；間隔 = 到下一段開始的秒數</small></h2>
-    <div id="pours">${(b.pours||[]).map((p,i)=>`<div class="pour"><span class="n">${i===0?"悶":i}</span>
+    <div id="pours">${(b.pours||[]).map((p,i)=>`<div class="pour" style="grid-template-columns:28px repeat(3,minmax(0,1fr)) 52px"><span class="n">${i===0?"悶":i}</span>
       <label class="f">水量 ml<input data-p="${i}.ml" type="number" value="${p.ml??""}" inputmode="decimal"></label>
       <label class="f">流速 ml/s<input data-p="${i}.rate" type="number" step="any" value="${p.rate??""}" inputmode="decimal"></label>
-      <label class="f">間隔 s<input data-p="${i}.wait" type="number" value="${p.wait??""}" inputmode="decimal"></label></div>
+      <label class="f">間隔 s<input data-p="${i}.wait" type="number" value="${p.wait??""}" inputmode="decimal"></label>
+      <label class="f">手法<select data-p="${i}.style"><option value=""></option>${["繞","中","邊","點"].map(o=>`<option ${p.style===o?"selected":""}>${o}</option>`).join("")}</select></label></div>
       <input data-p="${i}.note" value="${esc(p.note||"")}" placeholder="備註（例：起水失誤）" style="margin:0 0 10px 34px;width:calc(100% - 34px)">`).join("")}</div>
     <div class="row"><button class="btn" id="addP">＋ 加一段</button><button class="btn" id="rmP">－ 刪最後一段</button></div>
   </div>
@@ -420,8 +497,10 @@ function viewAdd(){
     <p class="hint" id="calc"></p>
     <label class="f" style="margin-top:8px">結尾備註<input data-k="endNote" value="${esc(b.endNote||"")}" placeholder="2:11 流乾"></label>
   </div>
-  <div class="taste">${tBlock("hot","高溫","var(--hot)")}${tBlock("warm","中常溫","var(--warm)")}</div>
-  <div class="card" style="margin-top:12px"><h2>整體</h2><textarea data-k="summary" rows="3" style="width:100%">${esc(b.summary||"")}</textarea></div>
+  <div class="card"><label class="f">壺香<input data-k="potAroma" value="${esc(b.potAroma||"")}" placeholder="甜、藥草"></label></div>
+  <div class="taste" style="grid-template-columns:1fr">${STAGES.map(st=>tBlock(st.k,st.n,st.c)).join("")}</div>
+  <div class="card" style="margin-top:12px"><h2>整體</h2><textarea data-k="summary" rows="3">${esc(b.summary||"")}</textarea>
+    <label class="f" style="margin-top:10px">➡️ 下次調整方向（一行一點）<textarea data-next rows="3">${esc((b.next||[]).join("\n"))}</textarea></label></div>
   <div class="row"><button class="btn pri" id="saveB" style="flex:1">儲存</button>${formState.mode==="edit"?`<button class="btn" id="cancelB">取消</button>`:""}</div>
   <p class="hint">滑桿拉到最左邊＝沒記（—）。</p>`;
 }
@@ -429,7 +508,9 @@ function bindForm(){
   const b=formState.b;
   const num=v=>v===""?null:(isNaN(+v)?v:+v);
   document.querySelectorAll("[data-k]").forEach(el=>el.oninput=()=>{ const k=el.dataset.k; b[k]= (el.type==="number")? num(el.value) : el.value; calc(); });
-  document.querySelectorAll("[data-p]").forEach(el=>el.oninput=()=>{ const [i,k]=el.dataset.p.split("."); b.pours[i][k]= k==="note"? el.value : num(el.value); });
+  document.querySelectorAll("[data-p]").forEach(el=>el.oninput=el.onchange=()=>{ const [i,k]=el.dataset.p.split("."); b.pours[i][k]= (k==="note"||k==="style")? el.value : num(el.value); });
+  document.querySelectorAll("[data-tn]").forEach(el=>el.oninput=()=>{ const [w,k]=el.dataset.tn.split("."); b.taste[w]=b.taste[w]||{}; b.taste[w][k]=num(el.value); });
+  const nx=document.querySelector("[data-next]"); nx.oninput=()=>{ b.next=nx.value.split("\n").map(x=>x.trim()).filter(Boolean); };
   document.querySelectorAll("[data-t]").forEach(el=>el.oninput=()=>{ const [w,k]=el.dataset.t.split("."); const v=+el.value; b.taste[w]=b.taste[w]||{}; b.taste[w][k]= v<0?null:v; el.nextElementSibling.textContent= v<0?"—":v; });
   document.querySelectorAll("[data-tt]").forEach(el=>el.oninput=()=>{ const [w,k]=el.dataset.tt.split("."); b.taste[w]=b.taste[w]||{}; b.taste[w][k]=el.value; });
   const tm=document.querySelector("[data-time]"); tm.oninput=()=>{ b.time=parseT(tm.value); };
@@ -480,7 +561,7 @@ function render(){
   if(view==="add"){ m.innerHTML=viewAdd(); bindForm(); }
 }
 document.querySelectorAll("#tabs button").forEach(b=>b.onclick=()=>{ if(b.dataset.v==="add"&&formState?.mode==="edit"){} else if(b.dataset.v==="add") formState=formState||null; go(b.dataset.v); });
-document.addEventListener("click",e=>{ const g=e.target.closest("[data-open]"); if(g && !e.target.closest("#sheet .in button")) detail(g.dataset.open); });
+document.addEventListener("click",e=>{ const g=e.target.closest("[data-open]"); if(g && !e.target.closest("#sheet .in button, #sheet .in select")) detail(g.dataset.open); });
 render();
 </script>
 </body>
