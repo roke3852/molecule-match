@@ -11,7 +11,7 @@
 | `fukuoka-trip/` | 福岡 5大2小 8天7夜 |
 | `spelling/` | 拼字消消樂 |
 | `molecule-reactions/` | 分子反應圖鑑 |
-| `extraction-sim/` | 萃取分子模擬器 |
+| `extraction-sim/` | 手沖咖啡實驗室（萃取模擬器＋闖關遊戲） |
 | `cupping/` | 杯測教室 |
 | `smell-training/` | 嗅覺練習日誌 |
 | `yoshi-combos/` | 耀西連招手冊 |
