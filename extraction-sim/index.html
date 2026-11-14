@@ -639,6 +639,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
   </div>
 
   <section class="panel bed-ctl">
+    <div class="param"><span class="label">注水方式</span><div class="seg" id="bedPour" role="group" aria-label="注水方式"><button data-v="normal" aria-pressed="true">一般注水</button><button data-v="k10" aria-pressed="false">粕谷 10 段（低擾動）</button></div></div>
     <div class="param"><span class="label">攪拌</span><div class="seg" id="bedStir" role="group" aria-label="攪拌"><button data-v="none" aria-pressed="true">不攪拌</button><button data-v="bloom" aria-pressed="false">只在悶蒸攪</button><button data-v="multi" aria-pressed="false">多次攪拌</button></div></div>
     <div class="transport">
       <button class="play" id="bedPlay">播放</button>
@@ -670,6 +671,8 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
     <p><b>上層萃得比下層多。</b>不管哪種濾杯，最上層的粉一直碰到剛注下的新鮮水；水往下流的途中一路帶走物質，到了下層已經變濃，濃度差小，下層的粉萃得比較慢。</p>
     <p><b>錐形濾杯：中心深、邊緣淺，差距大。</b>錐形的粉床中間厚、靠濾紙的邊緣薄。邊緣的路短、阻力小，比較多水從邊緣流過，那裡的粉被大量新鮮水沖洗，萃得多；中心深處的粉碰到的是走了很長一段、已經很濃的水，萃得少。同一杯裡混著萃得多和萃得少的粉，風味比較有層次，這就是模擬器裡「清晰度」比較高的原因。</p>
     <p><b>平底濾杯：每個位置厚度一樣，比較均勻。</b>粉床平、厚度一致，水比較平均地穿過每個位置，左右幾乎沒有差別，只剩上下層的差距，所以風味比較集中、融合。</p>
+    <p><b>一般注水會挖出一個凹洞。</b>注水時水柱打在中心，把中心的粉往外、往上推，粉床中間凹下去，粉被推到濾紙壁上（圖中藍框的格子）。原本的上下層被打亂，所以「上層多、下層少」的分層不明顯了。中心變薄、阻力小，水大多從凹洞往下流；被推到杯壁高處的粉只沾到一層水膜，水位一降就露出水面，萃得最少。這圈萃取不足的粉，和凹洞附近萃得多的粉混在一起，就是另一種不均勻。</p>
+    <p><b>低擾動（粕谷 10 段）讓分層保留。</b>超粗研磨加上每次只注 30 g，水柱細、粉床幾乎不被翻動，粉層一直維持原本的形狀，上下層、中心和邊緣的差距會保留到最後。</p>
     <p><b>攪拌：讓上下層、中心邊緣交換位置。</b>攪拌時粉被翻起來再落下，原本在下層的粉可能跑到上層，每顆粉輪流碰到新鮮和較濃的水，最後萃取率就拉近了，整體也萃得多一點。只在悶蒸時攪，主要是讓每顆粉都吸到水、沒有乾的粉團。代價是多次攪拌會讓細粉沉到最底層（圖中底部的小點），堵住濾紙，滴得變慢、時間拉長，也比較容易帶出苦味；層次也會變少。</p>
     <p>這是教學用的簡化模型：只看水溶性物質，萃取率是相對值，方向和真實一致，但數字不是實測。</p>
   </section>
@@ -2627,70 +2630,91 @@ matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change',()=>{read
 <script>
 // 濾杯粉層模型：把粉床切成一格一格（直欄＝位置、橫列＝深度），水由上往下流，
 // 每格粉的萃取速度取決於流過它的水有多「新鮮」（濃度越低越快）。教學用的相對模型。
+// 一般注水時，水柱會把中心的粉往外推：中心凹陷、粉被推到杯壁高處；低擾動（粕谷 10 段）則幾乎維持原狀。
 const BED_NX=14, BED_EYMAX=28;
 const BED_DRIP={
-  cone:{name:'錐形濾杯',sub:'V60 這類',depth:x=>Math.max(2,Math.round(10*(1-Math.abs(x))+1.4*Math.abs(x))),wall:1.0},
-  flat:{name:'平底濾杯',sub:'Kalita Wave、OREA 這類',depth:()=>6,wall:1.08},
+  cone:{name:'錐形濾杯',sub:'V60 這類',depth:x=>Math.max(2,Math.round(10*(1-Math.abs(x))+1.4*Math.abs(x))),wall:1.0,crater:{p:.13,inner:.4}},
+  flat:{name:'平底濾杯',sub:'Kalita Wave、OREA 這類',depth:()=>6,wall:1.08,crater:{p:.08,inner:.3}},
 };
 function bedRng(seed){let a=seed>>>0;return()=>{a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
 function bedStirs(stir){return stir==='bloom'?[5]:stir==='multi'?[5,60,95]:[];}
-function bedEnds(cfg){const d=cfg.stir==='multi'?15:0;return {bloom:30,pourEnd:120+d*.5,end:150+d};}
+function bedEnds(cfg){const d=cfg.stir==='multi'?15:0;
+  if(cfg.pour==='k10')return {bloom:30,pourEnd:150+d*.5,end:200+d,pulses:[30,45,60,75,90,105,120,135,150]};
+  return {bloom:30,pourEnd:120+d*.5,end:150+d,pulses:null};}
 function bedRun(cfg){
-  const D=BED_DRIP[cfg.drip],rnd=bedRng(cfg.seed||5),Tf=Math.exp(((cfg.temp||93)-93)/14);
+  const D=BED_DRIP[cfg.drip],rnd=bedRng(cfg.seed||5),Tf=Math.exp(((cfg.temp||93)-93)/14),k10=cfg.pour==='k10';
   const cols=[];
-  for(let i=0;i<BED_NX;i++){const x=(i+.5)/BED_NX*2-1,d=D.depth(x),w=Math.abs(x)+.06;cols.push({x,d,w,cells:[]});}
-  let maxD=0;cols.forEach(c=>maxD=Math.max(maxD,c.d));
-  // flux share per column (Darcy: shorter path → more flow); flat beds get a small wall effect
-  const H=2.5;cols.forEach(c=>{c.q=(H+c.d)/c.d*(Math.abs(c.x)>.85?D.wall:1);});
-  const qn=cols.reduce((a,c)=>a+c.q*c.w,0)/cols.reduce((a,c)=>a+c.w,0);cols.forEach(c=>c.q/=qn);
+  for(let i=0;i<BED_NX;i++){const x=(i+.5)/BED_NX*2-1,d=D.depth(x),w=Math.abs(x)+.06;cols.push({i,x,b:d,d0:d,w,cells:[]});}
+  let maxD=0;cols.forEach(c=>maxD=Math.max(maxD,c.b));
   const stirs=bedStirs(cfg.stir),E=bedEnds(cfg),fines=cfg.stir==='multi';
-  cols.forEach(c=>{for(let r=0;r<c.d;r++){
+  cols.forEach(c=>{for(let r=0;r<c.b;r++){
     const deep=r/Math.max(1,maxD-1);
     // 沒攪拌：少數格子悶蒸時被 CO₂ 包住、晚一點才濕（越深、越靠錐尖越容易）
     let wetT=r*1.5+rnd()*2;if(!stirs.length&&rnd()<.12+.18*deep*(cfg.drip==='cone'?1.3:1))wetT+=25+rnd()*30;
-    c.cells.push({r,E:0,Cp:0,wetT});}});
-  const k=.012,R=4,dt=1,snaps=[];
-  const all=()=>{let s=0,w=0;cols.forEach(c=>c.cells.forEach(e=>{s+=e.E*c.w;w+=c.w;}));return s/w;};
+    c.cells.push({r0:r,c0:c.i,E:0,Cp:0,wetT,moved:false});}});
+  // 粗研磨的粉萃得慢（粕谷 10 段）；拉長時間補回來
+  const k=.012*(k10?.78:1),R=4,dt=1,snaps=[],H=2.5;
+  const all=()=>{let s=0,w=0;cols.forEach(c=>c.cells.forEach(e=>{s+=e.E*cols[e.c0].w;w+=cols[e.c0].w;}));return s/w;};
+  const surf=c=>c.b-c.cells.length; // 表面位置（以列為單位，0＝原本粉面，負數＝高出原本粉面）
+  let moves=0;const wall={'-1':[],'1':[]};
+  // 杯壁上的粉：一層貼著濾紙往上堆，第 k 格的高度（列，負數＝高於原本粉面）
+  const wallY=k=>-(Math.floor(k/2)+.5)*.9;
   for(let t=0;t<=E.end+30;t+=dt){
-    // flow rate: bloom stagnant, pour, drawdown
-    let Q=0;if(t>=E.bloom&&t<E.pourEnd)Q=.55;else if(t>=E.pourEnd&&t<E.end)Q=.55*(1-(t-E.pourEnd)/(E.end-E.pourEnd));
+    let Q=0;if(t>=E.bloom&&t<E.pourEnd)Q=k10?.42:.55;else if(t>=E.pourEnd&&t<E.end)Q=(k10?.42:.55)*(1-(t-E.pourEnd)/(E.end-E.pourEnd));
     if(fines&&t>60)Q*=.85;
-    const active=t<E.end;
+    // 水位：注水時蓋過所有粉；滴完階段從高處降到最低的粉面
+    const top=Math.min(...cols.map(surf)),low=Math.max(...cols.map(surf));
+    let L;if(t<E.pourEnd)L=Math.min(top,0)-4;else if(t<E.end){const f=(t-E.pourEnd)/(E.end-E.pourEnd);L=(Math.min(top,0)-4)*(1-f)+low*f;}else L=99;
+    // 一般注水：水柱把中心的粉往外推，中心凹下去，粉堆到杯壁上
+    if(!k10&&t>=E.bloom&&t<E.pourEnd&&rnd()<D.crater.p){
+      const inner=cols.filter(c=>Math.abs(c.x)<D.crater.inner&&c.cells.length>2).sort((a,b)=>b.cells.length-a.cells.length);
+      if(inner.length){const src=inner[0],side=rnd()<.5?-1:1;
+        const cell=src.cells.shift();cell.moved=true;wall[side].push(cell);moves++;}}
     if(stirs.includes(t)){ // 攪拌：粉被翻起來、重新落下，上下層、中間邊緣互相交換
       const m=all();let cp=0,n=0;cols.forEach(c=>c.cells.forEach(e=>{cp+=e.Cp;n++;}));cp/=n;
       cols.forEach(c=>c.cells.forEach(e=>{e.E+=.6*(m-e.E);e.Cp+=.6*(cp-e.Cp);e.wetT=Math.min(e.wetT,t);}));}
-    if(active)for(const c of cols){
-      const phi=Math.min(.9,c.q*Q*dt);let above=0;
-      for(const e of c.cells){const old=e.Cp;e.Cp=(1-phi)*e.Cp+phi*above;above=old;
-        if(t<e.wetT)continue;
-        const dE=k*Tf*Math.pow(1-e.E,1.4)*Math.max(0,1-e.Cp)*dt;e.E+=dE;e.Cp=Math.min(1,e.Cp+dE*R);}
+    // 每欄流量：粉越薄阻力越小（Darcy）；粉面露出水面的欄沒有水進來
+    const act=cols.map(c=>t<E.bloom||(t<E.end&&surf(c)>L-.01));
+    let qs=cols.map((c,i)=>act[i]&&c.cells.length?(H+c.cells.length)/c.cells.length*(Math.abs(c.x)>.85?D.wall:1):0);
+    const qn=qs.reduce((a,q,i)=>a+q*cols[i].w,0)/cols.reduce((a,c)=>a+c.w,0)||1;qs=qs.map(q=>q/qn);
+    cols.forEach((c,i)=>c.q=qs[i]);
+    if(t<E.end)for(const sd of ['-1','1'])wall[sd].forEach((e,k)=>{
+      if(wallY(k)>L){const dE=.012*(k10?.78:1)*Tf*Math.pow(1-e.E,1.4)*.5*.35*dt;e.E+=dE;}});
+    if(t<E.end)for(const c of cols){
+      const phi=Math.min(.9,c.q*Q*dt);let above=0;const s0=surf(c);
+      c.cells.forEach((e,r)=>{const sub=s0+r+.5>L||t<E.bloom;
+        const old=e.Cp;if(sub)e.Cp=(1-phi)*e.Cp+phi*above;above=old;
+        if(t<e.wetT||!sub)return;
+        const dE=k*Tf*Math.pow(1-e.E,1.4)*Math.max(0,1-e.Cp)*dt*(e.moved?.35:1);/* 黏在杯壁上的粉：水多半從中心凹洞流走，只沾到一層水膜 */e.E+=dE;e.Cp=Math.min(1,e.Cp+dE*R);});
     }
-    snaps.push({t,Q,E:cols.map(c=>c.cells.map(e=>e.E)),dry:cols.map(c=>c.cells.map(e=>t<e.wetT))});
+    const sn=e=>({E:e.E,dry:t<e.wetT,mv:e.moved,r0:e.r0,c0:e.c0});
+    snaps.push({t,Q,L,cols:cols.map(c=>({q:c.q,s:surf(c),cells:c.cells.map(sn)})),wall:{L:wall['-1'].map((e,k)=>Object.assign(sn(e),{y:wallY(k),k})),R:wall['1'].map((e,k)=>Object.assign(sn(e),{y:wallY(k),k}))},moves});
   }
-  return {cfg,cols,maxD,snaps,ends:E,fines};
+  return {cfg,cols,maxD,snaps,ends:E,fines,k10};
 }
-// per-layer (row) stats, weighted by the volume each column stands for
+// 統計：依「原本在第幾層」分組（被推走的粉仍算原本那層），以每欄代表的體積加權
 function bedStats(run,si){
-  const s=run.snaps[Math.min(si,run.snaps.length-1)],rows=[];
-  for(let r=0;r<run.maxD;r++){let a=0,w=0;run.cols.forEach((c,i)=>{if(r<c.d){a+=s.E[i][r]*c.w;w+=c.w;}});if(w)rows.push({r,ey:a/w*BED_EYMAX,w});}
-  let a=0,w=0,vals=[];run.cols.forEach((c,i)=>c.cells.forEach((e,r)=>{const v=s.E[i][r]*BED_EYMAX;a+=v*c.w;w+=c.w;vals.push([v,c.w]);}));
+  const s=run.snaps[Math.min(si,run.snaps.length-1)],W=run.cols.map(c=>c.w),acc={};let a=0,w=0;const vals=[];let mv=0,mvw=0,mvn=0;
+  s.cols.concat([{cells:s.wall.L.concat(s.wall.R)}]).forEach(c=>c.cells.forEach(e=>{const ww=W[e.c0],v=e.E*BED_EYMAX;(acc[e.r0]=acc[e.r0]||[0,0]);acc[e.r0][0]+=v*ww;acc[e.r0][1]+=ww;a+=v*ww;w+=ww;vals.push([v,ww]);if(e.mv){mv+=v*ww;mvw+=ww;mvn++;}}));
+  const rows=Object.keys(acc).map(Number).sort((x,y)=>x-y).map(r=>({r,ey:acc[r][0]/acc[r][1]}));
   const mean=a/w,sd=Math.sqrt(vals.reduce((x,[v,ww])=>x+ww*(v-mean)**2,0)/w);
-  const zone=f=>{let a=0,w=0;run.cols.forEach((c,i)=>{if(f(Math.abs(c.x)))c.cells.forEach((e,r)=>{a+=s.E[i][r]*c.w;w+=c.w;});});return w?a/w*BED_EYMAX:0;};
+  const zone=f=>{let a=0,w=0;s.cols.forEach(c=>c.cells.forEach(e=>{if(f(Math.abs(run.cols[e.c0].x))&&!e.mv){a+=e.E*BED_EYMAX*W[e.c0];w+=W[e.c0];}}));return w?a/w:0;};
   const eys=rows.map(x=>x.ey);
+  const crater=Math.max(0,...s.cols.map((c,i)=>c.s-(run.cols[i].b-run.cols[i].d0)));
   return {rows,mean,sd,uni:Math.max(0,1-sd/mean),spread:Math.max(...eys)-Math.min(...eys),center:zone(x=>x<.35),edge:zone(x=>x>=.65),
-    lo:Math.min(...vals.map(v=>v[0])),hi:Math.max(...vals.map(v=>v[0]))};
+    lo:Math.min(...vals.map(v=>v[0])),hi:Math.max(...vals.map(v=>v[0])),wall:mvn?mv/mvw:null,wallN:mvn,crater};
 }
 if(typeof module!=='undefined')module.exports={bedRun,bedStats,BED_DRIP};
 
 (function(){
 const $=id=>document.getElementById(id);
-let stir='none',runs=null,si=0,playing=false,raf=0,last=0,acc=0,inited=false;
+let stir='none',pour='normal',runs=null,si=0,playing=false,raf=0,last=0,acc=0,inited=false;
 const fmt=t=>Math.floor(t/60)+':'+String(Math.round(t%60)).padStart(2,'0');
 const LO=12,HI=22,STOPS=[[246,235,208],[214,160,98],[150,82,38],[70,32,12]];
 function col(ey){let f=Math.max(0,Math.min(1,(ey-LO)/(HI-LO)))*(STOPS.length-1),i=Math.min(STOPS.length-2,Math.floor(f)),u=f-i;
   const c=STOPS[i].map((v,k)=>Math.round(v+(STOPS[i+1][k]-v)*u));return 'rgb('+c.join(',')+')';}
 const cssv=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
-function build(){runs={cone:bedRun({drip:'cone',stir,temp:93}),flat:bedRun({drip:'flat',stir,temp:93})};
+function build(){runs={cone:bedRun({drip:'cone',stir,pour,temp:93}),flat:bedRun({drip:'flat',stir,pour,temp:93})};
   const n=runs.cone.snaps.length-1;$('bedTime').max=n;if(si>n)si=n;}
 function card(key){const D=BED_DRIP[key];return '<header><b>'+D.name+'</b><small>'+D.sub+'</small></header><canvas></canvas><div class="bed-st"></div>';}
 function draw(key){
@@ -2698,23 +2722,32 @@ function draw(key){
   const dpr=Math.min(2,devicePixelRatio||1),h=Math.round(w*1.08);cv.style.height=h+'px';cv.width=Math.round(w*dpr);cv.height=Math.round(h*dpr);
   const g=cv.getContext('2d');g.setTransform(dpr,0,0,dpr,0,0);g.clearRect(0,0,w,h);
   const s=R.snaps[Math.min(si,R.snaps.length-1)],t=s.t,E=R.ends;
-  const cw=w*.84/BED_NX,x0=w*.08,y0=h*.36,rh=(h*.5)/10;
+  const x0=key==='cone'?w*.19:w*.08,cw=(w-2*x0)/BED_NX,y0=h*.36,rh=(h*.5)/10;
   const ink=cssv('--ink'),line=cssv('--muted');
   // cone: the bed sits inside a V; clip everything to it
   const vY=x=>{const u=Math.min(1,Math.abs((x-w/2)/(w/2-x0)));return y0+rh*(10*(1-u)+1.4*u)+rh*.3;};
   const ax=w/2,ay=vY(w/2),rimY=h*.08,ext=(ay-rimY)/(ay-vY(x0))*(w/2-x0);
   if(key==='cone'){g.save();g.beginPath();g.moveTo(w/2-ext,rimY);g.lineTo(ax,ay);g.lineTo(w/2+ext,rimY);g.closePath();g.clip();}
-  const water=t<E.end;const lvl=t<E.bloom?.25:t<E.pourEnd?1:Math.max(0,1-(t-E.pourEnd)/(E.end-E.pourEnd));
-  if(water&&lvl>0){g.fillStyle='rgba(110,170,195,.28)';const top=y0-h*.22*lvl;g.fillRect(key==='cone'?0:x0,top,key==='cone'?w:w-2*x0,y0-top+(key==='cone'?2:0));}
-  R.cols.forEach((c,i)=>c.cells.forEach((e,r)=>{const x=x0+i*cw,y=y0+r*rh;
-    if(s.dry[i][r]){g.fillStyle='#d9d4c8';g.fillRect(x,y,cw+.5,(key==='cone'&&r===c.d-1)?rh*2.5:rh+.5);g.strokeStyle='rgba(120,110,95,.6)';g.lineWidth=1;g.beginPath();g.moveTo(x,y+rh);g.lineTo(x+cw,y);g.stroke();}
-    else{g.fillStyle=col(s.E[i][r]*BED_EYMAX);g.fillRect(x,y,cw+.5,(key==='cone'&&r===c.d-1)?rh*2.5:rh+.5);}}));
+  if(t<E.end){const sMin=Math.min(...s.cols.map(c=>c.s));let ly=t<E.bloom?y0+(sMin-.8)*rh:y0+s.L*rh;ly=Math.max(h*.1,ly);
+    g.fillStyle='rgba(110,170,195,.28)';g.fillRect(key==='cone'?0:x0,ly,key==='cone'?w:w-2*x0,(key==='cone'?h:y0+6*rh)-ly);}
+  if(key!=='cone')g.save(),g.beginPath(),g.rect(x0,0,w-2*x0,h),g.clip();
+  s.cols.forEach((c,i)=>c.cells.forEach((e,r)=>{const x=x0+i*cw,y=y0+(c.s+r)*rh,hh=(key==='cone'&&r===c.cells.length-1)?rh*2.5:rh+.5;
+    if(e.dry){g.fillStyle='#d9d4c8';g.fillRect(x,y,cw+.5,hh);g.strokeStyle='rgba(120,110,95,.6)';g.lineWidth=1;g.beginPath();g.moveTo(x,y+rh);g.lineTo(x+cw,y);g.stroke();}
+    else{g.fillStyle=col(e.E*BED_EYMAX);g.fillRect(x,y,cw+.5,hh);}
+    }));
+  // 被推到杯壁上的粉：貼著濾紙往上堆（藍框）
+  const slope=(w/2-x0)/(ay-vY(x0));
+  [['L',-1],['R',1]].forEach(([sd,dir])=>(s.wall?s.wall[sd]:[]).forEach(e=>{const yc=y0+e.y*rh,y=yc-rh*.45;
+    let x;if(key==='cone'){const xl=dir<0?ax-(ay-yc)*slope:ax+(ay-yc)*slope;x=dir<0?xl+1+(e.k%2)*cw*.95:xl-1-cw*(1+(e.k%2)*.95);}
+    else x=dir<0?x0+(e.k%2)*cw:w-x0-cw*(1+(e.k%2));
+    g.fillStyle=e.dry?'#d9d4c8':col(e.E*BED_EYMAX);g.fillRect(x,y,cw,rh*.9);g.strokeStyle='rgba(30,70,110,.95)';g.lineWidth=1.3;g.strokeRect(x+.7,y+.7,cw-1.4,rh*.9-1.4);}));
+  if(key!=='cone')g.restore();
   if(key==='cone')g.restore();
   // flow ticks
   if(s.Q>0){g.strokeStyle='rgba(60,130,165,.85)';g.lineWidth=1.2;
-    R.cols.forEach((c,i)=>{const a=Math.min(1,c.q*s.Q*1.4);if(a<.15)return;const x=x0+(i+.5)*cw;for(let r=1;r<c.d;r+=3){const y=y0+r*rh+((t*3)%3)/3*rh;g.globalAlpha=a;g.beginPath();g.moveTo(x-2.5,y-2);g.lineTo(x,y+1);g.lineTo(x+2.5,y-2);g.stroke();}});g.globalAlpha=1;}
+    s.cols.forEach((c,i)=>{const a=Math.min(1,c.q*s.Q*1.4);if(a<.15)return;const x=x0+(i+.5)*cw;for(let r=1;r<c.cells.length;r+=3){const y=y0+(c.s+r)*rh+((t*3)%3)/3*rh;g.globalAlpha=a;g.beginPath();g.moveTo(x-2.5,y-2);g.lineTo(x,y+1);g.lineTo(x+2.5,y-2);g.stroke();}});g.globalAlpha=1;}
   // fines at bottom
-  if(R.fines&&t>60){g.fillStyle=key==='cone'?'#3a2416':'#3a2416';R.cols.forEach((c,i)=>{const yb=y0+c.d*rh;for(let k=0;k<4;k++){g.beginPath();g.arc(x0+i*cw+(k+.5)*cw/4,yb-2,1.2,0,6.3);g.fill();}});}
+  if(R.fines&&t>60){g.fillStyle=key==='cone'?'#3a2416':'#3a2416';R.cols.forEach((c,i)=>{const yb=y0+c.b*rh;for(let k=0;k<4;k++){g.beginPath();g.arc(x0+i*cw+(k+.5)*cw/4,yb-2,1.2,0,6.3);g.fill();}});}
   // dripper outline
   g.strokeStyle=line;g.lineWidth=2;g.beginPath();
   if(key==='cone'){g.moveTo(w/2-ext,rimY);g.lineTo(ax,ay);g.lineTo(w/2+ext,rimY);g.stroke();
@@ -2723,25 +2756,25 @@ function draw(key){
   else{const yb=y0+6*rh+4;g.moveTo(x0-w*.04,h*.08);g.lineTo(x0-2,yb);g.lineTo(w-x0+2,yb);g.lineTo(w-x0+w*.04,h*.08);g.stroke();
     if(s.Q>0){g.fillStyle='rgba(120,70,30,.8)';[.35,.5,.65].forEach(f=>{for(let k=0;k<2;k++){const yy=yb+5+((t*4+k*9)%16);g.beginPath();g.arc(w*f,yy,1.5,0,6.3);g.fill();}});}}
   // labels
-  g.fillStyle=cssv('--muted');g.font='11px '+cssv('--f-body');g.fillText('上層 ↓',x0,y0-4);
+  g.fillStyle=cssv('--muted');g.font='11px '+cssv('--f-body');
   g.fillText(key==='cone'?'下層（錐尖）':'下層',2,y0+(key==='cone'?10:6)*rh+(key==='cone'?20:14));
   const st=bedStats(R,si);
   el.querySelector('.bed-st').innerHTML='<span><em>平均</em><b>'+st.mean.toFixed(1)+'%</b></span><span><em>最高格</em><b>'+st.hi.toFixed(1)+'%</b></span><span><em>最低格</em><b>'+st.lo.toFixed(1)+'%</b></span>';
 }
 function layers(key){const R=runs[key],st=bedStats(R,si);
   return '<h3>'+BED_DRIP[key].name+'</h3>'+st.rows.map((x,i)=>'<div class="bl-row"><span>'+(i===0?'第 1 層（最上）':i===st.rows.length-1?'第 '+(i+1)+' 層（最下）':'第 '+(i+1)+' 層')+'</span><div><i style="width:'+Math.max(2,(x.ey-8)/(HI-8)*100)+'%;background:'+col(x.ey)+'"></i></div><b>'+x.ey.toFixed(1)+'</b></div>').join('')+
-    '<div class="bl-zone"><span>中心 <b>'+st.center.toFixed(1)+'%</b></span><span>邊緣 <b>'+st.edge.toFixed(1)+'%</b></span></div>';}
+    '<div class="bl-zone"><span>中心 <b>'+st.center.toFixed(1)+'%</b></span><span>邊緣 <b>'+st.edge.toFixed(1)+'%</b></span>'+(st.wall!=null?'<span>杯壁高處 <b>'+st.wall.toFixed(1)+'%</b></span>':'')+'</div>';}
 function table(){const a=bedStats(runs.cone,si),b=bedStats(runs.flat,si),f=v=>v.toFixed(1)+'%';
   const top=s=>s.rows[0].ey,bot=s=>s.rows[s.rows.length-1].ey;
-  const rows=[['平均萃取率',f(a.mean),f(b.mean)],['最高格－最低格',f(a.hi-a.lo),f(b.hi-b.lo)],['最上層－最下層',f(top(a)-bot(a)),f(top(b)-bot(b))],['邊緣－中心',f(a.edge-a.center),f(b.edge-b.center)],['均勻度（越高越均勻）',(a.uni*100).toFixed(0),(b.uni*100).toFixed(0)],['滴完時間',fmt(runs.cone.ends.end),fmt(runs.flat.ends.end)]];
+  const rows=[['平均萃取率',f(a.mean),f(b.mean)],['最高格－最低格',f(a.hi-a.lo),f(b.hi-b.lo)],['最上層－最下層',f(top(a)-bot(a)),f(top(b)-bot(b))],['邊緣－中心',f(a.edge-a.center),f(b.edge-b.center)],['均勻度（越高越均勻）',(a.uni*100).toFixed(0),(b.uni*100).toFixed(0)],['中心凹陷',a.crater?'約 '+a.crater+' 層':'沒有',b.crater?'約 '+b.crater+' 層':'沒有'],['被推到杯壁上的粉',a.wall!=null?f(a.wall):'—',b.wall!=null?f(b.wall):'—'],['滴完時間',fmt(runs.cone.ends.end),fmt(runs.flat.ends.end)]];
   $('bedTbl').innerHTML='<thead><tr><th>'+fmt(runs.cone.snaps[si].t)+'</th><th>錐形</th><th>平底</th></tr></thead><tbody>'+rows.map(r=>'<tr><td>'+r[0]+'</td><td>'+r[1]+'</td><td>'+r[2]+'</td></tr>').join('')+'</tbody>';}
-function caption(){const t=runs.cone.snaps[si].t,E=runs.cone.ends,st=bedStirs(stir);
+function caption(){const t=runs.cone.snaps[si].t,E=runs.cone.ends,st=bedStirs(stir),k10=pour==='k10';
   if(st.some(x=>t>=x&&t<x+4))return '攪拌：粉被翻起來再落下，上層和下層、中心和邊緣的粉交換位置，萃取率的差距一下子拉近。';
   if(t===0)return '按「播放」看水怎麼從上往下流，以及每一格粉萃取的過程。灰色斜線是還沒吸到水的粉。';
   if(t<E.bloom)return '悶蒸：少量的水由上往下滲，水不流動。'+(stir==='none'?'沒攪拌時有些粉被 CO₂ 包住，晚一點才濕（灰色），錐形底部的錐尖最容易發生。':'');
-  if(t<E.pourEnd)return '注水中：上層一直碰到新鮮的水，萃得最快；水往下流的途中越來越濃，下層萃得慢。錐形濾杯的邊緣粉層薄、阻力小，水比較多從邊緣走（藍色箭頭越明顯，流過的水越多）；中心深處碰到的是最濃的水。';
-  if(t<runs.cone.ends.end)return '水快滴完：流速越來越慢，萃取也跟著放慢。'+(stir==='multi'?'多次攪拌讓細粉沉到底部，堵住濾紙，滴得比較慢。':'');
-  return '滴完了。比較兩邊的顏色：錐形上下、中心邊緣的深淺差得多；平底只有上下層有些差別。';}
+  if(t<E.pourEnd)return k10?'粕谷 10 段：每 15 秒小注 30 g，水柱細、擾動小，粉層幾乎維持原本的樣子，上下分層一直存在：上層碰到新鮮的水萃得多，下層碰到變濃的水萃得少。':'注水中：水柱把中心的粉往外推，中心慢慢凹下去，粉被推到杯壁上（藍框的格子）。原本的上下層被打亂；中心變薄、阻力小，水大多從凹洞往下流（藍色箭頭越明顯，流過的水越多）。';
+  if(t<runs.cone.ends.end)return (k10?'水快滴完：流速越來越慢，萃取也跟著放慢。':'水位下降：杯壁高處的粉最先露出水面，之後幾乎不再萃取；剩下的水集中從中心凹洞流走。')+(stir==='multi'?'多次攪拌讓細粉沉到底部，堵住濾紙，滴得比較慢。':'');
+  return k10?'滴完了。低擾動讓分層保留下來：錐形上下、中心邊緣的深淺差得多；平底只有上下層有些差別。':'滴完了。中心形成凹洞，杯壁上那圈粉（藍框）萃得最少，凹洞底部附近的粉萃得多；原本的分層已經被打亂。';}
 function render(){if(!runs)build();draw('cone');draw('flat');$('bedLayCone').innerHTML=layers('cone');$('bedLayFlat').innerHTML=layers('flat');table();
   $('bedTime').value=si;$('bedClock').textContent=fmt(runs.cone.snaps[si].t);$('bedCap').textContent=caption();}
 function frame(now){if(!playing)return;const dt=Math.min(.1,(now-last)/1000);last=now;acc+=dt*10;while(acc>=1){acc-=1;si++;}
@@ -2753,6 +2786,7 @@ $('bedGrad').style.background='linear-gradient(90deg,'+[0,1/3,2/3,1].map(f=>col(
 $('bedPlay').onclick=()=>playing?stop():play();
 $('bedTime').oninput=e=>{stop();si=+e.target.value;render();};
 $('bedStir').querySelectorAll('button').forEach(b=>b.onclick=()=>{stop();stir=b.dataset.v;$('bedStir').querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',x===b));build();si=runs.cone.snaps.length-1;render();});
+$('bedPour').querySelectorAll('button').forEach(b=>b.onclick=()=>{stop();pour=b.dataset.v;$('bedPour').querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',x===b));build();si=runs.cone.snaps.length-1;render();});
 window.bedRender=()=>{if(!inited){inited=true;build();si=runs.cone.snaps.length-1;}render();};
 addEventListener('resize',()=>{if($('bedView')&&!$('bedView').hidden&&runs)render();});
 })();
