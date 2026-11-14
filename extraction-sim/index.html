@@ -141,7 +141,13 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
 }
 .beansel{width:100%;font:inherit;font-size:15px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:7px 10px}
 .param.champ{grid-column:1 / -1}
-.aroma .taste{flex-basis:100%;color:var(--ink)}
+.aroma .taste{flex-basis:100%;color:var(--ink);margin-top:6px}
+.aroma .taste .tt{font-size:13px;margin-bottom:4px}
+.aroma .taste .tg{display:grid;grid-template-columns:repeat(4,1fr);gap:4px}
+.aroma .taste .tg span{display:flex;flex-direction:column;align-items:flex-start;gap:0;padding:4px 6px;border:1px solid var(--line);border-radius:8px}
+.aroma .taste .tg em{font-style:normal;font-size:12px;color:var(--muted)}
+.aroma .taste .tg b{font-size:15px}
+.aroma .taste .tn{display:block;margin-top:4px;line-height:1.5}
 .wrapseg{flex-wrap:wrap}
 .wrapseg button{flex:1 1 30%;border-bottom:1px solid var(--line)}
 #dripParam{grid-column:1 / -1}
@@ -1289,7 +1295,7 @@ function stats(prefix,s,sim,kind){
   $(prefix+'Aroma').innerHTML=VOL.map(i=>{const c=CMP[i],keep=D[i]/sim.S0[i]*100,lost=s.lost[i]/sim.S0[i]*100;
     return '<span><i style="background:var(--'+c.id+')"></i>'+c.name+' <b>'+(D[i]*1000).toFixed(1)+' mg</b> <small>保留 '+keep.toFixed(0)+'% · 散失 '+lost.toFixed(0)+'%</small></span>';}).join('')+
     (V>5?[0,2,3].map(i=>'<span><i style="background:var(--'+CMP[i].id+')"></i>'+CMP[i].name+' <b>'+Math.round(D[i]/V*1e6).toLocaleString()+' mg/L</b></span>').join(''):'')+
-    ((V>5&&tot>0)?(pf=>'<span class="taste">口感（0–10）甜 <b>'+pf.sweet.toFixed(1)+'</b>・酸 <b>'+pf.acid.toFixed(1)+'</b>・苦 <b>'+pf.bitter.toFixed(1)+'</b>・澀 <b>'+pf.astr.toFixed(1)+'</b>・醇厚 <b>'+pf.body.toFixed(1)+'</b>・酸甜傾向 <b>'+pf.balance.toFixed(1)+'</b><small>（0 偏甜、10 偏酸）</small>・清晰度 <b>'+clarityOf(kind,simP(),sim).toFixed(1)+'</b><small>（高＝層次分明、低＝風味集中）</small></span>')(cupProfile({tds:tot/V*100,c:D.map(x=>x/V*1000),share:D.map(x=>x/tot)})):'');
+    ((V>5&&tot>0)?(pf=>'<div class="taste"><div class="tt">口感（0–10）</div><div class="tg">'+[['甜',pf.sweet],['酸',pf.acid],['苦',pf.bitter],['澀',pf.astr],['醇厚',pf.body],['酸甜傾向',pf.balance],['清晰度',clarityOf(kind,simP(),sim)]].map(x=>'<span><em>'+x[0]+'</em><b>'+x[1].toFixed(1)+'</b></span>').join('')+'</div><small class="tn">酸甜傾向：0 偏甜、10 偏酸<br>清晰度：高＝層次分明、低＝風味集中</small></div>')(cupProfile({tds:tot/V*100,c:D.map(x=>x/V*1000),share:D.map(x=>x/tot)})):'');
   let ph;
   $(kind==='po'?'stirPO':'stirIM').disabled=s.done;
   if(s.sv>.35&&!s.done)ph='攪拌中';
