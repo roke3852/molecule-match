@@ -140,6 +140,12 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
   .res{grid-column:1 / -1}.res .tag{display:block}
 }
 .beansel{width:100%;font:inherit;font-size:15px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:7px 10px}
+.param.champ{grid-column:1 / -1}
+.champinfo{display:flex;flex-direction:column;gap:4px;margin-top:6px;font-size:13px;line-height:1.55;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px 12px}
+.champinfo b{font-size:14px}
+.champinfo .mono{font-size:12px}
+.champinfo .est{color:var(--muted);font-size:12px}
+.champinfo a{color:var(--accent);font-size:12px}
 .fine{font-size:12px;color:var(--muted);max-width:80ch}
 @media (max-width:720px){.charts{grid-template-columns:1fr}.stage{gap:10px}.stat b{font-size:15px}.panel{padding:12px}}
 @media (max-width:420px){.stats{grid-template-columns:1fr 1fr}.stats .stat:last-child{grid-column:span 2}}
@@ -198,6 +204,8 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
 #gameView .seg{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
 #gameView .seg button{flex:1;background:transparent;border:0;font-size:14px;padding:7px 6px;cursor:pointer;white-space:nowrap}
 #gameView .seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+#gameView .gchamp{grid-column:1 / -1}
+#gameView .gsel{width:100%;font:inherit;font-size:15px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:7px 10px}
 #gameView .modeseg{margin-left:auto;flex:0 0 auto}
 #gameView .modeseg button{padding:4px 14px;font-size:13px}
 #gameView .brew{background:var(--accent);color:var(--accent-ink);border:0;border-radius:10px;font-weight:700;font-size:17px;padding:13px;cursor:pointer;width:100%}
@@ -300,6 +308,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
   </div>
 
   <section class="panel params" aria-label="沖煮參數">
+    <div class="param champ" id="champParam"><div class="row"><label for="champSel" class="label">世界手沖冠軍的沖煮手法</label><output id="champState" class="label"></output></div><select id="champSel" class="beansel"></select><div class="champinfo" id="champInfo" hidden></div></div>
     <div class="param wide" id="beanParam"><div class="row"><label for="beanSel" class="label">咖啡豆（依產區）</label><output id="beanOut" class="label"></output></div><select id="beanSel" class="beansel"></select></div>
     <div class="param" id="roastParam"><div class="row"><label for="roast" class="label">烘焙度</label><output id="roastOut"></output></div><input id="roast" type="range" min="1" max="5" step="1" value="3"></div>
     <div class="param"><div class="row"><label for="dose" class="label">粉量</label><output id="doseOut" class="mono"></output></div><input id="dose" type="range" min="10" max="25" step="1" value="15"></div>
@@ -451,6 +460,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
         <div class="seg modeseg" id="gMode" role="group" aria-label="設定模式"><button data-v="simple">簡單</button><button data-v="pro">精細</button></div></div>
       <p class="label" id="gModeNote"></p>
       <div class="params">
+        <div class="param pro gchamp" id="gchampP"><div class="row"><label for="gchamp" class="label">載入世界手沖冠軍配方</label><output id="gchampOut" class="label"></output></div><select id="gchamp" class="gsel"></select></div>
         <div class="param pro" id="gdoseP"><div class="row"><label for="gdose" class="label">粉量</label><output id="gdoseOut"></output></div><input id="gdose" type="range" min="10" max="25" step="1" value="15"></div>
         <div class="param"><div class="row"><label for="gtemp" class="label">水溫</label><output id="gtempOut"></output></div><input id="gtemp" type="range" min="80" max="100" step="1" value="92"></div>
         <div class="param"><div class="row"><label for="ggrind" class="label">研磨粒徑</label><output id="ggrindOut"></output></div><input id="ggrind" type="range" min="300" max="1200" step="50" value="600"></div>
@@ -571,7 +581,9 @@ function simulate(method,p){
   const SW=method==='po'&&p.pattern==='switch';
   const openFirst=SW&&p.swMode==='openFirst', tcl=openFirst?(p.swClose??30):0, tsw=Math.max(p.swOpen||120,tcl+15);
   const PL=(method==='po'&&(p.pattern==='pulse'||SW)&&p.plan)?planSegments(p.plan,p.planT,p.planD):null;
-  const closed=t=>SW&&t>=tcl&&t<tsw;
+  // valveWins: optional list of [close, open] times for brewers whose valve closes more than once
+  const VW=SW&&Array.isArray(p.valveWins)&&p.valveWins.length?p.valveWins:null;
+  const closed=t=>SW&&(VW?VW.some(w=>t>=w[0]&&t<w[1]):(t>=tcl&&t<tsw));
   // per-pour water temperature: the slurry temperature is the heat-weighted mix of the water poured so far
   const PT=(PL&&Array.isArray(p.planTemp)&&p.planTemp.length===PL.length)?p.planTemp:null;
   const pourTemp=t=>{if(PT){for(let i=0;i<PL.length;i++)if(t>=PL[i].s&&t<PL[i].e)return PT[i];}return p.temp;};
@@ -583,7 +595,7 @@ function simulate(method,p){
     if(t<10) return bloomV/10;
     return (t>=40&&t<115)?rest/75:0;
   }
-  const pourEnd = method==='im'?10:SW?Math.max(tsw,PL?PL[PL.length-1].e:20):PL?PL[PL.length-1].e:115;
+  const pourEnd = method==='im'?10:SW?Math.max(VW?VW[VW.length-1][1]:tsw,PL?PL[PL.length-1].e:20):PL?PL[PL.length-1].e:115;
   const tmax = method==='im'?p.steep:480;
   let wasClosed=false;
   const nearV=t=>(method==='im'||closed(t))?Math.min(Vb,.12*W):Vb;
@@ -666,6 +678,37 @@ const BEANS=[
 ];
 const ROAST_NAME=r=>r<=1.5?'淺焙':r<=2.5?'淺中焙':r<=3.4?'中焙':r<=4.2?'中深焙':'深焙';
 
+// World Brewers Cup champion recipes (sources noted per entry; values marked est are estimates)
+const CHAMPS=[
+ {id:'wbrc2016',realTime:'約 3:30',year:2016,name:'粕谷哲 Tetsu Kasuya',country:'日本',method:'4:6 法',real:'Hario V60（陶瓷）',dripper:'v60',pattern:'pulse',dose:20,water:300,temp:92,grind:900,bean:'geisha',
+  plan:[50,70,60,60,60],planT:[0,45,90,135,180],planD:[null,null,null,null,null],stir:'none',est:['研磨（原文：粗研磨）','每注秒數'],
+  note:'前 40% 水量分兩注決定酸甜，後 60% 分三注決定濃度；每注等前一注滴完再倒。',src:'https://kurasu.kyoto/blogs/kurasu-journal/2016-world-brewers-cup-champion-tetsu-kasuya'},
+ {id:'wbrc2017',realTime:'2:00–2:15',year:2017,name:'王策 Chad Wang',country:'台灣',method:'細研磨兩段注水',real:'Hario V60（陶瓷）',dripper:'v60',pattern:'pulse',dose:15,water:250,temp:93,grind:400,bean:'geisha',
+  plan:[30,220],planT:[0,30],planD:[6,45],stir:'none',est:['悶蒸注水秒數'],
+  note:'篩粉讓大部分粉粒約 400 μm；0:30 起中心注水 40–45 秒到 250 g，2:00–2:15 滴完。',src:'https://www.baristamagazine.com/world-brewers-2017-recipe/'},
+ {id:'wbrc2018',realTime:'2:55',year:2018,name:'Emi Fukahori 深堀絵美',country:'瑞士',method:'浸泡＋滴濾混合、冷熱交替',real:'GINA（可開關閥門）',dripper:'cone',pattern:'switch',dose:17,water:220,temp:80,grind:650,bean:'bra',
+  plan:[50,100,70],planT:[0,45,105],planD:[10,60,45],planTemp:[80,95,80],valveWins:[[0,45],[105,150]],stir:'none',est:['研磨','每注秒數'],
+  note:'關閥 80°C 浸泡 45 秒帶出甜感 → 開閥 95°C 注 100 g → 再關閥 80°C 注 70 g 到 2:30 → 開閥滴到 2:55。模擬器用聰明杯的閥門重現。',src:'https://europeancoffeetrip.com/emi-fukahori-world-brewers-cup-champion/'},
+ {id:'wbrc2019',realTime:'1:40–1:50',year:2019,name:'Du Jianing',country:'中國',method:'三段快注',real:'Origami＋波浪濾紙',dripper:'orea',pattern:'pulse',dose:16,water:240,temp:94,grind:780,bean:'geisha',
+  plan:[60,80,100],planT:[0,18,56],planD:[10,20,20],stir:'none',est:[],
+  note:'粉磨兩次讓粒徑更均勻；60 g、80 g、100 g 三段，1:40–1:50 滴完。波浪濾紙是平底，模擬器用 OREA 平底近似。',src:'https://theroasterspack.com/blogs/news/origami-dripper-our-extensive-guide-with-recipes'},
+ {id:'wbrc2021',realTime:'2:40',year:2021,name:'Matt Winton',country:'瑞士',method:'五等分注水',real:'Hario V60（金屬）',dripper:'v60',pattern:'pulse',dose:20,water:300,temp:93,grind:650,bean:'col',
+  plan:[60,60,60,60,60],planT:[0,40,75,110,145],planD:[12,12,12,12,12],planTemp:[93,93,88,88,88],stir:'none',est:['研磨（原文：中研磨）','每注開始時間','哪幾注改用 88°C'],
+  note:'五注各 60 g，靠注水本身攪動粉床、不另外旋轉；後段水溫降到 88°C 減少萃取。',src:'https://honestcoffeeguide.com/brew-recipes/matt-winton-v60-five-pour/'},
+ {id:'wbrc2022',realTime:'',year:2022,name:'Sherry Hsu',country:'台灣',method:'低溫悶蒸、高溫萃取',real:'OREA V3＋Kalita 185 濾紙',dripper:'orea',pattern:'pulse',dose:14,water:200,temp:95,grind:650,bean:'geisha',
+  plan:[50,50,50,50],planT:[0,30,60,90],planD:[null,null,null,null],planTemp:[70,95,95,95],stir:'none',est:['研磨','每注秒數'],
+  note:'第一注 70°C，之後三注 95°C，每 30 秒注 50 g。',src:'https://akarinohon.com/text/taketori.cgi/en.m.wikipedia.org/wiki/World_Brewers_Cup'},
+ {id:'wbrc2023',realTime:'2:40',year:2023,name:'Carlos Medina',country:'智利',method:'五等分、每 30 秒一注',real:'Origami Air S＋錐形濾紙',dripper:'v60',pattern:'pulse',dose:15.5,water:250,temp:91,grind:650,bean:'col',
+  plan:[50,50,50,50,50],planT:[0,30,60,90,120],planD:[null,null,null,null,null],stir:'none',est:['研磨（原文：1Zpresso ZP6 刻度 5.2）','每注秒數'],
+  note:'50 g 五注，由內往外再往內繞圈，總時間約 2:40。錐形濾紙的 Origami 用 V60 近似。',src:'https://www.slowpoursupply.co/blogs/brew-recipes/recipe-recap-carlos-medina-s-representing-chile-world-brewers-cup-champion-recipe'},
+ {id:'wbrc2024',realTime:'',year:2024,name:'Martin Wölfl',country:'奧地利',method:'大注收尾',real:'OREA V4 快速底＋Sibarist 濾紙',dripper:'orea',pattern:'pulse',dose:17,water:270,temp:93,grind:630,bean:'geisha',
+  plan:[60,60,50,100],planT:[0,40,80,120],planD:[null,null,null,null],stir:'none',est:['每注秒數'],
+  note:'630 μm，60 g 悶蒸，0:40 注 60 g、1:20 注 50 g、2:00 注 100 g；搭配 WDT 和 Melodrip 讓注水更溫和。',src:'https://akarinohon.com/text/taketori.cgi/en.m.wikipedia.org/wiki/World_Brewers_Cup'},
+ {id:'wbrc2025',realTime:'約 2:15',year:2025,name:'George Jinyang Peng',country:'中國',method:'高溫萃取、低溫收尾',real:'Solo Dripper＋Melodrip',dripper:'cone',pattern:'pulse',dose:15,water:210,temp:96,grind:550,bean:'geisha',
+  plan:[30,90,90],planT:[0,30,70],planD:[6,10,20],planTemp:[96,96,80],stir:'none',est:['研磨（原文：中細研磨）','第三注開始時間與秒數'],
+  note:'96°C 悶蒸 30 g → 0:30 注 90 g → 等 30 秒，用 Melodrip 注入 80°C 的 90 g，總時間約 2:15。Solo Dripper 用一般錐形近似。',src:'https://honestcoffeeguide.com/brew-recipes/george-jinyang-peng-2025-wbc/'},
+];
+
 </script>
 <script>
 (function(){
@@ -688,10 +731,11 @@ function labels(){
   const g=P.grind, d=g<450?'細':g<750?'中細':g<950?'中粗':'粗';
   $('grindOut').innerHTML='<span class="mono">'+g+' μm</span> <span class="label">'+d+'</span>';
   $('roastOut').innerHTML='<span class="label">'+['極淺焙','淺焙','中焙','中深焙','深焙'][P.roast-1]+'</span>';
+  if(typeof champSnap!=='undefined'&&champSnap)$('champState').textContent=champKey()===champSnap?'冠軍原始參數':'已從冠軍參數調整過';
   {const b=curBean();$('roastParam').hidden=!!b;$('beanSel').value=P.beanId||'';
    $('beanOut').textContent=b?ROAST_NAME(b.roast)+'・'+b.tags.join('、'):'用下方烘焙度滑桿';}
   $('swCloseOut').innerHTML='<span class="mono">'+fmtT(P.swClose)+'</span>';
-  $('swOpenOut').innerHTML='<span class="mono">'+fmtT(P.swOpen)+'</span>';
+  $('swOpenOut').innerHTML=P.valveWins?'<span class="label">依冠軍配方分段開關</span>':'<span class="mono">'+fmtT(P.swOpen)+'</span>';
   $('steepOut').innerHTML='<span class="mono">'+fmtT(P.steep)+'</span>';
 }
 function evenPlan(n){const W=Math.round(P.dose*P.ratio), b=Math.min(3*P.dose,W), r=W-b, each=Math.floor(r/n/5)*5;
@@ -736,6 +780,26 @@ function simP(){const b=curBean();return Object.assign({},P,b?{roast:b.roast,bea
     h+='<option value="'+b.id+'">'+b.name+'｜'+b.sub+'｜'+ROAST_NAME(b.roast)+'</option>';});
   sel.innerHTML=h+'</optgroup>';
   sel.addEventListener('change',e=>{P.beanId=e.target.value||null;run();});})();
+let champSnap=null;
+const champKey=()=>JSON.stringify(PFIELDS.map(k=>P[k]));
+(function(){const sel=$('champSel');
+  sel.innerHTML='<option value="">不套用，自己設定</option>'+CHAMPS.map(c=>'<option value="'+c.id+'">'+c.year+'｜'+c.name+'（'+c.country+'）｜'+c.method+'</option>').join('');
+  sel.addEventListener('change',e=>{const c=CHAMPS.find(x=>x.id===e.target.value);
+    if(!c){champSnap=null;$('champInfo').hidden=true;$('champState').textContent='';return;}
+    applyParams({dripper:c.dripper,dose:c.dose,ratio:c.water/c.dose,temp:c.temp,grind:c.grind,roast:P.roast,pattern:c.pattern,plan:c.plan.slice(),planT:c.planT.slice(),planD:c.planD.slice(),
+      planTemp:c.planTemp?c.planTemp.slice():null,beanId:c.bean,valveWins:c.valveWins?c.valveWins.map(w=>w.slice()):null,swOpen:c.valveWins?c.valveWins[0][1]:P.swOpen,swMode:'closeFirst',swClose:P.swClose,steep:P.steep,prePO:c.stir,preIM:P.preIM});
+    run();champSnap=champKey();showChamp(c);labels();});})();
+function showChamp(c){const b=BEANS.find(x=>x.id===c.bean),box=$('champInfo');
+  const pours=c.plan.map((ml,i)=>(i?'':'悶蒸 ')+ml+'g@'+fmtT(c.planT[i])+(c.planTemp?' '+c.planTemp[i]+'°C':'')).join('・');
+  box.innerHTML='<b>'+c.year+' 世界手沖冠軍　'+c.name+'（'+c.country+'）</b>'+
+    '<span>原器材：'+c.real+'　→ 模擬用：'+(c.pattern==='switch'?'聰明杯閥門':DRIPPER[c.dripper].name)+'</span>'+
+    '<span class="mono">'+c.dose+' g ・ '+c.water+' g 水（1:'+(c.water/c.dose).toFixed(1)+'）・ '+(c.planTemp?'各注水溫':c.temp+'°C')+' ・ '+c.grind+' μm</span>'+
+    '<span class="mono">'+pours+(c.valveWins?'・關閥 '+c.valveWins.map(w=>fmtT(w[0])+'–'+fmtT(w[1])).join('、'):'')+'</span>'+
+    '<span>'+c.note+'</span>'+
+    '<span>豆子用「'+b.name+'（'+b.sub+'）」近似比賽用豆'+(c.realTime?'；比賽實際總時間 '+c.realTime:'')+'。</span>'+
+    (c.est.length?'<span class="est">推估的參數：'+c.est.join('、')+'</span>':'')+
+    '<a href="'+c.src+'">配方出處</a>';
+  box.hidden=false;}
 function run(){
   if(!P.plan)P.plan=evenPlan(3);
   labels(); presetTimes(); renderPlan();
@@ -746,7 +810,7 @@ function run(){
   draw();
 }
 [['dose',1],['ratio',1],['temp',1],['grind',1],['steep',1],['roast',1],['swOpen',1],['swClose',1]].forEach(([id])=>{
-  $(id).addEventListener('input',e=>{P[id]=+e.target.value;if(id==='temp')P.planTemp=null;if(id==='ratio'||id==='dose')P.plan=evenPlan(P.plan.length-1);run();});
+  $(id).addEventListener('input',e=>{P[id]=+e.target.value;if(id==='temp')P.planTemp=null;if(id==='swOpen'||id==='swClose')P.valveWins=null;if(id==='ratio'||id==='dose')P.plan=evenPlan(P.plan.length-1);run();});
 });
 const PAT={pulse:'pPulse',cont:'pCont',switch:'pSwitch',immersion:'pImm'};
 const isIM=()=>P.pattern==='immersion';
@@ -757,7 +821,7 @@ function syncVis(){const k=P.pattern,sw=k==='switch';
   $('brewPO').hidden=im;$('brewIM').hidden=!im;$('stirPOParam').hidden=im;$('stirIMParam').hidden=!im;$('steepParam').hidden=!im;
   $('dripParam').hidden=!(k==='pulse'||k==='cont');
   $('poTitle').textContent=METHODN[k]+((k==='pulse'||k==='cont')?' · '+DRIPPER[P.dripper].name:'');$('planTitle').textContent=sw?'Switch 注水計畫':'分段注水計畫';}
-[['swCF','closeFirst'],['swOF','openFirst']].forEach(([id,m])=>$(id).onclick=()=>{P.swMode=m;
+[['swCF','closeFirst'],['swOF','openFirst']].forEach(([id,m])=>$(id).onclick=()=>{P.swMode=m;P.valveWins=null;
   $('swCF').setAttribute('aria-pressed',m==='closeFirst');$('swOF').setAttribute('aria-pressed',m==='openFirst');syncVis();run();});
 Object.entries(PAT).forEach(([k,id])=>$(id).onclick=()=>{P.pattern=k;Object.values(PAT).forEach(x=>$(x).setAttribute('aria-pressed',x===id?'true':'false'));syncVis();run();});
 [['segPO','prePO','xPO'],['segIM','preIM','xIM']].forEach(([id,key,x])=>{
@@ -1033,7 +1097,7 @@ addEventListener('resize',draw);
 document.fonts&&document.fonts.ready.then(draw);
 // ---------- remembered parameters ----------
 const PKEY='brewsim-params-v1';
-const PFIELDS=['dripper','dose','ratio','temp','grind','roast','pattern','plan','planT','planD','planTemp','beanId','swOpen','swMode','swClose','steep','prePO','preIM'];
+const PFIELDS=['dripper','dose','ratio','temp','grind','roast','pattern','plan','planT','planD','planTemp','beanId','valveWins','swOpen','swMode','swClose','steep','prePO','preIM'];
 function rememberParams(){try{const o={};PFIELDS.forEach(k=>o[k]=P[k]);localStorage.setItem(PKEY,JSON.stringify(o));}catch(e){}}
 function applyParams(o){
   PFIELDS.forEach(k=>{if(o[k]!==undefined)P[k]=Array.isArray(o[k])?o[k].slice():o[k];});
@@ -1119,7 +1183,7 @@ function brewPro(o){
   const B=BEANS.find(b=>b.id===o.bean), drip=['cone','v60','orea'].includes(o.brewer);
   const pattern=o.brewer==='press'?'immersion':o.brewer==='switch'?'switch':o.dpat;
   const p={dose:o.dose,ratio:o.ratio,temp:o.temp,grind:o.grind,roast:B.roast,bean:B.f,steep:o.steep,swOpen:o.swOpen,swMode:o.swMode,swClose:o.swClose,
-    dripper:drip?o.brewer:'cone',pattern,plan:o.plan,planT:o.planT,planD:o.planD,planTemp:o.planTemp};
+    dripper:drip?o.brewer:'cone',pattern,plan:o.plan,planT:o.planT,planD:o.planD,planTemp:o.planTemp,valveWins:o.valveWins||null};
   let method='po';
   if(pattern==='immersion'){method='im';const im=[];if(o.stirI!=='none')im.push(12);if(o.stirI==='min')for(let t=60;t<o.steep;t+=60)im.push(t);p.stirIM=im;}
   else p.stirPO={none:[],bloom:[12],swirl:pattern==='pulse'?planSegments(o.plan,o.planT,o.planD).slice(1).map(g=>Math.round(g.e+3)):pattern==='switch'?[o.swMode==='openFirst'?12:25,Math.max(30,o.swOpen-5)]:[25,115]}[o.stirP];
@@ -1254,9 +1318,9 @@ function syncParams(){
   $('gsteepOut').textContent=fmtT(O.steep);
   [['pour','pour'],['stir','stir']].forEach(([id,k])=>$(id).querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===O[k])));
 }
-['temp','grind','ratio','steep','dose','swClose','swOpen'].forEach(id=>$('g'+id).addEventListener('input',e=>{O[id]=+e.target.value;if(id==='temp')O.planTemp=null;
+['temp','grind','ratio','steep','dose','swClose','swOpen'].forEach(id=>$('g'+id).addEventListener('input',e=>{O[id]=+e.target.value;if(id==='temp')O.planTemp=null;if(id==='swOpen'||id==='swClose')O.valveWins=null;
   if(id==='ratio'||id==='dose')gEven(O.plan.length-1);syncParams();}));
-[['gdpat','dpat'],['gswMode','swMode'],['gMode','mode']].forEach(([id,k])=>$(id).querySelectorAll('button').forEach(b=>b.onclick=()=>{O[k]=b.dataset.v;
+[['gdpat','dpat'],['gswMode','swMode'],['gMode','mode']].forEach(([id,k])=>$(id).querySelectorAll('button').forEach(b=>b.onclick=()=>{O[k]=b.dataset.v;if(k==='swMode')O.valveWins=null;
   if(k==='mode'){save.mode=O.mode;persist();if(O.mode==='simple'&&O.ratio%0.5){O.ratio=Math.round(O.ratio*2)/2;}$('gratio').value=O.ratio;}
   syncParams();}));
 $('gplanMinus').onclick=()=>{if(O.plan.length>2){gEven(O.plan.length-2);syncParams();}};
@@ -1268,7 +1332,7 @@ function recipeText(o){const B=BEANS.find(b=>b.id===o.bean),R=BREWERS.find(b=>b.
   const drip=['cone','v60','orea'].includes(o.brewer);
   if(o.mode==='pro'){const sw=o.brewer==='switch',press=o.brewer==='press';
     const usesPlan=!press&&(sw||o.dpat==='pulse'), tl=usesPlan&&o.planTemp?'・各注 '+o.planTemp.join('/')+'°C':'';
-    const how=press?'浸泡 '+fmtT(o.steep):sw?(o.swMode==='openFirst'?'先開後關 '+fmtT(o.swClose)+'–'+fmtT(o.swOpen):'先關後開 開閥 '+fmtT(o.swOpen))+'・'+o.plan.join('/')+'ml':
+    const how=press?'浸泡 '+fmtT(o.steep):sw?(o.valveWins?'冠軍分段開關閥':o.swMode==='openFirst'?'先開後關 '+fmtT(o.swClose)+'–'+fmtT(o.swOpen):'先關後開 開閥 '+fmtT(o.swOpen))+'・'+o.plan.join('/')+'ml':
       o.dpat==='cont'?'一刀流':(o.plan.length-1)+' 段 '+o.plan.join('/')+'ml';
     return '精細・'+B.name+'・'+R.name+'・'+o.dose+'g・'+(tl?'':o.temp+'°C・')+o.grind+'μm・1:'+o.ratio+'・'+how+tl+'・'+(press?STIRI[o.stirI]:STIRP[o.stirP]);}
   return B.name+'・'+R.name+'・'+o.temp+'°C・'+o.grind+'μm・1:'+o.ratio+'・'+(drip?{three:'三段式',cont:'一刀流',multi:'少量多次'}[o.pour]:(o.brewer==='switch'?'開閥 ':'浸泡 ')+fmtT(o.steep))+(o.stir==='none'?'・不攪拌':'・攪拌');}
@@ -1322,6 +1386,16 @@ function showResult(o,r,pf,sc){
 $('againBtn').onclick=()=>{$('resultBox').hidden=true;document.querySelector('#beans').closest('.panel').scrollIntoView({behavior:'smooth',block:'start'});};
 $('nextBtn').onclick=()=>openLevel(cur+1);
 
+// ---- champion recipes in detailed mode ----
+$('gchamp').innerHTML='<option value="">選一位冠軍，自動填入他的參數</option>'+CHAMPS.map(c=>'<option value="'+c.id+'">'+c.year+'｜'+c.name+'（'+c.country+'）</option>').join('');
+$('gchamp').addEventListener('change',e=>{const c=CHAMPS.find(x=>x.id===e.target.value);if(!c){$('gchampOut').textContent='';return;}
+  Object.assign(O,{mode:'pro',brewer:c.pattern==='switch'?'switch':c.dripper,bean:c.bean,dose:c.dose,ratio:Math.round(c.water/c.dose*10)/10,temp:c.temp,grind:c.grind,dpat:'pulse',
+    plan:c.plan.slice(),planT:c.planT.slice(),planD:c.planD.slice(),planTemp:c.planTemp?c.planTemp.slice():null,swMode:'closeFirst',swOpen:c.valveWins?c.valveWins[0][1]:O.swOpen,
+    valveWins:c.valveWins?c.valveWins.map(w=>w.slice()):null,stirP:c.stir});
+  [['gtemp','temp'],['ggrind','grind'],['gratio','ratio'],['gdose','dose'],['gswOpen','swOpen']].forEach(([id,k])=>{$(id).value=O[k];});
+  renderChoices();syncParams();
+  $('gchampOut').textContent='已載入 '+c.method+'（原器材：'+c.real+'）';});
+
 // ---- brew history, comparison and suggestions ----
 const clone=x=>JSON.parse(JSON.stringify(x));
 const isDrip=o=>['cone','v60','orea'].includes(o.brewer);
@@ -1338,7 +1412,7 @@ function params(o){
     P.push({k:'攪拌',t:o.stir==='none'?'不攪拌':'攪拌'});
   } else {
     if(drip)P.push({k:'注水方式',t:DPATN[o.dpat]});
-    if(sw){P.push({k:'閥門順序',t:SWN[o.swMode]});if(o.swMode==='openFirst')P.push({k:'關閥時間',t:fmtT(o.swClose),n:o.swClose,u:' 秒',time:1});P.push({k:'開閥時間',t:fmtT(o.swOpen),n:o.swOpen,u:' 秒',time:1});}
+    if(sw&&o.valveWins)P.push({k:'閥門',t:'關 '+o.valveWins.map(w=>fmtT(w[0])+'–'+fmtT(w[1])).join('、')});else if(sw){P.push({k:'閥門順序',t:SWN[o.swMode]});if(o.swMode==='openFirst')P.push({k:'關閥時間',t:fmtT(o.swClose),n:o.swClose,u:' 秒',time:1});P.push({k:'開閥時間',t:fmtT(o.swOpen),n:o.swOpen,u:' 秒',time:1});}
     if(press)P.push({k:'浸泡時間',t:fmtT(o.steep),n:o.steep,u:' 秒',time:1});
     if(usesPlan){P.push({k:'注水量',t:o.plan.join('/')+' ml'});
       P.push({k:'注水時間',t:planSegments(o.plan,o.planT,o.planD).map(g=>fmtT(g.s)).join(' / ')});}
