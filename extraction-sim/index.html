@@ -650,7 +650,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
       <p class="say" id="rSay"></p>
       <div class="board" id="rBoard" hidden></div>
       <div>
-        <div class="dkey" id="rDkey"><span><i style="width:3px;height:12px;background:var(--want)"></i>客人想要</span><span><i style="width:9px;height:9px;border-radius:50%;background:var(--you)"></i>你這杯</span><span>右側：該項得分</span></div>
+        <div class="dkey" id="rDkey"><span><i style="width:3px;height:12px;background:var(--want)"></i>客人想要</span><span><i style="width:9px;height:9px;border-radius:50%;background:var(--you)"></i>你這杯</span><span>右側：該項得分</span><span>酸甜平衡：左偏甜、右偏酸</span></div>
       </div>
       <div class="dims" id="rDims"></div>
       <details><summary>這杯的其他風味</summary><div class="dims" id="rOther"></div></details>
@@ -900,7 +900,9 @@ function cupProfile(r){const Lg=Math.log,cl=v=>Math.max(0,Math.min(10,v));
   const body=cl(0.6*tdsS+0.4*cl(cdim('bitter',4)));
   const acidRaw=cl(dim('acid'));
   const acid=cl(acidRaw/Math.max(.4,1+0.08*(sweet-5)+0.05*(body-5)));
-  return {tds:tdsS,acid,acidRaw,sweet,bitter:B,astr:cl(dim('cga')),body,
+  // acid–sweet balance: 0 = sweet and round, 5 = balanced, 10 = sharp; acidity released vs sweetness, softened by body
+  const balance=cl(5+0.65*(acidRaw-sweet-0.4*(body-5)+0.35));
+  return {tds:tdsS,acid,acidRaw,sweet,balance,bitter:B,astr:cl(dim('cga')),body,
     fruity:cl(dim('fruity')),roasty:cl(dim('roasty')),caf:cl(r.c[1]*10)};}
 
 // Grinders: um = microns per click (null = stepless / not published, set in μm); fines = share of fine particles at ~650 μm (estimated from burr type)
@@ -1273,7 +1275,7 @@ function stats(prefix,s,sim,kind){
   $(prefix+'Aroma').innerHTML=VOL.map(i=>{const c=CMP[i],keep=D[i]/sim.S0[i]*100,lost=s.lost[i]/sim.S0[i]*100;
     return '<span><i style="background:var(--'+c.id+')"></i>'+c.name+' <b>'+(D[i]*1000).toFixed(1)+' mg</b> <small>保留 '+keep.toFixed(0)+'% · 散失 '+lost.toFixed(0)+'%</small></span>';}).join('')+
     (V>5?[0,2,3].map(i=>'<span><i style="background:var(--'+CMP[i].id+')"></i>'+CMP[i].name+' <b>'+Math.round(D[i]/V*1e6).toLocaleString()+' mg/L</b></span>').join(''):'')+
-    ((V>5&&tot>0)?(pf=>'<span class="taste">口感（0–10）甜 <b>'+pf.sweet.toFixed(1)+'</b>・酸 <b>'+pf.acid.toFixed(1)+'</b>・苦 <b>'+pf.bitter.toFixed(1)+'</b>・澀 <b>'+pf.astr.toFixed(1)+'</b>・醇厚 <b>'+pf.body.toFixed(1)+'</b></span>')(cupProfile({tds:tot/V*100,c:D.map(x=>x/V*1000),share:D.map(x=>x/tot)})):'');
+    ((V>5&&tot>0)?(pf=>'<span class="taste">口感（0–10）甜 <b>'+pf.sweet.toFixed(1)+'</b>・酸 <b>'+pf.acid.toFixed(1)+'</b>・苦 <b>'+pf.bitter.toFixed(1)+'</b>・澀 <b>'+pf.astr.toFixed(1)+'</b>・醇厚 <b>'+pf.body.toFixed(1)+'</b>・酸甜平衡 <b>'+pf.balance.toFixed(1)+'</b><small>（0 偏甜、10 偏酸）</small></span>')(cupProfile({tds:tot/V*100,c:D.map(x=>x/V*1000),share:D.map(x=>x/tot)})):'');
   let ph;
   $(kind==='po'?'stirPO':'stirIM').disabled=s.done;
   if(s.sv>.35&&!s.done)ph='攪拌中';
@@ -1334,7 +1336,7 @@ function snap(kind){
   const D=kind==='po'?s.cupM:s.m, V=kind==='po'?s.cupV:s.Vb, tot=D.reduce((a,b)=>a+b,0);
   const totNV=NONVOL.reduce((a,i)=>a+D[i],0);
   return {tds:V>5?tot/V*100:null,ey:tot/sim.dose*100,drive:s.drive,mix:totNV>0?D.map((v,i)=>CMP[i].vol?null:v/totNV*100):null,
-    aroma:VOL.map(i=>[D[i]/sim.S0[i]*100,s.lost[i]/sim.S0[i]*100,D[i]*1000]),conc:V>5?[D[0]/V*1e6,D[3]/V*1e6,D[2]/V*1e6]:null,taste:(V>5&&tot>0)?(pf=>[pf.sweet,pf.acid,pf.bitter,pf.astr,pf.body])(cupProfile({tds:tot/V*100,c:D.map(x=>x/V*1000),share:D.map(x=>x/tot)})):null,
+    aroma:VOL.map(i=>[D[i]/sim.S0[i]*100,s.lost[i]/sim.S0[i]*100,D[i]*1000]),conc:V>5?[D[0]/V*1e6,D[3]/V*1e6,D[2]/V*1e6]:null,taste:(V>5&&tot>0)?(pf=>[pf.sweet,pf.acid,pf.bitter,pf.astr,pf.body,pf.balance])(cupProfile({tds:tot/V*100,c:D.map(x=>x/V*1000),share:D.map(x=>x/tot)})):null,
     t:Math.min(t,sim.end),done:s.done,extra:(kind==='po'?P.xPO:P.xIM).length,score:(c=>c?Math.round(brewScore(c,styleFor(effRoast())).total):null)(cupOf(D,V,sim.dose,sim.S0)),scoreStyle:STYLES[styleFor(effRoast())].name};
 }
 function save(){
@@ -1357,7 +1359,7 @@ function resCell(r,kind,p){
     const q=document.createElement('span');q.style.width=r.mix[i]+'%';q.textContent=r.mix[i]>=7?Math.round(r.mix[i]):'';pct.appendChild(q);});
   d.appendChild(bar);d.appendChild(pct);
   if(r.aroma){const a=document.createElement('div');a.className='aroma';
-    a.innerHTML=(r.taste?'<span><small>口感</small> <b>甜 '+r.taste[0].toFixed(1)+'・酸 '+r.taste[1].toFixed(1)+'・苦 '+r.taste[2].toFixed(1)+'・澀 '+r.taste[3].toFixed(1)+(r.taste[4]!=null?'・醇厚 '+r.taste[4].toFixed(1):'')+'</b></span>':'')+(r.conc?'<span><small>有機酸</small> <b>'+Math.round(r.conc[0]).toLocaleString()+' mg/L</b></span>'+(r.conc[2]!=null?'<span><small>糖與甜感</small> <b>'+Math.round(r.conc[2]).toLocaleString()+' mg/L</b></span>':'')+'<span><small>綠原酸</small> <b>'+Math.round(r.conc[1]).toLocaleString()+' mg/L</b></span>':'')+VOL.map((i,j)=>'<span><i style="background:var(--'+CMP[i].id+')"></i>'+CMP[i].name+' <b>'+(r.aroma[j][2]!=null?r.aroma[j][2].toFixed(1)+' mg':r.aroma[j][0].toFixed(0)+'%')+'</b> <small>保留 '+r.aroma[j][0].toFixed(0)+'% · 散失 '+r.aroma[j][1].toFixed(0)+'%</small></span>').join('');d.appendChild(a);}
+    a.innerHTML=(r.taste?'<span><small>口感</small> <b>甜 '+r.taste[0].toFixed(1)+'・酸 '+r.taste[1].toFixed(1)+'・苦 '+r.taste[2].toFixed(1)+'・澀 '+r.taste[3].toFixed(1)+(r.taste[4]!=null?'・醇厚 '+r.taste[4].toFixed(1):'')+(r.taste[5]!=null?'・酸甜平衡 '+r.taste[5].toFixed(1):'')+'</b></span>':'')+(r.conc?'<span><small>有機酸</small> <b>'+Math.round(r.conc[0]).toLocaleString()+' mg/L</b></span>'+(r.conc[2]!=null?'<span><small>糖與甜感</small> <b>'+Math.round(r.conc[2]).toLocaleString()+' mg/L</b></span>':'')+'<span><small>綠原酸</small> <b>'+Math.round(r.conc[1]).toLocaleString()+' mg/L</b></span>':'')+VOL.map((i,j)=>'<span><i style="background:var(--'+CMP[i].id+')"></i>'+CMP[i].name+' <b>'+(r.aroma[j][2]!=null?r.aroma[j][2].toFixed(1)+' mg':r.aroma[j][0].toFixed(0)+'%')+'</b> <small>保留 '+r.aroma[j][0].toFixed(0)+'% · 散失 '+r.aroma[j][1].toFixed(0)+'%</small></span>').join('');d.appendChild(a);}
   const note=document.createElement('div');note.className='label';note.textContent=when+' · '+stir;d.appendChild(note);
   return d;
 }
@@ -1428,7 +1430,7 @@ const BREWERS=[
  {id:'press',name:'法式濾壓',sub:'全程浸泡，濾網過濾'},
 ];
 const ROASTN=ROAST_NAME;
-const DIMS={tds:'濃度',acid:'酸',sweet:'甜',bitter:'苦',astr:'澀',body:'醇厚度',fruity:'花果香',roasty:'烘焙香',caf:'咖啡因'};
+const DIMS={tds:'濃度',balance:'酸甜平衡',acid:'酸',sweet:'甜',bitter:'苦',astr:'澀',body:'醇厚度',fruity:'花果香',roasty:'烘焙香',caf:'咖啡因'};
 const SAY={
  tds:['太淡了，像在喝水。','太濃了，喝起來好重。'],
  acid:['酸度不夠，喝起來有點平。','太酸了，有點刺舌頭。'],
@@ -1439,19 +1441,20 @@ const SAY={
  roasty:['烘焙香不夠，少了堅果焦糖味。','焦香太重了。'],
  caf:['這杯沒什麼提神效果。','咖啡因太多，今晚要睡不著了。'],
  body:['口感太薄了。','口感太厚重了。'],
+ balance:['甜到有點膩，少了一點明亮感。','喝起來偏酸，甜感撐不住酸。'],
 };
 const LEVELS=[
  {name:'阿明',role:'上班族',color:'#7a4b2a',quote:'早上開會前一定要一杯濃的，要有烤堅果、焦糖那種香氣。酸的我真的不行。',
-  want:{tds:[9,2],roasty:[9,2],acid:[1,2],body:[8,1],bitter:[6,1]},budget:120,best:92,
+  want:{tds:[9,2],roasty:[9,2],balance:[2,2],body:[8,1],bitter:[6,1]},budget:120,best:99,
   hint:'深焙豆烘焙香多、酸少。粉水比往 1:13 左右調，杯子會更濃。',ok:'就是這個味道，今天的會議撐得住了！'},
  {name:'小美',role:'大學生',color:'#c23f78',quote:'我喜歡像果汁一樣的咖啡，酸酸亮亮、有莓果和花香。淡一點沒關係，苦的不要。',
-  want:{acid:[7,2],fruity:[8,2],bitter:[2,2],tds:[4,1]},budget:100,best:99,
+  want:{balance:[7,2],fruity:[8,2],bitter:[2,2],tds:[4,1]},budget:100,best:97,
   hint:'淺焙的衣索比亞、肯亞豆花果香和酸最多。水溫低一點、研磨粗一點，慢慢才出來的苦味大分子就少。',ok:'哇，好像在喝莓果茶，好喜歡！'},
  {name:'林奶奶',role:'老顧客',color:'#6b7f3a',quote:'醫生說我胃不好，酸的要少喝。我喜歡甜甜順順的，不要刮舌頭。',
-  want:{acid:[2,2],sweet:[7,2],astr:[2,2],bitter:[4,1],tds:[5,1]},budget:150,best:88,
+  want:{balance:[2,2],sweet:[7,2],astr:[2,2],bitter:[4,1],tds:[5,1]},budget:150,best:85,
   hint:'巴西、曼特寧這類豆子酸和綠原酸都少。澀感來自綠原酸，它出得很快；把萃取拉長，杯中其他成分變多，澀的比例就下降。',ok:'順口又甜，這杯我可以慢慢喝完。'},
  {name:'Leo',role:'甜點師',color:'#d86d1f',quote:'要搭我的檸檬塔：甜感要夠，帶一點明亮的酸和果香，尾韻乾淨，不能苦也不能澀。',
-  want:{sweet:[8,3],bitter:[3,2],astr:[3,2],acid:[5,1],fruity:[7,1],tds:[5,1]},budget:200,best:87,
+  want:{sweet:[8,3],bitter:[3,2],astr:[3,2],balance:[4,1],fruity:[7,1],tds:[5,1]},budget:200,best:85,
   hint:'糖出得比酸慢、比苦快。萃取在中段停下來甜最突出，挑本身糖多的豆子也有幫助。',ok:'甜感撐得住檸檬塔的酸，完美搭配。'},
  {name:'Kevin',role:'拿鐵控',color:'#5e4a3a',quote:'我要加一大杯牛奶，咖啡要夠濃才不會被蓋掉。烘焙香要明顯，但別澀。',
   want:{tds:[10,2],body:[9,2],roasty:[9,2],astr:[3,2],bitter:[7,1],sweet:[6,1]},budget:220,best:96,
@@ -1460,13 +1463,13 @@ const LEVELS=[
   want:{caf:[1,3],fruity:[7,2],tds:[4,1],bitter:[3,1]},budget:200,best:92,
   hint:'咖啡因幾乎一沖就出來，靠手法很難壓低。看看豆架上有沒有特別的豆子。',ok:'好香，而且今晚應該睡得著。謝謝你！'},
  {name:'王老師',role:'杯測評審',color:'#7f55b5',quote:'我只看平衡：中等濃度、酸甜清楚、花果香乾淨，苦澀都要收得住，烘焙香點到為止。',
-  want:{tds:[6,1],acid:[6,1],sweet:[8,1],bitter:[3,1],astr:[3,1],fruity:[8,1],roasty:[4,1]},budget:320,best:85,
+  want:{tds:[6,1],balance:[5,1],sweet:[8,1],bitter:[3,1],astr:[3,1],fruity:[8,1],roasty:[4,1]},budget:320,best:84,
   hint:'七個面向都要顧到。日曬豆糖和花果香都多；研磨放粗一點、分段注水，讓苦味不要跟著一起出來。',ok:'乾淨、平衡、有層次。這杯我給高分。'},
  {name:'陳先生',role:'老饕',color:'#3b2619',quote:'我只喝深焙，但最討厭焦苦和澀。要濃、要甜、烘焙香飽滿，酸一點點就好。',
-  want:{tds:[7,1],sweet:[7,1],bitter:[5,1],astr:[2,1],roasty:[8,1],acid:[2,1]},budget:280,best:93,
+  want:{tds:[7,1],sweet:[7,1],bitter:[5,1],astr:[2,1],roasty:[8,1],balance:[2.5,1]},budget:280,best:95,
   hint:'深焙豆苦味大分子多，萃太深就焦苦。研磨放粗一點、用流速快的濾杯縮短接觸，讓甜先出來、苦還沒追上。',ok:'深焙卻不焦苦，難得。你有兩下子。'},
  {name:'林董',role:'企業家',color:'#b08a2e',quote:'錢不是問題，我要喝這輩子最驚艷的一杯：花香要像整片花園，酸甜像剛摘的水果，乾淨到一點苦澀都沒有。',
-  want:{fruity:[10,3],sweet:[8,2],bitter:[2,2],acid:[7,1],astr:[3,1]},budget:450,best:84,
+  want:{fruity:[10,3],sweet:[8,2],bitter:[2,2],balance:[5.5,1],astr:[3,1]},budget:450,best:85,
   hint:'這位客人的期待很高，一般豆子的花果香不夠用；預算夠的時候，貴的豆子才有它的價值。低水溫、粉多一點能把香氣留住。',ok:'就是這個！這杯的錢花得值得。'}
 ];
 
@@ -1986,14 +1989,14 @@ function render(){
   $('tLast').querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',+b.dataset.v===S.n));
   const R=run46(S.first,S.n);
   $('tPlan').innerHTML=R.plan.map((ml,i)=>'<span class="'+(i<2?'p40':'p60')+'"><small>'+fmt(R.planT[i])+'</small><b>'+Math.round(ml)+' g</b></span>').join('');
-  $('tRes').innerHTML=[['濃度 TDS',R.tds.toFixed(2)+'%'],['萃取率',R.ey.toFixed(1)+'%'],['甜',R.pf.sweet.toFixed(1)],['酸感',R.pf.acid.toFixed(1)],['醇厚度',R.pf.body.toFixed(1)],['苦',R.pf.bitter.toFixed(1)]]
+  $('tRes').innerHTML=[['濃度 TDS',R.tds.toFixed(2)+'%'],['萃取率',R.ey.toFixed(1)+'%'],['甜',R.pf.sweet.toFixed(1)],['酸甜平衡',R.pf.balance.toFixed(1)+(R.pf.balance<4.5?' 偏甜':R.pf.balance>5.5?' 偏酸':' 平衡')],['醇厚度',R.pf.body.toFixed(1)],['苦',R.pf.bitter.toFixed(1)]]
     .map(([k,v])=>'<div><b>'+v+'</b><span>'+k+'</span></div>').join('');
   const A=[30,50,60,70,90].map(f=>({f,r:run46(f,S.n)}));
-  $('tCmpA').innerHTML='<div class="t46-row head"><span>分配</span><span>甜</span><span>酸感</span></div>'+A.map(x=>'<div class="t46-row'+(x.f===S.first?' on':'')+'"><span>'+x.f+'/'+(120-x.f)+'</span><span class="b">'+bar(x.r.pf.sweet,10)+x.r.pf.sweet.toFixed(2)+'</span><span class="b"><i style="width:'+Math.max(2,Math.min(100,x.r.pf.acid*10))*.6+'%;background:var(--acid)"></i>'+x.r.pf.acid.toFixed(2)+'</span></div>').join('');
+  $('tCmpA').innerHTML='<div class="t46-row head"><span>分配</span><span>甜</span><span>酸甜平衡（越大越酸）</span></div>'+A.map(x=>'<div class="t46-row'+(x.f===S.first?' on':'')+'"><span>'+x.f+'/'+(120-x.f)+'</span><span class="b">'+bar(x.r.pf.sweet,10)+x.r.pf.sweet.toFixed(2)+'</span><span class="b"><i style="width:'+Math.max(2,Math.min(100,x.r.pf.balance*10))*.6+'%;background:var(--acid)"></i>'+x.r.pf.balance.toFixed(2)+'</span></div>').join('');
   const Bv=[1,2,3,4].map(n=>({n,r:run46(S.first,n)}));
   $('tCmpB').innerHTML='<div class="t46-row head"><span>注數</span><span>TDS</span><span>醇厚度</span></div>'+Bv.map(x=>'<div class="t46-row'+(x.n===S.n?' on':'')+'"><span>'+x.n+' 注</span><span class="b">'+bar(x.r.tds-0.8,1.0)+x.r.tds.toFixed(2)+'%</span><span class="b">'+bar(x.r.pf.body,10)+x.r.pf.body.toFixed(1)+'</span></div>').join('');
   const dT=Bv[3].r.tds-Bv[0].r.tds,a0=A[0].r,a4=A[4].r;
-  $('tNote').innerHTML='<b>模型看到什麼：</b>前 40% 從 30/90 改成 90/30，濃度 '+a0.tds.toFixed(2)+'% → '+a4.tds.toFixed(2)+'%，甜 '+a0.pf.sweet.toFixed(1)+' → '+a4.pf.sweet.toFixed(1)+'，酸感 '+a0.pf.acid.toFixed(1)+' → '+a4.pf.acid.toFixed(1)+'。有機酸的溶出量幾乎一樣（'+Math.round(a0.acid).toLocaleString()+' → '+Math.round(a4.acid).toLocaleString()+' mg/L），酸感變強是因為甜和醇厚度少了，壓不住酸。'+
+  $('tNote').innerHTML='<b>模型看到什麼：</b>前 40% 從 30/90 改成 90/30，濃度 '+a0.tds.toFixed(2)+'% → '+a4.tds.toFixed(2)+'%，甜 '+a0.pf.sweet.toFixed(1)+' → '+a4.pf.sweet.toFixed(1)+'，酸甜平衡 '+a0.pf.balance.toFixed(1)+' → '+a4.pf.balance.toFixed(1)+'（越大越偏酸）。有機酸的溶出量幾乎一樣（'+Math.round(a0.acid).toLocaleString()+' → '+Math.round(a4.acid).toLocaleString()+' mg/L），平衡往酸偏，是因為甜和醇厚度少了，撐不住酸。'+
     '後 60% 從 1 注改成 4 注，濃度 '+Bv[0].r.tds.toFixed(2)+'% → '+Bv[3].r.tds.toFixed(2)+'%，醇厚度 '+Bv[0].r.pf.body.toFixed(1)+' → '+Bv[3].r.pf.body.toFixed(1)+'：一次倒完水位高、從濾杯壁繞過粉床的水多，攪動也少，所以比較淡。';
 }
 $('tFirst').addEventListener('input',e=>{S.first=+e.target.value;render();});
