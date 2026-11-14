@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>2026 台灣咖啡展 逛展地圖</title>
+<style>
+:root{
+  --bg:#f6f1ea; --card:#fff; --ink:#2b2018; --mute:#8a7a6c; --line:#e4d9cc;
+  --coffee:#efe0c8; --cocoa:#cfa98c; --intl:#dcd5ea; --event:#c7b0d0;
+  --star:#3d4fd1; --gold:#d9a94a; --done:#bcd9b2; --feat:#4a2f22; --featev:#6f4f80; --accent:#6b3e26;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif}
+header{position:sticky;top:0;z-index:5;background:var(--accent);color:#fff;padding:calc(10px + env(safe-area-inset-top)) 14px 10px}
+header h1{margin:0;font-size:17px;font-weight:700}
+header .sub{font-size:12px;opacity:.8;margin-top:2px}
+.prog{display:flex;align-items:center;gap:8px;margin-top:8px;font-size:12px}
+.bar{flex:1;height:8px;background:rgba(255,255,255,.25);border-radius:4px;overflow:hidden}
+.bar i{display:block;height:100%;background:#9fe09a;width:0;transition:width .3s}
+nav.tabs{display:flex;background:#fff;border-bottom:1px solid var(--line);position:sticky;top:var(--hh,84px);z-index:4}
+nav.tabs button{flex:1;border:0;background:none;padding:11px 0;font-size:14px;color:var(--mute);border-bottom:3px solid transparent}
+nav.tabs button.on{color:var(--accent);border-color:var(--accent);font-weight:700}
+.view{display:none}.view.on{display:block}
+/* map */
+.maptools{display:flex;gap:6px;align-items:center;padding:8px 10px;flex-wrap:wrap}
+.chip{border:1px solid var(--line);background:#fff;border-radius:16px;padding:5px 11px;font-size:13px;color:var(--ink)}
+.chip.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+.zoom{margin-left:auto;display:flex;gap:4px}
+.zoom button{width:34px;height:34px;border-radius:8px;border:1px solid var(--line);background:#fff;font-size:18px}
+#mapwrap{overflow:auto;height:calc(100vh - 230px);min-height:340px;background:#fbf8f4;border-top:1px solid var(--line);border-bottom:1px solid var(--line);touch-action:pan-x pan-y}
+#map{display:block}
+.booth rect{stroke:#b9a28a;stroke-width:1.2}
+.booth text{pointer-events:none;fill:#4a3a2c;font-weight:600}
+.booth .badge circle{fill:#ffd23f;stroke:#3d4fd1;stroke-width:2.5}
+.booth .badge text{fill:#3d4fd1;font-weight:800}
+.booth.feat rect{stroke:var(--gold);stroke-width:3}
+.booth.feat text{fill:#fff6e5}
+.booth.dim{opacity:.18}
+.booth.sel rect{stroke:#111;stroke-width:4;stroke-dasharray:8 4}
+.booth.star rect{stroke:var(--star);stroke-width:6;filter:drop-shadow(0 0 5px rgba(61,79,209,.75))}
+.booth.done rect{fill:var(--done)!important}
+.booth.done text{fill:#2b3a2a!important}
+.booth.done .badge text{fill:#3d4fd1!important}
+.legend{display:flex;flex-wrap:wrap;gap:10px;padding:8px 12px;font-size:12px;color:var(--mute)}
+.legend span{display:flex;align-items:center;gap:4px}
+.legend b{width:14px;height:14px;border-radius:3px;display:inline-block;border:1px solid #b9a28a}
+/* list */
+.listtools{padding:10px;display:flex;flex-direction:column;gap:8px;position:sticky;top:calc(var(--hh,84px) + 44px);background:var(--bg);z-index:3}
+.listtools input{width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--line);font-size:15px;background:#fff}
+.chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px}
+.chips .chip{white-space:nowrap}
+.item{display:flex;align-items:center;gap:10px;background:#fff;margin:0 10px 8px;border-radius:12px;padding:10px 12px;border:1px solid var(--line)}
+.item.feat{border:2px solid var(--gold);background:#f6ede2}
+.item.star{border:3px solid var(--star);background:#eef0ff;box-shadow:0 0 0 3px rgba(61,79,209,.18)}
+.item .sw{width:10px;align-self:stretch;border-radius:4px}
+.item .tx{flex:1;min-width:0}
+.item .nm{font-size:15px;font-weight:600}
+.item .meta{font-size:12px;color:var(--mute);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.item.done .nm{color:var(--mute);text-decoration:line-through}
+.chk{width:30px;height:30px;border-radius:50%;border:2px solid var(--line);background:#fff;font-size:16px;color:#fff;flex:none}
+.chk.on{background:#4c9a4a;border-color:#4c9a4a}
+.badge{display:inline-block;font-size:11px;padding:1px 6px;border-radius:8px;margin-left:4px;vertical-align:2px}
+.b-gold{background:var(--feat);color:#ffe6a8}
+.b-star{background:var(--star);color:#ffe27a;font-weight:700}
+.empty{text-align:center;color:var(--mute);padding:30px}
+/* sheet */
+#mask{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:9;display:none}
+#sheet{position:fixed;left:0;right:0;bottom:0;z-index:10;background:#fff;border-radius:18px 18px 0 0;padding:14px 16px calc(16px + env(safe-area-inset-bottom));max-height:80vh;overflow:auto;transform:translateY(105%);transition:transform .25s}
+#sheet.on{transform:none}
+#sheet .grab{width:40px;height:5px;background:#ddd;border-radius:3px;margin:0 auto 10px}
+#sheet h2{margin:0;font-size:20px}
+#sheet .code{color:var(--mute);font-size:13px;margin-top:3px}
+#sheet .intro{white-space:pre-line;font-size:15px;line-height:1.6;margin:12px 0;background:#faf6f0;padding:10px 12px;border-radius:10px}
+#sheet .acts{display:flex;gap:8px;margin:10px 0}
+#sheet .acts button{flex:1;padding:12px;border-radius:12px;border:1px solid var(--line);background:#fff;font-size:15px;font-weight:600}
+#sheet .acts .v.on{background:#4c9a4a;color:#fff;border-color:#4c9a4a}
+#sheet .acts .s.on{background:var(--star);color:#ffe27a;border-color:var(--star)}
+#sheet textarea{width:100%;min-height:70px;border-radius:10px;border:1px solid var(--line);padding:10px;font-size:15px;font-family:inherit}
+#sheet label{font-size:13px;color:var(--mute)}
+#sheet .close{position:absolute;right:12px;top:10px;border:0;background:#f0ebe4;width:32px;height:32px;border-radius:50%;font-size:16px}
+.foot{padding:16px;font-size:12px;color:var(--mute);text-align:center}
+.foot button{border:1px solid var(--line);background:#fff;border-radius:8px;padding:6px 12px;color:var(--mute)}
+#confirm{display:none;position:fixed;inset:0;z-index:20;background:rgba(0,0,0,.4);align-items:center;justify-content:center}
+#confirm div{background:#fff;border-radius:14px;padding:18px;width:280px;text-align:center}
+#confirm button{margin:12px 6px 0;padding:8px 16px;border-radius:8px;border:1px solid var(--line);background:#fff;font-size:14px}
+</style>
+</head>
+<body>
+<header id="hdr">
+  <h1>☕ 2026 台灣咖啡展 · 南港1館 4F</h1>
+  <div class="sub">點展位看介紹 · 打勾記錄已逛 · 深咖啡底＝名店；靛藍粗框＋★＝我的重點／知名品牌</div>
+  <div class="prog"><span id="progtx">已逛 0 / 0</span><div class="bar"><i id="progbar"></i></div></div>
+</header>
+<nav class="tabs">
+  <button data-v="map" class="on">🗺️ 地圖</button>
+  <button data-v="list">📋 廠商列表</button>
+  <button data-v="must">⭐ 必逛</button>
+</nav>
+
+<section class="view on" id="v-map">
+  <div class="maptools">
+    <button class="chip on" data-mf="all">全部</button>
+    <button class="chip" data-mf="feat">只看名店</button>
+    <button class="chip" data-mf="todo">未逛</button>
+    <button class="chip" data-mf="star">我的重點</button>
+    <div class="zoom"><button id="zo">－</button><button id="zi">＋</button></div>
+  </div>
+  <div id="mapwrap"><svg id="map" xmlns="http://www.w3.org/2000/svg"></svg></div>
+  <div class="legend">
+    <span><b style="background:var(--coffee)"></b>咖啡</span>
+    <span><b style="background:var(--cocoa)"></b>可可專區</span>
+    <span><b style="background:var(--intl)"></b>國際館</span>
+    <span><b style="background:var(--event)"></b>大會活動</span>
+    <span><b style="background:var(--feat);border:2px solid var(--gold)"></b>名店</span>
+    <span><b style="background:var(--done)"></b>已逛</span>
+    <span><b style="background:#fff;border:3px solid var(--star)"></b>★ 我的重點</span>
+  </div>
+</section>
+
+<section class="view" id="v-list">
+  <div class="listtools">
+    <input id="q" placeholder="搜尋廠商名稱或攤位號，例如 1Zpresso、M220">
+    <div class="chips">
+      <button class="chip on" data-lf="all">全部</button>
+      <button class="chip" data-lf="feat">名店</button>
+      <button class="chip" data-lf="star">我的重點</button>
+      <button class="chip" data-lf="todo">未逛</button>
+      <button class="chip" data-lf="done">已逛</button>
+      <button class="chip" data-lf="L">L 區</button>
+      <button class="chip" data-lf="M">M 區</button>
+      <button class="chip" data-lf="N">N 區</button>
+      <button class="chip" data-lf="k">可可</button>
+      <button class="chip" data-lf="i">國際館</button>
+    </div>
+  </div>
+  <div id="list"></div>
+</section>
+
+<section class="view" id="v-must">
+  <div style="padding:12px 14px 4px;font-size:13px;color:var(--mute)">名店與你標記的重點，依攤位走道排序（L → M → N），照順序逛最順路。</div>
+  <div style="margin:6px 10px 12px;padding:12px 14px;background:#fff;border:2px solid #e0402a;border-radius:12px;font-size:14px;line-height:1.6">
+    <b>🎪 活動時刻</b><br>
+    • 11/15（日）、11/16（一）13:00–14:00｜M520 十億國際：LEAVES COFFEE 石井康雄 手沖展演（ORIGAMI Pinn Dripper）<br>
+    • L025：WCC 世界盃烘豆大賽台灣選拔賽 ｜ L1311：咖啡職人工作坊<br>
+    <b>💡 逛展小提醒</b><br>
+    • 手沖器材順路：1Zpresso M1120 → Femobook N1106 → Brewista N1114，都在上方走道，可以和冠軍市集 L1108 排同一條動線。<br>
+    • 洗滌區在上方中央（經貿一路側），咖啡杯租借處在下方 M 區入口旁；自備品飲杯可以少排隊洗杯。
+  </div>
+  <div id="must"></div>
+</section>
+
+<div class="foot">展期 2026/11/13–11/16。平面圖依官方 4F 展場圖整理，攤位位置為示意；部分小攤名稱以官方為準。<br><br><button id="reset">清除所有逛展紀錄</button></div>
+
+<div id="mask"></div>
+<div id="sheet">
+  <div class="grab"></div>
+  <button class="close" id="sclose">✕</button>
+  <h2 id="sname"></h2>
+  <div class="code" id="scode"></div>
+  <div class="intro" id="sintro"></div>
+  <div class="acts">
+    <button class="v" id="sv">☐ 標記已逛</button>
+    <button class="s" id="ss">☆ 加入重點</button>
+  </div>
+  <label>我的筆記（試喝心得、價格、想買的豆子…）</label>
+  <textarea id="snote" placeholder="例如：衣索比亞日曬很莓果，250g $650"></textarea>
+  <div class="acts"><button id="sgo">📍 在地圖上看位置</button></div>
+</div>
+<div id="confirm"><div>確定清除所有已逛、重點與筆記？<br><button id="cno">取消</button><button id="cyes" style="color:#c00">清除</button></div></div>
+
+<script>
+// [攤位號, 名稱, x1, y1, x2, y2, 類別]  c=咖啡 k=可可 i=國際館 e=大會活動
+const B = [
+// 大會活動
+["L025","2026 WCC 世界盃烘豆大賽 台灣選拔賽",507,310,700,448,"e"],
+["L1311","咖啡職人工作坊",700,310,785,422,"e"],
+["L1212","旺德環球",700,422,785,448,"c"],
+["L1108","咖啡冠軍市集",645,477,785,532,"e"],
+// 左側邊攤
+["L022","奶泡貓咖啡",507,477,535,532,"c"],
+["L021","芸塔寶",507,590,535,615,"c"],
+["L020","有明心",507,615,535,640,"c"],
+["L019","甜點朋手",507,640,535,665,"c"],
+["L018","酒字商行",507,665,535,700,"c"],
+["L015","達文西咖啡",507,700,535,782,"c"],
+["L012","樂波波",507,923,535,1005,"c"],
+["L011","緩緩",507,1005,535,1035,"c"],
+["L010","走走",507,1035,535,1062,"c"],
+["L009","金果",507,1062,535,1088,"c"],
+["L008","艾緹咖啡 AT Coffee",507,1088,535,1117,"c"],
+["L007","大衛洋",507,1150,535,1180,"c"],
+["L006","The GoodOne",507,1180,535,1208,"c"],
+["L005","杜宅咖啡",507,1208,535,1238,"c"],
+["L004","徐家咖啡",507,1238,535,1264,"c"],
+["L003","豆京良倉",507,1264,535,1290,"c"],
+["L001","GK",507,1312,535,1375,"c"],
+// L 區（左）
+["L1102","嘉糖咖啡",562,477,645,532,"c"],
+["L1002","諾其頓",562,560,645,615,"c"],
+["L1008","吉麵",645,588,673,615,"c"],
+["L1010","優瑞咖啡",673,560,785,615,"c"],
+["L902","佈橙",562,643,645,698,"c"],
+["L1009","台華精技",673,643,785,670,"c"],
+["L810","大昌華嘉",673,670,785,782,"c"],
+["L802","自盛國際",562,727,645,782,"c"],
+["L701","WEBER WORKSHOPS",562,840,645,895,"c"],
+["L602","咖啡匠",562,923,645,950,"c"],
+["L610","禧龍",673,840,785,950,"c"],
+["L502","粉紅森林咖啡",562,978,645,1033,"c"],
+["L508","RICO瑞可",645,978,785,1033,"c"],
+["L402","速八國際",562,1062,645,1117,"c"],
+["L408","尚品",645,1062,785,1117,"c"],
+["L302","米寶",562,1145,618,1200,"c"],
+["L405","悠樂咖啡",618,1145,673,1172,"c"],
+["L306","宏得利",618,1172,673,1200,"c"],
+["L310","宗霆",673,1145,785,1200,"c"],
+["L202","咖啡地圖",562,1229,618,1284,"c"],
+["L205","上登",618,1229,673,1256,"c"],
+["L206","承易懋",618,1256,673,1284,"c"],
+["L210","勁香",673,1229,785,1284,"c"],
+["L102","艾可國際",562,1312,618,1367,"c"],
+["L106","屏東咖啡",618,1312,730,1367,"c"],
+["L110","米家貿易",730,1312,785,1367,"c"],
+// L 區（右）
+["L1318","恆隆行",842,310,925,365,"c"],
+["L1423","33度C甜點",925,310,985,338,"c"],
+["L1324","三分之二生活設計",925,338,985,365,"c"],
+["L1328","尚居",985,310,1010,365,"c"],
+["L1330","GOFFEE.PRO",1010,310,1065,365,"c"],
+["L1218","正晃行",842,393,925,448,"c"],
+["L1323","阿努納奇",925,393,985,420,"c"],
+["L1224","咖啡誌",925,420,985,448,"c"],
+["L1228","愛惠浦",985,393,1065,448,"c"],
+["L1118","奎達",842,477,953,532,"c"],
+["L1126","職人咖啡器械",953,477,980,532,"c"],
+["L1128","馬克老爹",980,477,1065,532,"c"],
+["L1018","王策",842,560,953,615,"c"],
+["L1026","全華咖啡",953,560,980,615,"c"],
+["L1028","伯朗咖啡館",980,560,1065,615,"c"],
+["L1017","盧貝思",842,643,953,670,"c"],
+["L818","維堤",842,670,953,782,"c"],
+["L928","LELIT",980,643,1065,698,"c"],
+["L828","立智傑",980,727,1316,782,"c"],
+["L618","誠品生活",842,840,1008,950,"c"],
+["L731","會納星",1037,840,1316,895,"c"],
+["L632","吉野何留",1037,923,1150,950,"c"],
+["M608","紅琉璃",1150,923,1316,950,"c"],
+["L518","圓石國際",842,978,1065,1033,"c"],
+["L418","豐億 LIGHTTELLS",842,1062,1037,1117,"c"],
+["L318","ORIGIN",842,1145,897,1200,"k"],
+["L322","台灣可可與巧克力產業協會",897,1145,953,1200,"k"],
+["L326","可可島風味館",953,1145,1037,1200,"k"],
+["L218","COORDY CHOCO",842,1229,953,1284,"k"],
+["L325","土庫驛可可莊園",953,1229,1037,1256,"k"],
+["L226","苗林",953,1256,981,1284,"k"],
+["L228","優要諾",981,1256,1009,1284,"k"],
+["L230","可可合作社",1009,1256,1037,1284,"k"],
+["L118","瑞興工業",842,1312,953,1367,"c"],
+["L225","香果可可 / GERM",953,1312,985,1367,"i"],
+["L227","MAVO",985,1312,1037,1340,"i"],
+["L128","Lykke Coffee Farms",985,1340,1037,1367,"i"],
+// M 區（左）
+["M1304","赤安",1093,310,1150,365,"c"],
+["M1411","天圓蜜品",1150,310,1233,338,"c"],
+["M1308","有香咖啡",1150,338,1205,365,"c"],
+["M1312","M1312 攤位",1205,338,1233,365,"c"],
+["M1314","萬友",1233,310,1316,365,"c"],
+["M1204","鐘集國際",1093,393,1178,448,"c"],
+["M1309","明那卡",1178,393,1233,420,"c"],
+["M1210","歐若",1178,420,1233,448,"c"],
+["M1214","雅柏咖啡",1233,393,1316,448,"c"],
+["M1104","艾加咖",1093,477,1316,532,"c"],
+["M1004","曬光咖啡",1093,560,1150,615,"c"],
+["M1008","咖啡烘烘烘",1150,560,1316,615,"c"],
+["M904","聯傑",1093,643,1316,698,"c"],
+["M504","郁盛",1093,978,1316,1033,"c"],
+["M402","臺灣精選咖啡可可館",1065,1062,1316,1117,"c"],
+["M302","臺灣咖啡可可小農",1065,1145,1150,1200,"c"],
+["M308","臺灣精選咖啡可可館（二）",1150,1145,1316,1200,"c"],
+["M202","臺名巧克力",1065,1229,1120,1284,"k"],
+["M206","巧克力秘境 / Ambeno",1120,1229,1150,1284,"k"],
+["M208","嘉義縣政府",1150,1229,1316,1284,"c"],
+["M102","ZHONGSHAN FRECOM / P.L.C",1065,1312,1120,1367,"i"],
+["M106","Si Cafe",1120,1312,1142,1367,"i"],
+["M108","Panama",1142,1312,1164,1367,"i"],
+["M110","Hunter",1164,1312,1188,1367,"i"],
+["M112","MAGENT / Arcofie",1188,1312,1233,1367,"i"],
+["M114","Hawaii Coffee Association",1233,1312,1316,1367,"i"],
+// M 區（右）
+["M1320","煒太",1372,310,1455,365,"c"],
+["M1425","天慶永",1455,310,1510,338,"c"],
+["M1326","OLOMO",1455,338,1510,365,"c"],
+["M1429","喜田",1510,310,1567,338,"c"],
+["M1330","墨人",1510,338,1567,365,"c"],
+["M1220","大統營",1372,393,1483,448,"c"],
+["M1327","iOmill",1483,393,1510,420,"c"],
+["M1228","大雅",1483,420,1510,448,"c"],
+["M1230","貝拉",1510,393,1567,448,"c"],
+["M1120","1Zpresso",1372,477,1483,532,"c"],
+["M1227","良記",1483,477,1510,532,"c"],
+["M1130","偉志牌",1510,477,1567,532,"c"],
+["M1020","沐泓",1372,560,1510,615,"c"],
+["M1030","可瓦汀 X 麥意斯",1510,560,1567,615,"c"],
+["M820","自家",1372,643,1510,782,"c"],
+["M832","台灣好璃奧",1540,643,1650,782,"c"],
+["M620","百懋",1372,840,1483,950,"c"],
+["M630","豐潤",1510,840,1622,950,"c"],
+["M520","十億國際",1372,978,1622,1033,"c"],
+["M420","歐客佬咖啡",1372,1062,1567,1117,"c"],
+["M320","93 COFFEE",1372,1145,1567,1200,"c"],
+["M220","UCC 優仕咖啡",1372,1229,1540,1284,"c"],
+["M232","太配樂",1540,1229,1567,1284,"c"],
+["M120","沃廚",1372,1312,1510,1367,"c"],
+["M130","里響",1510,1312,1567,1367,"c"],
+["M436","甜心屋咖啡",1595,1062,1650,1117,"c"],
+["M336","詠鑠生活",1595,1145,1650,1200,"c"],
+["M236","津香",1595,1229,1650,1284,"c"],
+["M136","台新餐飲",1595,1312,1790,1367,"c"],
+["M1336","De'Longhi 迪朗奇",1595,310,1650,365,"c"],
+["M1236","瓦卡咖啡",1595,393,1650,448,"c"],
+["M1136","SHOTSCLUB",1595,477,1678,532,"c"],
+["M1036","卡比歐",1595,560,1650,615,"c"],
+// N 區（左）
+["N1403","N1403 攤位",1650,310,1705,338,"c"],
+["N1304","擴豆",1650,338,1705,365,"c"],
+["N1308","永元",1705,310,1790,365,"c"],
+["N1303","imf Roaster",1650,393,1705,420,"c"],
+["N1204","宏道",1650,420,1705,448,"c"],
+["N1208","海諾帝",1705,393,1790,448,"c"],
+["N1106","Femobook",1678,477,1790,532,"c"],
+["N1002","義斯柏特",1650,560,1790,615,"c"],
+["N806","根本在旅行",1678,643,1790,782,"c"],
+["N606","守成",1678,840,1790,950,"c"],
+["N504","品硯",1650,978,1790,1033,"c"],
+["N404","滙格",1650,1062,1790,1117,"c"],
+["N304","滙格（二）",1650,1145,1790,1200,"c"],
+["N204","台灣麥斯馬汀",1650,1229,1790,1284,"c"],
+// N 區（右）
+["N1314","勝銓實業",1847,310,1930,365,"c"],
+["N1419","N1419 攤位",1930,310,1985,338,"c"],
+["N1320","陶博館",1930,338,1985,365,"c"],
+["N1425","東尚",2013,310,2068,338,"c"],
+["N1326","恩德發",2013,338,2068,365,"c"],
+["N1429","神山國際",2068,310,2125,338,"c"],
+["N1330","阿里山",2068,338,2125,365,"c"],
+["N1214","工藝中心",1847,393,1930,448,"c"],
+["N1319","麗明",1930,393,1985,420,"c"],
+["N1220","SAZA COFFEE",1930,420,1985,448,"i"],
+["N1325","捷可星",2013,393,2068,420,"c"],
+["N1226","全日興",2013,420,2068,448,"c"],
+["N1230","美美",2068,393,2125,448,"c"],
+["N1114","Brewista",1847,477,1930,532,"c"],
+["N1219","熙舍",1930,477,1985,532,"c"],
+["N1126","正食",2013,477,2040,532,"c"],
+["N1227","粉音咖啡",2040,477,2068,532,"c"],
+["N1130","永利恆能",2068,477,2125,532,"c"],
+["N1014","元揚",1847,560,1957,615,"c"],
+["N1022","富擎",1957,560,1985,615,"c"],
+["N1125","聚德富",2013,560,2068,588,"c"],
+["N1129","新富林",2068,560,2125,588,"c"],
+["N1026","圍咖啡",2013,588,2125,615,"c"],
+["N914","奧利 X 陶作坊",1847,643,1985,698,"c"],
+["N926","STANLEY 1913",2013,643,2068,698,"c"],
+["N930","盛發興",2068,643,2125,698,"c"],
+["N814","LACTO",1847,727,2125,782,"c"],
+["N614","正瀚生技 X COFFEELAND",1847,840,1957,950,"c"],
+["N723","卡塔摩納",1985,840,2125,895,"c"],
+["N624","泰摩 TIMEMORE",1985,923,2125,950,"c"],
+["N514","誠芳",1847,978,1985,1033,"c"],
+["N623","器器客氣",1985,978,2068,1005,"c"],
+["N524","愛利奧",1985,1005,2068,1033,"c"],
+["N530","易廷",2068,978,2125,1033,"c"],
+["N414","台灣納薩",1847,1062,1985,1117,"c"],
+["N523","福汎",1985,1062,2068,1088,"c"],
+["N424","沛瀅",1985,1088,2040,1117,"c"],
+["N428","幸新",2040,1088,2068,1117,"c"],
+["N430","義芳",2068,1062,2125,1117,"c"],
+["N314","川本",1847,1145,1985,1200,"c"],
+["N423","愷心",1985,1145,2040,1172,"c"],
+["N427","穎可達",2040,1145,2068,1172,"c"],
+["N324","可思創品",1985,1172,2068,1200,"c"],
+["N330","阿萊曼咖啡",2068,1145,2125,1200,"c"],
+["N214","梅珍香",1847,1229,1985,1284,"c"],
+["N323","選嘉咖啡",1985,1229,2068,1256,"c"],
+["N224","瓶in",1985,1256,2068,1284,"c"],
+["N230","因益達",2068,1229,2125,1284,"c"],
+["N114","鈦造",1847,1312,1957,1367,"c"],
+["N221","六和",1957,1312,2013,1340,"c"],
+["N124","彤承",1957,1340,2013,1367,"c"],
+["N225","Duralex",2013,1312,2068,1340,"c"],
+["N229","花伊朵",2068,1312,2125,1340,"c"],
+["N126","享樂思",2013,1340,2125,1367,"c"],
+// 右側邊攤
+["N027","樂酷",2152,310,2180,365,"c"],
+["N025","SOLO 歐洲居家",2152,393,2180,448,"c"],
+["N022","益昌瑞",2152,448,2180,532,"c"],
+["N019","承康研創",2152,588,2180,670,"c"],
+["N015","遠森",2152,670,2180,782,"c"],
+["N011","綻放",2152,950,2180,1033,"c"],
+["N008","凱風",2152,1033,2180,1117,"c"],
+["N007","荃友",2152,1150,2180,1200,"c"],
+["N003","Morning",2152,1200,2180,1290,"c"],
+["N001","法國樂家",2152,1312,2180,1375,"c"]
+];
+
+// 平面圖上沒有標出的攤位：[攤位號, 名稱, 類別, 附近攤位]
+const EXTRA = [
+["L733","THREE MARKS COFFEE","i","L731"],
+["L735","DAK Coffee Roasters","i","L731"],
+["L526","西當普利斯 Sit Down Plz","c","L518"],
+["L525","BUGGY COFFEE 蟲子咖啡館","c","L518"],
+["L530","KaKaLove Cafe","c","L518"]
+];
+const NEAR = {};
+EXTRA.forEach(([code,name,cat,near])=>{
+  const n = B.find(b=>b[0]===near);
+  B.push([code,name,n[2],n[3],n[4],n[5],cat,true]); NEAR[code]=near;
+});
+
+// 名店／知名品牌（金框）與介紹
+const FEAT = {
+"L025":"大會主秀！2026 WCC 世界盃烘豆大賽台灣選拔賽，可以近距離看選手烘豆、杯測評分，選出代表台灣出賽的烘豆師。",
+"L1108":"一級戰區！集結 5 位台灣 WCC 世界咖啡大賽冠軍的自有品牌：\n\n• No.1–3 老二咖啡 2ND COFFEE：2020 WCE 台灣烘豆冠軍蔡焜培（彰化鹿港），以精準控制烘焙曲線聞名。\n• No.4–5 傑恩咖啡 Just Go Coffee：2015、2023 世界盃沖煮大賽台灣冠軍王詩如，有精品豆、濾掛，也展出沖煮與品鑑器具。\n• No.6–7 艾暾咖啡 Alton Coffee：2015 WCE 台灣烘豆冠軍（世界第五）羅時賢，具 Q Grader 與金杯技師背景，主打細膩的產區風味。\n• No.8–9 翌莎精品咖啡 ISA COFFEE：2019、2026 台灣杯測師冠軍曾楷崴，生豆篩選與杯測標準極嚴格。\n• No.10–12 咖啡嗜者 Cafetaster：2018 WCE 台灣烘豆冠軍黃介吳，現場推出「巴拿馬彩虹藝伎」等 4 款特色咖啡與付費品飲，適合喜歡高階單品、淺焙的人。",
+"L1311":"咖啡職人工作坊：大會安排的示範／講座／實作課程區，建議先查當天時刻表。",
+"M1336":"義大利家電品牌，以全自動咖啡機、半自動義式機聞名，展場通常有現場試飲與展期優惠。",
+"M220":"日本老牌咖啡企業（1933 年創立），罐裝咖啡起家，有自家莊園豆、烘焙豆與濾掛系列。",
+"L1028":"台灣家喻戶曉的咖啡品牌（金車集團），罐裝咖啡與連鎖咖啡館，展場常有新品試喝與限定組合。",
+"M420":"台灣精品咖啡烘焙品牌，主打自有產區／莊園的生豆與熟豆，在台灣多地有門市。",
+"M1120":"台灣手搖磨豆機代表品牌，J 系列、K 系列在國際手沖圈很有名，可以現場試磨比較。順路：Brewista（N1114）、Femobook（N1106）都在上方同一條走道。",
+"L701":"美國高階咖啡器具品牌，EG-1 電動磨豆機、HG-2 手磨、布粉工具都是器材迷夢幻逸品。",
+"L928":"義大利家用義式咖啡機品牌，Bianca、Mara X 等機型很受玩家喜愛，可看實機操作。",
+"N1114":"手沖器具品牌，智慧電子秤、溫控手沖壺、濾杯，適合手沖玩家現場比較。",
+"N926":"美國經典保溫瓶品牌（1913 年起），保溫杯、隨行咖啡杯、戶外沖煮器具。",
+"N225":"法國強化玻璃餐具品牌，經典 Picardie 杯是咖啡館常見的拿鐵／小杯。",
+"N1220":"SAZA COFFEE 且座咖啡：日本茨城縣的老牌精品名店，以招牌「將軍珈琲」與巴拿馬藝伎莊園競標豆聞名。",
+"L128":"首度來台的瑞典精品咖啡品牌，用大膽撞色的塗鴉包裝打破北歐極簡印象，也以永續產地計畫聞名（例如烏干達「月球處理廠」微批次）。現場有 PlayStation 靈感聯名豆罐與各種周邊。",
+"L733":"來自西班牙巴塞隆納的歐洲指標性精品烘焙品牌，可以喝到歐陸現代淺焙，以及熱衝擊、厭氧發酵等特殊處理法。（平面圖上沒標出，位置在 L731 會納星附近）",
+"L735":"來自荷蘭阿姆斯特丹的精品烘焙名店，以大膽的特殊處理法與淺焙風味著稱，必訪。（平面圖上沒標出，位置在 L731 會納星附近）",
+"M520":"🎪 活動：東京名店 LEAVES COFFEE 主理人石井康雄 11/15（日）、11/16（一）13:00–14:00 在這裡做日本職人手沖展演，示範新的 ORIGAMI Pinn Dripper 濾杯。",
+"L1324":"三分之二生活設計：與 LEAVES COFFEE × ORIGAMI 合作展出，可看 ORIGAMI 濾杯等器具（手沖展演在 M520 十億國際）。",
+"L015":"1996 年創立的台北老牌精品烘焙坊，生豆、熟豆選擇豐富，烘焙理論與單品豆表現都很穩。",
+"L008":"台南安平的精品咖啡館，主理人參加過世界盃烘豆與沖煮兩種比賽。",
+"L526":"新北三重巷弄裡的自家焙煎名店，乾淨甜美的淺中焙單品很受手沖玩家推崇。（平面圖上沒標出，位置在 L518 圓石國際附近）",
+"L525":"專注精品莊園豆與自家烘焙，可以和 KaKaLove 試喝比較，看不同烘焙師怎麼詮釋同一產區。（平面圖上沒標出，位置在 L518 圓石國際附近）",
+"L530":"專注精品莊園豆與自家烘焙，可以和蟲子咖啡試喝比較。（平面圖上沒標出，位置在 L518 圓石國際附近）",
+"L022":"貓貓蟲咖波旗下的咖啡品牌，主打「咖啡豆貓蟲」限定周邊與一番賞抽獎，適合順道逛或買伴手禮。",
+"N624":"咖啡器具品牌，電子秤與「栗子」系列手搖磨豆機在手沖圈很普及。",
+"M114":"夏威夷咖啡協會：可以喝到 Kona 等夏威夷產區咖啡，難得一次比較多個小農。",
+"M402":"臺灣精選咖啡可可館：集合台灣各產區咖啡與可可，適合一次認識台灣豆。",
+"M308":"臺灣精選咖啡可可館（第二區），延續台灣在地咖啡、可可小農展出。",
+"M208":"嘉義縣政府：阿里山咖啡產區館，阿里山咖啡常在國內評鑑名列前茅，可試喝產區豆。",
+"L106":"屏東咖啡：台灣重要咖啡產區之一，可喝到屏東在地莊園豆。",
+"L1218":"台灣知名咖啡器材與原物料供應商，咖啡機、磨豆機、器具品項齊全，開店族必逛。",
+"N1106":"手沖器材順遊點，可以和 1Zpresso（M1120）、Brewista（N1114）排在同一條動線。",
+"N914":"陶作坊是台灣知名的茶陶器品牌，這次與奧利聯名展出咖啡器皿。"
+};
+
+const CAT = {c:"咖啡",k:"可可專區",i:"國際館",e:"大會活動"};
+const COL = {c:"var(--coffee)",k:"var(--cocoa)",i:"var(--intl)",e:"var(--event)"};
+const zoneOf = code => code[0];
+
+// state
+let S = {v:{},s:{},n:{}};
+try{ const raw = localStorage.getItem("cfx2026"); if(raw) S = Object.assign(S, JSON.parse(raw)); }catch(e){}
+function save(){ try{ localStorage.setItem("cfx2026", JSON.stringify(S)); }catch(e){} }
+
+const byCode = {}; B.forEach(b=>byCode[b[0]]=b);
+const NS = "http://www.w3.org/2000/svg";
+const svg = document.getElementById("map");
+let zoom = 1, mapFilter = "all", selCode = null;
+
+function introOf(b){
+  if(FEAT[b[0]]) return FEAT[b[0]];
+  const base = {c:"咖啡相關參展商",k:"可可專區參展商（巧克力／可可製品）",i:"國際館參展商",e:"大會活動"}[b[6]];
+  return base + "，攤位 " + b[0] + "。目前沒有更多資料，逛完可在下方寫筆記。";
+}
+
+function drawMap(){
+  svg.setAttribute("viewBox","495 280 1700 1110");
+  svg.innerHTML = "";
+  const bg = document.createElementNS(NS,"rect");
+  Object.entries({x:497,y:282,width:1696,height:1106,fill:"#fff",stroke:"#bbb","stroke-width":4}).forEach(([k,v])=>bg.setAttribute(k,v));
+  svg.appendChild(bg);
+  // aisle letters
+  [["L",812],["M",1344],["N",1818]].forEach(([t,x])=>{
+    const tx = document.createElementNS(NS,"text");
+    tx.setAttribute("x",x);tx.setAttribute("y",815);tx.setAttribute("text-anchor","middle");
+    tx.setAttribute("font-size",36);tx.setAttribute("font-weight",800);tx.setAttribute("fill","#c9b9a6");tx.textContent=t;
+    svg.appendChild(tx);
+  });
+  B.forEach(b=>{
+    if(b[7]) return;
+    const [code,name,x1,y1,x2,y2,cat] = b;
+    const w=x2-x1,h=y2-y1;
+    const g = document.createElementNS(NS,"g");
+    g.classList.add("booth"); g.dataset.code=code;
+    if(FEAT[code]) g.classList.add("feat");
+    const r = document.createElementNS(NS,"rect");
+    r.setAttribute("x",x1+1);r.setAttribute("y",y1+1);r.setAttribute("width",w-2);r.setAttribute("height",h-2);r.setAttribute("rx",3);
+    r.style.fill = FEAT[code] ? (cat==="e"?"var(--featev)":"var(--feat)") : COL[cat];
+    if(FEAT[code]&&cat==="e") g.classList.add("ev");
+    g.appendChild(r);
+    let label = name.replace(/（.*?）/g,"");
+    const vertical = w < 36 && h > w*1.4;
+    const t = document.createElementNS(NS,"text");
+    t.setAttribute("text-anchor","middle");t.setAttribute("dominant-baseline","central");
+    t.setAttribute("x",x1+w/2);t.setAttribute("y",y1+h/2);
+    let fs;
+    if(vertical){
+      fs = Math.min(w*0.6, (h-6)/Math.max(label.length,1)*0.95, 18);
+      t.style.writingMode="vertical-rl";
+    }else{
+      const len = [...label].reduce((a,ch)=>a+(/[\x00-\xff]/.test(ch)?0.58:1),0);
+      fs = Math.min(h*0.42, (w-6)/Math.max(len,1), 22);
+    }
+    fs = Math.max(fs,6);
+    t.setAttribute("font-size",fs.toFixed(1));
+    t.textContent = label;
+    g.appendChild(t);
+    const st = document.createElementNS(NS,"text");
+    st.setAttribute("x",x2-4);st.setAttribute("y",y2-4);st.setAttribute("text-anchor","end");
+    st.setAttribute("font-size",Math.min(18,Math.max(h*0.5,9)));st.setAttribute("class","mk");st.style.fill="#2f6b2c";
+    g.appendChild(st);
+    const rb = Math.max(9,Math.min(20,Math.min(w,h)*0.4));
+    const bd = document.createElementNS(NS,"g"); bd.setAttribute("class","badge"); bd.style.display="none";
+    const ci = document.createElementNS(NS,"circle"); ci.setAttribute("cx",x2-2);ci.setAttribute("cy",y1+2);ci.setAttribute("r",rb);
+    const bt = document.createElementNS(NS,"text"); bt.setAttribute("x",x2-2);bt.setAttribute("y",y1+2);bt.setAttribute("text-anchor","middle");bt.setAttribute("dominant-baseline","central");bt.setAttribute("font-size",rb*1.35);bt.textContent="★";
+    bd.appendChild(ci);bd.appendChild(bt);g.appendChild(bd);
+    g.addEventListener("click",()=>openSheet(code));
+    svg.appendChild(g);
+  });
+  setZoom();
+  refreshMap();
+}
+function refreshMap(){
+  svg.querySelectorAll(".booth").forEach(g=>{
+    const c=g.dataset.code;
+    g.classList.toggle("done",!!S.v[c]);
+    g.classList.toggle("sel",c===selCode);
+    g.classList.toggle("star",!!S.s[c]);
+    g.querySelector(".mk").textContent = S.v[c]?"✓":"";
+    g.querySelector(".badge").style.display = S.s[c]?"":"none";
+    if(S.s[c]) g.parentNode.appendChild(g);
+    let show = true;
+    if(mapFilter==="feat") show=!!FEAT[c];
+    if(mapFilter==="todo") show=!S.v[c];
+    if(mapFilter==="star") show=!!S.s[c];
+    g.classList.toggle("dim",!show);
+  });
+}
+function setZoom(){
+  const base = Math.max(document.getElementById("mapwrap").clientWidth, 360);
+  const w = base*zoom;
+  svg.setAttribute("width",w); svg.setAttribute("height",w*1110/1700);
+}
+
+// list
+let lf="all", q="";
+function rowHTML(b){
+  const [code,name,,,,,cat]=b;
+  const f=FEAT[code], v=S.v[code], s=S.s[code];
+  return `<div class="item ${f?"feat":""} ${s?"star":""} ${v?"done":""}" data-code="${code}">
+    <div class="sw" style="background:${COL[cat]}"></div>
+    <div class="tx"><div class="nm">${name}${f?'<span class="badge b-gold">名店</span>':""}${s?'<span class="badge b-star">★ 我的重點</span>':""}</div>
+    <div class="meta">${code} · ${zoneOf(code)} 區 · ${CAT[cat]}${b[7]?" · 圖上沒標，在 "+NEAR[code]+" 附近":""}${S.n[code]?" · 📝 "+esc(S.n[code]):""}</div></div>
+    <button class="chk ${v?"on":""}" data-chk="${code}">✓</button></div>`;
+}
+function esc(s){return s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
+function sortKey(b){const z="LMN".indexOf(b[0][0]); return [z, b[2], b[3]];}
+function cmp(a,b){const x=sortKey(a),y=sortKey(b);for(let i=0;i<3;i++){if(x[i]!==y[i])return x[i]-y[i];}return 0;}
+function renderList(){
+  const qq=q.trim().toLowerCase();
+  let arr=B.filter(b=>{
+    const c=b[0];
+    if(qq && !(b[1].toLowerCase().includes(qq)||c.toLowerCase().includes(qq)||(S.n[c]||"").toLowerCase().includes(qq))) return false;
+    switch(lf){
+      case "feat":return !!FEAT[c];case "star":return !!S.s[c];case "todo":return !S.v[c];case "done":return !!S.v[c];
+      case "L":case "M":case "N":return c[0]===lf;case "k":case "i":return b[6]===lf;default:return true;
+    }
+  });
+  arr.sort((a,b)=>(FEAT[b[0]]?1:0)-(FEAT[a[0]]?1:0) || cmp(a,b));
+  document.getElementById("list").innerHTML = arr.length? arr.map(rowHTML).join("") : '<div class="empty">沒有符合的廠商</div>';
+}
+function renderMust(){
+  const arr=B.filter(b=>FEAT[b[0]]||S.s[b[0]]).sort(cmp);
+  const left=arr.filter(b=>!S.v[b[0]]).length;
+  document.getElementById("must").innerHTML = `<div style="padding:4px 14px 10px;font-weight:700">還剩 ${left} / ${arr.length} 個必逛</div>` + arr.map(rowHTML).join("");
+}
+function renderProg(){
+  const n=Object.keys(S.v).filter(k=>S.v[k]&&byCode[k]).length;
+  document.getElementById("progtx").textContent=`已逛 ${n} / ${B.length}`;
+  document.getElementById("progbar").style.width=(n/B.length*100)+"%";
+}
+function renderAll(){refreshMap();renderList();renderMust();renderProg();}
+
+// sheet
+const sheet=document.getElementById("sheet"), mask=document.getElementById("mask");
+function openSheet(code){
+  const b=byCode[code]; selCode=code;
+  document.getElementById("sname").innerHTML = esc(b[1]) + (FEAT[code]?' <span class="badge b-gold">名店</span>':"");
+  document.getElementById("scode").textContent = `攤位 ${code} · ${zoneOf(code)} 區 · ${CAT[b[6]]}` + (b[7]?`（平面圖上沒標，在 ${NEAR[code]} ${byCode[NEAR[code]][1]} 附近）`:"");
+  document.getElementById("sintro").textContent = introOf(b);
+  document.getElementById("snote").value = S.n[code]||"";
+  syncSheet();
+  sheet.classList.add("on"); mask.style.display="block";
+  refreshMap();
+}
+function syncSheet(){
+  const v=S.v[selCode], s=S.s[selCode];
+  const bv=document.getElementById("sv"), bs=document.getElementById("ss");
+  bv.classList.toggle("on",!!v); bv.textContent = v?"✓ 已逛過":"☐ 標記已逛";
+  bs.classList.toggle("on",!!s); bs.textContent = s?"★ 我的重點":"☆ 加入重點";
+}
+function closeSheet(){ sheet.classList.remove("on"); mask.style.display="none"; }
+document.getElementById("sclose").onclick=closeSheet; mask.onclick=closeSheet;
+document.getElementById("sv").onclick=()=>{S.v[selCode]=!S.v[selCode];save();syncSheet();renderAll();};
+document.getElementById("ss").onclick=()=>{S.s[selCode]=!S.s[selCode];save();syncSheet();renderAll();};
+document.getElementById("snote").oninput=e=>{S.n[selCode]=e.target.value;save();};
+document.getElementById("snote").onchange=()=>{renderList();renderMust();};
+document.getElementById("sgo").onclick=()=>{
+  closeSheet(); showView("map");
+  if(zoom<2){zoom=2;setZoom();}
+  if(NEAR[selCode]) selCode=NEAR[selCode];
+  const b=byCode[selCode], wrap=document.getElementById("mapwrap");
+  const sc = svg.clientWidth/1700;
+  wrap.scrollLeft = ((b[2]+b[4])/2-495)*sc - wrap.clientWidth/2;
+  wrap.scrollTop = ((b[3]+b[5])/2-280)*sc - wrap.clientHeight/2;
+  refreshMap();
+};
+
+// list clicks
+function listClick(e){
+  const ck=e.target.closest("[data-chk]");
+  if(ck){const c=ck.dataset.chk;S.v[c]=!S.v[c];save();renderAll();return;}
+  const it=e.target.closest(".item"); if(it) openSheet(it.dataset.code);
+}
+document.getElementById("list").onclick=listClick;
+document.getElementById("must").onclick=listClick;
+document.getElementById("q").oninput=e=>{q=e.target.value;renderList();};
+document.querySelectorAll("[data-lf]").forEach(b=>b.onclick=()=>{
+  document.querySelectorAll("[data-lf]").forEach(x=>x.classList.remove("on"));b.classList.add("on");lf=b.dataset.lf;renderList();});
+document.querySelectorAll("[data-mf]").forEach(b=>b.onclick=()=>{
+  document.querySelectorAll("[data-mf]").forEach(x=>x.classList.remove("on"));b.classList.add("on");mapFilter=b.dataset.mf;refreshMap();});
+
+// tabs
+function showView(v){
+  document.querySelectorAll("nav.tabs button").forEach(b=>b.classList.toggle("on",b.dataset.v===v));
+  document.querySelectorAll(".view").forEach(s=>s.classList.toggle("on",s.id==="v-"+v));
+  if(v==="map") setZoom();
+}
+document.querySelectorAll("nav.tabs button").forEach(b=>b.onclick=()=>showView(b.dataset.v));
+
+// zoom
+document.getElementById("zi").onclick=()=>{zoom=Math.min(4,zoom*1.4);setZoom();};
+document.getElementById("zo").onclick=()=>{zoom=Math.max(1,zoom/1.4);setZoom();};
+window.addEventListener("resize",setZoom);
+
+// reset
+const cf=document.getElementById("confirm");
+document.getElementById("reset").onclick=()=>cf.style.display="flex";
+document.getElementById("cno").onclick=()=>cf.style.display="none";
+document.getElementById("cyes").onclick=()=>{S={v:{},s:{},n:{}};save();cf.style.display="none";renderAll();};
+
+function setHH(){document.documentElement.style.setProperty("--hh",document.getElementById("hdr").offsetHeight+"px");}
+setHH(); window.addEventListener("resize",setHH);
+zoom = window.innerWidth<700 ? 1.8 : 1;
+drawMap(); renderAll();
+</script>
+</body>
+</html>
