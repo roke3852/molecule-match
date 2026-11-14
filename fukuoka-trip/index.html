@@ -59,6 +59,18 @@ main{padding:0 0 calc(80px + env(safe-area-inset-bottom))}
 .bar{flex:1;height:6px;background:var(--line);border-radius:6px;overflow:hidden}
 .bar i{display:block;height:100%;background:var(--day);width:0;transition:width .3s}
 
+.wx{display:flex;gap:12px;align-items:center;margin:0 14px 2px;padding:12px 14px;border-radius:14px;background:linear-gradient(135deg,#eef5fb,#fdf6ec);border:1px solid var(--line)}
+.wx-i{font-size:38px;line-height:1}
+.wx-m{flex:1;min-width:0}
+.wx-m b{font-size:17px}
+.wx-m .rain{font-size:13px;color:var(--sea);margin-left:6px;font-weight:700}
+.wx-s{font-size:11.5px;color:var(--sub);margin-top:1px}
+.wx-r{width:32px;height:32px;border-radius:50%;background:#fff;border:1px solid var(--line);color:var(--sub);font-size:15px;flex:0 0 auto}
+.wx-r.spin{animation:sp 1s linear infinite}@keyframes sp{to{transform:rotate(360deg)}}
+.wx-tips{display:flex;flex-wrap:wrap;gap:6px;margin:8px 14px 12px}
+.wx-tips span{font-size:12px;padding:3px 9px;border-radius:999px;background:#fff;border:1px solid var(--line)}
+.chip .wxc{font-size:11px;margin-top:2px;white-space:nowrap}
+.chip.on .wxc{color:#fff}
 /* timeline */
 .tl{margin:0 14px;position:relative}
 .stop{position:relative;padding-left:58px;margin-bottom:10px}
@@ -371,6 +383,32 @@ function tripDayIndex(){const n=jstNow();const a=Date.UTC(n.y,n.mo-1,n.da),b=Dat
 function trIcon(tr){if(/包車|計程車|UBER/.test(tr))return['🚐','car'];if(/新幹線|JR|西鐵|列車|地鐵|火車/.test(tr))return['🚃','rail'];if(/船/.test(tr))return['⛴️',''];if(/單車/.test(tr))return['🚲',''];return['🚶','']}
 function soft(hex){const n=parseInt(hex.slice(1),16);const r=n>>16,g=n>>8&255,b=n&255;const m=x=>Math.round(x+(255-x)*.86);return`rgb(${m(r)},${m(g)},${m(b)})`}
 
+
+/* ---------- weather ---------- */
+const WXL=[{n:'福岡市',la:33.59,lo:130.40,avg:[9,16]},{n:'太宰府',la:33.52,lo:130.53,avg:[7,16]},{n:'由布院',la:33.26,lo:131.36,avg:[3,13]},{n:'門司港',la:33.95,lo:130.96,avg:[9,15]}];
+const DAYWX=[0,0,1,0,2,0,3,0];
+const WX_SNAP={t:1794621416184,d:[{"2026-11-21":{"c":53,"hi":10.1,"lo":6.8,"p":54},"2026-11-22":{"c":51,"hi":9.9,"lo":6.5,"p":27},"2026-11-23":{"c":51,"hi":13.1,"lo":5.9,"p":24},"2026-11-24":{"c":61,"hi":17.5,"lo":5.9,"p":28},"2026-11-25":{"c":61,"hi":18.1,"lo":10.5,"p":37},"2026-11-26":{"c":2,"hi":13.2,"lo":7.1,"p":37},"2026-11-27":{"c":0,"hi":11.5,"lo":3.3,"p":20},"2026-11-28":{"c":2,"hi":16.6,"lo":3.3,"p":12}},{"2026-11-21":{"c":51,"hi":10.2,"lo":5.4,"p":54},"2026-11-22":{"c":51,"hi":10.3,"lo":4.1,"p":27},"2026-11-23":{"c":3,"hi":13.3,"lo":5.8,"p":24},"2026-11-24":{"c":61,"hi":17.4,"lo":5.1,"p":28},"2026-11-25":{"c":61,"hi":18.8,"lo":7.8,"p":37},"2026-11-26":{"c":2,"hi":11.5,"lo":4.4,"p":37},"2026-11-27":{"c":0,"hi":12.5,"lo":2.6,"p":20},"2026-11-28":{"c":3,"hi":16.7,"lo":2.9,"p":12}},{"2026-11-21":{"c":51,"hi":7.8,"lo":2.3,"p":35},"2026-11-22":{"c":3,"hi":8.1,"lo":1.7,"p":8},"2026-11-23":{"c":1,"hi":9.7,"lo":2.8,"p":14},"2026-11-24":{"c":51,"hi":16.3,"lo":3.0,"p":30},"2026-11-25":{"c":53,"hi":17.7,"lo":6.7,"p":37},"2026-11-26":{"c":45,"hi":10.5,"lo":2.6,"p":41},"2026-11-27":{"c":0,"hi":11.9,"lo":1.7,"p":18},"2026-11-28":{"c":1,"hi":17.0,"lo":3.7,"p":10}},{"2026-11-21":{"c":51,"hi":11.0,"lo":7.3,"p":49},"2026-11-22":{"c":51,"hi":9.7,"lo":7.0,"p":25},"2026-11-23":{"c":51,"hi":13.3,"lo":6.8,"p":22},"2026-11-24":{"c":61,"hi":15.8,"lo":7.6,"p":26},"2026-11-25":{"c":61,"hi":18.6,"lo":10.5,"p":31},"2026-11-26":{"c":1,"hi":12.6,"lo":8.6,"p":30},"2026-11-27":{"c":1,"hi":11.9,"lo":6.0,"p":16},"2026-11-28":{"c":45,"hi":15.5,"lo":6.0,"p":11}}]};
+let wx=S.get('wx',null);if(!wx||wx.t<WX_SNAP.t)wx=WX_SNAP;
+function wmo(c){if(c==null)return['🌡️',''];if(c===0)return['☀️','晴'];if(c===1)return['🌤️','大致晴'];if(c===2)return['⛅','晴時多雲'];if(c===3)return['☁️','陰'];if(c<=48)return['🌫️','霧'];if(c<=57)return['🌦️','毛毛雨'];if(c<=67)return['🌧️','雨'];if(c<=77)return['🌨️','雪'];if(c<=82)return['🌦️','陣雨'];if(c<=86)return['🌨️','陣雪'];return['⛈️','雷雨']}
+function dayWx(i){const L=WXL[DAYWX[i]],key='2026-11-'+DAYS[i].date.split('/')[1];const f=wx&&wx.d&&wx.d[DAYWX[i]]&&wx.d[DAYWX[i]][key];
+ if(f&&f.hi!=null)return{live:true,L,c:f.c,lo:Math.round(f.lo),hi:Math.round(f.hi),p:f.p};return{live:false,L,c:null,lo:L.avg[0],hi:L.avg[1],p:null}}
+function wxTips(w){const t=[];if(w.p!=null&&w.p>=50)t.push('☔ 降雨機率高，帶傘');else if(w.p!=null&&w.p>=30)t.push('🌂 可能有雨，帶折傘');
+ if(w.lo<=5)t.push('🧣 很冷，帶厚外套、圍巾');else if(w.lo<=9)t.push('🧥 早晚涼，帶保暖外套');
+ if(w.hi-w.lo>=9)t.push('🧅 溫差大，穿洋蔥式');if(w.hi>=19)t.push('👕 白天偏暖');return t}
+function wxHtml(i){const w=dayWx(i),[ic,tx]=wmo(w.c);const at=new Date(wx.t+8*3600e3);const up=`${at.getUTCMonth()+1}/${at.getUTCDate()} ${String(at.getUTCHours()).padStart(2,'0')}:${String(at.getUTCMinutes()).padStart(2,'0')}`;
+ const tips=wxTips(w);
+ return `<div class="wx"><span class="wx-i">${ic}</span><div class="wx-m">${w.live?`<b>${tx}　${w.lo}–${w.hi}°C</b>${w.p!=null?`<span class="rain">💧${w.p}%</span>`:''}`:`<b>往年平均 約 ${w.lo}–${w.hi}°C</b>`}
+ <div class="wx-s">📍${w.L.n}・${w.live?`預報・${up} 更新`:'還沒有預報，連上網路會自動更新'}</div></div>
+ <button class="wx-r" id="wxR" aria-label="更新天氣">↻</button></div>${tips.length?`<div class="wx-tips">${tips.map(x=>`<span>${x}</span>`).join('')}</div>`:'<div style="height:10px"></div>'}`}
+async function loadWx(force){if(!force&&wx&&Date.now()-wx.t<3*3600e3)return;const b=$('#wxR');if(b)b.classList.add('spin');
+ try{const url='https://api.open-meteo.com/v1/forecast?latitude='+WXL.map(x=>x.la)+'&longitude='+WXL.map(x=>x.lo)+'&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=Asia%2FTokyo&forecast_days=16';
+  const r=await fetch(url);if(!r.ok)throw 0;let j=await r.json();if(!Array.isArray(j))j=[j];
+  const d=j.map(o=>{const m={};o.daily.time.forEach((t,k)=>{m[t]={c:o.daily.weather_code[k],hi:o.daily.temperature_2m_max[k],lo:o.daily.temperature_2m_min[k],p:o.daily.precipitation_probability_max[k]}});return m});
+  // keep earlier values for dates no longer in the forecast window
+  d.forEach((m,k)=>{const old=wx&&wx.d&&wx.d[k]||{};for(const t in old)if(!(t in m))m[t]=old[t]});
+  wx={t:Date.now(),d};S.set('wx',wx);renderChips();renderDay(true);if(force)toast('🌤️ 天氣已更新')}
+ catch(e){if(force)toast('目前無法更新天氣')}finally{const b2=$('#wxR');if(b2)b2.classList.remove('spin')}}
+
 /* ---------- state ---------- */
 let done=S.get('done',{});      // "d-i": true
 let memos=S.get('memo',{});
@@ -387,7 +425,7 @@ if(ti>=0&&ti<8)curDay=ti;
 /* ---------- itinerary ---------- */
 function renderChips(){
  $('#chips').innerHTML=DAYS.map((d,i)=>`<button class="chip${i===curDay?' on':''}${i===ti?' today':''}" style="--c:${d.c}" data-i="${i}">
-  <div class="d">Day ${i+1}</div><div class="n">${d.date.split('/')[1]}</div><div class="w">${d.date.split('/')[0]}月・${d.wk}</div></button>`).join('');
+  <div class="d">Day ${i+1}</div><div class="n">${d.date.split('/')[1]}</div><div class="w">${d.date.split('/')[0]}月・${d.wk}</div><div class="wxc">${(()=>{const w=dayWx(i);return w.live?wmo(w.c)[0]+' '+w.hi+'°':'🌡️ '+w.hi+'°'})()}</div></button>`).join('');
  const on=$('#chips .chip.on');if(on)on.scrollIntoView({inline:'center',block:'nearest'});
 }
 function nowStopIndex(day){
@@ -403,7 +441,7 @@ function renderDay(keep){
  const n=d.stops.length,k=d.stops.filter((_,i)=>done[curDay+'-'+i]).length;
  let h=`<div class="hero"><div class="hero-band"><div class="lbl">Day ${curDay+1}・${d.date}（${d.wk}）</div><h2>${esc(d.title)}</h2></div>
  <div class="hero-meta"><span class="pill${d.payWarn?' warn':''}">💳 ${esc(d.pay)}</span>${d.payNote?`<span class="pill" style="background:#f3ece4;color:#5b4d43">${esc(d.payNote)}</span>`:''}
- <div class="prog"><span>完成 ${k}/${n}</span><div class="bar"><i style="width:${n?k/n*100:0}%"></i></div></div></div></div><div class="tl">`;
+ <div class="prog"><span>完成 ${k}/${n}</span><div class="bar"><i style="width:${n?k/n*100:0}%"></i></div></div></div></div>${wxHtml(curDay)}<div class="tl">`;
  d.stops.forEach((s,i)=>{const id=curDay+'-'+i,isD=!!done[id],[ic,cls]=trIcon(s.tr);const tt=s.t.replace('-','<br>–<br>');
   h+=`<div class="stop${isD?' done':''}${i===nowI?' now open':''}" data-i="${i}">
    <button class="dot" data-act="done" aria-label="完成"></button>
@@ -424,6 +462,7 @@ function renderDay(keep){
 }
 $('#chips').addEventListener('click',e=>{const c=e.target.closest('.chip');if(!c)return;curDay=+c.dataset.i;S.set('day',curDay);renderChips();renderDay();window.scrollTo({top:$('header').offsetHeight,behavior:'smooth'})});
 $('#dayview').addEventListener('click',e=>{
+ if(e.target.closest('#wxR')){loadWx(true);return}
  const a=e.target.closest('[data-act]');if(!a)return;const st=a.closest('.stop');
  if(a.dataset.act==='toggle'){st.classList.toggle('open');return}
  if(a.dataset.act==='jr')return;
@@ -492,7 +531,7 @@ function route(){const v=currentView();VIEWS.forEach(x=>$('#v-'+x).classList.tog
  $('#todayBtn').classList.toggle('on',v==='trip'&&ti>=0&&ti<8&&curDay!==ti);window.scrollTo(0,0)}
 window.addEventListener('hashchange',route);
 
-renderChips();renderDay();route();
+renderChips();renderDay();route();loadWx(false);
 setInterval(()=>{if(currentView()==='trip'&&curDay===ti&&document.activeElement.id!=='memo')renderDay(true)},60000);
 </script>
 </body>
