@@ -634,6 +634,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
       <div class="param"><div class="row"><label for="micTemp" class="label">水溫</label><output id="micTempOut" class="mono"></output></div><input id="micTemp" type="range" min="80" max="98" step="1" value="93"></div>
       <div class="param"><span class="label">萃取方式</span><div class="seg" id="micMethod" role="group" aria-label="萃取方式"><button data-v="po">手沖（水流過）</button><button data-v="im">浸泡</button></div></div>
       <div class="param"><span class="label">悶蒸</span><div class="seg" id="micBloom" role="group" aria-label="悶蒸"><button data-v="0">不悶蒸</button><button data-v="30">30 秒</button><button data-v="40">40 秒</button></div></div>
+      <div class="param"><span class="label">攪拌</span><div class="seg" id="micStir" role="group" aria-label="攪拌"><button data-v="none">不攪拌</button><button data-v="bloom">只在悶蒸攪</button><button data-v="multi">多次攪拌</button></div></div>
       <div class="param" id="micPourP"><span class="label">注水力道</span><div class="seg" id="micPour" role="group" aria-label="注水力道"><button data-v="gentle">輕柔</button><button data-v="normal">一般</button><button data-v="strong">強力沖刷</button><button data-v="pulse10">10 段小注</button></div></div>
     </div>
   </section>
@@ -2147,7 +2148,15 @@ const micFl=T=>Math.max(.3,Math.min(2.4,Math.exp((T-90)/7)));
 const micShear=P=>P.bl*(1+1.5*P.turb)+P.U*.15;
 const MIC_CELL=50, MIC_VIEW={w:34,h:31};
 function micRng(seed){let a=seed>>>0;return()=>{a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
-function micPhase(cfg,t){
+// 攪拌：短暫把邊界層攪薄、打散乾粉團、加速排氣，也會把表面碎片打下來
+function micStirs(cfg){const B=cfg.bloom||0;if(cfg.stir==='bloom')return [3];if(cfg.stir==='multi')return cfg.method==='im'?[3,60,120]:[3,B+25,B+70];return [];}
+const MIC_STIR_DUR=8;
+function micPhase(cfg,t){const P=micPhase0(cfg,t),st=micStirs(cfg),ls=st.filter(x=>x<=t+1e-9).pop();
+  if(ls!=null&&t-ls<MIC_STIR_DUR&&P.ph!=='done'&&P.ph!=='drain'){P.stir=1;P.bl=Math.max(P.bl,1)*2.5;P.turb=Math.max(P.turb,1);P.swirl=3*(1-(t-ls)/MIC_STIR_DUR*.5);}
+  if(cfg.method==='im'&&P.ph==='steep'&&!P.stir){const ref=Math.max(cfg.bloom||0,ls??-1e9),since=t-ref;if(since>=8)P.bl=.5*(.55+.9*Math.exp(-(since-8)/30));}
+  return P;}
+function micVel(S,P,x,y){const v=micFlow(S,x,y,P.U);if(P.swirl){const r2=Math.max(x*x+y*y,1),a=S.R0*1.05;v[0]+=-y*P.swirl*a/r2;v[1]+=x*P.swirl*a/r2;}return v;}
+function micPhase0(cfg,t){
   const B=cfg.bloom||0;
   if(cfg.method==='im'){
     if(B&&t<B)return {ph:'bloom',U:0,bl:.6,turb:0};
@@ -2166,7 +2175,8 @@ function micPhase(cfg,t){
   return {ph:'done',U:0,bl:.08,turb:0,film:0};
 }
 const MIC_PULSE=[0,30,45,60,75,90,105,120,135,150];
-function micEnds(cfg){return cfg.method==='im'?[240,240]:cfg.pour==='pulse10'?[190,210]:[150,170];}
+// 多次攪拌會把細粉打下來、往下沉堵住濾紙，滴濾變慢
+function micEnds(cfg){if(cfg.method==='im')return [240,240];const e=cfg.pour==='pulse10'?[190,210]:[150,170],d=cfg.stir==='multi'?15:0;return [e[0]+d,e[1]+d];}
 function micCreate(cfg){
   const rnd=micRng(cfg.seed||7);
   const R0=cfg.grind/MIC_CELL/2, Tf=Math.max(.45,Math.min(1.6,Math.exp((cfg.temp-93)/14)));
@@ -2186,15 +2196,15 @@ function micCreate(cfg){
     c.nb=nb;c.surf=nb.some(k=>k<0);c.broken=c.depth<1.25;
   }
   // 沒悶蒸：CO₂ 包住一塊粉，水進不去，形成乾粉團
-  const clTh=cfg.bloom?2:cfg.method==='im'?.82:.2,clPh=rnd()*6.28;
-  for(const c of cells){const th=Math.atan2(c.cy,c.cx);c.clump=!cfg.bloom&&c.depth>.9&&Math.sin(th-clPh)>clTh;}
+  const clTh=cfg.method==='im'?.82:cfg.bloom?.75:.2,clPh=rnd()*6.28;
+  for(const c of cells){const th=Math.atan2(c.cy,c.cx);c.clump=c.depth>.9&&Math.sin(th-clPh)>clTh;}
   // molecules
   const mol=[];
   cells.forEach((c,ci)=>{for(let t=0;t<MIC_T.length;t++){let k=MIC_T[t].n;while(k>0){if(rnd()<Math.min(1,k)){mol.push({t,c:ci,ox:(rnd()-.5)*.64,oy:(rnd()-.5)*.64,st:0,x:0,y:0,lip:rnd()<(MIC_LIP[MIC_T[t].id]||0)});}k-=1;}}});
   const tot=new Array(MIC_T.length).fill(0);mol.forEach(m=>tot[m.t]++);
   const surfCells=cells.filter(c=>c.surf);
   const S={cfg,R0,Rof,n,half,vx,vy,cells,mol,tot,surfCells,Tf,t:0,dt:.5,rel:new Array(MIC_T.length).fill(0),
-    relBloom:0,gasRate:0,clumpEnd:cfg.method==='im'?60:140,G0:cells.length,gasLeft:cells.length,contact:1,drive:1,ph:micPhase(cfg,0),
+    relBloom:0,gasRate:0,clumpEnd:cfg.method==='im'?60:cfg.bloom?60:140,G0:cells.length,gasLeft:cells.length,contact:1,drive:1,ph:micPhase(cfg,0),
     bubbles:[],frags:[],gasAcc:0,fragAcc:0,rnd,curve:[]};
   S.wetFrac=0;
   return S;
@@ -2215,10 +2225,11 @@ function micStep(S){
   if(P.ph==='bloom')drive=Math.max(.08,1-S.relBloom/totAll/.35);
   else if(cfg.method==='im')drive=Math.max(.05,1-relAll/totAll/.72);
   S.drive=drive;
+  if(P.stir)for(const c of cells)c.clump=false;
   // gas & wetting
   let rel=0;
   for(const c of cells){
-    if(c.wet){const d=c.g*(1-Math.exp(-.09*Tf*dt));c.g-=d;rel+=d;}
+    if(c.wet){const d=c.g*(1-Math.exp(-.09*Tf*dt*(P.stir?2.5:1)));c.g-=d;rel+=d;}
     else{const d=c.g*.004*dt;c.g-=d;rel+=d;}
   }
   S.gasLeft-=rel;S.gasRate=rel/S.G0/dt;
@@ -2260,8 +2271,8 @@ function micStep(S){
           m.st=1;const th=Math.atan2(c.cy,c.cx),R=S.Rof(th)+.25+rnd()*.4;m.x=Math.cos(th)*R;m.y=Math.sin(th)*R;
           S.rel[m.t]++;if(P.ph==='bloom')S.relBloom++;}}
     }else if(m.st===1){
-      const [fx,fy]=micFlow(S,m.x,m.y,P.U);
-      const D=P.ph==='done'?.05:P.U?1.2:(.8+3*P.turb);const s=Math.sqrt(2*D*dt);
+      const [fx,fy]=micVel(S,P,m.x,m.y);
+      const D=P.ph==='done'?.05:P.U?1.2+2*P.turb*(P.stir?1:0):(.8+3*P.turb);const s=Math.sqrt(2*D*dt);
       m.x+=fx*dt+(rnd()-.5)*s*1.7;m.y+=fy*dt+(rnd()-.5)*s*1.7;
       const r=Math.hypot(m.x,m.y),th=Math.atan2(m.y,m.x),Rt=S.Rof(th)+.15;
       if(r<Rt){m.x*=Rt/r;m.y*=Rt/r;}
@@ -2271,7 +2282,7 @@ function micStep(S){
     }
   }
   // bubbles & fragments motion
-  for(const b of S.bubbles){const [fx,fy]=micFlow(S,b.x,b.y,P.U);b.x+=(b.ux*.6+fx*.35)*dt;b.y+=(b.uy*.6-1.2+fy*.35)*dt;b.life+=dt;}
+  for(const b of S.bubbles){const [fx,fy]=micVel(S,P,b.x,b.y);b.x+=(b.ux*.6+fx*.35)*dt;b.y+=(b.uy*.6-1.2+fy*.35)*dt;b.life+=dt;}
   S.bubbles=S.bubbles.filter(b=>b.y>-MIC_VIEW.h/2-1&&b.y<MIC_VIEW.h/2+1&&Math.abs(b.x)<MIC_VIEW.w/2+1&&b.life<14);
   for(const f of S.frags){const [fx,fy]=micFlow(S,f.x,f.y,Math.max(P.U,.3));f.x+=fx*dt*1.1;f.y+=fy*dt*1.1+.2*dt;f.rot+=.3*dt;}
   S.frags=S.frags.filter(f=>f.y<MIC_VIEW.h/2+1);
@@ -2280,11 +2291,11 @@ function micStep(S){
 }
 const MIC_TEND=240;
 function micRun(cfg,tEnd){const S=micCreate(cfg);S.curve.push({t:0,e:S.rel.map(()=>0),all:0,wet:0,gas:1,contact:1});while(S.t<(tEnd??MIC_TEND)-1e-9)micStep(S);return S;}
-if(typeof module!=='undefined')module.exports={micRun,micCreate,micStep,MIC_T,micPhase,micAll,micEnds};
+if(typeof module!=='undefined')module.exports={micStirs,micRun,micCreate,micStep,MIC_T,micPhase,micAll,micEnds};
 
 (function(){
 const $=id=>document.getElementById(id);
-const BASE={grind:650,temp:93,bloom:40,pour:'normal',method:'po',seed:7};
+const BASE={grind:650,temp:93,bloom:40,pour:'normal',method:'po',stir:'none',seed:7};
 const TOPICS=[
  {id:'grind',name:'粒徑',A:{grind:450},B:{grind:1100},an:'細研磨 450 μm',bn:'粗研磨 1100 μm',
   text:'<p>粉粒越細，從中心到表面的路越短；被切開的外圈細胞佔整顆的比例也越高，所以物質出得快、萃得多。</p><p>粗粉的中心離表面很遠，水要比較久才滲到中心，裡面的糖和苦味大分子到最後還有很多出不來。磨細會讓萃取率上升，苦味大分子也跟著變多。</p><p>磨得太細時，細粉會在粉床裡堵住濾紙（塞水）。這裡只看單顆粉粒，看不到塞水，要看請用練習模擬器。</p>'},
@@ -2300,6 +2311,8 @@ const TOPICS=[
   text:'<p>咖啡裡的物質分兩類。酸、糖、咖啡因、綠原酸這些<b>水溶性</b>物質會溶進水，再一格一格擴散出來。<b>油脂</b>不溶於水，以小油滴的形式存在細胞裡（畫面中金色的圓點）。</p><p>油要出來，得先被熱水加熱、變得比較會流動，再被水流和翻攪從粉粒表面剪下來，變成很小的油滴懸浮在咖啡裡（乳化）。所以溫度越高、注水越猛，帶出的油越多。內部完整細胞裡的油幾乎出不來，大部分的油最後都留在咖啡渣裡。</p><p>香氣分子不全是「不溶於水」。很多烘焙香（吡嗪、呋喃類）本身就溶得進水，跟水溶性物質一起擴散出來。另一部分比較親油的香氣（例如一些酯類）偏好待在油滴裡，要等油被帶出來，或很慢地從油轉進水裡（畫面中有金色外圈的香氣小點）。溫度高、水流強，這部分出得比較多。</p><p>油進到杯子裡會讓口感更滑、更厚，也會留住親油的香氣。不過手沖的濾紙會擋下大部分的油，紙濾咖啡口感比較乾淨；法壓壺、金屬濾網的咖啡油感就明顯得多。</p>'},
  {id:'k10',name:'粕谷 10 段',A:{grind:1250,temp:96,bloom:30,pour:'pulse10'},B:{grind:650,temp:93,bloom:40,pour:'normal'},an:'粕谷 10 段',bn:'一般配方',
   text:'<p>2026 年粕谷哲在世界手沖冠軍十週年推出的新沖法（也叫 Multi-Pour）：20 g 粉、300 g 水（1:15）、95–96°C、<b>超粗研磨</b>（C40 約 40–45 格，約 1200–1350 μm），V60 或 V60 NEO。先注 30 g 悶蒸 30 秒，之後每 15 秒注 30 g，共 10 注，約 3:00–3:30 滴完。</p><p><b>為什麼磨這麼粗：</b>粗粉的細粉少、不容易塞，可以放心用高溫、拉長時間。對照顯微鏡看：粗粉的中心離表面很遠，藏在裡面又大又慢的苦味大分子大多出不來；先出來的是外圈破裂細胞裡的酸、糖和香氣。所以整體萃得比較少，但苦味相對更少。</p><p><b>為什麼用 96°C：</b>粗粉萃得慢，用高溫讓分子動得快，也讓表面的油比較好帶出，補回一些口感。</p><p><b>為什麼分 10 注：</b>每 15 秒一小注，粉層一直泡在剛換上的新鮮水裡，濃度差保持大；每注都是一次輕輕的翻動，但水位低、不會猛烈沖刷。整個過程維持 3 分多鐘穩定接觸，讓粗粉有時間慢慢萃。</p><p>粕谷哲的說法是：精品咖啡的好味道是「加法」，短時間、乾淨的沖法雖然避開缺點，也把很多好的味道留在粉裡。網路上的評價不一：有人喝到很甜、很厚的口感，也有人和一般兩段沖法並排比較，覺得 10 段的酸比較搶、甜感和厚度反而少。這個模型能確定的是苦味大分子占比明顯較低；整體萃得比較少，所以甜和厚度不見得更多，酸和甜的比例則會隨粉粒而變。實際喝起來跟豆子很有關係。</p><p>圖上可以看到 10 次注水的節奏：每注一次，水流和邊界層短暫變強，之後慢慢緩下來。</p>'},
+ {id:'stir',name:'攪拌',A:{stir:'multi'},B:{stir:'none'},C:{stir:'bloom'},an:'多次攪拌',bn:'不攪拌',cn:'只在悶蒸攪',
+  text:'<p>攪拌（用攪拌棒、湯匙，或旋轉濾杯）時，畫面會出現旋渦。它做了三件事：</p><p><b>打散乾粉團</b>：悶蒸時有些粉被 CO₂ 包住、黏成一團，水進不去（顏色較淺的那塊）。攪一下把粉團打散，每顆粉都吸到水，CO₂ 也排得比較快。</p><p><b>把粉粒旁的濃水換掉</b>：粉粒周圍那層水會越來越濃，物質出來的速度就變慢。攪拌把這層濃水攪開、換上較淡的水，萃取變快。浸泡時差最多，因為水本來不流動，不攪的話這層濃水會一直貼著粉粒。</p><p><b>代價</b>：攪拌也會把外圈破裂細胞的碎片打下來變成細粉。手沖時細粉往下沉、堵住濾紙，滴得變慢，接觸時間拉長，苦味大分子跟著變多；粉層被攪混，層次也會變少（清晰度下降）。這就是為什麼很多配方只在悶蒸時攪一下，確保粉都濕透，之後就不再攪。</p>'},
  {id:'free',name:'自由調整',text:'<p>用下方「自己調整」改研磨、水溫、悶蒸、注水和萃取方式。每次改動後，上一次的曲線會留在圖上當虛線，方便比較。</p>'},
 ];
 const SHOW=['acid','sugar','bitter','fruity','oil'];
@@ -2316,17 +2329,22 @@ function load(c,keepGhost){
 function openTopic(tp,sd){topic=tp;side=sd||'A';
   [...$('micTabs').children].forEach(b=>b.setAttribute('aria-pressed',b.dataset.id===tp.id));
   if(tp.id==='free'){ $('micTopic').innerHTML=tp.text;load(cfg||BASE);return;}
-  const other=side==='A'?'B':'A';
-  ghost=micRun(cfgFor(tp,other));ghostName='虛線：'+(other==='A'?tp.an:tp.bn);
+  const sides=['A','B','C'].filter(k=>tp[k]),nm=k=>tp[k.toLowerCase()+'n'];
+  const other=side==='B'?'A':'B';
+  ghost=micRun(cfgFor(tp,other));ghostName='虛線：'+nm(other);
   load(cfgFor(tp,side),true);
-  const end=Math.max(micEnds(cfg)[1],micEnds(ghost.cfg)[1]);
+  const runs={};sides.forEach(k=>runs[k]=k===side?full:k===other?ghost:micRun(cfgFor(tp,k)));
+  const end=Math.max(...sides.map(k=>micEnds(runs[k].cfg)[1]));
   const at=(R,t)=>R.curve.find(x=>x.t>=t)||R.curve[R.curve.length-1];
-  const a=at(side==='A'?full:ghost,end),b=at(side==='A'?ghost:full,end);
-  const row=(n,f)=>'<tr><td>'+n+'</td><td>'+f(a)+'</td><td>'+f(b)+'</td></tr>';
+  const pts=sides.map(k=>at(runs[k],end));
+  const row=(n,f)=>'<tr><td>'+n+'</td>'+pts.map(x=>'<td>'+f(x)+'</td>').join('')+'</tr>';
   const p=v=>Math.round(v*100)+'%';
-  $('micTopic').innerHTML='<div class="seg mic-ab" role="group" aria-label="比較組"><button data-s="A" aria-pressed="'+(side==='A')+'">'+tp.an+'</button><button data-s="B" aria-pressed="'+(side==='B')+'">'+tp.bn+'</button></div>'+tp.text+
-    '<table class="mic-tbl"><thead><tr><th>'+fmt(end)+' 時溶出</th><th>'+tp.an+'</th><th>'+tp.bn+'</th></tr></thead><tbody>'+
-    row('整體（水溶性）',x=>p(x.all))+row('有機酸',x=>p(x.e[0]))+row('糖',x=>p(x.e[5]))+row('苦味大分子',x=>p(x.e[6]))+row('花果香',x=>p(x.e[3]))+row('油脂（不溶於水）',x=>p(x.e[7]))+'<tr><td>苦味大分子÷整體（越低越不苦）</td><td>'+(a.e[6]/Math.max(.01,a.all)).toFixed(2)+'</td><td>'+(b.e[6]/Math.max(.01,b.all)).toFixed(2)+'</td></tr><tr><td>酸÷糖（越高越偏酸）</td><td>'+(a.e[0]/Math.max(.01,a.e[5])).toFixed(2)+'</td><td>'+(b.e[0]/Math.max(.01,b.e[5])).toFixed(2)+'</td></tr></tbody></table>';
+  $('micTopic').innerHTML='<div class="seg mic-ab" role="group" aria-label="比較組">'+sides.map(k=>'<button data-s="'+k+'" aria-pressed="'+(side===k)+'">'+nm(k)+'</button>').join('')+'</div>'+tp.text+
+    '<table class="mic-tbl"><thead><tr><th>'+fmt(end)+' 時溶出</th>'+sides.map(k=>'<th>'+nm(k)+'</th>').join('')+'</tr></thead><tbody>'+
+    row('整體（水溶性）',x=>p(x.all))+row('有機酸',x=>p(x.e[0]))+row('糖',x=>p(x.e[5]))+row('苦味大分子',x=>p(x.e[6]))+row('花果香',x=>p(x.e[3]))+row('油脂（不溶於水）',x=>p(x.e[7]))+
+    row('苦味大分子÷整體（越低越不苦）',x=>(x.e[6]/Math.max(.01,x.all)).toFixed(2))+row('酸÷糖（越高越偏酸）',x=>(x.e[0]/Math.max(.01,x.e[5])).toFixed(2))+
+    (tp.id==='stir'?row('滴完時間',x=>'')+'':'')+'</tbody></table>';
+  if(tp.id==='stir'){const tr=$('micTopic').querySelectorAll('.mic-tbl tbody tr');const last=tr[tr.length-1];last.innerHTML='<td>滴完時間</td>'+sides.map(k=>'<td>'+fmt(micEnds(runs[k].cfg)[1])+'</td>').join('');}
   $('micTopic').querySelectorAll('.mic-ab button').forEach(b=>b.onclick=()=>openTopic(tp,b.dataset.s));
 }
 function seek(t){S=micCreate(cfg);S.curve.push({t:0,e:S.rel.map(()=>0),all:0,wet:0,gas:1,contact:1});while(S.t<t-1e-9)micStep(S);snapMol();tracers=[];draw();ui();}
@@ -2335,7 +2353,7 @@ function syncControls(){
   $('micGrind').value=cfg.grind;$('micGrindOut').textContent=cfg.grind+' μm';
   $('micTemp').value=cfg.temp;$('micTempOut').textContent=cfg.temp+'°C';
   const set=(id,v)=>$(id).querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v==String(v)));
-  set('micMethod',cfg.method);set('micBloom',cfg.bloom);set('micPour',cfg.pour);
+  set('micMethod',cfg.method);set('micStir',cfg.stir||'none');set('micBloom',cfg.bloom);set('micPour',cfg.pour);
   $('micPourP').style.opacity=cfg.method==='im'?.45:1;
 }
 function freeChange(ch){
@@ -2360,9 +2378,9 @@ function draw(){
   if(P.ph==='bloom'){const g=ctx.createRadialGradient(cx,cy,S.R0*cs*.9,cx,cy,S.R0*cs*1.8);g.addColorStop(0,rgba('#7a4a28',Math.min(.45,S.relBloom/S.mol.length*2.5)));g.addColorStop(1,'rgba(122,74,40,0)');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);}
   if(P.ph==='done'||P.ph==='drain'){ctx.strokeStyle='rgba(110,170,195,.5)';ctx.lineWidth=cs*.5;ctx.beginPath();for(let k=0;k<=72;k++){const th=k/72*6.2832,R=(S.Rof(th)+.25)*cs;ctx.lineTo(cx+Math.cos(th)*R,cy+Math.sin(th)*R);}ctx.stroke();}
   // tracers (water flow)
-  if(P.U>0){while(tracers.length<70)tracers.push({x:(Math.random()-.5)*MIC_VIEW.w,y:-MIC_VIEW.h/2+Math.random()*MIC_VIEW.h});
+  if(P.U>0||P.swirl){while(tracers.length<70)tracers.push({x:(Math.random()-.5)*MIC_VIEW.w,y:-MIC_VIEW.h/2+Math.random()*MIC_VIEW.h});
     ctx.strokeStyle=dark?'rgba(170,215,235,.35)':'rgba(60,120,150,.3)';ctx.lineWidth=1;
-    for(const t of tracers){const [fx,fy]=micFlow(S,t.x,t.y,P.U);const L=.18;ctx.beginPath();ctx.moveTo(X(t.x),Y(t.y));ctx.lineTo(X(t.x-fx*L),Y(t.y-fy*L));ctx.stroke();}}
+    for(const t of tracers){const [fx,fy]=micVel(S,P,t.x,t.y);const L=.18;ctx.beginPath();ctx.moveTo(X(t.x),Y(t.y));ctx.lineTo(X(t.x-fx*L),Y(t.y-fy*L));ctx.stroke();}}
   else tracers=[];
   // gas haze
   if(S.contact<.92&&waterA>0){ctx.strokeStyle='rgba(190,195,200,'+((1-S.contact)*.7)+')';ctx.lineWidth=cs*1.1;ctx.beginPath();for(let k=0;k<=72;k++){const th=k/72*6.2832,R=(S.Rof(th)+.45)*cs;ctx.lineTo(cx+Math.cos(th)*R,cy+Math.sin(th)*R);}ctx.stroke();}
@@ -2408,6 +2426,7 @@ function caption(){
   let t;
   if(P.ph==='done')t='水已經流完，粉粒只剩表面一層薄薄的水膜，物質幾乎出不來，萃取停止。';
   else if(P.ph==='drain')t='最後一段水正在流走，接觸的水越來越少，萃取快要停了。';
+  else if(P.stir)t='攪拌中：旋渦把粉粒旁那層濃水攪開、換上較淡的水，邊界層變薄，物質出得更快；黏在一起的乾粉團被打散、吸到水，CO₂ 也排得更快。表面的碎片也會被打下來變成細粉。';
   else if(P.ph==='bloom')t='悶蒸：少量熱水讓粉粒吸水，CO₂ 從細胞裡冒出來。水不多也沒在流，溶出的物質堆在粉粒周圍，所以萃得慢；這段主要是讓水滲進去、讓氣排出來。';
   else if(P.pulse&&P.ph==='flow'&&S.wetFrac>.97&&e[0]<.8)t='第 '+P.pulse+' 注：小量注水輕輕翻動粉層，換上新鮮的水，濃度差又拉大。粗粉的中心很遠，裡面的糖和苦味大分子出來得很慢，所以前段多是酸和香氣。';
   else if(S.contact<.7)t='CO₂ 正大量冒出，氣泡包住粉粒表面，把水推開，物質不容易離開粉粒，萃取效率打折。';
@@ -2448,7 +2467,7 @@ function frame(now){
   if(!playing)return;const dtR=Math.min(.1,(now-last)/1000);last=now;
   let steps=Math.round(speed*dtR/S.dt*100)/100;S._acc=(S._acc||0)+steps;
   while(S._acc>=1&&S.t<240){micStep(S);S._acc-=1;}
-  if(micPhase(cfg,S.t).U>0)for(const t of tracers){const [fx,fy]=micFlow(S,t.x,t.y,micPhase(cfg,S.t).U);t.x+=fx*speed*dtR;t.y+=fy*speed*dtR;if(t.y>MIC_VIEW.h/2||Math.hypot(t.x,t.y)<S.R0){t.x=(Math.random()-.5)*MIC_VIEW.w;t.y=-MIC_VIEW.h/2;}}
+  const PP=micPhase(cfg,S.t);if(PP.U>0||PP.swirl)for(const t of tracers){const [fx,fy]=micVel(S,PP,t.x,t.y);t.x+=fx*speed*dtR;t.y+=fy*speed*dtR;if(t.y>MIC_VIEW.h/2||Math.abs(t.x)>MIC_VIEW.w/2||Math.hypot(t.x,t.y)<S.R0){t.x=(Math.random()-.5)*MIC_VIEW.w;t.y=PP.U>0?-MIC_VIEW.h/2:(Math.random()-.5)*MIC_VIEW.h;}}
   draw();ui();
   if(S.t>=240){stop();return;}
   raf=requestAnimationFrame(frame);
@@ -2466,7 +2485,7 @@ $('micGrind').oninput=e=>{$('micGrindOut').textContent=e.target.value+' μm';};
 $('micGrind').onchange=e=>freeChange({grind:+e.target.value});
 $('micTemp').oninput=e=>{$('micTempOut').textContent=e.target.value+'°C';};
 $('micTemp').onchange=e=>freeChange({temp:+e.target.value});
-[['micMethod','method',v=>v],['micBloom','bloom',v=>+v],['micPour','pour',v=>v]].forEach(([id,k,f])=>$(id).querySelectorAll('button').forEach(b=>b.onclick=()=>freeChange({[k]:f(b.dataset.v)})));
+[['micStir','stir',v=>v],['micMethod','method',v=>v],['micBloom','bloom',v=>+v],['micPour','pour',v=>v]].forEach(([id,k,f])=>$(id).querySelectorAll('button').forEach(b=>b.onclick=()=>freeChange({[k]:f(b.dataset.v)})));
 let inited=false;
 window.micRender=()=>{readColors();if(!size())return;if(!inited){inited=true;openTopic(TOPICS[0]);}else{draw();drawChart();}};
 addEventListener('resize',()=>{if(!$('microView')||$('microView').hidden)return;if(size()){draw();drawChart();}});
