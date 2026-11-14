@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>沖煮紀錄 × 風味地圖</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --bg:#121a2a; --panel:#1c2638; --panel2:#253048; --line:#34405a; --ink:#e9edf4; --muted:#93a0b8; --faint:#5d6a83;
+  --teal:#7ccbb9; --teal-soft:rgba(124,203,185,.14); --gold:#f2cf6b; --lilac:#b3a3e6;
+  --hot:#ef8a5b; --warm:#7ccbb9;
+  --acid:#e8c547; --sweet:#ef8a5b; --bitter:#9c7bd6; --body:#5fa8e0; --astr:#c96a7a; --finish:#7ccbb9; --aroma:#e3a3c9;
+  --f-body:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.55}
+button,select,input,textarea{font:inherit;color:inherit}
+header{position:sticky;top:0;z-index:5;background:rgba(18,26,42,.94);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);padding:calc(env(safe-area-inset-top) + 10px) 16px 0}
+.top{display:flex;align-items:center;gap:10px}
+.top a{color:var(--teal);text-decoration:none;font-size:14px}
+h1{font-size:18px;margin:0;flex:1;letter-spacing:.02em}
+.tabs{display:flex;gap:4px;margin-top:10px;overflow-x:auto}
+.tabs button{flex:1;white-space:nowrap;background:none;border:0;border-bottom:2px solid transparent;color:var(--muted);padding:8px 6px 10px;font-weight:500}
+.tabs button.on{color:var(--ink);border-color:var(--teal)}
+main{padding:14px 14px 90px;max-width:760px;margin:0 auto}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:12px}
+.card h2{font-size:15px;margin:0 0 8px;display:flex;align-items:center;gap:8px}
+.card h2 small{font-weight:400;color:var(--muted);font-size:12px}
+.hint{color:var(--muted);font-size:13px;margin:4px 0 0}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+.stat{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:10px 12px}
+.stat b{display:block;font-family:var(--f-mono);font-size:20px;font-weight:500}
+.stat span{color:var(--muted);font-size:12px}
+svg{display:block;width:100%;height:auto;overflow:visible}
+svg text{font-family:var(--f-body)}
+.ax{fill:var(--muted);font-size:11px;font-family:var(--f-mono)}
+.zone{fill:var(--faint);font-size:13px;font-weight:700}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+select,input,textarea{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:8px 10px;min-width:0}
+select{flex:1}
+label.f{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted)}
+label.f input,label.f select,label.f textarea{color:var(--ink);font-size:15px}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+label.f input,label.f textarea,label.f select{width:100%}
+input[type=range]{accent-color:var(--teal)}
+textarea{width:100%}
+.btn{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:9px 14px}
+.btn.pri{background:var(--teal);color:#0f1a22;border-color:var(--teal);font-weight:700}
+.btn.danger{color:#f19a9a}
+.list .item{display:block;width:100%;text-align:left;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:12px 14px;margin-bottom:10px}
+.item .t{display:flex;justify-content:space-between;gap:8px;color:var(--muted);font-size:12px}
+.item .b{font-weight:700;margin:2px 0 6px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font-size:12px;background:var(--panel2);border-radius:999px;padding:2px 9px;color:var(--ink);font-family:var(--f-mono)}
+.chip i{font-style:normal;color:var(--muted);font-family:var(--f-body);margin-right:3px}
+.params{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.params div{background:var(--panel2);border-radius:12px;padding:8px 10px}
+.params span{display:block;font-size:11px;color:var(--muted)}
+.params b{font-family:var(--f-mono);font-weight:500;font-size:16px}
+.params b.txt{font-family:var(--f-body);font-size:13px;font-weight:500}
+.legend{display:flex;gap:14px;font-size:12px;color:var(--muted);margin-top:6px;flex-wrap:wrap}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;vertical-align:-1px}
+.note{background:var(--panel2);border-radius:12px;padding:10px 12px;margin-top:8px;font-size:14px}
+.note b{color:var(--teal);font-size:12px;display:block;margin-bottom:2px}
+table.tt{width:100%;border-collapse:collapse;font-size:13px}
+.tt th,.tt td{padding:6px 4px;border-bottom:1px solid var(--line);text-align:center}
+.tt th{color:var(--muted);font-weight:500;white-space:nowrap}
+.tt.sm td{font-size:12px;padding:6px 2px}
+.tt td:first-child,.tt th:first-child{text-align:left}
+.tt td{font-family:var(--f-mono)}
+.sheet{position:fixed;inset:0;z-index:20;background:rgba(5,9,16,.6);display:none}
+.sheet.on{display:block}
+.sheet .in{position:absolute;inset:auto 0 0 0;max-height:92vh;overflow:auto;background:var(--bg);border-radius:20px 20px 0 0;padding:14px 14px calc(env(safe-area-inset-bottom) + 24px);max-width:760px;margin:0 auto}
+.sheet .bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.pour{display:grid;grid-template-columns:28px repeat(3,minmax(0,1fr));gap:6px;align-items:end;margin-bottom:6px}
+.pour .n{color:var(--muted);font-size:12px;padding-bottom:10px}
+.taste{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.slider{display:grid;grid-template-columns:34px 1fr 32px;gap:6px;align-items:center;font-size:13px}
+.slider input{padding:0;background:none;border:0}
+.slider output{font-family:var(--f-mono);text-align:right}
+.empty{color:var(--muted);text-align:center;padding:30px 0}
+.toast{position:fixed;left:50%;bottom:30px;transform:translateX(-50%);background:var(--teal);color:#0f1a22;font-weight:700;padding:8px 18px;border-radius:999px;opacity:0;transition:.2s;z-index:30}
+.toast.on{opacity:1}
+@media (max-width:420px){.params{grid-template-columns:repeat(2,1fr)}.taste{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header>
+  <div class="top"><a href="../">‹ 目錄</a><h1>沖煮紀錄 × 風味地圖</h1></div>
+  <nav class="tabs" id="tabs">
+    <button data-v="map" class="on">控制圖</button>
+    <button data-v="corr">參數 × 風味</button>
+    <button data-v="list">紀錄</button>
+    <button data-v="add">＋ 新增</button>
+  </nav>
+</header>
+<main id="main"></main>
+
+<div class="sheet" id="sheet"><div class="in" id="sheetIn"></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ================= 資料 =================
+   每筆紀錄的格式（新增紀錄時 App 會照這個格式存）：
+   taste.hot / taste.warm：高溫、中常溫各一組，分數 0–5（可 0.5），沒記的填 null */
+const SEED = [{
+  id:"2026-10-26-a", date:"2026-10-26",
+  bean:"衣索比亞 西達摩 布爾薩 蒙塔莎處理廠 萊吉斯 74185", process:"日曬",
+  roast:"淺", agtron:80,
+  grinder:"Comandante C40 MK4", clicks:30, micron:900,
+  temp:96, dripper:"Orea Brewer（OREA-O）", filter:"93 蛋糕濾紙",
+  dose:12, water:199.7, yield:156, tds:1.46, ey:19.0, time:131,
+  pours:[
+    {ml:60, rate:4, wait:40, note:"起水失誤 8 ml/s，隨即調回 4 ml/s"},
+    {ml:40, rate:4, wait:30},
+    {ml:50, rate:4, wait:30},
+    {ml:50, rate:4, wait:null}
+  ],
+  endNote:"2:11 流乾",
+  taste:{
+    hot:{aroma:1, aromaNote:"前：焦糖", aromaBack:1, acid:3, sweet:3, bitter:0.5, body:2, astr:0.5, finish:0.5,
+         finishNote:"舌上些微回甘", desc:"酸甜平衡，像葡萄糖軟糖那樣微酸圓潤的口感"},
+    warm:{aroma:1, aromaNote:"前：柑橘甜", aromaBack:null, acid:3.5, sweet:3, bitter:1, body:2, astr:0.5, finish:null,
+         finishNote:"明亮酸值、甜回甘", desc:"甜感下降後，酸苦風味加上圓潤口感，像葡萄柚"}
+  },
+  summary:"整體酸甜平衡，TDS 偏高，帶來一點後段負面風味。可能因為注水不穩定，悶蒸偏離預期，產生些微苦味。"
+}];
+
+const LS = "roke-brewlog-v1";
+let store = {added:[], deleted:[], edited:{}};
+try{ const s = JSON.parse(localStorage.getItem(LS)); if(s) store = Object.assign(store, s); }catch(e){}
+const persist = () => { try{ localStorage.setItem(LS, JSON.stringify(store)); }catch(e){} };
+
+function brews(){
+  const base = SEED.filter(b => !store.deleted.includes(b.id)).map(b => store.edited[b.id] || b);
+  return base.concat(store.added).map(derive).sort((a,b)=> b.date.localeCompare(a.date) || b.id.localeCompare(a.id));
+}
+function derive(b){
+  const r = Object.assign({}, b);
+  r.ratio = b.dose && b.water ? b.water/b.dose : null;
+  if(r.ey == null && b.yield && b.tds && b.dose) r.ey = b.yield*b.tds/b.dose;
+  r.nPours = (b.pours||[]).length;
+  r.bloom = (b.pours||[])[0]?.ml ?? null;
+  return r;
+}
+
+/* ================= 共用 ================= */
+const $ = s => document.querySelector(s);
+const fmtT = s => s==null ? "—" : `${Math.floor(s/60)}:${String(Math.round(s%60)).padStart(2,"0")}`;
+const parseT = v => { if(!v) return null; if(/:/.test(v)){ const [m,s]=v.split(":"); return (+m)*60+(+s); } return +v; };
+const f1 = v => v==null||isNaN(v) ? "—" : (+v).toFixed(1);
+const f2 = v => v==null||isNaN(v) ? "—" : (+v).toFixed(2);
+const esc = s => String(s??"").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const BEAN_COLORS = ["#7ccbb9","#f2cf6b","#ef8a5b","#b3a3e6","#5fa8e0","#e3a3c9","#9bd17a"];
+function beanColor(bean){
+  const names = [...new Set(brews().map(b=>b.bean))];
+  return BEAN_COLORS[Math.max(0,names.indexOf(bean)) % BEAN_COLORS.length];
+}
+function toast(m){ const t=$("#toast"); t.textContent=m; t.classList.add("on"); setTimeout(()=>t.classList.remove("on"),1400); }
+
+const FLAVORS = [
+  {k:"acid",   n:"酸",   c:"var(--acid)"},
+  {k:"sweet",  n:"甜",   c:"var(--sweet)"},
+  {k:"bitter", n:"苦",   c:"var(--bitter)"},
+  {k:"body",   n:"厚",   c:"var(--body)"},
+  {k:"astr",   n:"澀",   c:"var(--astr)"},
+  {k:"finish", n:"韻",   c:"var(--finish)"},
+  {k:"aroma",  n:"嗅(前)", c:"var(--aroma)"}
+];
+const PARAMS = [
+  {k:"clicks", n:"研磨格數", u:"格", f:v=>v},
+  {k:"micron", n:"粒徑", u:"µm", f:v=>v},
+  {k:"temp",   n:"水溫", u:"°C", f:v=>v},
+  {k:"ratio",  n:"粉水比 1:", u:"", f:f1},
+  {k:"dose",   n:"粉重", u:"g", f:f1},
+  {k:"bloom",  n:"悶蒸水量", u:"ml", f:v=>v},
+  {k:"nPours", n:"注水段數", u:"段", f:v=>v},
+  {k:"time",   n:"沖煮時間", u:"秒", f:v=>v},
+  {k:"tds",    n:"TDS", u:"%", f:f2},
+  {k:"ey",     n:"萃取率", u:"%", f:f1}
+];
+
+/* ================= 控制圖 ================= */
+const ZONES = [
+  ["酸與柑橘味",0,2],["醇厚",1,2],["苦與烘焙味",2,2],
+  ["偏酸",0,1],["經典標準",1,1],["偏苦",2,1],
+  ["甜味",0,0],["清淡",1,0],["茶感",2,0]
+];
+function controlChart(list, opts={}){
+  const W=340,H=300,L=40,R=10,T=10,B=34, pw=W-L-R, ph=H-T-B;
+  const x0=14,x1=26,y0=0.9,y1=1.6;
+  const X=v=>L+(v-x0)/(x1-x0)*pw, Y=v=>T+(1-(v-y0)/(y1-y0))*ph;
+  let s=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="萃取率與 TDS 控制圖">`;
+  s+=`<rect x="${L}" y="${T}" width="${pw}" height="${ph}" fill="#172034" stroke="var(--line)" rx="6"/>`;
+  s+=`<rect x="${X(18)}" y="${Y(1.35)}" width="${X(22)-X(18)}" height="${Y(1.15)-Y(1.35)}" fill="var(--teal-soft)" stroke="rgba(124,203,185,.35)" stroke-dasharray="3 3"/>`;
+  for(let v=14;v<=26;v+=2){ s+=`<line x1="${X(v)}" x2="${X(v)}" y1="${T}" y2="${T+ph}" stroke="#25304a"/><text class="ax" x="${X(v)}" y="${H-B+16}" text-anchor="middle">${v}</text>`; }
+  for(let v=0.9;v<=1.601;v+=0.1){ s+=`<line x1="${L}" x2="${L+pw}" y1="${Y(v)}" y2="${Y(v)}" stroke="#25304a"/><text class="ax" x="${L-6}" y="${Y(v)+4}" text-anchor="end">${v.toFixed(1)}</text>`; }
+  const cx=[(14+18)/2,20,(22+26)/2], cy=[(0.9+1.15)/2,1.25,(1.35+1.6)/2];
+  ZONES.forEach(([n,i,j])=>{ s+=`<text class="zone" x="${X(cx[i])}" y="${Y(cy[j])+5}" text-anchor="middle" ${i==1&&j==1?'style="fill:rgba(124,203,185,.6)"':''}>${n}</text>`; });
+  s+=`<text class="ax" x="${L+pw/2}" y="${H-2}" text-anchor="middle" style="font-family:var(--f-body)">萃取率 EY (%)</text>`;
+  s+=`<text class="ax" transform="translate(10 ${T+ph/2}) rotate(-90)" text-anchor="middle" style="font-family:var(--f-body)">TDS (%)</text>`;
+  list.forEach(b=>{
+    if(b.ey==null||b.tds==null) return;
+    const px=X(Math.min(x1,Math.max(x0,b.ey))), py=Y(Math.min(y1,Math.max(y0,b.tds)));
+    const hl = opts.focus===b.id;
+    if(hl) s+=`<line x1="${L}" x2="${px}" y1="${py}" y2="${py}" stroke="#fff" stroke-dasharray="3 3" opacity=".7"/><line x1="${px}" x2="${px}" y1="${py}" y2="${T+ph}" stroke="#fff" stroke-dasharray="3 3" opacity=".7"/>`;
+    s+=`<g data-open="${b.id}" style="cursor:pointer"><circle cx="${px}" cy="${py}" r="16" fill="transparent"/><circle cx="${px}" cy="${py}" r="${hl?8:7}" fill="${beanColor(b.bean)}" stroke="#121a2a" stroke-width="2"/></g>`;
+    if(!opts.focus) s+=`<text class="ax" x="${px}" y="${py+20}" text-anchor="middle" style="fill:var(--ink)">${b.date.slice(5).replace("-","/")}</text>`;
+  });
+  return s+`</svg>`;
+}
+
+function viewMap(){
+  const list=brews();
+  const avg=k=>{const v=list.map(b=>b[k]).filter(v=>v!=null); return v.length? v.reduce((a,b)=>a+b,0)/v.length : null;};
+  const beans=[...new Set(list.map(b=>b.bean))];
+  return `
+  <div class="stats">
+    <div class="stat"><b>${list.length}</b><span>杯紀錄</span></div>
+    <div class="stat"><b>${f1(avg("ey"))}</b><span>平均萃取率 %</span></div>
+    <div class="stat"><b>${f2(avg("tds"))}</b><span>平均 TDS %</span></div>
+  </div>
+  <div class="card">
+    <h2>沖煮控制圖 <small>點圓點看那一杯</small></h2>
+    ${controlChart(list)}
+    <div class="legend">${beans.map(n=>`<span><i style="background:${beanColor(n)}"></i>${esc(n.length>18?n.slice(0,18)+"…":n)}</span>`).join("")}</div>
+    <p class="hint">中間框是 SCA 金杯區（EY 18–22%、TDS 1.15–1.35%）。往上越濃、往右萃得越多。</p>
+  </div>
+  ${list[0]?`<div class="card"><h2>最近一杯 <small>${list[0].date}</small></h2>${tasteTable(list[0])}<button class="btn" style="margin-top:10px;width:100%" data-open="${list[0].id}">看完整紀錄</button></div>`:""}`;
+}
+
+/* ================= 參數 × 風味 ================= */
+let corrX="ey", corrY="acid";
+function viewCorr(){
+  const list=brews();
+  const P=PARAMS.find(p=>p.k===corrX), F=FLAVORS.find(f=>f.k===corrY);
+  const pts=list.filter(b=>b[corrX]!=null);
+  const vals=pts.map(b=>+b[corrX]);
+  let lo=Math.min(...vals), hi=Math.max(...vals);
+  if(!isFinite(lo)){lo=0;hi=1}
+  if(hi-lo<1e-9){ const pad=Math.max(Math.abs(lo)*0.05,1); lo-=pad; hi+=pad; } else { const pad=(hi-lo)*0.12; lo-=pad; hi+=pad; }
+  const W=340,H=260,L=34,R=12,T=12,B=36,pw=W-L-R,ph=H-T-B;
+  const X=v=>L+(v-lo)/(hi-lo)*pw, Y=v=>T+(1-v/5)*ph;
+  let s=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${P.n}與${F.n}的關係">`;
+  s+=`<rect x="${L}" y="${T}" width="${pw}" height="${ph}" fill="#172034" stroke="var(--line)" rx="6"/>`;
+  for(let v=0;v<=5;v++) s+=`<line x1="${L}" x2="${L+pw}" y1="${Y(v)}" y2="${Y(v)}" stroke="#25304a"/><text class="ax" x="${L-6}" y="${Y(v)+4}" text-anchor="end">${v}</text>`;
+  for(let i=0;i<=4;i++){ const v=lo+(hi-lo)*i/4; s+=`<text class="ax" x="${X(v)}" y="${H-B+16}" text-anchor="middle">${P.f(v)}</text>`; }
+  s+=`<text class="ax" x="${L+pw/2}" y="${H-2}" text-anchor="middle" style="font-family:var(--f-body)">${P.n}${P.u?` (${P.u})`:""}</text>`;
+  pts.forEach(b=>{
+    const x=X(+b[corrX]), h=b.taste?.hot?.[corrY], w=b.taste?.warm?.[corrY], c=beanColor(b.bean);
+    s+=`<g data-open="${b.id}" style="cursor:pointer">`;
+    if(h!=null&&w!=null) s+=`<line x1="${x}" x2="${x}" y1="${Y(h)}" y2="${Y(w)}" stroke="${c}" stroke-width="2" opacity=".6"/>`;
+    if(h!=null) s+=`<circle cx="${x}" cy="${Y(h)}" r="7" fill="var(--hot)" stroke="#121a2a" stroke-width="2"/>`;
+    if(w!=null) s+=`<circle cx="${x}" cy="${Y(w)}" r="6" fill="#121a2a" stroke="var(--warm)" stroke-width="2.5"/>`;
+    s+=`<rect x="${x-14}" y="${T}" width="28" height="${ph}" fill="transparent"/></g>`;
+  });
+  s+=`</svg>`;
+  const opt=(arr,cur)=>arr.map(a=>`<option value="${a.k}" ${a.k===cur?"selected":""}>${a.n}</option>`).join("");
+
+  /* 熱圖：每一杯 × 每種風味（高溫） */
+  const heat = list.length ? `<div class="card"><h2>每杯風味一覽 <small>高溫 / 中常溫</small></h2>
+    <table class="tt sm"><tr><th>日期</th>${FLAVORS.slice(0,6).map(f=>`<th>${f.n}</th>`).join("")}<th>${P.n}</th></tr>
+    ${list.map(b=>`<tr data-open="${b.id}" style="cursor:pointer"><td>${b.date.slice(5)}</td>${FLAVORS.slice(0,6).map(f=>{
+      const h=b.taste?.hot?.[f.k], w=b.taste?.warm?.[f.k];
+      const a=Math.max(h??0,w??0)/5;
+      return `<td style="background:rgba(124,203,185,${(a*0.45).toFixed(2)})">${h??"—"}<span style="color:var(--muted)">/</span>${w??"—"}</td>`;}).join("")}<td>${b[corrX]!=null?P.f(b[corrX]):"—"}</td></tr>`).join("")}
+    </table></div>` : "";
+
+  return `<div class="card">
+    <h2>參數 × 風味</h2>
+    <div class="row" style="margin-bottom:10px"><select id="cx">${opt(PARAMS,corrX)}</select><span style="color:var(--muted)">對</span><select id="cy">${opt(FLAVORS,corrY)}</select></div>
+    ${s}
+    <div class="legend"><span><i style="background:var(--hot)"></i>高溫</span><span><i style="background:#121a2a;border:2px solid var(--warm)"></i>中常溫</span><span>直線 = 放涼後的變化</span></div>
+    <p class="hint">${pts.length<3?`目前只有 ${pts.length} 杯，紀錄累積到 5 杯以上就看得出趨勢。`:`每個圓點是一杯，點一下看詳情。`}</p>
+  </div>${heat}`;
+}
+
+/* ================= 紀錄列表 ================= */
+function viewList(){
+  const list=brews();
+  if(!list.length) return `<div class="empty">還沒有紀錄，到「＋ 新增」輸入第一杯</div>`;
+  return `<div class="list">${list.map(b=>`
+    <button class="item" data-open="${b.id}">
+      <div class="t"><span>${b.date}</span><span>${esc(b.dripper||"")}</span></div>
+      <div class="b"><span style="color:${beanColor(b.bean)}">●</span> ${esc(b.bean)}</div>
+      <div class="chips">
+        <span class="chip"><i>比例</i>1:${f1(b.ratio)}</span>
+        <span class="chip"><i>水溫</i>${b.temp??"—"}°</span>
+        <span class="chip"><i>研磨</i>${b.clicks??"—"}格</span>
+        <span class="chip"><i>TDS</i>${f2(b.tds)}</span>
+        <span class="chip"><i>EY</i>${f1(b.ey)}</span>
+        <span class="chip"><i>酸/甜/苦</i>${b.taste?.hot?.acid??"—"}/${b.taste?.hot?.sweet??"—"}/${b.taste?.hot?.bitter??"—"}</span>
+      </div>
+    </button>`).join("")}</div>
+    <div class="card"><h2>備份</h2><p class="hint" style="margin-bottom:10px">新增的紀錄只存在這支手機的瀏覽器裡，記得偶爾匯出備份，換手機時再匯入。</p>
+    <div class="row"><button class="btn" id="exp">匯出 JSON</button><label class="btn">匯入 JSON<input type="file" id="imp" accept=".json,application/json" hidden></label></div></div>`;
+}
+
+/* ================= 單杯詳情 ================= */
+function pourChart(b){
+  const ps=b.pours||[]; if(!ps.length) return "";
+  let t=0, cum=0; const seg=[];
+  ps.forEach((p,i)=>{ const dur=p.ml/(p.rate||4); seg.push({t0:t,t1:t+dur,c0:cum,c1:cum+p.ml,i,p}); cum+=p.ml; t+=p.wait!=null?p.wait:dur; });
+  const end=Math.max(b.time||0, seg.at(-1).t1+10);
+  const W=340,H=180,L=34,R=12,T=12,B=30,pw=W-L-R,ph=H-T-B, maxW=Math.ceil(Math.max(cum,b.water||0)*1.15/50)*50;
+  const X=v=>L+v/end*pw, Y=v=>T+(1-v/maxW)*ph;
+  let s=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="注水曲線">`;
+  s+=`<rect x="${L}" y="${T}" width="${pw}" height="${ph}" fill="#172034" stroke="var(--line)" rx="6"/>`;
+  for(let v=0;v<=maxW;v+=50) s+=`<line x1="${L}" x2="${L+pw}" y1="${Y(v)}" y2="${Y(v)}" stroke="#25304a"/><text class="ax" x="${L-6}" y="${Y(v)+4}" text-anchor="end">${v}</text>`;
+  for(let v=0;v<=end;v+=30) s+=`<text class="ax" x="${X(v)}" y="${H-B+16}" text-anchor="middle">${fmtT(v)}</text>`;
+  let d=`M${X(0)},${Y(0)}`;
+  seg.forEach(g=>{ d+=` L${X(g.t0)},${Y(g.c0)} L${X(g.t1)},${Y(g.c1)}`; });
+  d+=` L${X(end)},${Y(cum)}`;
+  s+=`<path d="${d}" fill="none" stroke="var(--gold)" stroke-width="2.5" stroke-linejoin="round"/>`;
+  seg.forEach(g=>{ s+=`<circle cx="${X(g.t0)}" cy="${Y(g.c0)}" r="3" fill="var(--gold)"/><text class="ax" x="${X(g.t0)+4}" y="${Y(g.c1)-6}" style="fill:var(--ink)">${g.i===0?"悶":g.i}·${g.p.ml}</text>`; if(g.p.note) s+=`<text class="ax" x="${X(g.t1)+6}" y="${Y(g.c1)+12}" style="fill:#f19a9a">⚠</text>`; });
+  if(b.time) s+=`<line x1="${X(b.time)}" x2="${X(b.time)}" y1="${T}" y2="${T+ph}" stroke="var(--teal)" stroke-dasharray="4 3"/><text class="ax" x="${X(b.time)-4}" y="${T+ph-6}" text-anchor="end" style="fill:var(--teal)">流乾 ${fmtT(b.time)}</text>`;
+  return s+`</svg>`;
+}
+function radar(b){
+  const keys=FLAVORS, N=keys.length, W=300,H=250, cx=W/2, cy=H/2+4, R=88;
+  const pt=(i,v)=>{ const a=-Math.PI/2+i*2*Math.PI/N; return [cx+Math.cos(a)*R*v/5, cy+Math.sin(a)*R*v/5]; };
+  let s=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="風味雷達圖" style="max-width:340px;margin:0 auto">`;
+  for(let r=1;r<=5;r++) s+=`<polygon points="${keys.map((_,i)=>pt(i,r).join(",")).join(" ")}" fill="none" stroke="#2a3550"/>`;
+  keys.forEach((k,i)=>{ const [x,y]=pt(i,5); const [lx,ly]=pt(i,6.1); s+=`<line x1="${cx}" y1="${cy}" x2="${x}" y2="${y}" stroke="#2a3550"/><text x="${lx}" y="${ly+4}" text-anchor="middle" style="fill:${k.c};font-size:12px;font-weight:700">${k.n}</text>`; });
+  [["warm","var(--warm)",.18,"6 4"],["hot","var(--hot)",.22,""]].forEach(([w,c,op,da])=>{
+    const t=b.taste?.[w]; if(!t) return;
+    const ps=keys.map((k,i)=>pt(i,t[k.k]??0));
+    s+=`<polygon points="${ps.map(p=>p.join(",")).join(" ")}" fill="${c}" fill-opacity="${op}" stroke="${c}" stroke-width="2" ${da?`stroke-dasharray="${da}"`:""}/>`;
+    keys.forEach((k,i)=>{ if(t[k.k]!=null){ const [x,y]=ps[i]; s+=`<circle cx="${x}" cy="${y}" r="3" fill="${c}"/>`; } });
+  });
+  return s+`</svg>`;
+}
+function tasteTable(b){
+  const h=b.taste?.hot||{}, w=b.taste?.warm||{};
+  return `<table class="tt"><tr><th></th>${FLAVORS.map(f=>`<th style="color:${f.c}">${f.n.replace("(前)","")}</th>`).join("")}</tr>
+  <tr><td style="color:var(--hot);font-family:var(--f-body)">高溫</td>${FLAVORS.map(f=>`<td>${h[f.k]??"—"}</td>`).join("")}</tr>
+  <tr><td style="color:var(--warm);font-family:var(--f-body)">中常溫</td>${FLAVORS.map(f=>`<td>${w[f.k]??"—"}</td>`).join("")}</tr></table>`;
+}
+function detail(id){
+  const b=brews().find(x=>x.id===id); if(!b) return;
+  const h=b.taste?.hot||{}, w=b.taste?.warm||{};
+  const P=(n,v,txt)=>`<div><span>${n}</span><b class="${txt?"txt":""}">${v??"—"}</b></div>`;
+  $("#sheetIn").innerHTML=`
+  <div class="bar"><b>${b.date}</b><button class="btn" id="closeS">關閉</button></div>
+  <div class="card"><h2><span style="color:${beanColor(b.bean)}">●</span>${esc(b.bean)}</h2>
+    <div class="chips" style="margin-bottom:10px">${b.process?`<span class="chip">${esc(b.process)}</span>`:""}${b.roast?`<span class="chip">${esc(b.roast)}焙${b.agtron?` · 色值 ${b.agtron}`:""}</span>`:""}</div>
+    <div class="params">
+      ${P("粉重 g",f1(b.dose))}${P("水量 g",f1(b.water))}${P("液重 g",f1(b.yield))}
+      ${P("比例",b.ratio?"1:"+f1(b.ratio):"—")}${P("TDS %",f2(b.tds))}${P("萃取率 %",f1(b.ey))}
+      ${P("水溫 °C",b.temp)}${P("研磨",b.clicks!=null?b.clicks+" 格":"—")}${P("粒徑 µm",b.micron)}
+      ${P("時間",fmtT(b.time))}${P("濾杯",esc(b.dripper),1)}${P("濾紙",esc(b.filter),1)}
+    </div>
+    ${b.grinder?`<p class="hint">${esc(b.grinder)}</p>`:""}
+  </div>
+  <div class="card"><h2>注水 <small>累積水量 (g) × 時間</small></h2>${pourChart(b)}
+    <table class="tt" style="margin-top:8px"><tr><th>段</th><th>水量</th><th>流速</th><th>間隔</th><th style="text-align:left">備註</th></tr>
+    ${(b.pours||[]).map((p,i)=>`<tr><td style="white-space:nowrap;font-family:var(--f-body)">${i===0?"悶蒸":i}</td><td>${p.ml}</td><td>${p.rate??"—"}</td><td>${p.wait!=null?p.wait+"s":"—"}</td><td style="text-align:left;font-family:var(--f-body);color:#f19a9a">${esc(p.note||"")}</td></tr>`).join("")}</table>
+    ${b.endNote?`<p class="hint">${esc(b.endNote)}</p>`:""}
+  </div>
+  <div class="card"><h2>風味 <small>0–5 分</small></h2>${radar(b)}
+    <div class="legend" style="justify-content:center"><span><i style="background:var(--hot)"></i>高溫</span><span><i style="background:var(--warm)"></i>中常溫（虛線）</span></div>
+    <div style="margin-top:10px">${tasteTable(b)}</div>
+    ${h.desc||h.aromaNote||h.finishNote?`<div class="note"><b style="color:var(--hot)">高溫</b>${esc(h.desc||"")}${h.aromaNote?`<br><span style="color:var(--muted)">嗅 ${esc(h.aromaNote)}${h.aromaBack!=null?`，後 ${h.aromaBack}`:""}</span>`:""}${h.finishNote?`<br><span style="color:var(--muted)">韻 ${esc(h.finishNote)}</span>`:""}</div>`:""}
+    ${w.desc||w.aromaNote||w.finishNote?`<div class="note"><b>中常溫</b>${esc(w.desc||"")}${w.aromaNote?`<br><span style="color:var(--muted)">嗅 ${esc(w.aromaNote)}${w.aromaBack!=null?`，後 ${w.aromaBack}`:""}</span>`:""}${w.finishNote?`<br><span style="color:var(--muted)">韻 ${esc(w.finishNote)}</span>`:""}</div>`:""}
+  </div>
+  ${b.summary?`<div class="card"><h2>整體</h2><div style="font-size:14px">${esc(b.summary)}</div></div>`:""}
+  <div class="card"><h2>在控制圖上的位置</h2>${controlChart(brews(),{focus:b.id})}</div>
+  <div class="row"><button class="btn" id="editB" style="flex:1">編輯</button><button class="btn" id="dupB" style="flex:1">複製參數沖下一杯</button><button class="btn danger" id="delB">刪除</button></div>`;
+  $("#sheet").classList.add("on"); $("#sheetIn").scrollTop=0;
+  $("#closeS").onclick=closeSheet;
+  $("#editB").onclick=()=>{ closeSheet(); formState={mode:"edit",b:JSON.parse(JSON.stringify(rawById(id)))}; go("add"); };
+  $("#dupB").onclick=()=>{ closeSheet(); const c=JSON.parse(JSON.stringify(rawById(id))); c.date=today(); c.taste={hot:{},warm:{}}; c.summary=""; c.tds=null; c.ey=null; c.yield=null; c.endNote=""; formState={mode:"new",b:c}; go("add"); };
+  $("#delB").onclick=()=>{ if(!confirm("確定刪除這筆紀錄？")) return; delBrew(id); closeSheet(); render(); toast("已刪除"); };
+}
+function closeSheet(){ $("#sheet").classList.remove("on"); }
+$("#sheet").addEventListener("click",e=>{ if(e.target.id==="sheet") closeSheet(); });
+function rawById(id){ return store.added.find(b=>b.id===id) || store.edited[id] || SEED.find(b=>b.id===id); }
+function delBrew(id){
+  store.added=store.added.filter(b=>b.id!==id);
+  if(SEED.some(b=>b.id===id)){ store.deleted.push(id); delete store.edited[id]; }
+  persist();
+}
+const today=()=>{ const d=new Date(Date.now()+8*3600e3); return d.toISOString().slice(0,10); };
+
+/* ================= 新增 / 編輯 ================= */
+let formState=null;
+function blank(){ return {date:today(), bean:"", process:"", roast:"淺", agtron:null, grinder:"Comandante C40 MK4", clicks:30, micron:null, temp:96, dripper:"Orea Brewer（OREA-O）", filter:"93 蛋糕濾紙", dose:12, water:200, yield:null, tds:null, ey:null, time:null, pours:[{ml:60,rate:4,wait:40},{ml:40,rate:4,wait:30},{ml:50,rate:4,wait:30},{ml:50,rate:4,wait:null}], endNote:"", taste:{hot:{},warm:{}}, summary:""}; }
+function viewAdd(){
+  if(!formState){ const last=brews()[0]; const b=blank(); if(last){ ["bean","process","roast","agtron","grinder","clicks","micron","temp","dripper","filter","dose","water"].forEach(k=>b[k]=last[k]??b[k]); b.pours=JSON.parse(JSON.stringify(last.pours||b.pours)).map(p=>({ml:p.ml,rate:p.rate,wait:p.wait})); } formState={mode:"new",b}; }
+  const b=formState.b; const I=(k,lab,type="number",step="any")=>`<label class="f">${lab}<input data-k="${k}" type="${type}" step="${step}" value="${esc(b[k]??"")}" inputmode="${type==="number"?"decimal":"text"}"></label>`;
+  const slider=(w,f)=>{ const v=b.taste?.[w]?.[f.k]; return `<div class="slider"><span style="color:${f.c}">${f.n.replace("(前)","")}</span><input type="range" min="-0.5" max="5" step="0.5" data-t="${w}.${f.k}" value="${v??-0.5}"><output>${v??"—"}</output></div>`; };
+  const tBlock=(w,lab,col)=>{ const t=b.taste?.[w]||{}; return `<div class="card" style="margin:0;background:var(--panel2)"><h2 style="color:${col}">${lab}</h2>
+     ${FLAVORS.map(f=>slider(w,f)).join("")}
+     <label class="f" style="margin-top:6px">嗅（前/後）描述<input data-tt="${w}.aromaNote" value="${esc(t.aromaNote||"")}" placeholder="前：焦糖"></label>
+     <label class="f" style="margin-top:6px">韻 描述<input data-tt="${w}.finishNote" value="${esc(t.finishNote||"")}" placeholder="舌上回甘"></label>
+     <label class="f" style="margin-top:6px">口感描述<textarea data-tt="${w}.desc" rows="2">${esc(t.desc||"")}</textarea></label></div>`; };
+  return `<div class="card"><h2>${formState.mode==="edit"?"編輯紀錄":"新增一杯"}</h2>
+    <div class="grid2">${I("date","日期","date")}${I("bean","豆子","text")}</div>
+    <div class="grid3" style="margin-top:10px">${I("process","處理法","text")}${I("roast","烘焙度","text")}${I("agtron","色值")}</div>
+  </div>
+  <div class="card"><h2>器材與參數</h2>
+    <div class="grid2">${I("grinder","磨豆機","text")}${I("dripper","濾杯","text")}</div>
+    <div class="grid3" style="margin-top:10px">${I("clicks","研磨格數")}${I("micron","粒徑 µm")}${I("temp","水溫 °C")}</div>
+    <div class="grid3" style="margin-top:10px">${I("filter","濾紙","text")}${I("dose","粉重 g")}${I("water","水量 g")}</div>
+  </div>
+  <div class="card"><h2>注水 <small>第 1 段為悶蒸；間隔 = 到下一段開始的秒數</small></h2>
+    <div id="pours">${(b.pours||[]).map((p,i)=>`<div class="pour"><span class="n">${i===0?"悶":i}</span>
+      <label class="f">水量 ml<input data-p="${i}.ml" type="number" value="${p.ml??""}" inputmode="decimal"></label>
+      <label class="f">流速 ml/s<input data-p="${i}.rate" type="number" step="any" value="${p.rate??""}" inputmode="decimal"></label>
+      <label class="f">間隔 s<input data-p="${i}.wait" type="number" value="${p.wait??""}" inputmode="decimal"></label></div>
+      <input data-p="${i}.note" value="${esc(p.note||"")}" placeholder="備註（例：起水失誤）" style="margin:0 0 10px 34px;width:calc(100% - 34px)">`).join("")}</div>
+    <div class="row"><button class="btn" id="addP">＋ 加一段</button><button class="btn" id="rmP">－ 刪最後一段</button></div>
+  </div>
+  <div class="card"><h2>結果</h2>
+    <div class="grid3">${I("yield","液重 g")}${I("tds","TDS %")}<label class="f">流乾時間<input data-time value="${b.time!=null?fmtT(b.time):""}" placeholder="2:11"></label></div>
+    <p class="hint" id="calc"></p>
+    <label class="f" style="margin-top:8px">結尾備註<input data-k="endNote" value="${esc(b.endNote||"")}" placeholder="2:11 流乾"></label>
+  </div>
+  <div class="taste">${tBlock("hot","高溫","var(--hot)")}${tBlock("warm","中常溫","var(--warm)")}</div>
+  <div class="card" style="margin-top:12px"><h2>整體</h2><textarea data-k="summary" rows="3" style="width:100%">${esc(b.summary||"")}</textarea></div>
+  <div class="row"><button class="btn pri" id="saveB" style="flex:1">儲存</button>${formState.mode==="edit"?`<button class="btn" id="cancelB">取消</button>`:""}</div>
+  <p class="hint">滑桿拉到最左邊＝沒記（—）。</p>`;
+}
+function bindForm(){
+  const b=formState.b;
+  const num=v=>v===""?null:(isNaN(+v)?v:+v);
+  document.querySelectorAll("[data-k]").forEach(el=>el.oninput=()=>{ const k=el.dataset.k; b[k]= (el.type==="number")? num(el.value) : el.value; calc(); });
+  document.querySelectorAll("[data-p]").forEach(el=>el.oninput=()=>{ const [i,k]=el.dataset.p.split("."); b.pours[i][k]= k==="note"? el.value : num(el.value); });
+  document.querySelectorAll("[data-t]").forEach(el=>el.oninput=()=>{ const [w,k]=el.dataset.t.split("."); const v=+el.value; b.taste[w]=b.taste[w]||{}; b.taste[w][k]= v<0?null:v; el.nextElementSibling.textContent= v<0?"—":v; });
+  document.querySelectorAll("[data-tt]").forEach(el=>el.oninput=()=>{ const [w,k]=el.dataset.tt.split("."); b.taste[w]=b.taste[w]||{}; b.taste[w][k]=el.value; });
+  const tm=document.querySelector("[data-time]"); tm.oninput=()=>{ b.time=parseT(tm.value); };
+  $("#addP").onclick=()=>{ const last=b.pours.at(-1)||{ml:50,rate:4}; if(last.wait==null) last.wait=30; b.pours.push({ml:last.ml,rate:last.rate,wait:null}); render(); };
+  $("#rmP").onclick=()=>{ if(b.pours.length>1){ b.pours.pop(); render(); } };
+  $("#saveB").onclick=save;
+  if($("#cancelB")) $("#cancelB").onclick=()=>{ formState=null; go("list"); };
+  function calc(){ const r=b.dose&&b.water?b.water/b.dose:null; const ey=b.yield&&b.tds&&b.dose? b.yield*b.tds/b.dose:null; $("#calc").textContent=`比例 1:${f1(r)}　萃取率 ${f1(ey)}%`; }
+  calc();
+}
+function save(){
+  const b=formState.b;
+  if(!b.bean){ toast("請填豆子名稱"); return; }
+  b.ey = b.yield&&b.tds&&b.dose ? +(b.yield*b.tds/b.dose).toFixed(2) : null;
+  if(formState.mode==="edit"){
+    if(SEED.some(s=>s.id===b.id)) store.edited[b.id]=b;
+    else store.added=store.added.map(x=>x.id===b.id?b:x);
+  } else {
+    b.id=b.date+"-"+Math.random().toString(36).slice(2,6);
+    store.added.push(b);
+  }
+  persist(); const id=b.id; formState=null; go("list"); toast("已保存"); setTimeout(()=>detail(id),250);
+}
+
+/* ================= 匯入匯出 ================= */
+function bindList(){
+  if($("#exp")) $("#exp").onclick=()=>{
+    const data=JSON.stringify(brews().map(({ratio,nPours,bloom,...r})=>r),null,2);
+    const a=document.createElement("a"); a.href=URL.createObjectURL(new Blob([data],{type:"application/json"})); a.download=`brew-log-${today()}.json`; a.click();
+  };
+  if($("#imp")) $("#imp").onchange=e=>{
+    const f=e.target.files[0]; if(!f) return; const r=new FileReader();
+    r.onload=()=>{ try{ const arr=JSON.parse(r.result); const have=new Set(brews().map(b=>b.id)); let n=0;
+      arr.forEach(b=>{ if(b&&b.id&&!have.has(b.id)){ store.added.push(b); n++; } });
+      persist(); render(); toast(`匯入 ${n} 筆`);}catch(err){ toast("檔案格式不對"); } };
+    r.readAsText(f);
+  };
+}
+
+/* ================= 路由 ================= */
+let view="map";
+function go(v){ view=v; document.querySelectorAll("#tabs button").forEach(b=>b.classList.toggle("on",b.dataset.v===v)); render(); window.scrollTo(0,0); }
+function render(){
+  const m=$("#main");
+  if(view==="map") m.innerHTML=viewMap();
+  if(view==="corr"){ m.innerHTML=viewCorr(); $("#cx").onchange=e=>{corrX=e.target.value;render()}; $("#cy").onchange=e=>{corrY=e.target.value;render()}; }
+  if(view==="list"){ m.innerHTML=viewList(); bindList(); }
+  if(view==="add"){ m.innerHTML=viewAdd(); bindForm(); }
+}
+document.querySelectorAll("#tabs button").forEach(b=>b.onclick=()=>{ if(b.dataset.v==="add"&&formState?.mode==="edit"){} else if(b.dataset.v==="add") formState=formState||null; go(b.dataset.v); });
+document.addEventListener("click",e=>{ const g=e.target.closest("[data-open]"); if(g && !e.target.closest("#sheet .in button")) detail(g.dataset.open); });
+render();
+</script>
+</body>
+</html>
