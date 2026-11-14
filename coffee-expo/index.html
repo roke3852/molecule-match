@@ -88,7 +88,7 @@ nav.tabs button.on{color:var(--accent);border-color:var(--accent);font-weight:70
 </head>
 <body>
 <header id="hdr">
-  <h1>☕ 2026 台灣咖啡展 · 南港1館 4F</h1>
+  <h1>☕ 2026 台灣咖啡展 · 南港1館 4F <span id="ver" style="font-size:11px;font-weight:600;background:rgba(255,255,255,.22);padding:2px 7px;border-radius:8px;vertical-align:2px">v1.3</span></h1>
   <div class="sub">雙指縮放地圖 · 點展位看介紹 · 打勾記錄已逛 · 深咖啡底＝名店；靛藍粗框＋★＝我的重點／知名品牌</div>
   <div class="prog"><span id="progtx">已逛 0 / 0</span><div class="bar"><i id="progbar"></i></div></div>
 </header>
@@ -645,7 +645,7 @@ document.getElementById("sgo").onclick=()=>{
   if(zoom<2){zoom=2;setZoom();}
   if(NEAR[selCode]) selCode=NEAR[selCode];
   const b=byCode[selCode], wrap=document.getElementById("mapwrap");
-  const sc = svg.clientWidth/1700;
+  const sc = svg.getBoundingClientRect().width/1700;
   wrap.scrollLeft = ((b[2]+b[4])/2-495)*sc - wrap.clientWidth/2;
   wrap.scrollTop = ((b[3]+b[5])/2-280)*sc - wrap.clientHeight/2;
   refreshMap();
@@ -681,10 +681,10 @@ function zoomAt(nz, cx, cy){
   const r=wrapEl.getBoundingClientRect();
   if(cx==null){cx=r.left+r.width/2; cy=r.top+r.height/2;}
   const ox=cx-r.left, oy=cy-r.top;
-  const oldW=svg.clientWidth||1;
+  const oz=zoom;
   const px=wrapEl.scrollLeft+ox, py=wrapEl.scrollTop+oy;
   zoom=nz; setZoom();
-  const k=(svg.clientWidth||1)/oldW;
+  const k=nz/oz;
   wrapEl.scrollLeft=px*k-ox; wrapEl.scrollTop=py*k-oy;
 }
 document.getElementById("zi").onclick=()=>zoomAt(zoom*1.4);
