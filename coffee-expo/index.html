@@ -48,8 +48,12 @@ nav.tabs button.on{color:var(--accent);border-color:var(--accent);font-weight:70
 #pinbar.on{display:flex}
 #pinbar span{flex:1}
 #pinbar button{border:1px solid #f3c2b8;background:#fff;border-radius:8px;padding:5px 9px;font-size:13px;color:#7a2a1c}
+#sheet .acts .pinmain{background:#e0402a;color:#fff;border-color:#e0402a;font-size:16px}
+.booth.here rect{fill:#ffd9d1!important;stroke:#e0402a!important;stroke-width:8!important;stroke-dasharray:none!important;filter:drop-shadow(0 0 8px rgba(224,64,42,.9))}
+.booth.here text{fill:#7a1a0c!important}
+#pinbar.on{font-weight:700}
 #mapwrap.pinning{cursor:crosshair;outline:3px solid #e0402a;outline-offset:-3px}
-@keyframes pulse{0%{r:14;opacity:.6}100%{r:44;opacity:0}}
+@keyframes pulse{0%{r:16;opacity:.7}100%{r:70;opacity:0}}
 #mypin .ring{fill:#e0402a;animation:pulse 1.6s ease-out infinite}
 .legend{display:flex;flex-wrap:wrap;gap:10px;padding:8px 12px;font-size:12px;color:var(--mute)}
 .legend span{display:flex;align-items:center;gap:4px}
@@ -97,7 +101,7 @@ nav.tabs button.on{color:var(--accent);border-color:var(--accent);font-weight:70
 </head>
 <body>
 <header id="hdr">
-  <h1>☕ 2026 台灣咖啡展 · 南港1館 4F <span id="ver" style="font-size:11px;font-weight:600;background:rgba(255,255,255,.22);padding:2px 7px;border-radius:8px;vertical-align:2px">v1.4</span></h1>
+  <h1>☕ 2026 台灣咖啡展 · 南港1館 4F <span id="ver" style="font-size:11px;font-weight:600;background:rgba(255,255,255,.22);padding:2px 7px;border-radius:8px;vertical-align:2px">v1.5</span></h1>
   <div class="sub">雙指縮放地圖 · 點展位看介紹 · 打勾記錄已逛 · 深咖啡底＝名店；靛藍粗框＋★＝我的重點／知名品牌</div>
   <div class="prog"><span id="progtx">已逛 0 / 0</span><div class="bar"><i id="progbar"></i></div></div>
 </header>
@@ -182,7 +186,8 @@ nav.tabs button.on{color:var(--accent);border-color:var(--accent);font-weight:70
   </div>
   <label>我的筆記（試喝心得、價格、想買的豆子…）</label>
   <textarea id="snote" placeholder="例如：衣索比亞日曬很莓果，250g $650"></textarea>
-  <div class="acts"><button id="sgo">🔍 在地圖上看位置</button><button id="spin">📍 我在這攤</button></div>
+  <div class="acts"><button id="spin" class="pinmain">📍 釘選我的位置（我在這攤）</button></div>
+  <div class="acts"><button id="sgo">🔍 在地圖上看這攤在哪</button></div>
 </div>
 <div id="confirm"><div>確定清除所有已逛、重點與筆記？<br><button id="cno">取消</button><button id="cyes" style="color:#c00">清除</button></div></div>
 
@@ -580,6 +585,7 @@ function refreshMap(){
     if(mapFilter==="todo") show=!S.v[c];
     if(mapFilter==="star") show=!!S.s[c];
     g.classList.toggle("dim",!show);
+    g.classList.toggle("here",!!(S.p&&S.p.code===c));
   });
   drawPin();
 }
@@ -604,13 +610,25 @@ function drawPin(){
   if(!S.p){ bar.classList.toggle("on",pinning); document.getElementById("pintx").textContent = pinning?"點地圖上你現在的位置（會取代舊的點）":""; syncPinBtns(); return; }
   const g=document.createElementNS(NS,"g"); g.id="mypin"; g.style.pointerEvents="none";
   const {x,y}=S.p;
-  const ring=document.createElementNS(NS,"circle"); ring.setAttribute("class","ring"); ring.setAttribute("cx",x); ring.setAttribute("cy",y); ring.setAttribute("r",14);
-  const dot=document.createElementNS(NS,"circle"); dot.setAttribute("cx",x); dot.setAttribute("cy",y); dot.setAttribute("r",12);
-  dot.setAttribute("fill","#e0402a"); dot.setAttribute("stroke","#fff"); dot.setAttribute("stroke-width",4);
-  const tag=document.createElementNS(NS,"text"); tag.setAttribute("x",x); tag.setAttribute("y",y-24); tag.setAttribute("text-anchor","middle");
-  tag.setAttribute("font-size",22); tag.setAttribute("font-weight",800); tag.setAttribute("fill","#e0402a");
-  tag.setAttribute("stroke","#fff"); tag.setAttribute("stroke-width",5); tag.setAttribute("paint-order","stroke"); tag.textContent="我在這";
-  g.appendChild(ring); g.appendChild(dot); g.appendChild(tag); svg.appendChild(g);
+  const ring=document.createElementNS(NS,"circle"); ring.setAttribute("class","ring"); ring.setAttribute("cx",x); ring.setAttribute("cy",y); ring.setAttribute("r",16);
+  // 大頭針造型：尖端在 (x,y)
+  const dot=document.createElementNS(NS,"path");
+  dot.setAttribute("d",`M${x},${y} C${x-8},${y-22} ${x-26},${y-34} ${x-26},${y-56} A26,26 0 1 1 ${x+26},${y-56} C${x+26},${y-34} ${x+8},${y-22} ${x},${y} Z`);
+  dot.setAttribute("fill","#e0402a"); dot.setAttribute("stroke","#fff"); dot.setAttribute("stroke-width",5);
+  dot.style.filter="drop-shadow(0 3px 4px rgba(0,0,0,.45))";
+  const hole=document.createElementNS(NS,"circle"); hole.setAttribute("cx",x); hole.setAttribute("cy",y-58); hole.setAttribute("r",10); hole.setAttribute("fill","#fff");
+  const tag=document.createElementNS(NS,"g");
+  // 靠近地圖上緣時把大頭針倒過來，避免被切掉
+  const flip = y < 450;
+  if(flip){ dot.setAttribute("transform",`rotate(180 ${x} ${y})`); hole.setAttribute("cy",y+58); }
+  const tw=150, th=44, ty= flip ? y+96 : y-96-th;
+  const tb=document.createElementNS(NS,"rect"); tb.setAttribute("x",x-tw/2); tb.setAttribute("y",ty); tb.setAttribute("width",tw); tb.setAttribute("height",th); tb.setAttribute("rx",22);
+  tb.setAttribute("fill","#e0402a"); tb.setAttribute("stroke","#fff"); tb.setAttribute("stroke-width",4);
+  const tt=document.createElementNS(NS,"text"); tt.setAttribute("x",x); tt.setAttribute("y",ty+th/2); tt.setAttribute("text-anchor","middle"); tt.setAttribute("dominant-baseline","central");
+  tt.setAttribute("font-size",26); tt.setAttribute("font-weight",800); tt.setAttribute("fill","#fff"); tt.textContent="我在這";
+  tag.appendChild(tb); tag.appendChild(tt);
+  g.appendChild(hole);
+  g.insertBefore(ring,g.firstChild); g.insertBefore(dot,hole); g.appendChild(tag); svg.appendChild(g);
   bar.classList.add("on");
   document.getElementById("pintx").textContent = pinning?"點地圖上你現在的位置（會取代舊的點）":pinLabel();
   syncPinBtns();
@@ -623,7 +641,10 @@ function syncPinBtns(){
   document.getElementById("pinclr").style.display = S.p&&!pinning?"":"none";
   document.getElementById("mapwrap").classList.toggle("pinning",pinning);
 }
-function setPin(x,y){ S.p={x:Math.round(x),y:Math.round(y)}; pinning=false; save(); drawPin(); }
+function setPin(x,y,code){
+  if(!code){ const [b,d]=nearestBooth(x,y); if(b&&d<1) code=b[0]; }
+  S.p={x:Math.round(x),y:Math.round(y),code:code||null}; pinning=false; save(); refreshMap();
+}
 function scrollToXY(x,y){
   const wrap=document.getElementById("mapwrap");
   const sc = svg.getBoundingClientRect().width/1700;
@@ -722,12 +743,12 @@ document.getElementById("sgo").onclick=()=>{
 };
 
 document.getElementById("pinbtn").onclick=()=>{ pinning=!pinning; drawPin(); };
-document.getElementById("pinclr").onclick=()=>{ S.p=null; save(); drawPin(); };
+document.getElementById("pinclr").onclick=()=>{ S.p=null; save(); refreshMap(); };
 document.getElementById("pingo").onclick=()=>{ if(!S.p) return; if(zoom<2){zoom=2;setZoom();} scrollToXY(S.p.x,S.p.y); };
 document.getElementById("spin").onclick=()=>{
   let b=byCode[selCode]; if(NEAR[selCode]) b=byCode[NEAR[selCode]];
   if(!b||b[2]==null) return;
-  setPin((b[2]+b[4])/2,(b[3]+b[5])/2);
+  setPin((b[2]+b[4])/2,(b[3]+b[5])/2,b[0]);
   closeSheet(); showView("map"); if(zoom<2){zoom=2;setZoom();} scrollToXY(S.p.x,S.p.y);
 };
 
