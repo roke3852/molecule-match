@@ -650,7 +650,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
       <p class="say" id="rSay"></p>
       <div class="board" id="rBoard" hidden></div>
       <div>
-        <div class="dkey" id="rDkey"><span><i style="width:3px;height:12px;background:var(--want)"></i>客人想要</span><span><i style="width:9px;height:9px;border-radius:50%;background:var(--you)"></i>你這杯</span><span>右側：該項得分</span><span>酸甜平衡：左偏甜、右偏酸</span></div>
+        <div class="dkey" id="rDkey"><span><i style="width:3px;height:12px;background:var(--want)"></i>客人想要</span><span><i style="width:9px;height:9px;border-radius:50%;background:var(--you)"></i>你這杯</span><span>右側：該項得分</span><span>酸甜傾向：左偏甜、右偏酸</span></div>
       </div>
       <div class="dims" id="rDims"></div>
       <details><summary>這杯的其他風味</summary><div class="dims" id="rOther"></div></details>
@@ -1275,7 +1275,7 @@ function stats(prefix,s,sim,kind){
   $(prefix+'Aroma').innerHTML=VOL.map(i=>{const c=CMP[i],keep=D[i]/sim.S0[i]*100,lost=s.lost[i]/sim.S0[i]*100;
     return '<span><i style="background:var(--'+c.id+')"></i>'+c.name+' <b>'+(D[i]*1000).toFixed(1)+' mg</b> <small>保留 '+keep.toFixed(0)+'% · 散失 '+lost.toFixed(0)+'%</small></span>';}).join('')+
     (V>5?[0,2,3].map(i=>'<span><i style="background:var(--'+CMP[i].id+')"></i>'+CMP[i].name+' <b>'+Math.round(D[i]/V*1e6).toLocaleString()+' mg/L</b></span>').join(''):'')+
-    ((V>5&&tot>0)?(pf=>'<span class="taste">口感（0–10）甜 <b>'+pf.sweet.toFixed(1)+'</b>・酸 <b>'+pf.acid.toFixed(1)+'</b>・苦 <b>'+pf.bitter.toFixed(1)+'</b>・澀 <b>'+pf.astr.toFixed(1)+'</b>・醇厚 <b>'+pf.body.toFixed(1)+'</b>・酸甜平衡 <b>'+pf.balance.toFixed(1)+'</b><small>（0 偏甜、10 偏酸）</small></span>')(cupProfile({tds:tot/V*100,c:D.map(x=>x/V*1000),share:D.map(x=>x/tot)})):'');
+    ((V>5&&tot>0)?(pf=>'<span class="taste">口感（0–10）甜 <b>'+pf.sweet.toFixed(1)+'</b>・酸 <b>'+pf.acid.toFixed(1)+'</b>・苦 <b>'+pf.bitter.toFixed(1)+'</b>・澀 <b>'+pf.astr.toFixed(1)+'</b>・醇厚 <b>'+pf.body.toFixed(1)+'</b>・酸甜傾向 <b>'+pf.balance.toFixed(1)+'</b><small>（0 偏甜、10 偏酸）</small></span>')(cupProfile({tds:tot/V*100,c:D.map(x=>x/V*1000),share:D.map(x=>x/tot)})):'');
   let ph;
   $(kind==='po'?'stirPO':'stirIM').disabled=s.done;
   if(s.sv>.35&&!s.done)ph='攪拌中';
@@ -1359,7 +1359,7 @@ function resCell(r,kind,p){
     const q=document.createElement('span');q.style.width=r.mix[i]+'%';q.textContent=r.mix[i]>=7?Math.round(r.mix[i]):'';pct.appendChild(q);});
   d.appendChild(bar);d.appendChild(pct);
   if(r.aroma){const a=document.createElement('div');a.className='aroma';
-    a.innerHTML=(r.taste?'<span><small>口感</small> <b>甜 '+r.taste[0].toFixed(1)+'・酸 '+r.taste[1].toFixed(1)+'・苦 '+r.taste[2].toFixed(1)+'・澀 '+r.taste[3].toFixed(1)+(r.taste[4]!=null?'・醇厚 '+r.taste[4].toFixed(1):'')+(r.taste[5]!=null?'・酸甜平衡 '+r.taste[5].toFixed(1):'')+'</b></span>':'')+(r.conc?'<span><small>有機酸</small> <b>'+Math.round(r.conc[0]).toLocaleString()+' mg/L</b></span>'+(r.conc[2]!=null?'<span><small>糖與甜感</small> <b>'+Math.round(r.conc[2]).toLocaleString()+' mg/L</b></span>':'')+'<span><small>綠原酸</small> <b>'+Math.round(r.conc[1]).toLocaleString()+' mg/L</b></span>':'')+VOL.map((i,j)=>'<span><i style="background:var(--'+CMP[i].id+')"></i>'+CMP[i].name+' <b>'+(r.aroma[j][2]!=null?r.aroma[j][2].toFixed(1)+' mg':r.aroma[j][0].toFixed(0)+'%')+'</b> <small>保留 '+r.aroma[j][0].toFixed(0)+'% · 散失 '+r.aroma[j][1].toFixed(0)+'%</small></span>').join('');d.appendChild(a);}
+    a.innerHTML=(r.taste?'<span><small>口感</small> <b>甜 '+r.taste[0].toFixed(1)+'・酸 '+r.taste[1].toFixed(1)+'・苦 '+r.taste[2].toFixed(1)+'・澀 '+r.taste[3].toFixed(1)+(r.taste[4]!=null?'・醇厚 '+r.taste[4].toFixed(1):'')+(r.taste[5]!=null?'・酸甜傾向 '+r.taste[5].toFixed(1):'')+'</b></span>':'')+(r.conc?'<span><small>有機酸</small> <b>'+Math.round(r.conc[0]).toLocaleString()+' mg/L</b></span>'+(r.conc[2]!=null?'<span><small>糖與甜感</small> <b>'+Math.round(r.conc[2]).toLocaleString()+' mg/L</b></span>':'')+'<span><small>綠原酸</small> <b>'+Math.round(r.conc[1]).toLocaleString()+' mg/L</b></span>':'')+VOL.map((i,j)=>'<span><i style="background:var(--'+CMP[i].id+')"></i>'+CMP[i].name+' <b>'+(r.aroma[j][2]!=null?r.aroma[j][2].toFixed(1)+' mg':r.aroma[j][0].toFixed(0)+'%')+'</b> <small>保留 '+r.aroma[j][0].toFixed(0)+'% · 散失 '+r.aroma[j][1].toFixed(0)+'%</small></span>').join('');d.appendChild(a);}
   const note=document.createElement('div');note.className='label';note.textContent=when+' · '+stir;d.appendChild(note);
   return d;
 }
@@ -1430,7 +1430,7 @@ const BREWERS=[
  {id:'press',name:'法式濾壓',sub:'全程浸泡，濾網過濾'},
 ];
 const ROASTN=ROAST_NAME;
-const DIMS={tds:'濃度',balance:'酸甜平衡',acid:'酸',sweet:'甜',bitter:'苦',astr:'澀',body:'醇厚度',fruity:'花果香',roasty:'烘焙香',caf:'咖啡因'};
+const DIMS={tds:'濃度',balance:'酸甜傾向',acid:'酸',sweet:'甜',bitter:'苦',astr:'澀',body:'醇厚度',fruity:'花果香',roasty:'烘焙香',caf:'咖啡因'};
 const SAY={
  tds:['太淡了，像在喝水。','太濃了，喝起來好重。'],
  acid:['酸度不夠，喝起來有點平。','太酸了，有點刺舌頭。'],
@@ -1989,14 +1989,14 @@ function render(){
   $('tLast').querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',+b.dataset.v===S.n));
   const R=run46(S.first,S.n);
   $('tPlan').innerHTML=R.plan.map((ml,i)=>'<span class="'+(i<2?'p40':'p60')+'"><small>'+fmt(R.planT[i])+'</small><b>'+Math.round(ml)+' g</b></span>').join('');
-  $('tRes').innerHTML=[['濃度 TDS',R.tds.toFixed(2)+'%'],['萃取率',R.ey.toFixed(1)+'%'],['甜',R.pf.sweet.toFixed(1)],['酸甜平衡',R.pf.balance.toFixed(1)+(R.pf.balance<4.5?' 偏甜':R.pf.balance>5.5?' 偏酸':' 平衡')],['醇厚度',R.pf.body.toFixed(1)],['苦',R.pf.bitter.toFixed(1)]]
+  $('tRes').innerHTML=[['濃度 TDS',R.tds.toFixed(2)+'%'],['萃取率',R.ey.toFixed(1)+'%'],['甜',R.pf.sweet.toFixed(1)],['酸甜傾向',R.pf.balance.toFixed(1)+(R.pf.balance<4.5?' 偏甜':R.pf.balance>5.5?' 偏酸':' 平衡')],['醇厚度',R.pf.body.toFixed(1)],['苦',R.pf.bitter.toFixed(1)]]
     .map(([k,v])=>'<div><b>'+v+'</b><span>'+k+'</span></div>').join('');
   const A=[30,50,60,70,90].map(f=>({f,r:run46(f,S.n)}));
-  $('tCmpA').innerHTML='<div class="t46-row head"><span>分配</span><span>甜</span><span>酸甜平衡（越大越酸）</span></div>'+A.map(x=>'<div class="t46-row'+(x.f===S.first?' on':'')+'"><span>'+x.f+'/'+(120-x.f)+'</span><span class="b">'+bar(x.r.pf.sweet,10)+x.r.pf.sweet.toFixed(2)+'</span><span class="b"><i style="width:'+Math.max(2,Math.min(100,x.r.pf.balance*10))*.6+'%;background:var(--acid)"></i>'+x.r.pf.balance.toFixed(2)+'</span></div>').join('');
+  $('tCmpA').innerHTML='<div class="t46-row head"><span>分配</span><span>甜</span><span>酸甜傾向（越大越酸）</span></div>'+A.map(x=>'<div class="t46-row'+(x.f===S.first?' on':'')+'"><span>'+x.f+'/'+(120-x.f)+'</span><span class="b">'+bar(x.r.pf.sweet,10)+x.r.pf.sweet.toFixed(2)+'</span><span class="b"><i style="width:'+Math.max(2,Math.min(100,x.r.pf.balance*10))*.6+'%;background:var(--acid)"></i>'+x.r.pf.balance.toFixed(2)+'</span></div>').join('');
   const Bv=[1,2,3,4].map(n=>({n,r:run46(S.first,n)}));
   $('tCmpB').innerHTML='<div class="t46-row head"><span>注數</span><span>TDS</span><span>醇厚度</span></div>'+Bv.map(x=>'<div class="t46-row'+(x.n===S.n?' on':'')+'"><span>'+x.n+' 注</span><span class="b">'+bar(x.r.tds-0.8,1.0)+x.r.tds.toFixed(2)+'%</span><span class="b">'+bar(x.r.pf.body,10)+x.r.pf.body.toFixed(1)+'</span></div>').join('');
   const dT=Bv[3].r.tds-Bv[0].r.tds,a0=A[0].r,a4=A[4].r;
-  $('tNote').innerHTML='<b>模型看到什麼：</b>前 40% 從 30/90 改成 90/30，濃度 '+a0.tds.toFixed(2)+'% → '+a4.tds.toFixed(2)+'%，甜 '+a0.pf.sweet.toFixed(1)+' → '+a4.pf.sweet.toFixed(1)+'，酸甜平衡 '+a0.pf.balance.toFixed(1)+' → '+a4.pf.balance.toFixed(1)+'（越大越偏酸）。有機酸的溶出量幾乎一樣（'+Math.round(a0.acid).toLocaleString()+' → '+Math.round(a4.acid).toLocaleString()+' mg/L），平衡往酸偏，是因為甜和醇厚度少了，撐不住酸。'+
+  $('tNote').innerHTML='<b>模型看到什麼：</b>前 40% 從 30/90 改成 90/30，濃度 '+a0.tds.toFixed(2)+'% → '+a4.tds.toFixed(2)+'%，甜 '+a0.pf.sweet.toFixed(1)+' → '+a4.pf.sweet.toFixed(1)+'，酸甜傾向 '+a0.pf.balance.toFixed(1)+' → '+a4.pf.balance.toFixed(1)+'（越大越偏酸）。有機酸的溶出量幾乎一樣（'+Math.round(a0.acid).toLocaleString()+' → '+Math.round(a4.acid).toLocaleString()+' mg/L），傾向往酸偏，是因為甜和醇厚度少了，撐不住酸。'+
     '後 60% 從 1 注改成 4 注，濃度 '+Bv[0].r.tds.toFixed(2)+'% → '+Bv[3].r.tds.toFixed(2)+'%，醇厚度 '+Bv[0].r.pf.body.toFixed(1)+' → '+Bv[3].r.pf.body.toFixed(1)+'：一次倒完水位高、從濾杯壁繞過粉床的水多，攪動也少，所以比較淡。';
 }
 $('tFirst').addEventListener('input',e=>{S.first=+e.target.value;render();});
