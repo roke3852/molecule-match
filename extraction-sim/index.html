@@ -328,7 +328,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
 .modes{position:sticky;top:0;z-index:5;background:var(--bg);padding:max(8px,env(safe-area-inset-top,0px)) 0 8px;margin:-20px 0 14px}
 .modes .in{max-width:1040px;margin:0 auto;display:flex;align-items:center;gap:10px}
 .modes .app{font-family:var(--f-display);font-weight:700;font-size:16px;margin-right:auto;white-space:nowrap}
-.modes .seg{flex:0 1 330px}
+.modes .seg{flex:0 1 440px}
 .modes .seg button{padding:7px 6px;font-weight:700;font-size:13px}
 @media (max-width:420px){.modes .app{display:none}}
 .t46 h1{font-size:clamp(26px,6vw,36px)}
@@ -355,13 +355,46 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
 .t46-note{font-size:14px;margin:0;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px 12px}
 #gameView .gwrap{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
 #gameView h1{font-size:clamp(26px,6vw,36px);line-height:1.2}
+.mic h1{font-size:clamp(26px,6vw,36px)}
+.mic-tabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.mic-tabs .chip{padding:5px 12px}
+.mic-tabs .chip[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.mic-topic p{margin:8px 0 0}
+.mic-ab{margin-bottom:4px}
+.mic-tbl{width:100%;border-collapse:collapse;margin-top:12px;font-size:13px}
+.mic-tbl th,.mic-tbl td{text-align:right;padding:4px 6px;border-bottom:1px solid var(--line)}
+.mic-tbl th:first-child,.mic-tbl td:first-child{text-align:left;color:var(--muted)}
+.mic-tbl td{font-family:var(--f-mono)}
+.mic-view{display:flex;flex-direction:column;gap:10px}
+.mic-canvas-wrap{position:relative;border-radius:8px;overflow:hidden;border:1px solid var(--line)}
+.mic-canvas-wrap canvas{display:block;width:100%}
+.mic-hud{position:absolute;top:6px;left:8px;display:flex;align-items:baseline;gap:8px;background:var(--panel);border-radius:6px;padding:2px 8px;opacity:.92}
+.mic-hud .clock{font-size:16px}
+.mic-ph{font-size:13px;font-weight:700}
+.mic-cap{margin:0;min-height:3.2em;font-size:14px}
+.mic-legend{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:12px;color:var(--muted)}
+.mic-legend span{display:flex;align-items:center;gap:5px}
+.mic-legend i{display:block;border-radius:50%;width:8px;height:8px}
+.mic-legend i.co2{border:1.5px solid #8a939c;background:transparent;width:9px;height:9px}
+.mic-legend i.cdry{border-radius:2px;background:#c9ab86;width:12px;height:10px}
+.mic-legend i.cwet{border-radius:2px;background:#8a5c3a;width:12px;height:10px}
+.mic-chart{display:flex;flex-direction:column;gap:8px}
+.mic-chart-head{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+.mic-chart canvas{display:block;width:100%}
+.mic-now{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:4px}
+.mic-now span{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:8px;padding:4px 8px}
+.mic-now span.all{border-color:var(--ink)}
+.mic-now em{font-style:normal;font-size:12px;color:var(--muted);display:flex;align-items:center;gap:5px}
+.mic-now em i{display:block;width:8px;height:8px;border-radius:50%}
+.mic-now b{font-family:var(--f-mono);font-weight:500;font-size:15px}
+.mic-notes p{margin:8px 0 0}
 
 </style>
 </head>
 <body>
 <nav class="modes" aria-label="模式"><div class="in">
   <span class="app">手沖咖啡實驗室</span>
-  <div class="seg" role="group" aria-label="切換模式"><button id="mSim" aria-pressed="true">練習模擬器</button><button id="mGame" aria-pressed="false">闖關遊戲</button><button id="mLearn" aria-pressed="false">4:6 教學</button></div>
+  <div class="seg" role="group" aria-label="切換模式"><button id="mSim" aria-pressed="true">練習模擬器</button><button id="mGame" aria-pressed="false">闖關遊戲</button><button id="mLearn" aria-pressed="false">4:6 教學</button><button id="mMicro" aria-pressed="false">萃取顯微鏡</button></div>
 </div></nav>
 <section id="simView">
 <div class="wrap">
@@ -556,6 +589,60 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
 </div>
 
 </section>
+<section id="microView" hidden>
+<div class="wrap mic">
+  <div>
+    <div class="label">教學 · 放大到細胞</div>
+    <h1>萃取顯微鏡</h1>
+    <p class="lede">把一顆咖啡粉放大到細胞層級：粉粒由許多小格子般的細胞組成，各種風味物質就關在細胞裡。熱水要先滲進細胞，物質再一格一格穿過細胞壁、離開粉粒表面，最後被水帶走。調整研磨、悶蒸、注水和浸泡，看看物質移動的方式怎麼改變。</p>
+  </div>
+
+  <section class="panel mic-topics">
+    <div class="mic-tabs" id="micTabs" role="group" aria-label="主題"></div>
+    <div id="micTopic" class="mic-topic"></div>
+  </section>
+
+  <section class="panel mic-view">
+    <div class="mic-canvas-wrap">
+      <canvas id="micCanvas" aria-label="咖啡粉粒細胞層級萃取動畫"></canvas>
+      <div class="mic-hud"><span class="clock" id="micClock">0:00</span><span id="micPhase" class="mic-ph"></span></div>
+    </div>
+    <div class="transport">
+      <button class="play" id="micPlay">播放</button>
+      <input id="micTime" type="range" min="0" max="240" step="2" value="0" aria-label="時間">
+      <div class="seg speed" id="micSpeed" role="group" aria-label="播放速度"><button data-v="5" aria-pressed="false">5×</button><button data-v="10" aria-pressed="true">10×</button><button data-v="20" aria-pressed="false">20×</button></div>
+    </div>
+    <p class="mic-cap" id="micCap"></p>
+    <div class="mic-legend" id="micLegend"></div>
+  </section>
+
+  <section class="panel mic-chart">
+    <div class="mic-chart-head"><h2>各物質溶出比例</h2><span class="label" id="micGhostLab"></span></div>
+    <canvas id="micChart" aria-label="溶出比例隨時間變化"></canvas>
+    <div class="mic-now" id="micNow"></div>
+  </section>
+
+  <section class="panel">
+    <h2 style="margin-bottom:10px">自己調整</h2>
+    <div class="params">
+      <div class="param"><div class="row"><label for="micGrind" class="label">研磨粒徑</label><output id="micGrindOut" class="mono"></output></div><input id="micGrind" type="range" min="300" max="1400" step="50" value="650"></div>
+      <div class="param"><div class="row"><label for="micTemp" class="label">水溫</label><output id="micTempOut" class="mono"></output></div><input id="micTemp" type="range" min="80" max="98" step="1" value="93"></div>
+      <div class="param"><span class="label">萃取方式</span><div class="seg" id="micMethod" role="group" aria-label="萃取方式"><button data-v="po">手沖（水流過）</button><button data-v="im">浸泡</button></div></div>
+      <div class="param"><span class="label">悶蒸</span><div class="seg" id="micBloom" role="group" aria-label="悶蒸"><button data-v="0">不悶蒸</button><button data-v="30">30 秒</button><button data-v="40">40 秒</button></div></div>
+      <div class="param" id="micPourP"><span class="label">注水力道</span><div class="seg" id="micPour" role="group" aria-label="注水力道"><button data-v="gentle">輕柔</button><button data-v="normal">一般</button><button data-v="strong">強力沖刷</button></div></div>
+    </div>
+  </section>
+
+  <section class="panel mic-notes">
+    <h2>這個模型怎麼想</h2>
+    <p>圖中一格約 50 μm，大約是一個咖啡細胞的大小。粉粒最外圈的細胞在研磨時被切開，物質幾乎直接泡在水裡，所以一開始溶出很快；內部的細胞完整，物質要一格一格穿過細胞壁，越裡面路越長。</p>
+    <p>小分子（有機酸、綠原酸、咖啡因）跑得快，糖中等，苦味大分子（類黑素等）又大又慢，所以萃取前段偏酸、後段才慢慢帶出甜和苦。水溫越高，分子動得越快。</p>
+    <p>物質離開粉粒表面時，要穿過貼在表面的一層「邊界層」。水流越強，這層越薄，物質越容易被帶走；水不動或越來越濃時，粉粒內外的濃度差變小，萃取就變慢。</p>
+    <p>這是教學用的簡化模型：物質數量和速度是相對比例，方向和真實一致，但數字不是實測值。整杯的濃度和萃取率，請用練習模擬器看。</p>
+  </section>
+</div>
+
+</section>
 <section id="gameView" hidden>
 <div class="wrap gwrap">
   <div class="top">
@@ -679,7 +766,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
     </section>
   </section>
 
-  <p class="fine">風味分數來自擴散萃取模型：每種成分溶出多少、杯中比例和濃度，換算成 0–10 的感受強度，再和客人的喜好比對。數值是教學用的近似，適合摸索趨勢。想看分子怎麼離開咖啡粉，切到上方的<a href="#sim">練習模擬器</a>。</p>
+  <p class="fine">風味分數來自擴散萃取模型：每種成分溶出多少、杯中比例和濃度，換算成滿分 5 的感受強度，再和客人的喜好比對。數值是教學用的近似，適合摸索趨勢。想看分子怎麼離開咖啡粉，切到上方的<a href="#sim">練習模擬器</a>。</p>
 </div>
 </section>
 <script>
@@ -978,6 +1065,9 @@ function clarityOf(method,p,s){
   const R=s&&s.rec?(s.rec[s.rec.length-1].R||1):1;
   return Math.max(0,Math.min(10,1.5+12*Heff-15*(FE-.13)-1.5*(R-1)));
 }
+
+// 口感顯示用：內部 0–10，畫面顯示滿分 5
+const T5=v=>(v/2).toFixed(1);
 
 </script>
 <script>
@@ -1295,7 +1385,7 @@ function stats(prefix,s,sim,kind){
   $(prefix+'Aroma').innerHTML=VOL.map(i=>{const c=CMP[i],keep=D[i]/sim.S0[i]*100,lost=s.lost[i]/sim.S0[i]*100;
     return '<span><i style="background:var(--'+c.id+')"></i>'+c.name+' <b>'+(D[i]*1000).toFixed(1)+' mg</b> <small>保留 '+keep.toFixed(0)+'% · 散失 '+lost.toFixed(0)+'%</small></span>';}).join('')+
     (V>5?[0,2,3].map(i=>'<span><i style="background:var(--'+CMP[i].id+')"></i>'+CMP[i].name+' <b>'+Math.round(D[i]/V*1e6).toLocaleString()+' mg/L</b></span>').join(''):'')+
-    ((V>5&&tot>0)?(pf=>'<div class="taste"><div class="tt">口感（0–10）</div><div class="tg">'+[['甜',pf.sweet],['酸',pf.acid],['苦',pf.bitter],['澀',pf.astr],['醇厚',pf.body],['酸甜傾向',pf.balance],['清晰度',clarityOf(kind,simP(),sim)]].map(x=>'<span><em>'+x[0]+'</em><b>'+x[1].toFixed(1)+'</b></span>').join('')+'</div><small class="tn">酸甜傾向：0 偏甜、10 偏酸<br>清晰度：高＝層次分明、低＝風味集中</small></div>')(cupProfile({tds:tot/V*100,c:D.map(x=>x/V*1000),share:D.map(x=>x/tot)})):'');
+    ((V>5&&tot>0)?(pf=>'<div class="taste"><div class="tt">口感（滿分 5）</div><div class="tg">'+[['甜',pf.sweet],['酸',pf.acid],['苦',pf.bitter],['澀',pf.astr],['醇厚',pf.body],['酸甜傾向',pf.balance],['清晰度',clarityOf(kind,simP(),sim)]].map(x=>'<span><em>'+x[0]+'</em><b>'+T5(x[1])+'</b></span>').join('')+'</div><small class="tn">酸甜傾向：0 偏甜、5 偏酸，2.5 為平衡<br>清晰度：高＝層次分明、低＝風味集中</small></div>')(cupProfile({tds:tot/V*100,c:D.map(x=>x/V*1000),share:D.map(x=>x/tot)})):'');
   let ph;
   $(kind==='po'?'stirPO':'stirIM').disabled=s.done;
   if(s.sv>.35&&!s.done)ph='攪拌中';
@@ -1379,7 +1469,7 @@ function resCell(r,kind,p){
     const q=document.createElement('span');q.style.width=r.mix[i]+'%';q.textContent=r.mix[i]>=7?Math.round(r.mix[i]):'';pct.appendChild(q);});
   d.appendChild(bar);d.appendChild(pct);
   if(r.aroma){const a=document.createElement('div');a.className='aroma';
-    a.innerHTML=(r.taste?'<span><small>口感</small> <b>甜 '+r.taste[0].toFixed(1)+'・酸 '+r.taste[1].toFixed(1)+'・苦 '+r.taste[2].toFixed(1)+'・澀 '+r.taste[3].toFixed(1)+(r.taste[4]!=null?'・醇厚 '+r.taste[4].toFixed(1):'')+(r.taste[5]!=null?'・酸甜傾向 '+r.taste[5].toFixed(1):'')+(r.taste[6]!=null?'・清晰度 '+r.taste[6].toFixed(1):'')+'</b></span>':'')+(r.conc?'<span><small>有機酸</small> <b>'+Math.round(r.conc[0]).toLocaleString()+' mg/L</b></span>'+(r.conc[2]!=null?'<span><small>糖與甜感</small> <b>'+Math.round(r.conc[2]).toLocaleString()+' mg/L</b></span>':'')+'<span><small>綠原酸</small> <b>'+Math.round(r.conc[1]).toLocaleString()+' mg/L</b></span>':'')+VOL.map((i,j)=>'<span><i style="background:var(--'+CMP[i].id+')"></i>'+CMP[i].name+' <b>'+(r.aroma[j][2]!=null?r.aroma[j][2].toFixed(1)+' mg':r.aroma[j][0].toFixed(0)+'%')+'</b> <small>保留 '+r.aroma[j][0].toFixed(0)+'% · 散失 '+r.aroma[j][1].toFixed(0)+'%</small></span>').join('');d.appendChild(a);}
+    a.innerHTML=(r.taste?'<span><small>口感</small> <b>甜 '+T5(r.taste[0])+'・酸 '+T5(r.taste[1])+'・苦 '+T5(r.taste[2])+'・澀 '+T5(r.taste[3])+(r.taste[4]!=null?'・醇厚 '+T5(r.taste[4]):'')+(r.taste[5]!=null?'・酸甜傾向 '+T5(r.taste[5]):'')+(r.taste[6]!=null?'・清晰度 '+T5(r.taste[6]):'')+'</b></span>':'')+(r.conc?'<span><small>有機酸</small> <b>'+Math.round(r.conc[0]).toLocaleString()+' mg/L</b></span>'+(r.conc[2]!=null?'<span><small>糖與甜感</small> <b>'+Math.round(r.conc[2]).toLocaleString()+' mg/L</b></span>':'')+'<span><small>綠原酸</small> <b>'+Math.round(r.conc[1]).toLocaleString()+' mg/L</b></span>':'')+VOL.map((i,j)=>'<span><i style="background:var(--'+CMP[i].id+')"></i>'+CMP[i].name+' <b>'+(r.aroma[j][2]!=null?r.aroma[j][2].toFixed(1)+' mg':r.aroma[j][0].toFixed(0)+'%')+'</b> <small>保留 '+r.aroma[j][0].toFixed(0)+'% · 散失 '+r.aroma[j][1].toFixed(0)+'%</small></span>').join('');d.appendChild(a);}
   const note=document.createElement('div');note.className='label';note.textContent=when+' · '+stir;d.appendChild(note);
   return d;
 }
@@ -1751,9 +1841,9 @@ function recipeText(o){const B=BEANS.find(b=>b.id===o.bean),R=BREWERS.find(b=>b.
 
 function dimRow(k,v,t,pts){
   const lo=t==null?null:Math.min(v,t),hi=t==null?null:Math.max(v,t);
-  return '<div class="dim"><span class="nm">'+DIMS[k]+'</span><div class="track" role="img" aria-label="'+DIMS[k]+' 你 '+v.toFixed(1)+(t!=null?' 客人想要 '+t:'')+'">'+
+  return '<div class="dim"><span class="nm">'+DIMS[k]+'</span><div class="track" role="img" aria-label="'+DIMS[k]+' 你 '+T5(v)+(t!=null?' 客人想要 '+T5(t):'')+'">'+
     (t!=null?'<span class="gap" style="left:'+lo*10+'%;width:'+(hi-lo)*10+'%"></span><span class="w" style="left:'+t*10+'%"></span>':'')+
-    '<span class="y" style="left:'+v*10+'%"></span></div><span class="pts">'+(pts!=null?Math.round(pts*100):v.toFixed(1))+'</span></div>';}
+    '<span class="y" style="left:'+v*10+'%"></span></div><span class="pts">'+(pts!=null?Math.round(pts*100):T5(v))+'</span></div>';}
 
 $('brewBtn').onclick=()=>{
   const o=JSON.parse(JSON.stringify(O));const L=curL();
@@ -1879,16 +1969,16 @@ function paramDiff(a,b){
 }
 function closeness(k,prev,curv,t){if(t==null)return '';const a=Math.abs(prev-t),b=Math.abs(curv-t);
   return b<a-.15?'<span class="tag up">更接近</span>':b>a+.15?'<span class="tag down">偏離</span>':'';}
-const compDims=pf=>[['甜',pf.sweet.toFixed(1)],['酸',pf.acid.toFixed(1)],['苦',pf.bitter.toFixed(1)],['澀',pf.astr.toFixed(1)],['花果香',pf.fruity.toFixed(1)]];
+const compDims=pf=>[['甜',T5(pf.sweet)],['酸',T5(pf.acid)],['苦',T5(pf.bitter)],['澀',T5(pf.astr)],['花果香',T5(pf.fruity)]];
 function resultDiff(p,c,L){
   const rows=[];const d=c.s-p.s;
   rows.push({k:'分數',v:Math.round(p.s)+' → '+Math.round(c.s),d:'<span class="'+(d>0.5?'up':d<-0.5?'down':'same')+'">'+sgn(d,0)+'</span>'});
   if(L.need){rows.push({k:'名次',v:placeName(p.rank)+' → '+placeName(c.rank),d:sgn(p.rank-c.rank,0)});
-    [['sweet','甜'],['acid','酸'],['bitter','苦'],['astr','澀'],['fruity','花果香']].forEach(([k,n])=>rows.push({k:n,v:p.pf[k].toFixed(1)+' → '+c.pf[k].toFixed(1),d:sgn(c.pf[k]-p.pf[k],1)}));
+    [['sweet','甜'],['acid','酸'],['bitter','苦'],['astr','澀'],['fruity','花果香']].forEach(([k,n])=>rows.push({k:n,v:T5(p.pf[k])+' → '+T5(c.pf[k]),d:sgn(c.pf[k]-p.pf[k],1)}));
     rows.push({k:'TDS',v:p.tds.toFixed(2)+' → '+c.tds.toFixed(2)+'%',d:sgn(c.tds-p.tds,2)},{k:'萃取率',v:p.ey.toFixed(1)+' → '+c.ey.toFixed(1)+'%',d:sgn(c.ey-p.ey,1)});
     return rows;}
   for(const [k,[t]] of Object.entries(L.want).sort((a,b)=>b[1][1]-a[1][1])){const dv=c.pf[k]-p.pf[k];
-    rows.push({k:DIMS[k],v:p.pf[k].toFixed(1)+' → '+c.pf[k].toFixed(1)+' <span class="label">目標 '+t+'</span>'+closeness(k,p.pf[k],c.pf[k],t),d:sgn(dv,1)});}
+    rows.push({k:DIMS[k],v:T5(p.pf[k])+' → '+T5(c.pf[k])+' <span class="label">目標 '+T5(t)+'</span>'+closeness(k,p.pf[k],c.pf[k],t),d:sgn(dv,1)});}
   const pc=cupCost(p.o),cc=cupCost(c.o);rows.push({k:'利潤',v:'NT$'+(L.budget-pc)+' → NT$'+(L.budget-cc)+(cc>L.budget?' <span class="tag down">超出預算</span>':''),d:sgn(pc-cc,0)});
   rows.push({k:'TDS',v:p.tds.toFixed(2)+' → '+c.tds.toFixed(2)+'%',d:sgn(c.tds-p.tds,2)});
   rows.push({k:'萃取率',v:p.ey.toFixed(1)+' → '+c.ey.toFixed(1)+'%',d:sgn(c.ey-p.ey,1)});
@@ -1933,7 +2023,7 @@ function suggest(rec,L){
 }
 function worstGap(rec,L){if(L.need){const d=judge(Object.assign({},rec,{aroma:rec.aroma}),L).diag[0];return '評審意見：'+d+' ';}
   if(cupCost(rec.o)>L.budget)return '這杯成本 NT$'+cupCost(rec.o)+'，超出預算 NT$'+(cupCost(rec.o)-L.budget)+'，要先換成預算內的豆子或減少粉量。';const g=Object.entries(L.want).map(([k,[t,w]])=>({k,d:rec.pf[k]-t,w:w*(1-part(rec.pf[k],t))})).sort((a,b)=>b.w-a.w)[0];
-  return g&&Math.abs(g.d)>1?'這杯離目標最遠的是「'+DIMS[g.k]+'」（'+rec.pf[g.k].toFixed(1)+'，客人想要 '+(rec.pf[g.k]-g.d).toFixed(0)+'）。':'';}
+  return g&&Math.abs(g.d)>1?'這杯離目標最遠的是「'+DIMS[g.k]+'」（'+T5(rec.pf[g.k])+'，客人想要 '+T5(rec.pf[g.k]-g.d)+'）。':'';}
 function applyO(o){
   Object.assign(O,clone(o));
   [['gtemp','temp'],['ggrind','grind'],['gratio','ratio'],['gsteep','steep'],['gdose','dose'],['gswClose','swClose'],['gswOpen','swOpen']].forEach(([id,k])=>{$(id).value=O[k];});
@@ -1961,7 +2051,7 @@ function renderHist(){
         h+='<h4>結果變化</h4>'+rowsHTML(resultDiff(p,rec,L));
       } else {
         h+='<h4>這杯的參數</h4>'+rowsHTML(params(rec.o).map(x=>({k:x.k,v:x.t,d:''})))+'<span class="label">這是第一杯，下一杯開始就能和前一次比較。</span>';
-        h+='<h4>結果</h4>'+rowsHTML([{k:'分數',v:String(Math.round(rec.s)),d:''}].concat(comp?compDims(rec.pf).map(([k,v])=>({k,v,d:''})):Object.entries(L.want).map(([k,[t]])=>({k:DIMS[k],v:rec.pf[k].toFixed(1)+' <span class="label">目標 '+t+'</span>',d:''}))).concat([{k:'TDS',v:rec.tds.toFixed(2)+'%',d:''},{k:'萃取率',v:rec.ey.toFixed(1)+'%',d:''}]));
+        h+='<h4>結果</h4>'+rowsHTML([{k:'分數',v:String(Math.round(rec.s)),d:''}].concat(comp?compDims(rec.pf).map(([k,v])=>({k,v,d:''})):Object.entries(L.want).map(([k,[t]])=>({k:DIMS[k],v:T5(rec.pf[k])+' <span class="label">目標 '+T5(t)+'</span>',d:''}))).concat([{k:'TDS',v:rec.tds.toFixed(2)+'%',d:''},{k:'萃取率',v:rec.ey.toFixed(1)+'%',d:''}]));
       }
       h+='<div class="hbtns"><button class="pri" data-a="sug">給我調整建議</button><button data-a="load">套用這杯的參數</button></div><div class="sugs"></div>';
       det.innerHTML=h;
@@ -1972,7 +2062,7 @@ function renderHist(){
           let h='<p class="sugnote">'+worstGap(rec,L)+'以下是用同一個萃取模型、每次只改一項試算出來，對'+(comp?'評審分數':'這位客人分數')+'幫助最大的調整：</p>';
           if(!S.length)h='<p class="sugnote">'+worstGap(rec,L)+'只改一項已經很難再加分了，這杯接近目前設定的上限。可以試著'+(isComp()?'換器具或注水方式後重新微調':'一次換豆子和器具')+'，或同時調整兩項。</p>';
           h+=S.map((x,j)=>'<div class="sug"><b>'+x.label+'</b><span class="pred">'+Math.round(rec.s)+' → '+Math.round(x.s)+' <span class="up">'+sgn(x.d,0)+'</span></span>'+
-            '<small>'+(x.note||(x.eff.length?x.eff.map(e=>DIMS[e.k]+' '+e.from.toFixed(1)+'→'+e.to.toFixed(1)+'（目標 '+e.t+'）').join('・'):'整體平衡變好'))+'</small><button data-j="'+j+'">套用</button></div>').join('');
+            '<small>'+(x.note||(x.eff.length?x.eff.map(e=>DIMS[e.k]+' '+T5(e.from)+'→'+T5(e.to)+'（目標 '+T5(e.t)+'）').join('・'):'整體平衡變好'))+'</small><button data-j="'+j+'">套用</button></div>').join('');
           sb.innerHTML=h;
           sb.querySelectorAll('button[data-j]').forEach(b=>b.onclick=()=>applyO(S[+b.dataset.j].o));
         },30);
@@ -2010,15 +2100,15 @@ function render(){
   $('tLast').querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',+b.dataset.v===S.n));
   const R=run46(S.first,S.n);
   $('tPlan').innerHTML=R.plan.map((ml,i)=>'<span class="'+(i<2?'p40':'p60')+'"><small>'+fmt(R.planT[i])+'</small><b>'+Math.round(ml)+' g</b></span>').join('');
-  $('tRes').innerHTML=[['濃度 TDS',R.tds.toFixed(2)+'%'],['萃取率',R.ey.toFixed(1)+'%'],['甜',R.pf.sweet.toFixed(1)],['酸甜傾向',R.pf.balance.toFixed(1)+(R.pf.balance<4.5?' 偏甜':R.pf.balance>5.5?' 偏酸':' 平衡')],['醇厚度',R.pf.body.toFixed(1)],['苦',R.pf.bitter.toFixed(1)]]
+  $('tRes').innerHTML=[['濃度 TDS',R.tds.toFixed(2)+'%'],['萃取率',R.ey.toFixed(1)+'%'],['甜',T5(R.pf.sweet)],['酸甜傾向',T5(R.pf.balance)+(R.pf.balance<4.5?' 偏甜':R.pf.balance>5.5?' 偏酸':' 平衡')],['醇厚度',T5(R.pf.body)],['苦',T5(R.pf.bitter)]]
     .map(([k,v])=>'<div><b>'+v+'</b><span>'+k+'</span></div>').join('');
   const A=[30,50,60,70,90].map(f=>({f,r:run46(f,S.n)}));
   $('tCmpA').innerHTML='<div class="t46-row head"><span>分配</span><span>甜</span><span>酸甜傾向（越大越酸）</span></div>'+A.map(x=>'<div class="t46-row'+(x.f===S.first?' on':'')+'"><span>'+x.f+'/'+(120-x.f)+'</span><span class="b">'+bar(x.r.pf.sweet,10)+x.r.pf.sweet.toFixed(2)+'</span><span class="b"><i style="width:'+Math.max(2,Math.min(100,x.r.pf.balance*10))*.6+'%;background:var(--acid)"></i>'+x.r.pf.balance.toFixed(2)+'</span></div>').join('');
   const Bv=[1,2,3,4].map(n=>({n,r:run46(S.first,n)}));
-  $('tCmpB').innerHTML='<div class="t46-row head"><span>注數</span><span>TDS</span><span>醇厚度</span></div>'+Bv.map(x=>'<div class="t46-row'+(x.n===S.n?' on':'')+'"><span>'+x.n+' 注</span><span class="b">'+bar(x.r.tds-0.8,1.0)+x.r.tds.toFixed(2)+'%</span><span class="b">'+bar(x.r.pf.body,10)+x.r.pf.body.toFixed(1)+'</span></div>').join('');
+  $('tCmpB').innerHTML='<div class="t46-row head"><span>注數</span><span>TDS</span><span>醇厚度</span></div>'+Bv.map(x=>'<div class="t46-row'+(x.n===S.n?' on':'')+'"><span>'+x.n+' 注</span><span class="b">'+bar(x.r.tds-0.8,1.0)+x.r.tds.toFixed(2)+'%</span><span class="b">'+bar(x.r.pf.body,10)+T5(x.r.pf.body)+'</span></div>').join('');
   const dT=Bv[3].r.tds-Bv[0].r.tds,a0=A[0].r,a4=A[4].r;
-  $('tNote').innerHTML='<b>模型看到什麼：</b>前 40% 從 30/90 改成 90/30，濃度 '+a0.tds.toFixed(2)+'% → '+a4.tds.toFixed(2)+'%，甜 '+a0.pf.sweet.toFixed(1)+' → '+a4.pf.sweet.toFixed(1)+'，酸甜傾向 '+a0.pf.balance.toFixed(1)+' → '+a4.pf.balance.toFixed(1)+'（越大越偏酸）。有機酸的溶出量幾乎一樣（'+Math.round(a0.acid).toLocaleString()+' → '+Math.round(a4.acid).toLocaleString()+' mg/L），傾向往酸偏，是因為甜和醇厚度少了，撐不住酸。'+
-    '後 60% 從 1 注改成 4 注，濃度 '+Bv[0].r.tds.toFixed(2)+'% → '+Bv[3].r.tds.toFixed(2)+'%，醇厚度 '+Bv[0].r.pf.body.toFixed(1)+' → '+Bv[3].r.pf.body.toFixed(1)+'：一次倒完水位高、從濾杯壁繞過粉床的水多，攪動也少，所以比較淡。';
+  $('tNote').innerHTML='<b>模型看到什麼：</b>前 40% 從 30/90 改成 90/30，濃度 '+a0.tds.toFixed(2)+'% → '+a4.tds.toFixed(2)+'%，甜 '+T5(a0.pf.sweet)+' → '+T5(a4.pf.sweet)+'，酸甜傾向 '+T5(a0.pf.balance)+' → '+T5(a4.pf.balance)+'（越大越偏酸）。有機酸的溶出量幾乎一樣（'+Math.round(a0.acid).toLocaleString()+' → '+Math.round(a4.acid).toLocaleString()+' mg/L），傾向往酸偏，是因為甜和醇厚度少了，撐不住酸。'+
+    '後 60% 從 1 注改成 4 注，濃度 '+Bv[0].r.tds.toFixed(2)+'% → '+Bv[3].r.tds.toFixed(2)+'%，醇厚度 '+T5(Bv[0].r.pf.body)+' → '+T5(Bv[3].r.pf.body)+'：一次倒完水位高、從濾杯壁繞過粉床的水多，攪動也少，所以比較淡。';
 }
 $('tFirst').addEventListener('input',e=>{S.first=+e.target.value;render();});
 $('tGrind').addEventListener('input',e=>{S.grind=+e.target.value;render();});
@@ -2032,26 +2122,347 @@ window.teachRender=render;
 
 </script>
 <script>
+// 萃取顯微鏡：單一粉粒的細胞層級萃取模型（教學用，單位：細胞＝50 μm、秒）
+const MIC_T=[
+  {id:'acid',  name:'有機酸',   n:1.8, r:1.00, sz:.9},
+  {id:'cga',   name:'綠原酸',   n:1.0, r:1.60, sz:1.0},
+  {id:'caf',   name:'咖啡因',   n:.8, r:.75,  sz:.9},
+  {id:'fruity',name:'花果香',   n:.6, r:.55,  sz:.8},
+  {id:'roasty',name:'烘焙香',   n:.6, r:.42,  sz:.8},
+  {id:'sugar', name:'糖',       n:2.4,r:.36,  sz:1.15},
+  {id:'bitter',name:'苦味大分子',n:2.0,r:.055, sz:1.8},
+];
+const MIC_CELL=50, MIC_VIEW={w:34,h:31};
+function micRng(seed){let a=seed>>>0;return()=>{a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+function micPhase(cfg,t){
+  const B=cfg.bloom||0;
+  if(cfg.method==='im'){
+    if(B&&t<B)return {ph:'bloom',U:0,bl:.6,turb:0};
+    const t0=B||0;return {ph:'steep',U:0,bl:t-t0<8?1.0:.5,turb:t-t0<8?1:0};
+  }
+  if(B&&t<B)return {ph:'bloom',U:0,bl:.6,turb:0};
+  const sp={gentle:{U:1.2,bl:.65},normal:{U:2,bl:1},strong:{U:4,bl:1.6}}[cfg.pour||'normal'];
+  const END=150,DR=170;
+  if(t<END)return {ph:'flow',U:sp.U,bl:sp.bl,turb:cfg.pour==='strong'?1:cfg.pour==='normal'?.4:0};
+  if(t<DR){const f=1-(t-END)/(DR-END);return {ph:'drain',U:sp.U*f,bl:sp.bl*f+.08*(1-f),turb:0,film:f};}
+  return {ph:'done',U:0,bl:.08,turb:0,film:0};
+}
+function micCreate(cfg){
+  const rnd=micRng(cfg.seed||7);
+  const R0=cfg.grind/MIC_CELL/2, Tf=Math.max(.45,Math.min(1.6,Math.exp((cfg.temp-93)/14)));
+  const ph1=rnd()*6.28,ph2=rnd()*6.28,a1=.07,a2=.05;
+  const Rof=th=>R0*(1+a1*Math.sin(3*th+ph1)+a2*Math.sin(5*th+ph2));
+  const n=Math.ceil(2*R0*1.15)+4, half=n/2;
+  // jittered vertex grid
+  const vx=[],vy=[];
+  for(let j=0;j<=n;j++)for(let i=0;i<=n;i++){vx.push(i-half+(rnd()-.5)*.36);vy.push(j-half+(rnd()-.5)*.36);}
+  const cells=[],idx=new Int32Array(n*n).fill(-1);
+  for(let j=0;j<n;j++)for(let i=0;i<n;i++){
+    const cx=i-half+.5,cy=j-half+.5,r=Math.hypot(cx,cy),th=Math.atan2(cy,cx),Rt=Rof(th);
+    if(r<=Rt-.35){idx[j*n+i]=cells.length;cells.push({i,j,cx,cy,r,depth:Rt-r,wet:0,g:1,broken:false,surf:false,m:0});}
+  }
+  for(const c of cells){
+    const nb=[[1,0],[-1,0],[0,1],[0,-1]].map(([di,dj])=>{const ii=c.i+di,jj=c.j+dj;return ii<0||jj<0||ii>=n||jj>=n?-1:idx[jj*n+ii];});
+    c.nb=nb;c.surf=nb.some(k=>k<0);c.broken=c.depth<1.25;
+  }
+  // 沒悶蒸：CO₂ 包住一塊粉，水進不去，形成乾粉團
+  const clTh=cfg.bloom?2:cfg.method==='im'?.82:.2,clPh=rnd()*6.28;
+  for(const c of cells){const th=Math.atan2(c.cy,c.cx);c.clump=!cfg.bloom&&c.depth>.9&&Math.sin(th-clPh)>clTh;}
+  // molecules
+  const mol=[];
+  cells.forEach((c,ci)=>{for(let t=0;t<MIC_T.length;t++){let k=MIC_T[t].n;while(k>0){if(rnd()<Math.min(1,k)){mol.push({t,c:ci,ox:(rnd()-.5)*.64,oy:(rnd()-.5)*.64,st:0,x:0,y:0});}k-=1;}}});
+  const tot=new Array(MIC_T.length).fill(0);mol.forEach(m=>tot[m.t]++);
+  const surfCells=cells.filter(c=>c.surf);
+  const S={cfg,R0,Rof,n,half,vx,vy,cells,mol,tot,surfCells,Tf,t:0,dt:.5,rel:new Array(MIC_T.length).fill(0),
+    relBloom:0,gasRate:0,clumpEnd:cfg.method==='im'?60:140,G0:cells.length,gasLeft:cells.length,contact:1,drive:1,ph:micPhase(cfg,0),
+    bubbles:[],frags:[],gasAcc:0,fragAcc:0,rnd,curve:[]};
+  S.wetFrac=0;
+  return S;
+}
+function micFlow(S,x,y,U){
+  if(!U)return [0,0];
+  const a=S.R0*1.04,r2=x*x+y*y;if(r2<a*a)return [0,0];
+  const r4=r2*r2,a2=a*a;
+  return [-U*2*a2*x*y/r4, U*(1-a2*(y*y-x*x)/r4)];
+}
+function micStep(S){
+  const {cells,mol,rnd,dt,Tf}=S,cfg=S.cfg;
+  const P=micPhase(cfg,S.t);S.ph=P;
+  const totAll=mol.length;
+  let relAll=0;for(const v of S.rel)relAll+=v;
+  // driving force
+  let drive=.97;
+  if(P.ph==='bloom')drive=Math.max(.08,1-S.relBloom/totAll/.35);
+  else if(cfg.method==='im')drive=Math.max(.05,1-relAll/totAll/.72);
+  S.drive=drive;
+  // gas & wetting
+  let rel=0;
+  for(const c of cells){
+    if(c.wet){const d=c.g*(1-Math.exp(-.09*Tf*dt));c.g-=d;rel+=d;}
+    else{const d=c.g*.004*dt;c.g-=d;rel+=d;}
+  }
+  S.gasLeft-=rel;S.gasRate=rel/S.G0/dt;
+  const watered=P.ph!=='done'||true;
+  S.contact=(1-Math.min(.75,30*S.gasRate))*(P.ph==='drain'?(.15+.85*P.film):P.ph==='done'?.12:1);
+  if(watered){
+    const wetNow=[];
+    for(const c of cells){if(c.wet)continue;
+      let ok=c.surf;if(!ok)for(const k of c.nb)if(k>=0&&cells[k].wet){ok=true;break;}
+      if(ok&&rnd()<.6*dt*Tf*(1-.5*c.g)*(.5+.5*S.contact)*(c.clump&&S.t<S.clumpEnd?.05:1))wetNow.push(c);}
+    wetNow.forEach(c=>c.wet=1);
+  }
+  let wn=0;for(const c of cells)if(c.wet)wn++;S.wetFrac=wn/cells.length;
+  // bubbles out
+  S.gasAcc+=rel*.9;
+  while(S.gasAcc>=1&&S.bubbles.length<220){S.gasAcc-=1;const c=S.surfCells[(rnd()*S.surfCells.length)|0];
+    const th=Math.atan2(c.cy,c.cx),R=S.Rof(th)+.2;S.bubbles.push({x:Math.cos(th)*R,y:Math.sin(th)*R,r:.25+rnd()*.35,ux:Math.cos(th),uy:Math.sin(th),life:0});}
+  if(S.gasAcc>=1)S.gasAcc=0;
+  // fragments (fines) knocked loose by turbulent pour
+  if(P.turb){S.fragAcc+=P.turb*dt*.35*(S.t<40?1:.25);
+    while(S.fragAcc>=1&&S.frags.length<60){S.fragAcc-=1;const c=S.surfCells[(rnd()*S.surfCells.length)|0];const th=Math.atan2(c.cy,c.cx),R=S.Rof(th)+.3;
+      S.frags.push({x:Math.cos(th)*R,y:Math.sin(th)*R,s:.25+rnd()*.3,rot:rnd()*6});}}
+  // molecule moves
+  const exitBase=P.bl*drive*S.contact;
+  for(const m of mol){
+    if(m.st===0){const c=cells[m.c];if(!c.wet)continue;
+      const T=MIC_T[m.t],rate=.45*T.r*Tf*(c.broken?5:1);
+      if(rnd()>=rate*dt)continue;
+      const k=c.nb[(rnd()*4)|0];
+      if(k>=0){const c2=cells[k];if(!c2.wet)continue;
+        m.c=k;m.ox=(rnd()-.5)*.64;m.oy=(rnd()-.5)*.64;}
+      else{ if(rnd()<Math.min(1,.4*exitBase*(c.broken?1.4:1))){
+          m.st=1;const th=Math.atan2(c.cy,c.cx),R=S.Rof(th)+.25+rnd()*.4;m.x=Math.cos(th)*R;m.y=Math.sin(th)*R;
+          S.rel[m.t]++;if(P.ph==='bloom')S.relBloom++;}}
+    }else if(m.st===1){
+      const [fx,fy]=micFlow(S,m.x,m.y,P.U);
+      const D=P.ph==='done'?.05:P.U?1.2:(.8+3*P.turb);const s=Math.sqrt(2*D*dt);
+      m.x+=fx*dt+(rnd()-.5)*s*1.7;m.y+=fy*dt+(rnd()-.5)*s*1.7;
+      const r=Math.hypot(m.x,m.y),th=Math.atan2(m.y,m.x),Rt=S.Rof(th)+.15;
+      if(r<Rt){m.x*=Rt/r;m.y*=Rt/r;}
+      const W=MIC_VIEW.w/2,H=MIC_VIEW.h/2;
+      if(P.U>0&&m.y>H+1)m.st=2;
+      else{if(m.x<-W)m.x=-2*W-m.x;if(m.x>W)m.x=2*W-m.x;if(m.y<-H)m.y=-2*H-m.y;if(m.y>H)m.y=2*H-m.y;}
+    }
+  }
+  // bubbles & fragments motion
+  for(const b of S.bubbles){const [fx,fy]=micFlow(S,b.x,b.y,P.U);b.x+=(b.ux*.6+fx*.35)*dt;b.y+=(b.uy*.6-1.2+fy*.35)*dt;b.life+=dt;}
+  S.bubbles=S.bubbles.filter(b=>b.y>-MIC_VIEW.h/2-1&&b.y<MIC_VIEW.h/2+1&&Math.abs(b.x)<MIC_VIEW.w/2+1&&b.life<14);
+  for(const f of S.frags){const [fx,fy]=micFlow(S,f.x,f.y,Math.max(P.U,.3));f.x+=fx*dt*1.1;f.y+=fy*dt*1.1+.2*dt;f.rot+=.3*dt;}
+  S.frags=S.frags.filter(f=>f.y<MIC_VIEW.h/2+1);
+  S.t+=dt;
+  if(Math.abs(S.t/2-Math.round(S.t/2))<1e-6)S.curve.push({t:S.t,e:S.rel.map((v,i)=>v/S.tot[i]),all:S.rel.reduce((a,b)=>a+b,0)/mol.length,wet:S.wetFrac,gas:S.gasLeft/S.G0,contact:S.contact});
+}
+const MIC_TEND=240;
+function micRun(cfg,tEnd){const S=micCreate(cfg);S.curve.push({t:0,e:S.rel.map(()=>0),all:0,wet:0,gas:1,contact:1});while(S.t<(tEnd??MIC_TEND)-1e-9)micStep(S);return S;}
+
+
+(function(){
+const $=id=>document.getElementById(id);
+const BASE={grind:650,temp:93,bloom:40,pour:'normal',method:'po',seed:7};
+const TOPICS=[
+ {id:'grind',name:'粒徑',A:{grind:450},B:{grind:1100},an:'細研磨 450 μm',bn:'粗研磨 1100 μm',
+  text:'<p>粉粒越細，從中心到表面的路越短；被切開的外圈細胞佔整顆的比例也越高，所以物質出得快、萃得多。</p><p>粗粉的中心離表面很遠，水要比較久才滲到中心，裡面的糖和苦味大分子到最後還有很多出不來。磨細會讓萃取率上升，苦味大分子也跟著變多。</p><p>磨得太細時，細粉會在粉床裡堵住濾紙（塞水）。這裡只看單顆粉粒，看不到塞水，要看請用練習模擬器。</p>'},
+ {id:'bloom',name:'悶蒸',A:{bloom:40},B:{bloom:0},an:'悶蒸 40 秒',bn:'不悶蒸',
+  text:'<p>新鮮烘焙的咖啡粉裡有很多 CO₂（畫面中的灰色小圈）。一碰到熱水，CO₂ 會大量冒出，氣泡包在粉粒表面，把水推開。</p><p>悶蒸是先用少量水讓粉吸水、把氣排掉。這段水不流動，溶出的物質堆在粉粒附近，所以萃得慢；等氣排掉再注水，水才能完整接觸粉粒。</p><p>不悶蒸直接注水，前面溶出看起來比較快，但氣泡會擋住接觸。還有一塊被 CO₂ 包住的乾粉團（顏色較淺的那一塊）很久才濕，同一顆粉粒裡外萃取不均。</p>'},
+ {id:'strong',name:'強力沖刷',A:{pour:'strong'},B:{pour:'normal'},an:'強力沖刷',bn:'一般注水',
+  text:'<p>水柱大、注得猛時，粉粒在水中翻滾，貼在表面的那層水（邊界層）被沖薄。溶出的物質立刻被帶走，粉粒內外的濃度差維持得大，萃取比較快、也比較多。</p><p>代價是外圈破裂細胞的碎片（細粉）會被沖下來（畫面中的小碎片）。在真實粉床裡，細粉會往下移動、卡在濾紙上造成塞水，也比較容易帶出苦和澀。</p>'},
+ {id:'gentle',name:'輕柔注水',A:{pour:'gentle'},B:{pour:'normal'},an:'輕柔注水',bn:'一般注水',
+  text:'<p>細水柱慢慢注，粉粒幾乎不動，表面的邊界層比較厚。溶出的物質在粉粒附近停留比較久，萃取比較慢、也比較少。</p><p>好處是細粉不太會被沖散，流速穩定、杯子乾淨。想萃到和一般注水差不多的程度，通常要拉長時間或磨細一點。</p>'},
+ {id:'im',name:'浸泡',A:{method:'im'},B:{method:'po'},an:'浸泡',bn:'手沖（水流過）',
+  text:'<p>浸泡時粉一直泡在同一池水裡，水不流動，溶出的物質留在粉粒周圍，整池液體越來越濃（背景越來越深）。粉粒內外的濃度差越來越小，萃取會自己踩煞車。</p><p>手沖一直有新的水流過，濃度差維持得大，同樣時間萃得比較多；但水流完萃取就結束（約 2:50 之後），浸泡則可以一直泡下去。浸泡也比較不怕不均勻，因為每顆粉都泡在同樣的液體裡。</p>'},
+ {id:'free',name:'自由調整',text:'<p>用下方「自己調整」改研磨、水溫、悶蒸、注水和萃取方式。每次改動後，上一次的曲線會留在圖上當虛線，方便比較。</p>'},
+];
+const SHOW=['acid','cga','sugar','bitter'];
+let topic=TOPICS[0],side='A',cfg=null,full=null,ghost=null,ghostName='',S=null,playing=false,speed=10,last=0,raf=0,tracers=[];
+const cssv=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+let C={};
+function readColors(){C={ink:cssv('--ink'),muted:cssv('--muted'),line:cssv('--line'),gl:cssv('--g-light')||'#c9ab86',gd:cssv('--g-dark')||'#3b2619',panel:cssv('--panel'),accent:cssv('--accent')};
+  MIC_T.forEach(t=>C[t.id]=cssv('--'+t.id));}
+const fmt=t=>Math.floor(t/60)+':'+String(Math.round(t%60)).padStart(2,'0');
+function cfgFor(tp,sd){return Object.assign({},BASE,tp[sd]||{});}
+function load(c,keepGhost){
+  if(!keepGhost){ghost=full;ghostName=full?'虛線：上一次':'';}
+  cfg=Object.assign({},c);full=micRun(cfg);seek(0);syncControls();drawChart();}
+function openTopic(tp,sd){topic=tp;side=sd||'A';
+  [...$('micTabs').children].forEach(b=>b.setAttribute('aria-pressed',b.dataset.id===tp.id));
+  if(tp.id==='free'){ $('micTopic').innerHTML=tp.text;load(cfg||BASE);return;}
+  const other=side==='A'?'B':'A';
+  ghost=micRun(cfgFor(tp,other));ghostName='虛線：'+(other==='A'?tp.an:tp.bn);
+  load(cfgFor(tp,side),true);
+  const end=cfg.method==='po'&&ghost.cfg.method==='po'?170:240;
+  const at=(R,t)=>R.curve.find(x=>x.t>=t)||R.curve[R.curve.length-1];
+  const a=at(side==='A'?full:ghost,end),b=at(side==='A'?ghost:full,end);
+  const row=(n,f)=>'<tr><td>'+n+'</td><td>'+f(a)+'</td><td>'+f(b)+'</td></tr>';
+  const p=v=>Math.round(v*100)+'%';
+  $('micTopic').innerHTML='<div class="seg mic-ab" role="group" aria-label="比較組"><button data-s="A" aria-pressed="'+(side==='A')+'">'+tp.an+'</button><button data-s="B" aria-pressed="'+(side==='B')+'">'+tp.bn+'</button></div>'+tp.text+
+    '<table class="mic-tbl"><thead><tr><th>'+fmt(end)+' 時溶出</th><th>'+tp.an+'</th><th>'+tp.bn+'</th></tr></thead><tbody>'+
+    row('整體',x=>p(x.all))+row('有機酸',x=>p(x.e[0]))+row('糖',x=>p(x.e[5]))+row('苦味大分子',x=>p(x.e[6]))+'</tbody></table>';
+  $('micTopic').querySelectorAll('.mic-ab button').forEach(b=>b.onclick=()=>openTopic(tp,b.dataset.s));
+}
+function seek(t){S=micCreate(cfg);S.curve.push({t:0,e:S.rel.map(()=>0),all:0,wet:0,gas:1,contact:1});while(S.t<t-1e-9)micStep(S);snapMol();tracers=[];draw();ui();}
+function snapMol(){for(const m of S.mol){m.px=null;}}
+function syncControls(){
+  $('micGrind').value=cfg.grind;$('micGrindOut').textContent=cfg.grind+' μm';
+  $('micTemp').value=cfg.temp;$('micTempOut').textContent=cfg.temp+'°C';
+  const set=(id,v)=>$(id).querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v==String(v)));
+  set('micMethod',cfg.method);set('micBloom',cfg.bloom);set('micPour',cfg.pour);
+  $('micPourP').style.opacity=cfg.method==='im'?.45:1;
+}
+function freeChange(ch){
+  if(topic.id!=='free'){topic=TOPICS[TOPICS.length-1];[...$('micTabs').children].forEach(b=>b.setAttribute('aria-pressed',b.dataset.id==='free'));$('micTopic').innerHTML=topic.text;}
+  stop();load(Object.assign({},cfg,ch));}
+// ---------- drawing ----------
+let cv,ctx,W=0,H=0,cs=1,dpr=1;
+function size(){cv=$('micCanvas');const w=cv.parentElement.clientWidth;if(!w)return false;dpr=Math.min(2,devicePixelRatio||1);
+  W=w;H=Math.round(w*MIC_VIEW.h/MIC_VIEW.w);cv.style.height=H+'px';cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr);ctx=cv.getContext('2d');ctx.setTransform(dpr,0,0,dpr,0,0);cs=W/MIC_VIEW.w;return true;}
+function rgba(hex,a){if(!hex)return 'rgba(0,0,0,'+a+')';if(hex.startsWith('rgb'))return hex.replace(/rgba?\(([^)]+)\)/,(m,x)=>{const p=x.split(',').slice(0,3);return 'rgba('+p.join(',')+','+a+')';});
+  let h=hex.replace('#','');if(h.length===3)h=h.split('').map(x=>x+x).join('');const n=parseInt(h,16);return 'rgba('+(n>>16&255)+','+(n>>8&255)+','+(n&255)+','+a+')';}
+function draw(){
+  if(!S)return;if(!ctx||!W){if(!size())return;}
+  const P=micPhase(cfg,S.t),cx=W/2,cy=H/2,X=x=>cx+x*cs,Y=y=>cy+y*cs;
+  const dark=matchMedia('(prefers-color-scheme: dark)').matches;
+  ctx.clearRect(0,0,W,H);
+  const all=S.rel.reduce((a,b)=>a+b,0)/S.mol.length;
+  // liquid
+  const waterA=P.ph==='done'?0:P.ph==='drain'?P.film:1;
+  if(waterA>0){ctx.fillStyle='rgba(110,170,195,'+(.2*waterA)+')';ctx.fillRect(0,0,W,H);}
+  if(cfg.method==='im'&&S.t>0){ctx.fillStyle=rgba('#7a4a28',Math.min(.5,all*.6));ctx.fillRect(0,0,W,H);}
+  if(P.ph==='bloom'){const g=ctx.createRadialGradient(cx,cy,S.R0*cs*.9,cx,cy,S.R0*cs*1.8);g.addColorStop(0,rgba('#7a4a28',Math.min(.45,S.relBloom/S.mol.length*2.5)));g.addColorStop(1,'rgba(122,74,40,0)');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);}
+  if(P.ph==='done'||P.ph==='drain'){ctx.strokeStyle='rgba(110,170,195,.5)';ctx.lineWidth=cs*.5;ctx.beginPath();for(let k=0;k<=72;k++){const th=k/72*6.2832,R=(S.Rof(th)+.25)*cs;ctx.lineTo(cx+Math.cos(th)*R,cy+Math.sin(th)*R);}ctx.stroke();}
+  // tracers (water flow)
+  if(P.U>0){while(tracers.length<70)tracers.push({x:(Math.random()-.5)*MIC_VIEW.w,y:-MIC_VIEW.h/2+Math.random()*MIC_VIEW.h});
+    ctx.strokeStyle=dark?'rgba(170,215,235,.35)':'rgba(60,120,150,.3)';ctx.lineWidth=1;
+    for(const t of tracers){const [fx,fy]=micFlow(S,t.x,t.y,P.U);const L=.18;ctx.beginPath();ctx.moveTo(X(t.x),Y(t.y));ctx.lineTo(X(t.x-fx*L),Y(t.y-fy*L));ctx.stroke();}}
+  else tracers=[];
+  // gas haze
+  if(S.contact<.92&&waterA>0){ctx.strokeStyle='rgba(190,195,200,'+((1-S.contact)*.7)+')';ctx.lineWidth=cs*1.1;ctx.beginPath();for(let k=0;k<=72;k++){const th=k/72*6.2832,R=(S.Rof(th)+.45)*cs;ctx.lineTo(cx+Math.cos(th)*R,cy+Math.sin(th)*R);}ctx.stroke();}
+  // cells
+  const n1=S.n+1,vx=S.vx,vy=S.vy;
+  const wall=dark?'rgba(30,18,10,.85)':'rgba(70,42,24,.6)';
+  ctx.lineWidth=Math.max(.6,cs*.07);
+  for(const c of S.cells){const a=c.j*n1+c.i,b=a+1,d=a+n1,e=d+1;
+    const px=[vx[a],vx[b],vx[e],vx[d]],py=[vy[a],vy[b],vy[e],vy[d]];
+    ctx.beginPath();for(let k=0;k<4;k++)ctx.lineTo(X(px[k]),Y(py[k]));ctx.closePath();
+    ctx.fillStyle=c.wet?(dark?'#5a3a24':'#8a5c3a'):(c.clump?(dark?'#b49572':'#e3cfae'):(dark?'#8f7050':'#c9ab86'));ctx.fill();
+    // walls: open edges for broken cells
+    ctx.strokeStyle=wall;
+    const nbE=[c.nb[3],c.nb[0],c.nb[2],c.nb[1]]; // top,right,bottom,left edges
+    for(let k=0;k<4;k++){if(c.broken&&(nbE[k]<0||((c.i*7+c.j*3+k)%3===0)))continue;
+      ctx.beginPath();ctx.moveTo(X(px[k]),Y(py[k]));ctx.lineTo(X(px[(k+1)%4]),Y(py[(k+1)%4]));ctx.stroke();}
+    if(c.g>.06){ctx.strokeStyle=dark?'rgba(220,225,230,.7)':'rgba(255,255,255,.85)';ctx.lineWidth=Math.max(.6,cs*.06);ctx.beginPath();ctx.arc(X(c.cx+.18),Y(c.cy-.18),cs*.2*Math.sqrt(c.g),0,6.2832);ctx.stroke();ctx.lineWidth=Math.max(.6,cs*.07);}
+  }
+  // fragments
+  ctx.fillStyle=dark?'#8f7050':'#6b4428';
+  for(const f of S.frags){ctx.save();ctx.translate(X(f.x),Y(f.y));ctx.rotate(f.rot);const s=f.s*cs;ctx.fillRect(-s/2,-s/2,s,s*.8);ctx.restore();}
+  // molecules
+  const r0=Math.max(1.1,cs*.1),tt=performance.now()/1000;
+  for(let k=0;k<S.mol.length;k++){const m=S.mol[k];if(m.st===2)continue;const T=MIC_T[m.t];let x,y;
+    if(m.st===0){const c=S.cells[m.c];const j=c.wet?.06*Math.sin(tt*3+k):0;x=X(c.cx+m.ox+j);y=Y(c.cy+m.oy+j*.7);}
+    else{x=X(m.x);y=Y(m.y);}
+    if(m.px==null||!playing){m.px=x;m.py=y;}else{m.px+=(x-m.px)*.35;m.py+=(y-m.py)*.35;}
+    ctx.fillStyle=C[T.id];ctx.beginPath();ctx.arc(m.px,m.py,r0*T.sz,0,6.2832);ctx.fill();}
+  // free bubbles
+  ctx.strokeStyle=dark?'rgba(220,225,230,.75)':'rgba(120,130,140,.8)';ctx.lineWidth=1;
+  for(const b of S.bubbles){ctx.beginPath();ctx.arc(X(b.x),Y(b.y),b.r*cs,0,6.2832);ctx.stroke();}
+  // scale bar
+  ctx.fillStyle=C.ink;ctx.fillRect(10,H-14,cs*2,2);ctx.font='11px '+cssv('--f-mono');ctx.fillText('100 μm',10,H-19);
+}
+// ---------- text & chart ----------
+function caption(){
+  const P=micPhase(cfg,S.t),c=S.curve[S.curve.length-1]||{e:S.rel.map(()=>0),all:0};
+  const e=S.rel.map((v,i)=>v/S.tot[i]),all=S.rel.reduce((a,b)=>a+b,0)/S.mol.length;
+  let ph={bloom:'悶蒸中',flow:'注水中',drain:'水快流完',done:'水已流完',steep:'浸泡中'}[P.ph];
+  if(S.t===0)return ['尚未開始','按「播放」開始。熱水會從粉粒表面往內滲，淺色是乾的細胞，深色是吸了水的細胞；彩色小點是各種風味物質，灰色小圈是 CO₂。'];
+  let t;
+  if(P.ph==='done')t='水已經流完，粉粒只剩表面一層薄薄的水膜，物質幾乎出不來，萃取停止。';
+  else if(P.ph==='drain')t='最後一段水正在流走，接觸的水越來越少，萃取快要停了。';
+  else if(P.ph==='bloom')t='悶蒸：少量熱水讓粉粒吸水，CO₂ 從細胞裡冒出來。水不多也沒在流，溶出的物質堆在粉粒周圍，所以萃得慢；這段主要是讓水滲進去、讓氣排出來。';
+  else if(S.contact<.7)t='CO₂ 正大量冒出，氣泡包住粉粒表面，把水推開，物質不容易離開粉粒，萃取效率打折。';
+  else if(S.wetFrac<.97)t='水正從外往內滲透（已濕 '+Math.round(S.wetFrac*100)+'%）。還沒吸到水的細胞，裡面的物質動不了。'+(S.cells.some(x=>x.clump&&!x.wet)?'淺色那一塊是被 CO₂ 包住的乾粉團，水很難進去。':'');
+  else if(cfg.method==='im'&&S.drive<.6)t='杯中液體越來越濃，粉粒內外的濃度差變小，物質出來的速度慢下來，萃取在自己踩煞車。';
+  else if(e[0]<.55)t='外圈被切開的細胞最先被沖空。現在靠內部的細胞：物質要一格一格穿過細胞壁才能到表面，小分子（酸、綠原酸）跑得最快。'+(P.turb>=1?'強力水流把表面的邊界層沖薄，出來的物質馬上被帶走。':P.ph==='flow'&&cfg.pour==='gentle'?'水流輕柔，邊界層比較厚，物質在粉粒附近停留得比較久。':'');
+  else t='小分子大多已經出來了，剩下的是糖和苦味大分子在慢慢擴散。時間拉得越長，杯中的甜、苦和厚度越多。';
+  return [ph,t];
+}
+let chartW=0,chartH=0,ch,cctx;
+function drawChart(){
+  ch=$('micChart');const w=ch.parentElement.clientWidth-2;if(!w)return;const d=Math.min(2,devicePixelRatio||1);
+  chartW=w;chartH=Math.round(Math.min(260,w*.55));ch.style.height=chartH+'px';ch.width=Math.round(w*d);ch.height=Math.round(chartH*d);cctx=ch.getContext('2d');cctx.setTransform(d,0,0,d,0,0);
+  const g=cctx,L=34,R=8,T=8,B=22,pw=w-L-R,ph=chartH-T-B,X=t=>L+t/240*pw,Y=v=>T+(1-v)*ph;
+  g.clearRect(0,0,w,chartH);g.font='11px '+cssv('--f-mono');g.fillStyle=C.muted;g.strokeStyle=C.line;g.lineWidth=1;
+  [0,.25,.5,.75,1].forEach(v=>{g.beginPath();g.moveTo(L,Y(v));g.lineTo(L+pw,Y(v));g.stroke();g.fillText(Math.round(v*100)+'%',2,Y(v)+4);});
+  [0,60,120,180,240].forEach(t=>g.fillText(fmt(t),X(t)-12,chartH-6));
+  if(cfg.method==='po'){g.fillStyle=rgba(C.muted||'#888',.1);g.fillRect(X(150),T,X(240)-X(150),ph);g.fillStyle=C.muted;g.fillText('水流完',X(170)+4,T+12);}
+  if(cfg.bloom){g.fillStyle=rgba(C.muted||'#888',.08);g.fillRect(X(0),T,X(cfg.bloom)-X(0),ph);g.fillStyle=C.muted;g.fillText('悶蒸',X(2),T+12);}
+  const line=(R,f,col,wd,dash)=>{g.strokeStyle=col;g.lineWidth=wd;g.setLineDash(dash||[]);g.beginPath();R.curve.forEach((p,i)=>i?g.lineTo(X(p.t),Y(f(p))):g.moveTo(X(p.t),Y(f(p))));g.stroke();g.setLineDash([]);};
+  const idx=id=>MIC_T.findIndex(t=>t.id===id);
+  if(ghost){SHOW.forEach(id=>line(ghost,p=>p.e[idx(id)],rgba(C[id],.55),1.4,[4,4]));line(ghost,p=>p.all,rgba(C.ink,.55),2,[5,4]);}
+  SHOW.forEach(id=>line(full,p=>p.e[idx(id)],C[id],1.8));line(full,p=>p.all,C.ink,2.6);
+  g.strokeStyle=C.accent;g.lineWidth=1.5;g.beginPath();g.moveTo(X(S.t),T);g.lineTo(X(S.t),T+ph);g.stroke();
+  $('micGhostLab').textContent=ghostName;
+}
+function ui(){
+  $('micClock').textContent=fmt(S.t);$('micTime').value=S.t;
+  const [ph,t]=caption();$('micPhase').textContent=ph;$('micCap').textContent=t;
+  const e=S.rel.map((v,i)=>v/S.tot[i]),all=S.rel.reduce((a,b)=>a+b,0)/S.mol.length;
+  $('micNow').innerHTML='<span class="all"><em>整體</em><b>'+Math.round(all*100)+'%</b></span>'+MIC_T.map((T,i)=>'<span><em><i style="background:var(--'+T.id+')"></i>'+T.name+'</em><b>'+Math.round(e[i]*100)+'%</b></span>').join('')+
+    '<span><em>細胞吸水</em><b>'+Math.round(S.wetFrac*100)+'%</b></span><span><em>CO₂ 剩餘</em><b>'+Math.round(S.gasLeft/S.G0*100)+'%</b></span>';
+  drawChart();
+}
+function frame(now){
+  if(!playing)return;const dtR=Math.min(.1,(now-last)/1000);last=now;
+  let steps=Math.round(speed*dtR/S.dt*100)/100;S._acc=(S._acc||0)+steps;
+  while(S._acc>=1&&S.t<240){micStep(S);S._acc-=1;}
+  if(micPhase(cfg,S.t).U>0)for(const t of tracers){const [fx,fy]=micFlow(S,t.x,t.y,micPhase(cfg,S.t).U);t.x+=fx*speed*dtR;t.y+=fy*speed*dtR;if(t.y>MIC_VIEW.h/2||Math.hypot(t.x,t.y)<S.R0){t.x=(Math.random()-.5)*MIC_VIEW.w;t.y=-MIC_VIEW.h/2;}}
+  draw();ui();
+  if(S.t>=240){stop();return;}
+  raf=requestAnimationFrame(frame);
+}
+function play(){if(S.t>=240)seek(0);playing=true;$('micPlay').textContent='暫停';last=performance.now();raf=requestAnimationFrame(frame);}
+function stop(){playing=false;cancelAnimationFrame(raf);$('micPlay').textContent='播放';}
+// ---------- init ----------
+$('micTabs').innerHTML=TOPICS.map(t=>'<button class="chip" data-id="'+t.id+'" aria-pressed="false">'+t.name+'</button>').join('');
+$('micTabs').querySelectorAll('button').forEach(b=>b.onclick=()=>{stop();openTopic(TOPICS.find(t=>t.id===b.dataset.id));});
+$('micLegend').innerHTML=MIC_T.map(T=>'<span><i style="background:var(--'+T.id+');width:'+(8*T.sz)+'px;height:'+(8*T.sz)+'px"></i>'+T.name+'</span>').join('')+'<span><i class="co2"></i>CO₂</span><span><i class="cdry"></i>乾的細胞</span><span><i class="cwet"></i>吸水的細胞</span>';
+$('micPlay').onclick=()=>playing?stop():play();
+$('micTime').oninput=e=>{stop();seek(+e.target.value);};
+$('micSpeed').querySelectorAll('button').forEach(b=>b.onclick=()=>{speed=+b.dataset.v;$('micSpeed').querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',x===b));});
+$('micGrind').oninput=e=>{$('micGrindOut').textContent=e.target.value+' μm';};
+$('micGrind').onchange=e=>freeChange({grind:+e.target.value});
+$('micTemp').oninput=e=>{$('micTempOut').textContent=e.target.value+'°C';};
+$('micTemp').onchange=e=>freeChange({temp:+e.target.value});
+[['micMethod','method',v=>v],['micBloom','bloom',v=>+v],['micPour','pour',v=>v]].forEach(([id,k,f])=>$(id).querySelectorAll('button').forEach(b=>b.onclick=()=>freeChange({[k]:f(b.dataset.v)})));
+let inited=false;
+window.micRender=()=>{readColors();if(!size())return;if(!inited){inited=true;openTopic(TOPICS[0]);}else{draw();drawChart();}};
+addEventListener('resize',()=>{if(!$('microView')||$('microView').hidden)return;if(size()){draw();drawChart();}});
+matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change',()=>{readColors();if(S){draw();drawChart();}});
+})();
+
+</script>
+<script>
 (function(){
 const $=id=>document.getElementById(id);
 function show(mode,push){
-  const ids={sim:'simView',game:'gameView',learn:'learnView'},btn={sim:'mSim',game:'mGame',learn:'mLearn'};
+  const ids={sim:'simView',game:'gameView',learn:'learnView',micro:'microView'},btn={sim:'mSim',game:'mGame',learn:'mLearn',micro:'mMicro'};
   if(!ids[mode])mode='sim';
   Object.keys(ids).forEach(k=>{$(ids[k]).hidden=k!==mode;$(btn[k]).setAttribute('aria-pressed',k===mode);});
   if(push){try{history.replaceState(null,'','#'+mode);}catch(e){}}
   try{localStorage.setItem('brewLab.mode',mode);}catch(e){}
   if(mode==='sim')dispatchEvent(new Event('resize'));
   if(mode==='learn'&&window.teachRender)window.teachRender();
+  if(mode==='micro'&&window.micRender)requestAnimationFrame(()=>window.micRender());
 }
 $('mSim').onclick=()=>{show('sim',true);scrollTo(0,0);};
 $('mGame').onclick=()=>{show('game',true);scrollTo(0,0);};
 $('mLearn').onclick=()=>{show('learn',true);scrollTo(0,0);};
+$('mMicro').onclick=()=>{show('micro',true);scrollTo(0,0);};
 function route(){const h=location.hash||'';
   if(h==='#sim')return show('sim');
   if(h==='#learn')return show('learn');
+  if(h==='#micro')return show('micro');
   if(h==='#game'||/^#level-\d+$/.test(h)){show('game');window.gameRoute&&window.gameRoute(h);return;}
   let m='sim';try{m=localStorage.getItem('brewLab.mode')||'sim';}catch(e){}
-  show(['game','learn'].includes(m)?m:'sim');
+  show(['game','learn','micro'].includes(m)?m:'sim');
 }
 addEventListener('hashchange',route);route();
 })();
