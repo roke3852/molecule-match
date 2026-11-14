@@ -71,6 +71,7 @@ main{padding:0 0 calc(80px + env(safe-area-inset-bottom))}
 .wx-tips span{font-size:12px;padding:3px 9px;border-radius:999px;background:#fff;border:1px solid var(--line)}
 .chip .wxc{font-size:11px;margin-top:2px;white-space:nowrap}
 .chip.on .wxc{color:#fff}
+.mapbtn{margin-left:auto}.mapbtn+.editbtn{margin-left:0}
 .editbtn{margin-left:auto;font-size:12.5px;font-weight:700;padding:5px 12px;border-radius:999px;border:1.5px solid var(--day);color:var(--day);background:#fff}
 .hero.editing .editbtn{background:var(--day);color:#fff}
 .mod{display:inline-block;margin-left:8px;font-size:10.5px;background:rgba(255,255,255,.25);border-radius:6px;padding:0 6px}
@@ -185,6 +186,33 @@ textarea:focus,input:focus,select:focus{outline:none;border-color:var(--maple)}
 .toast{position:fixed;left:50%;bottom:calc(90px + env(safe-area-inset-bottom));transform:translateX(-50%);background:#2b2420;color:#fff;padding:8px 16px;border-radius:999px;font-size:13px;opacity:0;transition:.25s;pointer-events:none;z-index:60}
 .toast.on{opacity:1}
 
+/* map */
+#v-map{position:relative}
+.mchips{display:flex;gap:6px;overflow-x:auto;padding:10px 12px;scrollbar-width:none}
+.mchips::-webkit-scrollbar{display:none}
+.mchips button{flex:0 0 auto;padding:6px 11px;border-radius:999px;border:1.5px solid var(--line);background:#fff;font-size:12.5px;font-weight:700}
+.mchips button.on{background:var(--c);border-color:var(--c);color:#fff}
+.mapwrap{position:relative;margin:0 12px;border-radius:18px;overflow:hidden;border:1px solid var(--line)}
+#mapbox{height:60vh;background:#e8e2da}
+.mfab{position:absolute;left:10px;top:10px;z-index:500;display:flex;flex-direction:column;gap:8px}
+.mfab button{width:40px;height:40px;border-radius:12px;background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.2);font-size:18px}
+.mstrip{position:absolute;left:0;right:0;bottom:26px;z-index:500;display:flex;gap:6px;overflow-x:auto;padding:0 10px;scrollbar-width:none}
+.mstrip::-webkit-scrollbar{display:none}
+.mstrip button{flex:0 0 auto;display:flex;align-items:center;gap:6px;background:#fff;border-radius:999px;padding:5px 11px 5px 5px;font-size:12.5px;box-shadow:0 2px 8px rgba(0,0,0,.2);max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mstrip i{font-style:normal;flex:0 0 22px;height:22px;border-radius:50%;background:var(--c);color:#fff;display:grid;place-items:center;font-size:11.5px;font-weight:700}
+.mk{width:30px;height:30px;border-radius:50%;color:#fff;font-weight:900;font-size:13px;display:grid;place-items:center;border:2.5px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.35);font-family:"Noto Sans TC",sans-serif}
+.mk.sm{font-size:10px;width:auto;min-width:30px;padding:0 5px;border-radius:15px}
+.me{width:18px;height:18px;border-radius:50%;background:#1a73e8;border:3px solid #fff;box-shadow:0 0 0 6px rgba(26,115,232,.25)}
+.pp{font-family:"Noto Sans TC",sans-serif;font-size:13px;line-height:1.45}
+.pp-d{font-size:11.5px;font-weight:700}
+.pp b{font-size:14.5px;display:block;margin:2px 0}
+.pp-t{color:#7a6c62;font-size:12px}
+.pp-a{display:flex;gap:6px;margin-top:8px}
+.pp-a a{flex:1;text-align:center;text-decoration:none;padding:6px 8px;border-radius:9px;background:#f3ece4;color:#2b2420!important;font-weight:700;font-size:12.5px}
+.leaflet-popup-content hr{border:0;border-top:1px dashed #eadfd3;margin:8px 0}
+.mnote{display:none;position:absolute;inset:0;z-index:600;background:rgba(247,241,234,.95);place-items:center;text-align:center;padding:20px;font-size:14px}
+.mnote.on{display:grid}
+.maphint{margin:8px 14px 0;font-size:12px;color:var(--sub)}
 /* bottom nav */
 nav{position:fixed;left:0;right:0;bottom:0;background:rgba(255,253,249,.96);backdrop-filter:blur(8px);border-top:1px solid var(--line);display:flex;padding:6px 6px calc(6px + env(safe-area-inset-bottom));z-index:20}
 nav a{flex:1;text-align:center;text-decoration:none;color:var(--sub);font-size:11.5px;padding:4px 0;border-radius:12px}
@@ -194,6 +222,8 @@ nav a.on{color:var(--maple);font-weight:700;background:var(--maple-soft)}
 .todaybtn.on{display:block}
 @media(min-width:620px){main,header .h-top,.hotel-line{max-width:600px;margin-left:auto;margin-right:auto}nav{justify-content:center}nav a{max-width:150px}}
 </style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 </head>
 <body>
 <header>
@@ -212,6 +242,18 @@ nav a.on{color:var(--maple);font-weight:700;background:var(--maple-soft)}
   <section class="view" id="v-trip">
     <div class="chips" id="chips"></div>
     <div id="dayview"></div>
+  </section>
+
+  <!-- 地圖 -->
+  <section class="view" id="v-map">
+    <div class="mchips" id="mchips"></div>
+    <div class="mapwrap">
+      <div id="mapbox"></div>
+      <div class="mfab"><button id="meBtn" aria-label="我的位置">📍</button><button id="hotelBtn" aria-label="飯店">🏨</button></div>
+      <div class="mstrip" id="mstrip"></div>
+      <div class="mnote" id="mapNote"><div>🗺️ 地圖在這裡載入不了<br><br>請用 GitHub 網址開啟：<br><b>roke3852.github.io/molecule-match/fukuoka-trip</b></div></div>
+    </div>
+    <div class="maphint">點圓點看行程、導航；選某一天會用虛線連出當天路線。</div>
   </section>
 
   <!-- 清單 -->
@@ -282,6 +324,7 @@ nav a.on{color:var(--maple);font-weight:700;background:var(--maple-soft)}
 
 <nav>
   <a href="#trip" data-v="trip"><i>🗓️</i>行程</a>
+  <a href="#map" data-v="map"><i>🗺️</i>地圖</a>
   <a href="#list" data-v="list"><i>✅</i>清單</a>
   <a href="#tools" data-v="tools"><i>🧰</i>工具</a>
 </nav>
@@ -498,7 +541,7 @@ function renderDay(keep){
  h+=`<div class="hero${editing?' editing':''}"><div class="hero-band"><div class="lbl">Day ${curDay+1}・${d.date}（${d.wk}）${dayChanged(curDay)?'<span class="mod">已修改・只在這台手機</span>':''}</div>
  ${editing?`<input class="title-in" id="titleIn" value="${esc(d.title)}">`:`<h2>${esc(d.title)}</h2>`}</div>
  <div class="hero-meta"><span class="pill${d.payWarn?' warn':''}">💳 ${esc(d.pay)}</span>${d.payNote?`<span class="pill" style="background:#f3ece4;color:#5b4d43">${esc(d.payNote)}</span>`:''}
- <button class="editbtn" data-act="edit">${editing?'✓ 完成編輯':'✏️ 編輯'}</button>
+ ${editing?'':'<button class="editbtn mapbtn" data-act="map">🗺️ 地圖</button>'}<button class="editbtn" data-act="edit">${editing?'✓ 完成編輯':'✏️ 編輯'}</button>
  <div class="prog"><span>完成 ${k}/${n}</span><div class="bar"><i style="width:${n?k/n*100:0}%"></i></div></div></div></div>`;
  if(editing){h+=`<div class="edtools"><button class="btn" data-act="add">＋ 新增一站</button><button class="btn" data-act="sort">⏱ 依時間排序</button>${dayChanged(curDay)?'<button class="btn" data-act="reset">↩ 還原這天</button>':''}</div>`}
  else h+=wxHtml(curDay);
@@ -539,6 +582,7 @@ $('#dayview').addEventListener('click',e=>{
  if(act==='done'){const id=st.dataset.id;done[id]=!done[id];if(!done[id])delete done[id];S.set('done',done);
   renderDay(true);if(done[id]){const el=document.querySelector(`.stop[data-id="${id}"]`);if(el)el.classList.remove('open')}
   if(done[id])toast('👍 完成！');return}
+ if(act==='map'){showMap(curDay);return}
  if(act==='edit'){editing=!editing;delArm=null;renderDay();if(!editing&&anyChanged())toast('已存在這台手機');return}
  if(act==='useBase'){ed=null;S.set('edits',null);renderChips();renderDay();toast('已改用正式版');return}
  if(act==='keepMine'){ed.v=BASEV;saveEd();renderDay();return}
@@ -583,6 +627,60 @@ function exportText(){const changed=DAYS.map((_,i)=>i).filter(dayChanged);
 function openExport(){$('#exTxt').value=exportText();$('#export').classList.add('on')}
 $('#exClose').onclick=()=>$('#export').classList.remove('on');
 $('#exCopy').onclick=async()=>{const t=$('#exTxt');try{await navigator.clipboard.writeText(t.value);toast('✅ 已複製，貼給 Claude 吧')}catch(e){t.focus();t.select();toast('請長按文字 → 全選 → 拷貝')}};
+
+/* ---------- map ---------- */
+const LL={'福岡空港 国際線ターミナル':[33.5848,130.4443],'Hotel Monterey Fukuoka':[33.5848,130.4047],'博多駅':[33.5900,130.4199],'AMU PLAZA 博多':[33.5898,130.4198],
+ '警固公園':[33.5882,130.3994],'博多華味鳥 天神':[33.5897,130.3962],'天神地下街':[33.5896,130.3997],'ポケモンセンターフクオカ':[33.5898,130.4198],'肉屋肉一 博多':[33.5893,130.4205,1],
+ '西鉄福岡(天神)駅':[33.5893,130.3994],'太宰府駅':[33.5185,130.5312],'竈門神社 太宰府':[33.5288,130.5524],'太宰府天満宮 参道':[33.5195,130.5335],'太宰府天満宮':[33.5214,130.5351],
+ '中洲 屋台':[33.5903,130.4084],'マリンワールド海の中道':[33.6614,130.3634],'海の中道海浜公園':[33.6645,130.3656],'九州自然動物公園アフリカンサファリ':[33.3540,131.4114],
+ '由布院駅':[33.2626,131.3551],'湯布院フローラルヴィレッジ':[33.2652,131.3640],'天神 回転寿司':[33.5900,130.3978],'シーサイドももち海浜公園':[33.5949,130.3508],
+ 'BOSS E・ZO FUKUOKA':[33.5950,130.3638],'ららぽーと福岡':[33.5648,130.4403],'門司港駅':[33.9451,130.9615],'九州鉄道記念館':[33.9433,130.9618],'唐戸市場':[33.9566,130.9458],
+ 'ブルーウィングもじ':[33.9478,130.9627],'小倉城':[33.8844,130.8743],'小倉駅':[33.8868,130.8822],'大濠公園':[33.5861,130.3764],'櫛田神社':[33.5931,130.4107],'博多駅 マイング':[33.5900,130.4199],
+ '福岡塔':[33.5933,130.3515],'福岡タワー':[33.5933,130.3515]};
+const HOTEL=[33.5848,130.4047];
+let geo=S.get('geo',{});
+const llOf=s=>LL[s.q]||LL[s.n]||geo[s.q||s.n]||null;
+let map=null,layer=null,meMk=null,mapDay=-1,mkIdx={},geoBusy=false;
+function mapReady(){return typeof L!=='undefined'}
+function initMap(){if(map||!mapReady())return;
+ map=L.map('mapbox',{zoomControl:false,attributionControl:true}).setView(HOTEL,12);
+ L.control.zoom({position:'topright'}).addTo(map);
+ let errs=0;L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,subdomains:'abc',attribution:'© OpenStreetMap'}).on('tileerror',()=>{if(++errs===4)$('#mapNote').classList.add('on')}).addTo(map);
+ layer=L.layerGroup().addTo(map)}
+function pin(label,color,small){return L.divIcon({className:'',html:`<div class="mk${small?' sm':''}" style="background:${color}">${label}</div>`,iconSize:[30,30],iconAnchor:[15,15],popupAnchor:[0,-14]})}
+function popHtml(day,i,s,ll){const d=DAYS[day];return `<div class="pp"><div class="pp-d" style="color:${d.c}">Day ${day+1}・${d.date}（${d.wk}）・${esc(s.t)}</div><b>${esc(s.n)}</b><div class="pp-t">${trIcon(s.tr)[0]} ${esc(s.tr)}</div>${ll[2]?'<div class="pp-t">⚠️ 位置約略，導航請以店家為準</div>':''}
+ <div class="pp-a"><a href="https://www.google.com/maps/dir/?api=1&destination=${ll[0]},${ll[1]}" target="_blank" rel="noopener">🧭 導航</a><a href="#trip" data-go="${day}" data-id="${s.id}">📋 看行程</a></div></div>`}
+function renderMapChips(){$('#mchips').innerHTML=`<button class="${mapDay<0?'on':''}" data-d="-1" style="--c:#2b2420">全部</button>`+DAYS.map((d,i)=>`<button class="${i===mapDay?'on':''}" data-d="${i}" style="--c:${d.c}">D${i+1} ${d.date.split('/')[1]}日</button>`).join('')}
+function drawMap(fit=true){initMap();renderMapChips();if(!map){$('#mapNote').classList.add('on');return}
+ layer.clearLayers();mkIdx={};const pts=[HOTEL];const missing=[];
+ L.marker(HOTEL,{icon:pin('🏨','#2b2420'),zIndexOffset:-100}).bindPopup('<div class="pp"><b>福岡蒙特利飯店</b><div class="pp-t">Hotel Monterey Fukuoka・ホテルモントレ福岡</div><div class="pp-a"><a href="https://www.google.com/maps/dir/?api=1&destination='+HOTEL+'" target="_blank" rel="noopener">🧭 導航回飯店</a></div></div>').addTo(layer);
+ const days=mapDay<0?DAYS.map((_,i)=>i):[mapDay];let strip='';
+ days.forEach(day=>{const d=D(day),route=[];const grp={};
+  d.stops.forEach((s,i)=>{const ll=llOf(s);if(!ll){missing.push(s);return}
+   const key=ll[0].toFixed(4)+','+ll[1].toFixed(4);route.push([ll[0],ll[1]]);pts.push([ll[0],ll[1]]);
+   if(mapDay>=0)strip+=`<button data-k="${key}" style="--c:${d.c}"><i>${i+1}</i>${esc(s.n)}</button>`;
+   (grp[key]=grp[key]||{ll,items:[]}).items.push([i,s])});
+  Object.entries(grp).forEach(([key,g])=>{const label=mapDay<0?(day+1):g.items.map(x=>x[0]+1).join('·');
+   const m=L.marker([g.ll[0],g.ll[1]],{icon:pin(label,d.c,label.toString().length>3)}).bindPopup(g.items.map(([i,s])=>popHtml(day,i,s,g.ll)).join('<hr>'),{maxWidth:260}).addTo(layer);mkIdx[key]=m});
+  if(mapDay>=0&&route.length>1)L.polyline(route,{color:d.c,weight:3,opacity:.7,dashArray:'6 6'}).addTo(layer)});
+ $('#mstrip').innerHTML=strip;$('#mstrip').style.display=strip?'flex':'none';
+ if(fit&&pts.length>1)map.fitBounds(pts,{padding:[40,40],maxZoom:15});
+ if(missing.length)geocodeMissing(missing)}
+async function geocodeMissing(list){if(geoBusy)return;geoBusy=true;let got=0;
+ for(const s of list){const q=s.q||s.n;if(geo[q]===0)continue;
+  try{const r=await fetch('https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=jp&viewbox=129.9,34.2,131.8,33.0&q='+encodeURIComponent(q));const j=await r.json();
+   geo[q]=j[0]?[+j[0].lat,+j[0].lon,1]:0;if(j[0])got++}catch(e){break}
+  await new Promise(r=>setTimeout(r,1100))}
+ S.set('geo',geo);geoBusy=false;if(got)drawMap(false)}
+$('#mchips').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;mapDay=+b.dataset.d;drawMap()});
+$('#mstrip').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const m=mkIdx[b.dataset.k];if(m){map.flyTo(m.getLatLng(),15,{duration:.6});setTimeout(()=>m.openPopup(),650)}});
+document.addEventListener('click',e=>{const a=e.target.closest('[data-go]');if(!a)return;curDay=+a.dataset.go;S.set('day',curDay);renderChips();renderDay();
+ setTimeout(()=>{const el=document.querySelector(`.stop[data-id="${a.dataset.id}"]`);if(el){el.classList.add('open');el.scrollIntoView({block:'center'})}},80)});
+$('#meBtn').onclick=()=>{if(!map)return;if(!navigator.geolocation){toast('這裡無法取得位置');return}
+ navigator.geolocation.getCurrentPosition(p=>{const ll=[p.coords.latitude,p.coords.longitude];if(meMk)meMk.setLatLng(ll);else meMk=L.marker(ll,{icon:L.divIcon({className:'',html:'<div class="me"></div>',iconSize:[18,18],iconAnchor:[9,9]})}).addTo(map);map.flyTo(ll,15)},
+  ()=>toast('無法取得位置，請允許定位'),{enableHighAccuracy:true,timeout:10000})};
+$('#hotelBtn').onclick=()=>{if(map)map.flyTo(HOTEL,15)};
+function showMap(day){if(day!=null)mapDay=day;location.hash='map'}
 
 /* ---------- checklists ---------- */
 function list(key,defaults,el){
@@ -636,11 +734,12 @@ $('#phrases').innerHTML=PHR.map((p,i)=>`<div class="ph"><div class="z"><b class=
 $('#phrases').onclick=e=>{const b=e.target.closest('button');if(!b)return;const p=PHR[+b.dataset.i];big(p.jp,p.zh);$('#ovJp').style.whiteSpace='normal'};
 
 /* ---------- routing ---------- */
-const VIEWS=['trip','list','tools'];
+const VIEWS=['trip','map','list','tools'];
 function currentView(){const h=location.hash.slice(1);return VIEWS.includes(h)?h:'trip'}
 function route(){const v=currentView();VIEWS.forEach(x=>$('#v-'+x).classList.toggle('on',x===v));
  document.querySelectorAll('nav a').forEach(a=>a.classList.toggle('on',a.dataset.v===v));
- $('#todayBtn').classList.toggle('on',v==='trip'&&ti>=0&&ti<8&&curDay!==ti);window.scrollTo(0,0)}
+ $('#todayBtn').classList.toggle('on',v==='trip'&&ti>=0&&ti<8&&curDay!==ti);window.scrollTo(0,0);
+ if(v==='map'){const h=window.innerHeight-$('header').offsetHeight-$('nav').offsetHeight-90;$('#mapbox').style.height=Math.max(320,h)+'px';drawMap();setTimeout(()=>{if(map){map.invalidateSize();drawMap()}},60)}}
 window.addEventListener('hashchange',route);
 
 renderChips();renderDay();route();loadWx(false);
