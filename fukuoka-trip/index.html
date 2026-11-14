@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>福岡 5大2小 8天7夜</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Noto+Sans+JP:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f7f1ea; --card:#fffdf9; --ink:#2b2420; --sub:#7a6c62; --line:#eadfd3;
+  --maple:#c8442b; --maple-soft:#fbe6df; --gold:#d99a2b; --green:#3f7d5c; --sea:#2c6e8f;
+  --day:#c8442b; --day-soft:#fbe6df;
+  --r:18px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:"Noto Sans TC",system-ui,sans-serif;font-size:15px;line-height:1.55}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
+a{color:inherit}
+.jp{font-family:"Noto Sans JP","Noto Sans TC",sans-serif}
+
+/* header */
+header{padding:calc(env(safe-area-inset-top) + 18px) 18px 12px;background:linear-gradient(160deg,#7a2a1c 0%,#c8442b 55%,#e07a3c 100%);color:#fff;position:relative;overflow:hidden}
+header::after{content:"";position:absolute;right:-30px;top:-30px;width:170px;height:170px;opacity:.18;
+  background:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path fill='white' d='M50 4l7 20 14-10-3 18 20-4-11 15 18 7-18 8 11 15-20-4 3 18-14-10-7 20-7-20-14 10 3-18-20 4 11-15-18-8 18-7-11-15 20 4-3-18 14 10z'/></svg>") no-repeat center/contain}
+.h-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;position:relative;z-index:1}
+.h-title{font-weight:900;font-size:22px;letter-spacing:.5px;margin:0}
+.h-sub{font-size:13px;opacity:.9;margin-top:2px}
+.count{background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.35);border-radius:14px;padding:6px 10px;text-align:center;min-width:76px;backdrop-filter:blur(4px)}
+.count b{display:block;font-size:22px;line-height:1.1}
+.count span{font-size:11px;opacity:.9}
+.hotel-line{margin-top:10px;font-size:12.5px;opacity:.95;position:relative;z-index:1}
+
+/* views */
+main{padding:0 0 calc(80px + env(safe-area-inset-bottom))}
+.view{display:none}.view.on{display:block}
+
+/* day chips */
+.chips{display:flex;gap:8px;overflow-x:auto;padding:14px 14px 6px;scrollbar-width:none;position:sticky;top:0;background:var(--bg);z-index:5}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:0 0 auto;width:62px;padding:8px 0 7px;border-radius:14px;background:var(--card);border:1.5px solid var(--line);text-align:center;transition:.15s}
+.chip .d{font-size:11px;color:var(--sub)}
+.chip .n{font-weight:900;font-size:18px;line-height:1.15}
+.chip .w{font-size:11px;color:var(--sub)}
+.chip.on{background:var(--c);border-color:var(--c);color:#fff}
+.chip.on .d,.chip.on .w{color:#fff;opacity:.9}
+.chip.today{box-shadow:0 0 0 2px var(--gold) inset}
+
+/* day hero */
+.hero{margin:8px 14px 12px;border-radius:var(--r);background:var(--card);border:1px solid var(--line);overflow:hidden}
+.hero-band{background:var(--day);color:#fff;padding:14px 16px}
+.hero-band .lbl{font-size:12px;opacity:.9}
+.hero-band h2{margin:2px 0 0;font-size:19px;font-weight:900;line-height:1.35}
+.hero-meta{display:flex;flex-wrap:wrap;gap:6px;padding:10px 14px 12px;align-items:center}
+.pill{font-size:12px;padding:3px 9px;border-radius:999px;background:var(--day-soft);color:var(--day);font-weight:700}
+.pill.warn{background:#fff3c4;color:#8a6200}
+.prog{flex:1 1 100%;display:flex;align-items:center;gap:8px;font-size:12px;color:var(--sub);margin-top:4px}
+.bar{flex:1;height:6px;background:var(--line);border-radius:6px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--day);width:0;transition:width .3s}
+
+/* timeline */
+.tl{margin:0 14px;position:relative}
+.stop{position:relative;padding-left:58px;margin-bottom:10px}
+.stop::before{content:"";position:absolute;left:23px;top:0;bottom:-10px;width:2px;background:var(--line)}
+.stop:last-child::before{bottom:50%}
+.dot{position:absolute;left:12px;top:14px;width:24px;height:24px;border-radius:50%;background:var(--card);border:2px solid var(--day);display:grid;place-items:center;font-size:13px;color:#fff;z-index:1}
+.stop.done .dot{background:var(--day)}
+.stop.done .dot::after{content:"✓";font-weight:900}
+.stop.now .dot{box-shadow:0 0 0 5px var(--day-soft);animation:pulse 1.6s infinite}
+@keyframes pulse{50%{box-shadow:0 0 0 9px transparent}}
+.tm{position:absolute;left:0;top:42px;width:48px;text-align:center;font-size:10.5px;color:var(--sub);line-height:1.2}
+.sc{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:11px 13px}
+.stop.now .sc{border-color:var(--day);box-shadow:0 4px 14px -6px var(--day)}
+.stop.done .sc{opacity:.6}
+.sc-h{display:flex;gap:8px;align-items:flex-start}
+.sc-h .t{font-size:12px;color:var(--day);font-weight:700}
+.sc-h h3{margin:1px 0 0;font-size:15.5px;font-weight:700;line-height:1.35}
+.sc-h .main{flex:1;min-width:0}
+.now-tag{display:inline-block;font-size:10.5px;background:var(--day);color:#fff;border-radius:6px;padding:0 6px;margin-left:6px;vertical-align:2px}
+.tr{display:inline-flex;align-items:center;gap:4px;margin-top:6px;font-size:12px;background:#f3ece4;color:#5b4d43;border-radius:8px;padding:2px 8px}
+.tr.car{background:#e3eef5;color:var(--sea)}
+.tr.rail{background:#e6f1ea;color:var(--green)}
+.chev{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;color:var(--sub);transition:transform .2s;flex:0 0 auto}
+.stop.open .chev{transform:rotate(180deg)}
+.more{display:none;margin-top:9px;padding-top:9px;border-top:1px dashed var(--line);font-size:13.5px;color:#4a3f38}
+.stop.open .more{display:block}
+.tip{margin-top:8px;background:#fff8e1;border-radius:10px;padding:7px 10px;font-size:12.5px;color:#7a5a00}
+.acts{display:flex;gap:8px;margin-top:10px}
+.btn{flex:1;display:inline-flex;justify-content:center;align-items:center;gap:6px;padding:8px 10px;border-radius:11px;font-size:13px;font-weight:700;text-decoration:none;border:1.5px solid var(--line);background:#fff}
+.btn.pri{background:var(--day);border-color:var(--day);color:#fff}
+.sec .btn.pri{background:var(--maple);border-color:var(--maple)}
+.extras{margin:14px 14px 0;padding:12px 14px;border-radius:16px;border:1.5px dashed var(--gold);background:#fffaf0}
+.extras h4{margin:0 0 6px;font-size:13px;color:#8a6200}
+.extras a{display:inline-block;margin:3px 6px 3px 0;padding:4px 10px;border-radius:999px;background:#fff;border:1px solid #f0d9a8;font-size:13px;text-decoration:none}
+.memo{margin:14px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px 14px}
+.memo h4{margin:0 0 6px;font-size:13px;color:var(--sub)}
+textarea,input,select{font:inherit;width:100%;border:1.5px solid var(--line);border-radius:11px;padding:9px 11px;background:#fff;color:var(--ink)}
+textarea{min-height:70px;resize:vertical}
+textarea:focus,input:focus,select:focus{outline:none;border-color:var(--maple)}
+
+/* generic sections */
+.sec{margin:14px;background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:14px}
+.sec h3{margin:0 0 10px;font-size:16px;font-weight:900;display:flex;align-items:center;gap:8px}
+.sec .hint{font-size:12px;color:var(--sub);margin-top:-6px;margin-bottom:10px}
+.ck{display:flex;gap:10px;align-items:flex-start;padding:9px 0;border-bottom:1px solid var(--line)}
+.ck:last-child{border-bottom:0}
+.box{flex:0 0 22px;height:22px;border-radius:7px;border:2px solid #cbbcae;display:grid;place-items:center;margin-top:1px}
+.ck.on .box{background:var(--green);border-color:var(--green)}
+.ck.on .box::after{content:"✓";color:#fff;font-size:13px;font-weight:900}
+.ck .txt{flex:1}
+.ck.on .txt{color:var(--sub);text-decoration:line-through}
+.ck .tag{font-size:11px;color:var(--maple);font-weight:700;display:block}
+.ck .del{color:#b9a99b;font-size:18px;line-height:1;padding:0 4px}
+.addrow{display:flex;gap:8px;margin-top:10px}
+.addrow input{flex:1}
+.addrow button{padding:0 16px;border-radius:11px;background:var(--maple);color:#fff;font-weight:700}
+
+.showcard{border-radius:16px;background:#1f1a17;color:#fff;padding:16px;text-align:center;margin-top:10px}
+.showcard .big{font-size:20px;font-weight:700;line-height:1.5}
+.showcard .small{font-size:13px;opacity:.75;margin-top:6px}
+.row{display:flex;gap:8px;align-items:center;margin-bottom:8px}
+.row label{font-size:13px;color:var(--sub);flex:0 0 auto}
+.step{display:flex;align-items:center;border:1.5px solid var(--line);border-radius:11px;overflow:hidden;background:#fff}
+.step button{width:34px;height:36px;font-size:18px;font-weight:700;color:var(--maple)}
+.step b{min-width:26px;text-align:center}
+.seg{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.seg button{padding:6px 11px;border-radius:999px;border:1.5px solid var(--line);background:#fff;font-size:13px}
+.seg button.on{background:var(--maple);border-color:var(--maple);color:#fff}
+.steps li{margin-bottom:6px;font-size:13.5px}
+.conv{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center}
+.conv .eq{color:var(--sub);font-weight:700}
+.ph{padding:10px 0;border-bottom:1px solid var(--line);display:flex;gap:10px;align-items:center}
+.ph:last-child{border-bottom:0}
+.ph .z{flex:1}
+.ph .z b{display:block;font-size:16px}
+.ph .z span{font-size:12.5px;color:var(--sub)}
+.ph button{font-size:12px;padding:6px 10px;border-radius:9px;border:1.5px solid var(--line);background:#fff;flex:0 0 auto}
+.sos{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.sos div{border-radius:14px;padding:12px;background:var(--maple-soft);text-align:center}
+.sos b{display:block;font-size:26px;color:var(--maple)}
+.sos span{font-size:12.5px}
+
+/* overlay */
+.ov{position:fixed;inset:0;background:#120e0c;color:#fff;z-index:50;display:none;flex-direction:column;justify-content:center;align-items:center;padding:30px 22px;text-align:center}
+.ov.on{display:flex}
+.ov .big{font-size:34px;font-weight:700;line-height:1.5}
+.ov .small{font-size:15px;opacity:.7;margin-top:14px}
+.ov .x{position:absolute;top:calc(env(safe-area-inset-top) + 14px);right:16px;font-size:15px;padding:8px 14px;border-radius:999px;background:rgba(255,255,255,.12)}
+.toast{position:fixed;left:50%;bottom:calc(90px + env(safe-area-inset-bottom));transform:translateX(-50%);background:#2b2420;color:#fff;padding:8px 16px;border-radius:999px;font-size:13px;opacity:0;transition:.25s;pointer-events:none;z-index:60}
+.toast.on{opacity:1}
+
+/* bottom nav */
+nav{position:fixed;left:0;right:0;bottom:0;background:rgba(255,253,249,.96);backdrop-filter:blur(8px);border-top:1px solid var(--line);display:flex;padding:6px 6px calc(6px + env(safe-area-inset-bottom));z-index:20}
+nav a{flex:1;text-align:center;text-decoration:none;color:var(--sub);font-size:11.5px;padding:4px 0;border-radius:12px}
+nav a i{display:block;font-style:normal;font-size:21px;line-height:1.2}
+nav a.on{color:var(--maple);font-weight:700;background:var(--maple-soft)}
+.todaybtn{position:fixed;right:14px;bottom:calc(78px + env(safe-area-inset-bottom));background:var(--ink);color:#fff;border-radius:999px;padding:9px 14px;font-size:13px;font-weight:700;box-shadow:0 6px 18px -6px rgba(0,0,0,.4);z-index:15;display:none}
+.todaybtn.on{display:block}
+@media(min-width:620px){main,header .h-top,.hotel-line{max-width:600px;margin-left:auto;margin-right:auto}nav{justify-content:center}nav a{max-width:150px}}
+</style>
+</head>
+<body>
+<header>
+  <div class="h-top">
+    <div>
+      <h1 class="h-title">🍁 福岡 8天7夜</h1>
+      <div class="h-sub">5大2小・2026/11/21（六）– 11/28（六）</div>
+    </div>
+    <div class="count" id="count"><b>–</b><span></span></div>
+  </div>
+  <div class="hotel-line">🏨 福岡蒙特利飯店 Hotel Monterey Fukuoka</div>
+</header>
+
+<main>
+  <!-- 行程 -->
+  <section class="view" id="v-trip">
+    <div class="chips" id="chips"></div>
+    <div id="dayview"></div>
+  </section>
+
+  <!-- 清單 -->
+  <section class="view" id="v-list">
+    <div class="sec">
+      <h3>✅ 出發前待辦</h3>
+      <div class="hint">從行程表整理出要先預約／確認的事，點一下打勾。</div>
+      <div id="todo"></div>
+      <div class="addrow"><input id="todoIn" placeholder="新增待辦…"><button id="todoAdd">加入</button></div>
+    </div>
+    <div class="sec">
+      <h3>🎒 打包清單</h3>
+      <div id="pack"></div>
+      <div class="addrow"><input id="packIn" placeholder="新增要帶的東西…"><button id="packAdd">加入</button></div>
+    </div>
+  </section>
+
+  <!-- 工具 -->
+  <section class="view" id="v-tools">
+    <div class="sec">
+      <h3>🚕 計程車目的地卡</h3>
+      <div class="hint">選目的地，按「放大給司機看」。</div>
+      <div class="seg" id="taxiSeg"></div>
+      <div class="showcard"><div class="big jp" id="taxiJp"></div><div class="small" id="taxiZh"></div></div>
+      <div class="acts"><button class="btn pri" id="taxiBig">🔍 放大給司機看</button><a class="btn" id="taxiMap" target="_blank" rel="noopener">📍 地圖</a></div>
+    </div>
+
+    <div class="sec">
+      <h3>🚄 11/27 新幹線買票小抄</h3>
+      <div class="hint">博多 ⇔ 小倉，山陽新幹線自由席來回。</div>
+      <div class="row"><label>大人</label><div class="step"><button data-k="ad" data-v="-1">−</button><b id="adN">5</b><button data-k="ad" data-v="1">＋</button></div>
+        <label style="margin-left:8px">小孩</label><div class="step"><button data-k="ch" data-v="-1">−</button><b id="chN">2</b><button data-k="ch" data-v="1">＋</button></div></div>
+      <div class="showcard"><div class="big jp" id="jrJp"></div><div class="small" id="jrZh"></div></div>
+      <div class="acts"><button class="btn pri" id="jrBig">🔍 放大給站員看</button></div>
+      <ol class="steps" style="padding-left:20px;margin:12px 0 0">
+        <li><b>購買地點：</b>博多車站靠「筑紫口（新幹線口）」那側的綠色窗口（みどりの窓口）或藍色自動售票機。</li>
+        <li><b>售票機：</b>點螢幕上的「お得なきっぷ（特惠票）」或直接搜尋「小倉」，就能找到往返小倉的新幹線自由席票。</li>
+        <li><b>臨櫃最安心：</b>排人工窗口，把上面這張卡秀給站員看，站員會直接出當天最適合的票。</li>
+      </ol>
+      <div class="tip">⚠️ 你在行程表標了「要查一下」：JR Pass 北部九州券不能搭這段新幹線，需自費或持全九州券。另外 JR 規定未上小學的幼兒由大人陪同搭自由席通常免費（每位大人最多帶 2 名），出發前請再跟站員確認。</div>
+    </div>
+
+    <div class="sec">
+      <h3>💴 日圓換算</h3>
+      <div class="conv">
+        <input id="jpy" type="number" inputmode="decimal" placeholder="日圓 ¥">
+        <span class="eq">⇄</span>
+        <input id="twd" type="number" inputmode="decimal" placeholder="台幣 NT$">
+      </div>
+      <div class="row" style="margin-top:10px"><label>匯率：1 日圓 =</label><input id="rate" type="number" step="0.001" inputmode="decimal" style="width:100px"><label>台幣</label></div>
+      <div class="hint" style="margin:0">匯率請自行改成當天數字，會記在這台手機上。</div>
+    </div>
+
+    <div class="sec">
+      <h3>🗣️ 親子實用日文</h3>
+      <div class="hint">點「放大」直接給店員看。</div>
+      <div id="phrases"></div>
+    </div>
+
+    <div class="sec">
+      <h3>🆘 緊急電話（日本）</h3>
+      <div class="sos"><div><b>110</b><span>警察</span></div><div><b>119</b><span>救護車／消防</span></div></div>
+    </div>
+  </section>
+</main>
+
+<button class="todaybtn" id="todayBtn">📍 回到今天</button>
+
+<nav>
+  <a href="#trip" data-v="trip"><i>🗓️</i>行程</a>
+  <a href="#list" data-v="list"><i>✅</i>清單</a>
+  <a href="#tools" data-v="tools"><i>🧰</i>工具</a>
+</nav>
+
+<div class="ov" id="ov"><button class="x" id="ovX">✕ 關閉</button><div class="big jp" id="ovJp"></div><div class="small" id="ovZh"></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ---------- storage (safe) ---------- */
+const S={get(k,d){try{const v=localStorage.getItem('fuk26_'+k);return v==null?d:JSON.parse(v)}catch(e){return d}},
+         set(k,v){try{localStorage.setItem('fuk26_'+k,JSON.stringify(v))}catch(e){}}};
+
+/* ---------- data ---------- */
+const DAYS=[
+{date:'11/21',wk:'六',c:'#7a3b2e',title:'抵達與市區備戰',pay:'信用卡',payNote:'地下鐵一律只刷信用卡',stops:[
+ {t:'18:00-19:15',n:'抵達福岡機場入境',tr:'步行',d:'18:00 抵達機場，辦理入境手續、提取行李與推車。',q:'福岡空港 国際線ターミナル'},
+ {t:'19:15-19:45',n:'機場直達博多車站／飯店',tr:'UBER或計程車',d:'預約大台車或分兩台計程車直達飯店入住。5大2小免去第一晚搭車疲累，迎合長輩。',q:'Hotel Monterey Fukuoka'},
+ {t:'20:00~',n:'車站美食街或附近晚餐',tr:'地鐵七隈線',d:'飯店放完行李後，搭地鐵七隈線 2 站直達「博多站」。尋找車站樓上的熱門餐廳用餐。',q:'博多駅'},
+ {t:'20:30~',n:'晚間散步與雜貨購物',tr:'步行',d:'晚餐後逛博多車站共構的 AMU PLAZA（如：利久牛舌）享用，隨後返回飯店休息。',q:'AMU PLAZA 博多'}
+]},
+{date:'11/22',wk:'日',c:'#c8442b',title:'福岡市區經典散策與百貨聖誕季',pay:'信用卡',payNote:'不包車',stops:[
+ {t:'10:00-12:00',n:'睡到自然醒／警固公園散步',tr:'步行',d:'連續移動後讓長輩小孩睡到飽。從飯店散步 8 分鐘到天神中心的警固公園，11 月下旬開始會有豐富的冬日聖誕燈飾裝置，白天非常適合小朋友奔跑。',q:'警固公園'},
+ {t:'12:00-14:00',n:'天神名產午餐（水炊鍋／拉麵）',tr:'步行',d:'在天神商圈享用道地的博多名物午餐（如：博多華味鳥水炊鍋，湯頭溫潤很適合老人小孩）。',q:'博多華味鳥 天神'},
+ {t:'14:00-17:30',n:'天神地下街與百貨輕鬆逛',tr:'步行',d:'漫步歐洲風格的天神地下街，媽媽可逛街、爸爸和長輩帶小孩。累了隨時可買 RINGO 蘋果派或 Truffle Bakery 松露鹽麵包當點心。',q:'天神地下街'},
+ {t:'17:30-18:00',n:'前往博多車站',tr:'地鐵七隈線',d:'從「天神南站」搭地鐵七隈線，2 站直達「博多站」（車程 5 分鐘）。',tip:'AMU PLAZA 8 樓有寶可夢中心，可以順路去買！',q:'ポケモンセンターフクオカ'},
+ {t:'18:00~',n:'博多黑毛和牛燒肉',tr:'步行',d:'核心晚餐！準時前往預訂的博多燒肉餐廳大啖和牛，完美享受週日的夜晚（推薦提早一個月預約 Nikuichi 肉屋肉一 博多店）。',q:'肉屋肉一 博多'}
+],extras:['櫛田神社']},
+{date:'11/23',wk:'一',c:'#b5651d',title:'太宰府與竈門神社極盛賞楓',pay:'西瓜卡',payNote:'非包車・電車',stops:[
+ {t:'08:15-08:30',n:'前往西鐵福岡（天神）站',tr:'步行',d:'從福岡蒙特利飯店走路約 8-10 分鐘，抵達西鐵天神站。',q:'西鉄福岡(天神)駅'},
+ {t:'08:30-09:10',n:'搭西鐵電車至太宰府',tr:'西鐵特急／急行',d:'搭乘西鐵天神大牟田線（在二日市站轉乘太宰府線），約 40 分鐘抵達「太宰府站」。',q:'太宰府駅'},
+ {t:'09:15-11:15',n:'先上山：竈門神社賞楓',tr:'UBER或計程車（1,000日圓）',d:'分搭 2 台計程車上山（車程僅 7-10 分鐘）。11 月下旬正值竈門神社紅葉巔峰，可以悠閒走在 300 棵楓樹的紅葉隧道下拍照，賞精緻的結緣御守。',q:'竈門神社 太宰府'},
+ {t:'11:15-11:30',n:'下山返回太宰府車站',tr:'UBER或計程車（1,000日圓）',d:'搭乘回程巴士下山回到車站周邊。',q:'太宰府駅'},
+ {t:'11:30-13:00',n:'表參道午餐與梅枝餅',tr:'步行',d:'在參道上享用午餐，並品嚐現烤的限定點心梅枝餅。',q:'太宰府天満宮 参道'},
+ {t:'13:00-15:00',n:'太宰府天滿宮參拜',tr:'步行',d:'參觀全新整修完工、睽違 124 年的令和本殿！欣賞隈研吾設計的星巴克，帶小孩摸摸御神牛祈求聰明智慧。',q:'太宰府天満宮'},
+ {t:'15:15-16:00',n:'體驗回程：旅人號觀光列車',tr:'觀光列車「旅人」',d:'搭乘太宰府限定的「旅人號」彩繪觀光列車返回天神。車廂內有開運許願箱，小朋友搭乘會覺得很有趣。',q:'太宰府駅'},
+ {t:'18:00~',n:'屋台美食體驗',tr:'2台計程車',d:'傍晚從飯店出發，搭 2 台計程車前往那珂川河畔，體驗福岡特有的「屋台（路邊攤）」美食與交際氣氛。',q:'中洲 屋台'}
+]},
+{date:'11/24',wk:'二',c:'#2c6e8f',title:'水族館與海濱公園大自然',pay:'西瓜卡',stops:[
+ {t:'09:00-11:30',n:'海之中道海洋世界',tr:'JR火車',d:'乘坐至「海之中道站」，參觀海洋世界大水族館，看趣味海豚與海獅表演。',q:'マリンワールド海の中道'},
+ {t:'11:30-13:30',n:'海鮮館餐廳午餐',tr:'步行',d:'觀賞完博多港的大型海豚秀，在水族館餐廳享用企鵝便當。',q:'マリンワールド海の中道'},
+ {t:'13:30-17:30',n:'海之中道海濱公園',tr:'步行／園內單車',d:'水族館旁就是超大公園，5-6 歲小孩可在巨大戶外遊戲場、跳跳床放電、觀賞小動物，注意防曬與補充水分。',q:'海の中道海浜公園'},
+ {t:'18:00~',n:'天神地下街與晚餐',tr:'地鐵或2台計程車',d:'返回市區前往天神商圈，逛著名的天神地下街，晚餐享用博多牛腸鍋或拉麵。',q:'天神地下街'}
+]},
+{date:'11/25',wk:'三',c:'#3f7d5c',title:'九州自然動物園＋由布院',pay:'10人座包車',payNote:'自駕免排隊版・約 10 小時',stops:[
+ {t:'08:00',n:'福岡蒙特利飯店大廳出發',tr:'10人座包車',d:'準時出發是關鍵！車程約 1.5 小時。避開福岡早晨通勤車潮，孩子可在車上吃早餐、補眠。',q:'Hotel Monterey Fukuoka'},
+ {t:'09:30-10:20',n:'九州自然動物園【野生動物區】',tr:'全車免下車・直接開包車進入',d:'抵達門口後走「自駕車通道（My Car Lane）」。核心體驗：租借中文 GPS 語音導覽機（600 日圓），司機大哥直接開車載著全家闖入獅子、老虎、大象的家！平視猛獸，全程約 50 分鐘。',q:'九州自然動物公園アフリカンサファリ'},
+ {t:'10:20-11:30',n:'九州自然動物園【小動物互動區】',tr:'步行',d:'包車停在園區停車場，全家下車伸展。核心體驗：帶 5、6 歲小孩親手餵食松鼠猴、觸摸溫馴袋鼠、體驗騎迷你馬。最後買支別府高原限定的「鮮乳霜淇淋」！',q:'九州自然動物公園アフリカンサファリ'},
+ {t:'11:30-12:00',n:'前往溫泉鄉由布院',tr:'10人座包車',d:'車程僅需 30 分鐘。這段平穩山路很適合讓剛剛興奮過度的孩子在車上稍微閉眼、收心。',q:'由布院駅'},
+ {t:'12:00-15:30',n:'由布院湯之坪街道、金鱗湖',tr:'步行',d:'停留 3.5 小時極度充裕！抵達後先享用午餐（推薦購買金賞可樂餅、吉吾炸雞等小吃定點吃完，免去排隊進餐廳的時間）。核心體驗：深度暢玩由布院花卉村（Floral Village）餵小兔子與看童話小屋（1.5 小時），一路散步到金鱗湖。',q:'湯布院フローラルヴィレッジ'},
+ {t:'15:30-17:30',n:'啟程舒適返回福岡',tr:'10人座包車',d:'避開黃昏進城塞車潮。回程走高速公路直達福岡市區（約 2 小時），孩子與大人可以在包車上徹底熟睡補眠。',q:'Hotel Monterey Fukuoka'},
+ {t:'17:30',n:'抵達福岡蒙特利飯店',tr:'—',d:'不超時、安全達陣！總行程精準控制在 9.5～10 小時內。下車回房稍作休息。',q:'Hotel Monterey Fukuoka'},
+ {t:'18:00~',n:'周邊自由晚餐',tr:'步行',d:'晚上在飯店周邊（天神／渡邊通）尋找親子友善、免排隊的餐廳（如迴轉壽司或家庭餐廳），輕鬆結束完美的一天。',q:'天神 回転寿司'}
+]},
+{date:'11/26',wk:'四',c:'#5b4a8b',title:'海港巨蛋與最新 LaLaport 鋼彈',pay:'西瓜卡',stops:[
+ {t:'09:30-10:30',n:'前往百道海灘',tr:'2台計程車',d:'坐 2 台計程車直奔福岡海濱百道海灘，在沙灘步道散步、看海、吹海風。',q:'シーサイドももち海浜公園'},
+ {t:'10:30-12:30',n:'BOSS E・ZO 福岡',tr:'2台計程車',d:'位於巨蛋旁，帶小朋友玩 teamLab 森林美術館（互動數位藝術，大人小孩都愛）。',q:'BOSS E・ZO FUKUOKA'},
+ {t:'12:30-13:00',n:'前往 LaLaport 福岡',tr:'2台計程車',d:'從巨蛋直達 LaLaport（車程約 20-25 分鐘），無縫銜接。亦可在車上讓孩子小憩。',q:'ららぽーと福岡'},
+ {t:'13:00-17:30',n:'【LaLaport 福岡】',tr:'步行',d:'【專屬看鋼彈】秋季 13:00／15:00／17:00 有鋼彈表演。3 樓美食街午餐，4 樓玩具反斗城、2 樓媽媽逛街。',q:'ららぽーと福岡'},
+ {t:'17:30-18:30',n:'傍晚返程／回飯店',tr:'2台計程車',d:'欣賞完 17:00 鋼彈燈光秀特技後，搭車返回飯店放戰利品。',q:'Hotel Monterey Fukuoka'},
+ {t:'19:00~',n:'車站美食街晚餐',tr:'地鐵七隈線',d:'地鐵 5 分鐘到博多站，AMU PLAZA 9-10 樓「城市廚房」美食街用餐。',q:'AMU PLAZA 博多'}
+],extras:['福岡塔']},
+{date:'11/27',wk:'五',c:'#8f2d56',title:'門司港與小倉懷舊一日遊',pay:'買 JR 票',payWarn:true,payNote:'要查一下 → 見工具頁',stops:[
+ {t:'09:00-09:17',n:'新幹線速達小倉北九州',tr:'山陽新幹線',d:'於博多站搭乘山陽新幹線前往小倉，只需 17 分鐘！老小完全不累。（注意：JR Pass 北部九州券不可搭這段，需自費或持有全九州券）',q:'博多駅',jr:true},
+ {t:'09:25-09:40',n:'抵達門司港車站',tr:'JR鹿兒島本線',d:'從小倉換乘火車到門司港站（約 13 分鐘），古色古香非常適合全家合影。',q:'門司港駅'},
+ {t:'09:45-11:30',n:'九州鐵道紀念館',tr:'步行',d:'就在車站旁，5-6 歲小孩可開模擬「迷你新幹線與小火車」，戶外區有大火車頭模型。',q:'九州鉄道記念館'},
+ {t:'11:30-13:30',n:'唐戶市場海鮮大餐',tr:'關門聯絡船',d:'從門司港搭 5 分鐘跨海渡輪到對岸山口縣，現挑現吃握壽司與河豚肉。',q:'唐戸市場'},
+ {t:'13:30-15:30',n:'門司港浪漫古蹟散策',tr:'步行＋船',d:'隨意悠閒地回河畔，散步看藍翼門司吊橋開合秀，下午茶吃燒咖哩。',q:'ブルーウィングもじ'},
+ {t:'15:45-17:30',n:'小倉城迎風賞楓',tr:'JR火車',d:'搭火車回到小倉站，徒步到古色古香的小倉城（11 月下旬有美麗銀杏與紅葉），美景好拍照。',q:'小倉城'},
+ {t:'17:30-17:47',n:'輕鬆返回博多車站',tr:'山陽新幹線',d:'從小倉站再次搭乘新幹線快速返回博多站，17 分鐘回到博多。',q:'小倉駅',jr:true}
+]},
+{date:'11/28',wk:'六',c:'#a0522d',title:'市區最後巡禮與回台',pay:'信用卡',stops:[
+ {t:'09:30-11:30',n:'大濠公園悠閒散步',tr:'地鐵七隈線',d:'悠閒辦理退房，行李暫放飯店。搭地鐵到大濠公園散步，主要目的為去看美麗的日本庭園與金黃色銀杏。',tip:'大濠公園站在地鐵「空港線」上（天神站搭 2 站），不是七隈線喔。',q:'大濠公園'},
+ {t:'11:30-13:30',n:'櫛田神社與川端商店街',tr:'地鐵或步行',d:'參拜博多總鎮守櫛田神社，步行隔壁的川端商店街，在老街中享受最後的日式午餐。',q:'櫛田神社'},
+ {t:'13:30-15:30',n:'市區最後伴手禮補貨',tr:'步行',d:'回博多車站購物，在車站內或近郊商圈做最後小伴手禮採買（如：明太子、努努雞）。',q:'博多駅 マイング'},
+ {t:'16:00-16:30',n:'飯店出發前往機場',tr:'2台排班計程車',d:'返回飯店領行李，大廳叫兩台大計程車，老小與大小包行李直奔機場（車程僅約 15-20 分鐘，最省錢省事）。',q:'福岡空港 国際線ターミナル'},
+ {t:'16:30-19:10',n:'機場免稅店最後衝刺',tr:'步行',d:'抵達機場辦理登機，出境後在免稅店做最後的伴手禮補貨，19:10 搭乘班機返台。',q:'福岡空港 国際線ターミナル'}
+]}
+];
+
+const TODO=[
+ {t:'預約 Nikuichi 肉屋肉一 博多店（建議提早一個月）',g:'11/22 晚餐'},
+ {t:'確認 10 人座包車、司機聯絡方式、08:00 大廳集合',g:'11/25'},
+ {t:'機場→飯店：預約大台車或確認分兩台計程車',g:'11/21'},
+ {t:'準備西瓜卡／Suica（太宰府、海之中道、百道都用得到）',g:'11/23・24・26'},
+ {t:'查新幹線博多⇔小倉票價與小孩票規定',g:'11/27'},
+ {t:'查旅人號觀光列車當天班次',g:'11/23'},
+ {t:'確認 LaLaport 鋼彈表演時間（13/15/17 點）',g:'11/26'},
+ {t:'確認回程班機 19:10、線上報到',g:'11/28'}
+];
+const PACK=['護照 ×7','機票／訂房確認','信用卡','日圓現金（屋台、小店）','西瓜卡／Suica','手機充電器、行動電源','轉接頭（日本 A 型兩孔）','小孩常備藥','防曬乳、帽子','薄外套＋保暖層（11 月下旬早晚涼）','好走的鞋','小孩換洗衣物、濕紙巾','購物袋、裝伴手禮的空間'];
+
+const TAXI=[
+ {k:'飯店',jp:'ホテルモントレ福岡',zh:'福岡蒙特利飯店',q:'Hotel Monterey Fukuoka'},
+ {k:'博多站',jp:'博多駅',zh:'博多車站',q:'博多駅'},
+ {k:'機場（國際線）',jp:'福岡空港 国際線ターミナル',zh:'福岡機場 國際線航廈',q:'福岡空港 国際線ターミナル'},
+ {k:'屋台（中洲）',jp:'中洲の屋台',zh:'中洲那珂川河畔屋台',q:'中洲 屋台'},
+ {k:'百道海灘',jp:'シーサイドももち海浜公園',zh:'百道海濱公園',q:'シーサイドももち海浜公園'},
+ {k:'BOSS E・ZO',jp:'BOSS E・ZO FUKUOKA（みずほPayPayドーム横）',zh:'BOSS E・ZO 福岡（巨蛋旁）',q:'BOSS E・ZO FUKUOKA'},
+ {k:'LaLaport',jp:'ららぽーと福岡',zh:'LaLaport 福岡',q:'ららぽーと福岡'},
+ {k:'竈門神社',jp:'竈門神社',zh:'竈門神社',q:'竈門神社 太宰府'}
+];
+const PHR=[
+ {jp:'7人です。大人5人と子供2人です。',zh:'我們 7 位：5 大 2 小。'},
+ {jp:'予約した〇〇です。',zh:'我有預約，名字是〇〇。'},
+ {jp:'子供用の椅子はありますか？',zh:'有兒童椅嗎？'},
+ {jp:'お子様メニューはありますか？',zh:'有兒童餐嗎？'},
+ {jp:'待ち時間はどのくらいですか？',zh:'大概要等多久？'},
+ {jp:'カードで払えますか？',zh:'可以刷卡嗎？'},
+ {jp:'免税できますか？',zh:'可以免稅嗎？'},
+ {jp:'トイレはどこですか？',zh:'廁所在哪裡？'},
+ {jp:'タクシーを2台お願いします。',zh:'麻煩幫我叫兩台計程車。'}
+];
+
+/* ---------- helpers ---------- */
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const mapUrl=q=>'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(q);
+const toMin=s=>{const m=s.match(/(\d{1,2}):(\d{2})/);return m?+m[1]*60+ +m[2]:null};
+function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(toast._);toast._=setTimeout(()=>t.classList.remove('on'),1600)}
+function jstNow(){const d=new Date(Date.now()+9*3600e3);return {y:d.getUTCFullYear(),mo:d.getUTCMonth()+1,da:d.getUTCDate(),min:d.getUTCHours()*60+d.getUTCMinutes()}}
+function tripDayIndex(){const n=jstNow();const a=Date.UTC(n.y,n.mo-1,n.da),b=Date.UTC(2026,10,21);return Math.round((a-b)/864e5)}
+function trIcon(tr){if(/包車|計程車|UBER/.test(tr))return['🚐','car'];if(/新幹線|JR|西鐵|列車|地鐵|火車/.test(tr))return['🚃','rail'];if(/船/.test(tr))return['⛴️',''];if(/單車/.test(tr))return['🚲',''];return['🚶','']}
+function soft(hex){const n=parseInt(hex.slice(1),16);const r=n>>16,g=n>>8&255,b=n&255;const m=x=>Math.round(x+(255-x)*.86);return`rgb(${m(r)},${m(g)},${m(b)})`}
+
+/* ---------- state ---------- */
+let done=S.get('done',{});      // "d-i": true
+let memos=S.get('memo',{});
+let curDay=S.get('day',0);
+const ti=tripDayIndex();
+if(ti>=0&&ti<8)curDay=ti;
+
+/* ---------- header countdown ---------- */
+(function(){const c=$('#count');
+ if(ti<0){c.innerHTML=`<b>${-ti}</b><span>天後出發</span>`}
+ else if(ti<8){c.innerHTML=`<b>Day ${ti+1}</b><span>旅程進行中</span>`}
+ else{c.innerHTML=`<b>🏠</b><span>平安回家</span>`}})();
+
+/* ---------- itinerary ---------- */
+function renderChips(){
+ $('#chips').innerHTML=DAYS.map((d,i)=>`<button class="chip${i===curDay?' on':''}${i===ti?' today':''}" style="--c:${d.c}" data-i="${i}">
+  <div class="d">Day ${i+1}</div><div class="n">${d.date.split('/')[1]}</div><div class="w">${d.date.split('/')[0]}月・${d.wk}</div></button>`).join('');
+ const on=$('#chips .chip.on');if(on)on.scrollIntoView({inline:'center',block:'nearest'});
+}
+function nowStopIndex(day){
+ if(day!==ti)return -1;const m=jstNow().min;const st=DAYS[day].stops;let idx=-1;
+ st.forEach((s,i)=>{const a=toMin(s.t);if(a!=null&&m>=a)idx=i});
+ if(idx>=0){const last=st[idx];const e=toMin(last.t.split('-')[1]||'');if(idx===st.length-1&&e&&m>e+60)idx=-1}
+ return idx;
+}
+function renderDay(keep){
+ const opened=keep?[...document.querySelectorAll('.stop.open')].map(x=>x.dataset.i):[];
+ const d=DAYS[curDay];document.documentElement.style.setProperty('--day',d.c);document.documentElement.style.setProperty('--day-soft',soft(d.c));
+ const nowI=nowStopIndex(curDay);
+ const n=d.stops.length,k=d.stops.filter((_,i)=>done[curDay+'-'+i]).length;
+ let h=`<div class="hero"><div class="hero-band"><div class="lbl">Day ${curDay+1}・${d.date}（${d.wk}）</div><h2>${esc(d.title)}</h2></div>
+ <div class="hero-meta"><span class="pill${d.payWarn?' warn':''}">💳 ${esc(d.pay)}</span>${d.payNote?`<span class="pill" style="background:#f3ece4;color:#5b4d43">${esc(d.payNote)}</span>`:''}
+ <div class="prog"><span>完成 ${k}/${n}</span><div class="bar"><i style="width:${n?k/n*100:0}%"></i></div></div></div></div><div class="tl">`;
+ d.stops.forEach((s,i)=>{const id=curDay+'-'+i,isD=!!done[id],[ic,cls]=trIcon(s.tr);const tt=s.t.replace('-','<br>–<br>');
+  h+=`<div class="stop${isD?' done':''}${i===nowI?' now open':''}" data-i="${i}">
+   <button class="dot" data-act="done" aria-label="完成"></button>
+   <div class="tm">${tt}</div>
+   <div class="sc"><div class="sc-h" data-act="toggle"><div class="main"><div class="t">${esc(s.t)}${i===nowI?'<span class="now-tag">現在</span>':''}</div><h3>${esc(s.n)}</h3>
+   <span class="tr ${cls}">${ic} ${esc(s.tr)}</span></div><span class="chev">⌄</span></div>
+   <div class="more">${esc(s.d)}${s.tip?`<div class="tip">💡 ${esc(s.tip)}</div>`:''}
+   <div class="acts"><a class="btn" href="${mapUrl(s.q)}" target="_blank" rel="noopener">📍 地圖導航</a>
+   ${s.jr?'<a class="btn" href="#tools" data-act="jr">🎫 買票小抄</a>':''}
+   <button class="btn pri" data-act="done">${isD?'↺ 取消完成':'✓ 完成'}</button></div></div></div></div>`});
+ h+='</div>';
+ if(d.extras)h+=`<div class="extras"><h4>✨ 有空可加碼</h4>${d.extras.map(x=>`<a href="${mapUrl(x)}" target="_blank" rel="noopener">📍 ${esc(x)}</a>`).join('')}</div>`;
+ h+=`<div class="memo"><h4>📝 今日筆記（只存在這台手機）</h4><textarea id="memo" placeholder="訂位編號、想吃的店、花費…">${esc(memos[curDay]||'')}</textarea></div>`;
+ $('#dayview').innerHTML=h;
+ opened.forEach(i=>{const el=document.querySelector(`.stop[data-i="${i}"]`);if(el)el.classList.add('open')});
+ $('#memo').addEventListener('input',e=>{memos[curDay]=e.target.value;S.set('memo',memos)});
+ $('#todayBtn').classList.toggle('on',ti>=0&&ti<8&&curDay!==ti&&currentView()==='trip');
+}
+$('#chips').addEventListener('click',e=>{const c=e.target.closest('.chip');if(!c)return;curDay=+c.dataset.i;S.set('day',curDay);renderChips();renderDay();window.scrollTo({top:$('header').offsetHeight,behavior:'smooth'})});
+$('#dayview').addEventListener('click',e=>{
+ const a=e.target.closest('[data-act]');if(!a)return;const st=a.closest('.stop');
+ if(a.dataset.act==='toggle'){st.classList.toggle('open');return}
+ if(a.dataset.act==='jr')return;
+ if(a.dataset.act==='done'){const id=curDay+'-'+st.dataset.i;done[id]=!done[id];if(!done[id])delete done[id];S.set('done',done);
+  renderDay(true);if(done[id]){const el=document.querySelector(`.stop[data-i="${st.dataset.i}"]`);if(el)el.classList.remove('open')}
+  if(done[id])toast('👍 完成！')}
+});
+$('#todayBtn').onclick=()=>{curDay=ti;renderChips();renderDay()};
+
+/* ---------- checklists ---------- */
+function list(key,defaults,el){
+ let items=S.get(key,null);if(!items)items=defaults.map(x=>typeof x==='string'?{t:x}:{...x});
+ const save=()=>S.set(key,items);
+ const draw=()=>{el.innerHTML=items.map((x,i)=>`<div class="ck${x.on?' on':''}" data-i="${i}"><span class="box"></span><span class="txt">${x.g?`<span class="tag">${esc(x.g)}</span>`:''}${esc(x.t)}</span><button class="del" data-del="${i}" aria-label="刪除">×</button></div>`).join('')};
+ el.addEventListener('click',e=>{const dl=e.target.closest('[data-del]');if(dl){items.splice(+dl.dataset.del,1);save();draw();return}
+  const r=e.target.closest('.ck');if(!r)return;items[+r.dataset.i].on=!items[+r.dataset.i].on;save();draw()});
+ draw();return t=>{if(!t.trim())return;items.push({t:t.trim()});save();draw()};
+}
+const addTodo=list('todo',TODO,$('#todo')),addPack=list('pack',PACK,$('#pack'));
+$('#todoAdd').onclick=()=>{addTodo($('#todoIn').value);$('#todoIn').value=''};
+$('#packAdd').onclick=()=>{addPack($('#packIn').value);$('#packIn').value=''};
+$('#todoIn').onkeydown=e=>{if(e.key==='Enter')$('#todoAdd').click()};
+$('#packIn').onkeydown=e=>{if(e.key==='Enter')$('#packAdd').click()};
+
+/* ---------- overlay ---------- */
+function big(jp,zh){$('#ovJp').textContent=jp;$('#ovZh').textContent=zh;$('#ov').classList.add('on')}
+$('#ovX').onclick=()=>$('#ov').classList.remove('on');
+
+/* ---------- taxi ---------- */
+let taxiI=0;
+function drawTaxi(){const t=TAXI[taxiI];
+ $('#taxiSeg').innerHTML=TAXI.map((x,i)=>`<button class="${i===taxiI?'on':''}" data-i="${i}">${esc(x.k)}</button>`).join('');
+ $('#taxiJp').textContent=`${t.jp}までお願いします。`;$('#taxiZh').textContent=`請載我們到：${t.zh}`;$('#taxiMap').href=mapUrl(t.q)}
+$('#taxiSeg').onclick=e=>{const b=e.target.closest('button');if(!b)return;taxiI=+b.dataset.i;drawTaxi()};
+$('#taxiBig').onclick=()=>big($('#taxiJp').textContent,$('#taxiZh').textContent);
+drawTaxi();
+
+/* ---------- JR card ---------- */
+let jr=S.get('jr',{ad:5,ch:2});
+function drawJr(){$('#adN').textContent=jr.ad;$('#chN').textContent=jr.ch;
+ const who=`大人${jr.ad}名`+(jr.ch?`・子供${jr.ch}名`:'');
+ $('#jrJp').textContent=`博多 ⇔ 小倉\n新幹線 自由席 往復\n${who}　本日利用`;
+ $('#jrJp').style.whiteSpace='pre-line';
+ $('#jrZh').textContent=`博多⇔小倉 新幹線自由席 來回，${jr.ad} 大${jr.ch?` ${jr.ch} 小`:''}，今天使用`}
+document.querySelectorAll('.step button').forEach(b=>b.onclick=()=>{const k=b.dataset.k;jr[k]=Math.max(k==='ad'?1:0,Math.min(9,jr[k]+ +b.dataset.v));S.set('jr',jr);drawJr()});
+$('#jrBig').onclick=()=>{big($('#jrJp').textContent,$('#jrZh').textContent);$('#ovJp').style.whiteSpace='pre-line'};
+drawJr();
+
+/* ---------- currency ---------- */
+const rate=$('#rate');rate.value=S.get('rate',0.21);
+const jpy=$('#jpy'),twd=$('#twd');
+const fmt=v=>isFinite(v)?String(Math.round(v*10)/10):'';
+jpy.oninput=()=>{twd.value=jpy.value===''?'':fmt(jpy.value*rate.value)};
+twd.oninput=()=>{jpy.value=twd.value===''?'':Math.round(twd.value/rate.value)};
+rate.oninput=()=>{S.set('rate',+rate.value||0);jpy.oninput()};
+
+/* ---------- phrases ---------- */
+$('#phrases').innerHTML=PHR.map((p,i)=>`<div class="ph"><div class="z"><b class="jp">${esc(p.jp)}</b><span>${esc(p.zh)}</span></div><button data-i="${i}">放大</button></div>`).join('');
+$('#phrases').onclick=e=>{const b=e.target.closest('button');if(!b)return;const p=PHR[+b.dataset.i];big(p.jp,p.zh);$('#ovJp').style.whiteSpace='normal'};
+
+/* ---------- routing ---------- */
+const VIEWS=['trip','list','tools'];
+function currentView(){const h=location.hash.slice(1);return VIEWS.includes(h)?h:'trip'}
+function route(){const v=currentView();VIEWS.forEach(x=>$('#v-'+x).classList.toggle('on',x===v));
+ document.querySelectorAll('nav a').forEach(a=>a.classList.toggle('on',a.dataset.v===v));
+ $('#todayBtn').classList.toggle('on',v==='trip'&&ti>=0&&ti<8&&curDay!==ti);window.scrollTo(0,0)}
+window.addEventListener('hashchange',route);
+
+renderChips();renderDay();route();
+setInterval(()=>{if(currentView()==='trip'&&curDay===ti&&document.activeElement.id!=='memo')renderDay(true)},60000);
+</script>
+</body>
+</html>
