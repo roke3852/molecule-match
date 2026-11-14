@@ -42,6 +42,15 @@ nav.tabs button.on{color:var(--accent);border-color:var(--accent);font-weight:70
 .booth.done rect{fill:var(--done)!important}
 .booth.done text{fill:#2b3a2a!important}
 .booth.done .badge text{fill:#3d4fd1!important}
+.chip.pin{border-color:#e0402a;color:#e0402a;font-weight:700}
+.chip.pin.on{background:#e0402a;color:#fff}
+#pinbar{display:none;margin:0 10px 6px;padding:8px 12px;border-radius:10px;background:#fff3f0;border:1px solid #f3c2b8;font-size:13px;color:#7a2a1c;align-items:center;gap:8px}
+#pinbar.on{display:flex}
+#pinbar span{flex:1}
+#pinbar button{border:1px solid #f3c2b8;background:#fff;border-radius:8px;padding:5px 9px;font-size:13px;color:#7a2a1c}
+#mapwrap.pinning{cursor:crosshair;outline:3px solid #e0402a;outline-offset:-3px}
+@keyframes pulse{0%{r:14;opacity:.6}100%{r:44;opacity:0}}
+#mypin .ring{fill:#e0402a;animation:pulse 1.6s ease-out infinite}
 .legend{display:flex;flex-wrap:wrap;gap:10px;padding:8px 12px;font-size:12px;color:var(--mute)}
 .legend span{display:flex;align-items:center;gap:4px}
 .legend b{width:14px;height:14px;border-radius:3px;display:inline-block;border:1px solid #b9a28a}
@@ -88,7 +97,7 @@ nav.tabs button.on{color:var(--accent);border-color:var(--accent);font-weight:70
 </head>
 <body>
 <header id="hdr">
-  <h1>☕ 2026 台灣咖啡展 · 南港1館 4F <span id="ver" style="font-size:11px;font-weight:600;background:rgba(255,255,255,.22);padding:2px 7px;border-radius:8px;vertical-align:2px">v1.3</span></h1>
+  <h1>☕ 2026 台灣咖啡展 · 南港1館 4F <span id="ver" style="font-size:11px;font-weight:600;background:rgba(255,255,255,.22);padding:2px 7px;border-radius:8px;vertical-align:2px">v1.4</span></h1>
   <div class="sub">雙指縮放地圖 · 點展位看介紹 · 打勾記錄已逛 · 深咖啡底＝名店；靛藍粗框＋★＝我的重點／知名品牌</div>
   <div class="prog"><span id="progtx">已逛 0 / 0</span><div class="bar"><i id="progbar"></i></div></div>
 </header>
@@ -104,8 +113,10 @@ nav.tabs button.on{color:var(--accent);border-color:var(--accent);font-weight:70
     <button class="chip" data-mf="feat">只看名店</button>
     <button class="chip" data-mf="todo">未逛</button>
     <button class="chip" data-mf="star">我的重點</button>
+    <button class="chip pin" id="pinbtn">📍 釘選我的位置</button>
     <div class="zoom"><button id="zo">－</button><button id="zi">＋</button></div>
   </div>
+  <div id="pinbar"><span id="pintx"></span><button id="pingo">跳過去</button><button id="pinclr">清除</button></div>
   <div id="mapwrap"><svg id="map" xmlns="http://www.w3.org/2000/svg"></svg></div>
   <div class="legend">
     <span><b style="background:var(--coffee)"></b>咖啡</span>
@@ -115,6 +126,7 @@ nav.tabs button.on{color:var(--accent);border-color:var(--accent);font-weight:70
     <span><b style="background:var(--feat);border:2px solid var(--gold)"></b>名店</span>
     <span><b style="background:var(--done)"></b>已逛</span>
     <span><b style="background:#fff;border:3px solid var(--star)"></b>★ 我的重點</span>
+    <span>📍 我的位置</span>
   </div>
 </section>
 
@@ -170,7 +182,7 @@ nav.tabs button.on{color:var(--accent);border-color:var(--accent);font-weight:70
   </div>
   <label>我的筆記（試喝心得、價格、想買的豆子…）</label>
   <textarea id="snote" placeholder="例如：衣索比亞日曬很莓果，250g $650"></textarea>
-  <div class="acts"><button id="sgo">📍 在地圖上看位置</button></div>
+  <div class="acts"><button id="sgo">🔍 在地圖上看位置</button><button id="spin">📍 我在這攤</button></div>
 </div>
 <div id="confirm"><div>確定清除所有已逛、重點與筆記？<br><button id="cno">取消</button><button id="cyes" style="color:#c00">清除</button></div></div>
 
@@ -482,7 +494,7 @@ const COL = {c:"var(--coffee)",k:"var(--cocoa)",i:"var(--intl)",e:"var(--event)"
 const zoneOf = code => code[0];
 
 // state
-let S = {v:{},s:{},n:{}};
+let S = {v:{},s:{},n:{},p:null};
 try{ const raw = localStorage.getItem("cfx2026"); if(raw) S = Object.assign(S, JSON.parse(raw)); }catch(e){}
 function save(){ try{ localStorage.setItem("cfx2026", JSON.stringify(S)); }catch(e){} }
 
@@ -569,7 +581,64 @@ function refreshMap(){
     if(mapFilter==="star") show=!!S.s[c];
     g.classList.toggle("dim",!show);
   });
+  drawPin();
 }
+// ===== 我的位置（只會有一個點） =====
+let pinning=false;
+function nearestBooth(x,y){
+  let best=null,bd=1e9;
+  B.forEach(b=>{ if(b[7]) return;
+    const dx=Math.max(b[2]-x,0,x-b[4]), dy=Math.max(b[3]-y,0,y-b[5]);
+    const d=Math.hypot(dx,dy); if(d<bd){bd=d;best=b;}
+  });
+  return [best,bd];
+}
+function pinLabel(){
+  if(!S.p) return "";
+  const [b,d]=nearestBooth(S.p.x,S.p.y);
+  return b ? (d<1?`📍 我在 ${b[0]} ${b[1]}`:`📍 我在 ${b[0]} ${b[1]} 附近`) : "📍 已釘選位置";
+}
+function drawPin(){
+  const old=document.getElementById("mypin"); if(old) old.remove();
+  const bar=document.getElementById("pinbar");
+  if(!S.p){ bar.classList.toggle("on",pinning); document.getElementById("pintx").textContent = pinning?"點地圖上你現在的位置（會取代舊的點）":""; syncPinBtns(); return; }
+  const g=document.createElementNS(NS,"g"); g.id="mypin"; g.style.pointerEvents="none";
+  const {x,y}=S.p;
+  const ring=document.createElementNS(NS,"circle"); ring.setAttribute("class","ring"); ring.setAttribute("cx",x); ring.setAttribute("cy",y); ring.setAttribute("r",14);
+  const dot=document.createElementNS(NS,"circle"); dot.setAttribute("cx",x); dot.setAttribute("cy",y); dot.setAttribute("r",12);
+  dot.setAttribute("fill","#e0402a"); dot.setAttribute("stroke","#fff"); dot.setAttribute("stroke-width",4);
+  const tag=document.createElementNS(NS,"text"); tag.setAttribute("x",x); tag.setAttribute("y",y-24); tag.setAttribute("text-anchor","middle");
+  tag.setAttribute("font-size",22); tag.setAttribute("font-weight",800); tag.setAttribute("fill","#e0402a");
+  tag.setAttribute("stroke","#fff"); tag.setAttribute("stroke-width",5); tag.setAttribute("paint-order","stroke"); tag.textContent="我在這";
+  g.appendChild(ring); g.appendChild(dot); g.appendChild(tag); svg.appendChild(g);
+  bar.classList.add("on");
+  document.getElementById("pintx").textContent = pinning?"點地圖上你現在的位置（會取代舊的點）":pinLabel();
+  syncPinBtns();
+}
+function syncPinBtns(){
+  const pb=document.getElementById("pinbtn");
+  pb.classList.toggle("on",pinning);
+  pb.textContent = pinning?"✕ 取消釘選":(S.p?"📍 重新釘選":"📍 釘選我的位置");
+  document.getElementById("pingo").style.display = S.p&&!pinning?"":"none";
+  document.getElementById("pinclr").style.display = S.p&&!pinning?"":"none";
+  document.getElementById("mapwrap").classList.toggle("pinning",pinning);
+}
+function setPin(x,y){ S.p={x:Math.round(x),y:Math.round(y)}; pinning=false; save(); drawPin(); }
+function scrollToXY(x,y){
+  const wrap=document.getElementById("mapwrap");
+  const sc = svg.getBoundingClientRect().width/1700;
+  wrap.scrollLeft = (x-495)*sc - wrap.clientWidth/2;
+  wrap.scrollTop = (y-280)*sc - wrap.clientHeight/2;
+}
+// 釘選模式時，點地圖＝放下位置點（攔截攤位的點擊）
+svg.addEventListener("click",e=>{
+  if(!pinning) return;
+  e.stopPropagation(); e.preventDefault();
+  const pt=svg.createSVGPoint(); pt.x=e.clientX; pt.y=e.clientY;
+  const m=svg.getScreenCTM(); if(!m) return;
+  const q=pt.matrixTransform(m.inverse());
+  setPin(q.x,q.y);
+},true);
 function setZoom(){
   const base = Math.max(document.getElementById("mapwrap").clientWidth, 360);
   const w = base*zoom;
@@ -622,6 +691,7 @@ function openSheet(code){
   document.getElementById("sname").innerHTML = esc(b[1]) + (FEAT[code]?' <span class="badge b-gold">名店</span>':"");
   document.getElementById("scode").textContent = `攤位 ${code} · ${zoneOf(code)} 區 · ${CAT[b[6]]}` + (b[7]?(NEAR[code]?`（平面圖上沒標，在 ${NEAR[code]} ${byCode[NEAR[code]][1]} 附近）`:"（平面圖上沒有位置，請現場確認）"):"");
   document.getElementById("sgo").style.display = b[2]==null ? "none" : "";
+  document.getElementById("spin").style.display = b[2]==null ? "none" : "";
   document.getElementById("sintro").textContent = introOf(b);
   document.getElementById("snote").value = S.n[code]||"";
   syncSheet();
@@ -649,6 +719,16 @@ document.getElementById("sgo").onclick=()=>{
   wrap.scrollLeft = ((b[2]+b[4])/2-495)*sc - wrap.clientWidth/2;
   wrap.scrollTop = ((b[3]+b[5])/2-280)*sc - wrap.clientHeight/2;
   refreshMap();
+};
+
+document.getElementById("pinbtn").onclick=()=>{ pinning=!pinning; drawPin(); };
+document.getElementById("pinclr").onclick=()=>{ S.p=null; save(); drawPin(); };
+document.getElementById("pingo").onclick=()=>{ if(!S.p) return; if(zoom<2){zoom=2;setZoom();} scrollToXY(S.p.x,S.p.y); };
+document.getElementById("spin").onclick=()=>{
+  let b=byCode[selCode]; if(NEAR[selCode]) b=byCode[NEAR[selCode]];
+  if(!b||b[2]==null) return;
+  setPin((b[2]+b[4])/2,(b[3]+b[5])/2);
+  closeSheet(); showView("map"); if(zoom<2){zoom=2;setZoom();} scrollToXY(S.p.x,S.p.y);
 };
 
 // list clicks
@@ -730,7 +810,7 @@ window.addEventListener("resize",setZoom);
 const cf=document.getElementById("confirm");
 document.getElementById("reset").onclick=()=>cf.style.display="flex";
 document.getElementById("cno").onclick=()=>cf.style.display="none";
-document.getElementById("cyes").onclick=()=>{S={v:{},s:{},n:{}};save();cf.style.display="none";renderAll();};
+document.getElementById("cyes").onclick=()=>{S={v:{},s:{},n:{},p:S.p};save();cf.style.display="none";renderAll();};
 
 function setHH(){document.documentElement.style.setProperty("--hh",document.getElementById("hdr").offsetHeight+"px");}
 setHH(); window.addEventListener("resize",setHH);
