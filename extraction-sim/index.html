@@ -375,6 +375,11 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
 .mic-legend{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:12px;color:var(--muted)}
 .mic-legend span{display:flex;align-items:center;gap:5px}
 .mic-legend i{display:block;border-radius:50%;width:8px;height:8px}
+:root{--oil:#c9971f}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--oil:#e6c25a}}
+:root[data-theme="dark"]{--oil:#e6c25a}
+.mic-legend i.oilc{opacity:.75;box-shadow:0 0 0 1.5px var(--oil) inset}
+.mic-legend i.lip{box-shadow:0 0 0 1.5px var(--panel),0 0 0 3px var(--oil)}
 .mic-legend i.co2{border:1.5px solid #8a939c;background:transparent;width:9px;height:9px}
 .mic-legend i.cdry{border-radius:2px;background:#c9ab86;width:12px;height:10px}
 .mic-legend i.cwet{border-radius:2px;background:#8a5c3a;width:12px;height:10px}
@@ -638,6 +643,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
     <p>圖中一格約 50 μm，大約是一個咖啡細胞的大小。粉粒最外圈的細胞在研磨時被切開，物質幾乎直接泡在水裡，所以一開始溶出很快；內部的細胞完整，物質要一格一格穿過細胞壁，越裡面路越長。</p>
     <p>小分子（有機酸、綠原酸、咖啡因）跑得快，糖中等，苦味大分子（類黑素等）又大又慢，所以萃取前段偏酸、後段才慢慢帶出甜和苦。水溫越高，分子動得越快。</p>
     <p>物質離開粉粒表面時，要穿過貼在表面的一層「邊界層」。水流越強，這層越薄，物質越容易被帶走；水不動或越來越濃時，粉粒內外的濃度差變小，萃取就變慢。</p>
+    <p>油脂不溶於水，以油滴的形式待在細胞裡。只有表面破裂細胞裡的油，能在熱水讓它變得好流動、水流把它剪下來時，以很小的油滴懸浮在咖啡裡（乳化）；內部的油幾乎出不來。香氣分子有的溶得進水、跟著擴散，有的偏好待在油裡，要靠油被帶出來或慢慢轉進水裡。</p>
     <p>這是教學用的簡化模型：物質數量和速度是相對比例，方向和真實一致，但數字不是實測值。整杯的濃度和萃取率，請用練習模擬器看。</p>
   </section>
 </div>
@@ -2130,8 +2136,15 @@ const MIC_T=[
   {id:'fruity',name:'花果香',   n:.6, r:.55,  sz:.8},
   {id:'roasty',name:'烘焙香',   n:.6, r:.42,  sz:.8},
   {id:'sugar', name:'糖',       n:2.4,r:.36,  sz:1.15},
-  {id:'bitter',name:'苦味大分子',n:2.0,r:.055, sz:1.8},
+  {id:'bitter',name:'苦味大分子',n:2.0, r:.055, sz:1.8},
+  {id:'oil',   name:'油脂',     n:1.6, r:0,    sz:1.6, insol:true},
 ];
+// 油溶性香氣：一部分香氣分子溶在細胞裡的油滴中（分配係數大於 1），要靠油被帶出，或很慢地分配進水
+const MIC_LIP={fruity:.6,roasty:.3};
+const micAll=S=>{let a=0,n=0;S.rel.forEach((v,i)=>{if(!MIC_T[i].insol){a+=v;n+=S.tot[i];}});return n?a/n:0;};
+// 油的流動性（溫度）與剪切力（水流、翻攪）
+const micFl=T=>Math.max(.3,Math.min(2.4,Math.exp((T-90)/7)));
+const micShear=P=>P.bl*(1+1.5*P.turb)+P.U*.15;
 const MIC_CELL=50, MIC_VIEW={w:34,h:31};
 function micRng(seed){let a=seed>>>0;return()=>{a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
 function micPhase(cfg,t){
@@ -2170,7 +2183,7 @@ function micCreate(cfg){
   for(const c of cells){const th=Math.atan2(c.cy,c.cx);c.clump=!cfg.bloom&&c.depth>.9&&Math.sin(th-clPh)>clTh;}
   // molecules
   const mol=[];
-  cells.forEach((c,ci)=>{for(let t=0;t<MIC_T.length;t++){let k=MIC_T[t].n;while(k>0){if(rnd()<Math.min(1,k)){mol.push({t,c:ci,ox:(rnd()-.5)*.64,oy:(rnd()-.5)*.64,st:0,x:0,y:0});}k-=1;}}});
+  cells.forEach((c,ci)=>{for(let t=0;t<MIC_T.length;t++){let k=MIC_T[t].n;while(k>0){if(rnd()<Math.min(1,k)){mol.push({t,c:ci,ox:(rnd()-.5)*.64,oy:(rnd()-.5)*.64,st:0,x:0,y:0,lip:rnd()<(MIC_LIP[MIC_T[t].id]||0)});}k-=1;}}});
   const tot=new Array(MIC_T.length).fill(0);mol.forEach(m=>tot[m.t]++);
   const surfCells=cells.filter(c=>c.surf);
   const S={cfg,R0,Rof,n,half,vx,vy,cells,mol,tot,surfCells,Tf,t:0,dt:.5,rel:new Array(MIC_T.length).fill(0),
@@ -2188,8 +2201,8 @@ function micFlow(S,x,y,U){
 function micStep(S){
   const {cells,mol,rnd,dt,Tf}=S,cfg=S.cfg;
   const P=micPhase(cfg,S.t);S.ph=P;
-  const totAll=mol.length;
-  let relAll=0;for(const v of S.rel)relAll+=v;
+  const totAll=S.tot.reduce((a,v,i)=>a+(MIC_T[i].insol?0:v),0);
+  const relAll=micAll(S)*totAll;
   // driving force
   let drive=.97;
   if(P.ph==='bloom')drive=Math.max(.08,1-S.relBloom/totAll/.35);
@@ -2222,10 +2235,16 @@ function micStep(S){
     while(S.fragAcc>=1&&S.frags.length<60){S.fragAcc-=1;const c=S.surfCells[(rnd()*S.surfCells.length)|0];const th=Math.atan2(c.cy,c.cx),R=S.Rof(th)+.3;
       S.frags.push({x:Math.cos(th)*R,y:Math.sin(th)*R,s:.25+rnd()*.3,rot:rnd()*6});}}
   // molecule moves
-  const exitBase=P.bl*drive*S.contact;
+  const exitBase=P.bl*drive*S.contact,fl=micFl(cfg.temp),sh=micShear(P);S.fl=fl;S.sh=sh;
   for(const m of mol){
     if(m.st===0){const c=cells[m.c];if(!c.wet)continue;
-      const T=MIC_T[m.t],rate=.45*T.r*Tf*(c.broken?5:1);
+      const T=MIC_T[m.t];
+      if(T.insol){ // 油滴：不溶於水，只有破裂細胞表面的油會被熱水軟化、被水流剪下來乳化帶走
+        if(!c.broken)continue;
+        if(rnd()<.0016*fl*sh*S.contact*(c.surf?1:.45)*dt){m.st=1;const th=Math.atan2(c.cy,c.cx),R=S.Rof(th)+.3+rnd()*.4;m.x=Math.cos(th)*R;m.y=Math.sin(th)*R;S.rel[m.t]++;}
+        continue;}
+      let rate=.45*T.r*Tf*(c.broken?5:1);
+      if(m.lip){rate*=.22;if(c.broken)rate+=.5*fl*sh;}
       if(rnd()>=rate*dt)continue;
       const k=c.nb[(rnd()*4)|0];
       if(k>=0){const c2=cells[k];if(!c2.wet)continue;
@@ -2250,11 +2269,11 @@ function micStep(S){
   for(const f of S.frags){const [fx,fy]=micFlow(S,f.x,f.y,Math.max(P.U,.3));f.x+=fx*dt*1.1;f.y+=fy*dt*1.1+.2*dt;f.rot+=.3*dt;}
   S.frags=S.frags.filter(f=>f.y<MIC_VIEW.h/2+1);
   S.t+=dt;
-  if(Math.abs(S.t/2-Math.round(S.t/2))<1e-6)S.curve.push({t:S.t,e:S.rel.map((v,i)=>v/S.tot[i]),all:S.rel.reduce((a,b)=>a+b,0)/mol.length,wet:S.wetFrac,gas:S.gasLeft/S.G0,contact:S.contact});
+  if(Math.abs(S.t/2-Math.round(S.t/2))<1e-6)S.curve.push({t:S.t,e:S.rel.map((v,i)=>v/S.tot[i]),all:micAll(S),wet:S.wetFrac,gas:S.gasLeft/S.G0,contact:S.contact});
 }
 const MIC_TEND=240;
 function micRun(cfg,tEnd){const S=micCreate(cfg);S.curve.push({t:0,e:S.rel.map(()=>0),all:0,wet:0,gas:1,contact:1});while(S.t<(tEnd??MIC_TEND)-1e-9)micStep(S);return S;}
-
+if(typeof module!=='undefined')module.exports={micRun,micCreate,micStep,MIC_T,micPhase,micAll};
 
 (function(){
 const $=id=>document.getElementById(id);
@@ -2270,13 +2289,15 @@ const TOPICS=[
   text:'<p>細水柱慢慢注，粉粒幾乎不動，表面的邊界層比較厚。溶出的物質在粉粒附近停留比較久，萃取比較慢、也比較少。</p><p>好處是細粉不太會被沖散，流速穩定、杯子乾淨。想萃到和一般注水差不多的程度，通常要拉長時間或磨細一點。</p>'},
  {id:'im',name:'浸泡',A:{method:'im'},B:{method:'po'},an:'浸泡',bn:'手沖（水流過）',
   text:'<p>浸泡時粉一直泡在同一池水裡，水不流動，溶出的物質留在粉粒周圍，整池液體越來越濃（背景越來越深）。粉粒內外的濃度差越來越小，萃取會自己踩煞車。</p><p>手沖一直有新的水流過，濃度差維持得大，同樣時間萃得比較多；但水流完萃取就結束（約 2:50 之後），浸泡則可以一直泡下去。浸泡也比較不怕不均勻，因為每顆粉都泡在同樣的液體裡。</p>'},
+ {id:'oil',name:'油脂與香氣',A:{temp:96,pour:'strong'},B:{temp:88,pour:'gentle'},an:'96°C・強力沖刷',bn:'88°C・輕柔注水',
+  text:'<p>咖啡裡的物質分兩類。酸、糖、咖啡因、綠原酸這些<b>水溶性</b>物質會溶進水，再一格一格擴散出來。<b>油脂</b>不溶於水，以小油滴的形式存在細胞裡（畫面中金色的圓點）。</p><p>油要出來，得先被熱水加熱、變得比較會流動，再被水流和翻攪從粉粒表面剪下來，變成很小的油滴懸浮在咖啡裡（乳化）。所以溫度越高、注水越猛，帶出的油越多。內部完整細胞裡的油幾乎出不來，大部分的油最後都留在咖啡渣裡。</p><p>香氣分子不全是「不溶於水」。很多烘焙香（吡嗪、呋喃類）本身就溶得進水，跟水溶性物質一起擴散出來。另一部分比較親油的香氣（例如一些酯類）偏好待在油滴裡，要等油被帶出來，或很慢地從油轉進水裡（畫面中有金色外圈的香氣小點）。溫度高、水流強，這部分出得比較多。</p><p>油進到杯子裡會讓口感更滑、更厚，也會留住親油的香氣。不過手沖的濾紙會擋下大部分的油，紙濾咖啡口感比較乾淨；法壓壺、金屬濾網的咖啡油感就明顯得多。</p>'},
  {id:'free',name:'自由調整',text:'<p>用下方「自己調整」改研磨、水溫、悶蒸、注水和萃取方式。每次改動後，上一次的曲線會留在圖上當虛線，方便比較。</p>'},
 ];
-const SHOW=['acid','cga','sugar','bitter'];
+const SHOW=['acid','sugar','bitter','fruity','oil'];
 let topic=TOPICS[0],side='A',cfg=null,full=null,ghost=null,ghostName='',S=null,playing=false,speed=10,last=0,raf=0,tracers=[];
 const cssv=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
 let C={};
-function readColors(){C={ink:cssv('--ink'),muted:cssv('--muted'),line:cssv('--line'),gl:cssv('--g-light')||'#c9ab86',gd:cssv('--g-dark')||'#3b2619',panel:cssv('--panel'),accent:cssv('--accent')};
+function readColors(){C={oil:cssv('--oil')||'#c9971f',ink:cssv('--ink'),muted:cssv('--muted'),line:cssv('--line'),gl:cssv('--g-light')||'#c9ab86',gd:cssv('--g-dark')||'#3b2619',panel:cssv('--panel'),accent:cssv('--accent')};
   MIC_T.forEach(t=>C[t.id]=cssv('--'+t.id));}
 const fmt=t=>Math.floor(t/60)+':'+String(Math.round(t%60)).padStart(2,'0');
 function cfgFor(tp,sd){return Object.assign({},BASE,tp[sd]||{});}
@@ -2296,7 +2317,7 @@ function openTopic(tp,sd){topic=tp;side=sd||'A';
   const p=v=>Math.round(v*100)+'%';
   $('micTopic').innerHTML='<div class="seg mic-ab" role="group" aria-label="比較組"><button data-s="A" aria-pressed="'+(side==='A')+'">'+tp.an+'</button><button data-s="B" aria-pressed="'+(side==='B')+'">'+tp.bn+'</button></div>'+tp.text+
     '<table class="mic-tbl"><thead><tr><th>'+fmt(end)+' 時溶出</th><th>'+tp.an+'</th><th>'+tp.bn+'</th></tr></thead><tbody>'+
-    row('整體',x=>p(x.all))+row('有機酸',x=>p(x.e[0]))+row('糖',x=>p(x.e[5]))+row('苦味大分子',x=>p(x.e[6]))+'</tbody></table>';
+    row('整體（水溶性）',x=>p(x.all))+row('有機酸',x=>p(x.e[0]))+row('糖',x=>p(x.e[5]))+row('苦味大分子',x=>p(x.e[6]))+row('花果香',x=>p(x.e[3]))+row('油脂（不溶於水）',x=>p(x.e[7]))+'</tbody></table>';
   $('micTopic').querySelectorAll('.mic-ab button').forEach(b=>b.onclick=()=>openTopic(tp,b.dataset.s));
 }
 function seek(t){S=micCreate(cfg);S.curve.push({t:0,e:S.rel.map(()=>0),all:0,wet:0,gas:1,contact:1});while(S.t<t-1e-9)micStep(S);snapMol();tracers=[];draw();ui();}
@@ -2322,7 +2343,7 @@ function draw(){
   const P=micPhase(cfg,S.t),cx=W/2,cy=H/2,X=x=>cx+x*cs,Y=y=>cy+y*cs;
   const dark=matchMedia('(prefers-color-scheme: dark)').matches;
   ctx.clearRect(0,0,W,H);
-  const all=S.rel.reduce((a,b)=>a+b,0)/S.mol.length;
+  const all=micAll(S);
   // liquid
   const waterA=P.ph==='done'?0:P.ph==='drain'?P.film:1;
   if(waterA>0){ctx.fillStyle='rgba(110,170,195,'+(.2*waterA)+')';ctx.fillRect(0,0,W,H);}
@@ -2360,7 +2381,9 @@ function draw(){
     if(m.st===0){const c=S.cells[m.c];const j=c.wet?.06*Math.sin(tt*3+k):0;x=X(c.cx+m.ox+j);y=Y(c.cy+m.oy+j*.7);}
     else{x=X(m.x);y=Y(m.y);}
     if(m.px==null||!playing){m.px=x;m.py=y;}else{m.px+=(x-m.px)*.35;m.py+=(y-m.py)*.35;}
-    ctx.fillStyle=C[T.id];ctx.beginPath();ctx.arc(m.px,m.py,r0*T.sz,0,6.2832);ctx.fill();}
+    if(T.insol){ctx.fillStyle=rgba(C.oil,.55);ctx.strokeStyle=C.oil;ctx.lineWidth=1;ctx.beginPath();ctx.arc(m.px,m.py,r0*T.sz,0,6.2832);ctx.fill();ctx.stroke();continue;}
+    ctx.fillStyle=C[T.id];ctx.beginPath();ctx.arc(m.px,m.py,r0*T.sz,0,6.2832);ctx.fill();
+    if(m.lip){ctx.strokeStyle=C.oil;ctx.lineWidth=1.2;ctx.beginPath();ctx.arc(m.px,m.py,r0*T.sz+1.3,0,6.2832);ctx.stroke();}}
   // free bubbles
   ctx.strokeStyle=dark?'rgba(220,225,230,.75)':'rgba(120,130,140,.8)';ctx.lineWidth=1;
   for(const b of S.bubbles){ctx.beginPath();ctx.arc(X(b.x),Y(b.y),b.r*cs,0,6.2832);ctx.stroke();}
@@ -2370,7 +2393,7 @@ function draw(){
 // ---------- text & chart ----------
 function caption(){
   const P=micPhase(cfg,S.t),c=S.curve[S.curve.length-1]||{e:S.rel.map(()=>0),all:0};
-  const e=S.rel.map((v,i)=>v/S.tot[i]),all=S.rel.reduce((a,b)=>a+b,0)/S.mol.length;
+  const e=S.rel.map((v,i)=>v/S.tot[i]),all=micAll(S);
   let ph={bloom:'悶蒸中',flow:'注水中',drain:'水快流完',done:'水已流完',steep:'浸泡中'}[P.ph];
   if(S.t===0)return ['尚未開始','按「播放」開始。熱水會從粉粒表面往內滲，淺色是乾的細胞，深色是吸了水的細胞；彩色小點是各種風味物質，灰色小圈是 CO₂。'];
   let t;
@@ -2382,6 +2405,7 @@ function caption(){
   else if(cfg.method==='im'&&S.drive<.6)t='杯中液體越來越濃，粉粒內外的濃度差變小，物質出來的速度慢下來，萃取在自己踩煞車。';
   else if(e[0]<.55)t='外圈被切開的細胞最先被沖空。現在靠內部的細胞：物質要一格一格穿過細胞壁才能到表面，小分子（酸、綠原酸）跑得最快。'+(P.turb>=1?'強力水流把表面的邊界層沖薄，出來的物質馬上被帶走。':P.ph==='flow'&&cfg.pour==='gentle'?'水流輕柔，邊界層比較厚，物質在粉粒附近停留得比較久。':'');
   else t='小分子大多已經出來了，剩下的是糖和苦味大分子在慢慢擴散。時間拉得越長，杯中的甜、苦和厚度越多。';
+  if(P.U>0||P.turb){const o=e[MIC_T.length-1];if(cfg.temp>=94&&P.turb>=1)t+='水溫高、水流猛，表面的油脂變軟、被剪下來乳化（金色油滴已帶出 '+Math.round(o*100)+'%）。';else if(cfg.temp<=89||cfg.pour==='gentle')t+='水溫低或水流輕，油脂不太流動，幾乎留在粉裡（已帶出 '+Math.round(o*100)+'%）。';}
   return [ph,t];
 }
 let chartW=0,chartH=0,ch,cctx;
@@ -2396,16 +2420,16 @@ function drawChart(){
   if(cfg.bloom){g.fillStyle=rgba(C.muted||'#888',.08);g.fillRect(X(0),T,X(cfg.bloom)-X(0),ph);g.fillStyle=C.muted;g.fillText('悶蒸',X(2),T+12);}
   const line=(R,f,col,wd,dash)=>{g.strokeStyle=col;g.lineWidth=wd;g.setLineDash(dash||[]);g.beginPath();R.curve.forEach((p,i)=>i?g.lineTo(X(p.t),Y(f(p))):g.moveTo(X(p.t),Y(f(p))));g.stroke();g.setLineDash([]);};
   const idx=id=>MIC_T.findIndex(t=>t.id===id);
-  if(ghost){SHOW.forEach(id=>line(ghost,p=>p.e[idx(id)],rgba(C[id],.55),1.4,[4,4]));line(ghost,p=>p.all,rgba(C.ink,.55),2,[5,4]);}
-  SHOW.forEach(id=>line(full,p=>p.e[idx(id)],C[id],1.8));line(full,p=>p.all,C.ink,2.6);
+  if(ghost){SHOW.forEach(id=>line(ghost,p=>p.e[idx(id)],rgba(id==='oil'?C.oil:C[id],.55),1.4,[4,4]));line(ghost,p=>p.all,rgba(C.ink,.55),2,[5,4]);}
+  SHOW.forEach(id=>id==='oil'?line(full,p=>p.e[idx(id)],C.oil,2.6,[1.5,3.5]):line(full,p=>p.e[idx(id)],C[id],1.8));line(full,p=>p.all,C.ink,2.6);
   g.strokeStyle=C.accent;g.lineWidth=1.5;g.beginPath();g.moveTo(X(S.t),T);g.lineTo(X(S.t),T+ph);g.stroke();
-  $('micGhostLab').textContent=ghostName;
+  $('micGhostLab').textContent=(ghostName?ghostName+'・':'')+'點線：油脂';
 }
 function ui(){
   $('micClock').textContent=fmt(S.t);$('micTime').value=S.t;
   const [ph,t]=caption();$('micPhase').textContent=ph;$('micCap').textContent=t;
-  const e=S.rel.map((v,i)=>v/S.tot[i]),all=S.rel.reduce((a,b)=>a+b,0)/S.mol.length;
-  $('micNow').innerHTML='<span class="all"><em>整體</em><b>'+Math.round(all*100)+'%</b></span>'+MIC_T.map((T,i)=>'<span><em><i style="background:var(--'+T.id+')"></i>'+T.name+'</em><b>'+Math.round(e[i]*100)+'%</b></span>').join('')+
+  const e=S.rel.map((v,i)=>v/S.tot[i]),all=micAll(S);
+  $('micNow').innerHTML='<span class="all"><em>整體（水溶性）</em><b>'+Math.round(all*100)+'%</b></span>'+MIC_T.map((T,i)=>'<span><em><i style="background:var(--'+T.id+')"></i>'+T.name+'</em><b>'+Math.round(e[i]*100)+'%</b></span>').join('')+
     '<span><em>細胞吸水</em><b>'+Math.round(S.wetFrac*100)+'%</b></span><span><em>CO₂ 剩餘</em><b>'+Math.round(S.gasLeft/S.G0*100)+'%</b></span>';
   drawChart();
 }
@@ -2423,7 +2447,7 @@ function stop(){playing=false;cancelAnimationFrame(raf);$('micPlay').textContent
 // ---------- init ----------
 $('micTabs').innerHTML=TOPICS.map(t=>'<button class="chip" data-id="'+t.id+'" aria-pressed="false">'+t.name+'</button>').join('');
 $('micTabs').querySelectorAll('button').forEach(b=>b.onclick=()=>{stop();openTopic(TOPICS.find(t=>t.id===b.dataset.id));});
-$('micLegend').innerHTML=MIC_T.map(T=>'<span><i style="background:var(--'+T.id+');width:'+(8*T.sz)+'px;height:'+(8*T.sz)+'px"></i>'+T.name+'</span>').join('')+'<span><i class="co2"></i>CO₂</span><span><i class="cdry"></i>乾的細胞</span><span><i class="cwet"></i>吸水的細胞</span>';
+$('micLegend').innerHTML=MIC_T.map(T=>'<span><i class="'+(T.insol?'oilc':'')+'" style="background:var(--'+T.id+');width:'+(8*T.sz)+'px;height:'+(8*T.sz)+'px"></i>'+T.name+'</span>').join('')+'<span><i class="lip" style="background:var(--fruity)"></i>油溶性香氣</span><span><i class="co2"></i>CO₂</span><span><i class="cdry"></i>乾的細胞</span><span><i class="cwet"></i>吸水的細胞</span>';
 $('micPlay').onclick=()=>playing?stop():play();
 $('micTime').oninput=e=>{stop();seek(+e.target.value);};
 $('micSpeed').querySelectorAll('button').forEach(b=>b.onclick=()=>{speed=+b.dataset.v;$('micSpeed').querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',x===b));});
