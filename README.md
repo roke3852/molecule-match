@@ -23,7 +23,7 @@
 2. 在根目錄 `index.html` 的 `APPS` 清單加一行（含 `ver`、`updated`）
 
 ## 更新 App 時
-在根目錄 `index.html` 的 `APPS` 清單把該 App 的 `ver` 往上加、`updated` 改成當天、`note` 寫這次改了什麼。
+在根目錄 `index.html` 的 `APPS` 清單把該 App 的 `ver` 往上加、`updated` 改成更新的日期和時間（格式 `2026-11-14 10:57`，台灣時間）、`note` 寫這次改了什麼。
 版本號一變，目錄頁會在該 App 顯示「新版」紅標與更新說明，頂端也會有新版提示；打開 App 後就會消失。
 
 ## 目錄頁功能
