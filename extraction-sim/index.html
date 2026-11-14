@@ -141,6 +141,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
 }
 .beansel{width:100%;font:inherit;font-size:15px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:7px 10px}
 .param.champ{grid-column:1 / -1}
+.aroma .taste{flex-basis:100%;color:var(--ink)}
 .wrapseg{flex-wrap:wrap}
 .wrapseg button{flex:1 1 30%;border-bottom:1px solid var(--line)}
 #dripParam{grid-column:1 / -1}
@@ -321,8 +322,31 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
 .modes{position:sticky;top:0;z-index:5;background:var(--bg);padding:max(8px,env(safe-area-inset-top,0px)) 0 8px;margin:-20px 0 14px}
 .modes .in{max-width:1040px;margin:0 auto;display:flex;align-items:center;gap:10px}
 .modes .app{font-family:var(--f-display);font-weight:700;font-size:16px;margin-right:auto;white-space:nowrap}
-.modes .seg{flex:0 1 250px}
-.modes .seg button{padding:7px 10px;font-weight:700}
+.modes .seg{flex:0 1 330px}
+.modes .seg button{padding:7px 6px;font-weight:700;font-size:13px}
+@media (max-width:420px){.modes .app{display:none}}
+.t46 h1{font-size:clamp(26px,6vw,36px)}
+.t46-steps ul,.t46-practice ol{margin:8px 0 0;padding-left:20px;display:flex;flex-direction:column;gap:4px}
+.t46-rules{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
+.t46-rules p{margin:6px 0 0}
+.t46-lab{display:flex;flex-direction:column;gap:14px}
+.t46-plan{display:flex;gap:6px;flex-wrap:wrap}
+.t46-plan span{display:flex;flex-direction:column;align-items:center;border-radius:8px;padding:6px 10px;min-width:58px}
+.t46-plan .p40{background:rgba(201,152,0,.15)}.t46-plan .p60{background:rgba(45,106,88,.13)}
+.t46-plan small{font-family:var(--f-mono);font-size:11px;color:var(--muted)}
+.t46-plan b{font-family:var(--f-mono);font-weight:500}
+.t46-res{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.t46-res div{display:flex;flex-direction:column}
+.t46-res b{font-family:var(--f-mono);font-weight:500;font-size:18px}
+.t46-res span{font-size:12px;color:var(--muted)}
+.t46-cmp{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
+.t46-cmp h3{font-size:15px;margin:0 0 6px}
+.t46-row{display:grid;grid-template-columns:4.2em 1fr 1fr;gap:8px;align-items:center;font-size:13px;padding:3px 4px;border-radius:6px}
+.t46-row.head{color:var(--muted);font-size:12px}
+.t46-row.on{background:var(--accent-soft);font-weight:700}
+.t46-row .b{display:flex;align-items:center;gap:6px;font-family:var(--f-mono);font-size:12px}
+.t46-row .b i{display:block;height:7px;border-radius:3px;background:var(--accent);flex:0 0 auto;max-width:60%}
+.t46-note{font-size:14px;margin:0;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px 12px}
 #gameView .gwrap{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
 #gameView h1{font-size:clamp(26px,6vw,36px);line-height:1.2}
 
@@ -331,7 +355,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
 <body>
 <nav class="modes" aria-label="模式"><div class="in">
   <span class="app">手沖咖啡實驗室</span>
-  <div class="seg" role="group" aria-label="切換模式"><button id="mSim" aria-pressed="true">練習模擬器</button><button id="mGame" aria-pressed="false">闖關遊戲</button></div>
+  <div class="seg" role="group" aria-label="切換模式"><button id="mSim" aria-pressed="true">練習模擬器</button><button id="mGame" aria-pressed="false">闖關遊戲</button><button id="mLearn" aria-pressed="false">4:6 教學</button></div>
 </div></nav>
 <section id="simView">
 <div class="wrap">
@@ -451,6 +475,68 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
 
   <p class="fine">模型說明：有機酸與綠原酸的速度、溫度與研磨反應依《咖啡香味的科學》表 31–33（出處 JCO Seneory）校正：以浸泡、94°C、一般粒度（設為 650 μm，粗 1000 μm、細 400 μm）、5 分鐘為基準，擬合 1 / 14 分鐘、70 / 100°C、粗 / 細研磨的相對濃度，誤差多在 3% 內。書中數值未標單位，此處當作 mg/L 對照。表 31 印刷時欄位錯開一列，已依表 32、33 的 94°C／5 分鐘欄位對齊後使用。其他成分無實測，依書中圖 63 的快慢順序（味道成分快、香氣居中、高分子苦味慢）設定。每類分子以一階擴散描述，速率 ∝ 擴散常數 × (粉粒內濃度 − 周圍液體濃度)。擴散常數隨溫度呈指數變化（大分子對溫度更敏感），並隨粒徑縮小而增加；粉粒吸水約為粉重 2 倍。濾杯流速依液面高度與粒徑估算。浸泡時把液體分成「粉粒周圍的一層」與「其餘液體」，兩者靠自然對流緩慢交換；攪拌會暫時加快交換、讓粉粒外的邊界層變薄，並讓未濕透的粉團完整吸水，效果在十幾秒內衰減。香氣分子以一階揮發描述：散失速率 ∝ 揮發常數 × 液體中香氣量，隨水溫升高而增加，注水時與攪拌後暫時加快，杯中因溫度較低只算 35%。濾杯以三個係數描述：流出速度倍率（V60 1.35×、OREA 1.2×）、粉床被水均勻穿過的比例（錐形 95%、V60 90%、OREA 100%），以及沿濾紙壁繞過粉床直接流進杯中的旁流比例（錐形 4%、V60 7%、OREA 1.5%）。烘焙度依淺、中、深三個參考點內插：調整各類分子的可溶量（酸與綠原酸隨烘焙遞減、苦味大分子遞增、糖類在中焙最高），並讓深焙的整體萃取速度較快。各類分子的可溶量與速率為教學用的近似值，用來比較趨勢，不是精確的化學測量。手沖的流速與注水攪動另以 2016–2025 世界手沖冠軍配方校正：讓各配方的滴濾時間接近比賽實際時間、萃取率落在約 19% 附近。評分的理想區間參考 SCA 沖煮控制圖（EY 18–22%），濃度上限放寬到 1.55% 以涵蓋冠軍杯；風味平衡的界線也以冠軍杯在模型中的表現為準。</p>
 </div>
+</section>
+<section id="learnView" hidden>
+<div class="wrap t46">
+  <div>
+    <div class="label">教學 · 2016 世界手沖冠軍</div>
+    <h1>粕谷哲的 4:6 沖煮法</h1>
+    <p class="lede">粕谷哲（Tetsu Kasuya）用這個方法拿下 2016 年世界手沖冠軍。它把注水分成兩段：前 40% 調甜與酸，後 60% 調濃度。同一支豆子、同樣的研磨和水溫，只改每一段怎麼倒，就能把杯子往想要的方向推。</p>
+  </div>
+
+  <section class="panel t46-steps">
+    <h2>基本配方</h2>
+    <ul>
+      <li><b>20 g 咖啡粉、300 g 水（1:15）</b>，水溫 92°C，偏粗研磨。</li>
+      <li><b>前 40%＝120 g，分兩注。</b>兩注的比例決定甜和酸。</li>
+      <li><b>後 60%＝180 g，分 1–3 注。</b>注數決定濃度和厚度。</li>
+      <li>每注約間隔 45 秒，等上一注滴得差不多再倒，約 3:30 移開濾杯。</li>
+    </ul>
+  </section>
+
+  <section class="panel t46-rules">
+    <div><h3>前 40%：甜還是酸</h3>
+      <p>第一注<b>少</b>、第二注<b>多</b>（例如 50 g → 70 g）：比較甜、圓潤。粕谷哲比賽用的就是 50 g + 70 g。</p>
+      <p>第一注<b>多</b>、第二注<b>少</b>（例如 70 g → 50 g）：酸質比較明亮。</p>
+      <p>兩注一樣（60 g + 60 g）：平衡的起點。</p></div>
+    <div><h3>後 60%：淡還是濃</h3>
+      <p>180 g <b>一次倒完</b>：最淡、最乾淨。</p>
+      <p>分<b>兩注</b>（90 g × 2）：中等。</p>
+      <p>分<b>三注</b>（60 g × 3）：最濃，口感也最厚。</p>
+      <p>注數越多，粉床被攪動的次數越多、接觸時間越長，萃得越多。</p></div>
+  </section>
+
+  <section class="panel t46-lab">
+    <h2>動手試：在模型裡調 4:6</h2>
+    <div class="params">
+      <div class="param"><div class="row"><label for="tFirst" class="label">前 40% 的第一注</label><output id="tFirstOut"></output></div><input id="tFirst" type="range" min="30" max="90" step="5" value="50"></div>
+      <div class="param"><span class="label">後 60% 分幾注</span><div class="seg" id="tLast" role="group" aria-label="後 60% 注數"><button data-v="1">1 注</button><button data-v="2">2 注</button><button data-v="3">3 注</button><button data-v="4">4 注</button></div></div>
+      <div class="param"><div class="row"><label for="tBean" class="label">豆子</label></div><select id="tBean" class="beansel"></select></div>
+      <div class="param"><div class="row"><label for="tGrind" class="label">研磨</label><output id="tGrindOut"></output></div><input id="tGrind" type="range" min="550" max="1000" step="50" value="800"></div>
+    </div>
+    <div class="t46-plan" id="tPlan"></div>
+    <div class="t46-res" id="tRes"></div>
+    <div class="t46-cmp">
+      <div><h3>改前 40% 的分配</h3><div id="tCmpA"></div></div>
+      <div><h3>改後 60% 的注數</h3><div id="tCmpB"></div></div>
+    </div>
+    <p class="t46-note" id="tNote"></p>
+    <button class="savebtn" id="tToSim">把這組 4:6 帶到練習模擬器</button>
+  </section>
+
+  <section class="panel t46-practice">
+    <h2>實際練習的順序</h2>
+    <ol>
+      <li>先用 60 g + 60 g、後段 3 注沖一杯當基準，記下味道。</li>
+      <li>只改前 40%：沖 40 g + 80 g 和 80 g + 40 g 各一杯，和基準比甜、比酸。</li>
+      <li>挑出喜歡的甜酸後，只改後 60%：試 1 注、2 注，找到喜歡的濃度。</li>
+      <li>一次只改一個地方，才知道是哪個變化造成的。</li>
+    </ol>
+  </section>
+
+  <p class="fine">4:6 法的規則整理自粕谷哲的說明與比賽紀錄：<a href="https://www.premium-j.jp/en/spotlight/20250508_51727/">Premium Japan 專訪</a>、<a href="https://kurasu.kyoto/blogs/kurasu-journal/2016-world-brewers-cup-champion-tetsu-kasuya">Kurasu 比賽紀錄</a>、<a href="https://medium.com/standart-magazine/tetsu-kasuya-78a65906da71">Standart</a>。模擬結果來自本 app 的擴散萃取模型。</p>
+</div>
+
 </section>
 <section id="gameView" hidden>
 <div class="wrap gwrap">
@@ -952,6 +1038,7 @@ function renderScore(){
 $('segStyle').querySelectorAll('button').forEach(b=>{b.setAttribute('aria-pressed',b.dataset.v===scoreStyle);b.onclick=()=>{scoreStyle=b.dataset.v;
   try{localStorage.setItem('brewLab.scoreStyle',scoreStyle);}catch(e){}
   $('segStyle').querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',x===b));renderScore();};});
+window.simApplyRecipe=o=>{applyParams(Object.assign({roast:P.roast,swOpen:P.swOpen,swMode:'closeFirst',swClose:P.swClose,steep:P.steep,preIM:P.preIM,grinder:P.grinder},o));run();if($('champSel'))$('champSel').value='';};
 let champSnap=null;
 const champKey=()=>JSON.stringify(PFIELDS.map(k=>P[k]));
 (function(){const sel=$('champSel');
@@ -1151,7 +1238,8 @@ function stats(prefix,s,sim,kind){
   if(totNV>0)NONVOL.forEach(i=>{const c=CMP[i];const e=document.createElement('i');e.style.width=(D[i]/totNV*100)+'%';e.style.background='var(--'+c.id+')';e.title=c.name+' '+(D[i]/totNV*100).toFixed(0)+'%';mix.appendChild(e);});
   $(prefix+'Aroma').innerHTML=VOL.map(i=>{const c=CMP[i],keep=D[i]/sim.S0[i]*100,lost=s.lost[i]/sim.S0[i]*100;
     return '<span><i style="background:var(--'+c.id+')"></i>'+c.name+' <b>'+(D[i]*1000).toFixed(1)+' mg</b> <small>保留 '+keep.toFixed(0)+'% · 散失 '+lost.toFixed(0)+'%</small></span>';}).join('')+
-    (V>5?[0,3].map(i=>'<span><i style="background:var(--'+CMP[i].id+')"></i>'+CMP[i].name+' <b>'+Math.round(D[i]/V*1e6).toLocaleString()+' mg/L</b></span>').join(''):'');
+    (V>5?[0,2,3].map(i=>'<span><i style="background:var(--'+CMP[i].id+')"></i>'+CMP[i].name+' <b>'+Math.round(D[i]/V*1e6).toLocaleString()+' mg/L</b></span>').join(''):'')+
+    ((V>5&&tot>0)?(pf=>'<span class="taste">口感（0–10）甜 <b>'+pf.sweet.toFixed(1)+'</b>・酸 <b>'+pf.acid.toFixed(1)+'</b>・苦 <b>'+pf.bitter.toFixed(1)+'</b>・澀 <b>'+pf.astr.toFixed(1)+'</b></span>')(cupProfile({tds:tot/V*100,c:D.map(x=>x/V*1000),share:D.map(x=>x/tot)})):'');
   let ph;
   $(kind==='po'?'stirPO':'stirIM').disabled=s.done;
   if(s.sv>.35&&!s.done)ph='攪拌中';
@@ -1212,7 +1300,7 @@ function snap(kind){
   const D=kind==='po'?s.cupM:s.m, V=kind==='po'?s.cupV:s.Vb, tot=D.reduce((a,b)=>a+b,0);
   const totNV=NONVOL.reduce((a,i)=>a+D[i],0);
   return {tds:V>5?tot/V*100:null,ey:tot/sim.dose*100,drive:s.drive,mix:totNV>0?D.map((v,i)=>CMP[i].vol?null:v/totNV*100):null,
-    aroma:VOL.map(i=>[D[i]/sim.S0[i]*100,s.lost[i]/sim.S0[i]*100,D[i]*1000]),conc:V>5?[D[0]/V*1e6,D[3]/V*1e6]:null,
+    aroma:VOL.map(i=>[D[i]/sim.S0[i]*100,s.lost[i]/sim.S0[i]*100,D[i]*1000]),conc:V>5?[D[0]/V*1e6,D[3]/V*1e6,D[2]/V*1e6]:null,taste:(V>5&&tot>0)?(pf=>[pf.sweet,pf.acid,pf.bitter,pf.astr])(cupProfile({tds:tot/V*100,c:D.map(x=>x/V*1000),share:D.map(x=>x/tot)})):null,
     t:Math.min(t,sim.end),done:s.done,extra:(kind==='po'?P.xPO:P.xIM).length,score:(c=>c?Math.round(brewScore(c,styleFor(effRoast())).total):null)(cupOf(D,V,sim.dose,sim.S0)),scoreStyle:STYLES[styleFor(effRoast())].name};
 }
 function save(){
@@ -1235,7 +1323,7 @@ function resCell(r,kind,p){
     const q=document.createElement('span');q.style.width=r.mix[i]+'%';q.textContent=r.mix[i]>=7?Math.round(r.mix[i]):'';pct.appendChild(q);});
   d.appendChild(bar);d.appendChild(pct);
   if(r.aroma){const a=document.createElement('div');a.className='aroma';
-    a.innerHTML=(r.conc?'<span><small>有機酸</small> <b>'+Math.round(r.conc[0]).toLocaleString()+' mg/L</b></span><span><small>綠原酸</small> <b>'+Math.round(r.conc[1]).toLocaleString()+' mg/L</b></span>':'')+VOL.map((i,j)=>'<span><i style="background:var(--'+CMP[i].id+')"></i>'+CMP[i].name+' <b>'+(r.aroma[j][2]!=null?r.aroma[j][2].toFixed(1)+' mg':r.aroma[j][0].toFixed(0)+'%')+'</b> <small>保留 '+r.aroma[j][0].toFixed(0)+'% · 散失 '+r.aroma[j][1].toFixed(0)+'%</small></span>').join('');d.appendChild(a);}
+    a.innerHTML=(r.taste?'<span><small>口感</small> <b>甜 '+r.taste[0].toFixed(1)+'・酸 '+r.taste[1].toFixed(1)+'・苦 '+r.taste[2].toFixed(1)+'・澀 '+r.taste[3].toFixed(1)+'</b></span>':'')+(r.conc?'<span><small>有機酸</small> <b>'+Math.round(r.conc[0]).toLocaleString()+' mg/L</b></span>'+(r.conc[2]!=null?'<span><small>糖與甜感</small> <b>'+Math.round(r.conc[2]).toLocaleString()+' mg/L</b></span>':'')+'<span><small>綠原酸</small> <b>'+Math.round(r.conc[1]).toLocaleString()+' mg/L</b></span>':'')+VOL.map((i,j)=>'<span><i style="background:var(--'+CMP[i].id+')"></i>'+CMP[i].name+' <b>'+(r.aroma[j][2]!=null?r.aroma[j][2].toFixed(1)+' mg':r.aroma[j][0].toFixed(0)+'%')+'</b> <small>保留 '+r.aroma[j][0].toFixed(0)+'% · 散失 '+r.aroma[j][1].toFixed(0)+'%</small></span>').join('');d.appendChild(a);}
   const note=document.createElement('div');note.className='label';note.textContent=when+' · '+stir;d.appendChild(note);
   return d;
 }
@@ -1846,21 +1934,66 @@ window.gameRoute=h=>{const m=(h||'').match(/^#level-(\d+)$/);
 <script>
 (function(){
 const $=id=>document.getElementById(id);
+const S={first:50,n:3,bean:'geisha',grind:800};
+$('tBean').innerHTML=BEANS.map(b=>'<option value="'+b.id+'">'+b.name+'（'+b.sub.split('・')[0]+'・'+ROAST_NAME(b.roast)+'）</option>').join('');
+$('tBean').value=S.bean;
+function plan46(first,n){return [first,120-first].concat(Array(n).fill(180/n));}
+function run46(first,n){const B=BEANS.find(b=>b.id===S.bean),plan=plan46(first,n),planT=plan.map((_,i)=>i*45);
+  const s=simulate('po',{dose:20,ratio:15,temp:92,grind:S.grind,roast:B.roast,bean:B.f,pattern:'pulse',dripper:'v60',plan,planT,planD:plan.map(()=>null),stirPO:[]});
+  const r=s.rec[s.rec.length-1],D=r.cupM,V=r.cupV,tot=D.reduce((a,b)=>a+b,0);
+  const cup={tds:tot/V*100,c:D.map(x=>x/V*1000),share:D.map(x=>x/tot)};
+  return {plan,planT,tds:cup.tds,ey:tot/20*100,end:s.end,pf:cupProfile(cup)};}
+const fmt=t=>Math.floor(t/60)+':'+String(Math.round(t%60)).padStart(2,'0');
+const bar=(v,max)=>'<i style="width:'+Math.max(2,Math.min(100,v/max*100))+'%"></i>';
+function render(){
+  $('tFirstOut').innerHTML='<span class="mono">'+S.first+' g → '+(120-S.first)+' g</span> <span class="label">'+(S.first<60?'偏甜':S.first>60?'偏酸':'平衡')+'</span>';
+  $('tGrindOut').innerHTML='<span class="mono">'+S.grind+' μm</span>';
+  $('tLast').querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',+b.dataset.v===S.n));
+  const R=run46(S.first,S.n);
+  $('tPlan').innerHTML=R.plan.map((ml,i)=>'<span class="'+(i<2?'p40':'p60')+'"><small>'+fmt(R.planT[i])+'</small><b>'+Math.round(ml)+' g</b></span>').join('');
+  $('tRes').innerHTML=[['濃度 TDS',R.tds.toFixed(2)+'%'],['萃取率',R.ey.toFixed(1)+'%'],['甜',R.pf.sweet.toFixed(1)],['酸',R.pf.acid.toFixed(1)],['苦',R.pf.bitter.toFixed(1)],['滴完',fmt(R.end)]]
+    .map(([k,v])=>'<div><b>'+v+'</b><span>'+k+'</span></div>').join('');
+  const A=[30,50,60,70,90].map(f=>({f,r:run46(f,S.n)}));
+  $('tCmpA').innerHTML='<div class="t46-row head"><span>分配</span><span>甜</span><span>酸</span></div>'+A.map(x=>'<div class="t46-row'+(x.f===S.first?' on':'')+'"><span>'+x.f+'/'+(120-x.f)+'</span><span class="b">'+bar(x.r.pf.sweet,10)+x.r.pf.sweet.toFixed(2)+'</span><span class="b">'+bar(x.r.pf.acid,10)+x.r.pf.acid.toFixed(2)+'</span></div>').join('');
+  const Bv=[1,2,3,4].map(n=>({n,r:run46(S.first,n)}));
+  $('tCmpB').innerHTML='<div class="t46-row head"><span>注數</span><span>TDS</span><span>苦</span></div>'+Bv.map(x=>'<div class="t46-row'+(x.n===S.n?' on':'')+'"><span>'+x.n+' 注</span><span class="b">'+bar(x.r.tds-0.8,1.0)+x.r.tds.toFixed(2)+'%</span><span class="b">'+bar(x.r.pf.bitter,10)+x.r.pf.bitter.toFixed(1)+'</span></div>').join('');
+  const dS=Math.abs(A[0].r.pf.sweet-A[4].r.pf.sweet),dA=Math.abs(A[0].r.pf.acid-A[4].r.pf.acid),dT=Bv[3].r.tds-Bv[0].r.tds;
+  $('tNote').innerHTML='<b>模型看到什麼：</b>後 60% 從 1 注改成 4 注，濃度從 '+Bv[0].r.tds.toFixed(2)+'% 升到 '+Bv[3].r.tds.toFixed(2)+'%（'+(dT>=0?'+':'')+dT.toFixed(2)+'），苦味也跟著上升，和粕谷哲說的「注數越多越濃」一致。'+
+    (dS<.2&&dA<.2?'但前 40% 從 30/90 改到 90/30，甜和酸在模型裡只差 '+Math.max(dS,dA).toFixed(2)+'，幾乎沒變。這個模型只計算各種成分怎麼溶出、怎麼流進杯子，沒有模擬悶蒸時的排氣、粉床的結構和注水沖擊的細節；20 g 粉本身就會吸走約 40 g 水，第一注小的時候幾乎全被吸住。粕谷哲描述的甜酸差異，要靠實際沖煮、用舌頭比較。':
+    '前 40% 從 30/90 改到 90/30，甜變化 '+dS.toFixed(2)+'、酸變化 '+dA.toFixed(2)+'。');
+}
+$('tFirst').addEventListener('input',e=>{S.first=+e.target.value;render();});
+$('tGrind').addEventListener('input',e=>{S.grind=+e.target.value;render();});
+$('tBean').addEventListener('change',e=>{S.bean=e.target.value;render();});
+$('tLast').querySelectorAll('button').forEach(b=>b.onclick=()=>{S.n=+b.dataset.v;render();});
+$('tToSim').onclick=()=>{const plan=plan46(S.first,S.n);
+  if(window.simApplyRecipe)window.simApplyRecipe({dripper:'v60',dose:20,ratio:15,temp:92,grind:S.grind,pattern:'pulse',plan,planT:plan.map((_,i)=>i*45),planD:plan.map(()=>null),planTemp:null,beanId:S.bean,valveWins:null,prePO:'none'});
+  location.hash='#sim';};
+window.teachRender=render;
+})();
+
+</script>
+<script>
+(function(){
+const $=id=>document.getElementById(id);
 function show(mode,push){
-  const g=mode==='game';
-  $('simView').hidden=g;$('gameView').hidden=!g;
-  $('mSim').setAttribute('aria-pressed',!g);$('mGame').setAttribute('aria-pressed',g);
-  if(push){try{history.replaceState(null,'',g?'#game':'#sim');}catch(e){}}
+  const ids={sim:'simView',game:'gameView',learn:'learnView'},btn={sim:'mSim',game:'mGame',learn:'mLearn'};
+  if(!ids[mode])mode='sim';
+  Object.keys(ids).forEach(k=>{$(ids[k]).hidden=k!==mode;$(btn[k]).setAttribute('aria-pressed',k===mode);});
+  if(push){try{history.replaceState(null,'','#'+mode);}catch(e){}}
   try{localStorage.setItem('brewLab.mode',mode);}catch(e){}
-  if(!g)dispatchEvent(new Event('resize'));
+  if(mode==='sim')dispatchEvent(new Event('resize'));
+  if(mode==='learn'&&window.teachRender)window.teachRender();
 }
 $('mSim').onclick=()=>{show('sim',true);scrollTo(0,0);};
 $('mGame').onclick=()=>{show('game',true);scrollTo(0,0);};
+$('mLearn').onclick=()=>{show('learn',true);scrollTo(0,0);};
 function route(){const h=location.hash||'';
   if(h==='#sim')return show('sim');
+  if(h==='#learn')return show('learn');
   if(h==='#game'||/^#level-\d+$/.test(h)){show('game');window.gameRoute&&window.gameRoute(h);return;}
   let m='sim';try{m=localStorage.getItem('brewLab.mode')||'sim';}catch(e){}
-  show(m==='game'?'game':'sim');
+  show(['game','learn'].includes(m)?m:'sim');
 }
 addEventListener('hashchange',route);route();
 })();
