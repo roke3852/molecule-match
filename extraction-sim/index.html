@@ -634,7 +634,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
       <div class="param"><div class="row"><label for="micTemp" class="label">水溫</label><output id="micTempOut" class="mono"></output></div><input id="micTemp" type="range" min="80" max="98" step="1" value="93"></div>
       <div class="param"><span class="label">萃取方式</span><div class="seg" id="micMethod" role="group" aria-label="萃取方式"><button data-v="po">手沖（水流過）</button><button data-v="im">浸泡</button></div></div>
       <div class="param"><span class="label">悶蒸</span><div class="seg" id="micBloom" role="group" aria-label="悶蒸"><button data-v="0">不悶蒸</button><button data-v="30">30 秒</button><button data-v="40">40 秒</button></div></div>
-      <div class="param" id="micPourP"><span class="label">注水力道</span><div class="seg" id="micPour" role="group" aria-label="注水力道"><button data-v="gentle">輕柔</button><button data-v="normal">一般</button><button data-v="strong">強力沖刷</button></div></div>
+      <div class="param" id="micPourP"><span class="label">注水力道</span><div class="seg" id="micPour" role="group" aria-label="注水力道"><button data-v="gentle">輕柔</button><button data-v="normal">一般</button><button data-v="strong">強力沖刷</button><button data-v="pulse10">10 段小注</button></div></div>
     </div>
   </section>
 
@@ -2154,12 +2154,19 @@ function micPhase(cfg,t){
     const t0=B||0;return {ph:'steep',U:0,bl:t-t0<8?1.0:.5,turb:t-t0<8?1:0};
   }
   if(B&&t<B)return {ph:'bloom',U:0,bl:.6,turb:0};
+  const [END,DR]=micEnds(cfg);
+  if(cfg.pour==='pulse10'){ // 粕谷 10 段：每 15 秒小注 30 g，每次注水是一次小翻攪
+    if(t<END){const lp=MIC_PULSE.filter(x=>x<=t+1e-9).pop()??0,since=t-lp,k=Math.exp(-since/4);
+      return {ph:'flow',U:1.6*(.45+.9*k),bl:.8*(.6+.9*k),turb:since<3?.7:0,pulse:MIC_PULSE.indexOf(lp)+1};}
+    if(t<DR){const f=1-(t-END)/(DR-END);return {ph:'drain',U:1.2*f,bl:.6*f+.08*(1-f),turb:0,film:f};}
+    return {ph:'done',U:0,bl:.08,turb:0,film:0};}
   const sp={gentle:{U:1.2,bl:.65},normal:{U:2,bl:1},strong:{U:4,bl:1.6}}[cfg.pour||'normal'];
-  const END=150,DR=170;
   if(t<END)return {ph:'flow',U:sp.U,bl:sp.bl,turb:cfg.pour==='strong'?1:cfg.pour==='normal'?.4:0};
   if(t<DR){const f=1-(t-END)/(DR-END);return {ph:'drain',U:sp.U*f,bl:sp.bl*f+.08*(1-f),turb:0,film:f};}
   return {ph:'done',U:0,bl:.08,turb:0,film:0};
 }
+const MIC_PULSE=[0,30,45,60,75,90,105,120,135,150];
+function micEnds(cfg){return cfg.method==='im'?[240,240]:cfg.pour==='pulse10'?[190,210]:[150,170];}
 function micCreate(cfg){
   const rnd=micRng(cfg.seed||7);
   const R0=cfg.grind/MIC_CELL/2, Tf=Math.max(.45,Math.min(1.6,Math.exp((cfg.temp-93)/14)));
@@ -2273,7 +2280,7 @@ function micStep(S){
 }
 const MIC_TEND=240;
 function micRun(cfg,tEnd){const S=micCreate(cfg);S.curve.push({t:0,e:S.rel.map(()=>0),all:0,wet:0,gas:1,contact:1});while(S.t<(tEnd??MIC_TEND)-1e-9)micStep(S);return S;}
-if(typeof module!=='undefined')module.exports={micRun,micCreate,micStep,MIC_T,micPhase,micAll};
+if(typeof module!=='undefined')module.exports={micRun,micCreate,micStep,MIC_T,micPhase,micAll,micEnds};
 
 (function(){
 const $=id=>document.getElementById(id);
@@ -2291,6 +2298,8 @@ const TOPICS=[
   text:'<p>浸泡時粉一直泡在同一池水裡，水不流動，溶出的物質留在粉粒周圍，整池液體越來越濃（背景越來越深）。粉粒內外的濃度差越來越小，萃取會自己踩煞車。</p><p>手沖一直有新的水流過，濃度差維持得大，同樣時間萃得比較多；但水流完萃取就結束（約 2:50 之後），浸泡則可以一直泡下去。浸泡也比較不怕不均勻，因為每顆粉都泡在同樣的液體裡。</p>'},
  {id:'oil',name:'油脂與香氣',A:{temp:96,pour:'strong'},B:{temp:88,pour:'gentle'},an:'96°C・強力沖刷',bn:'88°C・輕柔注水',
   text:'<p>咖啡裡的物質分兩類。酸、糖、咖啡因、綠原酸這些<b>水溶性</b>物質會溶進水，再一格一格擴散出來。<b>油脂</b>不溶於水，以小油滴的形式存在細胞裡（畫面中金色的圓點）。</p><p>油要出來，得先被熱水加熱、變得比較會流動，再被水流和翻攪從粉粒表面剪下來，變成很小的油滴懸浮在咖啡裡（乳化）。所以溫度越高、注水越猛，帶出的油越多。內部完整細胞裡的油幾乎出不來，大部分的油最後都留在咖啡渣裡。</p><p>香氣分子不全是「不溶於水」。很多烘焙香（吡嗪、呋喃類）本身就溶得進水，跟水溶性物質一起擴散出來。另一部分比較親油的香氣（例如一些酯類）偏好待在油滴裡，要等油被帶出來，或很慢地從油轉進水裡（畫面中有金色外圈的香氣小點）。溫度高、水流強，這部分出得比較多。</p><p>油進到杯子裡會讓口感更滑、更厚，也會留住親油的香氣。不過手沖的濾紙會擋下大部分的油，紙濾咖啡口感比較乾淨；法壓壺、金屬濾網的咖啡油感就明顯得多。</p>'},
+ {id:'k10',name:'粕谷 10 段',A:{grind:1250,temp:96,bloom:30,pour:'pulse10'},B:{grind:650,temp:93,bloom:40,pour:'normal'},an:'粕谷 10 段',bn:'一般配方',
+  text:'<p>2026 年粕谷哲在世界手沖冠軍十週年推出的新沖法（也叫 Multi-Pour）：20 g 粉、300 g 水（1:15）、95–96°C、<b>超粗研磨</b>（C40 約 40–45 格，約 1200–1350 μm），V60 或 V60 NEO。先注 30 g 悶蒸 30 秒，之後每 15 秒注 30 g，共 10 注，約 3:00–3:30 滴完。</p><p><b>為什麼磨這麼粗：</b>粗粉的細粉少、不容易塞，可以放心用高溫、拉長時間。對照顯微鏡看：粗粉的中心離表面很遠，藏在裡面又大又慢的苦味大分子大多出不來；先出來的是外圈破裂細胞裡的酸、糖和香氣。所以整體萃得比較少，但苦味相對更少。</p><p><b>為什麼用 96°C：</b>粗粉萃得慢，用高溫讓分子動得快，也讓表面的油比較好帶出，補回一些口感。</p><p><b>為什麼分 10 注：</b>每 15 秒一小注，粉層一直泡在剛換上的新鮮水裡，濃度差保持大；每注都是一次輕輕的翻動，但水位低、不會猛烈沖刷。整個過程維持 3 分多鐘穩定接觸，讓粗粉有時間慢慢萃。</p><p>粕谷哲的說法是：精品咖啡的好味道是「加法」，短時間、乾淨的沖法雖然避開缺點，也把很多好的味道留在粉裡。網路上的評價不一：有人喝到很甜、很厚的口感，也有人和一般兩段沖法並排比較，覺得 10 段的酸比較搶、甜感和厚度反而少。這個模型能確定的是苦味大分子占比明顯較低；整體萃得比較少，所以甜和厚度不見得更多，酸和甜的比例則會隨粉粒而變。實際喝起來跟豆子很有關係。</p><p>圖上可以看到 10 次注水的節奏：每注一次，水流和邊界層短暫變強，之後慢慢緩下來。</p>'},
  {id:'free',name:'自由調整',text:'<p>用下方「自己調整」改研磨、水溫、悶蒸、注水和萃取方式。每次改動後，上一次的曲線會留在圖上當虛線，方便比較。</p>'},
 ];
 const SHOW=['acid','sugar','bitter','fruity','oil'];
@@ -2310,14 +2319,14 @@ function openTopic(tp,sd){topic=tp;side=sd||'A';
   const other=side==='A'?'B':'A';
   ghost=micRun(cfgFor(tp,other));ghostName='虛線：'+(other==='A'?tp.an:tp.bn);
   load(cfgFor(tp,side),true);
-  const end=cfg.method==='po'&&ghost.cfg.method==='po'?170:240;
+  const end=Math.max(micEnds(cfg)[1],micEnds(ghost.cfg)[1]);
   const at=(R,t)=>R.curve.find(x=>x.t>=t)||R.curve[R.curve.length-1];
   const a=at(side==='A'?full:ghost,end),b=at(side==='A'?ghost:full,end);
   const row=(n,f)=>'<tr><td>'+n+'</td><td>'+f(a)+'</td><td>'+f(b)+'</td></tr>';
   const p=v=>Math.round(v*100)+'%';
   $('micTopic').innerHTML='<div class="seg mic-ab" role="group" aria-label="比較組"><button data-s="A" aria-pressed="'+(side==='A')+'">'+tp.an+'</button><button data-s="B" aria-pressed="'+(side==='B')+'">'+tp.bn+'</button></div>'+tp.text+
     '<table class="mic-tbl"><thead><tr><th>'+fmt(end)+' 時溶出</th><th>'+tp.an+'</th><th>'+tp.bn+'</th></tr></thead><tbody>'+
-    row('整體（水溶性）',x=>p(x.all))+row('有機酸',x=>p(x.e[0]))+row('糖',x=>p(x.e[5]))+row('苦味大分子',x=>p(x.e[6]))+row('花果香',x=>p(x.e[3]))+row('油脂（不溶於水）',x=>p(x.e[7]))+'</tbody></table>';
+    row('整體（水溶性）',x=>p(x.all))+row('有機酸',x=>p(x.e[0]))+row('糖',x=>p(x.e[5]))+row('苦味大分子',x=>p(x.e[6]))+row('花果香',x=>p(x.e[3]))+row('油脂（不溶於水）',x=>p(x.e[7]))+'<tr><td>苦味大分子÷整體（越低越不苦）</td><td>'+(a.e[6]/Math.max(.01,a.all)).toFixed(2)+'</td><td>'+(b.e[6]/Math.max(.01,b.all)).toFixed(2)+'</td></tr><tr><td>酸÷糖（越高越偏酸）</td><td>'+(a.e[0]/Math.max(.01,a.e[5])).toFixed(2)+'</td><td>'+(b.e[0]/Math.max(.01,b.e[5])).toFixed(2)+'</td></tr></tbody></table>';
   $('micTopic').querySelectorAll('.mic-ab button').forEach(b=>b.onclick=()=>openTopic(tp,b.dataset.s));
 }
 function seek(t){S=micCreate(cfg);S.curve.push({t:0,e:S.rel.map(()=>0),all:0,wet:0,gas:1,contact:1});while(S.t<t-1e-9)micStep(S);snapMol();tracers=[];draw();ui();}
@@ -2400,6 +2409,7 @@ function caption(){
   if(P.ph==='done')t='水已經流完，粉粒只剩表面一層薄薄的水膜，物質幾乎出不來，萃取停止。';
   else if(P.ph==='drain')t='最後一段水正在流走，接觸的水越來越少，萃取快要停了。';
   else if(P.ph==='bloom')t='悶蒸：少量熱水讓粉粒吸水，CO₂ 從細胞裡冒出來。水不多也沒在流，溶出的物質堆在粉粒周圍，所以萃得慢；這段主要是讓水滲進去、讓氣排出來。';
+  else if(P.pulse&&P.ph==='flow'&&S.wetFrac>.97&&e[0]<.8)t='第 '+P.pulse+' 注：小量注水輕輕翻動粉層，換上新鮮的水，濃度差又拉大。粗粉的中心很遠，裡面的糖和苦味大分子出來得很慢，所以前段多是酸和香氣。';
   else if(S.contact<.7)t='CO₂ 正大量冒出，氣泡包住粉粒表面，把水推開，物質不容易離開粉粒，萃取效率打折。';
   else if(S.wetFrac<.97)t='水正從外往內滲透（已濕 '+Math.round(S.wetFrac*100)+'%）。還沒吸到水的細胞，裡面的物質動不了。'+(S.cells.some(x=>x.clump&&!x.wet)?'淺色那一塊是被 CO₂ 包住的乾粉團，水很難進去。':'');
   else if(cfg.method==='im'&&S.drive<.6)t='杯中液體越來越濃，粉粒內外的濃度差變小，物質出來的速度慢下來，萃取在自己踩煞車。';
@@ -2416,7 +2426,8 @@ function drawChart(){
   g.clearRect(0,0,w,chartH);g.font='11px '+cssv('--f-mono');g.fillStyle=C.muted;g.strokeStyle=C.line;g.lineWidth=1;
   [0,.25,.5,.75,1].forEach(v=>{g.beginPath();g.moveTo(L,Y(v));g.lineTo(L+pw,Y(v));g.stroke();g.fillText(Math.round(v*100)+'%',2,Y(v)+4);});
   [0,60,120,180,240].forEach(t=>g.fillText(fmt(t),X(t)-12,chartH-6));
-  if(cfg.method==='po'){g.fillStyle=rgba(C.muted||'#888',.1);g.fillRect(X(150),T,X(240)-X(150),ph);g.fillStyle=C.muted;g.fillText('水流完',X(170)+4,T+12);}
+  if(cfg.method==='po'){const [e0,e1]=micEnds(cfg);g.fillStyle=rgba(C.muted||'#888',.1);g.fillRect(X(e0),T,X(240)-X(e0),ph);g.fillStyle=C.muted;g.fillText('水流完',Math.min(X(e1)+4,L+pw-40),T+12);}
+  if(cfg.pour==='pulse10'&&cfg.method==='po'){g.strokeStyle=rgba(C.accent||'#2d6a58',.35);g.lineWidth=1;[30,45,60,75,90,105,120,135,150].forEach(t=>{g.beginPath();g.moveTo(X(t),T+ph-8);g.lineTo(X(t),T+ph);g.stroke();});}
   if(cfg.bloom){g.fillStyle=rgba(C.muted||'#888',.08);g.fillRect(X(0),T,X(cfg.bloom)-X(0),ph);g.fillStyle=C.muted;g.fillText('悶蒸',X(2),T+12);}
   const line=(R,f,col,wd,dash)=>{g.strokeStyle=col;g.lineWidth=wd;g.setLineDash(dash||[]);g.beginPath();R.curve.forEach((p,i)=>i?g.lineTo(X(p.t),Y(f(p))):g.moveTo(X(p.t),Y(f(p))));g.stroke();g.setLineDash([]);};
   const idx=id=>MIC_T.findIndex(t=>t.id===id);
