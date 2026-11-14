@@ -129,7 +129,36 @@ const SEED = [{
   },
   summary:"整體酸甜平衡，TDS 偏高，帶來一點後段負面風味。可能因為注水不穩定，悶蒸偏離預期，產生些微苦味。"
 },{
-  id:"2026-11-14-0", date:"2026-11-14", title:"布爾 30cl 60-40 96", recipe:"60-40",
+  id:"2026-11-14-4060", seq:1, date:"2026-11-14", title:"布爾 30cl 40-60 96", recipe:"40-60",
+  bean:"衣索比亞 西達摩 布爾薩 蒙塔莎處理廠 萊吉斯 74185", process:"日曬",
+  roast:"淺", agtron:80,
+  grinder:"Comandante C40 MK4", clicks:30, micron:900,
+  temp:96, dripper:"Orea Brewer（OREA-O）", filter:"93 蛋糕濾紙",
+  dose:12, water:203.7, yield:182.1, tds:1.31, ey:19.9, time:139,
+  remark:"濾紙浸濕後放粉才開始煮水，粉在浸濕的濾紙上放了一段時間，可能會有點負面風味",
+  pours:[
+    {ml:40, rate:4, wait:40},
+    {ml:60, rate:4, wait:30},
+    {ml:50, rate:4, wait:30},
+    {ml:50, rate:4, wait:30}
+  ],
+  endNote:"2:19 流乾",
+  potAroma:"草本、甜",
+  taste:{
+    hot:{aroma:1, aromaNote:"前：草本", aromaBack:1, aromaBackNote:"桃香", acid:3, sweet:3, bitter:0, body:2, astr:1, finish:0,
+         finishNote:"甜苦澀平衡，無特別感覺",
+         desc:"酸甜平衡，無特別突出之風味，如水一般乾淨。"},
+    warm:{label:"中溫", aroma:0.5, aromaNote:"前：焦糖", aromaBack:1, aromaBackNote:"桃香", acid:3.5, sweet:3, bitter:0, body:2, astr:1, finish:null,
+         finishNote:"上顎些微回甘、微澀",
+         desc:"明亮柑橘酸，酸甜平衡適中，酸感稍微突出（但甜感與 50-50 相比較高），呈現明亮之酸值，口感清爽乾淨。厚 2 屬茶感。"},
+    room:{aroma:0, aromaBack:0, acid:4, sweet:3, bitter:1, body:2, astr:1, finish:null,
+         finishNote:"無特別風味",
+         desc:"檸檬尖酸，但甜感不錯，稍微對尖酸做修飾，微苦味。茶感偏水感，常溫風味較 46 54 正面。"}
+  },
+  summary:"40-60 較 50-50 保留較多甜感，並維持乾淨度與明亮酸值，但還是沖入微苦味，對整體風味影響不大。",
+  next:["測試 60-40 對風味之影響","降一格到 29 格測試 50-50，看能否在保有乾淨度下增加甜感及厚度"]
+},{
+  id:"2026-11-14-0", seq:2, date:"2026-11-14", title:"布爾 30cl 60-40 96", recipe:"60-40",
   bean:"衣索比亞 西達摩 布爾薩 蒙塔莎處理廠 萊吉斯 74185", process:"日曬",
   roast:"淺", agtron:80,
   grinder:"Comandante C40 MK4", clicks:30, micron:900,
@@ -157,7 +186,7 @@ const SEED = [{
   summary:"60-40 整體酸感下降，酸甜較為平衡，在此研磨度下依舊沒有太明顯負面風味，打入好球帶的風味。",
   next:["維持 60-40，研磨調細到 29 格，看能否在維持酸甜平衡下增加整體風味濃郁度"]
 },{
-  id:"2026-11-14-a", date:"2026-11-14", title:"布爾 29cl 60-40 96", recipe:"60-40",
+  id:"2026-11-14-a", seq:3, date:"2026-11-14", title:"布爾 29cl 60-40 96", recipe:"60-40",
   bean:"衣索比亞 西達摩 布爾薩 蒙塔莎處理廠 萊吉斯 74185", process:"日曬",
   roast:"淺", agtron:80,
   grinder:"Comandante C40 MK4", clicks:29, micron:870,
@@ -195,7 +224,7 @@ const persist = () => { try{ localStorage.setItem(LS, JSON.stringify(store)); }c
 
 function brews(){
   const base = SEED.filter(b => !store.deleted.includes(b.id)).map(b => store.edited[b.id] || b);
-  return base.concat(store.added).map(derive).sort((a,b)=> b.date.localeCompare(a.date) || b.id.localeCompare(a.id));
+  return base.concat(store.added).map(derive).sort((a,b)=> b.date.localeCompare(a.date) || (b.seq??0)-(a.seq??0) || b.id.localeCompare(a.id));
 }
 function derive(b){
   const r = Object.assign({}, b);
@@ -203,6 +232,7 @@ function derive(b){
   if(r.ey == null && b.yield && b.tds && b.dose) r.ey = b.yield*b.tds/b.dose;
   r.nPours = (b.pours||[]).length;
   r.bloom = (b.pours||[])[0]?.ml ?? null;
+  { const ps=b.pours||[]; r.firstPct = ps.length>=2 ? ps[0].ml/(ps[0].ml+ps[1].ml)*100 : null; }
   r.pourStyle = (b.pours||[]).every(p=>p.style) && (b.pours||[]).length ? b.pours.map(p=>p.style).join("") : null;
   return r;
 }
@@ -246,6 +276,7 @@ const PARAMS = [
   {k:"dose",   n:"粉重", u:"g", f:f1},
   {k:"bloom",  n:"悶蒸水量", u:"ml", f:v=>v},
   {k:"nPours", n:"注水段數", u:"段", f:v=>v},
+  {k:"firstPct", n:"前段比例", u:"前兩段的前段 %", f:v=>Math.round(v)+"%"},
   {k:"time",   n:"沖煮時間", u:"秒", f:v=>v},
   {k:"tds",    n:"TDS", u:"%", f:f2},
   {k:"ey",     n:"萃取率", u:"%", f:f1}
@@ -303,7 +334,7 @@ function viewMap(){
 }
 
 /* ================= 參數 × 風味 ================= */
-let corrX="clicks", corrY="sweet";
+let corrX="firstPct", corrY="sweet";
 function viewCorr(){
   const list=brews();
   const P=PARAMS.find(p=>p.k===corrX), F=YOPTS.find(f=>f.k===corrY);
@@ -319,8 +350,10 @@ function viewCorr(){
   for(let v=0;v<=5;v++) s+=`<line x1="${L}" x2="${L+pw}" y1="${Y(v)}" y2="${Y(v)}" stroke="#25304a"/><text class="ax" x="${L-6}" y="${Y(v)+4}" text-anchor="end">${v}</text>`;
   for(let i=0;i<=4;i++){ const v=lo+(hi-lo)*i/4; s+=`<text class="ax" x="${X(v)}" y="${H-B+16}" text-anchor="middle">${+v.toFixed(hi-lo<1?2:1)}</text>`; }
   s+=`<text class="ax" x="${L+pw/2}" y="${H-2}" text-anchor="middle" style="font-family:var(--f-body)">${P.n}${P.u?` (${P.u})`:""}</text>`;
+  const grp={}; pts.forEach(b=>{ const k=Math.round(X(+b[corrX])); (grp[k]=grp[k]||[]).push(b.id); });
   pts.forEach(b=>{
-    const x=X(+b[corrX]), c=beanColor(b.bean);
+    const k=Math.round(X(+b[corrX])), g=grp[k], j=g.length>1 ? (g.indexOf(b.id)-(g.length-1)/2)*16 : 0;
+    const x=X(+b[corrX])+j, c=beanColor(b.bean);
     const vs=STAGES.map(st=>[st,b.taste?.[st.k]?.[corrY]]).filter(([,v])=>v!=null);
     s+=`<g data-open="${b.id}" style="cursor:pointer">`;
     if(vs.length>1){ const ys=vs.map(([,v])=>Y(v)); s+=`<line x1="${x}" x2="${x}" y1="${Math.min(...ys)}" y2="${Math.max(...ys)}" stroke="${c}" stroke-width="2" opacity=".6"/>`; }
@@ -333,7 +366,7 @@ function viewCorr(){
   /* 熱圖：每一杯 × 每種風味（高溫） */
   const heat = list.length ? `<div class="card"><h2>每杯風味一覽 <small>高溫 / 中溫 / 常溫，顏色越深分數越高</small></h2>
     <div style="overflow-x:auto"><table class="tt sm"><tr><th>杯</th><th></th>${FLAVORS.slice(0,6).map(f=>`<th style="color:${f.c}">${f.n}</th>`).join("")}<th style="color:var(--gold)">整體</th><th>${P.n}</th></tr>
-    ${list.map(b=>{ const sts=stagesOf(b); return sts.map((st,i)=>`<tr data-open="${b.id}" style="cursor:pointer">${i===0?`<td rowspan="${sts.length}" style="font-family:var(--f-body);white-space:nowrap">${b.date.slice(5).replace("-","/")}${b.clicks!=null?`<br><span style="color:var(--muted)">${b.clicks}格</span>`:""}</td>`:""}<td style="color:${st.c};font-family:var(--f-body);white-space:nowrap">${stageName(b,st)}</td>${FLAVORS.slice(0,6).concat([{k:"score"}]).map(f=>{
+    ${list.map(b=>{ const sts=stagesOf(b); return sts.map((st,i)=>`<tr data-open="${b.id}" style="cursor:pointer">${i===0?`<td rowspan="${sts.length}" style="font-family:var(--f-body);white-space:nowrap">${b.date.slice(5).replace("-","/")}${b.clicks!=null?`<br><span style="color:var(--muted)">${b.clicks}格</span>`:""}${b.recipe?`<br><span style="color:var(--muted)">${esc(b.recipe)}</span>`:""}</td>`:""}<td style="color:${st.c};font-family:var(--f-body);white-space:nowrap">${stageName(b,st)}</td>${FLAVORS.slice(0,6).concat([{k:"score"}]).map(f=>{
       const v=b.taste[st.k][f.k];
       return `<td style="background:rgba(124,203,185,${((v??0)/5*0.5).toFixed(2)})">${v??"—"}</td>`;}).join("")}${i===0?`<td rowspan="${sts.length}">${b[corrX]!=null?P.f(b[corrX]):"—"}</td>`:""}</tr>`).join(""); }).join("")}
     </table></div></div>` : "";
@@ -357,7 +390,7 @@ function viewList(){
       <div class="b"><span style="color:${beanColor(b.bean)}">●</span> ${esc(b.bean)}</div>
       ${b.goal?`<div style="font-size:13px;color:var(--muted);margin:-2px 0 6px">🎯 ${esc(b.goal)}</div>`:""}
       <div class="chips">
-        <span class="chip"><i>比例</i>1:${f1(b.ratio)}</span>
+        ${b.recipe?`<span class="chip"><i>配方</i>${esc(b.recipe)}</span>`:""}<span class="chip"><i>比例</i>1:${f1(b.ratio)}</span>
         <span class="chip"><i>水溫</i>${b.temp??"—"}°</span>
         <span class="chip"><i>研磨</i>${b.clicks??"—"}格</span>
         <span class="chip"><i>TDS</i>${f2(b.tds)}</span>
@@ -421,7 +454,7 @@ const CMP_FIELDS=[["clicks","研磨",v=>v+" 格"],["micron","粒徑",v=>v+" µm"
 let cmpState={id:null,with:null,stage:"hot"};
 function compareCard(b){
   const others=brews().filter(x=>x.id!==b.id); if(!others.length) return "";
-  if(cmpState.id!==b.id){ const same=others.filter(x=>x.bean===b.bean); const prev=same.find(x=>x.date<=b.date&&x.id!==b.id)||same[0]||others[0]; cmpState={id:b.id,with:prev.id,stage:"hot"}; }
+  if(cmpState.id!==b.id){ const all=brews(), idx=all.findIndex(x=>x.id===b.id); const prev=all.slice(idx+1).find(x=>x.bean===b.bean)||others.find(x=>x.bean===b.bean)||others[0]; cmpState={id:b.id,with:prev.id,stage:"hot"}; }
   const o=others.find(x=>x.id===cmpState.with)||others[0];
   const rows=CMP_FIELDS.map(([k,n,f])=>{ const va=b[k], vb=o[k]; if(va==null&&vb==null) return ""; const diff=String(va)!==String(vb);
     return `<tr style="${diff?"":"opacity:.45"}"><td style="font-family:var(--f-body)">${n}</td><td>${vb!=null?f(vb):"—"}</td><td style="${diff?"color:var(--gold)":""}">${va!=null?f(va):"—"}</td></tr>`; }).join("");
@@ -443,6 +476,7 @@ function detail(id, keepScroll){
   const P=(n,v,txt)=>`<div><span>${n}</span><b class="${txt?"txt":""}">${v??"—"}</b></div>`;
   $("#sheetIn").innerHTML=`
   <div class="bar"><b>${b.date}${b.title?`・${esc(b.title)}`:""}</b><button class="btn" id="closeS">關閉</button></div>
+  ${b.remark?`<div class="note" style="margin:0 0 12px;border:1px solid rgba(241,154,154,.35)"><b style="color:#f19a9a">⚠ 沖煮備註</b>${esc(b.remark)}</div>`:""}
   ${b.goal?`<div class="card" style="border-color:rgba(242,207,107,.4)"><h2 style="color:var(--gold)">🎯 測試目的</h2><div style="font-size:14px">${esc(b.goal)}</div></div>`:""}
   <div class="card"><h2><span style="color:${beanColor(b.bean)}">●</span>${esc(b.bean)}</h2>
     <div class="chips" style="margin-bottom:10px">${b.process?`<span class="chip">${esc(b.process)}</span>`:""}${b.roast?`<span class="chip">${esc(b.roast)}焙${b.agtron?` · 色值 ${b.agtron}`:""}</span>`:""}${b.recipe?`<span class="chip"><i>配方</i>${esc(b.recipe)}</span>`:""}${b.pourStyle?`<span class="chip"><i>手法</i>${esc(b.pourStyle)}</span>`:""}</div>
@@ -476,7 +510,7 @@ function detail(id, keepScroll){
   if($("#cmpWith")) $("#cmpWith").onchange=e=>{ cmpState.with=e.target.value; detail(id,true); };
   document.querySelectorAll("[data-cmpst]").forEach(el=>el.onclick=()=>{ cmpState.stage=el.dataset.cmpst; detail(id,true); });
   $("#editB").onclick=()=>{ closeSheet(); formState={mode:"edit",b:JSON.parse(JSON.stringify(rawById(id)))}; go("add"); };
-  $("#dupB").onclick=()=>{ closeSheet(); const c=JSON.parse(JSON.stringify(rawById(id))); delete c.id; c.date=today(); c.taste={hot:{},warm:{},room:{}}; c.summary=""; c.tds=null; c.ey=null; c.yield=null; c.time=null; c.endNote=""; c.potAroma=""; c.goal=(c.next||[]).join("；"); c.next=[]; c.title=""; (c.pours||[]).forEach(p=>delete p.note); formState={mode:"new",b:c}; go("add"); };
+  $("#dupB").onclick=()=>{ closeSheet(); const c=JSON.parse(JSON.stringify(rawById(id))); delete c.id; c.date=today(); c.taste={hot:{},warm:{},room:{}}; c.summary=""; c.tds=null; c.ey=null; c.yield=null; c.time=null; c.endNote=""; c.potAroma=""; c.remark=""; c.goal=(c.next||[]).join("；"); c.next=[]; c.title=""; (c.pours||[]).forEach(p=>delete p.note); formState={mode:"new",b:c}; go("add"); };
   $("#delB").onclick=()=>{ if(!confirm("確定刪除這筆紀錄？")) return; delBrew(id); closeSheet(); render(); toast("已刪除"); };
 }
 function closeSheet(){ $("#sheet").classList.remove("on"); }
@@ -525,6 +559,7 @@ function viewAdd(){
   <div class="card"><h2>結果</h2>
     <div class="grid3">${I("yield","液重 g")}${I("tds","TDS %")}<label class="f">流乾時間<input data-time value="${b.time!=null?fmtT(b.time):""}" placeholder="2:11"></label></div>
     <p class="hint" id="calc"></p>
+    <label class="f" style="margin-top:8px">⚠ 沖煮備註（意外、失誤）<input data-k="remark" value="${esc(b.remark||"")}" placeholder="例：粉放在濕濾紙上等太久"></label>
     <label class="f" style="margin-top:8px">結尾備註<input data-k="endNote" value="${esc(b.endNote||"")}" placeholder="2:11 流乾"></label>
   </div>
   <div class="card"><label class="f">壺香<input data-k="potAroma" value="${esc(b.potAroma||"")}" placeholder="甜、藥草"></label></div>
@@ -559,7 +594,7 @@ function save(){
     if(SEED.some(s=>s.id===b.id)) store.edited[b.id]=b;
     else store.added=store.added.map(x=>x.id===b.id?b:x);
   } else {
-    b.id=b.date+"-"+Math.random().toString(36).slice(2,6);
+    b.id=b.date+"-"+Math.random().toString(36).slice(2,6); b.seq=Date.now();
     store.added.push(b);
   }
   persist(); const id=b.id; formState=null; go("list"); toast("已保存"); setTimeout(()=>detail(id),250);
