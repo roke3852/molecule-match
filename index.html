@@ -799,10 +799,10 @@ const LEVELS=[];
   });
 })();
 function frontier(){let i=0;while(i<LEVELS.length-1&&(P().stars[LEVELS[i].id]||0)>0)i++;return i}
-/* a chapter with `after` opens once that earlier chapter is fully cleared, without waiting for the chapters in between */
+/* every chapter is open from the start; inside a chapter, levels still open one after another */
 function tierFrontier(ti){const ls=LEVELS.map((L,i)=>[L,i]).filter(([L])=>L.tier===ti);const f=ls.find(([L])=>!(P().stars[L.id]>0));return f?f[1]:ls[ls.length-1][1]}
 const tierCleared=ti=>LEVELS.filter(L=>L.tier===ti).every(L=>P().stars[L.id]>0);
-function isOpen(i){const L=LEVELS[i],a=TIERS[L.tier].after;if(a!==undefined&&tierCleared(a))return i<=tierFrontier(L.tier);return i<=frontier()}
+function isOpen(i){return i<=tierFrontier(LEVELS[i].tier)}
 const totalStars=()=>LEVELS.reduce((s,L)=>s+(P().stars[L.id]||0),0);
 function byPractice(ids){return shuffle(ids.slice()).sort((a,b)=>(P().practice[a]||0)-(P().practice[b]||0))}
 function levelPairs(i){
@@ -1042,7 +1042,7 @@ function win(){
     G.newTitles=unlockedIds(P()).filter(id=>!before.includes(id));
     const secs=Math.ceil(Math.max(0,G.timeLeft));
     let msg=st===3?`一次都沒配錯，還剩 ${secs} 秒！`:st===2?`還剩 ${secs} 秒。${G.miss?'下次一次都不配錯':'再快一點'}，就有三顆星。`:`過關了！還剩 ${secs} 秒，再快一點可以拿更多星星。`;
-    if(L.last&&P().cur<LEVELS.length-1)msg+=` ${TIERS[L.tier].name.slice(4)}完成，下一章開啟了！`;
+    if(L.last&&P().cur<LEVELS.length-1)msg+=` ${TIERS[L.tier].name.slice(4)}完成！`;
     if(LEVELS.every(x=>P().stars[x.id]>0))msg='全部章節都完成了，你是分子小達人！';
     $('winT').textContent=`${TIERS[L.tier].short} 第 ${L.num} 關過關！`;
     $('winP').textContent=msg;$('winP').hidden=false;
@@ -1259,7 +1259,7 @@ function openMap(){
 function renderMap(){
   renderWhoBtns();
   renderYin(renderMap);
-  const fr=frontier();
+  const fr=tierFrontier(mapTier);
   $('mapStars').textContent=`★ ${totalStars()} / ${LEVELS.length*3}`;
   $('tabs').innerHTML=TIERS.map((t,ti)=>{const first=LEVELS.findIndex(L=>L.tier===ti),open=isOpen(first);
     return `<button class="tab" style="--tc:${t.color}" data-t="${ti}" aria-pressed="${ti===mapTier}" ${open?'':'disabled'}>${open?'':'🔒 '}${t.short}</button>`}).join('');
