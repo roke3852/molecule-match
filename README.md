@@ -16,7 +16,6 @@
 | `smell-training/` | 嗅覺練習日誌 |
 | `yoshi-combos/` | 耀西連招手冊 |
 | `mtx-sim/` | 小台指期模擬器 |
-| `taiflex-tracker/` | 台虹 分點追蹤 |
 | `eink-notes/` | 元太法說會筆記 |
 
 ## 新增 App
