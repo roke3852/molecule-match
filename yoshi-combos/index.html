@@ -1,0 +1,1925 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>耀西連招手冊</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Rubik:wght@600;800&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+/* Layout: sticky percent dial + tabs on top, single column of cards below; one green accent, red for kill moves */
+:root{
+  --bg:#f3f6f1; --surface:#ffffff; --ink:#16221a; --muted:#5a6a5f; --line:#dbe3d9;
+  --accent:#27964a; --accent-soft:#e2f2e6; --accent-ink:#0d5a27;
+  --kill:#d0433a; --kill-soft:#fbe6e3; --amber:#b87a0c; --amber-soft:#f8eed6;
+  --f-display:"Rubik","Noto Sans TC",system-ui,sans-serif;
+  --f-body:"Noto Sans TC",system-ui,-apple-system,"PingFang TC","Microsoft JhengHei",sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0e1511; --surface:#16201a; --ink:#e6eee8; --muted:#97a79b; --line:#28352d;
+  --accent:#4cc26b; --accent-soft:#1b3424; --accent-ink:#a3e6b6;
+  --kill:#f06a5f; --kill-soft:#3a1c1a; --amber:#e6b04a; --amber-soft:#33291a; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0e1511; --surface:#16201a; --ink:#e6eee8; --muted:#97a79b; --line:#28352d;
+  --accent:#4cc26b; --accent-soft:#1b3424; --accent-ink:#a3e6b6;
+  --kill:#f06a5f; --kill-soft:#3a1c1a; --amber:#e6b04a; --amber-soft:#33291a; color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.6;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 48px}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+.wrap{max-width:760px;margin:0 auto}
+header.top{padding-block:22px 6px;display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap}
+h1{font-family:var(--f-display);font-weight:900;font-size:1.75rem;line-height:1.15;margin:0;text-wrap:balance}
+h1 small{display:block;font-family:var(--f-mono);font-size:.72rem;font-weight:500;letter-spacing:.12em;color:var(--muted);text-transform:uppercase;margin-bottom:4px}
+.egg{width:34px;height:42px;border-radius:50% 50% 46% 46%/60% 60% 40% 40%;background:var(--surface);border:2px solid var(--line);position:relative;flex:none}
+.egg i{position:absolute;border-radius:50%;background:var(--accent)}
+.sticky{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding-block:10px 8px;border-bottom:1px solid var(--line)}
+.meter{display:flex;align-items:center;gap:14px}
+.pct{font-family:var(--f-display);font-weight:800;font-size:2.4rem;line-height:1;font-variant-numeric:tabular-nums;min-width:4.2ch;color:var(--accent-ink)}
+.pct span{font-size:1.1rem;margin-left:2px}
+.meter .col{flex:1;min-width:0}
+.meter label{font-size:.78rem;color:var(--muted);display:block}
+input[type=range]{width:100%;accent-color:var(--accent);height:28px}
+.tabs{display:flex;gap:6px;margin-top:8px;overflow-x:auto}
+.tabs button{flex:1 0 auto;font:inherit;font-weight:700;font-size:.9rem;padding:8px 12px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--muted);cursor:pointer}
+.tabs button[aria-selected=true]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+button:focus-visible,input:focus-visible,summary:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+section{display:flex;flex-direction:column;gap:12px;padding-top:16px}
+.note{font-size:.82rem;color:var(--muted);background:var(--surface);border:1px dashed var(--line);border-radius:10px;padding:10px 12px}
+.filters{display:flex;gap:6px;flex-wrap:wrap}
+.chipbtn{font:inherit;font-size:.8rem;padding:4px 10px;border-radius:999px;border:1px solid var(--line);background:transparent;color:var(--muted);cursor:pointer}
+.chipbtn[aria-pressed=true]{background:var(--accent-soft);color:var(--accent-ink);border-color:var(--accent)}
+details.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+details.card.off{opacity:.42}
+details.card summary{list-style:none;cursor:pointer;padding:14px 14px 12px;display:grid;grid-template-columns:1fr auto;gap:4px 10px;align-items:start}
+details.card summary::-webkit-details-marker{display:none}
+.ttl{font-weight:900;font-size:1.02rem;min-width:0}
+.sub{grid-column:1/-1;font-size:.84rem;color:var(--muted)}
+.badge{font-family:var(--f-mono);font-size:.72rem;font-weight:700;padding:2px 8px;border-radius:6px;background:var(--accent-soft);color:var(--accent-ink);white-space:nowrap}
+.badge.kill{background:var(--kill-soft);color:var(--kill)}
+.range{grid-column:1/-1;height:8px;border-radius:4px;background:var(--line);position:relative;margin-top:6px}
+.range b{position:absolute;top:0;bottom:0;border-radius:4px;background:var(--accent)}
+.range b.kill{background:var(--kill)}
+.range em{position:absolute;top:-4px;width:3px;height:16px;background:var(--ink);border-radius:2px}
+.body{padding:0 14px 14px;display:flex;flex-direction:column;gap:10px}
+ol.steps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+ol.steps li{display:grid;grid-template-columns:26px 1fr;gap:10px;align-items:start}
+.n{width:26px;height:26px;border-radius:50%;background:var(--ink);color:var(--bg);font-family:var(--f-mono);font-size:.78rem;font-weight:700;display:grid;place-items:center}
+.st{min-width:0;display:flex;flex-direction:column;gap:4px}
+.st .mv{font-weight:700}
+.keys{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
+kbd{font-family:var(--f-mono);font-size:.78rem;font-weight:700;padding:2px 7px;border-radius:6px;border:1px solid var(--line);border-bottom-width:3px;background:var(--bg);color:var(--ink)}
+.plus{color:var(--muted);font-size:.8rem}
+.time{font-family:var(--f-mono);font-size:.76rem;color:var(--amber);background:var(--amber-soft);border-radius:6px;padding:2px 8px;align-self:flex-start;font-variant-numeric:tabular-nums}
+.st p{margin:0;font-size:.85rem;color:var(--muted)}
+.tip{font-size:.85rem;border-left:3px solid var(--accent);padding:4px 10px;background:var(--accent-soft);border-radius:0 8px 8px 0;color:var(--ink)}
+.legend{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.legend div{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-size:.84rem;display:flex;gap:8px;align-items:center}
+h2{font-family:var(--f-display);font-size:1.15rem;margin:8px 0 0;font-weight:800}
+.tp{display:flex;flex-direction:column;gap:12px}
+.trainer{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:12px;align-items:center;text-align:center}
+#pad{width:150px;height:150px;border-radius:50%;border:none;background:var(--accent);color:#fff;font-family:var(--f-display);font-weight:800;font-size:1.3rem;cursor:pointer;touch-action:none;user-select:none;-webkit-user-select:none;box-shadow:0 6px 0 var(--accent-ink)}
+#pad.down{transform:translateY(4px);box-shadow:0 2px 0 var(--accent-ink)}
+.res{font-family:var(--f-mono);font-size:1.4rem;font-weight:700;font-variant-numeric:tabular-nums}
+.res.ok{color:var(--accent-ink)}.res.bad{color:var(--kill)}
+.hist{display:flex;gap:4px;flex-wrap:wrap;justify-content:center}
+.hist span{font-family:var(--f-mono);font-size:.72rem;padding:2px 6px;border-radius:5px;background:var(--bg);border:1px solid var(--line)}
+.hist span.ok{border-color:var(--accent);color:var(--accent-ink)}
+.conv{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:center;font-family:var(--f-mono)}
+.conv input{width:80px;font:inherit;padding:6px 8px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink)}
+.tablewrap{overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:12px}
+table{border-collapse:collapse;width:100%;font-size:.85rem;min-width:420px}
+th,td{padding:8px 10px;text-align:left;border-bottom:1px solid var(--line)}
+th{font-size:.74rem;letter-spacing:.06em;color:var(--muted);font-weight:700}
+td.num{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+tr:last-child td{border-bottom:none}
+.lane{width:100%;max-width:360px;height:56px;border-radius:12px;background:var(--bg);border:1px solid var(--line);position:relative;overflow:hidden}
+.ln-egg{position:absolute;bottom:8px;left:8%;width:30px;height:38px;border-radius:50% 50% 46% 46%/60% 60% 40% 40%;background:var(--surface);border:2px solid var(--accent);transition:left .35s ease-out,transform .12s}
+.ln-egg i{position:absolute;width:7px;height:7px;border-radius:50%;background:var(--accent);top:9px;left:15px}
+.ln-egg i+i{top:20px;left:6px;width:6px;height:6px}
+.ln-egg.flip{transform:scaleX(-1)}.ln-egg.air{bottom:22px}
+.ln-face{position:absolute;top:6px;right:10px;font-family:var(--f-mono);font-size:.72rem;color:var(--muted)}
+.rsteps{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;width:100%;max-width:420px}
+.rsteps div{border:1px solid var(--line);border-radius:10px;padding:6px 4px;font-size:.8rem;display:flex;flex-direction:column;align-items:center;gap:2px;background:var(--bg);min-width:0}
+.rsteps b{font-family:var(--f-mono);font-size:.72rem;color:var(--muted)}
+.rsteps span{font-family:var(--f-mono);font-size:.72rem;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+.rsteps div.ok{border-color:var(--accent);background:var(--accent-soft)}.rsteps div.ok span{color:var(--accent-ink)}
+.rsteps div.bad{border-color:var(--kill);background:var(--kill-soft)}.rsteps div.bad span{color:var(--kill)}
+.rpad{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;width:100%;max-width:360px}
+.rk{aspect-ratio:1;max-width:100%;border-radius:16px;border:1px solid var(--line);border-bottom-width:4px;background:var(--surface);color:var(--ink);font-family:var(--f-display);font-weight:800;font-size:1.4rem;cursor:pointer;touch-action:none;user-select:none;-webkit-user-select:none}
+.rk.jump{background:var(--accent);color:#fff;border-color:var(--accent-ink)}
+.rk.atk{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.rk.down{transform:translateY(3px);border-bottom-width:1px}
+.acmode{display:flex;gap:6px}
+.sky{width:100%;max-width:360px;height:120px;border-radius:12px;background:var(--bg);border:1px solid var(--line);position:relative;overflow:hidden}
+.sky .ground{position:absolute;left:0;right:0;bottom:0;height:8px;background:var(--line)}
+.sky .ln-egg{left:calc(50% - 15px);bottom:8px;transition:none}
+.sky .ln-egg.lag{border-color:var(--kill)}
+.acbar{width:100%;max-width:420px;height:34px;border-radius:8px;background:var(--kill-soft);position:relative;overflow:hidden;border:1px solid var(--line)}
+.acbar .z{position:absolute;top:0;bottom:0;background:var(--accent-soft);border-left:1px solid var(--accent);border-right:1px solid var(--accent)}
+.acbar .hb{position:absolute;top:0;height:6px;background:var(--amber)}
+.acbar .mk{position:absolute;top:-2px;bottom:-2px;width:3px;background:var(--ink);border-radius:2px}
+.acbar .lb{position:absolute;bottom:2px;left:6px;font-family:var(--f-mono);font-size:.68rem;color:var(--muted)}
+.acpad{display:flex;gap:16px;align-items:center;justify-content:center;flex-wrap:wrap}
+.lcol{display:flex;flex-direction:column;gap:10px;width:76px}
+.cstick{display:grid;grid-template-columns:repeat(3,58px);grid-template-rows:repeat(3,58px);gap:4px;background:var(--bg);border:1px solid var(--line);border-radius:50%;padding:10px}
+.cs{border-radius:12px;border:1px solid var(--line);border-bottom-width:3px;background:var(--amber-soft);color:var(--ink);font-family:var(--f-display);font-weight:800;font-size:1.1rem;cursor:pointer;touch-action:none;user-select:none;-webkit-user-select:none;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.1}
+.cs small{font-family:var(--f-body);font-size:.62rem;font-weight:500;color:var(--muted)}
+.cs.ct{background:var(--ink);color:var(--bg);border-radius:50%}.cs.ct small{color:var(--bg);opacity:.75}
+.cs.up{grid-area:1/2}.cs.lf{grid-area:2/1}.cs.ct{grid-area:2/2}.cs.rt{grid-area:2/3}.cs.dn{grid-area:3/2}
+.cs.down{transform:translateY(2px);border-bottom-width:1px}
+.pdlane{width:100%;max-width:420px;height:120px;border-radius:12px;background:var(--bg);border:1px solid var(--line);position:relative;overflow:hidden}
+.pdlane .ground{position:absolute;left:0;right:0;bottom:0;height:8px;background:var(--line)}
+#pdYoshi{left:14%;bottom:8px;transition:none}
+#pdShield{position:absolute;left:calc(14% - 13px);bottom:2px;width:58px;height:58px;border-radius:50%;border:3px solid var(--accent);background:color-mix(in srgb,var(--accent) 22%,transparent);opacity:0;transition:opacity .05s}
+#pdShield.on{opacity:1}
+#pdShield.drop{opacity:.35;border-style:dashed}
+#pdShield.parry{opacity:1;border-color:var(--amber);background:color-mix(in srgb,var(--amber) 35%,transparent);box-shadow:0 0 18px var(--amber)}
+#pdEnemy{position:absolute;bottom:8px;width:34px;height:46px;border-radius:8px;background:var(--ink);transition:left .25s}
+#pdEnemy.wind{background:var(--kill)}
+#pdEnemy.charge{animation:pdPulse .18s infinite alternate}
+@keyframes pdPulse{from{box-shadow:0 0 0 0 var(--kill)}to{box-shadow:0 0 0 7px transparent}}
+#pdHitbox{position:absolute;bottom:20px;height:16px;border-radius:8px;background:var(--kill);opacity:0}
+#pdHitbox.on{opacity:.85}
+#pdProj{position:absolute;bottom:22px;width:16px;height:16px;border-radius:50%;background:var(--kill);opacity:0}
+#pdFlash{position:absolute;inset:0;display:grid;place-items:center;font-family:var(--f-display);font-weight:800;font-size:1.5rem;pointer-events:none;opacity:0;transition:opacity .4s}
+#pdFlash.show{opacity:1;transition:none}
+.pdstats{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;width:100%;max-width:420px}
+.pdstats div{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:6px 4px;display:flex;flex-direction:column;align-items:center;font-size:.72rem;color:var(--muted)}
+.pdstats b{font-family:var(--f-mono);font-size:1.05rem;color:var(--ink);font-variant-numeric:tabular-nums}
+#pdBtn{width:min(100%,260px);height:84px;border-radius:18px;border:none;background:var(--accent);color:#fff;font-family:var(--f-display);font-weight:800;font-size:1.2rem;cursor:pointer;touch-action:none;user-select:none;-webkit-user-select:none;box-shadow:0 5px 0 var(--accent-ink)}
+#pdBtn.down{transform:translateY(4px);box-shadow:0 1px 0 var(--accent-ink)}
+.pdrow{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:center;font-size:.82rem;color:var(--muted)}
+.pdrow input[type=range]{width:140px;height:24px}
+.pdrow .ctl{font:inherit;font-weight:700;padding:6px 14px;border-radius:999px;border:1px solid var(--ink);background:var(--ink);color:var(--bg);cursor:pointer}
+.tclane{width:100%;max-width:420px;height:150px;border-radius:12px;background:var(--bg);border:1px solid var(--line);position:relative;overflow:hidden}
+.tclane .ground{position:absolute;left:0;right:0;bottom:0;height:10px;background:var(--line)}
+.tclane .wall{position:absolute;left:0;top:0;bottom:0;width:12px;background:var(--line)}
+#tcEgg{position:absolute;transition:none;left:70%;bottom:10px}
+#tcEgg.lag{border-color:var(--kill)}
+#tcFlash{position:absolute;inset:0;display:grid;place-items:center;font-family:var(--f-display);font-weight:800;font-size:1.5rem;pointer-events:none;opacity:0;transition:opacity .5s}
+#tcFlash.show{opacity:1;transition:none}
+.tcpad{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;width:100%;max-width:380px}
+.tcpad .rk small{display:block;font-family:var(--f-body);font-size:.6rem;font-weight:500}
+.tcpad .rk.shield{background:var(--accent);color:#fff;border-color:var(--accent-ink)}
+.tcpad .rk.on{outline:3px solid var(--amber);outline-offset:1px}
+.splane{width:100%;max-width:420px;height:130px;border-radius:12px;background:var(--bg);border:1px solid var(--line);position:relative;overflow:hidden}
+.splane .ground{position:absolute;left:0;right:0;bottom:0;height:10px;background:var(--line)}
+#spY{position:absolute;bottom:10px;transition:none;margin-left:-15px}
+#spY.air{bottom:34px}
+#spO{position:absolute;bottom:10px;width:30px;height:44px;margin-left:-15px;border-radius:8px;background:var(--ink)}
+#spO.wind{background:var(--kill)}#spO.lag{background:var(--amber)}#spO.shield{box-shadow:0 0 0 5px color-mix(in srgb,var(--accent) 45%,transparent)}
+.spr{position:absolute;height:10px;border-radius:5px}
+#spMy{bottom:60px;background:color-mix(in srgb,var(--accent) 30%,transparent)}
+#spMy b{position:absolute;top:0;bottom:0;right:0;border-radius:5px;background:var(--accent)}
+#spOpp{bottom:74px;background:color-mix(in srgb,var(--kill) 30%,transparent)}
+#spOppAtk{bottom:26px;height:14px;background:var(--kill);opacity:0}
+#spAtk{bottom:26px;height:14px;background:var(--accent);opacity:0}
+#spFlash{position:absolute;inset:0;display:grid;place-items:center;font-family:var(--f-display);font-weight:800;font-size:1.4rem;pointer-events:none;opacity:0;transition:opacity .5s}
+#spFlash.show{opacity:1;transition:none}
+#spDist{position:absolute;left:10px;top:6px;font-family:var(--f-mono);font-size:.72rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.sppad{display:grid;grid-template-columns:1fr 1fr 1.3fr;gap:10px;width:100%;max-width:340px}
+.sppad .rk{aspect-ratio:auto;height:64px}
+.wdlane{width:100%;max-width:420px;height:190px;border-radius:12px;background:var(--bg);border:1px solid var(--line);position:relative;overflow:hidden}
+.wdlane .ground{position:absolute;left:0;right:0;bottom:0;height:10px;background:var(--line)}
+.wdlane .plat{position:absolute;left:40%;width:30%;bottom:105px;height:6px;border-radius:3px;background:var(--line)}
+#wdEgg{position:absolute;transition:none;margin-left:-15px}
+#wdEgg.dodge{opacity:.55;box-shadow:0 0 0 4px color-mix(in srgb,var(--accent) 35%,transparent)}
+#wdEgg.lag{border-color:var(--kill)}
+#wdTrail{position:absolute;bottom:12px;height:4px;border-radius:2px;background:var(--accent);opacity:0}
+#wdFlash{position:absolute;inset:0;display:grid;place-items:center;font-family:var(--f-display);font-weight:800;font-size:1.4rem;pointer-events:none;opacity:0;transition:opacity .5s}
+#wdFlash.show{opacity:1;transition:none}
+.wdpad{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;width:100%;max-width:400px}
+.wdpad .rk{aspect-ratio:auto;height:62px;font-size:1.2rem}
+.wdpad .rk small{display:block;font-family:var(--f-body);font-size:.58rem;font-weight:500}
+.wdpad .rk.shield{background:var(--accent);color:#fff;border-color:var(--accent-ink)}
+.chlane{width:100%;max-width:420px;height:170px;border-radius:12px;background:var(--bg);border:1px solid var(--line);position:relative;overflow:hidden}
+.chlane .ground{position:absolute;left:0;right:0;bottom:0;height:10px;background:var(--line)}
+.chlane .plat{position:absolute;left:30%;width:40%;bottom:100px;height:6px;border-radius:3px;background:var(--line)}
+#chY{position:absolute;bottom:10px;margin-left:-15px;transition:none}
+#chY.air{bottom:40px}#chY.flip{transform:scaleX(-1)}
+#chO{position:absolute;width:26px;height:40px;margin-left:-13px;border-radius:7px;background:var(--ink);transition:none}
+#chO.down{width:42px;height:16px;margin-left:-21px;border-radius:8px}
+#chO.intan{opacity:.3}
+#chO.vuln{box-shadow:0 0 0 4px var(--amber)}
+#chO.act{background:var(--muted)}
+#chO.hit{background:var(--kill)}
+#chAtk{position:absolute;height:12px;border-radius:6px;background:var(--accent);opacity:0}
+.chspot{position:absolute;bottom:107px;width:2px;height:12px;margin-left:-1px;background:var(--muted);opacity:.45}
+#chGhost{position:absolute;bottom:10px;width:6px;height:6px;margin-left:-3px;border-radius:50%;background:var(--amber);opacity:0}
+#chFlash{position:absolute;inset:0;display:grid;place-items:center;font-family:var(--f-display);font-weight:800;font-size:1.4rem;pointer-events:none;opacity:0;transition:opacity .5s}
+#chFlash.show{opacity:1;transition:none}
+.chpad{display:grid;grid-template-columns:repeat(2,1fr) repeat(5,1.1fr);gap:7px;width:100%;max-width:420px}
+.chpad .rk{aspect-ratio:auto;height:60px;font-size:1.05rem}
+.chpad .rk small{display:block;font-family:var(--f-body);font-size:.58rem;font-weight:500}
+@media (max-width:420px){.chpad{grid-template-columns:repeat(2,1fr) repeat(3,1fr)}.chpad .rk.mv{grid-row:span 2;height:auto}}
+#diCv{width:100%;max-width:420px;height:auto;aspect-ratio:2/1;border-radius:12px;border:1px solid var(--line);background:var(--bg);display:block}
+.dipad{display:grid;grid-template-columns:repeat(3,56px);grid-template-rows:repeat(3,56px);gap:6px;padding:8px;border-radius:50%;background:var(--bg);border:1px solid var(--line)}
+.dipad .dk{border-radius:12px;border:1px solid var(--line);border-bottom-width:3px;background:var(--surface);color:var(--ink);font-family:var(--f-display);font-weight:800;font-size:1.2rem;cursor:pointer;touch-action:none;user-select:none;-webkit-user-select:none}
+.dipad .dk.down{transform:translateY(2px);border-bottom-width:1px;background:var(--accent-soft)}
+.dipad .dk.ok{background:var(--accent);color:#fff}
+.dipad .dc{border-radius:50%;background:var(--line)}
+#ltCv,#lgCv{width:100%;max-width:420px;height:auto;aspect-ratio:2/1;border-radius:12px;border:1px solid var(--line);background:var(--bg);display:block}
+.ltpad{display:grid;grid-template-columns:repeat(5,1fr);gap:7px;width:100%;max-width:420px}
+.ltpad .rk{aspect-ratio:auto;height:62px;font-size:1.05rem}
+.ltpad .rk small{display:block;font-family:var(--f-body);font-size:.58rem;font-weight:500}
+.ltpad .rk.grab{background:var(--amber);border-color:var(--amber);color:#fff}
+.ltseq{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;font-family:var(--f-mono);font-size:.74rem}
+.ltseq span{padding:2px 8px;border-radius:6px;border:1px solid var(--line);background:var(--bg);color:var(--muted)}
+.ltseq span.ok{border-color:var(--accent);color:var(--accent-ink);background:var(--accent-soft)}
+.ltseq span.bad{border-color:var(--kill);color:var(--kill);background:var(--kill-soft)}
+footer{margin-top:24px;font-size:.78rem;color:var(--muted)}
+footer a{color:var(--accent-ink)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <h1><small>SSBU · Yoshi practice</small>耀西連招手冊</h1>
+    <div class="egg" aria-hidden="true"><i style="width:9px;height:9px;left:6px;top:9px"></i><i style="width:7px;height:7px;left:19px;top:20px"></i><i style="width:6px;height:6px;left:8px;top:27px"></i></div>
+  </header>
+
+  <div class="sticky">
+    <div class="meter">
+      <div class="pct" id="pctOut">0<span>%</span></div>
+      <div class="col">
+        <label for="pct">對手目前百分比（拖動看能接什麼）</label>
+        <input type="range" id="pct" min="0" max="180" step="5" value="0">
+      </div>
+    </div>
+    <div class="tabs" role="tablist">
+      <button role="tab" id="t-combo" aria-selected="true" data-tab="combo">連招</button>
+      <button role="tab" id="t-tech" aria-selected="false" data-tab="tech">基礎技巧</button>
+      <button role="tab" id="t-train" aria-selected="false" data-tab="train">按鍵練習</button>
+    </div>
+  </div>
+
+  <section id="combo">
+    <div class="filters" id="filters">
+      <button class="chipbtn" id="f-all" aria-pressed="true" data-f="all">全部</button>
+      <button class="chipbtn" id="f-now" aria-pressed="false" data-f="now">只看現在能接</button>
+      <button class="chipbtn" id="f-kill" aria-pressed="false" data-f="kill">擊殺</button>
+    </div>
+    <div class="note">百分比以中量級角色（如瑪利歐）、在終點場地、對手沒做太多 DI 為準。重量級可往後推 10–20%，輕量級往前推。</div>
+    <div id="comboList" style="display:flex;flex-direction:column;gap:12px"></div>
+  </section>
+
+  <section id="tech" hidden>
+    <h2>按鍵代號</h2>
+    <div class="legend">
+      <div><kbd>A</kbd>普通攻擊</div>
+      <div><kbd>B</kbd>必殺技</div>
+      <div><kbd>X</kbd>跳躍（X 或 Y）</div>
+      <div><kbd>盾</kbd>ZL / ZR</div>
+      <div><kbd>抓</kbd>L / R</div>
+      <div><kbd>→</kbd>左搖桿方向</div>
+      <div><kbd>R搖</kbd>右搖桿（建議設強攻擊）</div>
+    </div>
+    <div class="note">Pro 手把預設配置。GameCube 手把：抓 = Z，盾 = L / R。遊戲 60 幀/秒，<b>1 幀 ≈ 16.7 ms</b>。Ultimate 有約 <b>10 幀（≈167 ms）的預輸入緩衝</b>，很多動作可以提早按。</div>
+    <div id="techList" style="display:flex;flex-direction:column;gap:12px"></div>
+  </section>
+
+  <section id="train" hidden>
+    <div class="pdrow" style="justify-content:flex-start">
+      <button class="chipbtn" id="sfxTest">測試音效</button>
+      <label for="sfxVol">音量</label><input type="range" id="sfxVol" min="0" max="100" step="5" value="60" style="width:110px">
+      <span id="sfxMsg" style="font-size:.78rem"></span>
+    </div>
+    <div class="filters" id="trSel">
+      <button class="chipbtn" id="p-sh" aria-pressed="true" data-p="sh">小跳</button>
+      <button class="chipbtn" id="p-rar" aria-pressed="false" data-p="rar">RAR</button>
+      <button class="chipbtn" id="p-ac" aria-pressed="false" data-p="ac">自動取消</button>
+      <button class="chipbtn" id="p-atc" aria-pressed="false" data-p="atc">攻擊取消</button>
+      <button class="chipbtn" id="p-pd" aria-pressed="false" data-p="pd">完美防禦</button>
+      <button class="chipbtn" id="p-tc" aria-pressed="false" data-p="tc">受身</button>
+      <button class="chipbtn" id="p-sp" aria-pressed="false" data-p="sp">Spacing</button>
+      <button class="chipbtn" id="p-wd" aria-pressed="false" data-p="wd">Waveland</button>
+      <button class="chipbtn" id="p-ch" aria-pressed="false" data-p="ch">受身追擊</button>
+      <button class="chipbtn" id="p-di" aria-pressed="false" data-p="di">DI／SDI</button>
+      <button class="chipbtn" id="p-lt" aria-pressed="false" data-p="lt">搶邊</button>
+      <button class="chipbtn" id="p-data" aria-pressed="false" data-p="data">幀數資料</button>
+    </div>
+    <div class="tp" data-p="sh">
+    <h2>小跳時機練習</h2>
+    <div class="trainer">
+      <p style="margin:0;font-size:.88rem;color:var(--muted)">按住再放開。按壓時間 ≤ 3 幀（約 50 ms）就是小跳。也可以用鍵盤空白鍵練習。</p>
+      <button id="pad" aria-label="跳躍按鈕">JUMP</button>
+      <div class="res" id="res">— ms</div>
+      <div id="verdict" style="font-weight:700">按下開始</div>
+      <div class="hist" id="hist"></div>
+      <p style="margin:0;font-size:.78rem;color:var(--muted)">手機觸控有延遲，數字只作手感參考，不等於遊戲內實際判定。</p>
+    </div>
+    </div>
+    <div class="tp" data-p="rar" hidden>
+    <h2>RAR 背空練習</h2>
+    <div class="trainer">
+      <p style="margin:0;font-size:.88rem;color:var(--muted)">依序按：<kbd>→</kbd> 衝刺 → <kbd>←</kbd> 轉身 → <kbd>X</kbd> 跳（轉身後 ≤ 100 ms）→ <kbd>→</kbd><span class="plus">+</span><kbd>A</kbd> 背空。<br>鍵盤：方向鍵、<kbd>K</kbd> 跳、<kbd>J</kbd> 攻擊。</p>
+      <div class="lane" aria-hidden="true"><div class="ln-egg" id="rEgg"><i></i><i></i></div><span class="ln-face" id="rFace">面向 →</span></div>
+      <div class="rsteps" id="rSteps">
+        <div data-s="0"><b>1</b>衝刺<span>—</span></div>
+        <div data-s="1"><b>2</b>轉身<span>—</span></div>
+        <div data-s="2"><b>3</b>跳<span>—</span></div>
+        <div data-s="3"><b>4</b>背空<span>—</span></div>
+      </div>
+      <div id="rVerdict" style="font-weight:700;min-height:1.6em">按 → 開始</div>
+      <div class="rpad">
+        <button class="rk" id="rL" data-k="L" aria-label="左">←</button>
+        <button class="rk" id="rR" data-k="R" aria-label="右">→</button>
+        <button class="rk jump" id="rX" data-k="X">X</button>
+        <button class="rk atk" id="rA" data-k="A">A</button>
+      </div>
+      <div class="hist" id="rHist"></div>
+      <p style="margin:0;font-size:.78rem;color:var(--muted)">手機上可以左手按住 → 、右手按 A（支援多點觸控）。在 A 之前 200 ms 內按過 → 也算。</p>
+    </div>
+    </div>
+    <div class="tp" data-p="ac" hidden>
+    <h2>自動取消＋C 搖桿練習</h2>
+    <div class="trainer">
+      <p style="margin:0;font-size:.88rem;color:var(--muted)">按 <kbd>X</kbd> 跳，用右邊的 <b>C 搖桿</b>出空中攻擊（耀西面向 →），需要時按 <kbd>↓急降</kbd>。落地那一刻若在招式的 AC 區間內，就沒有落地硬直。<br>鍵盤：空白鍵跳、方向鍵 = C 搖桿、<kbd>Z</kbd> 空N、<kbd>F</kbd> 急降。</p>
+      <div class="acmode" role="group" aria-label="跳躍高度">
+        <button class="chipbtn" id="m-sh" aria-pressed="true" data-m="sh">小跳</button>
+        <button class="chipbtn" id="m-fh" aria-pressed="false" data-m="fh">大跳</button>
+      </div>
+      <div class="sky" aria-hidden="true"><div class="ln-egg" id="acEgg"><i></i><i></i></div><div class="ground"></div><span class="ln-face" id="acClock">空中 0 F</span></div>
+      <div class="acbar" id="acBar" aria-label="招式時間軸"></div>
+      <div id="acVerdict" style="font-weight:700;min-height:1.6em">按 X 起跳</div>
+      <div class="acpad">
+        <div class="lcol">
+          <button class="rk jump" id="acX" data-ac="X">X</button>
+          <button class="rk" id="acFF" data-ac="FF" style="font-size:1rem">↓<br>急降</button>
+        </div>
+        <div class="cstick" aria-label="C 搖桿">
+          <button class="cs up" id="cU" data-ac="U" aria-label="C上 上空">↑<small>上空</small></button>
+          <button class="cs lf" id="cL" data-ac="L" aria-label="C左 背空">←<small>背空</small></button>
+          <button class="cs ct" id="cN" data-ac="N" aria-label="A 空N">A<small>空N</small></button>
+          <button class="cs rt" id="cR" data-ac="R" aria-label="C右 前空">→<small>前空</small></button>
+          <button class="cs dn" id="cD" data-ac="D" aria-label="C下 下空">↓<small>下空</small></button>
+        </div>
+      </div>
+      <div class="hist" id="acHist"></div>
+    </div>
+    <div class="tablewrap"><table>
+      <thead><tr><th>空中攻擊</th><th>C 搖桿</th><th>落地硬直</th><th id="acColHead">小跳不急降：AC 出招時機</th></tr></thead>
+      <tbody id="acTable"></tbody>
+    </table></div>
+    <div class="note">空中幀數 = 離地後第幾幀（起跳準備 3 幀之後開始算）。耀西小跳滯空 38 幀、小跳急降 26 幀、大跳 60 幀、大跳急降 42 幀。招式數據來自 ultimateframedata.com。</div>
+    </div>
+    <div class="tp" data-p="atc" hidden>
+    <h2>攻擊取消：小跳向前背空</h2>
+    <div class="trainer">
+      <p style="margin:0;font-size:.88rem;color:var(--muted)">左搖桿按住 <kbd>→</kbd> 不放 → <b>初始衝刺內（約 200 ms）</b>撥 <kbd>C←</kbd> → <b>3 幀（≈ 50 ms）內</b>按 <kbd>X</kbd>。地面攻擊被跳躍取消，變成帶著衝刺速度的小跳背空。<br>鍵盤：<kbd>D</kbd> 左搖桿→（按住）、<kbd>J</kbd> C←、<kbd>K</kbd> 跳。</p>
+      <div class="lane" aria-hidden="true"><div class="ln-egg" id="aEgg"><i></i><i></i></div><span class="ln-face" id="aFace">面向 →</span></div>
+      <div class="rsteps" id="aSteps" style="grid-template-columns:repeat(3,1fr)">
+        <div data-s="0"><b>1</b>衝刺 →<span>—</span></div>
+        <div data-s="1"><b>2</b>C←（快）<span>—</span></div>
+        <div data-s="2"><b>3</b>跳取消<span>—</span></div>
+      </div>
+      <div class="acbar" id="aBar"></div>
+      <div id="aVerdict" style="font-weight:700;min-height:1.6em">按住 → 開始衝刺</div>
+      <div class="acpad">
+        <div class="lcol"><button class="rk" id="aR" data-a="R" aria-label="左搖桿右">→<br><small style="font-size:.6rem;font-weight:500">左搖桿</small></button></div>
+        <button class="cs" id="aC" data-a="C" style="width:76px;height:76px;border-radius:50%">C←<small>C 搖桿</small></button>
+        <div class="lcol"><button class="rk jump" id="aX" data-a="X">X</button></div>
+      </div>
+      <div class="hist" id="aHist"></div>
+      <p style="margin:0;font-size:.78rem;color:var(--muted)">先按 X、再在 3 幀內撥 C← 也會成立（跳躍準備中輸入攻擊 = 小跳空中攻擊）。</p>
+    </div>
+    </div>
+    <div class="tp" data-p="pd" hidden>
+    <h2>完美防禦（Parry）練習</h2>
+    <div class="trainer">
+      <p style="margin:0;font-size:.88rem;color:var(--muted)">按住 <kbd>盾</kbd> 舉盾，在攻擊打到前<b>一瞬間放開</b>。放開後的<b>第 1–5 幀（≈ 83 ms 內）</b>被打中就是完美防禦。盾要先舉滿 3 幀才能放開。<br>鍵盤：按住 <kbd>S</kbd> 或空白鍵。</p>
+      <div class="filters" id="pdType" style="justify-content:center">
+        <button class="chipbtn" id="pt-mix" aria-pressed="true" data-t="mix">隨機</button>
+        <button class="chipbtn" id="pt-jab" aria-pressed="false" data-t="jab">快攻</button>
+        <button class="chipbtn" id="pt-smash" aria-pressed="false" data-t="smash">蓄力重擊</button>
+        <button class="chipbtn" id="pt-proj" aria-pressed="false" data-t="proj">飛行道具</button>
+      </div>
+      <div class="pdlane" aria-hidden="true">
+        <div id="pdShield"></div>
+        <div class="ln-egg" id="pdYoshi"><i></i><i></i></div>
+        <div id="pdEnemy" style="left:70%"></div>
+        <div id="pdHitbox"></div>
+        <div id="pdProj"></div>
+        <div class="ground"></div>
+        <span class="ln-face" id="pdInfo">按「開始」</span>
+        <div id="pdFlash"></div>
+      </div>
+      <div class="acbar" id="pdBar"></div>
+      <div id="pdVerdict" style="font-weight:700;min-height:3em;max-width:420px">按「開始」，對手會不斷攻擊你</div>
+      <button id="pdBtn" aria-label="盾（按住）">盾<br><small style="font-size:.72rem;font-weight:500">按住舉盾・放開＝完美防禦</small></button>
+      <div class="pdstats">
+        <div><b id="pdN">0</b>次數</div>
+        <div><b id="pdOk">0%</b>成功率</div>
+        <div><b id="pdStreak">0</b>連續</div>
+        <div><b id="pdBest">0</b>最佳</div>
+      </div>
+      <div class="pdrow">
+        <button class="ctl" id="pdStart">開始</button>
+        <label><input type="checkbox" id="pdSound" checked> 音效</label>
+      </div>
+      <div class="pdrow">
+        <label for="pdLag">輸入延遲補償</label>
+        <input type="range" id="pdLag" min="0" max="120" step="5" value="0">
+        <b id="pdLagOut" style="font-family:var(--f-mono);color:var(--ink)">0 ms</b>
+      </div>
+      <div class="hist" id="pdHist"></div>
+      <p style="margin:0;font-size:.78rem;color:var(--muted)">手機觸控或藍牙鍵盤若讓你一直「太晚」，把延遲補償往右調。攻擊會在紅色亮起、蓄力閃爍或飛行道具射出後到達。</p>
+    </div>
+    </div>
+    <div class="tp" data-p="tc" hidden>
+    <h2>受身（Tech）練習</h2>
+    <div class="trainer">
+      <p style="margin:0;font-size:.88rem;color:var(--muted)">耀西被打飛撞向地面或牆壁。在<b>撞到前 11 幀內（≈ 183 ms）</b>按 <kbd>盾</kbd>。按太早會有一段時間不能再按（鎖定），按太晚就倒地。<br>按住 <kbd>←</kbd>／<kbd>→</kbd> 再按盾＝受身翻滾；撞牆時盾＋<kbd>X</kbd>＝蹬牆受身。<br>鍵盤：<kbd>S</kbd> 盾、方向鍵、<kbd>K</kbd> 跳。</p>
+      <div class="filters" id="tcType" style="justify-content:center">
+        <button class="chipbtn" id="tt-mix" aria-pressed="true" data-t="mix">隨機</button>
+        <button class="chipbtn" id="tt-floor" aria-pressed="false" data-t="floor">地面</button>
+        <button class="chipbtn" id="tt-wall" aria-pressed="false" data-t="wall">牆壁</button>
+      </div>
+      <div class="tclane" aria-hidden="true">
+        <div class="wall"></div><div class="ground"></div>
+        <div class="ln-egg" id="tcEgg"><i></i><i></i></div>
+        <span class="ln-face" id="tcInfo">按「開始」</span>
+        <div id="tcFlash"></div>
+      </div>
+      <div class="acbar" id="tcBar"></div>
+      <div id="tcVerdict" style="font-weight:700;min-height:3em;max-width:420px">按「開始」，耀西會被打飛</div>
+      <div class="tcpad">
+        <button class="rk" id="tcL" data-tc="L" aria-label="左">←<small>翻滾</small></button>
+        <button class="rk" id="tcR" data-tc="R" aria-label="右">→<small>翻滾</small></button>
+        <button class="rk jump" id="tcX" data-tc="X">X<small>蹬牆</small></button>
+        <button class="rk shield" id="tcS" data-tc="S">盾<small>受身</small></button>
+      </div>
+      <div class="pdstats">
+        <div><b id="tcN">0</b>次數</div>
+        <div><b id="tcOk">0%</b>成功率</div>
+        <div><b id="tcStreak">0</b>連續</div>
+        <div><b id="tcBest">0</b>最佳</div>
+      </div>
+      <div class="pdrow">
+        <button class="ctl" id="tcStart">開始</button>
+        <label><input type="checkbox" id="tcSound" checked> 音效</label>
+        <label><input type="checkbox" id="tcSlow"> 慢速</label>
+      </div>
+      <div class="pdrow">
+        <label for="tcLag">輸入延遲補償</label>
+        <input type="range" id="tcLag" min="0" max="120" step="5" value="0">
+        <b id="tcLagOut" style="font-family:var(--f-mono);color:var(--ink)">0 ms</b>
+      </div>
+      <div class="hist" id="tcHist"></div>
+      <p style="margin:0;font-size:.78rem;color:var(--muted)">按太早後的鎖定時間在 Ultimate 沒有公開的確切數字，這裡簡化成：每次被打飛只能按一次，按早了就會倒地。</p>
+    </div>
+    </div>
+    <div class="tp" data-p="sp" hidden>
+    <h2>Spacing（間距）練習</h2>
+    <div class="trainer">
+      <p style="margin:0;font-size:.88rem;color:var(--muted)">用 <kbd>←</kbd><kbd>→</kbd> 調整距離，按 <kbd>A</kbd> 出招。目標是用招式的<b>最前端</b>打到對手：太近會被盾後反擊，太遠會揮空。<br>鍵盤：方向鍵移動、<kbd>J</kbd> 出招、<kbd>1</kbd>–<kbd>4</kbd> 換招。</p>
+      <div class="filters" id="spMode" style="justify-content:center">
+        <button class="chipbtn" id="sm-poke" aria-pressed="true" data-m="poke">最遠端打擊</button>
+        <button class="chipbtn" id="sm-wp" aria-pressed="false" data-m="wp">揮空懲罰</button>
+      </div>
+      <div class="filters" id="spMove" style="justify-content:center">
+        <button class="chipbtn" id="mv-ft" aria-pressed="true" data-v="ft">1 前強</button>
+        <button class="chipbtn" id="mv-ba" aria-pressed="false" data-v="ba">2 小跳背空</button>
+        <button class="chipbtn" id="mv-fs" aria-pressed="false" data-v="fs">3 前Smash</button>
+        <button class="chipbtn" id="mv-na" aria-pressed="false" data-v="na">4 空N</button>
+      </div>
+      <div class="splane" aria-hidden="true">
+        <div class="ground"></div>
+        <div class="spr" id="spMy"><b></b></div>
+        <div class="spr" id="spOpp"></div>
+        <div class="spr" id="spOppAtk"></div>
+        <div class="spr" id="spAtk"></div>
+        <div class="ln-egg" id="spY"><i></i><i></i></div>
+        <div id="spO"></div>
+        <span id="spDist">距離 —</span>
+        <span class="ln-face" id="spInfo">對手舉盾中</span>
+        <div id="spFlash"></div>
+      </div>
+      <div id="spVerdict" style="font-weight:700;min-height:3em;max-width:420px">走到深綠色剛好碰到對手的位置再出招</div>
+      <div class="sppad">
+        <button class="rk" id="spL" data-sp="L" aria-label="左">←</button>
+        <button class="rk" id="spR" data-sp="R" aria-label="右">→</button>
+        <button class="rk atk" id="spA" data-sp="A">A</button>
+      </div>
+      <div class="pdstats">
+        <div><b id="spN">0</b>出招</div>
+        <div><b id="spOk">0%</b>完美間距</div>
+        <div><b id="spStreak">0</b>連續</div>
+        <div><b id="spBest">0</b>最佳</div>
+      </div>
+      <div class="pdrow">
+        <label><input type="checkbox" id="spShow" checked> 顯示範圍</label>
+        <label><input type="checkbox" id="spMoveO"> 對手會走動</label>
+      </div>
+      <div class="hist" id="spHist"></div>
+      <div class="note" style="max-width:420px;text-align:left">綠條＝你這招的範圍，深綠＝安全的最前端（對手盾後反擊打不到）。紅條＝對手的攻擊／反擊範圍。距離和範圍是示意比例，不是遊戲內實際數值；熟練後把「顯示範圍」關掉，只靠眼睛判斷。</div>
+    </div>
+    </div>
+    <div class="tp" data-p="wd" hidden>
+    <h2>Waveland／Wavedash 練習</h2>
+    <div class="trainer">
+      <p style="margin:0;font-size:.88rem;color:var(--muted)">按住 <kbd>↙</kbd>（斜後下）再按 <kbd>盾</kbd>＝往後下方空中閃避。<b>越接近落地才按，滑得越遠</b>；太早只會在空中閃避，太晚已經落地。耀西面向 →，所以 ↙ 是往後滑。<br>鍵盤：方向鍵（← + ↓ 一起按＝↙）、<kbd>S</kbd> 盾、<kbd>K</kbd> 跳。</p>
+      <div class="filters" id="wdMode" style="justify-content:center">
+        <button class="chipbtn" id="wm-land" aria-pressed="true" data-m="land">Waveland（落地前）</button>
+        <button class="chipbtn" id="wm-plat" aria-pressed="false" data-m="plat">跳上平台</button>
+        <button class="chipbtn" id="wm-dash" aria-pressed="false" data-m="dash">Wavedash（起跳後）</button>
+      </div>
+      <div class="wdlane" aria-hidden="true">
+        <div class="plat"></div><div class="ground"></div>
+        <div id="wdTrail"></div>
+        <div class="ln-egg" id="wdEgg"><i></i><i></i></div>
+        <span class="ln-face" id="wdInfo">按「開始」</span>
+        <div id="wdFlash"></div>
+      </div>
+      <div class="acbar" id="wdBar"></div>
+      <div id="wdVerdict" style="font-weight:700;min-height:3em;max-width:420px">按「開始」，耀西會從平台或空中落下</div>
+      <div class="wdpad">
+        <button class="rk" id="wdBL" data-wd="BL" aria-label="斜後下">↙<small>斜後下</small></button>
+        <button class="rk" id="wdD" data-wd="D" aria-label="下">↓<small>原地</small></button>
+        <button class="rk" id="wdFR" data-wd="FR" aria-label="斜前下">↘<small>斜前下</small></button>
+        <button class="rk jump" id="wdX" data-wd="X">X<small>跳</small></button>
+        <button class="rk shield" id="wdS" data-wd="S">盾<small>閃避</small></button>
+      </div>
+      <div class="pdstats">
+        <div><b id="wdN">0</b>次數</div>
+        <div><b id="wdOk">0%</b>成功率</div>
+        <div><b id="wdAvg">—</b>平均滑行</div>
+        <div><b id="wdBest">—</b>最遠</div>
+      </div>
+      <div class="pdrow">
+        <button class="ctl" id="wdStart">開始</button>
+        <label><input type="checkbox" id="wdSlow"> 慢速</label>
+        <label><input type="checkbox" id="wdSound" checked> 音效</label>
+      </div>
+      <div class="hist" id="wdHist"></div>
+      <div class="note" style="max-width:420px;text-align:left">Ultimate 的空中閃避落地有硬直（比 Melee 長），滑行距離也短很多；空中閃避還有約 5 幀的起始動作。這裡的滑行距離用「離落地剩幾幀」換算，是示意值。在平台上 Waveland 最實用：從平台下落或跳上平台時往後滑開拉距離。</div>
+    </div>
+    </div>
+    <div class="tp" data-p="ch" hidden>
+    <h2>受身追擊（Tech chase）練習</h2>
+    <div class="trainer">
+      <p style="margin:0;font-size:.88rem;color:var(--muted)">地面：先用 <b>NA（弱）</b>把對手打倒地，他會<b>原地受身、往左／右翻滾受身，或沒受身</b>。平台：先用 <b>C 搖桿往前（C→ 前強）</b>把對手打上平台，他會停在<b>左邊緣、正上方或右邊緣</b>。預測或看清方向，移動到他停下的位置，在他<b>無敵結束（亮黃框）</b>時打中。太早打會穿過無敵，太晚他已經能行動。<br>鍵盤：方向鍵移動、<kbd>U</kbd> C→ 前強、<kbd>J</kbd> 弱（NA）、<kbd>K</kbd> 空N、<kbd>L</kbd> 衝刺攻擊、<kbd>I</kbd> 上空。</p>
+      <div class="filters" id="chMode" style="justify-content:center">
+        <button class="chipbtn" id="cm-mix" aria-pressed="true" data-m="mix">隨機</button>
+        <button class="chipbtn" id="cm-ground" aria-pressed="false" data-m="ground">地面倒地追擊</button>
+        <button class="chipbtn" id="cm-plat" aria-pressed="false" data-m="plat">平台上空追擊</button>
+      </div>
+      <div class="filters" id="chPref" style="justify-content:center;align-items:center">
+        <span style="font-size:.78rem;color:var(--muted)">對手習慣</span>
+        <button class="chipbtn" id="cp-even" aria-pressed="true" data-p="even">平均</button>
+        <button class="chipbtn" id="cp-inplace" aria-pressed="false" data-p="inplace">愛原地</button>
+        <button class="chipbtn" id="cp-with" aria-pressed="false" data-p="with">愛順向</button>
+        <button class="chipbtn" id="cp-against" aria-pressed="false" data-p="against">愛反向</button>
+        <button class="chipbtn" id="cp-missed" aria-pressed="false" data-p="missed">愛不受身</button>
+      </div>
+      <div class="chlane" aria-hidden="true">
+        <div class="plat"></div><div class="ground"></div>
+        <div id="chGhost"></div>
+        <div class="chspot" style="left:31.6%"></div><div class="chspot" style="left:50%"></div><div class="chspot" style="left:68.4%"></div>
+        <div id="chAtk"></div>
+        <div class="ln-egg" id="chY"><i></i><i></i></div>
+        <div id="chO"></div>
+        <span class="ln-face" id="chInfo">按「開始」</span>
+        <div id="chFlash"></div>
+      </div>
+      <div class="acbar" id="chBar"></div>
+      <div id="chVerdict" style="font-weight:700;min-height:3em;max-width:420px">按「開始」，耀西會把對手打倒地或打上平台</div>
+      <div class="chpad">
+        <button class="rk mv" id="chL" data-ch="L" aria-label="左">←</button>
+        <button class="rk mv" id="chR" data-ch="R" aria-label="右">→</button>
+        <button class="rk atk" id="chJ" data-ch="jab">A<small>弱（NA）</small></button>
+        <button class="rk atk" id="chN" data-ch="nair">X+A<small>空N</small></button>
+        <button class="rk atk" id="chD" data-ch="da">DA<small>衝刺攻擊</small></button>
+        <button class="rk atk" id="chF" data-ch="fs" style="background:var(--amber);border-color:var(--amber);color:#fff">C→<small>前強</small></button>
+        <button class="rk jump" id="chU" data-ch="uair">↑<small>上空</small></button>
+      </div>
+      <div class="pdstats">
+        <div><b id="chN0">0</b>次數</div>
+        <div><b id="chOk">0%</b>追到</div>
+        <div><b id="chStreak">0</b>連續</div>
+        <div><b id="chBest">0</b>最佳</div>
+      </div>
+      <div class="pdrow">
+        <button class="ctl" id="chStart">開始</button>
+        <label><input type="checkbox" id="chSlow"> 慢速</label>
+        <label><input type="checkbox" id="chTell" checked> 顯示停點</label>
+        <label><input type="checkbox" id="chSound" checked> 音效</label>
+      </div>
+      <div class="tablewrap" style="max-width:420px;width:100%"><table style="min-width:0">
+        <thead><tr><th>對手選擇（★＝目前習慣）</th><th>次數</th><th>追到</th></tr></thead>
+        <tbody id="chTable"></tbody>
+      </table></div>
+      <div class="note" style="max-width:420px;text-align:left">半透明＝無敵中（打不到），黃框＝可以打的空檔，灰色＝對手已經能行動。地面用弱／空N／衝刺攻擊／前強，平台上的對手只有上空打得到。受身的無敵和空檔幀數、移動距離是示意值；表格會統計你對每種選擇的追擊成功率，看出自己最常讀錯哪一種。順向＝往被打飛的方向滾（離你更遠），反向＝往回滾（滾向你或滾到你背後）。選了「愛 XX」的對手約 55% 會做那個選擇，練習抓習慣、先站好位置。</div>
+    </div>
+    </div>
+    <div class="tp" data-p="di" hidden>
+    <h2>DI／SDI 練習</h2>
+    <div class="trainer">
+      <p style="margin:0;font-size:.88rem;color:var(--muted)"><b>DI</b>：被打中後的停頓（hitlag）期間<b>按住</b>方向，遊戲在停頓最後一幀讀取，讓飛出角度偏轉。<br><b>SDI</b>：被多段攻擊打中時<b>快速連點</b>方向，每點一下位移一小段，逃出攻擊範圍。<br>鍵盤：方向鍵（兩個一起＝斜角）。</p>
+      <div class="filters" id="diMode" style="justify-content:center">
+        <button class="chipbtn" id="dm-surv" aria-pressed="true" data-m="surv">存活 DI</button>
+        <button class="chipbtn" id="dm-combo" aria-pressed="false" data-m="combo">連段 DI</button>
+        <button class="chipbtn" id="dm-sdi" aria-pressed="false" data-m="sdi">SDI 逃脫</button>
+      </div>
+      <canvas id="diCv" width="420" height="210" aria-label="DI 示意畫面"></canvas>
+      <div id="diVerdict" style="font-weight:700;min-height:3em;max-width:420px">按「開始」</div>
+      <div class="dipad" id="diPad">
+        <button class="dk" data-d="135" aria-label="左上">↖</button><button class="dk" data-d="90" aria-label="上">↑</button><button class="dk" data-d="45" aria-label="右上">↗</button>
+        <button class="dk" data-d="180" aria-label="左">←</button><div class="dc"></div><button class="dk" data-d="0" aria-label="右">→</button>
+        <button class="dk" data-d="225" aria-label="左下">↙</button><button class="dk" data-d="270" aria-label="下">↓</button><button class="dk" data-d="315" aria-label="右下">↘</button>
+      </div>
+      <div class="filters" id="diSpeed" style="justify-content:center;align-items:center">
+        <span style="font-size:.78rem;color:var(--muted)">速度</span>
+        <button class="chipbtn" id="ds-3" aria-pressed="false" data-s="3">很慢</button>
+        <button class="chipbtn" id="ds-2" aria-pressed="true" data-s="2">慢</button>
+        <button class="chipbtn" id="ds-1.4" aria-pressed="false" data-s="1.4">中</button>
+        <button class="chipbtn" id="ds-1" aria-pressed="false" data-s="1">實戰</button>
+      </div>
+      <div class="pdstats">
+        <div><b id="diN">0</b>次數</div>
+        <div><b id="diOk">0%</b>正確</div>
+        <div><b id="diStreak">0</b>連續</div>
+        <div><b id="diBest">0</b>最佳</div>
+      </div>
+      <div class="pdrow">
+        <button class="ctl" id="diStart">開始</button>
+                <label><input type="checkbox" id="diHint"> 顯示提示</label>
+      </div>
+      <div class="hist" id="diHist"></div>
+      <div class="note" style="max-width:420px;text-align:left"><b>存活 DI</b>：垂直擊殺（上Smash、上空）按<b>左或右</b>；水平擊殺按<b>斜上、往場內</b>（例如被往右打飛就按 ↖）。<br><b>連段 DI</b>：被往上打時按<b>水平、遠離對手</b>，讓他追不到。<br><b>SDI</b>：每個<b>新的方向輸入</b>才算一次，按住沒用；兩次之間至少隔 4 幀。<br>偏轉角度用 9.74°×sin(輸入與飛出方向的夾角) 計算（SmashWiki 的 Smash 4 數值，Ultimate 沿用同一機制）；SDI 位移距離和 hitlag 長度為示意值。</div>
+    </div>
+    </div>
+    <div class="tp" data-p="lt" hidden>
+    <div class="filters" id="ltMode" style="justify-content:center">
+      <button class="chipbtn" id="lm-grab" aria-pressed="true" data-m="grab">抓邊按法</button>
+      <button class="chipbtn" id="lm-trump" aria-pressed="false" data-m="trump">搶邊後追擊</button>
+    </div>
+    <div id="lgBlock">
+    <h2>抓邊按法</h2>
+    <div class="trainer">
+      <div class="note" style="max-width:420px;text-align:left;border-style:solid">
+        <b>為什麼會「啪」一下掛到牆上？</b><br>
+        每個角色頭部附近有兩個看不見的<b>抓邊判定框</b>：一個在前面、一個在背後（背後的小 40%）。人在空中時，只要判定框碰到場邊的角，遊戲就會<b>自動</b>把你吸到場邊掛著，不用按任何鍵。<br>
+        <b>唯一會擋住抓邊的是按著 ↓。</b>所以急降可以，但撥完 ↓ 要放開。<br>
+        從台上下去抓邊：<b>往場外跑出去 → 一離地就往 ← 拉回場邊</b>，讓頭貼著場邊掉下去。跑出去時耀西面向場外，拉回時場邊在他背後，用的是<b>比較小的背後判定框</b>，所以要貼得很近才抓得到；這就是常常按不出來的原因。
+      </div>
+      <canvas id="lgCv" width="420" height="210" aria-label="抓邊練習畫面"></canvas>
+      <div id="lgVerdict" style="font-weight:700;min-height:3em;max-width:420px">從台上往 → 跑出場邊，離地後按住 ← 拉回來</div>
+      <div class="ltpad" style="grid-template-columns:repeat(5,1fr)">
+        <button class="rk" id="lgL" data-lg="L" aria-label="左">←</button>
+        <button class="rk" id="lgR" data-lg="R" aria-label="右">→</button>
+        <button class="rk" id="lgD" data-lg="D" aria-label="下">↓<small>急降</small></button>
+        <button class="rk jump" id="lgX" data-lg="X">X<small>跳</small></button>
+        <button class="rk" id="lgZ" data-lg="Z" style="font-size:.85rem">重來</button>
+      </div>
+      <div class="pdstats">
+        <div><b id="lgN">0</b>嘗試</div>
+        <div><b id="lgOk">0</b>抓到</div>
+        <div><b id="lgFront">0</b>前框</div>
+        <div><b id="lgBack">0</b>背框</div>
+      </div>
+      <div class="pdrow">
+        <label><input type="checkbox" id="lgBox" checked> 顯示抓邊判定框</label>
+        <label><input type="checkbox" id="lgOpp"> 對手掛邊（練搶邊）</label>
+        <label><input type="checkbox" id="lgSlow" checked> 慢速</label>
+      </div>
+      <div class="hist" id="lgHist"></div>
+      <div class="note" style="max-width:420px;text-align:left">掛邊時：<kbd>↓</kbd> 放手、<kbd>←</kbd> 起身回台上、<kbd>X</kbd> 跳起。從場外回來：在場邊下方用 <kbd>X</kbd> 二段跳往上，頭碰到場邊就會抓住（面向場邊用的是較大的前框，比較好抓）。<br>鍵盤：方向鍵、<kbd>K</kbd> 跳、<kbd>R</kbd> 重來。物理數值為示意。</div>
+    </div>
+    </div>
+    <div id="ltBlock" hidden>
+    <h2>搶邊後追擊（Ledge trump）練習</h2>
+    <div class="trainer">
+      <p style="margin:0;font-size:.88rem;color:var(--muted)">對手掛在場邊時，你也去抓場邊，會把他<b>彈出去</b>（搶邊）。他被彈開後有一小段時間不能動，這時：<br><kbd>↓</kbd> 放開場邊 → <kbd>X</kbd> 二段跳（可省略）→ <kbd>C→</kbd> 背空打他。<br>掛在場邊時耀西面向舞台，場外在背後，所以往場外（→）出招就是<b>背空</b>。<br>鍵盤：<kbd>G</kbd> 抓邊、<kbd>↓</kbd> 放手、<kbd>K</kbd> 二段跳、<kbd>L</kbd> 背空、<kbd>J</kbd> 空N。</p>
+      <div class="filters" id="ltSpeed" style="justify-content:center;align-items:center">
+        <span style="font-size:.78rem;color:var(--muted)">速度</span>
+        <button class="chipbtn" id="ls-3" aria-pressed="false" data-s="3">很慢</button>
+        <button class="chipbtn" id="ls-2" aria-pressed="true" data-s="2">慢</button>
+        <button class="chipbtn" id="ls-1.4" aria-pressed="false" data-s="1.4">中</button>
+        <button class="chipbtn" id="ls-1" aria-pressed="false" data-s="1">實戰</button>
+      </div>
+      <canvas id="ltCv" width="420" height="210" aria-label="搶邊示意畫面"></canvas>
+      <div class="ltseq" id="ltSeq"><span data-s="0">抓邊</span><span data-s="1">↓ 放手</span><span data-s="2">X 二段跳</span><span data-s="3">背空</span></div>
+      <div id="ltVerdict" style="font-weight:700;min-height:3em;max-width:420px">按「開始」</div>
+      <div class="ltpad">
+        <button class="rk grab" id="ltG" data-lt="G">抓邊<small>搶邊</small></button>
+        <button class="rk" id="ltD" data-lt="D">↓<small>放手</small></button>
+        <button class="rk jump" id="ltX" data-lt="X">X<small>二段跳</small></button>
+        <button class="rk atk" id="ltB" data-lt="B">C→<small>背空</small></button>
+        <button class="rk atk" id="ltN" data-lt="N" style="background:var(--muted);border-color:var(--muted)">A<small>空N</small></button>
+      </div>
+      <div class="pdstats">
+        <div><b id="ltNn">0</b>次數</div>
+        <div><b id="ltOk">0%</b>成功</div>
+        <div><b id="ltStreak">0</b>連續</div>
+        <div><b id="ltBest">0</b>最佳</div>
+      </div>
+      <div class="pdrow"><button class="ctl" id="ltStart">開始</button></div>
+      <div class="hist" id="ltHist"></div>
+      <div class="note" style="max-width:420px;text-align:left">對手掛邊後會在隨機時間起身、跳起或翻滾，要在他動之前搶到邊。被搶邊的對手不能行動的時間、彈開距離是示意值（實際依角色與版本而定）。實戰中「抓邊」的做法是背對場外走下場邊，或跑出場外再往回拉，會自動抓住場邊。</div>
+    </div>
+    </div>
+    </div>
+    <div class="tp" data-p="data" hidden>
+    <h2>幀 ↔ 毫秒換算</h2>
+    <div class="trainer">
+      <div class="conv">
+        <input id="fr" type="number" min="0" value="3" aria-label="幀數"> 幀 =
+        <b id="msOut">50.0</b> ms
+      </div>
+    </div>
+    <h2>耀西常用招式幀數（約）</h2>
+    <div class="tablewrap"><table>
+      <thead><tr><th>招式</th><th>輸入</th><th>發生幀</th><th>≈ ms</th><th>用途</th></tr></thead>
+      <tbody id="fdata"></tbody>
+    </table></div>
+    <div class="note">數值為約略值，版本 13.0 系列，精確數字請以 ultimateframedata.com/yoshi 為準。</div>
+    </div>
+  </section>
+
+  <footer>參考：<a href="https://ultimateframedata.com/yoshi" target="_blank" rel="noopener">Ultimate Frame Data – Yoshi</a>、SmashWiki。百分比與時機是練習用的參考範圍，實戰要依對手體重與 DI 調整。</footer>
+</div>
+
+<script>
+const F = n => (n*1000/60).toFixed(0);
+const k = s => s.split(' ').map(t => t==='+' ? '<span class="plus">+</span>' : t==='/' ? '<span class="plus">或</span>' : t==='→→'||t==='then' ? '<span class="plus">然後</span>' : `<kbd>${t}</kbd>`).join('');
+
+const combos = [
+  {name:'上強連段 → 上空', en:'Utilt → Utilt → Uair', r:[0,35], kill:false,
+   sub:'低%最穩的起手，把對手往上送後追擊。',
+   steps:[
+    {mv:'上強（Up Tilt）', in:'↑ + A', t:'發生約 5 幀 ≈ 83 ms', p:'輕推上（別推太大力，會變上Smash）。右搖桿設強攻擊最穩。'},
+    {mv:'再一次上強', in:'↑ + A', t:'上一下收招前 ≤167 ms 預輸入', p:'看到命中就立刻再按，利用緩衝。節奏約每 0.4 秒一下。'},
+    {mv:'跳 + 上空（Up Air）', in:'X + ↑ + A', t:'起跳 3 幀 ≈ 50 ms 後出招', p:'對手 25% 以後第二下上強飛太高，就直接跳起來上空。'}],
+   tip:'超過 35% 左右上強只能接一次，改成 上強 → 上空。'},
+  {name:'小跳空N 急降 → 上強 / 抓', en:'SH Nair (FF) → Utilt / Grab', r:[0,50], kill:false,
+   sub:'耀西最好用的牽制起手，空N出得快、持續久。',
+   steps:[
+    {mv:'小跳空N', in:'X + A', t:'兩鍵同時按（同一幀內）', p:'開啟「同時按攻擊+跳躍＝小跳攻擊」，X 和 A 一起按就是小跳空N。'},
+    {mv:'急降', in:'↓', t:'跳到最高點後撥一下', p:'空N打到後馬上往下撥，讓落地更快。'},
+    {mv:'落地上強 或 抓', in:'↑ + A / 抓', t:'落地硬直結束前 ≤167 ms 預輸入', p:'用「晚段空N」落地命中最容易連；早段命中對手會被打遠。'}],
+   tip:'中%（35%以上）改接抓，再用投技延續。'},
+  {name:'下空落地 → 上強 / 抓', en:'Dair landing → Utilt / Grab', r:[0,40], kill:false,
+   sub:'踩踏在對手頭上，最後落地一擊後接招。',
+   steps:[
+    {mv:'空中下A（Down Air）', in:'X then ↓ + A', t:'起跳後盡快出，落地前打完多段', p:'在對手頭上方使用，讓最後幾下剛好落地。'},
+    {mv:'落地衝擊', in:'（自動）', t:'—', p:'落地時的那一下會讓對手微微浮空。'},
+    {mv:'上強 / 抓', in:'↑ + A / 抓', t:'落地後立刻（預輸入）', p:'低%接上強，接近 40% 改抓。'}]},
+  {name:'上投 → 上空', en:'Uthrow → Uair', r:[0,45], kill:false,
+   sub:'抓到之後最直接的追擊路線。',
+   steps:[
+    {mv:'抓', in:'抓', t:'站立抓約 6 幀 ≈ 100 ms', p:'近距離或對手揮空時抓。'},
+    {mv:'上投', in:'↑', t:'抓到後撥上', p:''},
+    {mv:'跳 + 上空', in:'X + ↑ + A', t:'投完硬直結束立刻跳（可預輸入）', p:'對手若往旁邊 DI，就跟著跑一步再跳。'}]},
+  {name:'背空 RAR 落地 → 刺擊 / 衝刺', en:'RAR Bair → Jab / Dash attack', r:[0,50], kill:false,
+   sub:'背空多段，落地時對手常在身旁。',
+   steps:[
+    {mv:'RAR 背空', in:'→→ ← X then → + A', t:'轉身後 ≤ 約 100 ms 按跳', p:'詳細按法看「基礎技巧 → RAR」。'},
+    {mv:'急降落地', in:'↓', t:'背空命中後', p:'讓最後一段剛好落地。'},
+    {mv:'刺擊 / 衝刺攻擊', in:'A / → + A', t:'落地後立刻', p:'近就刺擊，對手被推遠就衝刺攻擊。'}]},
+  {name:'上空 → 二段跳上空 追擊', en:'Uair juggle', r:[30,90], kill:false,
+   sub:'對手在頭上時用上空不斷追。',
+   steps:[
+    {mv:'跳 + 上空', in:'X + ↑ + A', t:'', p:''},
+    {mv:'二段跳', in:'X', t:'上空收招後', p:'耀西二段跳前段有霸體，被打也不會中斷。'},
+    {mv:'再上空', in:'↑ + A', t:'二段跳開始後馬上', p:'沒有二段跳就用下一次落地重新抓位置。'}],
+   tip:'90% 以後讀對手空中閃避，在他落地處等抓或上Smash。'},
+  {name:'空N → 前空 場外下砸', en:'Nair → Fair spike', r:[50,110], kill:true,
+   sub:'把對手打出場外，用前空的下砸效果收尾。',
+   steps:[
+    {mv:'空N 打出場', in:'X + A', t:'', p:'在場邊打，對手被打向場外。'},
+    {mv:'追出場外', in:'→ / X', t:'看對手位置決定要不要用二段跳', p:'保留二段跳回場！耀西回復靠二段跳。'},
+    {mv:'前空（下砸）', in:'→ + A', t:'發生 16 幀 ≈ 267 ms', p:'很慢，要提早出，在對手頭上方打下去。'}],
+   tip:'只要對手在場外夠低，任何%都可能直接下砸擊殺。'},
+  {name:'上Smash', en:'Up Smash', r:[100,140], kill:true,
+   sub:'讀對手落地、或空中閃避結束時使用。',
+   steps:[
+    {mv:'上Smash', in:'↑ + A', t:'用力撥上 + A 同時；或 R搖 ↑（設 Smash 時）', p:'也可從衝刺中直接出（衝刺上Smash）。'}],
+   tip:'%越高範圍越寬鬆，120%後碰到幾乎都能擊殺。'},
+  {name:'上空 擊殺', en:'Uair kill', r:[120,170], kill:true,
+   sub:'在平台上或場地上方高處命中。',
+   steps:[
+    {mv:'跳 + 上空', in:'X + ↑ + A', t:'', p:'越靠近畫面上方越早能殺。在平台上可提前 15–20%。'}]},
+  {name:'前Smash / 背空 場邊擊殺', en:'Fsmash / Bair near ledge', r:[90,140], kill:true,
+   sub:'對手在場邊時最快的擊殺選擇。',
+   steps:[
+    {mv:'前Smash', in:'→ + A', t:'用力撥 + A；可按住蓄力', p:'可以稍微上下調角度。'},
+    {mv:'或 背空', in:'X then ← + A', t:'背對對手出', p:'背空在場邊 110% 起就有擊殺力。'}]},
+];
+
+const techs = [
+  {name:'小跳（Short Hop）', en:'Short hop', steps:[
+    {mv:'方法 1：快速放開', in:'X', t:'按下後 ≤ 3 幀（≈ 50 ms）放開', p:'起跳準備有 3 幀，在這段時間內放開就是小跳。'},
+    {mv:'方法 2：兩個跳躍鍵同時按', in:'X + Y', t:'同一幀同時按', p:'最穩，不用控制放開時機。'},
+    {mv:'方法 3：小跳攻擊', in:'X + A', t:'同時按', p:'需在設定開啟「攻擊+跳躍同時按＝小跳攻擊」，直接出小跳空N。'}],
+   tip:'到「按鍵練習」頁可以練方法 1 的手感。'},
+  {name:'急降（Fast Fall）', en:'Fast fall', steps:[
+    {mv:'跳到最高點', in:'X', t:'', p:''},
+    {mv:'往下撥', in:'↓', t:'到最高點之後撥一下（不用一直壓）', p:'上升途中撥無效，一定要過最高點。'}]},
+  {name:'RAR 背空（反向空中衝刺）', en:'Reverse Aerial Rush', steps:[
+    {mv:'衝刺', in:'→→', t:'', p:'先往前衝刺。'},
+    {mv:'往反方向撥', in:'←', t:'衝刺中撥一下', p:'會進入轉身動作。'},
+    {mv:'轉身中按跳', in:'X', t:'轉身後盡快，約 ≤ 100 ms（6 幀內較穩）', p:'太晚角色會完全轉過來，就變成普通跳。'},
+    {mv:'出背空', in:'→ + A', t:'起跳後', p:'這時耀西「背對前進方向」往前飛，撥往前就是背空。'}],
+   tip:'成功的樣子：耀西面向你，但往對手方向移動並踢出背空。'},
+  {name:'自動取消（Auto-cancel）', en:'Auto-cancel', steps:[
+    {mv:'了解 AC 區間', in:'（概念）', t:'每招的開頭幾幀和結尾段', p:'空中攻擊在這些幀數落地，不會有落地硬直，可以馬上行動。其他時間落地要吃 7–17 幀硬直。'},
+    {mv:'早出招', in:'X + C搖桿', t:'起跳後越早出越好', p:'例如小跳空N在第 1 幀出，落地時剛好過了第 38 幀 → AC。'},
+    {mv:'控制急降', in:'↓', t:'看招式決定要不要急降', p:'急降讓落地變早，常會落在 AC 區間之前。小跳上空不急降能 AC，急降就不能。'}],
+   tip:'到「按鍵練習 → 自動取消」可以看落地時是招式的第幾幀。'},
+  {name:'C 搖桿（右搖桿）出空中攻擊', en:'C-stick aerials', steps:[
+    {mv:'設定右搖桿', in:'設定 → 按鍵配置', t:'', p:'預設是「Smash 攻擊」，在空中撥一樣會出空中攻擊；設成「攻擊」或「強攻擊」也可以。'},
+    {mv:'左搖桿管移動，右搖桿管出招', in:'X then C搖桿', t:'跳躍中', p:'用左搖桿出招要推方向，會影響飄移；用 C 搖桿出招，左搖桿可以繼續往任何方向飄。'},
+    {mv:'例：往前飄的背空', in:'左搖桿 → + C←', t:'背對對手時', p:'左手一直往前推，右手往後撥出背空，不會被迫往後飄。'}],
+   tip:'也能避免往上推出上空時不小心多跳一下。'},
+  {name:'攻擊取消（小跳向前背空）', en:'Jump-cancel attack / C-stick RAR', steps:[
+    {mv:'衝刺', in:'→→', t:'左搖桿保持往前', p:'整個過程左搖桿都不用往回撥，這是它比一般 RAR 好按的地方。'},
+    {mv:'C 搖桿往後撥', in:'C←', t:'推 → 之後非常快（初始衝刺內，約 200 ms）', p:'太晚撥就會進入奔跑狀態，做出其他動作。此時地面攻擊開始啟動，耀西轉為背對前方。'},
+    {mv:'3 幀內按跳取消', in:'X', t:'C← 後 ≤ 3 幀（≈ 50 ms）', p:'跳躍把地面攻擊取消，攻擊輸入轉成空中攻擊：帶著衝刺速度的小跳背空。'}],
+   tip:'太晚按跳會出地面攻擊。到「按鍵練習 → 攻擊取消」練 3 幀的節奏。'},
+  {name:'完美防禦（Parry）', en:'Perfect shield / parry', steps:[
+    {mv:'舉盾', in:'盾', t:'至少按住 3 幀（≈ 50 ms）', p:'盾舉起來 3 幀後才放得掉，所以最快也要舉盾後第 4 幀才能完美防禦。'},
+    {mv:'在被打到前放開', in:'放開 盾', t:'放開後第 1–5 幀（≈ 83 ms 內）被打中', p:'收盾動作共 11 幀，前 5 幀是完美防禦判定。第 6–11 幀被打中會直接吃招。'},
+    {mv:'反擊', in:'↑ + A / X + A / 抓', t:'完美防禦後立刻（可預輸入）', p:'近戰招被完美防禦，你比普通防禦早 3 幀行動，攻擊方還多 14 幀硬直，可以接上強、空N、抓或上Smash。'}],
+   tip:'不用一直舉盾等：看到對手出招前搖時「按一下又放開」也行，只要舉盾 ≥ 3 幀。到「按鍵練習 → 完美防禦」練時機。'},
+  {name:'受身（Tech）', en:'Teching', steps:[
+    {mv:'被打飛撞向地面／牆壁／天花板', in:'（被打中）', t:'', p:'被打飛到會翻滾（tumble）的程度時才能受身。'},
+    {mv:'撞到前按盾', in:'盾', t:'撞到前 11 幀內（≈ 183 ms）', p:'按太早會被鎖定一段時間不能再按，所以不要亂按，要看準落點。'},
+    {mv:'選擇受身方向', in:'盾 / ← + 盾 / → + 盾', t:'和盾同時', p:'原地受身、往左或往右翻滾受身。混著用，讓對手猜不到。'},
+    {mv:'撞牆時', in:'盾 / 盾 + X', t:'撞牆前 11 幀內', p:'盾＝牆壁受身；加上跳＝蹬牆受身（往外跳開）。'}],
+   tip:'沒受身會倒地，容易被追擊（甚至被刺擊鎖住）。到「按鍵練習 → 受身」練時機。'},
+  {name:'Spacing（間距控制）', en:'Spacing', steps:[
+    {mv:'記住每招的範圍', in:'（概念）', t:'', p:'前強、小跳背空、前Smash、空N 的打擊距離都不同。練到不用看就知道「這個距離打得到」。'},
+    {mv:'用最前端打', in:'← / → 微調 then 出招', t:'', p:'只用招式尖端碰到對手。打在盾上時對手的盾後反擊（抓、空N）構不到你，就算被擋也安全。'},
+    {mv:'站在對手範圍外', in:'← / →', t:'', p:'保持在對手攻擊剛好打不到的距離，逼他先出招。'},
+    {mv:'揮空懲罰', in:'→ then A / 衝刺攻擊', t:'對手揮空的收招期間', p:'對手出招沒打到你時，他還在收招，馬上往前打過去。'}],
+   tip:'耀西的小跳背空範圍長又多段，是最好用的間距工具；背空後往後飄可以更安全。到「按鍵練習 → Spacing」練距離感。'},
+  {name:'Waveland／Wavedash（空中閃避滑行）', en:'Waveland / Wavedash', steps:[
+    {mv:'在空中、快落地前', in:'（落下中）', t:'', p:'從平台落下、或小跳下降時。'},
+    {mv:'斜下方空中閃避', in:'↙ + 盾', t:'落地前一瞬間（越接近落地越遠）', p:'↙＝往後滑（拉開距離做 spacing），↘＝往前滑，↓＝原地落地。'},
+    {mv:'跳上平台 Waveland', in:'X then ↙ + 盾', t:'大跳穿過平台、腳一高過平台時', p:'閃避往下把你直接拉到平台上並滑一段，比正常落下快很多。'},
+    {mv:'Wavedash：起跳後馬上做', in:'X then ↙ + 盾', t:'起跳準備 3 幀內或剛離地', p:'幾乎沒離開地面就閃避進地板，看起來像在地上滑。'}],
+   tip:'Ultimate 滑行短、落地有硬直，主要用在平台上調整位置。到「按鍵練習 → Waveland」練時機。'},
+  {name:'受身追擊（Tech chase）', en:'Tech chasing', steps:[
+    {mv:'把對手打倒地／打上平台', in:'下空落地、下強、空N、上投', t:'', p:'對手撞地後只能選：原地受身、往左或往右翻滾受身、不受身。'},
+    {mv:'預測或看清受身方向', in:'← / →', t:'受身的無敵時間內移動', p:'先站到他會停下的位置。翻滾比原地受身慢，有時間用看的反應。'},
+    {mv:'無敵結束時打中', in:'弱 / 空N / 衝刺攻擊', t:'對手受身動作的最後幾幀', p:'太早會穿過無敵；太晚他已經可以舉盾或跳走。'},
+    {mv:'平台版本：上空追擊', in:'X + ↑ + A', t:'站到他停下的位置正下方', p:'對手在平台上受身時，從下方跳起用上空打他。'}],
+   tip:'對手常有習慣（例如總是往場中翻滾）。記住他的習慣，下次直接站好等。到「按鍵練習 → 受身追擊」練。'},
+  {name:'DI（方向影響）', en:'Directional influence', steps:[
+    {mv:'被打中的停頓中按住方向', in:'左搖桿', t:'hitlag 最後一幀被讀取（按住就好）', p:'可以讓飛出角度偏轉約 10°，太早放開就沒效果。'},
+    {mv:'垂直擊殺（上Smash、上空）', in:'← 或 →', t:'', p:'把垂直飛行偏向旁邊，離上方爆線更遠。'},
+    {mv:'水平擊殺（前Smash、背空）', in:'斜上往場內（↖ 或 ↗）', t:'', p:'把水平飛行往上偏，飛向較遠的角落。'},
+    {mv:'低 % 被連段', in:'水平遠離對手', t:'', p:'被往上打時往外偏，讓對手接不到下一招。'}],
+   tip:'到「按鍵練習 → DI／SDI」練反應。'},
+  {name:'SDI（連點位移）', en:'Smash DI', steps:[
+    {mv:'被多段攻擊打中', in:'（被打中）', t:'', p:'例如多段空中攻擊、連續刺擊。'},
+    {mv:'快速連點方向', in:'左搖桿連撥', t:'每次輸入間隔 ≥ 4 幀', p:'每個新方向輸入讓角色位移一小段（按住沒用）。輪流撥兩個相鄰方向（如 ← 和 ↖）也算新輸入。'},
+    {mv:'往攻擊範圍外撥', in:'離中心最近的出口方向', t:'最後一擊之前', p:'逃出多段攻擊就不會吃到最後擊飛的那一下。'}],
+   tip:'Ultimate 的 SDI 距離比以前短，但多段攻擊越長越容易逃（每 5 段距離 ×1.15）。'},
+  {name:'抓邊（Ledge grab）原理', en:'Ledge grab', steps:[
+    {mv:'自動抓邊', in:'（不用按鍵）', t:'人在空中、頭部判定框碰到場邊的角', p:'前方判定框較大；背後也抓得到，但範圍小 40%。'},
+    {mv:'不要按著 ↓', in:'放開 ↓', t:'經過場邊時', p:'按著下是唯一會讓你不抓邊的輸入。急降撥一下就放開。'},
+    {mv:'從台上下去抓邊', in:'→ 跑出場邊 then ←', t:'一離地就往回拉', p:'這時用的是背後的小判定框，要貼著場邊掉下去。'},
+    {mv:'限制', in:'', t:'', p:'不落地、沒被打的情況下最多連續抓邊 6 次；同一個場邊不能兩人同時掛（後抓的會把先掛的彈開＝搶邊）。'}],
+   tip:'到「按鍵練習 → 搶邊 → 抓邊按法」看判定框實際練。'},
+  {name:'搶邊後追擊（Ledge trump）', en:'Ledge trump', steps:[
+    {mv:'對手掛在場邊時去抓邊', in:'往場外跑出去 → 離地馬上往 ← 拉回（別按著 ↓）', t:'在對手起身、跳起之前', p:'你抓住場邊的瞬間，原本掛著的對手會被彈出場外。'},
+    {mv:'放開場邊', in:'↓', t:'搶邊後馬上', p:'掛邊時耀西面向舞台，對手在背後。'},
+    {mv:'（二段跳）背空', in:'X then C→ / → + A', t:'對手被彈開、還不能動的時候', p:'往場外方向出招就是背空。耀西二段跳有霸體，但打完要記得留回場的手段。'}],
+   tip:'到「按鍵練習 → 搶邊」練節奏。'},
+  {name:'衝刺轉身抓（Pivot Grab）', en:'Pivot grab', steps:[
+    {mv:'衝刺', in:'→→', t:'', p:''},
+    {mv:'反方向 + 抓', in:'← + 抓', t:'兩者同時（同一幀內）', p:'耀西會轉身往後抓，抓距比衝刺抓遠。'}],
+   tip:'用來抓那些跑向你、等你揮空的對手。'},
+  {name:'完美轉身（Perfect Pivot）', en:'Perfect pivot', steps:[
+    {mv:'開始衝刺', in:'→', t:'初始衝刺（剛開始跑）', p:''},
+    {mv:'反方向輕撥後立刻回中', in:'← then 放開', t:'反向輸入只停約 1 幀（≈ 17 ms）', p:'像彈一下搖桿。成功時角色滑一小段並轉身，可接任何地面技。'},
+    {mv:'接招', in:'A / ↑ + A', t:'滑行中', p:'常接前強或上強。'}],
+   tip:'進階技巧，先把 RAR 和轉身抓練熟。'},
+  {name:'預輸入緩衝（Buffer）', en:'Input buffer', steps:[
+    {mv:'在上一招結束前輸入下一招', in:'下一招', t:'結束前 ≤ 10 幀（≈ 167 ms）', p:'按住或提前按，遊戲會在可行動的第一幀幫你出招。連招大多靠它。'}],
+   tip:'太早按（超過 167 ms）會被吃掉，要在收招尾段按。'},
+  {name:'盾下平台（Shield Drop）', en:'Shield drop', steps:[
+    {mv:'在平台上舉盾', in:'盾', t:'', p:''},
+    {mv:'往下撥', in:'↓', t:'舉盾中撥下', p:'直接穿過平台往下掉，可馬上出空中招。'}]},
+  {name:'盾後反擊（Out of Shield）', en:'OOS options', steps:[
+    {mv:'擋住攻擊後', in:'盾', t:'', p:'耀西的盾不會縮小、不會被戳穿。'},
+    {mv:'跳 + 空N', in:'X then A', t:'擋住後立刻', p:'耀西最快的盾後選項之一。'},
+    {mv:'或 盾抓', in:'A（舉盾中）', t:'', p:'耀西抓比較慢，對手要硬直夠大才抓得到。'}]},
+  {name:'二段跳霸體', en:'Double jump armor', steps:[
+    {mv:'空中按跳', in:'X', t:'二段跳前段', p:'有重量級霸體：被打不會中斷，傷害照吃。'}],
+   tip:'用來硬吃對手的追擊、強行回場或反打。'},
+  {name:'投蛋（Up B）回場', en:'Egg Throw recovery', steps:[
+    {mv:'二段跳', in:'X', t:'', p:'先用二段跳回場，這是主要回復距離。'},
+    {mv:'投蛋', in:'↑ + B', t:'二段跳後', p:'投蛋會讓耀西稍微停在空中，可干擾對手守邊，也可在場上用 ↑B 調整蛋的角度。'}],
+   tip:'二段跳被用掉就很難回場，打場外時一定要留著。'},
+];
+
+const fdata = [
+  ['空N','X+A（空中）','3','50','最快，盾後/牽制'],
+  ['上空','↑+A（空中）','5','83','追擊/擊殺'],
+  ['上強','↑+A','約 5','≈ 83','低%連招'],
+  ['抓','抓','約 6','≈ 100','近身'],
+  ['背空','←+A（空中）','11','183','多段、場邊擊殺'],
+  ['前空','→+A（空中）','16','267','場外下砸'],
+  ['下空','↓+A（空中）','16','267','多段、落地衝擊'],
+  ['起跳準備','X','3','50','所有角色相同'],
+];
+
+const $ = s => document.querySelector(s);
+let pct = 0, filt = 'all';
+
+function stepsHTML(steps){
+  return '<ol class="steps">'+steps.map((s,i)=>`<li><div class="n">${i+1}</div><div class="st"><div class="mv">${s.mv}</div><div class="keys">${k(s.in)}</div>${s.t?`<div class="time">⏱ ${s.t}</div>`:''}${s.p?`<p>${s.p}</p>`:''}</div></li>`).join('')+'</ol>';
+}
+function renderCombos(){
+  const out = combos.map((c,i)=>{
+    const on = pct>=c.r[0] && pct<=c.r[1];
+    if(filt==='now' && !on) return '';
+    if(filt==='kill' && !c.kill) return '';
+    const L = c.r[0]/180*100, W=(c.r[1]-c.r[0])/180*100, M=pct/180*100;
+    return `<details class="card ${on?'':'off'}" id="c${i}"><summary>
+      <div class="ttl">${c.name}<div style="font-family:var(--f-mono);font-size:.72rem;color:var(--muted);font-weight:500">${c.en}</div></div>
+      <span class="badge ${c.kill?'kill':''}">${c.kill?'擊殺 ':''}${c.r[0]}–${c.r[1]}%</span>
+      <div class="sub">${c.sub}</div>
+      <div class="range"><b class="${c.kill?'kill':''}" style="left:${L}%;width:${W}%"></b><em style="left:calc(${M}% - 1px)"></em></div>
+    </summary><div class="body">${stepsHTML(c.steps)}${c.tip?`<div class="tip">${c.tip}</div>`:''}</div></details>`;
+  }).join('');
+  $('#comboList').innerHTML = out || '<div class="note">這個百分比沒有符合的連招，拖動上方滑桿試試。</div>';
+}
+function renderTech(){
+  $('#techList').innerHTML = techs.map((t,i)=>`<details class="card" id="tk${i}" ${i===0?'open':''}><summary>
+    <div class="ttl">${t.name}<div style="font-family:var(--f-mono);font-size:.72rem;color:var(--muted);font-weight:500">${t.en}</div></div>
+    <span class="badge">${t.steps.length} 步</span></summary>
+    <div class="body">${stepsHTML(t.steps)}${t.tip?`<div class="tip">${t.tip}</div>`:''}</div></details>`).join('');
+}
+$('#fdata').innerHTML = fdata.map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td><td class="num">${r[2]}</td><td class="num">${r[3]}</td><td>${r[4]}</td></tr>`).join('');
+
+$('#pct').addEventListener('input',e=>{pct=+e.target.value;$('#pctOut').innerHTML=pct+'<span>%</span>';renderCombos()});
+document.querySelectorAll('#filters .chipbtn').forEach(b=>b.addEventListener('click',()=>{
+  filt=b.dataset.f;document.querySelectorAll('#filters .chipbtn').forEach(x=>x.setAttribute('aria-pressed',x===b));renderCombos()}));
+document.querySelectorAll('.tabs button').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('.tabs button').forEach(x=>x.setAttribute('aria-selected',x===b));
+  ['combo','tech','train'].forEach(id=>$('#'+id).hidden = id!==b.dataset.tab);
+  $('.meter').style.display = b.dataset.tab==='combo'?'':'none';
+}));
+
+function panel(){if($('#train').hidden)return null;const p=document.querySelector('#trSel [aria-pressed=true]');return p?p.dataset.p:null;}
+document.querySelectorAll('#trSel .chipbtn').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('#trSel .chipbtn').forEach(x=>x.setAttribute('aria-pressed',x===b));
+  document.querySelectorAll('.tp').forEach(p=>p.hidden=p.dataset.p!==b.dataset.p);b.blur();}));
+// short hop trainer
+let t0=null; const hist=[];
+function press(){ if(t0!==null) return; t0=performance.now(); $('#pad').classList.add('down'); }
+function release(){ if(t0===null) return; const d=performance.now()-t0; t0=null; $('#pad').classList.remove('down');
+  const fr=d/16.667, ok=d<=50;
+  $('#res').textContent=d.toFixed(0)+' ms · '+fr.toFixed(1)+' 幀'; $('#res').className='res '+(ok?'ok':'bad');
+  $('#verdict').textContent= ok?'小跳 ✓':(d<=90?'差一點，再快一點放開':'大跳（放太慢）');
+  hist.unshift({d,ok}); hist.length=Math.min(hist.length,12);
+  $('#hist').innerHTML=hist.map(h=>`<span class="${h.ok?'ok':''}">${h.d.toFixed(0)}</span>`).join('');
+}
+const pad=$('#pad');
+pad.addEventListener('pointerdown',e=>{e.preventDefault();pad.setPointerCapture?.(e.pointerId);press()});
+pad.addEventListener('pointerup',release); pad.addEventListener('pointercancel',()=>{t0=null;pad.classList.remove('down')});
+document.addEventListener('keydown',e=>{if(e.code==='Space' && panel()==='sh' && !e.repeat){e.preventDefault();press()}});
+document.addEventListener('keyup',e=>{if(e.code==='Space' && panel()==='sh'){e.preventDefault();release()}});
+// RAR trainer
+const R = {stage:0, done:false, tTurn:0, tJump:0, held:{L:false,R:false}, last:{L:-1e9,R:-1e9}, timer:null, hist:[]};
+const rEgg=$('#rEgg'), rFace=$('#rFace');
+function rCell(i,txt,cls){const c=document.querySelector(`#rSteps [data-s="${i}"]`);c.className=cls||'';c.querySelector('span').textContent=txt;}
+function rReset(){clearTimeout(R.timer);R.stage=0;R.done=false;for(let i=0;i<4;i++)rCell(i,'—');
+  rEgg.style.left='8%';rEgg.classList.remove('flip','air');rFace.textContent='面向 →';$('#rVerdict').textContent='按 → 開始';}
+function rEnd(ok,msg,ms){R.done=true;clearTimeout(R.timer);$('#rVerdict').textContent=msg;$('#rVerdict').style.color=ok?'var(--accent-ink)':'var(--kill)';
+  R.hist.unshift({ok,ms});R.hist.length=Math.min(R.hist.length,10);
+  $('#rHist').innerHTML=R.hist.map(h=>`<span class="${h.ok?'ok':''}">${h.ok?'✓':'✗'} ${h.ms!=null?h.ms.toFixed(0)+'ms':''}</span>`).join('');
+  R.timer=setTimeout(rReset,1800);}
+function rInput(key){
+  const now=performance.now();
+  if(key==='L'||key==='R'){R.last[key]=now;}
+  if(R.done){ if(key==='R'){rReset();} else return; }
+  $('#rVerdict').style.color='';
+  if(R.stage===0){
+    if(key==='R'){R.stage=1;rCell(0,'✓','ok');rEgg.style.left='32%';$('#rVerdict').textContent='衝刺中，往 ← 撥';}
+    else if(key!=='L'){$('#rVerdict').textContent='先按 → 衝刺';}
+  } else if(R.stage===1){
+    if(key==='L'){R.stage=2;R.tTurn=now;rCell(1,'✓','ok');rEgg.classList.add('flip');rFace.textContent='面向 ←';$('#rVerdict').textContent='快按 X！';
+      R.timer=setTimeout(()=>{if(R.stage===2){rCell(2,'太慢','bad');rEgg.style.left='26%';rEnd(false,'轉身已完成，變成往回跑（要更快按跳）',null);}},300);}
+    else if(key==='X'||key==='A'){rEnd(false,key==='X'?'還沒轉身就跳了：先按 ← 再跳':'衝刺中按 A 是衝刺攻擊',null);}
+  } else if(R.stage===2){
+    if(key==='X'){clearTimeout(R.timer);const d=now-R.tTurn,f=d/16.667;
+      const lbl=d.toFixed(0)+'ms '+f.toFixed(1)+'F';
+      if(d<=133){R.stage=3;R.tJump=now;rCell(2,lbl,'ok');rEgg.classList.add('air');rEgg.style.left='62%';
+        $('#rVerdict').textContent=d<=100?'時機漂亮！按 → + A':'勉強趕上，按 → + A';
+        R.timer=setTimeout(()=>{if(R.stage===3){rCell(3,'沒出招','bad');rEnd(false,'跳了但沒出背空',d);}},900);
+        R.jd=d;}
+      else{rCell(2,lbl,'bad');rEnd(false,'跳太晚，已經轉過身了',d);}}
+    else if(key==='A'){clearTimeout(R.timer);rEnd(false,'轉身中按 A 會變成轉身攻擊，要先按 X',null);}
+  } else if(R.stage===3){
+    if(key==='A'){clearTimeout(R.timer);
+      const rOn=R.held.R||now-R.last.R<=200, lOn=R.held.L||now-R.last.L<=200;
+      if(rOn&&!(R.held.L&&!R.held.R)){rCell(3,'背空 ✓','ok');rEgg.style.left='88%';rEnd(true,'RAR 成功！往前飛的背空',R.jd);}
+      else if(lOn){rCell(3,'前空','bad');rEnd(false,'出成前空：方向要推 →（你前進的方向）',R.jd);}
+      else{rCell(3,'空N','bad');rEnd(false,'沒推方向變空N：A 要配 →',R.jd);}}
+  }
+}
+document.querySelectorAll('.rk').forEach(b=>{
+  const key=b.dataset.k;
+  b.addEventListener('pointerdown',e=>{e.preventDefault();b.classList.add('down');if(key in R.held)R.held[key]=true;rInput(key);});
+  const up=()=>{b.classList.remove('down');if(key in R.held)R.held[key]=false;};
+  b.addEventListener('pointerup',up);b.addEventListener('pointercancel',up);b.addEventListener('pointerleave',up);
+});
+const kmap={ArrowLeft:'L',ArrowRight:'R',KeyK:'X',KeyJ:'A'};
+document.addEventListener('keydown',e=>{const key=kmap[e.code];if(!key||panel()!=='rar'||e.repeat)return;e.preventDefault();
+  if(key in R.held)R.held[key]=true;document.querySelector(`.rk[data-k="${key}"]`).classList.add('down');rInput(key);});
+document.addEventListener('keyup',e=>{const key=kmap[e.code];if(!key)return;if(key in R.held)R.held[key]=false;document.querySelector(`.rk[data-k="${key}"]`).classList.remove('down');});
+
+// Auto-cancel + C-stick trainer (Yoshi data: ultimateframedata.com)
+const AER = {
+  N:{n:'空N',c:'A',su:3,tot:44,lag:7,ac:[[1,2],[38,999]]},
+  U:{n:'上空',c:'C↑',su:5,tot:36,lag:8,ac:[[1,4],[31,999]]},
+  R:{n:'前空',c:'C→',su:16,tot:43,lag:12,ac:[[1,3],[40,999]]},
+  L:{n:'背空',c:'C←',su:11,tot:55,lag:11,ac:[[1,5],[44,999]]},
+  D:{n:'下空',c:'C↓',su:16,tot:56,lag:17,ac:[[50,999]]},
+};
+const JUMP = {sh:{air:38,ff:26,apex:19}, fh:{air:60,ff:42,apex:30}};
+const FR=1000/60;
+const AC={mode:'sh',t0:null,mv:null,s:null,ff:null,raf:null,done:false,hist:[]};
+const inAC=(m,ac)=>ac.some(([a,b])=>m>=a&&m<=b);
+function landFrame(){const J=JUMP[AC.mode];if(AC.ff==null)return J.air;const f=AC.ff;return Math.round(f+(J.air-f)*(J.ff-J.apex)/(J.air-J.apex));}
+function airFrame(now){return Math.floor((now-AC.t0)/FR)-3+1;}
+function eggH(f,L){const J=JUMP[AC.mode],H=AC.mode==='sh'?52:82;if(f<=0)return 0;
+  if(f<=J.apex){const x=(J.apex-f)/J.apex;return H*(1-x*x);}
+  const p=Math.min(1,(f-J.apex)/(L-J.apex));return H*(1-p*p);}
+function drawBar(key,m){const a=AER[key],bar=$('#acBar'),W=a.tot+10;const pc=v=>Math.min(100,v/W*100);
+  let h=a.ac.map(([x,y])=>`<div class="z" style="left:${pc(x-1)}%;width:${pc(Math.min(y,W)-x+1)}%"></div>`).join('');
+  h+=`<div class="hb" style="left:${pc(a.su-1)}%;width:${Math.max(1.5,pc(2))}%"></div>`;
+  if(m!=null)h+=`<div class="mk" style="left:calc(${pc(Math.min(m,W)-.5)}% - 1px)"></div>`;
+  h+=`<span class="lb">${a.n}：綠＝AC　紅＝有硬直　黃＝攻擊判定${m!=null?'　｜＝落地 第'+m+'幀':''}</span>`;bar.innerHTML=h;}
+function acTable(){const J=JUMP[AC.mode];
+  $('#acColHead').textContent=(AC.mode==='sh'?'小跳':'大跳')+'：AC 出招時機（不急降 / 最高點急降）';
+  const range=(a,L)=>{const late=a.ac[a.ac.length-1][0];const smax=L-late+1;return smax>=1?`空中第 1–${smax} 幀內（≤${(smax*FR).toFixed(0)} ms）`:'做不到';};
+  $('#acTable').innerHTML=Object.entries(AER).map(([k,a])=>`<tr><td>${a.n}</td><td><kbd>${a.c}</kbd></td><td class="num">${a.lag} F</td><td>${range(a,J.air)}<br><span style="color:var(--muted)">急降：${range(a,J.ff)}</span></td></tr>`).join('');}
+function acReset(){cancelAnimationFrame(AC.raf);AC.t0=null;AC.mv=null;AC.s=null;AC.ff=null;AC.done=false;
+  $('#acEgg').style.bottom='8px';$('#acEgg').classList.remove('lag');$('#acClock').textContent='空中 0 F';}
+function acLand(L){AC.done=true;const egg=$('#acEgg');egg.style.bottom='8px';const v=$('#acVerdict');let ok,msg;
+  if(!AC.mv){ok=false;msg='沒有出招就落地了';}
+  else{const a=AER[AC.mv],m=L-AC.s+1;drawBar(AC.mv,m);
+    if(m>a.tot){ok=true;msg=`${a.n}已經打完才落地：沒有硬直（落地是第 ${m} 幀）`;}
+    else if(inAC(m,a.ac)){ok=true;msg=`AC 成功！${a.n}落地在第 ${m} 幀，沒有落地硬直${m<a.su?'（但攻擊判定還沒出來）':''}`;}
+    else{ok=false;egg.classList.add('lag');msg=`落地硬直 ${a.lag} 幀（${(a.lag*FR).toFixed(0)} ms）：落地時是第 ${m} 幀，要第 ${a.ac[a.ac.length-1][0]} 幀以後才 AC`;
+      if(m<a.ac[a.ac.length-1][0])msg+=AC.ff!=null?'，試試不急降或更早出招':'，要更早出招';}
+    AC.hist.unshift({ok,t:a.n});AC.hist.length=Math.min(AC.hist.length,10);
+    $('#acHist').innerHTML=AC.hist.map(h=>`<span class="${h.ok?'ok':''}">${h.ok?'✓':'✗'} ${h.t}</span>`).join('');}
+  v.textContent=msg;v.style.color=ok?'var(--accent-ink)':'var(--kill)';}
+function acTick(){const now=performance.now(),f=airFrame(now),L=landFrame();
+  $('#acClock').textContent=f<=0?'起跳準備':`空中 ${Math.min(f,L)} F`;
+  if(f>=L){acLand(L);return;}
+  $('#acEgg').style.bottom=(8+eggH(f,L))+'px';AC.raf=requestAnimationFrame(acTick);}
+function acInput(key){const now=performance.now();
+  if(key==='X'){if(AC.t0!==null&&!AC.done)return;acReset();AC.t0=now;$('#acVerdict').textContent='起跳！用 C 搖桿出招';$('#acVerdict').style.color='';AC.raf=requestAnimationFrame(acTick);return;}
+  if(AC.t0===null||AC.done){$('#acVerdict').textContent='先按 X 起跳';return;}
+  const f=Math.max(1,airFrame(now));
+  if(key==='FF'){const J=JUMP[AC.mode];if(AC.ff!=null)return;
+    if(f<J.apex){$('#acVerdict').textContent=`還沒到最高點（第 ${J.apex} 幀），急降無效`;return;}
+    AC.ff=f;$('#acVerdict').textContent=`第 ${f} 幀急降`;return;}
+  if(AC.mv)return;AC.mv=key;AC.s=f;drawBar(key,null);$('#acVerdict').textContent=`空中第 ${f} 幀出 ${AER[key].n}`;}
+document.querySelectorAll('[data-ac]').forEach(b=>{const key=b.dataset.ac;
+  b.addEventListener('pointerdown',e=>{e.preventDefault();b.classList.add('down');acInput(key);});
+  const up=()=>b.classList.remove('down');b.addEventListener('pointerup',up);b.addEventListener('pointercancel',up);b.addEventListener('pointerleave',up);});
+document.querySelectorAll('.acmode .chipbtn').forEach(b=>b.addEventListener('click',()=>{AC.mode=b.dataset.m;
+  document.querySelectorAll('.acmode .chipbtn').forEach(x=>x.setAttribute('aria-pressed',x===b));acReset();acTable();$('#acVerdict').textContent='按 X 起跳';}));
+const acKeys={ArrowUp:'U',ArrowDown:'D',ArrowLeft:'L',ArrowRight:'R',KeyZ:'N',KeyF:'FF',Space:'X'};
+document.addEventListener('keydown',e=>{if(e.repeat)return;const key=acKeys[e.code];if(!key)return;
+  if(panel()!=='ac')return;
+  e.preventDefault();acInput(key);});
+drawBar('N',null);acTable();
+
+// attack-cancel trainer
+const DASHWIN=200; // estimated initial-dash window (ms)
+const A3={t0:null,tC:null,tX:null,held:false,done:false,timer:null,hist:[]};
+const aCell=(i,t,c)=>{const e=document.querySelector(`#aSteps [data-s="${i}"]`);e.className=c||'';e.querySelector('span').textContent=t;};
+function aBar(d){const W=8,pc=v=>Math.min(100,v/W*100);let h=`<div class="z" style="left:0;width:${pc(3)}%"></div>`;
+  if(d!=null)h+=`<div class="mk" style="left:calc(${pc(Math.min(d/FR,W))}% - 1px)"></div>`;
+  h+=`<span class="lb">C← 之後：綠＝3 幀內可取消　｜＝你按跳的時間${d!=null?' '+(d/FR).toFixed(1)+'F':''}</span>`;$('#aBar').innerHTML=h;}
+function aReset(){clearTimeout(A3.timer);Object.assign(A3,{t0:null,tC:null,tX:null,done:false});for(let i=0;i<3;i++)aCell(i,'—');
+  const e=$('#aEgg');e.style.left='8%';e.classList.remove('flip','air');$('#aFace').textContent='面向 →';aBar(null);
+  const v=$('#aVerdict');v.style.color='';v.textContent=A3.held?'衝刺中，撥 C←':'按住 → 開始衝刺';
+  if(A3.held){A3.t0=performance.now();aCell(0,'✓','ok');e.style.left='28%';}}
+function aEnd(ok,msg,d){A3.done=true;clearTimeout(A3.timer);const v=$('#aVerdict');v.textContent=msg;v.style.color=ok?'var(--accent-ink)':'var(--kill)';
+  aBar(d);A3.hist.unshift({ok,d});A3.hist.length=Math.min(A3.hist.length,10);
+  $('#aHist').innerHTML=A3.hist.map(h=>`<span class="${h.ok?'ok':''}">${h.ok?'✓':'✗'} ${h.d!=null?(h.d/FR).toFixed(1)+'F':''}</span>`).join('');
+  A3.timer=setTimeout(aReset,1800);}
+function aSuccess(d){const e=$('#aEgg');aCell(2,(d/FR).toFixed(1)+'F','ok');e.classList.add('flip','air');e.style.left='80%';$('#aFace').textContent='背空 → 前進';
+  aEnd(true,`成功！${(d).toFixed(0)} ms 內取消，小跳背空向前`,d);}
+function aInput(k,down){const now=performance.now();
+  if(k==='R'){A3.held=down;
+    if(down){if(A3.done||A3.t0===null){aReset();}}
+    else if(!A3.done&&A3.t0!==null&&A3.tC===null&&A3.tX===null){$('#aVerdict').textContent='放開 → 了：衝刺停止';A3.t0=null;aCell(0,'—');$('#aEgg').style.left='8%';}
+    return;}
+  if(A3.done)return;
+  if(A3.t0===null){$('#aVerdict').textContent='先按住 → 衝刺';$('#aVerdict').style.color='var(--kill)';return;}
+  if(k==='C'){if(A3.tC!==null)return;A3.tC=now;const dd=now-A3.t0;if(dd>DASHWIN){aCell(1,dd.toFixed(0)+'ms','bad');$('#aEgg').style.left='45%';aEnd(false,`→ 推了 ${dd.toFixed(0)} ms 才撥 C←：初始衝刺已結束、進入奔跑，做不出來（要 ≤ ${DASHWIN} ms）`,null);return;}aCell(1,dd.toFixed(0)+'ms','ok');$('#aEgg').classList.add('flip');
+    if(A3.tX!==null){const d=now-A3.tX;if(d<=3*FR+1)aSuccess(d);else{aCell(1,'太晚','bad');aEnd(false,'跳了之後才撥 C←，已經離地：變成一般跳躍背空（沒有小跳取消）',d);}return;}
+    $('#aVerdict').textContent='快按 X！';
+    A3.timer=setTimeout(()=>{if(!A3.done&&A3.tX===null){aCell(2,'沒取消','bad');$('#aEgg').style.left='34%';aEnd(false,'沒在 3 幀內跳：地面攻擊出來了',null);}},300);return;}
+  if(k==='X'){if(A3.tX!==null)return;A3.tX=now;
+    if(A3.tC===null){aCell(2,'等 C←');$('#aVerdict').textContent='跳躍準備中…3 幀內撥 C←';
+      A3.timer=setTimeout(()=>{if(!A3.done&&A3.tC===null){aCell(1,'沒撥','bad');aEnd(false,'只是普通小跳，要配 C←',null);}},3*FR+40);return;}
+    const d=now-A3.tC;if(!A3.held){aCell(2,'無衝刺','bad');aEnd(false,'跳的時候沒按住 → ：沒有向前速度',d);return;}
+    if(d<=3*FR+1)aSuccess(d);else{aCell(2,(d/FR).toFixed(1)+'F','bad');aEnd(false,`太慢（${d.toFixed(0)} ms）：超過 3 幀，地面攻擊已經出來`,d);}}
+}
+document.querySelectorAll('[data-a]').forEach(b=>{const k=b.dataset.a;
+  b.addEventListener('pointerdown',e=>{e.preventDefault();b.setPointerCapture?.(e.pointerId);b.classList.add('down');aInput(k,true);});
+  const up=()=>{if(!b.classList.contains('down'))return;b.classList.remove('down');if(k==='R')aInput('R',false);};
+  b.addEventListener('pointerup',up);b.addEventListener('pointercancel',up);});
+const aKeys={KeyD:'R',KeyJ:'C',KeyK:'X'};
+document.addEventListener('keydown',e=>{const k=aKeys[e.code];if(!k||panel()!=='atc'||e.repeat)return;e.preventDefault();
+  document.querySelector(`[data-a="${k}"]`).classList.add('down');aInput(k,true);});
+document.addEventListener('keyup',e=>{const k=aKeys[e.code];if(!k||panel()!=='atc')return;
+  document.querySelector(`[data-a="${k}"]`).classList.remove('down');if(k==='R')aInput('R',false);});
+aBar(null);
+
+// shared sound: one AudioContext, unlocked on first touch/key; iOS: play even with silent switch where supported
+const SFX={ctx:null,vol:.18};
+function sfxUnlock(){try{if(navigator.audioSession)navigator.audioSession.type='playback';}catch(e){}
+  try{SFX.ctx=SFX.ctx||new (window.AudioContext||window.webkitAudioContext)();if(SFX.ctx.state!=='running')SFX.ctx.resume();
+    const b=SFX.ctx.createBuffer(1,1,22050),src=SFX.ctx.createBufferSource();src.buffer=b;src.connect(SFX.ctx.destination);src.start(0);}catch(e){}}
+['pointerdown','keydown','touchend'].forEach(ev=>document.addEventListener(ev,sfxUnlock,{capture:true,passive:true}));
+function sfx(f,d,type){try{if(!SFX.ctx)sfxUnlock();const c=SFX.ctx;if(!c)return;if(c.state!=='running')c.resume();
+  const o=c.createOscillator(),g=c.createGain(),t=c.currentTime;o.type=type||'square';o.frequency.value=f;
+  g.gain.setValueAtTime(SFX.vol,t);g.gain.exponentialRampToValueAtTime(.0001,t+d+.05);o.connect(g);g.connect(c.destination);o.start(t);o.stop(t+d+.06);}catch(e){}}
+// perfect shield trainer (window: frames 1-5 of shield drop; shield must be up >= 3F)
+const PD={run:false,atk:null,press:null,release:null,holding:false,lastNormal:null,n:0,ok:0,streak:0,best:0,hist:[],type:'mix',timer:null,raf:null,lag:0,ctx:null};
+const pdEl=id=>document.getElementById(id);
+function pdBeep(f,d,type){if(!document.getElementById('pdSound').checked)return;sfx(f,d,type);}
+function pdBar(r){const MIN=-16,MAX=6,W=MAX-MIN,pc=v=>(Math.max(MIN,Math.min(MAX,v))-MIN)/W*100;
+  let h=`<div class="z" style="left:${pc(-5)}%;width:${pc(0)-pc(-5)}%"></div>`;
+  h+=`<div class="hb" style="left:${pc(0)}%;width:1.5%;height:100%;opacity:.6"></div>`;
+  if(r!=null)h+=`<div class="mk" style="left:calc(${pc(r)}% - 1px)"></div>`;
+  h+=`<span class="lb" style="white-space:nowrap">← 早放開　綠＝完美　黃＝命中　｜＝你${r!=null?' '+(r<=0?'早 '+(-r).toFixed(1):'晚 '+r.toFixed(1))+'F':''}</span>`;
+  pdEl('pdBar').innerHTML=h;}
+function pdShieldVis(){const sh=pdEl('pdShield');sh.classList.remove('drop');
+  if(PD.holding){sh.classList.add('on');}else{sh.classList.remove('on');
+    if(PD.release!=null&&performance.now()-PD.release<11*FR){sh.classList.add('drop');}}}
+function pdStats(){pdEl('pdN').textContent=PD.n;pdEl('pdOk').textContent=PD.n?Math.round(PD.ok/PD.n*100)+'%':'0%';
+  pdEl('pdStreak').textContent=PD.streak;pdEl('pdBest').textContent=PD.best;
+  pdEl('pdHist').innerHTML=PD.hist.map(h=>`<span class="${h.ok?'ok':''}">${h.t}</span>`).join('');}
+function pdFlash(txt,color){const f=pdEl('pdFlash');f.textContent=txt;f.style.color=color;f.classList.add('show');setTimeout(()=>f.classList.remove('show'),60);}
+function pdSchedule(){clearTimeout(PD.timer);if(!PD.run)return;PD.timer=setTimeout(pdLaunch,900+Math.random()*1600);}
+function pdLaunch(){if(!PD.run)return;
+  let t=PD.type;if(t==='mix')t=['jab','smash','proj'][Math.floor(Math.random()*3)];
+  const now=performance.now(),en=pdEl('pdEnemy'),hb=pdEl('pdHitbox'),pj=pdEl('pdProj');
+  hb.classList.remove('on');pj.style.opacity=0;en.classList.remove('wind','charge');
+  let wind,travel=0;
+  if(t==='jab'){en.style.left='30%';wind=260+Math.random()*220;}
+  else if(t==='smash'){en.style.left='30%';wind=550+Math.random()*1100;en.classList.add('charge');}
+  else{en.style.left='80%';wind=220;travel=380+Math.random()*420;}
+  en.classList.add('wind');pdBeep(t==='smash'?220:440,.06);
+  PD.atk={type:t,start:now,fire:now+wind,T:now+wind+travel,judged:false,travel};
+  pdEl('pdInfo').textContent={jab:'快攻',smash:'蓄力重擊',proj:'飛行道具'}[t];
+  cancelAnimationFrame(PD.raf);PD.raf=requestAnimationFrame(pdTick);}
+function pdTick(){const now=performance.now(),a=PD.atk;pdShieldVis();if(!a){return;}
+  const en=pdEl('pdEnemy'),hb=pdEl('pdHitbox'),pj=pdEl('pdProj');
+  if(a.type!=='proj'){
+    if(now>=a.T-2*FR&&!a.judged){en.classList.remove('charge');hb.style.left='calc(14% + 32px)';hb.style.width='calc(16% - 32px + 2px)';hb.classList.add('on');}
+  }else if(now>=a.fire){en.classList.remove('wind');const p=Math.min(1,(now-a.fire)/a.travel);
+    pj.style.opacity=1;pj.style.left=`calc(${80-p*(80-14)}% + ${(1-p)*0+ p*28}px)`;}
+  if(!a.judged&&now>=a.T){a.judged=true;pdJudge(a.T);}
+  if(now<a.T+400||PD.holding||(PD.release!=null&&now-PD.release<11*FR))PD.raf=requestAnimationFrame(pdTick);
+  else{hb.classList.remove('on');pj.style.opacity=0;en.classList.remove('wind','charge');pdShieldVis();}}
+function pdJudge(T){const v=pdEl('pdVerdict'),sh=pdEl('pdShield'),L=PD.lag;let res,msg,col,r=null;
+  setTimeout(()=>{pdEl('pdHitbox').classList.remove('on');pdEl('pdProj').style.opacity=0;pdEl('pdEnemy').classList.remove('wind','charge');},120);
+  const press=PD.press!=null?PD.press-L:null,rel=PD.release!=null?PD.release-L:null;
+  const holdingAtT=PD.press!=null&&press<=T&&(PD.holding||rel>T);
+  if(holdingAtT){res='normal';msg='普通防禦：沒有在打到前放開盾';col='var(--muted)';PD.lastNormal=T;r=null;
+    if(!PD.holding&&rel!=null){r=(rel-T)/FR;msg=`普通防禦：晚了 ${(rel-T).toFixed(0)} ms（${r.toFixed(1)} 幀）放開`;}}
+  else if(press!=null&&rel!=null&&rel<=T){const drop=Math.max(rel,press+3*FR);const d=T-drop;r=(drop-T)/FR;
+    if(d<0){res='normal';msg='普通防禦：盾還沒舉滿 3 幀就被打到，放不掉';col='var(--muted)';}
+    else if(d<5*FR){const fN=Math.floor(d/FR)+1;res='parry';msg=`完美防禦！放開後第 ${fN} 幀被打中${a_proj()?'（飛行道具：優勢較小）':''}`;col='var(--amber)';}
+    else if(d<11*FR){res='early';msg=`太早放開 ${d.toFixed(0)} ms（${(d/FR).toFixed(1)} 幀）：在收盾動作中被打中，要再晚 ${(d-4*FR).toFixed(0)} ms 左右`;col='var(--kill)';}
+    else{res='hit';msg=`太早放開 ${d.toFixed(0)} ms：盾早就收掉了，被打中`;col='var(--kill)';}}
+  else{res='hit';msg='被打中：沒有舉盾';col='var(--kill)';}
+  function a_proj(){return PD.atk&&PD.atk.type==='proj';}
+  PD.n++;if(res==='parry'){PD.ok++;PD.streak++;PD.best=Math.max(PD.best,PD.streak);}else PD.streak=0;
+  PD.hist.unshift({ok:res==='parry',t:{parry:'✓ 完美',normal:'盾',early:'✗ 早',hit:'✗ 中'}[res]});PD.hist.length=Math.min(PD.hist.length,12);
+  v.textContent=msg;v.style.color=col;pdBar(r);pdStats();
+  if(res==='parry'){sh.classList.add('parry');setTimeout(()=>sh.classList.remove('parry'),350);pdFlash('PARRY','var(--amber)');pdBeep(1320,.18,'triangle');}
+  else if(res==='normal'){pdFlash('SHIELD','var(--muted)');pdBeep(330,.08);}
+  else{pdFlash('HIT','var(--kill)');pdBeep(110,.2,'sawtooth');const y=pdEl('pdYoshi');y.classList.add('lag');setTimeout(()=>y.classList.remove('lag'),300);}
+  pdSchedule();}
+function pdDown(){if(PD.holding)return;PD.holding=true;PD.press=performance.now();PD.release=null;pdEl('pdBtn').classList.add('down');pdShieldVis();
+  if(!PD.raf||!PD.atk||PD.atk.judged){cancelAnimationFrame(PD.raf);PD.raf=requestAnimationFrame(pdTick);}}
+function pdUp(){if(!PD.holding)return;PD.holding=false;PD.release=performance.now();pdEl('pdBtn').classList.remove('down');
+  // late release right after a normal shield: report how late
+  if(PD.lastNormal!=null&&PD.release-PD.lag-PD.lastNormal<250&&PD.release-PD.lag>PD.lastNormal){const d=PD.release-PD.lag-PD.lastNormal;
+    pdEl('pdVerdict').textContent=`普通防禦：晚了 ${d.toFixed(0)} ms（${(d/FR).toFixed(1)} 幀）放開，要在打到「之前」放開`;pdBar(d/FR);}
+  PD.lastNormal=null;cancelAnimationFrame(PD.raf);PD.raf=requestAnimationFrame(pdTick);}
+const pdB=pdEl('pdBtn');
+pdB.addEventListener('pointerdown',e=>{e.preventDefault();pdB.setPointerCapture?.(e.pointerId);pdDown();});
+pdB.addEventListener('pointerup',pdUp);pdB.addEventListener('pointercancel',pdUp);
+document.addEventListener('keydown',e=>{if(panel()!=='pd'||e.repeat)return;if(e.code==='KeyS'||e.code==='Space'){e.preventDefault();pdDown();}});
+document.addEventListener('keyup',e=>{if(panel()!=='pd')return;if(e.code==='KeyS'||e.code==='Space'){e.preventDefault();pdUp();}});
+pdEl('pdStart').addEventListener('click',()=>{PD.run=!PD.run;pdEl('pdStart').textContent=PD.run?'暫停':'開始';
+  sfxUnlock();
+  if(PD.run){pdEl('pdVerdict').textContent='準備…看對手出招';pdEl('pdVerdict').style.color='';pdSchedule();}else{clearTimeout(PD.timer);pdEl('pdInfo').textContent='已暫停';}});
+document.querySelectorAll('#pdType .chipbtn').forEach(b=>b.addEventListener('click',()=>{PD.type=b.dataset.t;
+  document.querySelectorAll('#pdType .chipbtn').forEach(x=>x.setAttribute('aria-pressed',x===b));}));
+pdEl('pdLag').addEventListener('input',e=>{PD.lag=+e.target.value;pdEl('pdLagOut').textContent=PD.lag+' ms';});
+// pause when leaving the panel
+document.querySelectorAll('#trSel .chipbtn, .tabs button').forEach(b=>b.addEventListener('click',()=>{if(panel()!=='pd'&&PD.run){PD.run=false;clearTimeout(PD.timer);pdEl('pdStart').textContent='開始';}}));
+pdBar(null);
+
+// tech trainer (window: 11F before impact)
+const TC={run:false,fly:null,held:{L:false,R:false,X:false},lastX:-1e9,type:'mix',timer:null,raf:null,lag:0,n:0,ok:0,streak:0,best:0,hist:[],ctx:null};
+const tcEl=id=>document.getElementById(id);
+const TCWIN=11*FR;
+function tcBeep(f,d,type){if(!document.getElementById('tcSound').checked)return;sfx(f,d,type);}
+function tcBar(r){const MIN=-20,MAX=6,W=MAX-MIN,pc=v=>(Math.max(MIN,Math.min(MAX,v))-MIN)/W*100;
+  let h=`<div class="z" style="left:${pc(-11)}%;width:${pc(0)-pc(-11)}%"></div><div class="hb" style="left:${pc(0)}%;width:1.5%;height:100%;opacity:.6"></div>`;
+  if(r!=null)h+=`<div class="mk" style="left:calc(${pc(r)}% - 1px)"></div>`;
+  h+=`<span class="lb" style="white-space:nowrap">← 早按　綠＝可受身（11 幀）　黃＝撞到${r!=null?'　｜＝你 '+(r<=0?'早 '+(-r).toFixed(1):'晚 '+r.toFixed(1))+'F':''}</span>`;
+  tcEl('tcBar').innerHTML=h;}
+function tcFlash(t,c){const f=tcEl('tcFlash');f.textContent=t;f.style.color=c;f.classList.add('show');setTimeout(()=>f.classList.remove('show'),80);}
+function tcStats(){tcEl('tcN').textContent=TC.n;tcEl('tcOk').textContent=TC.n?Math.round(TC.ok/TC.n*100)+'%':'0%';
+  tcEl('tcStreak').textContent=TC.streak;tcEl('tcBest').textContent=TC.best;
+  tcEl('tcHist').innerHTML=TC.hist.map(h=>`<span class="${h.ok?'ok':''}">${h.t}</span>`).join('');}
+function tcPlace(x,y,rot){const e=tcEl('tcEgg');e.style.left=x+'%';e.style.bottom=y+'px';e.style.transform=`rotate(${rot}deg)`;}
+function tcSchedule(){clearTimeout(TC.timer);if(!TC.run)return;TC.timer=setTimeout(tcLaunch,1000+Math.random()*1400);}
+function tcLaunch(){if(!TC.run)return;let t=TC.type;if(t==='mix')t=Math.random()<.6?'floor':'wall';
+  const slow=tcEl('tcSlow').checked?1.8:1,now=performance.now(),dur=(320+Math.random()*480)*slow;
+  const fly={kind:t,start:now,T:now+dur,press:null,dir:null,judged:false};
+  if(t==='floor'){fly.from=[55+Math.random()*30,85+Math.random()*25];fly.to=[30+Math.random()*25,10];}
+  else{fly.from=[60+Math.random()*25,30+Math.random()*60];fly.to=[4,20+Math.random()*50];}
+  TC.fly=fly;tcEl('tcEgg').classList.remove('lag');tcEl('tcInfo').textContent=t==='floor'?'撞向地面':'撞向牆壁';
+  tcEl('tcVerdict').textContent='…';tcEl('tcVerdict').style.color='';tcBeep(180,.08,'sawtooth');
+  cancelAnimationFrame(TC.raf);TC.raf=requestAnimationFrame(tcTick);}
+function tcTick(){const f=TC.fly;if(!f)return;const now=performance.now();
+  if(!f.judged){const p=Math.min(1,(now-f.start)/(f.T-f.start));
+    tcPlace(f.from[0]+(f.to[0]-f.from[0])*p,f.from[1]+(f.to[1]-f.from[1])*p,p*900);
+    if(now>=f.T){f.judged=true;tcJudge(f);}}
+  if(!f.judged||now<f.T+600)TC.raf=requestAnimationFrame(tcTick);}
+function tcJudge(f){const v=tcEl('tcVerdict');let res,msg,col,r=null;
+  if(f.press!=null){const d=f.T-(f.press-TC.lag);r=-d/FR;
+    if(d<0){res='late';}
+    else if(d<=TCWIN){res='ok';}
+    else{res='early';msg=`太早 ${d.toFixed(0)} ms（${(d/FR).toFixed(1)} 幀）：被鎖定，倒地了。要在撞到前 183 ms 內才按`;col='var(--kill)';}}
+  else res='miss';
+  if(res==='ok'){const d=f.T-(f.press-TC.lag);let name;
+    if(f.kind==='wall'){name=f.jump?'蹬牆受身':'牆壁受身';}
+    else{name=f.dir==='L'?'往左翻滾受身':f.dir==='R'?'往右翻滾受身':'原地受身';}
+    msg=`${name}成功！撞到前 ${d.toFixed(0)} ms（${(d/FR).toFixed(1)} 幀）按下`;col='var(--accent-ink)';
+    tcFlash('TECH!','var(--accent)');tcBeep(990,.15,'triangle');
+    const e=tcEl('tcEgg');let x=f.to[0],y=f.to[1];
+    if(f.kind==='floor'){x+=f.dir==='L'?-14:f.dir==='R'?14:0;tcPlace(Math.max(6,Math.min(88,x)),10,0);}
+    else{tcPlace(f.jump?24:6,y+(f.jump?30:0),0);}
+    e.style.transition='left .25s, bottom .25s, transform .2s';setTimeout(()=>{e.style.transition='none';},300);}
+  else{if(res==='miss'){msg='沒按：倒地（容易被追擊）';col='var(--kill)';}
+    if(res==='late'){msg=`太晚 ${(f.press-TC.lag-f.T).toFixed(0)} ms：已經撞到，倒地`;col='var(--kill)';}
+    tcFlash('倒地','var(--kill)');tcBeep(110,.22,'sawtooth');tcEl('tcEgg').classList.add('lag');
+    if(f.kind==='floor')tcPlace(f.to[0],10,90);else{tcPlace(f.to[0],10,90);}}
+  TC.n++;if(res==='ok'){TC.ok++;TC.streak++;TC.best=Math.max(TC.best,TC.streak);}else TC.streak=0;
+  TC.hist.unshift({ok:res==='ok',t:{ok:'✓',early:'✗ 早',late:'✗ 晚',miss:'✗ 沒按'}[res]});TC.hist.length=Math.min(TC.hist.length,12);
+  v.textContent=msg;v.style.color=col;tcBar(r);tcStats();tcSchedule();}
+function tcDown(k){const b=document.querySelector(`[data-tc="${k}"]`);b&&b.classList.add('down');const now=performance.now();
+  if(k in TC.held)TC.held[k]=true;if(k==='X')TC.lastX=now;
+  if(k!=='S')return;const f=TC.fly;
+  if(!f||f.judged){tcEl('tcVerdict').textContent=TC.run?'等耀西被打飛再按':'先按「開始」';return;}
+  if(f.press!=null){tcEl('tcVerdict').textContent='鎖定中：一次飛行只能按一次';return;}
+  f.press=now;f.dir=TC.held.L&&!TC.held.R?'L':TC.held.R&&!TC.held.L?'R':null;f.jump=TC.held.X||now-TC.lastX<TCWIN;
+  if(f.T-(now-TC.lag)>TCWIN){tcEl('tcVerdict').textContent='按太早…鎖定中';tcEl('tcVerdict').style.color='var(--kill)';}
+}
+function tcUp(k){const b=document.querySelector(`[data-tc="${k}"]`);b&&b.classList.remove('down');if(k in TC.held)TC.held[k]=false;
+  // jump pressed slightly after shield still counts for wall-jump tech
+}
+document.querySelectorAll('[data-tc]').forEach(b=>{const k=b.dataset.tc;
+  b.addEventListener('pointerdown',e=>{e.preventDefault();b.setPointerCapture?.(e.pointerId);tcDown(k);
+    if(k==='X'&&TC.fly&&TC.fly.press!=null&&!TC.fly.judged)TC.fly.jump=true;});
+  b.addEventListener('pointerup',()=>tcUp(k));b.addEventListener('pointercancel',()=>tcUp(k));});
+const tcKeys={KeyS:'S',ArrowLeft:'L',ArrowRight:'R',KeyK:'X'};
+document.addEventListener('keydown',e=>{const k=tcKeys[e.code];if(!k||panel()!=='tc'||e.repeat)return;e.preventDefault();tcDown(k);
+  if(k==='X'&&TC.fly&&TC.fly.press!=null&&!TC.fly.judged)TC.fly.jump=true;});
+document.addEventListener('keyup',e=>{const k=tcKeys[e.code];if(!k||panel()!=='tc')return;tcUp(k);});
+tcEl('tcStart').addEventListener('click',()=>{TC.run=!TC.run;tcEl('tcStart').textContent=TC.run?'暫停':'開始';
+  sfxUnlock();
+  if(TC.run){tcEl('tcVerdict').textContent='準備…';tcEl('tcVerdict').style.color='';tcSchedule();}else{clearTimeout(TC.timer);tcEl('tcInfo').textContent='已暫停';}});
+document.querySelectorAll('#tcType .chipbtn').forEach(b=>b.addEventListener('click',()=>{TC.type=b.dataset.t;
+  document.querySelectorAll('#tcType .chipbtn').forEach(x=>x.setAttribute('aria-pressed',x===b));}));
+tcEl('tcLag').addEventListener('input',e=>{TC.lag=+e.target.value;tcEl('tcLagOut').textContent=TC.lag+' ms';});
+document.querySelectorAll('#trSel .chipbtn, .tabs button').forEach(b=>b.addEventListener('click',()=>{if(panel()!=='tc'&&TC.run){TC.run=false;clearTimeout(TC.timer);tcEl('tcStart').textContent='開始';}}));
+tcBar(null);
+
+// spacing trainer (illustrative units: lane = 1000)
+const SPM={ft:{n:'前強',r:60,su:6,tot:26,air:false},ba:{n:'小跳背空',r:75,su:14,tot:36,air:true},fs:{n:'前Smash',r:68,su:16,tot:48,air:false},na:{n:'空N',r:50,su:6,tot:30,air:true}};
+const SP={mode:'poke',mv:'ft',y:150,o:360,held:{L:false,R:false},act:null,raf:null,last:0,n:0,ok:0,streak:0,best:0,hist:[],
+  OOS:44,oppR:58,opp:{st:'idle',t:0,next:0,dir:0,wt:0}};
+const spEl=id=>document.getElementById(id);
+const u2p=x=>(x/5)+'%';
+function spFlash(t,c){const f=spEl('spFlash');f.textContent=t;f.style.color=c;f.classList.add('show');setTimeout(()=>f.classList.remove('show'),80);}
+function spStats(){spEl('spN').textContent=SP.n;spEl('spOk').textContent=SP.n?Math.round(SP.ok/SP.n*100)+'%':'0%';
+  spEl('spStreak').textContent=SP.streak;spEl('spBest').textContent=SP.best;
+  spEl('spHist').innerHTML=SP.hist.map(h=>`<span class="${h.ok?'ok':''}">${h.t}</span>`).join('');}
+function spResult(ok,tag,msg,col,flash){SP.n++;if(ok){SP.ok++;SP.streak++;SP.best=Math.max(SP.best,SP.streak);}else SP.streak=0;
+  SP.hist.unshift({ok,t:tag});SP.hist.length=Math.min(SP.hist.length,12);const v=spEl('spVerdict');v.textContent=msg;v.style.color=col;
+  if(flash)spFlash(flash,col);spStats();}
+function spDraw(){const m=SPM[SP.mv],show=spEl('spShow').checked;
+  spEl('spY').style.left=u2p(SP.y);spEl('spO').style.left=u2p(SP.o);
+  const my=spEl('spMy');my.style.display=show?'':'none';my.style.left=u2p(SP.y);my.style.width=u2p(m.r);
+  const safeW=Math.max(0,m.r-SP.OOS);my.querySelector('b').style.width=(safeW/m.r*100)+'%';
+  const op=spEl('spOpp');op.style.display=show?'':'none';const R=SP.mode==='wp'?SP.oppR:SP.OOS;op.style.left=u2p(SP.o-R);op.style.width=u2p(R);
+  spEl('spDist').textContent='距離 '+Math.round(SP.o-SP.y);}
+function spSetMode(m){SP.mode=m;SP.y=150;SP.o=360;SP.act=null;Object.assign(SP.opp,{st:'idle',t:performance.now(),next:performance.now()+1200});
+  spEl('spO').className=m==='poke'?'shield':'';spEl('spInfo').textContent=m==='poke'?'對手舉盾中':'對手會出招';
+  spEl('spVerdict').style.color='';spEl('spVerdict').textContent=m==='poke'?'走到深綠色剛好碰到對手的位置再出招':'站在紅條外面，等對手揮空（變黃）再打';spDraw();}
+function spAttack(){const now=performance.now();if(SP.act||SP.opp.st==='hitYou')return;const m=SPM[SP.mv];
+  SP.act={mv:SP.mv,start:now,hit:now+m.su*FR,end:now+m.tot*FR,done:false};
+  spEl('spY').classList.toggle('air',m.air);}
+function spResolve(){const a=SP.act,m=SPM[a.mv],d=SP.o-SP.y,atk=spEl('spAtk');
+  atk.style.left=u2p(SP.y);atk.style.width=u2p(m.r);atk.style.opacity=.85;setTimeout(()=>atk.style.opacity=0,120);
+  const dist=Math.round(d);
+  if(SP.mode==='poke'){
+    if(d>m.r)spResult(false,'✗ 揮空',`${m.n}揮空：距離 ${dist}，範圍只有 ${m.r}，再靠近 ${Math.ceil(d-m.r)}`,'var(--kill)','MISS');
+    else if(d<=SP.OOS)spResult(false,'✗ 太近',`打在盾上但太近（距離 ${dist}）：對手盾後反擊打得到你，要退到 ${SP.OOS+1}–${m.r}`,'var(--kill)','PUNISHED');
+    else{const tip=(d-SP.OOS)/(m.r-SP.OOS);spResult(true,'✓ '+dist,`完美間距！距離 ${dist}（安全區 ${SP.OOS+1}–${m.r}）${tip>.66?'，幾乎用最尖端':''}`,'var(--accent-ink)','SPACED');}
+  }else{
+    const o=SP.opp;
+    if(d>m.r){if(o.st==='lag')spResult(false,'✗ 構不到',`對手在破綻中，但${m.n}構不到（距離 ${dist} > ${m.r}）：要先往前再打`,'var(--kill)','MISS');
+      else if(d<=SP.oppR+20){spResult(false,'✗ 被抓揮空',`揮空了，而且在對手範圍附近：被反擊`,'var(--kill)','PUNISHED');}
+      else spResult(false,'✗ 揮空',`揮空（距離 ${dist}）`,'var(--muted)','MISS');}
+    else if(o.st==='lag')spResult(true,'✓ 懲罰',`揮空懲罰成功！趁對手收招用${m.n}打中（距離 ${dist}）`,'var(--accent-ink)','PUNISH!');
+    else if(o.st==='wind'){spResult(true,'✓ 搶先',`在對手出招前搶先打中`,'var(--accent-ink)','HIT');o.st='idle';o.next=performance.now()+1400;spEl('spO').className='';}
+    else if(d<=SP.OOS)spResult(false,'✗ 太近',`對手舉盾擋住，距離 ${dist} 太近：被盾後反擊`,'var(--kill)','PUNISHED');
+    else spResult(true,'✓ 安全',`打在盾上但間距安全（距離 ${dist}）`,'var(--accent-ink)','SAFE');
+  }}
+function spOpp(now,dt){const o=SP.opp,el=spEl('spO');
+  if(SP.mode==='poke'){if(spEl('spMoveO').checked){if(now>o.wt){o.dir=[-1,0,1][Math.floor(Math.random()*3)];o.wt=now+500+Math.random()*900;}
+      SP.o=Math.max(260,Math.min(450,SP.o+o.dir*45*dt));}return;}
+  if(o.st==='idle'){if(now>o.wt){o.dir=[-1,0,1,1][Math.floor(Math.random()*4)];o.wt=now+400+Math.random()*700;}
+    SP.o=Math.max(210,Math.min(460,SP.o-o.dir*40*dt));
+    if(now>o.next){o.st='wind';o.t=now;el.className='wind';}}
+  else if(o.st==='wind'&&now-o.t>230){o.st='act';o.t=now;const oa=spEl('spOppAtk');oa.style.left=u2p(SP.o-SP.oppR);oa.style.width=u2p(SP.oppR);oa.style.opacity=.85;
+    if(SP.o-SP.y<=SP.oppR&&!(SP.act&&!SP.act.done&&SPM[SP.act.mv].air&&false)){spResult(false,'✗ 被打',`被打中：你站在對手範圍內（距離 ${Math.round(SP.o-SP.y)} ≤ ${SP.oppR}）`,'var(--kill)','HIT');SP.y=Math.max(15,SP.y-60);}
+    setTimeout(()=>oa.style.opacity=0,120);}
+  else if(o.st==='act'&&now-o.t>100){o.st='lag';o.t=now;el.className='lag';}
+  else if(o.st==='lag'&&now-o.t>450){o.st='idle';o.next=now+900+Math.random()*1600;el.className='';}}
+function spTick(){const now=performance.now(),dt=Math.min(.05,(now-SP.last)/1000);SP.last=now;
+  if(panel()!=='sp'){SP.raf=null;return;}
+  const a=SP.act;
+  if(!a){const v=(SP.held.R?1:0)-(SP.held.L?1:0);SP.y=Math.max(15,Math.min(SP.o-18,SP.y+v*85*dt));}
+  else{if(!a.done&&now>=a.hit){a.done=true;spResolve();}if(now>=a.end){SP.act=null;spEl('spY').classList.remove('air');}}
+  spOpp(now,dt);SP.y=Math.min(SP.y,SP.o-18);spDraw();SP.raf=requestAnimationFrame(spTick);}
+function spStart(){if(SP.raf)return;SP.last=performance.now();SP.raf=requestAnimationFrame(spTick);}
+function spKey(k,down){const b=document.querySelector(`[data-sp="${k}"]`);b&&b.classList.toggle('down',down);
+  if(k==='L'||k==='R')SP.held[k]=down;else if(k==='A'&&down)spAttack();spStart();}
+document.querySelectorAll('[data-sp]').forEach(b=>{const k=b.dataset.sp;
+  b.addEventListener('pointerdown',e=>{e.preventDefault();b.setPointerCapture?.(e.pointerId);spKey(k,true);});
+  b.addEventListener('pointerup',()=>spKey(k,false));b.addEventListener('pointercancel',()=>spKey(k,false));});
+const spKeys={ArrowLeft:'L',ArrowRight:'R',KeyJ:'A'};
+function spSelMove(v){SP.mv=v;document.querySelectorAll('#spMove .chipbtn').forEach(x=>x.setAttribute('aria-pressed',x.dataset.v===v));spDraw();}
+document.addEventListener('keydown',e=>{if(panel()!=='sp'||e.repeat)return;
+  if(spKeys[e.code]){e.preventDefault();spKey(spKeys[e.code],true);}
+  else if(/^Digit[1-4]$/.test(e.code)){spSelMove(['ft','ba','fs','na'][+e.code.slice(5)-1]);}});
+document.addEventListener('keyup',e=>{if(panel()!=='sp')return;if(spKeys[e.code]){e.preventDefault();spKey(spKeys[e.code],false);}});
+document.querySelectorAll('#spMove .chipbtn').forEach(b=>b.addEventListener('click',()=>{spSelMove(b.dataset.v);b.blur();}));
+document.querySelectorAll('#spMode .chipbtn').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('#spMode .chipbtn').forEach(x=>x.setAttribute('aria-pressed',x===b));spSetMode(b.dataset.m);spStart();b.blur();}));
+spEl('spShow').addEventListener('change',spDraw);
+document.querySelectorAll('#trSel .chipbtn').forEach(b=>b.addEventListener('click',()=>{if(b.dataset.p==='sp'){setTimeout(()=>{spSetMode(SP.mode);spStart();},0);}}));
+spSetMode('poke');
+
+// waveland / wavedash trainer
+const WD={run:false,mode:'land',held:{BL:false,D:false,FR:false,L:false,R:false,Dn:false},lastDir:{dir:null,t:-1e9},fall:null,timer:null,raf:null,
+  n:0,ok:0,dists:[],best:0,hist:[],ctx:null,jumpAt:null};
+const wdEl=id=>document.getElementById(id);
+const WDMAX=12; // frames before landing where a slide still happens (illustrative)
+function wdBeep(f,d,type){if(!document.getElementById('wdSound').checked)return;sfx(f,d,type);}
+function wdBar(r,label){const MIN=-20,MAX=4,W=MAX-MIN,pc=v=>(Math.max(MIN,Math.min(MAX,v))-MIN)/W*100;
+  let h=`<div class="z" style="left:${pc(-WDMAX)}%;width:${pc(0)-pc(-WDMAX)}%;background:linear-gradient(90deg,transparent,var(--accent-soft) 60%)"></div><div class="z" style="left:${pc(-4)}%;width:${pc(0)-pc(-4)}%;background:color-mix(in srgb,var(--accent) 35%,transparent)"></div><div class="hb" style="left:${pc(0)}%;width:1.5%;height:100%;opacity:.6"></div>`;
+  if(r!=null)h+=`<div class="mk" style="left:calc(${pc(r)}% - 1px)"></div>`;
+  h+=`<span class="lb" style="white-space:nowrap">${label||'← 早按　綠越深滑越遠　黃＝落地'}${r!=null?'　｜＝你 '+(r<=0?'早 '+(-r).toFixed(1):'晚 '+r.toFixed(1))+'F':''}</span>`;
+  wdEl('wdBar').innerHTML=h;}
+function wdFlash(t,c){const f=wdEl('wdFlash');f.textContent=t;f.style.color=c;f.classList.add('show');setTimeout(()=>f.classList.remove('show'),80);}
+function wdStats(){wdEl('wdN').textContent=WD.n;wdEl('wdOk').textContent=WD.n?Math.round(WD.ok/WD.n*100)+'%':'0%';
+  wdEl('wdAvg').textContent=WD.dists.length?Math.round(WD.dists.reduce((a,b)=>a+b,0)/WD.dists.length)+'%':'—';
+  wdEl('wdBest').textContent=WD.best?WD.best+'%':'—';
+  wdEl('wdHist').innerHTML=WD.hist.map(h=>`<span class="${h.ok?'ok':''}">${h.t}</span>`).join('');}
+function wdPlace(x,y){const e=wdEl('wdEgg');e.style.left=x+'%';e.style.bottom=y+'px';}
+function wdDir(now){ // current stick direction: buttons or keyboard combos, with 3F leniency
+  let d=WD.held.BL?'BL':WD.held.FR?'FR':WD.held.D?'D':null;
+  if(!d&&WD.held.Dn){d=WD.held.L?'BL':WD.held.R?'FR':'D';}
+  if(!d&&now-WD.lastDir.t<3*FR)d=WD.lastDir.dir;return d;}
+function wdSchedule(){clearTimeout(WD.timer);if(!WD.run)return;
+  if(WD.mode==='land')WD.timer=setTimeout(wdDrop,900+Math.random()*1200);
+  else if(WD.fall&&WD.fall.judged){WD.timer=setTimeout(()=>{wdReset();},1100);}
+  else{wdReset();wdEl('wdVerdict').textContent=WD.mode==='plat'?'按 X 大跳穿過平台，腳一高過平台就 ↙ + 盾':'按 X 起跳，馬上 ↙ + 盾';wdEl('wdVerdict').style.color='';}}
+function wdReset(){const e=wdEl('wdEgg');e.classList.remove('dodge','lag');const tr=wdEl('wdTrail');tr.style.opacity=0;tr.style.bottom='12px';wdPlace(WD.mode==='plat'?57:55,10);WD.fall=null;}
+function wdDrop(){if(!WD.run)return;const slow=wdEl('wdSlow').checked?1.8:1,now=performance.now();
+  const fromPlat=Math.random()<.5,y0=fromPlat?111:60+Math.random()*60,x=fromPlat?50+Math.random()*15:30+Math.random()*45;
+  const dur=(fromPlat?420:300+Math.random()*250)*slow;
+  WD.fall={start:now,T:now+dur,y0,x,press:null,dir:null,judged:false,kind:'land'};
+  wdEl('wdEgg').classList.remove('dodge','lag');wdEl('wdTrail').style.opacity=0;
+  wdEl('wdInfo').textContent=fromPlat?'從平台落下':'空中落下';wdEl('wdVerdict').textContent='…';wdEl('wdVerdict').style.color='';
+  cancelAnimationFrame(WD.raf);WD.raf=requestAnimationFrame(wdTick);}
+function wdJump(now){if(WD.mode!=='dash'||(WD.fall&&!WD.fall.judged))return;clearTimeout(WD.timer);const slow=wdEl('wdSlow').checked?1.8:1;
+  WD.fall={start:now,T:now+3*FR*slow,y0:10,x:55,press:null,dir:null,judged:false,kind:'dash',slow,air:now+3*FR*slow,peak:now+(3+19)*FR*slow};
+  wdEl('wdEgg').classList.remove('dodge','lag');wdEl('wdTrail').style.opacity=0;wdEl('wdInfo').textContent='起跳';
+  cancelAnimationFrame(WD.raf);WD.raf=requestAnimationFrame(wdTick);
+  WD.timer=setTimeout(()=>{if(WD.fall&&!WD.fall.judged&&WD.fall.press==null){WD.fall.judged=true;wdResult(false,'✗ 沒閃避','只是普通小跳：要在起跳後馬上 ↙ + 盾',null,'var(--kill)');wdLand(WD.fall,0);}},(3+14)*FR*slow);}
+const PL={top:111,apex:160,u:Math.sqrt(1-(111-10)/150)};
+function wdPlatJump(now){if(WD.fall&&!WD.fall.judged)return;clearTimeout(WD.timer);const slow=wdEl('wdSlow').checked?1.8:1;
+  const air=now+3*FR*slow,aT=30*FR*slow;
+  WD.fall={kind:'plat',start:now,air,aT,Tc:air+(1-PL.u)*aT,Tl:air+(1+PL.u)*aT,x:57,press:null,dir:null,judged:false,slow,T:air+(1+PL.u)*aT};
+  wdEl('wdEgg').classList.remove('dodge','lag');wdEl('wdTrail').style.opacity=0;wdEl('wdTrail').style.bottom='12px';wdEl('wdInfo').textContent='大跳';
+  wdBar(null,'← 平台下方　綠＝腳在平台上方（越貼近越好）');
+  cancelAnimationFrame(WD.raf);WD.raf=requestAnimationFrame(wdTick);}
+function wdPlatY(f,now){if(now<f.air)return 10;const u=(now-f.air)/f.aT-1;return 10+150*(1-u*u);}
+function wdPlatJudge(f,now){f.judged=true;const y=wdPlatY(f,now),h=y-PL.top,rising=now<f.air+f.aT;
+  const MIN=-1.2,MAX=1.2,pc=v=>(Math.max(MIN,Math.min(MAX,v))-MIN)/(MAX-MIN)*100; // bar in units of time relative to Tc..Tl
+  const rel=now<f.Tc?-(f.Tc-now)/(f.Tl-f.Tc):(now-f.Tc)/(f.Tl-f.Tc);
+  wdEl('wdBar').innerHTML=`<div class="z" style="left:${pc(0)}%;width:${pc(1)-pc(0)}%;background:linear-gradient(90deg,color-mix(in srgb,var(--accent) 35%,transparent),var(--accent-soft) 50%,color-mix(in srgb,var(--accent) 35%,transparent))"></div><div class="mk" style="left:calc(${pc(rel)}% - 1px)"></div><span class="lb" style="white-space:nowrap">← 還在平台下　綠＝腳高過平台（兩端最貼近）</span>`;
+  const e=wdEl('wdEgg');
+  if(f.press==null){wdResult(false,'✗ 沒按','普通落在平台上：沒有 Waveland',null,'var(--muted)');wdPlace(f.x,PL.top);wdSchedule();return;}
+  if(h<0){wdResult(false,'✗ 太早',`太早：腳還在平台下方 ${Math.round(-h)}，閃避穿過平台掉回地面（要等腳高過平台再按）`,null,'var(--kill)');
+    e.classList.add('lag');wdFlash('太早','var(--kill)');wdBeep(140,.2,'sawtooth');
+    e.style.transition='bottom .25s ease-in';wdPlace(f.x,10);setTimeout(()=>{e.style.transition='none';e.classList.remove('dodge');},300);wdSchedule();return;}
+  if(!f.dir){wdResult(false,'✗ 沒方向','沒推方向：原地空中閃避，在空中停住',null,'var(--kill)');wdSchedule();setTimeout(()=>{wdPlace(f.x,PL.top);e.classList.remove('dodge');},300);return;}
+  const q=Math.max(0,Math.round(100*(1-h/(PL.apex-PL.top))));
+  e.style.transition='bottom .08s linear';wdPlace(f.x,PL.top);setTimeout(()=>{e.style.transition='none';},90);
+  if(f.dir==='D'){wdResult(true,'✓ 站上','平台 Waveland（↓）：直接站上平台',0,'var(--accent-ink)');wdFlash('LAND','var(--accent)');wdBeep(660,.1,'triangle');setTimeout(()=>e.classList.remove('dodge'),200);wdSchedule();return;}
+  const name=f.dir==='BL'?'往後':'往前';
+  wdResult(true,'✓ '+q+'%',`${rising?'上升中':'下降中'}在平台上方 ${Math.round(h)} 按下：${name}滑上平台 ${q}%${q<60?'（再貼近平台一點按會更低、更快站上）':''}`,q,'var(--accent-ink)');
+  wdFlash('WAVELAND','var(--accent)');wdBeep(880,.12,'triangle');
+  const tr=wdEl('wdTrail');tr.style.bottom=(PL.top+2)+'px';
+  setTimeout(()=>{const dx=(f.dir==='BL'?-1:1)*q*0.13;const x2=Math.max(41,Math.min(69,f.x+dx));
+    tr.style.left=Math.min(f.x,x2)+'%';tr.style.width=Math.abs(x2-f.x)+'%';tr.style.opacity=.8;
+    e.style.transition='left .28s cubic-bezier(.2,.8,.3,1)';e.style.left=x2+'%';setTimeout(()=>{e.style.transition='none';e.classList.remove('dodge');},320);},90);
+  wdSchedule();}
+function wdTick(){const f=WD.fall;if(!f)return;const now=performance.now();
+  if(f.kind==='land'&&!f.judged){const p=Math.min(1,(now-f.start)/(f.T-f.start));wdPlace(f.x,f.y0-(f.y0-10)*p*p);if(now>=f.T){f.judged=true;wdJudge(f);}}
+  if(f.kind==='dash'&&!f.judged){const t=(now-f.air)/(19*FR*f.slow);if(now>f.air){wdPlace(f.x,10+Math.max(0,40*(1-(1-t)*(1-t))));}}
+  if(f.kind==='plat'&&!f.judged){wdPlace(f.x,wdPlatY(f,now));if(now>=f.Tl){wdPlatJudge(f,now);}}
+  if(!f.judged||now<f.T+800)WD.raf=requestAnimationFrame(wdTick);}
+function wdResult(ok,tag,msg,dist,col){WD.n++;if(ok){WD.ok++;WD.dists.push(dist);WD.best=Math.max(WD.best,dist);}
+  WD.hist.unshift({ok,t:tag});WD.hist.length=Math.min(WD.hist.length,12);const v=wdEl('wdVerdict');v.textContent=msg;v.style.color=col;wdStats();}
+function wdLand(f,slide){const e=wdEl('wdEgg'),tr=wdEl('wdTrail');wdPlace(f.x,10);
+  if(slide>0){const dx=(f.dir==='BL'?-1:1)*slide*0.22;const x2=Math.max(4,Math.min(94,f.x+dx));
+    tr.style.left=Math.min(f.x,x2)+'%';tr.style.width=Math.abs(x2-f.x)+'%';tr.style.opacity=.8;
+    e.style.transition='left .28s cubic-bezier(.2,.8,.3,1)';requestAnimationFrame(()=>{e.style.left=x2+'%';});setTimeout(()=>{e.style.transition='none';e.classList.remove('dodge');},320);}
+  else setTimeout(()=>e.classList.remove('dodge'),250);
+  wdSchedule();}
+function wdJudge(f){ // waveland
+  if(f.press==null){wdResult(false,'✗ 沒按','普通落地：沒有空中閃避',null,'var(--muted)');wdBar(null);wdLand(f,0);return;}
+  const d=(f.T-f.press)/FR;wdBar(-d);
+  if(d>WDMAX){wdResult(false,'✗ 早',`太早 ${(d*FR).toFixed(0)} ms（${d.toFixed(1)} 幀）：在空中閃避完才落下，沒有滑行，落地硬直很大`,null,'var(--kill)');wdEl('wdEgg').classList.add('lag');wdFlash('太早','var(--kill)');wdBeep(140,.2,'sawtooth');wdLand(f,0);return;}
+  if(!f.dir){wdResult(false,'✗ 沒方向','沒推方向：變成原地空中閃避，不會滑',null,'var(--kill)');wdLand(f,0);return;}
+  if(f.dir==='D'){wdResult(true,'✓ 原地','原地 Waveland：直接落地（適合平台上快速停下）',0,'var(--accent-ink)');wdFlash('LAND','var(--accent)');wdBeep(660,.1,'triangle');wdLand(f,0);return;}
+  const q=Math.round(100*(1-d/WDMAX)),name=f.dir==='BL'?'往後':'往前';
+  wdResult(true,'✓ '+q+'%',`${name} Waveland！落地前 ${(d*FR).toFixed(0)} ms（${d.toFixed(1)} 幀）按下，滑行 ${q}%${q<50?'（再晚一點按會滑更遠）':''}`,q,'var(--accent-ink)');
+  wdFlash('WAVELAND','var(--accent)');wdBeep(880,.12,'triangle');wdLand(f,q);}
+function wdDashJudge(f,now){f.judged=true;clearTimeout(WD.timer);
+  const af=(now-f.air)/(FR*f.slow); // airborne frames at airdodge (negative = still in jumpsquat)
+  wdBar(null,'');
+  if(!f.dir){wdResult(false,'✗ 沒方向','沒推方向：原地空中閃避',null,'var(--kill)');wdLand(f,0);return;}
+  if(af>4){wdResult(false,'✗ 太慢',`太慢：已經離地 ${af.toFixed(1)} 幀，閃避在空中，沒有滑行`,null,'var(--kill)');wdEl('wdEgg').classList.add('lag');wdFlash('太慢','var(--kill)');wdBeep(140,.2,'sawtooth');wdLand(f,0);return;}
+  if(f.dir==='D'){wdResult(true,'✓ 原地','原地 Wavedash：起跳後立刻落回地面',0,'var(--accent-ink)');wdLand(f,0);return;}
+  const q=Math.round(100*Math.min(1,1-Math.max(0,af)/5)),ms=(now-WD.jumpAt).toFixed(0);
+  wdResult(true,'✓ '+q+'%',`${f.dir==='BL'?'往後':'往前'} Wavedash！按 X 後 ${ms} ms 閃避，滑行 ${q}%`,q,'var(--accent-ink)');
+  wdFlash('WAVEDASH','var(--accent)');wdBeep(880,.12,'triangle');wdLand(f,q);}
+function wdDown(k){const now=performance.now(),b=document.querySelector(`[data-wd="${k}"]`);b&&b.classList.add('down');
+  if(k in WD.held)WD.held[k]=true;
+  if(['BL','D','FR'].includes(k)){WD.lastDir={dir:k,t:now};}
+  if(k==='X'){WD.jumpAt=now;if(WD.mode==='plat'){if(!WD.run){wdEl('wdVerdict').textContent='先按「開始」';return;}wdPlatJump(now);return;}if(WD.mode==='dash'){if(!WD.run){wdEl('wdVerdict').textContent='先按「開始」';return;}wdJump(now);}return;}
+  if(k!=='S')return;const f=WD.fall;
+  if(WD.mode==='plat'){if(!f||f.judged||f.kind!=='plat'){wdEl('wdVerdict').textContent=WD.run?'先按 X 跳':'先按「開始」';return;}
+    f.press=now;f.dir=wdDir(now);wdEl('wdEgg').classList.add('dodge');
+    if(f.dir){wdPlatJudge(f,now);}else setTimeout(()=>{if(!f.judged){f.dir=wdDir(performance.now());wdPlatJudge(f,now);}},3*FR);return;}
+  if(WD.mode==='dash'){if(!f||f.judged){wdEl('wdVerdict').textContent=WD.run?'先按 X 起跳':'先按「開始」';return;}
+    f.press=now;f.dir=wdDir(now);wdEl('wdEgg').classList.add('dodge');
+    const wait=Math.max(0,f.air-now);setTimeout(()=>{if(!f.judged){f.dir=f.dir||wdDir(performance.now());wdDashJudge(f,now);}},wait+20);return;}
+  if(!f||f.judged){wdEl('wdVerdict').textContent=WD.run?'等耀西落下再按':'先按「開始」';return;}
+  if(f.press!=null)return;f.press=now;f.dir=wdDir(now);wdEl('wdEgg').classList.add('dodge');
+  if(!f.dir)setTimeout(()=>{if(!f.dir)f.dir=wdDir(performance.now());},3*FR);}
+function wdUp(k){const b=document.querySelector(`[data-wd="${k}"]`);b&&b.classList.remove('down');if(k in WD.held)WD.held[k]=false;}
+document.querySelectorAll('[data-wd]').forEach(b=>{const k=b.dataset.wd;
+  b.addEventListener('pointerdown',e=>{e.preventDefault();b.setPointerCapture?.(e.pointerId);wdDown(k);});
+  b.addEventListener('pointerup',()=>wdUp(k));b.addEventListener('pointercancel',()=>wdUp(k));});
+const wdKeys={ArrowLeft:'L',ArrowRight:'R',ArrowDown:'Dn',KeyS:'S',KeyK:'X'};
+document.addEventListener('keydown',e=>{const k=wdKeys[e.code];if(!k||panel()!=='wd'||e.repeat)return;e.preventDefault();
+  if(k==='L'||k==='R'||k==='Dn'){WD.held[k]=true;const now=performance.now();if(WD.held.Dn)WD.lastDir={dir:WD.held.L?'BL':WD.held.R?'FR':'D',t:now};
+    const f=WD.fall;if(f&&f.press!=null&&!f.dir&&now-f.press<3*FR)f.dir=wdDir(now);return;}
+  wdDown(k);});
+document.addEventListener('keyup',e=>{const k=wdKeys[e.code];if(!k||panel()!=='wd')return;if(k in WD.held)WD.held[k]=false;else wdUp(k);});
+wdEl('wdStart').addEventListener('click',()=>{WD.run=!WD.run;wdEl('wdStart').textContent=WD.run?'暫停':'開始';
+  sfxUnlock();
+  if(WD.run){wdEl('wdVerdict').style.color='';wdSchedule();if(WD.mode==='land')wdEl('wdVerdict').textContent='準備…';}else{clearTimeout(WD.timer);wdEl('wdInfo').textContent='已暫停';}});
+document.querySelectorAll('#wdMode .chipbtn').forEach(b=>b.addEventListener('click',()=>{WD.mode=b.dataset.m;
+  document.querySelectorAll('#wdMode .chipbtn').forEach(x=>x.setAttribute('aria-pressed',x===b));clearTimeout(WD.timer);wdReset();
+  wdBar(null,WD.mode==='dash'?'按 X 後越快 ↙ + 盾滑越遠（離地 ≤ 4 幀）':WD.mode==='plat'?'← 平台下方　綠＝腳在平台上方（越貼近越好）':null);
+  wdEl('wdVerdict').style.color='';wdEl('wdVerdict').textContent=WD.mode==='dash'?(WD.run?'按 X 起跳，馬上 ↙ + 盾':'按「開始」後，按 X 起跳再馬上 ↙ + 盾'):WD.mode==='plat'?(WD.run?'按 X 大跳穿過平台，腳一高過平台就 ↙ + 盾':'按「開始」後，按 X 大跳穿過平台，腳一高過平台就 ↙ + 盾'):'按「開始」，耀西會從平台或空中落下';
+  if(WD.run)wdSchedule();b.blur();}));
+document.querySelectorAll('#trSel .chipbtn, .tabs button').forEach(b=>b.addEventListener('click',()=>{if(panel()!=='wd'&&WD.run){WD.run=false;clearTimeout(WD.timer);wdEl('wdStart').textContent='開始';}}));
+wdReset();wdBar(null);
+
+// tech chase trainer (illustrative frame data)
+const CHM={jab:{n:'弱（NA）',su:3,r:34,front:true,lag:18,ground:true},nair:{n:'空N',su:6,r:42,front:false,lag:28,ground:true,air:true},
+  da:{n:'衝刺攻擊',su:10,r:46,front:true,lag:38,ground:true,lunge:40},fs:{n:'前強（C→）',su:6,r:44,front:true,lag:22,ground:true},uair:{n:'上空',su:8,r:30,front:false,lag:30,plat:true,air:true}};
+const CHO={inplace:{n:'原地受身',intan:20,end:27,dist:0},rollL:{n:'往左翻滾',intan:30,end:41,dist:-75},rollR:{n:'往右翻滾',intan:30,end:41,dist:75},missed:{n:'沒受身（倒地）',intan:0,end:32,dist:0}};
+const CH={lastTap:{},dashUntil:0,run:false,mode:'mix',y:200,face:1,held:{L:false,R:false},round:null,act:null,timer:null,raf:null,last:0,n:0,ok:0,streak:0,best:0,
+  pref:'even',stat:{inplace:[0,0],with:[0,0],against:[0,0],missed:[0,0]},ctx:null};
+const chEl=id=>document.getElementById(id);
+const chP=x=>(x/5)+'%';
+function chBeep(f,d,t){if(!document.getElementById('chSound').checked)return;sfx(f,d,t);}
+function chFlash(t,c){const f=chEl('chFlash');f.textContent=t;f.style.color=c;f.classList.add('show');setTimeout(()=>f.classList.remove('show'),80);}
+function chStats(){chEl('chN0').textContent=CH.n;chEl('chOk').textContent=CH.n?Math.round(CH.ok/CH.n*100)+'%':'0%';
+  chEl('chStreak').textContent=CH.streak;chEl('chBest').textContent=CH.best;
+  chEl('chTable').innerHTML=Object.entries(CHA).map(([k,nm])=>{const [n,ok]=CH.stat[k];return `<tr><td>${nm}${CH.pref===k?' ★':''}</td><td class="num">${n}</td><td class="num">${n?Math.round(ok/n*100)+'%':'—'}</td></tr>`;}).join('');}
+function chBar(r,o,sl){const opt=CHO[o]||CHO.inplace,MAX=opt.end+8,pc=v=>Math.max(0,Math.min(100,v/MAX*100));
+  let h=`<div class="z" style="left:${pc(opt.intan)}%;width:${pc(opt.end)-pc(opt.intan)}%;background:var(--amber-soft);border-color:var(--amber)"></div><div style="position:absolute;top:0;bottom:0;left:0;width:${pc(opt.intan)}%;background:repeating-linear-gradient(45deg,transparent 0 5px,color-mix(in srgb,var(--muted) 18%,transparent) 5px 10px)"></div>`;
+  if(r!=null)h+=`<div class="mk" style="left:calc(${pc(r)}% - 1px)"></div>`;
+  h+=`<span class="lb" style="white-space:nowrap">斜線＝無敵　黃＝空檔（${opt.n} 第 ${opt.intan+1}–${opt.end} 幀）${r!=null?'　｜＝命中 第 '+r.toFixed(0)+' 幀':''}</span>`;chEl('chBar').innerHTML=h;}
+function chSchedule(){clearTimeout(CH.timer);if(!CH.run)return;CH.timer=setTimeout(chLaunch,1100+Math.random()*900);}
+const CHA={inplace:'原地受身',with:'順向受身',against:'反向受身',missed:'不受身'};
+function chPick(){const ks=['inplace','with','against','missed'],p=CH.pref;
+  const w=ks.map(k=>p==='even'?1:k===p?11:3),tot=w.reduce((a,b)=>a+b,0);let r=Math.random()*tot;
+  for(let i=0;i<4;i++){r-=w[i];if(r<0)return ks[i];}return 'inplace';}
+function chName(r){return CHA[r.abs]+(r.opt==='rollL'?'（往左）':r.opt==='rollR'?'（往右）':'');}
+function chLaunch(){if(!CH.run)return;let m=CH.mode;if(m==='mix')m=Math.random()<.55?'ground':'plat';
+  const now=performance.now(),slow=chEl('chSlow').checked?1.8:1,o=chEl('chO');
+  const side=Math.random()<.5?1:-1,abs=chPick(),opt=abs==='with'?(side>0?'rollR':'rollL'):abs==='against'?(side>0?'rollL':'rollR'):abs;CH.act=null;chEl('chGhost').style.opacity=0;
+  if(m==='plat'){CH.y=side>0?185+Math.random()*40:275+Math.random()*40;CH.face=side;const ox=CH.y+side*(30+Math.random()*12);
+    CH.round={mode:m,phase:'setup',side,abs,opt,slow,ox,y0:10,yl:106,judged:false,attacked:false};
+    o.className='act';o.style.left=chP(ox);o.style.bottom='10px';chEl('chInfo').textContent='先打上平台';
+    chEl('chVerdict').textContent='用 C 搖桿往前（C→ 前強）把對手打上平台';chEl('chVerdict').style.color='';chBar(null,opt);
+    if(!CH.raf){CH.last=now;CH.raf=requestAnimationFrame(chTick);}return;}
+  {CH.y=side>0?140+Math.random()*90:270+Math.random()*90;CH.face=side;const ox=CH.y+side*(20+Math.random()*10);
+  CH.round={mode:m,phase:'setup',side,abs,opt,slow,ox,y0:10,yl:10,judged:false,attacked:false};
+  o.className='act';o.style.left=chP(ox);o.style.bottom='10px';chEl('chInfo').textContent='先打倒地';
+  chEl('chVerdict').textContent='用 NA（弱）把對手打倒地';chEl('chVerdict').style.color='';chBar(null,opt);}
+  chEl('chGhost').style.opacity=0;chBar(null,opt);chBeep(200,.06,'sawtooth');
+  if(!CH.raf){CH.last=now;CH.raf=requestAnimationFrame(chTick);}}
+const PLX={L:158,C:250,R:342};
+function chPlatLaunch(r,now){r.phase='tech';r.start=now;r.T0=now+450*r.slow;r.x0=r.ox;r.land=230+Math.random()*40;
+  r.endX=r.opt==='rollL'?PLX.L:r.opt==='rollR'?PLX.R:r.land;
+  chEl('chInfo').textContent='打上平台';chEl('chVerdict').textContent='打上去了！猜他的受身：左邊緣／正上方／右邊緣';chEl('chVerdict').style.color='';chBeep(330,.08,'square');}
+function chGroundLaunch(r,now){r.phase='tech';r.start=now;r.T0=now+380*r.slow;r.x0=r.ox;
+  r.land=Math.max(60,Math.min(440,r.ox+r.side*(45+Math.random()*25)));r.endX=Math.max(20,Math.min(480,r.land+CHO[r.opt].dist));r.y0=10;
+  chEl('chInfo').textContent='打倒地';chEl('chVerdict').textContent='打倒了！猜他的受身：原地／往左／往右／不受身';chEl('chVerdict').style.color='';chBeep(330,.08,'square');}
+function chFrame(now){const r=CH.round;return (now-r.T0)/(FR*r.slow);}
+function chOppState(f){const r=CH.round,o=CHO[r.opt];if(f<0)return 'fly';if(f<=o.intan)return 'intan';if(f<=o.end)return 'vuln';return 'act';}
+function chOppX(f){const r=CH.round,o=CHO[r.opt];if(f<=0)return r.land;if(o.dist===0)return r.land;const p=Math.min(1,f/(o.intan));return r.land+(r.endX-r.land)*p;}
+function chTick(){const now=performance.now(),dt=Math.min(.05,(now-CH.last)/1000);CH.last=now;
+  if(panel()!=='ch'){CH.raf=null;return;}
+  const r=CH.round,a=CH.act,oe=chEl('chO');
+  // move yoshi
+  if(!a){const v=(CH.held.R?1:0)-(CH.held.L?1:0);if(v){CH.face=v;}CH.y=Math.max(10,Math.min(490,CH.y+v*270*dt));}
+  else{if(a.lunge&&now<a.hit){CH.y=Math.max(10,Math.min(490,CH.y+a.dir*a.lunge/(a.hit-a.start)*1000*dt));}
+    if(!a.done&&now>=a.hit){a.done=true;chResolve(a,now);}if(now>=a.end){CH.act=null;chEl('chY').classList.remove('air');}}
+  const ye=chEl('chY');ye.style.left=chP(CH.y);ye.classList.toggle('flip',CH.face<0);
+  if(r&&r.phase==='setup'){oe.style.left=chP(r.ox);oe.style.bottom='10px';}
+  else if(r){const f=chFrame(now);
+    if(f<0){const p=(now-r.start)/(r.T0-r.start);oe.style.left=chP(r.x0+(r.land-r.x0)*p);
+      const yy=r.y0+(r.yl-r.y0)*p+(r.mode==='plat'?Math.sin(p*Math.PI)*40:Math.sin(p*Math.PI)*30);oe.style.bottom=yy+'px';oe.className='down';}
+    else{oe.style.bottom=r.yl+'px';const st=chOppState(f);oe.style.left=chP(chOppX(f));
+      if(!r.judged)oe.className=(r.opt==='missed'&&st!=='act'?'down ':'')+(st==='intan'?'intan':st==='vuln'?'vuln':'act');
+      if(chEl('chTell').checked&&r.opt!=='missed'&&f>=0&&!r.judged){const g=chEl('chGhost');g.style.left=chP(r.endX);g.style.bottom=(r.yl-4)+'px';g.style.opacity=.9;}
+      if(!r.judged&&!r.attacked&&f>CHO[r.opt].end+2){chResult(false,`沒追到：${chName(r)}結束，對手已經能行動`,'var(--kill)',null);}}}
+  CH.raf=requestAnimationFrame(chTick);}
+function chAttack(k){const r=CH.round,now=performance.now();if(CH.act)return;if(k==='jab'&&now<CH.dashUntil)k='da';const m=CHM[k];
+  if(r&&!r.judged&&r.phase!=='setup')r.attacked=true;
+  const dir=m.lunge?((CH.held.R?1:0)-(CH.held.L?1:0)||CH.face):CH.face;CH.face=dir;
+  CH.act={k,start:now,hit:now+m.su*FR*(r?r.slow:1),end:now+(m.su+m.lag)*FR*(r?r.slow:1),done:false,lunge:m.lunge||0,dir};
+  chEl('chY').classList.toggle('air',!!m.air);}
+function chResolve(a,now){const m=CHM[a.k],r=CH.round,atk=chEl('chAtk');
+  const left=m.front?(a.dir>0?CH.y:CH.y-m.r):CH.y-m.r,w=m.front?m.r:m.r*2;
+  atk.style.left=chP(left);atk.style.width=chP(w);atk.style.bottom=(m.plat?96:24)+'px';atk.style.opacity=.85;setTimeout(()=>atk.style.opacity=0,130);
+  if(!r||r.judged){return;}
+  if(r.phase==='setup'){const d=r.ox-CH.y;
+    const need=r.mode==='plat'?'fs':'jab';
+    if(a.k!==need){chEl('chVerdict').textContent=r.mode==='plat'?`要用 C→（前強）才會把對手打上平台，${m.n}不行`:`要用 NA（弱）把對手打倒地，${m.n}不行`;chEl('chVerdict').style.color='var(--kill)';return;}
+    if(a.dir===r.side&&d*r.side>=-6&&d*r.side<=m.r){chEl('chO').className='hit';if(r.mode==='plat')chPlatLaunch(r,now);else chGroundLaunch(r,now);}
+    else{chEl('chVerdict').textContent=a.dir!==r.side?`方向打反了：對手在你${r.side>0?'右':'左'}邊`:'沒打到：再靠近一點';chEl('chVerdict').style.color='var(--kill)';}
+    return;}
+  const f=chFrame(now);if(f<0){chResult(false,'太早：對手還沒落地','var(--kill)',null);return;}
+  const ox=chOppX(f),st=chOppState(f),onPlat=r.mode==='plat';
+  const inRange=m.front?((a.dir>0&&ox>=CH.y-6&&ox<=CH.y+m.r)||(a.dir<0&&ox<=CH.y+6&&ox>=CH.y-m.r)):Math.abs(ox-CH.y)<=m.r;
+  const where=Math.round(ox-CH.y);
+  if(onPlat&&!m.plat){chResult(false,`對手在平台上，${m.n}打不到：要站到他下面用上空`,'var(--kill)',f);return;}
+  if(!onPlat&&m.plat){chResult(false,'對手在地面，上空打不到：用弱、空N 或衝刺攻擊','var(--kill)',f);return;}
+  if(!inRange){chResult(false,`${m.n}沒打到：對手在你${where>0?'右':'左'}邊 ${Math.abs(where)}${m.front&&Math.sign(where)!==a.dir?'（方向打反了）':''}，他選的是${chName(r)}`,'var(--kill)',f);return;}
+  if(st==='intan'){chResult(false,`太早 ${(CHO[r.opt].intan+1-f).toFixed(0)} 幀：打在無敵上（${chName(r)}）`,'var(--kill)',f);return;}
+  if(st==='act'){chResult(false,`太晚 ${(f-CHO[r.opt].end).toFixed(0)} 幀：對手已經能行動（舉盾擋下）`,'var(--kill)',f);return;}
+  chEl('chO').className=(r.opt==='missed'?'down ':'')+'hit';
+  chResult(true,`追到了！${chName(r)} → ${m.n}，受身第 ${f.toFixed(0)} 幀命中`,'var(--accent-ink)',f);}
+function chResult(ok,msg,col,f){const r=CH.round;if(!r||r.judged)return;r.judged=true;CH.n++;CH.stat[r.abs][0]++;
+  if(ok){CH.ok++;CH.stat[r.abs][1]++;CH.streak++;CH.best=Math.max(CH.best,CH.streak);chFlash('HIT!','var(--accent)');chBeep(880,.12,'triangle');}
+  else{CH.streak=0;chFlash('MISS','var(--kill)');chBeep(120,.18,'sawtooth');}
+  const v=chEl('chVerdict');v.textContent=msg;v.style.color=col;chBar(f,r.opt);chStats();chEl('chGhost').style.opacity=0;chSchedule();}
+function chKey(k,down){const b=document.querySelector(`[data-ch="${k}"]`);b&&b.classList.toggle('down',down);
+  if(k==='L'||k==='R'){if(down){const now=performance.now();if(now-(CH.lastTap[k]||-1e9)<260)CH.dashUntil=now+450;CH.lastTap[k]=now;}CH.held[k]=down;}else if(down){chAttack(k);}
+  if(!CH.raf){CH.last=performance.now();CH.raf=requestAnimationFrame(chTick);}}
+document.querySelectorAll('[data-ch]').forEach(b=>{const k=b.dataset.ch;
+  b.addEventListener('pointerdown',e=>{e.preventDefault();b.setPointerCapture?.(e.pointerId);chKey(k,true);});
+  b.addEventListener('pointerup',()=>chKey(k,false));b.addEventListener('pointercancel',()=>chKey(k,false));});
+const chKeys={ArrowLeft:'L',ArrowRight:'R',KeyJ:'jab',KeyK:'nair',KeyL:'da',KeyI:'uair',KeyU:'fs'};
+document.addEventListener('keydown',e=>{const k=chKeys[e.code];if(!k||panel()!=='ch'||e.repeat)return;e.preventDefault();chKey(k,true);});
+document.addEventListener('keyup',e=>{const k=chKeys[e.code];if(!k||panel()!=='ch')return;e.preventDefault();chKey(k,false);});
+chEl('chStart').addEventListener('click',()=>{CH.run=!CH.run;chEl('chStart').textContent=CH.run?'暫停':'開始';
+  sfxUnlock();
+  if(CH.run){chEl('chVerdict').textContent='準備…';chEl('chVerdict').style.color='';chSchedule();if(!CH.raf){CH.last=performance.now();CH.raf=requestAnimationFrame(chTick);}}
+  else{clearTimeout(CH.timer);chEl('chInfo').textContent='已暫停';}});
+document.querySelectorAll('#chPref .chipbtn').forEach(b=>b.addEventListener('click',()=>{CH.pref=b.dataset.p;
+  document.querySelectorAll('#chPref .chipbtn').forEach(x=>x.setAttribute('aria-pressed',x===b));chStats();b.blur();}));
+document.querySelectorAll('#chMode .chipbtn').forEach(b=>b.addEventListener('click',()=>{CH.mode=b.dataset.m;
+  document.querySelectorAll('#chMode .chipbtn').forEach(x=>x.setAttribute('aria-pressed',x===b));b.blur();}));
+document.querySelectorAll('#trSel .chipbtn, .tabs button').forEach(b=>b.addEventListener('click',()=>{setTimeout(()=>{
+  if(panel()!=='ch'&&CH.run){CH.run=false;clearTimeout(CH.timer);chEl('chStart').textContent='開始';}
+  if(panel()==='ch'&&!CH.raf){CH.last=performance.now();CH.raf=requestAnimationFrame(chTick);}},0);}));
+(function(){const o=chEl('chO');o.className='act';o.style.left=chP(320);o.style.bottom='10px';chEl('chY').style.left=chP(200);})();
+chBar(null,'inplace');chStats();
+
+document.getElementById('sfxVol').addEventListener('input',e=>{SFX.vol=.3*(+e.target.value)/100;});
+document.getElementById('sfxTest').addEventListener('click',()=>{sfxUnlock();sfx(660,.12,'triangle');setTimeout(()=>sfx(990,.15,'triangle'),140);
+  const st=SFX.ctx?SFX.ctx.state:'none';document.getElementById('sfxMsg').textContent=st==='none'?'這個瀏覽器不支援音效':'聽不到的話：檢查靜音鍵與音量';});
+// DI / SDI trainer
+const DI={speed:2,run:false,mode:'surv',held:new Set(),keys:{L:false,R:false,U:false,D:false},sc:null,timer:null,raf:null,n:0,ok:0,streak:0,best:0,hist:[],lastPulse:-1e9,buf:null};
+const diEl=id=>document.getElementById(id);
+const DIMAX=9.74;
+function diCol(n){return getComputedStyle(document.documentElement).getPropertyValue(n).trim()||'#888';}
+function diNorm(a){a=((a%360)+360)%360;return a>180?a-360:a;}
+function diHeldAngle(){ // from pad buttons or keyboard
+  if(DI.held.size){return [...DI.held].slice(-1)[0];}
+  const k=DI.keys,x=(k.R?1:0)-(k.L?1:0),y=(k.U?1:0)-(k.D?1:0);if(!x&&!y)return null;return ((Math.atan2(y,x)*180/Math.PI)+360)%360;}
+function diStats(){diEl('diN').textContent=DI.n;diEl('diOk').textContent=DI.n?Math.round(DI.ok/DI.n*100)+'%':'0%';
+  diEl('diStreak').textContent=DI.streak;diEl('diBest').textContent=DI.best;diEl('diHist').innerHTML=DI.hist.map(h=>`<span class="${h.ok?'ok':''}">${h.t}</span>`).join('');}
+function diResult(ok,tag,msg,col){DI.n++;if(ok){DI.ok++;DI.streak++;DI.best=Math.max(DI.best,DI.streak);sfx(880,.12,'triangle');}else{DI.streak=0;sfx(120,.18,'sawtooth');}
+  DI.hist.unshift({ok,t:tag});DI.hist.length=Math.min(DI.hist.length,12);const v=diEl('diVerdict');v.textContent=msg;v.style.color=col;diStats();
+  clearTimeout(DI.timer);if(DI.run)DI.timer=setTimeout(diNext,1400+600*DI.speed);}
+function diPadHint(best){document.querySelectorAll('#diPad .dk').forEach(b=>b.classList.toggle('ok',best!=null&&diEl('diHint').checked&&best.includes(+b.dataset.d)));}
+// scenarios
+function diNext(){if(!DI.run)return;const slow=DI.speed,now=performance.now(),m=DI.mode,wind=500+250*slow;
+  if(m==='sdi'){const ang=Math.random()*Math.PI*2,off=6+Math.random()*6;
+    DI.sc={type:'sdi',start:now+wind,hits:12,gap:9*FR*slow,cx:210,cy:105,R:46,x:210+Math.cos(ang)*off,y:105+Math.sin(ang)*off,hit:0,pulses:0,done:false,slow};
+    DI.lastPulse=-1e9;DI.buf=null;diPadHint(null);diEl('diVerdict').textContent='對手準備出多段攻擊…打中後快速連點方向逃出紅圈';diEl('diVerdict').style.color='';}
+  else{let sc;
+    if(m==='surv'){const r=Math.random();
+      if(r<.34)sc={name:'上Smash（垂直擊殺）',L:90,x:210,y:150,ax:210,ay:168,best:[0,180],okk:[45,135,225,315],why:'垂直擊殺按左或右'};
+      else if(r<.67)sc={name:'前Smash（往右飛）',L:38,x:300,y:150,ax:270,ay:150,best:[135],okk:[90,180],why:'往右水平飛，按斜上往場內（↖）'};
+      else sc={name:'前Smash（往左飛）',L:142,x:120,y:150,ax:150,ay:150,best:[45],okk:[90,0],why:'往左水平飛，按斜上往場內（↗）'};}
+    else{const side=Math.random()<.5?1:-1;
+      sc={name:'上投／上強（低 % 連段）',L:90+side*(-4),x:210,y:150,ax:210-side*22,ay:150,best:[side>0?0:180],okk:[side>0?45:135,side>0?315:225],why:`對手在你${side>0?'左':'右'}邊，水平往${side>0?'右':'左'}遠離他`,combo:true,side};}
+    const H=(14+Math.floor(Math.random()*9));
+    DI.sc=Object.assign(sc,{type:'di',start:now+wind,hl:H,end:now+wind+H*FR*slow,done:false,slow});
+    diPadHint(sc.best);diEl('diVerdict').textContent=`${sc.name}：對手出招中，準備按住方向…`;diEl('diVerdict').style.color='';sfx(200,.06,'square');
+    setTimeout(()=>{if(DI.sc===sc&&!sc.done){diEl('diVerdict').textContent=`被打中！hitlag ${H} 幀，按住方向！`;sfx(300,.08,'square');}},wind);}
+  if(!DI.raf)DI.raf=requestAnimationFrame(diTick);}
+function diJudge(sc){sc.done=true;const a=diHeldAngle();diPadHint(null);
+  if(a==null){diResult(false,'✗ 沒按',`${sc.name}：停頓結束時沒有按住方向，沒有 DI。${sc.why}`,'var(--kill)');sc.out=sc.L;return;}
+  const d=diNorm(a-sc.L),rot=DIMAX*Math.sin(d*Math.PI/180);sc.out=sc.L+rot;sc.inA=a;
+  const oa=((sc.out%360)+360)%360,noLSI=(oa>=65&&oa<=115)||(oa>=245&&oa<=295),sy=Math.sin(a*Math.PI/180);
+  const lsi=noLSI?1:(sy>0?1+.095*sy:1+.08*sy);sc.lsi=lsi;
+  const deg=`偏轉 ${rot>=0?'+':''}${rot.toFixed(1)}°（${sc.L}° → ${sc.out.toFixed(1)}°）${lsi!==1?`，速度 ×${lsi.toFixed(3)}`:''}`;
+  const near=(arr)=>arr.some(x=>Math.abs(diNorm(a-x))<1);
+  if(near(sc.best))diResult(true,'✓ 最佳',`正確！${deg}`,'var(--accent-ink)');
+  else if(near(sc.okk))diResult(true,'△ 可以',`還可以，但不是最佳：${deg}。${sc.why}`,'var(--amber)');
+  else diResult(false,'✗ 錯',`方向不好：${deg}。${sc.why}`,'var(--kill)');}
+function diPulse(dirAngle,now){const sc=DI.sc;if(!sc||sc.type!=='sdi'||sc.done||now<sc.start)return;
+  if(now-DI.lastPulse<4*FR*sc.slow){DI.buf=dirAngle;return;}
+  DI.lastPulse=now;sc.pulses++;const r=dirAngle*Math.PI/180;sc.x+=Math.cos(r)*6;sc.y-=Math.sin(r)*6;sfx(520,.03,'square');
+  if(Math.hypot(sc.x-sc.cx,sc.y-sc.cy)>sc.R){sc.done=true;diResult(true,'✓ 逃脫',`逃出來了！第 ${sc.hit} 段時脫離，共 ${sc.pulses} 次 SDI`,'var(--accent-ink)');}}
+function diTick(){const now=performance.now(),sc=DI.sc;
+  if(panel()!=='di'){DI.raf=null;return;}
+  if(sc&&sc.type==='di'&&!sc.done&&now>=sc.end)diJudge(sc);
+  if(sc&&sc.type==='sdi'&&!sc.done){
+    if(DI.buf!=null&&now-DI.lastPulse>=4*FR*sc.slow){const b=DI.buf;DI.buf=null;diPulse(b,now);}
+    const h=now<sc.start?0:Math.floor((now-sc.start)/sc.gap)+1;
+    while(sc.hit<h&&!sc.done){sc.hit++;const dx=sc.cx-sc.x,dy=sc.cy-sc.y,dd=Math.hypot(dx,dy)||1;sc.x+=dx/dd*1;sc.y+=dy/dd*1;
+      if(sc.hit>=sc.hits){sc.done=true;diResult(false,'✗ 被打飛',`沒逃出來：吃滿 ${sc.hits} 段被最後一擊打飛（SDI ${sc.pulses} 次，要連點更快、方向朝最近的出口）`,'var(--kill)');}}}
+  diDraw(now);DI.raf=requestAnimationFrame(diTick);}
+function diDraw(now){const cv=diEl('diCv'),W=cv.clientWidth||420,H=210,dpr=window.devicePixelRatio||1,k=W/420;
+  if(cv.width!==Math.round(W*dpr)){cv.width=Math.round(W*dpr);cv.height=Math.round(H*k*dpr);cv.style.height=(H*k)+'px';}
+  const c=cv.getContext('2d');c.setTransform(dpr*k,0,0,dpr*k,0,0);c.clearRect(0,0,420,H);
+  const ink=diCol('--ink'),mut=diCol('--muted'),line=diCol('--line'),acc=diCol('--accent'),kill=diCol('--kill'),amb=diCol('--amber');
+  c.font='12px "JetBrains Mono",monospace';const sc=DI.sc;
+  if(!sc||sc.type==='di'){
+    c.setLineDash([4,4]);c.strokeStyle=kill;c.globalAlpha=.5;c.strokeRect(4,4,412,H-8);c.globalAlpha=1;c.setLineDash([]);
+    c.fillStyle=mut;c.fillText('爆線',10,18);
+    c.fillStyle=line;c.fillRect(90,165,240,8);
+    if(!sc){c.fillStyle=mut;c.fillText('按「開始」',180,100);return;}
+    // attacker
+    c.fillStyle=ink;c.fillRect(sc.ax-9,sc.ay-24+ (sc.ay>=160?-6:0),18,28);
+    const pre=now<sc.start,shaking=!sc.done&&!pre,jx=shaking?(Math.random()-.5)*4:0,jy=shaking?(Math.random()-.5)*4:0;
+    const arrow=(ang,col,dash,len)=>{const r=ang*Math.PI/180;c.strokeStyle=col;c.lineWidth=3;c.setLineDash(dash?[6,5]:[]);c.beginPath();c.moveTo(sc.x,sc.y-12);
+      const ex=sc.x+Math.cos(r)*len,ey=sc.y-12-Math.sin(r)*len;c.lineTo(ex,ey);c.stroke();c.setLineDash([]);
+      c.beginPath();c.moveTo(ex,ey);c.lineTo(ex-Math.cos(r-.4)*10,ey+Math.sin(r-.4)*10);c.lineTo(ex-Math.cos(r+.4)*10,ey+Math.sin(r+.4)*10);c.closePath();c.fillStyle=col;c.fill();};
+    arrow(sc.L,mut,true,140);
+    if(sc.done&&sc.out!=null){arrow(sc.out,acc,false,140*(sc.lsi||1));c.fillStyle=acc;c.fillText(`${sc.out.toFixed(1)}°`,Math.max(8,Math.min(372,sc.x+Math.cos(sc.out*Math.PI/180)*150*(sc.lsi||1)-14)),sc.y-12-Math.sin(sc.out*Math.PI/180)*150*(sc.lsi||1));}
+    // yoshi
+    c.fillStyle=acc;c.beginPath();c.ellipse(sc.x+jx,sc.y-12+jy,11,14,0,0,Math.PI*2);c.fill();
+    if(pre){c.fillStyle=amb;c.font='bold 18px sans-serif';c.fillText('!',sc.ax-4,sc.ay-36);c.font='12px "JetBrains Mono",monospace';c.fillStyle=mut;c.fillText('對手出招中',sc.x-30,sc.y-40);}
+    else if(!sc.done){const left=Math.max(0,(sc.end-now)/(FR*sc.slow));c.fillStyle=kill;c.fillText(`HITLAG ${left.toFixed(0)}F`,sc.x-36,sc.y-40);
+      const a=diHeldAngle();if(a!=null){const r=a*Math.PI/180;c.strokeStyle=amb;c.lineWidth=2;c.beginPath();c.moveTo(sc.x,sc.y-12);c.lineTo(sc.x+Math.cos(r)*30,sc.y-12-Math.sin(r)*30);c.stroke();}}
+  }else{ // sdi
+    c.fillStyle=kill;c.globalAlpha=.16;c.beginPath();c.arc(sc.cx,sc.cy,sc.R,0,Math.PI*2);c.fill();c.globalAlpha=1;
+    c.strokeStyle=kill;c.lineWidth=2;c.beginPath();c.arc(sc.cx,sc.cy,sc.R,0,Math.PI*2);c.stroke();
+    c.fillStyle=ink;c.fillRect(sc.cx-10,sc.cy+sc.R+6,20,26);
+    const jx=sc.done||now<sc.start?0:(Math.random()-.5)*3;if(now<sc.start){c.fillStyle=amb;c.font='bold 18px sans-serif';c.fillText('!',sc.cx-4,sc.cy+sc.R+2);c.font='12px "JetBrains Mono",monospace';}c.fillStyle=acc;c.beginPath();c.ellipse(sc.x+jx,sc.y,9,11,0,0,Math.PI*2);c.fill();
+    c.fillStyle=mut;c.fillText(`段數 ${Math.min(sc.hit,sc.hits)}/${sc.hits}　SDI ${sc.pulses}`,10,18);
+    const cd=Math.max(0,4-(now-DI.lastPulse)/(FR*sc.slow));c.fillStyle=cd>0?amb:acc;c.fillText(cd>0?`冷卻 ${cd.toFixed(1)}F`:'可輸入',330,18);
+    if(diEl('diHint').checked&&!sc.done){const ang=Math.atan2(sc.y-sc.cy,sc.x-sc.cx);c.strokeStyle=acc;c.setLineDash([3,4]);c.beginPath();c.moveTo(sc.x,sc.y);c.lineTo(sc.cx+Math.cos(ang)*(sc.R+16),sc.cy+Math.sin(ang)*(sc.R+16));c.stroke();c.setLineDash([]);}
+  }}
+function diInput(a,down){const now=performance.now();if(down&&DI.sc&&DI.sc.type==='sdi')diPulse(a,now);}
+document.querySelectorAll('#diPad .dk').forEach(b=>{const a=+b.dataset.d;
+  b.addEventListener('pointerdown',e=>{e.preventDefault();b.setPointerCapture?.(e.pointerId);b.classList.add('down');DI.held.delete(a);DI.held.add(a);diInput(a,true);});
+  const up=()=>{b.classList.remove('down');DI.held.delete(a);};b.addEventListener('pointerup',up);b.addEventListener('pointercancel',up);});
+const diKeys={ArrowLeft:'L',ArrowRight:'R',ArrowUp:'U',ArrowDown:'D'};
+document.addEventListener('keydown',e=>{const k=diKeys[e.code];if(!k||panel()!=='di')return;e.preventDefault();if(e.repeat)return;DI.keys[k]=true;
+  const a=diHeldAngle();if(a!=null)diInput(a,true);});
+document.addEventListener('keyup',e=>{const k=diKeys[e.code];if(!k||panel()!=='di')return;e.preventDefault();DI.keys[k]=false;});
+diEl('diStart').addEventListener('click',()=>{DI.run=!DI.run;diEl('diStart').textContent=DI.run?'暫停':'開始';sfxUnlock();
+  if(DI.run){diNext();}else{clearTimeout(DI.timer);}});
+document.querySelectorAll('#diMode .chipbtn').forEach(b=>b.addEventListener('click',()=>{DI.mode=b.dataset.m;
+  document.querySelectorAll('#diMode .chipbtn').forEach(x=>x.setAttribute('aria-pressed',x===b));clearTimeout(DI.timer);DI.sc=null;diPadHint(null);
+  diEl('diVerdict').style.color='';diEl('diVerdict').textContent=DI.run?'準備…':'按「開始」';if(DI.run)DI.timer=setTimeout(diNext,600);b.blur();}));
+document.querySelectorAll('#diSpeed .chipbtn').forEach(b=>b.addEventListener('click',()=>{DI.speed=+b.dataset.s;
+  document.querySelectorAll('#diSpeed .chipbtn').forEach(x=>x.setAttribute('aria-pressed',x===b));b.blur();}));
+diEl('diHint').addEventListener('change',()=>{if(DI.sc&&DI.sc.type==='di'&&!DI.sc.done)diPadHint(DI.sc.best);});
+document.querySelectorAll('#trSel .chipbtn, .tabs button').forEach(b=>b.addEventListener('click',()=>{setTimeout(()=>{
+  if(panel()!=='di'&&DI.run){DI.run=false;clearTimeout(DI.timer);diEl('diStart').textContent='開始';}
+  if(panel()==='di'&&!DI.raf)DI.raf=requestAnimationFrame(diTick);},0);}));
+
+// ledge trump trainer (illustrative timings)
+const LT={speed:2,run:false,st:null,timer:null,raf:null,n:0,ok:0,streak:0,best:0,hist:[]};
+const ltEl=id=>document.getElementById(id);
+const LTX=300,LTY=110; // ledge position (canvas units)
+function ltSeq(i,cls){const e=document.querySelector(`#ltSeq [data-s="${i}"]`);if(e)e.className=cls||'';}
+function ltStats(){ltEl('ltNn').textContent=LT.n;ltEl('ltOk').textContent=LT.n?Math.round(LT.ok/LT.n*100)+'%':'0%';
+  ltEl('ltStreak').textContent=LT.streak;ltEl('ltBest').textContent=LT.best;ltEl('ltHist').innerHTML=LT.hist.map(h=>`<span class="${h.ok?'ok':''}">${h.t}</span>`).join('');}
+function ltResult(ok,tag,msg,col){const st=LT.st;if(!st||st.done)return;st.done=true;st.doneAt=performance.now();LT.n++;
+  if(ok){LT.ok++;LT.streak++;LT.best=Math.max(LT.best,LT.streak);sfx(880,.12,'triangle');}else{LT.streak=0;sfx(120,.18,'sawtooth');}
+  LT.hist.unshift({ok,t:tag});LT.hist.length=Math.min(LT.hist.length,12);const v=ltEl('ltVerdict');v.textContent=msg;v.style.color=col;ltStats();
+  clearTimeout(LT.timer);if(LT.run)LT.timer=setTimeout(ltNext,1500+700*LT.speed);}
+function ltNext(){if(!LT.run)return;const now=performance.now(),sl=LT.speed;for(let i=0;i<4;i++)ltSeq(i);
+  const acts=['起身','跳起','翻滾','起身攻擊'];const wait=(350+Math.random()*700)*sl;
+  LT.st={phase:'hang',slow:sl,start:now,oppAct:now+wait,oppMove:acts[Math.floor(Math.random()*4)],yx:LTX-38,yy:LTY,ox:LTX+6,oy:LTY+18,done:false,
+    trump:null,drop:null,dj:null,atk:null,atkKind:null,hit:null};
+  const v=ltEl('ltVerdict');v.textContent='對手掛在場邊！在他動之前按「抓邊」';v.style.color='';sfx(260,.06,'square');
+  if(!LT.raf)LT.raf=requestAnimationFrame(ltTick);}
+function ltInput(k){const st=LT.st,now=performance.now();
+  if(!st||st.done){ltEl('ltVerdict').textContent=LT.run?'等下一回合':'先按「開始」';return;}
+  const F=FR*st.slow;
+  if(st.phase==='hang'){
+    if(k!=='G'){ltEl('ltVerdict').textContent='先抓邊（搶邊）';ltEl('ltVerdict').style.color='var(--kill)';return;}
+    st.trump=now;st.phase='trump';st.vulnEnd=now+34*F;ltSeq(0,'ok');
+    const d=(st.oppAct-now)/F;ltEl('ltVerdict').textContent=`搶邊成功（比他動早 ${d.toFixed(0)} 幀）！↓ 放手 → 背空`;ltEl('ltVerdict').style.color='';sfx(520,.08,'square');return;}
+  if(st.phase==='trump'){
+    if(k==='D'){if(st.drop)return;st.drop=now;ltSeq(1,'ok');return;}
+    if(k==='X'){if(!st.drop){ltSeq(1,'bad');ltResult(false,'✗ 掛邊跳','還掛在邊上就按跳：會跳回舞台，追不到。先按 ↓ 放手','var(--kill)');return;}
+      if(st.dj)return;st.dj=now;ltSeq(2,'ok');return;}
+    if(k==='B'||k==='N'){if(st.atk)return;
+      if(!st.drop){ltSeq(1,'bad');ltResult(false,'✗ 起身攻擊','掛在邊上按攻擊會變成起身攻擊，打不到場外。先按 ↓ 放手','var(--kill)');return;}
+      st.atk=now;st.atkKind=k;st.hit=now+(k==='B'?11:3)*F;ltSeq(3,k==='B'?'ok':'');return;}
+    if(k==='G')return;}
+}
+function ltTick(){const now=performance.now(),st=LT.st;
+  if(panel()!=='lt'){LT.raf=null;return;}
+  if(st&&!st.done){const F=FR*st.slow;
+    if(st.phase==='hang'&&now>=st.oppAct){ltResult(false,'✗ 慢了',`太慢：對手先${st.oppMove}了（掛邊 ${((st.oppAct-st.start)/F).toFixed(0)} 幀後）`,'var(--kill)');}
+    if(st.phase==='trump'&&st.hit&&now>=st.hit){const tf=(st.hit-st.trump)/F,late=now>st.vulnEnd;
+      if(late)ltResult(false,'✗ 太晚',`太晚：搶邊後第 ${tf.toFixed(0)} 幀才打到，對手已經能動、跳走了（要在 34 幀內）`,'var(--kill)');
+      else if(tf<6)ltResult(false,'✗ 太早',`太早：對手才剛被彈開還沒到位置（第 ${tf.toFixed(0)} 幀）`,'var(--kill)');
+      else if(st.atkKind==='B')ltResult(true,'✓ 背空',`搶邊 → 放手${st.dj?' → 二段跳':''} → 背空！第 ${tf.toFixed(0)} 幀命中${st.dj?'':'（沒用二段跳，記得留著回場）'}`,'var(--accent-ink)');
+      else ltResult(true,'△ 空N',`空N 打到了（第 ${tf.toFixed(0)} 幀），但背空威力和距離更好`,'var(--amber)');}
+    if(st.phase==='trump'&&!st.hit&&now>st.vulnEnd+4*F)ltResult(false,'✗ 沒追',`沒有追擊：對手已經能動了${st.drop?'':'（要先 ↓ 放手）'}`,'var(--kill)');}
+  ltDraw(now);LT.raf=requestAnimationFrame(ltTick);}
+function ltDraw(now){const cv=ltEl('ltCv'),W=cv.clientWidth||420,H=210,dpr=window.devicePixelRatio||1,k=W/420;
+  if(cv.width!==Math.round(W*dpr)){cv.width=Math.round(W*dpr);cv.height=Math.round(H*k*dpr);cv.style.height=(H*k)+'px';}
+  const c=cv.getContext('2d');c.setTransform(dpr*k,0,0,dpr*k,0,0);c.clearRect(0,0,420,H);
+  const ink=diCol('--ink'),mut=diCol('--muted'),line=diCol('--line'),acc=diCol('--accent'),kill=diCol('--kill'),amb=diCol('--amber');
+  c.fillStyle=line;c.fillRect(0,LTY,LTX,H-LTY);c.fillStyle=mut;c.font='12px "JetBrains Mono",monospace';c.fillText('舞台',20,LTY+24);c.fillText('場外 →',340,24);
+  const st=LT.st;if(!st){c.fillText('按「開始」',170,80);return;}
+  const F=FR*st.slow;
+  // yoshi
+  let yx=LTX-38,yy=LTY-14;
+  if(st.trump){yx=LTX+4;yy=LTY+14;
+    if(st.drop){const t=(now-st.drop)/F;yy=LTY+14+Math.min(t,40)*1.6;yx=LTX+10;
+      if(st.dj){const tj=(now-st.dj)/F;yy=LTY+14+Math.min((st.dj-st.drop)/F,40)*1.6-Math.min(tj,20)*2.2+Math.max(0,tj-20)*1.2;yx=LTX+10+Math.min(tj,20)*0.6;}}}
+  yy=Math.min(yy,H-12);
+  // opponent
+  let ox=st.ox,oy=st.oy,ocol=ink;
+  if(st.phase==='hang'&&!st.done){ox=LTX+6;oy=LTY+18;}
+  else if(st.trump){const t=(now-st.trump)/F;
+    if(st.done&&st.atkKind&&st.hit&&now>=st.hit&&LT.hist[0]&&LT.hist[0].t.startsWith('✓')||st.done&&LT.hist[0]&&LT.hist[0].t.startsWith('△')){ocol=kill;const t2=(now-st.hit)/F;ox=yx+30+t2*3;oy=yy-t2*1.5;}
+    else if(t<=34){ox=LTX+12+t*1.2;oy=LTY+18+t*1.1;ocol=amb;}else{const t2=t-34;ox=LTX+53-t2*1.2;oy=Math.max(LTY-20,LTY+55-t2*3);ocol=ink;}}
+  else if(st.done){ox=LTX-30;oy=LTY-14;} // got up
+  c.fillStyle=ocol;c.fillRect(ox-9,oy-14,18,28);
+  if(st.trump&&!st.done&&(now-st.trump)/F<=34){c.fillStyle=amb;c.fillText('不能動',ox-18,oy-20);}
+  c.fillStyle=acc;c.beginPath();c.ellipse(yx,yy,10,13,0,0,Math.PI*2);c.fill();
+  if(st.hit&&now>=st.hit&&now<st.hit+8*F){c.fillStyle=st.atkKind==='B'?acc:mut;c.globalAlpha=.5;c.beginPath();c.ellipse(yx+(st.atkKind==='B'?22:0),yy,st.atkKind==='B'?18:20,12,0,0,Math.PI*2);c.fill();c.globalAlpha=1;}
+  if(st.phase==='hang'&&!st.done){const left=Math.max(0,(st.oppAct-now)/F);c.fillStyle=kill;c.fillText('對手掛邊中',LTX+16,LTY-6);}
+  // ledge mark
+  c.fillStyle=amb;c.fillRect(LTX-3,LTY-3,6,6);}
+document.querySelectorAll('[data-lt]').forEach(b=>{const k=b.dataset.lt;
+  b.addEventListener('pointerdown',e=>{e.preventDefault();b.classList.add('down');ltInput(k);});
+  const up=()=>b.classList.remove('down');b.addEventListener('pointerup',up);b.addEventListener('pointercancel',up);b.addEventListener('pointerleave',up);});
+const ltKeys={KeyG:'G',ArrowDown:'D',KeyK:'X',KeyL:'B',KeyJ:'N'};
+document.addEventListener('keydown',e=>{const k=ltKeys[e.code];if(!k||panel()!=='lt'||e.repeat||document.getElementById('ltBlock').hidden)return;e.preventDefault();
+  const b=document.querySelector(`[data-lt="${k}"]`);b&&b.classList.add('down');ltInput(k);});
+document.addEventListener('keyup',e=>{const k=ltKeys[e.code];if(!k||panel()!=='lt')return;const b=document.querySelector(`[data-lt="${k}"]`);b&&b.classList.remove('down');});
+ltEl('ltStart').addEventListener('click',()=>{LT.run=!LT.run;ltEl('ltStart').textContent=LT.run?'暫停':'開始';sfxUnlock();
+  if(LT.run)ltNext();else clearTimeout(LT.timer);});
+document.querySelectorAll('#ltSpeed .chipbtn').forEach(b=>b.addEventListener('click',()=>{LT.speed=+b.dataset.s;
+  document.querySelectorAll('#ltSpeed .chipbtn').forEach(x=>x.setAttribute('aria-pressed',x===b));b.blur();}));
+document.querySelectorAll('#trSel .chipbtn, .tabs button').forEach(b=>b.addEventListener('click',()=>{setTimeout(()=>{
+  if(panel()!=='lt'&&LT.run){LT.run=false;clearTimeout(LT.timer);ltEl('ltStart').textContent='開始';}
+  if(panel()==='lt'&&!LT.raf)LT.raf=requestAnimationFrame(ltTick);},0);}));
+
+// ledge grab practice (physics sketch)
+const LG={keys:{L:false,R:false,D:false},raf:null,last:0,n:0,ok:0,front:0,back:0,hist:[],p:null,opp:null};
+const lgEl=id=>document.getElementById(id);
+const LGX=300,LGY=110,LGG=900,LGFALL=240,LGFF=360;
+function lgReset(keep){LG.p={x:200,y:LGY,vx:0,vy:0,ground:true,face:1,dj:true,state:'stand',heldDownPass:false,attempt:false,grabT:0,minDist:1e9};
+  LG.opp=lgEl('lgOpp').checked?{t0:performance.now(),act:performance.now()+(2200+Math.random()*1800)*(lgEl('lgSlow').checked?1.6:1),state:'hang'}:null;
+  if(keep)return;const v=lgEl('lgVerdict');v.style.color='';v.textContent=LG.opp?'對手掛在場邊！在他起身前抓到場邊把他彈開':'從台上往 → 跑出場邊，離地後按住 ← 拉回來';}
+function lgStats(){lgEl('lgN').textContent=LG.n;lgEl('lgOk').textContent=LG.ok;lgEl('lgFront').textContent=LG.front;lgEl('lgBack').textContent=LG.back;
+  lgEl('lgHist').innerHTML=LG.hist.map(h=>`<span class="${h.ok?'ok':''}">${h.t}</span>`).join('');}
+function lgLog(ok,t,msg,col){if(ok){LG.ok++;sfx(880,.12,'triangle');}else sfx(130,.16,'sawtooth');LG.hist.unshift({ok,t});LG.hist.length=Math.min(LG.hist.length,12);
+  const v=lgEl('lgVerdict');v.textContent=msg;v.style.color=col;lgStats();}
+function lgBoxes(p){return {front:{x:p.x+p.face*9,y:p.y-26,r:16},back:{x:p.x-p.face*9,y:p.y-26,r:9.6}};}
+function lgTick(){const now=performance.now();if(panel()!=='lt'||lgEl('lgBlock').hidden){LG.raf=null;return;}
+  const sl=lgEl('lgSlow').checked?0.55:1;let dt=Math.min(.033,(now-LG.last)/1000)*sl;LG.last=now;const p=LG.p,k=LG.keys;
+  if(LG.opp&&LG.opp.state==='hang'&&now>=LG.opp.act){LG.opp.state='up';if(p.state!=='hang'){LG.n++;lgLog(false,'✗ 慢了','對手已經起身回到台上了：要更快抓邊',"var(--kill)");}}
+  if(p.state==='hang'){/* wait for input */}
+  else if(p.ground){
+    const v=(k.R?1:0)-(k.L?1:0);if(v)p.face=v;p.vx=v*170;p.x+=p.vx*dt;p.x=Math.max(14,p.x);
+    if(p.x>LGX){p.ground=false;p.vy=0;p.state='air';p.attempt=true;p.heldDownPass=false;p.minDist=1e9;}
+  }else{
+    const v=(k.R?1:0)-(k.L?1:0);p.vx+=v*700*dt;if(!v)p.vx*=Math.pow(.2,dt);p.vx=Math.max(-100,Math.min(100,p.vx));
+    const maxF=k.D?LGFF:LGFALL;p.vy=Math.min(maxF,p.vy+LGG*dt);if(k.D&&p.vy>0)p.vy=LGFF;
+    p.x+=p.vx*dt;p.y+=p.vy*dt;
+    // stage collision (land back on stage)
+    if(p.x<LGX&&p.y>=LGY&&p.y-p.vy*dt<=LGY+1){p.y=LGY;p.ground=true;p.vy=0;p.state='stand';p.dj=true;
+      if(p.attempt){p.attempt=false;LG.n++;lgLog(false,'✗ 落回台上','拉回太多，落回台上了：離地後輕輕往 ← 拉，或晚一點拉','var(--amber)');}}
+    if(p.x<LGX&&p.y>LGY&&p.x>LGX-12){p.x=LGX;p.vx=Math.max(0,p.vx);} // wall
+    // ledge grab check
+    const b=lgBoxes(p),df=Math.hypot(b.front.x-LGX,b.front.y-LGY),db=Math.hypot(b.back.x-LGX,b.back.y-LGY);
+    p.minDist=Math.min(p.minDist,Math.min(df-b.front.r,db-b.back.r));
+    const canGrab=!(LG.opp&&LG.opp.state==='up');
+    if(df<=b.front.r||db<=b.back.r){
+      if(k.D){p.heldDownPass=true;}
+      else if(canGrab){const which=df<=b.front.r?'front':'back';p.state='hang';p.x=LGX+10;p.y=LGY+30;p.vx=p.vy=0;p.face=-1;p.dj=true;p.attempt=false;LG.n++;
+        if(which==='front')LG.front++;else LG.back++;
+        if(LG.opp&&LG.opp.state==='hang'){LG.opp.state='trumped';LG.opp.t0=now;lgLog(true,'✓ 搶邊',`搶邊成功！用${which==='front'?'前':'背後'}判定框抓到，對手被彈開（切到「搶邊後追擊」練接背空）`,'var(--accent-ink)');}
+        else lgLog(true,which==='front'?'✓ 前框':'✓ 背框',`抓到了！用的是${which==='front'?'前方（大）':'背後（小）'}判定框。↓ 放手、← 起身、X 跳起`,'var(--accent-ink)');}}
+    if(p.y>230){LG.n++;const why=p.heldDownPass?'經過場邊時按著 ↓，所以沒抓（放開 ↓ 就會自動抓）':p.minDist<14?`差一點：判定框離場邊只差 ${Math.max(1,p.minDist).toFixed(0)}，再往 ← 貼近一點`:p.x>LGX+40?'離場邊太遠：離地後要馬上往 ← 拉回':'頭沒有經過場邊附近';
+      lgLog(false,'✗ 掉落','掉下去了：'+why,'var(--kill)');p.attempt=false;lgResetPos();}
+  }
+  lgDraw(now);LG.raf=requestAnimationFrame(lgTick);}
+function lgResetPos(){const keepOpp=LG.opp;lgReset(true);if(keepOpp&&keepOpp.state==='hang')LG.opp=keepOpp;}
+function lgDraw(now){const cv=lgEl('lgCv'),W=cv.clientWidth||420,H=210,dpr=window.devicePixelRatio||1,k=W/420;
+  if(cv.width!==Math.round(W*dpr)){cv.width=Math.round(W*dpr);cv.height=Math.round(H*k*dpr);cv.style.height=(H*k)+'px';}
+  const c=cv.getContext('2d');c.setTransform(dpr*k,0,0,dpr*k,0,0);c.clearRect(0,0,420,H);
+  const ink=diCol('--ink'),mut=diCol('--muted'),line=diCol('--line'),acc=diCol('--accent'),kill=diCol('--kill'),amb=diCol('--amber');
+  c.fillStyle=line;c.fillRect(0,LGY,LGX,H-LGY);c.fillStyle=amb;c.beginPath();c.arc(LGX,LGY,3.5,0,Math.PI*2);c.fill();
+  c.fillStyle=mut;c.font='12px "JetBrains Mono",monospace';c.fillText('舞台',20,LGY+24);c.fillText('場邊',LGX-14,LGY-8);
+  const o=LG.opp;if(o){let ox=LGX+8,oy=LGY+16,col=ink;
+    if(o.state==='up'){ox=LGX-30;oy=LGY-14;}else if(o.state==='trumped'){const t=(now-o.t0)/1000;ox=LGX+20+t*60;oy=LGY+16+t*40;col=amb;}
+    if(oy<230){c.fillStyle=col;c.fillRect(ox-8,oy-14,16,28);}}
+  const p=LG.p;c.fillStyle=acc;c.beginPath();c.ellipse(p.x,p.y-14,10,14,0,0,Math.PI*2);c.fill();
+  c.fillStyle=diCol('--surface');c.beginPath();c.arc(p.x+p.face*5,p.y-20,2.5,0,Math.PI*2);c.fill();
+  if(lgEl('lgBox').checked&&p.state!=='hang'){const b=lgBoxes(p);
+    c.strokeStyle=acc;c.lineWidth=1.5;c.setLineDash([3,3]);c.beginPath();c.arc(b.front.x,b.front.y,b.front.r,0,Math.PI*2);c.stroke();
+    c.strokeStyle=amb;c.beginPath();c.arc(b.back.x,b.back.y,b.back.r,0,Math.PI*2);c.stroke();c.setLineDash([]);
+    c.fillStyle=mut;c.fillText('前',b.front.x-6,b.front.y-b.front.r-3);c.fillText('後',b.back.x-6,b.back.y-b.back.r-3);}
+  if(LG.keys.D&&!p.ground&&p.state!=='hang'){c.fillStyle=kill;c.fillText('按著 ↓：不會抓邊',10,18);}
+  if(p.state==='hang'){c.fillStyle=acc;c.fillText('掛邊中',LGX+22,LGY+24);}}
+function lgKey(kk,down){const p=LG.p,b=document.querySelector(`[data-lg="${kk}"]`);b&&b.classList.toggle('down',down);
+  if(kk==='Z'){if(down)lgReset();return;}
+  if(kk==='X'){if(!down)return;
+    if(p.state==='hang'){p.state='air';p.ground=false;p.x=LGX+4;p.y=LGY+4;p.vy=-330;p.vx=-60;return;}
+    if(p.ground){p.ground=false;p.state='air';p.vy=-330;p.attempt=p.x>LGX-60;p.minDist=1e9;return;}
+    if(p.dj){p.dj=false;p.vy=-300;}return;}
+  if(p.state==='hang'&&down){
+    if(kk==='D'){p.state='air';p.ground=false;p.x=LGX+16;p.vy=40;p.attempt=false;LG.keys.D=true;setTimeout(()=>{},0);return;}
+    if(kk==='L'){p.state='stand';p.ground=true;p.x=LGX-20;p.y=LGY;p.face=-1;p.dj=true;return;}
+  }
+  LG.keys[kk]=down;}
+document.querySelectorAll('[data-lg]').forEach(b=>{const kk=b.dataset.lg;
+  b.addEventListener('pointerdown',e=>{e.preventDefault();b.setPointerCapture?.(e.pointerId);lgKey(kk,true);});
+  b.addEventListener('pointerup',()=>lgKey(kk,false));b.addEventListener('pointercancel',()=>lgKey(kk,false));});
+const lgKeys={ArrowLeft:'L',ArrowRight:'R',ArrowDown:'D',KeyK:'X',KeyR:'Z'};
+document.addEventListener('keydown',e=>{const kk=lgKeys[e.code];if(!kk||panel()!=='lt'||lgEl('lgBlock').hidden)return;e.preventDefault();if(e.repeat)return;lgKey(kk,true);});
+document.addEventListener('keyup',e=>{const kk=lgKeys[e.code];if(!kk||panel()!=='lt'||lgEl('lgBlock').hidden)return;e.preventDefault();lgKey(kk,false);});
+lgEl('lgOpp').addEventListener('change',lgReset);
+function lgStart(){if(!LG.raf){LG.last=performance.now();LG.raf=requestAnimationFrame(lgTick);}}
+document.querySelectorAll('#ltMode .chipbtn').forEach(b=>b.addEventListener('click',()=>{const m=b.dataset.m;
+  document.querySelectorAll('#ltMode .chipbtn').forEach(x=>x.setAttribute('aria-pressed',x===b));
+  lgEl('lgBlock').hidden=m!=='grab';lgEl('ltBlock').hidden=m!=='trump';
+  if(m==='grab'){if(LT.run){LT.run=false;clearTimeout(LT.timer);ltEl('ltStart').textContent='開始';}lgStart();}
+  else if(!LT.raf)LT.raf=requestAnimationFrame(ltTick);b.blur();}));
+document.querySelectorAll('#trSel .chipbtn, .tabs button').forEach(b=>b.addEventListener('click',()=>{setTimeout(()=>{if(panel()==='lt'&&!lgEl('lgBlock').hidden)lgStart();},0);}));
+lgReset();
+
+$('#fr').addEventListener('input',e=>{$('#msOut').textContent=((+e.target.value||0)*1000/60).toFixed(1)});
+
+renderCombos(); renderTech();
+</script>
+
+</body></html>

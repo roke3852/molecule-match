@@ -1,0 +1,464 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>小台指期模擬器</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=Noto+Sans+TC:wght@400;500;700&display=swap">
+<style>
+/* Layout: trading-terminal panels; one column on phone, two columns (market | account) on wide screens. Taiwan convention: red = up/buy, green = down/sell. */
+:root{
+  --bg:#eef1f6; --panel:#ffffff; --ink:#131926; --muted:#5b6476; --line:#dbe0e9; --soft:#f5f7fb;
+  --accent:#2f4bd1; --up:#d1242f; --down:#0d8549; --warn:#b86e00; --crit:#d1242f;
+  --sans:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0d1119; --panel:#151b26; --ink:#e6e9f0; --muted:#8e97a9; --line:#262e3d; --soft:#1b2230;
+  --accent:#8196ff; --up:#ff5c62; --down:#33c47d; --warn:#f0a72c; --crit:#ff5c62; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0d1119; --panel:#151b26; --ink:#e6e9f0; --muted:#8e97a9; --line:#262e3d; --soft:#1b2230;
+  --accent:#8196ff; --up:#ff5c62; --down:#33c47d; --warn:#f0a72c; --crit:#ff5c62; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:16px 40px}
+.wrap{max-width:1180px;margin:0 auto;display:grid;gap:14px}
+.cols{display:grid;gap:14px;grid-template-columns:1fr}
+@media (min-width:900px){.cols{grid-template-columns:1.15fr 1fr;align-items:start}}
+.col{display:grid;gap:14px;min-width:0}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px;min-width:0}
+h2{font-size:13px;font-weight:700;letter-spacing:.06em;color:var(--muted);margin:0 0 10px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.up{color:var(--up)} .down{color:var(--down)} .muted{color:var(--muted)}
+/* quote */
+.quote{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:10px}
+.sym{font-size:12px;color:var(--muted);letter-spacing:.04em}
+.px{font-family:var(--mono);font-size:44px;font-weight:600;line-height:1;letter-spacing:-.02em}
+.chg{font-family:var(--mono);font-size:15px;font-weight:600}
+.lims{font-size:12px;color:var(--muted);text-align:right}
+canvas{width:100%;height:170px;display:block;margin-top:10px}
+/* buttons */
+button,select,input{font:inherit;color:inherit}
+button{border:1px solid var(--line);background:var(--soft);border-radius:7px;padding:8px 10px;cursor:pointer;font-weight:500;transition:filter .1s}
+button:hover{filter:brightness(.96)}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+input,select{background:var(--panel);border:1px solid var(--line);border-radius:7px;padding:8px 10px;width:100%;min-width:0}
+input[type=range]{padding:0;border:0;accent-color:var(--accent)}
+.grid-btn{display:grid;gap:6px}
+.g4{grid-template-columns:repeat(4,1fr)} .g3{grid-template-columns:repeat(3,1fr)} .g2{grid-template-columns:repeat(2,1fr)}
+.grid-btn button{font-family:var(--mono);font-variant-numeric:tabular-nums;padding:8px 4px}
+.b-up{color:var(--up)} .b-down{color:var(--down)}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.row>*{flex:1 1 auto}
+.lbl{font-size:12px;color:var(--muted);margin-bottom:4px;display:block}
+.stack{display:grid;gap:10px}
+.sep{height:1px;background:var(--line);margin:4px 0}
+.buy{background:var(--up);border-color:var(--up);color:#fff;font-weight:700;font-size:16px;padding:12px}
+.sell{background:var(--down);border-color:var(--down);color:#fff;font-weight:700;font-size:16px;padding:12px}
+.pill{font-size:11px;font-weight:700;padding:2px 8px;border-radius:99px;border:1px solid var(--line);color:var(--muted);letter-spacing:.04em}
+.pill.on{color:var(--accent);border-color:var(--accent)}
+/* risk */
+.kv{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 14px}
+.kv div{display:flex;justify-content:space-between;gap:8px;border-bottom:1px dashed var(--line);padding-bottom:4px}
+.kv span:first-child{color:var(--muted);font-size:13px}
+.risk-big{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:6px}
+.risk-big .num{font-size:30px;font-weight:600}
+.gauge{position:relative;height:10px;border-radius:5px;background:var(--soft);border:1px solid var(--line);overflow:hidden}
+.gauge i{position:absolute;inset:0 auto 0 0;background:var(--down);transition:width .2s}
+.tick{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--ink);opacity:.5}
+.gl{position:relative;height:16px;font-size:10px;color:var(--muted)}
+.gl span{position:absolute;transform:translateX(-50%)}
+.banner{border-radius:8px;padding:10px 12px;font-weight:500;display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.banner.warn{background:color-mix(in srgb,var(--warn) 14%,var(--panel));border:1px solid var(--warn);color:var(--ink)}
+.banner.crit{background:color-mix(in srgb,var(--crit) 14%,var(--panel));border:1px solid var(--crit)}
+/* tables */
+.tbl{overflow-x:auto;border:1px solid var(--line);border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:13px;white-space:nowrap}
+th,td{padding:7px 9px;text-align:right;border-bottom:1px solid var(--line)}
+th{font-weight:500;color:var(--muted);background:var(--soft);font-size:12px}
+td:first-child,th:first-child{text-align:left}
+tr:last-child td{border-bottom:0}
+tr.liq td{background:color-mix(in srgb,var(--crit) 9%,transparent)}
+.tag{font-size:11px;padding:1px 6px;border-radius:4px;border:1px solid var(--line)}
+.tag.liq{border-color:var(--crit);color:var(--crit);font-weight:700}
+.x{padding:2px 7px;font-size:12px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin-bottom:10px}
+.stats div{background:var(--soft);border-radius:7px;padding:8px 10px}
+.stats b{display:block;font-family:var(--mono);font-size:17px;font-variant-numeric:tabular-nums}
+.stats span{font-size:12px;color:var(--muted)}
+.empty{padding:16px;text-align:center;color:var(--muted);font-size:13px}
+details summary{cursor:pointer;font-weight:700;font-size:13px;color:var(--muted);letter-spacing:.06em}
+.note{font-size:12px;color:var(--muted)}
+#toasts{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(16px + env(safe-area-inset-bottom,0px));display:grid;gap:6px;z-index:20;width:min(92vw,420px)}
+.toast{background:var(--ink);color:var(--bg);padding:10px 14px;border-radius:8px;font-size:13px;box-shadow:0 6px 20px rgb(0 0 0/.2)}
+.toast.crit{background:var(--crit);color:#fff}
+textarea{width:100%;height:120px;font-family:var(--mono);font-size:12px;background:var(--soft);color:var(--ink);border:1px solid var(--line);border-radius:7px;padding:8px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+  <div class="cols">
+    <div class="col">
+      <!-- quote -->
+      <section class="panel">
+        <div class="quote">
+          <div>
+            <div class="sym">小型臺指 MTX · 每點 NT$50 <span id="modePill" class="pill">手動</span></div>
+            <div id="px" class="px">—</div>
+            <div id="chg" class="chg">—</div>
+          </div>
+          <div class="lims num">
+            <div>漲停 <span id="limUp" class="up"></span></div>
+            <div>參考 <span id="refPx"></span></div>
+            <div>跌停 <span id="limDn" class="down"></span></div>
+            <div id="capLbl"></div>
+          </div>
+        </div>
+        <canvas id="chart" aria-label="價格走勢"></canvas>
+      </section>
+
+      <!-- price control -->
+      <section class="panel stack">
+        <h2>行情控制 <span class="note">紅漲綠跌</span></h2>
+        <div class="row">
+          <input id="jumpPx" type="number" inputmode="numeric" placeholder="輸入指數點位" aria-label="指定價格">
+          <button id="jumpBtn" style="flex:0 0 auto">跳到此價</button>
+        </div>
+        <input id="slider" type="range" aria-label="拖曳調整價格">
+        <div class="grid-btn g4" id="stepBtns"></div>
+        <div class="grid-btn g3" id="pctBtns"></div>
+        <span class="lbl" style="margin:2px 0 -4px">情境</span>
+        <div class="grid-btn g3" id="scnBtns"></div>
+        <div class="sep"></div>
+        <div class="row">
+          <button id="autoBtn" style="flex:0 0 auto">▶ 自動走勢</button>
+          <select id="vol" aria-label="波動度"><option value="5">波動 小</option><option value="15">波動 中</option><option value="40">波動 大</option></select>
+          <select id="speed" aria-label="速度"><option value="1500">慢</option><option value="800">中</option><option value="250">快</option></select>
+        </div>
+        <div class="note">自動走勢時一樣可以手動調價。</div>
+      </section>
+    </div>
+
+    <div class="col">
+      <div id="banner"></div>
+
+      <!-- order -->
+      <section class="panel stack">
+        <h2>下單</h2>
+        <div class="row">
+          <div style="flex:1 1 90px"><label class="lbl" for="qty">口數</label><input id="qty" type="number" min="1" value="1" inputmode="numeric"></div>
+          <div style="flex:1 1 110px"><label class="lbl" for="otype">委託</label>
+            <select id="otype"><option value="MKT">市價</option><option value="LMT">限價</option><option value="STP">停損</option></select></div>
+          <div style="flex:1 1 110px" id="opxWrap" hidden><label class="lbl" for="opx">委託價</label><input id="opx" type="number" inputmode="numeric"></div>
+        </div>
+        <div class="grid-btn g2">
+          <button class="buy" id="buyBtn">買進</button>
+          <button class="sell" id="sellBtn">賣出</button>
+        </div>
+        <div id="ordersBox"></div>
+      </section>
+
+      <!-- position -->
+      <section class="panel">
+        <h2>持倉 <button id="flatBtn" class="x">全部平倉</button></h2>
+        <div id="posBox"></div>
+      </section>
+
+      <!-- account -->
+      <section class="panel stack">
+        <h2>帳戶與風險</h2>
+        <div>
+          <div class="risk-big"><span class="muted">風險指標</span><span id="riskNum" class="num">—</span></div>
+          <div class="gauge"><i id="gaugeFill"></i><b class="tick" style="left:12.5%"></b><b class="tick" id="mmTick"></b><b class="tick" style="left:50%"></b></div>
+          <div class="gl"><span style="left:12.5%">25% 代沖銷</span><span id="mmLbl"></span><span style="left:50%">100%</span></div>
+        </div>
+        <div class="kv num" id="acctKv"></div>
+        <div class="sep"></div>
+        <div class="row">
+          <input id="amt" type="number" inputmode="numeric" placeholder="金額" aria-label="入出金金額" value="100000">
+          <button id="depBtn" style="flex:0 0 auto">入金</button>
+          <button id="wdBtn" style="flex:0 0 auto">出金</button>
+        </div>
+        <div id="fundBox"></div>
+      </section>
+    </div>
+  </div>
+
+  <!-- closed trades -->
+  <section class="panel">
+    <h2>平倉紀錄 <span class="row" style="flex:0 0 auto;gap:6px"><button class="x" id="csvBtn">複製 CSV</button><button class="x" id="clrBtn">清空</button></span></h2>
+    <div class="stats" id="stats"></div>
+    <div id="tradesBox"></div>
+    <div id="csvBox" hidden style="margin-top:8px"><div class="note">已選取，請手動複製：</div><textarea id="csvTa" readonly></textarea></div>
+  </section>
+
+  <!-- settings -->
+  <section class="panel">
+    <details>
+      <summary>參數設定</summary>
+      <div class="stack" style="margin-top:12px">
+        <div class="note">保證金請依期交所最新公告調整，預設值僅供練習。</div>
+        <div class="row">
+          <div><label class="lbl" for="cIm">原始保證金／口</label><input id="cIm" type="number"></div>
+          <div><label class="lbl" for="cMm">維持保證金／口</label><input id="cMm" type="number"></div>
+        </div>
+        <div class="row">
+          <div><label class="lbl" for="cFee">手續費／口（單邊）</label><input id="cFee" type="number"></div>
+          <div><label class="lbl" for="cTax">期交稅率</label><input id="cTax" type="number" step="0.00001"></div>
+        </div>
+        <div class="row">
+          <div><label class="lbl" for="cRef">參考價（決定漲跌停）</label><input id="cRef" type="number"></div>
+          <button id="newDayBtn" style="flex:0 0 auto;align-self:end">以現價換日</button>
+        </div>
+        <label class="row" style="gap:8px;cursor:pointer"><input id="cLim" type="checkbox" style="width:auto;flex:0 0 auto"><span>啟用漲跌停 ±10%（關閉時價格可調到 1～70,000 點）</span></label>
+        <div class="row"><button id="saveCfg">套用設定</button><button id="resetBtn">全部重設</button></div>
+      </div>
+    </details>
+  </section>
+</div>
+<div id="toasts" aria-live="polite"></div>
+
+<script>
+const $=id=>document.getElementById(id);
+const KEY='mtx-sim-v1';
+let S, timer=null;
+
+function defaults(){
+  const hist=[];let p=25000;
+  for(let i=0;i<80;i++){hist.unshift(p);p+=Math.round((Math.random()-0.5)*40);}
+  return {price:25000,ref:hist[0],hist,bal:300000,pos:{q:0,avg:0,feeAcc:0},orders:[],trades:[],
+    funds:[{t:Date.now(),type:'入金',amt:300000,note:'初始資金（範例）'}],
+    cfg:{im:175250,mm:134500,fee:20,tax:0.00002,mult:50,lim:false},seq:1,vol:15,speed:800,callOn:false};
+}
+function load(){
+  try{const raw=localStorage.getItem(KEY);if(raw){const d=JSON.parse(raw);return Object.assign(defaults(),d);}}catch(e){}
+  return defaults();
+}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
+
+const f0=n=>Math.round(n).toLocaleString('en-US');
+const fs=n=>(n>0?'+':n<0?'−':'')+Math.abs(Math.round(n)).toLocaleString('en-US');
+const fp=n=>Number.isInteger(n)?n.toLocaleString('en-US'):n.toLocaleString('en-US',{minimumFractionDigits:1,maximumFractionDigits:1});
+const cls=n=>n>0?'up':n<0?'down':'';
+const tstr=t=>{const d=new Date(t);return `${d.getMonth()+1}/${d.getDate()} ${d.toTimeString().slice(0,8)}`;};
+const limUp=()=>Math.floor(S.ref*1.1), limDn=()=>Math.ceil(S.ref*0.9);
+const MAXPX=70000, hiB=()=>S.cfg.lim?limUp():MAXPX, loB=()=>S.cfg.lim?limDn():1;
+
+function fees(q,px){const c=S.cfg;return (c.fee+Math.round(px*c.mult*c.tax))*q;}
+function unreal(){return (S.price-S.pos.avg)*S.pos.q*S.cfg.mult;}
+function equity(){return S.bal+(S.pos.q?unreal():0);}
+function reqIM(q=S.pos.q){return Math.abs(q)*S.cfg.im;}
+function reqMM(q=S.pos.q){return Math.abs(q)*S.cfg.mm;}
+
+function toast(msg,kind){const el=document.createElement('div');el.className='toast'+(kind?' '+kind:'');el.textContent=msg;$('toasts').appendChild(el);setTimeout(()=>el.remove(),3200);}
+
+function exec(side,qty,px,reason){
+  const p=S.pos,q=p.q,c=S.cfg;
+  const closeQty=(q!==0&&Math.sign(q)!==side)?Math.min(qty,Math.abs(q)):0;
+  const openQty=qty-closeQty;
+  if(openQty>0){
+    const newQ=q+side*qty, need=reqIM(newQ), have=equity()-fees(qty,px);
+    if(have<need){toast(`保證金不足：需 ${f0(need)}，權益扣費後 ${f0(have)}`,'crit');return false;}
+  }
+  if(closeQty){
+    const pts=(px-p.avg)*Math.sign(q), gross=pts*c.mult*closeQty;
+    const openPart=p.feeAcc*closeQty/Math.abs(q), closeFee=fees(closeQty,px);
+    S.bal+=gross-closeFee; p.feeAcc-=openPart;
+    S.trades.push({id:S.seq++,t:Date.now(),dir:q>0?'多':'空',qty:closeQty,entry:p.avg,exit:px,pts,gross,cost:openPart+closeFee,net:gross-openPart-closeFee,reason});
+    p.q+=side*closeQty; if(p.q===0){p.avg=0;p.feeAcc=0;}
+  }
+  if(openQty){
+    const fee=fees(openQty,px), cur=Math.abs(p.q);
+    S.bal-=fee; p.avg=(cur*p.avg+openQty*px)/(cur+openQty); p.q+=side*openQty; p.feeAcc+=fee;
+  }
+  toast(`${reason}：${side>0?'買進':'賣出'} ${qty} 口 @ ${f0(px)}`, reason==='代沖銷'?'crit':'');
+  return true;
+}
+
+function processOrders(){
+  const px=S.price;
+  for(const o of [...S.orders]){
+    const hit=o.type==='LMT'?(o.side>0?px<=o.px:px>=o.px):(o.side>0?px>=o.px:px<=o.px);
+    if(hit){S.orders=S.orders.filter(x=>x!==o);exec(o.side,o.qty,px,o.type==='LMT'?'限價成交':'停損觸發');}
+  }
+}
+
+function checkRisk(){
+  const q=S.pos.q;
+  if(!q){S.callOn=false;return;}
+  const eq=equity(), risk=eq/reqIM()*100;
+  if(risk<25){
+    S.orders=[]; exec(-Math.sign(q),Math.abs(q),S.price,'代沖銷'); S.callOn=false;
+    S.lastLiq=Date.now(); return;
+  }
+  if(eq<reqMM()){ if(!S.callOn) toast(`權益數低於維持保證金，追繳 ${f0(reqIM()-eq)}`,'crit'); S.callOn=true; }
+  else S.callOn=false;
+}
+
+function setPrice(p){
+  p=Math.round(p); p=Math.min(hiB(),Math.max(loB(),p));
+  if(!Number.isFinite(p)||p===S.price) return;
+  S.price=p; S.hist.push(p); if(S.hist.length>300) S.hist.shift();
+  processOrders(); checkRisk(); render(); save();
+}
+
+function placeOrder(side){
+  const qty=Math.max(1,parseInt($('qty').value)||1), type=$('otype').value;
+  if(type==='MKT'){exec(side,qty,S.price,'市價成交');}
+  else{
+    const px=Math.round(+$('opx').value);
+    if(!px){toast('請輸入委託價');return;}
+    const marketable=type==='LMT'?(side>0?S.price<=px:S.price>=px):(side>0?S.price>=px:S.price<=px);
+    if(marketable){exec(side,qty,S.price,type==='LMT'?'限價成交':'停損觸發');}
+    else{S.orders.push({id:S.seq++,side,qty,type,px});toast(`已掛單：${type==='LMT'?'限價':'停損'}${side>0?'買':'賣'} ${qty} 口 @ ${f0(px)}`);}
+  }
+  checkRisk(); render(); save();
+}
+
+function arm(btn,fn){
+  if(btn.dataset.armed){delete btn.dataset.armed;btn.textContent=btn.dataset.orig;fn();return;}
+  btn.dataset.orig=btn.textContent;btn.dataset.armed=1;btn.textContent='再按一次確認';
+  setTimeout(()=>{if(btn.dataset.armed){delete btn.dataset.armed;btn.textContent=btn.dataset.orig;}},3000);
+}
+
+/* ---------- render ---------- */
+function render(){
+  const c=S.cfg,q=S.pos.q,px=S.price,d=px-S.ref;
+  $('px').textContent=f0(px); $('px').className='px '+cls(d);
+  $('chg').innerHTML=`<span class="${cls(d)}">${d>0?'▲':d<0?'▼':''} ${fs(d)}（${(d/S.ref*100).toFixed(2)}%）</span>`;
+  $('limUp').textContent=f0(limUp()); $('limDn').textContent=f0(limDn()); $('refPx').textContent=f0(S.ref);
+  const sl=$('slider'); sl.min=loB(); sl.max=hiB(); $('capLbl').textContent=S.cfg.lim?'漲跌停 ±10%':'無漲跌停 · 上限 70,000'; sl.value=px;
+  $('modePill').textContent=timer?'自動':'手動'; $('modePill').className='pill'+(timer?' on':'');
+  $('autoBtn').textContent=timer?'■ 停止自動':'▶ 自動走勢';
+
+  // banner
+  const eq=equity(), im=reqIM(), mm=reqMM(); let b='';
+  if(q&&eq<mm) b=`<div class="banner crit"><span>追繳中：權益數 ${f0(eq)} 低於維持保證金 ${f0(mm)}，需補繳 <b class="num">${f0(im-eq)}</b></span><button id="payCall">一鍵補繳</button></div>`;
+  else if(S.lastLiq&&Date.now()-S.lastLiq<8000) b=`<div class="banner crit"><span>風險指標跌破 25%，已代沖銷全部部位。</span></div>`;
+  $('banner').innerHTML=b;
+  if($('payCall')) $('payCall').onclick=()=>{const a=Math.ceil(reqIM()-equity());S.bal+=a;S.funds.push({t:Date.now(),type:'入金',amt:a,note:'補繳追繳'});S.callOn=false;toast(`已入金 ${f0(a)}`);render();save();};
+
+  // orders
+  $('ordersBox').innerHTML=S.orders.length?`<span class="lbl">掛單中</span><div class="tbl"><table><tr><th>委託</th><th>口數</th><th>價格</th><th></th></tr>${
+    S.orders.map(o=>`<tr><td class="${o.side>0?'up':'down'}">${o.type==='LMT'?'限價':'停損'}${o.side>0?'買':'賣'}</td><td class="num">${o.qty}</td><td class="num">${f0(o.px)}</td><td><button class="x" data-cancel="${o.id}">取消</button></td></tr>`).join('')}</table></div>`:'';
+
+  // position
+  if(!q){$('posBox').innerHTML='<div class="empty">目前無持倉。用上方下單開始交易。</div>';}
+  else{
+    const u=unreal(), pts=(px-S.pos.avg)*Math.sign(q), mult=q*c.mult;
+    const callPx=S.pos.avg+(mm-S.bal)/mult, liqPx=S.pos.avg+(0.25*im-S.bal)/mult;
+    $('posBox').innerHTML=`<div class="kv num">
+      <div><span>方向</span><b class="${q>0?'up':'down'}">${q>0?'多單':'空單'} ${Math.abs(q)} 口</b></div>
+      <div><span>均價</span><b>${fp(S.pos.avg)}</b></div>
+      <div><span>損益點數</span><b class="${cls(pts)}">${fs(pts)}</b></div>
+      <div><span>未平倉損益</span><b class="${cls(u)}">${fs(u)}</b></div>
+      <div><span>追繳價</span><b class="muted">${f0(q>0?Math.ceil(callPx):Math.floor(callPx))}</b></div>
+      <div><span>代沖銷價</span><b class="muted">${f0(q>0?Math.ceil(liqPx):Math.floor(liqPx))}</b></div></div>
+      <div class="note" style="margin-top:6px">追繳價／代沖銷價為估算，未計平倉手續費與稅。</div>`;
+  }
+
+  // risk
+  const risk=q?eq/im*100:null;
+  $('riskNum').textContent=risk===null?'無持倉':risk.toFixed(1)+'%';
+  const col=risk===null?'var(--muted)':risk<25?'var(--crit)':eq<mm?'var(--crit)':risk<100?'var(--warn)':'var(--down)';
+  $('riskNum').style.color=col;
+  $('gaugeFill').style.width=(risk===null?0:Math.min(100,risk/2))+'%'; $('gaugeFill').style.background=col;
+  const mmPct=c.mm/c.im*100/2; $('mmTick').style.left=mmPct+'%'; $('mmLbl').style.left=mmPct+'%'; $('mmLbl').textContent=`${(c.mm/c.im*100).toFixed(0)}% 追繳`;
+  const wd=Math.max(0,Math.min(S.bal,eq)-im);
+  $('acctKv').innerHTML=`
+    <div><span>帳戶餘額</span><b>${f0(S.bal)}</b></div>
+    <div><span>權益數</span><b>${f0(eq)}</b></div>
+    <div><span>原始保證金</span><b>${f0(im)}</b></div>
+    <div><span>維持保證金</span><b>${f0(mm)}</b></div>
+    <div><span>可用保證金</span><b class="${eq-im<0?'down':''}">${f0(eq-im)}</b></div>
+    <div><span>可出金</span><b>${f0(wd)}</b></div>`;
+  const fl=S.funds.slice(-5).reverse();
+  $('fundBox').innerHTML=`<span class="lbl">資金異動（最近 5 筆）</span><div class="tbl"><table><tr><th>時間</th><th>類別</th><th>金額</th><th>備註</th></tr>${
+    fl.map(x=>`<tr><td class="num">${tstr(x.t)}</td><td>${x.type}</td><td class="num ${x.type==='入金'?'up':'down'}">${x.type==='入金'?'+':'−'}${f0(x.amt)}</td><td class="muted">${x.note||''}</td></tr>`).join('')}</table></div>`;
+
+  // trades
+  const T=S.trades, wins=T.filter(t=>t.net>0).length, tot=T.reduce((a,t)=>a+t.net,0), worst=T.length?Math.min(...T.map(t=>t.net)):0;
+  $('stats').innerHTML=`<div><span>總筆數</span><b>${T.length}</b></div><div><span>勝率</span><b>${T.length?(wins/T.length*100).toFixed(0)+'%':'—'}</b></div>
+    <div><span>累計淨損益</span><b class="${cls(tot)}">${fs(tot)}</b></div><div><span>最大單筆虧損</span><b class="${worst<0?'down':''}">${worst<0?fs(worst):'—'}</b></div>`;
+  $('tradesBox').innerHTML=T.length?`<div class="tbl"><table><tr><th>平倉時間</th><th>方向</th><th>口數</th><th>進場</th><th>出場</th><th>點數</th><th>損益</th><th>費用</th><th>淨損益</th><th>原因</th><th></th></tr>${
+    [...T].reverse().map(t=>`<tr class="${t.reason==='代沖銷'?'liq':''}"><td class="num">${tstr(t.t)}</td><td class="${t.dir==='多'?'up':'down'}">${t.dir}</td><td class="num">${t.qty}</td><td class="num">${fp(t.entry)}</td><td class="num">${f0(t.exit)}</td>
+    <td class="num ${cls(t.pts)}">${fs(t.pts)}</td><td class="num ${cls(t.gross)}">${fs(t.gross)}</td><td class="num muted">${f0(t.cost)}</td><td class="num ${cls(t.net)}"><b>${fs(t.net)}</b></td>
+    <td><span class="tag ${t.reason==='代沖銷'?'liq':''}">${t.reason}</span></td><td><button class="x" data-del="${t.id}">刪除</button></td></tr>`).join('')}</table></div>`
+    :'<div class="empty">還沒有平倉紀錄。每次平倉、停損或代沖銷都會自動記在這裡。</div>';
+
+  drawChart();
+}
+
+function drawChart(){
+  const cv=$('chart'),dpr=window.devicePixelRatio||1,w=cv.clientWidth,h=cv.clientHeight;
+  cv.width=w*dpr;cv.height=h*dpr;const g=cv.getContext('2d');g.scale(dpr,dpr);g.clearRect(0,0,w,h);
+  const cs=getComputedStyle(document.documentElement),V=k=>cs.getPropertyValue(k).trim();
+  const H=S.hist.slice(-200); if(H.length<2) return;
+  let lo=Math.min(...H,S.ref),hi=Math.max(...H,S.ref); if(S.pos.q){lo=Math.min(lo,S.pos.avg);hi=Math.max(hi,S.pos.avg);}
+  const pad=(hi-lo)*0.1||10; lo-=pad; hi+=pad;
+  const R=52, X=i=>i/(H.length-1)*(w-R), Y=v=>h-6-(v-lo)/(hi-lo)*(h-12);
+  g.font='11px "IBM Plex Mono", monospace'; g.textBaseline='middle';
+  g.strokeStyle=V('--line'); g.fillStyle=V('--muted'); g.lineWidth=1;
+  for(let k=0;k<=3;k++){const v=lo+(hi-lo)*k/3,y=Y(v);g.beginPath();g.moveTo(0,y);g.lineTo(w-R,y);g.stroke();g.fillText(f0(v),w-R+6,y);}
+  const dash=(v,color,label)=>{g.setLineDash([4,4]);g.strokeStyle=color;g.beginPath();g.moveTo(0,Y(v));g.lineTo(w-R,Y(v));g.stroke();g.setLineDash([]);g.fillStyle=color;g.fillText(label,4,Y(v)-8);};
+  dash(S.ref,V('--muted'),'參考');
+  if(S.pos.q) dash(S.pos.avg,V('--accent'),'均價 '+fp(S.pos.avg));
+  const last=H[H.length-1], lc=last>=S.ref?V('--up'):V('--down');
+  g.strokeStyle=lc; g.lineWidth=1.8; g.beginPath(); H.forEach((v,i)=>i?g.lineTo(X(i),Y(v)):g.moveTo(X(i),Y(v))); g.stroke();
+  g.fillStyle=lc; g.beginPath(); g.arc(X(H.length-1),Y(last),3.5,0,7); g.fill();
+}
+
+/* ---------- controls ---------- */
+function build(){
+  [-100,-50,-10,-1,1,10,50,100].forEach(n=>{const b=document.createElement('button');b.textContent=(n>0?'+':'')+n;b.className=n>0?'b-up':'b-down';b.onclick=()=>setPrice(S.price+n);$('stepBtns').appendChild(b);});
+  [-5,-3,-1,1,3,5].forEach(n=>{const b=document.createElement('button');b.textContent=(n>0?'+':'')+n+'%';b.className=n>0?'b-up':'b-down';b.onclick=()=>setPrice(S.price*(1+n/100));$('pctBtns').appendChild(b);});
+  const run=(steps,delta)=>{let i=0;const t=setInterval(()=>{setPrice(S.price+delta+Math.round((Math.random()-0.5)*20));if(++i>=steps)clearInterval(t);},350);};
+  [['跳空 +300',()=>setPrice(S.price+300),'b-up'],['跳空 −300',()=>setPrice(S.price-300),'b-down'],['漲停',()=>setPrice(limUp()),'b-up'],
+   ['連續長紅',()=>run(5,80),'b-up'],['連續長黑',()=>run(5,-80),'b-down'],['跌停',()=>setPrice(limDn()),'b-down']]
+   .forEach(([t,fn,c])=>{const b=document.createElement('button');b.textContent=t;b.className=c;b.style.fontFamily='var(--sans)';b.onclick=fn;$('scnBtns').appendChild(b);});
+
+  $('jumpBtn').onclick=()=>{const v=+$('jumpPx').value;if(v)setPrice(v);};
+  $('jumpPx').onkeydown=e=>{if(e.key==='Enter')$('jumpBtn').click();};
+  $('slider').oninput=e=>setPrice(+e.target.value);
+  $('vol').value=S.vol; $('speed').value=S.speed;
+  const startAuto=()=>{clearInterval(timer);timer=setInterval(()=>{const u=Math.random()||1e-9,v=Math.random();const z=Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);setPrice(S.price+Math.round(z*S.vol));},S.speed);};
+  $('autoBtn').onclick=()=>{if(timer){clearInterval(timer);timer=null;}else startAuto();render();};
+  $('vol').onchange=e=>{S.vol=+e.target.value;save();};
+  $('speed').onchange=e=>{S.speed=+e.target.value;save();if(timer)startAuto();};
+
+  $('otype').onchange=e=>{$('opxWrap').hidden=e.target.value==='MKT';if(!$('opx').value)$('opx').value=S.price;};
+  $('buyBtn').onclick=()=>placeOrder(1); $('sellBtn').onclick=()=>placeOrder(-1);
+  $('flatBtn').onclick=()=>{if(!S.pos.q){toast('目前無持倉');return;}exec(-Math.sign(S.pos.q),Math.abs(S.pos.q),S.price,'手動平倉');checkRisk();render();save();};
+  $('ordersBox').onclick=e=>{const id=e.target.dataset.cancel;if(id){S.orders=S.orders.filter(o=>o.id!=id);toast('已取消掛單');render();save();}};
+  $('tradesBox').onclick=e=>{const id=e.target.dataset.del;if(id)arm(e.target,()=>{S.trades=S.trades.filter(t=>t.id!=id);render();save();});};
+  $('clrBtn').onclick=e=>arm(e.target,()=>{S.trades=[];render();save();toast('已清空平倉紀錄');});
+
+  $('depBtn').onclick=()=>{const a=Math.round(+$('amt').value);if(a<=0){toast('請輸入金額');return;}S.bal+=a;S.funds.push({t:Date.now(),type:'入金',amt:a});toast(`已入金 ${f0(a)}`);checkRisk();render();save();};
+  $('wdBtn').onclick=()=>{const a=Math.round(+$('amt').value);const max=Math.max(0,Math.min(S.bal,equity())-reqIM());
+    if(a<=0){toast('請輸入金額');return;} if(a>max){toast(`超過可出金額度 ${f0(max)}`,'crit');return;}
+    S.bal-=a;S.funds.push({t:Date.now(),type:'出金',amt:a});toast(`已出金 ${f0(a)}`);render();save();};
+
+  $('csvBtn').onclick=()=>{
+    const rows=[['平倉時間','方向','口數','進場價','出場價','點數','損益','費用','淨損益','原因']].concat(S.trades.map(t=>[new Date(t.t).toLocaleString('zh-TW'),t.dir,t.qty,t.entry,t.exit,t.pts,Math.round(t.gross),Math.round(t.cost),Math.round(t.net),t.reason]));
+    const csv=rows.map(r=>r.join(',')).join('\n');
+    const fb=()=>{$('csvBox').hidden=false;$('csvTa').value=csv;$('csvTa').select();};
+    try{navigator.clipboard.writeText(csv).then(()=>toast('已複製 CSV，可貼到 Excel'),fb);}catch(err){fb();}
+  };
+
+  const fillCfg=()=>{$('cIm').value=S.cfg.im;$('cMm').value=S.cfg.mm;$('cFee').value=S.cfg.fee;$('cTax').value=S.cfg.tax;$('cRef').value=S.ref;$('cLim').checked=!!S.cfg.lim;};
+  fillCfg();
+  $('saveCfg').onclick=()=>{const im=+$('cIm').value,mm=+$('cMm').value;if(!(im>0&&mm>0&&mm<=im)){toast('維持保證金需大於 0 且不高於原始保證金','crit');return;}
+    S.cfg.im=im;S.cfg.mm=mm;S.cfg.fee=Math.max(0,+$('cFee').value);S.cfg.tax=Math.max(0,+$('cTax').value);
+    S.cfg.lim=$('cLim').checked; const r=Math.round(+$('cRef').value);if(r>0)S.ref=r; S.price=Math.min(hiB(),Math.max(loB(),S.price));
+    toast('設定已套用');checkRisk();render();save();};
+  $('newDayBtn').onclick=()=>{S.ref=S.price;fillCfg();toast(`新參考價 ${f0(S.ref)}`);render();save();};
+  $('resetBtn').onclick=e=>arm(e.target,()=>{clearInterval(timer);timer=null;S=defaults();fillCfg();render();save();toast('已全部重設');});
+
+  window.addEventListener('resize',drawChart);
+  matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change',drawChart);
+}
+
+S=load();
+if(S.cfg.im===88000&&S.cfg.mm===67500){S.cfg.im=175250;S.cfg.mm=134500;save();}
+build(); render();
+</script>
+
+</body></html>

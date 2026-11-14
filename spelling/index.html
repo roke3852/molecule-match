@@ -1,0 +1,1975 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>拼字消消樂</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Andika:wght@400;700&family=Baloo+2:wght@600;800&display=swap">
+<style>
+/* Layout: one-screen toy board — spelling strip on top, chunky letter blocks below, like a classroom pocket chart */
+:root{
+  --sky:#D6ECF6;
+  --sky-deep:#B5D9EC;
+  --ink:#22324A;
+  --ink-soft:#5A6E86;
+  --card:#FFFFFF;
+  --card-edge:#8FB9D3;
+  --sun:#FFC83D;
+  --sun-edge:#D99A00;
+  --leaf:#4FAE63;
+  --berry:#E0506A;
+  --chalk:#F7FBFD;
+  --t1:#4FAE63;
+  --t2:#3E8FC4;
+  --t3:#E39B00;
+  --t4:#E0506A;
+  --t5:#8B5CF6;
+  --t6:#0E9F9E;
+  --t7:#D946A6;
+  --f-display:"Baloo 2","Arial Rounded MT Bold","Trebuchet MS",sans-serif;
+  --f-letter:"Andika","Comic Sans MS","Trebuchet MS",sans-serif;
+  --f-ui:"Baloo 2","PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;
+  color-scheme:light;
+}
+[hidden]{display:none!important}
+html,body{height:100%}
+body{background:var(--sky);color:var(--ink);font-family:var(--f-ui);overflow:hidden;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}
+.app{height:100%;display:flex;flex-direction:column;gap:12px;max-width:760px;margin:0 auto;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:12px 14px;box-sizing:border-box}
+header{display:flex;align-items:center;justify-content:space-between;gap:8px}
+h1{margin:0;font-family:var(--f-display);font-weight:800;font-size:1.5rem;letter-spacing:.01em;line-height:1.05;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+h1:has(.lvtag){font-size:1.15rem;line-height:1.5;padding-block:2px}
+h1 span{color:var(--berry)}
+h1 .lvtag{display:inline-block;background:var(--tc,var(--berry));color:#fff;border-radius:10px;padding:1px 8px;margin-right:6px;font-size:1rem;line-height:1.35;vertical-align:middle}
+.hbtns{display:flex;gap:8px;flex-shrink:0}
+button{font-family:var(--f-ui);cursor:pointer;color:var(--ink)}
+button:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
+.pill{border:0;background:var(--chalk);border-radius:999px;padding:6px 14px;font-size:.95rem;font-weight:600;box-shadow:0 3px 0 var(--sky-deep)}
+.pill:active{transform:translateY(2px);box-shadow:0 1px 0 var(--sky-deep)}
+
+/* spelling strip */
+.strip{background:var(--chalk);border-radius:18px;min-height:84px;display:flex;align-items:center;justify-content:center;gap:10px;padding:10px;box-sizing:border-box;border:3px dashed var(--sky-deep);flex-wrap:wrap}
+.strip .hint{color:var(--ink-soft);font-size:1.05rem}
+.strip .letters{display:flex;gap:6px}
+.strip .lt{font-family:var(--f-letter);font-weight:700;font-size:2.4rem;line-height:1;min-width:1.1em;text-align:center;padding:6px 4px 8px;border-radius:12px;color:var(--ink-soft);transition:transform .15s,background .15s,color .15s}
+.strip.word .lt{color:var(--ink)}
+.strip .lt.done{color:var(--ink)}
+.strip .lt.capl{color:var(--berry)}
+.strip .caphint{flex-basis:100%;text-align:center;font-size:.95rem}
+.strip .lt.on{background:var(--sun);color:var(--ink);transform:translateY(-4px) scale(1.15)}
+.strip .mean{display:flex;align-items:center;gap:8px;padding:6px 14px;background:#fff;border-radius:14px;font-size:1.3rem;font-weight:600;box-shadow:0 3px 0 var(--sky-deep)}
+.strip .mean b{font-size:2.1rem;line-height:1;font-weight:400}
+.strip .sent{flex-basis:100%;text-align:center;font-family:var(--f-letter);font-size:1.35rem;font-weight:700;line-height:1.3}
+.strip .sent b{background:var(--sun);border-radius:6px;padding:0 4px}
+.strip .mean.got{background:var(--leaf);color:#fff;box-shadow:0 3px 0 #367E46}
+
+/* board */
+.board{flex:1;min-height:0;overflow:auto;display:grid;grid-template-columns:repeat(var(--cols,4),1fr);grid-auto-rows:minmax(64px,1fr);gap:10px;padding:2px 2px 6px}
+.card{border:0;border-radius:16px;background:var(--card);box-shadow:0 5px 0 var(--card-edge);display:flex;flex-direction:column;gap:2px;align-items:center;justify-content:center;font-family:var(--f-letter);font-weight:700;color:var(--ink);padding:4px;min-width:0;transition:transform .12s,background .15s,box-shadow .15s,opacity .2s;touch-action:manipulation;contain:layout}
+.card .pic{font-size:calc(var(--fs,2rem) * 0.85);line-height:1.1}
+.card .w{display:flex;font-size:var(--fs,2rem);line-height:1}
+.card .w span{border-radius:6px;padding:0 1px;transition:background .12s}
+.card .w span.on{background:var(--ink);color:var(--sun)}
+.card:active{transform:translateY(3px);box-shadow:0 2px 0 var(--card-edge)}
+.card.sel{background:var(--sun);box-shadow:0 5px 0 var(--sun-edge);transform:translateY(-3px)}
+.card.bad{animation:shake .45s}
+.card.bad.sel{background:#FFD9DF;box-shadow:0 5px 0 var(--berry)}
+.card.match{background:var(--leaf);color:#fff;box-shadow:0 5px 0 #367E46;animation:pop .7s .35s forwards}
+.card.gone{visibility:hidden}
+.board.busy .card:not(.sel):not(.match){opacity:.6}
+.board.busy .card,.board.busy .ftile{pointer-events:none}
+@keyframes shake{0%,100%{translate:0}20%{translate:-7px}40%{translate:7px}60%{translate:-5px}80%{translate:5px}}
+@keyframes pop{0%{scale:1;opacity:1}30%{scale:1.15}100%{scale:.2;opacity:0}}
+
+.card{position:relative}
+.card .newtag{position:absolute;top:4px;right:4px;background:var(--berry);color:#fff;font-family:var(--f-ui);font-size:.7rem;font-weight:800;border-radius:8px;padding:1px 6px;line-height:1.4}
+.timerrow{display:flex;align-items:center;gap:8px}
+.timerrow .clock{font-size:1.2rem;line-height:1}
+.timer{flex:1;height:14px;background:var(--chalk);border-radius:999px;overflow:hidden;box-shadow:inset 0 0 0 2px var(--card-edge)}
+.timer i{display:block;height:100%;width:100%;background:var(--leaf);border-radius:999px;transform-origin:left center;transition:transform .1s linear,background .3s;will-change:transform}
+.timerrow.low .timer i{background:var(--berry)}
+.timerrow.paused .timer i{opacity:.5}
+.timerrow{position:relative}
+.penalty{position:absolute;right:0;top:-6px;background:var(--berry);color:#fff;font-weight:800;border-radius:10px;padding:0 8px;font-size:.95rem;opacity:0;pointer-events:none}
+.penalty.show{animation:pen 1.1s ease-out}
+@keyframes pen{0%{opacity:0;transform:translateY(6px) scale(.8)}15%{opacity:1;transform:translateY(0) scale(1.1)}70%{opacity:1}100%{opacity:0;transform:translateY(-14px)}}
+.tsec{font-weight:700;font-variant-numeric:tabular-nums;min-width:3.6em;text-align:right;font-size:.95rem}
+.progress{display:flex;justify-content:center;gap:6px;flex-wrap:wrap}
+.progress i{width:14px;height:14px;border-radius:50%;background:var(--chalk);box-shadow:inset 0 0 0 2px var(--card-edge)}
+.progress i.got{background:var(--leaf);box-shadow:none}
+
+/* overlays */
+.overlay{position:fixed;inset:0;background:rgba(34,50,74,.35);display:flex;align-items:center;justify-content:center;z-index:20;
+  padding:max(16px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(16px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.panel{background:var(--chalk);border-radius:24px;padding:22px 20px;width:100%;max-width:440px;max-height:100%;overflow:auto;box-sizing:border-box;box-shadow:0 8px 0 var(--sky-deep);display:flex;flex-direction:column;gap:16px}
+.panel.wide{max-width:580px}
+.panel>*{flex-shrink:0}   /* rows that scroll sideways (grade tabs, album tabs) must keep their full height */
+.panel h2{margin:0;font-family:var(--f-display);font-weight:800;font-size:1.9rem;text-align:center;line-height:1.1;text-wrap:balance}
+.panel p{margin:0;color:var(--ink-soft);text-align:center;font-size:1rem;line-height:1.5}
+.ptop{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.tally{font-family:var(--f-display);font-weight:800;color:var(--sun-edge);font-size:1.15rem}
+.grp{display:flex;flex-direction:column;gap:8px}
+.grp label,.grp .lab{font-weight:600;font-size:.95rem;letter-spacing:.02em}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:2px solid var(--sky-deep);background:#fff;border-radius:12px;padding:6px 12px;font-size:.95rem;font-weight:600}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--chalk);border-color:var(--ink)}
+.clist{display:flex;flex-direction:column;gap:6px}
+.crow{display:grid;grid-template-columns:1.2fr 1fr 34px;gap:6px;align-items:center}
+.crow input{min-width:0;width:100%;box-sizing:border-box;border-radius:12px;border:2px solid var(--sky-deep);padding:8px 10px;font-family:var(--f-ui);font-size:1.05rem;color:var(--ink);background:#fff;user-select:text;-webkit-user-select:text}
+.crow input:first-child{font-family:var(--f-letter);font-weight:700}
+.crow input:focus{outline:none;border-color:var(--ink)}
+.xbtn{border:0;background:transparent;font-size:1.1rem;color:var(--ink-soft);border-radius:10px;height:38px}
+#addRow{align-self:flex-start}
+.vrow{display:flex;gap:8px}
+select{flex:1;min-width:0;border-radius:12px;border:2px solid var(--sky-deep);padding:8px 10px;font-family:var(--f-ui);font-size:.95rem;background:#fff;color:var(--ink)}
+.small{font-size:.85rem;color:var(--ink-soft)}
+.err{color:var(--berry);font-size:.9rem;font-weight:600}
+.big{border:0;background:var(--sun);border-radius:18px;padding:12px 18px;font-size:1.4rem;font-weight:800;font-family:var(--f-display);box-shadow:0 6px 0 var(--sun-edge)}
+.big:active{transform:translateY(3px);box-shadow:0 3px 0 var(--sun-edge)}
+.big.alt{background:#fff;box-shadow:0 6px 0 var(--sky-deep);font-size:1.15rem}
+.big.go{background:var(--leaf);color:#fff;box-shadow:0 6px 0 #367E46}
+.big .sub{display:block;font-family:var(--f-ui);font-size:.85rem;font-weight:600;opacity:.85}
+.stars{text-align:center;font-size:2.8rem;letter-spacing:.2em;color:var(--sun);line-height:1}
+.stars .off{color:var(--sky-deep)}
+#winOv.reveal .learned,#winOv.reveal .big,#winOv.reveal .gmeter{visibility:hidden;opacity:0}
+#winOv .gmeter{transition:opacity .35s}
+#winOv .learned,#winOv .big{transition:opacity .35s}
+.stars .s{display:inline-block;color:var(--sky-deep)}
+.stars .s.on{color:var(--sun);animation:starpop .55s cubic-bezier(.3,1.6,.5,1)}
+@keyframes starpop{0%{transform:scale(.2) rotate(-40deg)}60%{transform:scale(1.45) rotate(10deg)}100%{transform:scale(1) rotate(0)}}
+.learned{display:flex;flex-wrap:wrap;justify-content:center;gap:8px}
+.learned button small{font-family:var(--f-ui);font-size:.95rem;color:var(--ink-soft);font-weight:600}
+.learned button{border:0;background:#fff;border-radius:12px;padding:6px 12px;font-family:var(--f-letter);font-weight:700;font-size:1.3rem;box-shadow:0 3px 0 var(--card-edge)}
+
+/* level map */
+.tier{display:flex;flex-direction:column;gap:8px}
+.tierhead{display:flex;align-items:center;gap:10px;background:var(--tc);color:#fff;border-radius:18px;padding:8px 14px}
+.ticon{font-size:2.2rem;line-height:1;filter:drop-shadow(0 2px 0 rgba(0,0,0,.15))}
+.ttext{display:flex;flex-direction:column;min-width:0}
+.tierhead b{font-family:var(--f-display);font-weight:800;font-size:1.3rem;line-height:1.1}
+.tierhead small{font-size:.85rem;opacity:.9}
+.tier.dark .tierhead{background:#1E2433;color:#C9CFDB}
+.tier.dark .ticon{filter:brightness(0) invert(.35)}
+.lvls{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px}
+.lvl{border:0;border-top:5px solid var(--tc);background:#fff;border-radius:14px;padding:8px 10px 10px;text-align:left;display:flex;flex-direction:column;gap:2px;box-shadow:0 4px 0 var(--sky-deep);min-width:0}
+.lvl:active{transform:translateY(2px);box-shadow:0 2px 0 var(--sky-deep)}
+.lvl .num{font-family:var(--f-display);font-weight:800;font-size:1.15rem;line-height:1}
+.lvl .nm{font-size:.9rem;font-weight:600;line-height:1.25}
+.lvl .st{color:var(--sun-edge);letter-spacing:.1em;font-size:1rem}
+.lvl .st .off{color:var(--sky-deep)}
+.lvl.next{outline:3px solid var(--tc);outline-offset:2px}
+.lvl.locked{background:#2A3142;border-top-color:#2A3142;box-shadow:0 4px 0 #161A24;cursor:default;align-items:center;justify-content:center;font-size:1.5rem;min-height:84px}
+.tier:not(.dark) .lvl.locked{background:#3A4256;border-top-color:#3A4256}
+/* gift meter */
+.gmeter{display:flex;align-items:center;justify-content:center;gap:6px;background:#FFF0F5;border-radius:999px;padding:6px 16px;align-self:center;font-size:1.8rem;line-height:1}
+.gmeter .gm-s{color:#E8D3DC}
+.gmeter .gm-s.on{color:var(--sun)}
+.gmeter .gm-a{font-size:1.1rem;color:#C27A97}
+.gmeter .gm-g{font-size:1.9rem}
+.gmeter.sm{font-size:1.15rem;padding:3px 10px;gap:3px}
+.gmeter.sm .gm-g{font-size:1.2rem}
+.gmeter.sm .gm-a{font-size:.85rem}
+.big .gmeter{display:inline-flex;margin-top:4px;background:rgba(255,255,255,.7)}
+/* test mode */
+.devbar{display:flex;flex-wrap:wrap;align-items:center;gap:6px;background:#2A3142;color:#fff;border-radius:12px;padding:6px 10px;font-size:.85rem;font-weight:700}
+.devbar button{border:0;border-radius:8px;background:#fff;color:#2A3142;padding:3px 10px;font-weight:700;font-size:.85rem}
+.devnote{align-self:center;background:#2A3142;color:#fff;border-radius:999px;padding:4px 14px;font-size:.85rem;font-weight:700}
+/* ending */
+.big.trophy{background:#FFE9A8;box-shadow:0 6px 0 var(--sun-edge);color:#7A4E00}
+.overlay.ending{background:linear-gradient(160deg,#FFD6E7 0%,#E6D9FF 50%,#CDEBFF 100%);z-index:25}
+#confetti{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:1}
+.endpanel{position:relative;z-index:2;align-items:center;text-align:center;max-width:480px;gap:12px;background:rgba(255,255,255,.88)}
+.endtop{font-family:var(--f-display);font-weight:800;font-size:1.4rem;color:#C2416B}
+.evo{display:flex;align-items:center;gap:6px;font-size:2rem;line-height:1;min-height:2.2rem}
+.evo .evs,.evo i{opacity:0;animation:evpop .5s cubic-bezier(.3,1.6,.5,1) forwards}
+.evo i{font-style:normal;font-size:1.1rem;color:#C27A97}
+@keyframes evpop{0%{opacity:0;transform:scale(.2)}100%{opacity:1;transform:scale(1)}}
+.endhero{font-size:6.5rem;line-height:1;width:150px;height:150px;display:flex;align-items:center;justify-content:center;border-radius:50%;
+  background:radial-gradient(circle,#FFF6C9 0%,#FFE3EC 60%,rgba(255,227,236,0) 72%);opacity:0;animation:heroin 1s cubic-bezier(.3,1.5,.5,1) forwards}
+@keyframes heroin{0%{opacity:0;transform:scale(0) rotate(-200deg)}100%{opacity:1;transform:scale(1) rotate(0)}}
+.endpanel h2{color:#7B4CC2}
+.cert{width:100%;box-sizing:border-box;background:#FFFDF6;border:3px double #E3B34A;border-radius:18px;padding:12px 14px;display:flex;flex-direction:column;gap:8px}
+.certh{font-family:var(--f-display);font-weight:800;font-size:1.25rem;color:#B07A00;letter-spacing:.08em}
+.certto{font-size:1rem;color:var(--ink-soft)}
+.certto b{font-family:var(--f-display);font-size:1.4rem;color:var(--ink)}
+.certstats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.certstats div{display:flex;flex-direction:column;align-items:center}
+.certstats b{font-family:var(--f-display);font-weight:800;font-size:1.3rem;font-variant-numeric:tabular-nums}
+.certstats span{font-size:.8rem;color:var(--ink-soft)}
+.certdate{font-size:.85rem;color:var(--ink-soft);font-variant-numeric:tabular-nums}
+.endwords{display:flex;flex-wrap:wrap;justify-content:center;gap:6px}
+.endwords button{border:0;background:#fff;border-radius:10px;padding:4px 10px;font-family:var(--f-letter);font-weight:700;font-size:1rem;box-shadow:0 2px 0 var(--card-edge)}
+.endbtns{display:flex;flex-direction:column;gap:10px;width:100%}
+#endOv.reveal .endbtns,#endOv.reveal .endwords{visibility:hidden;opacity:0}
+#endOv .endbtns,#endOv .endwords{transition:opacity .4s}
+@media (prefers-reduced-motion:reduce){.evo .evs,.evo i,.endhero{animation:none;opacity:1}}
+/* grade tabs + certificates */
+.gtabs{display:flex;gap:6px;overflow-x:auto;padding:2px 2px 6px;-webkit-overflow-scrolling:touch}
+.gtab{flex-shrink:0;display:flex;align-items:center;gap:6px;border:0;border-radius:999px;padding:6px 12px 6px 8px;background:#fff;color:var(--ink);font-weight:800;font-size:.95rem;box-shadow:0 3px 0 var(--sky-deep)}
+.gtab .gic{font-size:1.3rem;line-height:1}
+.gtab[aria-pressed="true"]{background:var(--tc);color:#fff;box-shadow:0 3px 0 rgba(0,0,0,.18)}
+.gtab.dark{background:#2A3142;color:#8C94A8;box-shadow:0 3px 0 #161A24;cursor:default}
+.gtab.dark .gic{filter:brightness(0) invert(.35)}
+.certc{display:flex;align-items:center;gap:12px;border:0;border-left:8px solid var(--tc);background:#FFFDF6;border-radius:16px;padding:10px 14px;text-align:left;box-shadow:0 4px 0 var(--sky-deep)}
+.certc .cic{font-size:2rem;line-height:1}
+.certc.dark{background:#2A3142;border-left-color:#3A4256;color:#8C94A8;box-shadow:0 4px 0 #161A24;cursor:default}
+.certc.dark small{color:#8C94A8}
+/* statistics */
+.big.stats{background:#DDF0FF;box-shadow:0 6px 0 #9CC8EA;color:#1F4E79}
+.stattop{display:flex;align-items:center;gap:16px;flex-wrap:wrap;justify-content:center}
+.donut{width:140px;height:140px;flex-shrink:0}
+.donut svg{width:100%;height:100%}
+.statnums{display:flex;flex-direction:column;gap:6px;min-width:0}
+.statnums div{display:flex;align-items:baseline;gap:8px}
+.statnums b{font-family:var(--f-display);font-weight:800;font-size:1.6rem;font-variant-numeric:tabular-nums;min-width:2.4ch;text-align:right}
+.statnums span{color:var(--ink-soft);font-size:.9rem}
+.gbars{display:flex;flex-direction:column;gap:6px}
+.gbar{display:grid;grid-template-columns:3em 1fr 4.6em;align-items:center;gap:8px}
+.gbar .gl{font-weight:800}
+.gbar .track{height:14px;background:#E4EEF4;border-radius:999px;overflow:hidden}
+.gbar .track i{display:block;height:100%;background:var(--tc);border-radius:999px}
+.gbar .gv{font-variant-numeric:tabular-nums;text-align:right;font-size:.9rem;color:var(--ink-soft)}
+.mbar{display:flex;height:18px;border-radius:999px;overflow:hidden;background:#E4EEF4;gap:2px}
+.mbar i{display:block}
+.mleg{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:8px;font-size:.85rem;color:var(--ink-soft)}
+.mleg span{display:flex;align-items:center;gap:5px}
+.mleg b{width:12px;height:12px;border-radius:4px;display:inline-block}
+.wgroup{display:flex;flex-direction:column;gap:6px}
+.wgh{font-family:var(--f-display);font-weight:800;color:var(--tc)}
+.wgrid{display:flex;flex-wrap:wrap;gap:6px}
+.wchip{display:inline-flex;align-items:center;gap:4px;border:0;border-radius:10px;padding:4px 6px 4px 8px;background:#fff;box-shadow:0 2px 0 var(--card-edge);font-family:var(--f-letter);font-weight:700;font-size:.95rem}
+.wchip .wc{font-family:var(--f-ui);font-size:.75rem;font-weight:800;min-width:1.6em;padding:0 5px;border-radius:999px;background:#C9D6E0;color:var(--ink);font-variant-numeric:tabular-nums}
+.wchip[data-lv="1"] .wc{background:#FFC83D}
+.wchip[data-lv="2"] .wc{background:#7DB9E8}
+.wchip[data-lv="3"] .wc{background:#4FAE63;color:#fff}
+.wlocked{display:inline-flex;align-items:center;padding:4px 10px;border-radius:10px;background:#2A3142;color:#C9CFDB;font-size:.85rem;font-weight:700}
+.gmeter.tap{border:0;cursor:pointer;font-family:inherit}
+.gmeter.tap:active{transform:translateY(1px)}
+.pill.bookpill{padding:6px 10px}
+@media (max-width:430px){.tname{display:none}.hbtns{gap:6px}.pill{padding:6px 11px}.pill.bookpill{padding:6px 8px}}
+/* fill-in levels */
+.board.fillmode{display:flex;align-items:flex-start;justify-content:center;overflow:auto}
+.fcard{width:100%;max-width:520px;background:#fff;border-radius:22px;box-shadow:0 5px 0 var(--card-edge);padding:16px 14px 18px;display:flex;flex-direction:column;align-items:center;gap:12px;box-sizing:border-box}
+.fcard.done{box-shadow:0 5px 0 #367E46;outline:3px solid var(--leaf)}
+.fpicrow{position:relative;display:flex;justify-content:center;width:100%}
+.fpic{font-size:4.6rem;line-height:1.1}
+.fpic.txt{font-size:2.2rem;font-weight:800;padding:14px 0;color:var(--ink)}
+.fhear{position:absolute;right:0;top:0;border:0;background:var(--chalk);border-radius:50%;width:44px;height:44px;font-size:1.3rem;box-shadow:0 3px 0 var(--sky-deep)}
+.fzh{color:var(--ink-soft);font-weight:700;min-height:1.2em}
+.fslots{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
+.fslot{min-width:calc(var(--fz) * .9);height:calc(var(--fz) * 1.35);display:flex;align-items:flex-end;justify-content:center;border-bottom:4px solid var(--card-edge);font-family:var(--f-letter);font-weight:700;font-size:var(--fz);line-height:1;padding-bottom:4px;color:var(--ink)}
+.fslot.given{color:var(--berry);border-bottom-color:var(--berry)}
+.fslot.next{border-bottom-color:var(--sun-edge);background:linear-gradient(transparent 70%,#FFF1C2 70%)}
+.fslot.ok{border-bottom-color:var(--leaf);animation:pop1 .25s}
+@keyframes pop1{50%{transform:scale(1.25)}}
+.ftiles{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;padding-top:4px}
+.ftile{border:0;width:56px;height:56px;border-radius:14px;background:var(--sun);box-shadow:0 5px 0 var(--sun-edge);font-family:var(--f-letter);font-weight:700;font-size:1.9rem;color:var(--ink);touch-action:manipulation}
+.ftile:active{transform:translateY(3px);box-shadow:0 2px 0 var(--sun-edge)}
+.ftile.used{visibility:hidden}
+.ftile.bad{animation:shake .45s;background:#FFD9DF;box-shadow:0 5px 0 var(--berry)}
+.vnote{background:#FFF1C2;color:#7A4E00;border-radius:12px;padding:6px 12px;font-size:.9rem;font-weight:700;text-align:center}
+.diag{margin:0;white-space:pre-wrap;word-break:break-all;background:#22324A;color:#E6EEF6;border-radius:12px;padding:10px 12px;font-size:.8rem;line-height:1.5;font-family:ui-monospace,Menlo,monospace;user-select:text;-webkit-user-select:text}
+/* players */
+.who{display:flex;align-items:center;gap:12px;border:0;background:#fff;border-radius:18px;padding:10px 14px;box-shadow:0 4px 0 var(--sky-deep);text-align:left}
+.wav{font-size:2.6rem;line-height:1;width:56px;height:56px;display:flex;align-items:center;justify-content:center;background:#FFE3EC;border-radius:50%;flex-shrink:0}
+.wtx{display:flex;flex-direction:column;min-width:0;flex:1}
+.wtx b{font-family:var(--f-display);font-weight:800;font-size:1.25rem;line-height:1.15}
+.wtx small{color:var(--ink-soft);font-size:.85rem}
+.wchg{color:var(--ink-soft);font-weight:700;font-size:.9rem;flex-shrink:0}
+.plist{display:flex;flex-direction:column;gap:8px}
+.prow{display:flex;align-items:center;gap:8px;background:#fff;border-radius:18px;padding:8px 10px;box-shadow:0 4px 0 var(--sky-deep)}
+.prow.cur{outline:3px solid var(--sun-edge)}
+.ppick{flex:1;min-width:0;display:flex;align-items:center;gap:12px;border:0;background:transparent;text-align:left;padding:0}
+.tinput{width:100%;box-sizing:border-box;border-radius:12px;border:2px solid var(--sky-deep);padding:10px 12px;font-family:var(--f-ui);font-size:1.1rem;color:var(--ink);background:#fff;user-select:text;-webkit-user-select:text}
+.tinput:focus{outline:none;border-color:var(--ink)}
+.chars{display:flex;flex-direction:column;gap:8px}
+.charc{border:3px solid transparent;background:#fff;border-radius:16px;padding:10px 12px;display:flex;flex-direction:column;gap:4px;text-align:left;box-shadow:0 3px 0 var(--sky-deep)}
+.charc[aria-pressed="true"]{border-color:#E99AB6;background:#FFF0F5}
+.cstages{display:flex;align-items:center;gap:6px;font-size:1.9rem;line-height:1}
+.cstages i{font-style:normal;font-size:1rem;color:var(--ink-soft)}
+.cname{font-size:.85rem;font-weight:600;color:var(--ink-soft)}
+.pill.danger{color:var(--berry)}
+/* stickers */
+.big.pink{background:#FFD6E4;box-shadow:0 6px 0 #E99AB6;color:#7A2246}
+.big.pink:active{box-shadow:0 3px 0 #E99AB6}
+.btabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch}
+.btab{flex-shrink:0;border:2px solid transparent;background:var(--pg);color:var(--pink);border-radius:999px;padding:5px 12px;font-weight:700;font-size:.9rem;font-variant-numeric:tabular-nums}
+.btab[aria-pressed="true"]{border-color:var(--pink);background:#fff}
+.bpage{background:var(--pg);border-radius:22px;padding:14px;display:flex;flex-direction:column;gap:10px;
+  background-image:radial-gradient(rgba(255,255,255,.7) 2px,transparent 2.5px);background-size:22px 22px}
+.pgname{font-family:var(--f-display);font-weight:800;color:var(--pink);font-size:1.35rem;text-align:center}
+.sgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.scell{border:0;background:transparent;display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px 0;min-width:0}
+.scell .sq{width:58px;height:58px;border-radius:50%;border:3px dashed rgba(0,0,0,.18);color:rgba(0,0,0,.3);border-color:color-mix(in srgb,var(--pink) 45%,transparent);display:flex;align-items:center;justify-content:center;color:color-mix(in srgb,var(--pink) 55%,transparent);font-family:var(--f-display);font-weight:800;font-size:1.4rem}
+.stk{display:inline-flex;align-items:center;justify-content:center;width:62px;height:62px;font-size:2.3rem;line-height:1;background:#fff;border-radius:50%;
+  box-shadow:0 0 0 4px #fff,0 4px 10px rgba(80,40,60,.18);transform:rotate(var(--r,0deg))}
+.stk.boing{animation:boing .6s}
+@keyframes boing{0%{transform:scale(1) rotate(var(--r,0deg))}30%{transform:scale(1.3) rotate(-8deg)}60%{transform:scale(.9) rotate(6deg)}100%{transform:scale(1) rotate(var(--r,0deg))}}
+.slabel{font-family:var(--f-letter);font-weight:700;font-size:.85rem;color:var(--pink);line-height:1.1;text-align:center}
+.overlay.gift{z-index:30;background:rgba(122,34,70,.35)}
+.giftpanel{background:var(--pg,#FFE3EC);align-items:center;text-align:center;overflow:visible}
+.giftpanel h2{color:var(--pink,#C2416B)}
+.giftbox{border:0;background:transparent;font-size:6.5rem;line-height:1;animation:wiggle 1.2s ease-in-out infinite;padding:8px}
+@keyframes wiggle{0%,60%,100%{transform:rotate(0)}10%{transform:rotate(-10deg) scale(1.05)}20%{transform:rotate(9deg) scale(1.05)}30%{transform:rotate(-6deg)}40%{transform:rotate(4deg)}}
+.greveal{position:relative;display:flex;flex-direction:column;align-items:center;gap:10px}
+.stk.big{width:130px;height:130px;font-size:5rem;box-shadow:0 0 0 7px #fff,0 8px 22px rgba(80,40,60,.22);animation:popin .7s cubic-bezier(.3,1.6,.5,1)}
+@keyframes popin{0%{transform:scale(0) rotate(-180deg)}100%{transform:scale(1) rotate(0)}}
+.gname{font-family:var(--f-letter);font-weight:700;font-size:1.6rem;color:var(--pink,#C2416B)}
+.spark{position:absolute;left:50%;top:65px;font-size:1.6rem;pointer-events:none;animation:spark 1.1s ease-out forwards}
+@keyframes spark{0%{transform:translate(-50%,-50%) scale(.3);opacity:1}100%{transform:translate(calc(-50% + var(--dx)),calc(-50% + var(--dy))) scale(1.1);opacity:0}}
+@media (prefers-reduced-motion:reduce){.giftbox{animation:none}.spark{display:none}}
+@media (prefers-reduced-motion:reduce){.card.match{animation:fade .4s .3s forwards}.card.bad{animation:none}@keyframes fade{to{opacity:0}}}
+</style>
+
+<div class="app">
+  <header>
+    <h1 id="title">拼字<span>消消樂</span></h1>
+    <div class="hbtns">
+      <button class="pill bookpill" id="bookBtn" type="button" aria-label="貼紙簿">🎀</button>
+      <button class="pill" id="againBtn" type="button">重來</button>
+      <button class="pill" id="menuBtn" type="button">選單</button>
+    </div>
+  </header>
+  <div class="devbar" id="devBar" hidden>
+    <span>🛠 測試</span>
+    <button type="button" data-s="3">完成 ★★★</button>
+    <button type="button" data-s="2">★★</button>
+    <button type="button" data-s="1">★</button>
+    <button type="button" data-s="0">時間到</button>
+  </div>
+  <div class="timerrow" id="timerRow" hidden>
+    <span class="clock" aria-hidden="true">⏱</span>
+    <div class="timer"><i id="timerFill"></i></div>
+    <span class="tsec" id="timerSec"></span>
+    <span class="penalty" id="penalty" aria-live="polite"></span>
+  </div>
+  <div class="vnote" id="voiceNote" hidden>🔊 原本選的聲音沒有反應，已經改用手機的預設聲音。</div>
+  <div class="strip" id="strip" aria-live="polite"><span class="hint">點一張卡片聽聽看 👂</span></div>
+  <div class="board" id="board"></div>
+  <div class="progress" id="progress" aria-label="配對進度"></div>
+</div>
+
+<!-- home -->
+<div class="overlay" id="homeOv">
+  <div class="panel">
+    <h2>拼字消消樂</h2>
+    <button class="who" id="whoBtn" type="button">
+      <span class="wav" id="whoAv"></span>
+      <span class="wtx"><b id="whoName"></b><small id="whoStage"></small></span>
+      <span class="wchg">換玩家 ›</span>
+    </button>
+    <button class="big go" id="resumeBtn" type="button" hidden>繼續玩<span class="sub" id="resumeSub"></span></button>
+    <button class="big" id="toMap" type="button">闖關模式<span class="sub" id="homeStars">一關一關往上挑戰</span></button>
+    <button class="big trophy" id="toEnd" type="button" hidden>🏆 我的證書<span class="sub" id="certSub"></span></button>
+    <button class="big pink" id="toBook" type="button">🎀 我的貼紙簿<span class="sub" id="bookSub"></span><span class="gmeter sm" id="homeGift"></span></button>
+    <button class="big stats" id="toStats" type="button">📊 單字統計<span class="sub">學了幾個字、每個字練了幾次</span></button>
+    <button class="big alt" id="toFree" type="button">自由練習與設定<span class="sub">自己選主題、自訂單字、選聲音</span></button>
+    <span class="small" id="noVoice" hidden>這個瀏覽器不支援語音，字母仍會一個一個亮起來。建議用 Safari 或 Chrome。</span>
+  </div>
+</div>
+
+<!-- level map -->
+<div class="overlay" id="mapOv" hidden>
+  <div class="panel wide">
+    <div class="ptop"><button class="pill" id="mapBack" type="button">← 回首頁</button><button class="gmeter sm tap" id="mapGift" type="button" title="看貼紙簿"></button><span class="tally" id="mapStars"></span></div>
+    <h2>闖關地圖</h2>
+    <div class="devnote" id="mapDev" hidden>🛠 測試模式：所有關卡都打開了</div>
+    <p>每關都有倒數計時，配錯會扣秒數。★★★ 要剩六成以上的時間，而且一次都沒配錯；★★ 要剩三成半以上。學過的字會一直回來複習。</p>
+    <div class="gtabs" id="gradeTabs"></div>
+    <div id="mapList" class="grp" style="gap:18px"></div>
+  </div>
+</div>
+
+<!-- free practice settings -->
+<div class="overlay" id="startOv" hidden>
+  <div class="panel">
+    <div class="ptop"><button class="pill" id="freeBack" type="button">← 回首頁</button></div>
+    <h2>自由練習</h2>
+    <div class="grp">
+      <span class="lab">單字主題</span>
+      <div class="chips" id="setChips"></div>
+    </div>
+    <div class="grp" id="customGrp" hidden>
+      <span class="lab">自訂單字</span>
+      <div class="clist" id="customList"></div>
+      <button class="chip" id="addRow" type="button">＋ 新增一個單字</button>
+      <span class="small">英文必填，中文可以不填。常見單字會自動配圖和中文。這份清單會記在這台裝置上。</span>
+    </div>
+    <div class="grp">
+      <span class="lab">卡片數量</span>
+      <div class="chips" id="sizeChips"></div>
+    </div>
+    <div class="grp">
+      <span class="lab">每個單字出現幾張</span>
+      <div class="chips" id="copyChips"></div>
+    </div>
+    <div class="grp">
+      <span class="lab">玩法</span>
+      <div class="chips" id="playChips"></div>
+    </div>
+    <div class="grp">
+      <span class="lab">大寫開頭的卡片（Dog 配 dog）</span>
+      <div class="chips" id="capChips"></div>
+    </div>
+    <div class="grp">
+      <span class="lab">圖片提示</span>
+      <div class="chips" id="picChips"></div>
+      <span class="small">開啟後卡片上會有小圖，適合剛開始認字時用。熟了以後關掉，讓她靠拼字來找。闖關模式會依關卡自動決定。</span>
+    </div>
+    <div class="grp">
+      <span class="lab">配對成功後唸中文意思（兩種模式都適用）</span>
+      <div class="chips" id="zhChips"></div>
+    </div>
+    <div class="grp">
+      <span class="lab">聲音檢查（聽不到發音時用）</span>
+      <div class="chips">
+        <button class="chip" id="chkDing" type="button">① 叮一聲</button>
+        <button class="chip" id="chkDefault" type="button">② 預設聲音唸 dog</button>
+        <button class="chip" id="chkChosen" type="button">③ 選的聲音唸 dog</button>
+      </div>
+      <pre class="diag" id="diagOut">按上面的按鈕，再把這裡的文字截圖給我。</pre>
+    </div>
+    <div class="grp" id="voiceGrp">
+      <label for="voiceSel">聲音（兩種模式都適用）</label>
+      <div class="vrow"><select id="voiceSel"></select><button class="chip" id="tryBtn" type="button">試聽</button></div>
+      <span class="small">名稱有 Premium、Enhanced 或 Natural 的聲音最自然，已自動排在最前面。</span>
+    </div>
+    <div class="grp">
+      <span class="lab">設計者測試模式</span>
+      <div class="chips" id="devChips"></div>
+      <span class="small">開啟後所有關卡都能直接進入，遊戲畫面上方會多一排按鈕可以直接過關。直接過關會記到目前玩家的紀錄，建議先新增一個測試用的玩家。</span>
+    </div>
+    <div class="err" id="err" hidden></div>
+    <button class="big" id="goBtn" type="button">開始練習！</button>
+  </div>
+</div>
+
+<!-- players -->
+<div class="overlay" id="playerOv" hidden>
+  <div class="panel">
+    <div class="ptop"><button class="pill" id="playerBack" type="button">← 回首頁</button></div>
+    <h2>選擇玩家</h2>
+    <p>每個玩家有自己的關卡紀錄、星星和貼紙。</p>
+    <div class="plist" id="playerList"></div>
+    <button class="big alt" id="addPlayer" type="button">＋ 新增玩家<span class="sub">開一份新的遊戲紀錄</span></button>
+  </div>
+</div>
+<div class="overlay" id="editOv" hidden>
+  <div class="panel">
+    <h2 id="editTitle">新玩家</h2>
+    <div class="grp">
+      <label for="pName">名字</label>
+      <input class="tinput" id="pName" type="text" maxlength="12" placeholder="例如：小美">
+    </div>
+    <div class="grp">
+      <span class="lab">闖關角色（過關會一路長大喔）</span>
+      <div class="chars" id="charList"></div>
+    </div>
+    <div class="err" id="pErr" hidden></div>
+    <button class="big" id="pSave" type="button">好了！</button>
+    <div class="ptop">
+      <button class="pill" id="pCancel" type="button">取消</button>
+      <button class="pill danger" id="pReset" type="button" hidden>重置紀錄</button>
+      <button class="pill danger" id="pDel" type="button" hidden>刪除這個玩家</button>
+    </div>
+  </div>
+</div>
+
+<!-- sticker album -->
+<div class="overlay" id="bookOv" hidden>
+  <div class="panel wide">
+    <div class="ptop"><button class="pill" id="bookBack" type="button">← 回去</button><span class="tally" id="bookCount"></span></div>
+    <h2>我的貼紙簿</h2>
+    <p>每拿到 5 顆星就能換一張貼紙。點貼紙會唸出它的英文名字。</p>
+    <div class="btabs" id="bookTabs"></div>
+    <div class="bpage" id="bookPage"></div>
+  </div>
+</div>
+
+<!-- gift -->
+<div class="overlay gift" id="giftOv" hidden>
+  <div class="panel giftpanel">
+    <h2 id="giftTitle">你得到新貼紙了！</h2>
+    <button class="giftbox" id="giftBox" type="button" aria-label="打開禮物">🎁</button>
+    <p id="giftHint">點禮物打開看看！</p>
+    <div class="greveal" id="giftReveal" hidden>
+      <span class="stk big" id="giftSticker"></span>
+      <div class="gname" id="giftName"></div>
+      <p id="giftPage"></p>
+    </div>
+    <button class="big" id="giftNext" type="button" hidden>收進貼紙簿</button>
+  </div>
+</div>
+
+<!-- word statistics -->
+<div class="overlay" id="statsOv" hidden>
+  <div class="panel wide">
+    <div class="ptop"><button class="pill" id="statsBack" type="button">← 回首頁</button></div>
+    <h2>單字統計</h2>
+    <div class="stattop">
+      <div class="donut" id="statDonut"></div>
+      <div class="statnums">
+        <div><b id="statUn"></b><span>已解鎖的單字</span></div>
+        <div><b id="statLock"></b><span>還沒解鎖</span></div>
+        <div><b id="statPlays"></b><span>總共配對成功幾次</span></div>
+      </div>
+    </div>
+    <div class="grp"><span class="lab">各年級解鎖進度</span><div class="gbars" id="statGrades"></div></div>
+    <div class="grp"><span class="lab">練習程度（已解鎖的單字）</span><div id="statMastery"></div></div>
+    <div class="grp"><span class="lab">最需要多練的字</span><div class="wgrid" id="statNeed"></div><span class="small">配錯比較多、或配對次數比較少的字。點一下可以聽。</span></div>
+    <div class="grp">
+      <span class="lab">全部單字（數字是配對成功的次數）</span>
+      <div class="chips" id="statSortChips"></div>
+      <div id="statList" class="grp"></div>
+    </div>
+  </div>
+</div>
+
+<!-- certificate wall -->
+<div class="overlay" id="certOv" hidden>
+  <div class="panel">
+    <div class="ptop"><button class="pill" id="certBack" type="button">← 回首頁</button><span class="tally" id="certCount"></span></div>
+    <h2>我的證書</h2>
+    <p>完成一整個年級就能拿到那一級的證書。</p>
+    <div class="plist" id="certList"></div>
+  </div>
+</div>
+
+<!-- ending: shown after finishing a grade -->
+<div class="overlay ending" id="endOv" hidden>
+  <canvas id="confetti" aria-hidden="true"></canvas>
+  <div class="panel endpanel">
+    <div class="endtop" id="endTop">🎉 破關了！🎉</div>
+    <div class="evo" id="endEvo"></div>
+    <div class="endhero" id="endHero"></div>
+    <h2 id="endTitle"></h2>
+    <div class="cert">
+      <div class="certh" id="certHead">拼字證書</div>
+      <div class="certto">頒給 <b id="certName"></b></div>
+      <div class="certstats">
+        <div><b id="certWords"></b><span>這一級的單字</span></div>
+        <div><b id="certStars"></b><span>這一級的星星</span></div>
+        <div><b id="certStk"></b><span>貼紙</span></div>
+      </div>
+      <div class="certdate" id="certDate"></div>
+    </div>
+    <p>點一點學會的單字，再聽一次：</p>
+    <div class="endwords" id="endWords"></div>
+    <div class="endbtns" id="endBtns">
+      <button class="big go" id="endNext" type="button" hidden>開始下一級 →</button>
+      <button class="big trophy" id="endCerts" type="button">🏆 我的證書</button>
+      <button class="big pink" id="endBook" type="button">🎀 看我的貼紙簿</button>
+      <button class="big alt" id="endHome" type="button">回首頁</button>
+    </div>
+  </div>
+</div>
+
+<!-- win -->
+<div class="overlay" id="winOv" hidden>
+  <div class="panel">
+    <div class="stars" id="winStars">★★★</div>
+    <h2 id="winTitle">全部消完了！</h2>
+    <p id="winSub">再點一次今天的單字，聽聽怎麼拼：</p>
+    <button class="gmeter tap" id="winGift" type="button" title="看貼紙簿" hidden></button>
+    <div class="learned" id="learned"></div>
+    <button class="big go" id="nextBtn" type="button" hidden>下一關 →</button>
+    <button class="big" id="replayBtn" type="button">再玩一次</button>
+    <button class="big alt" id="changeBtn" type="button">換單字</button>
+  </div>
+</div>
+
+<script>
+(function(){
+const SETS = {
+  cvc:   {name:"三個字母", words:["cat","dog","pig","sun","hat","bed","cup","box","bus","red","pen","map","bat","fox","hen","big","top","run"]},
+  animal:{name:"動物", words:["cat","dog","pig","cow","hen","fox","bee","owl","duck","fish","frog","bear","lion","goat"]},
+  color: {name:"顏色", words:["red","blue","pink","green","black","white","brown","yellow","purple","orange"]},
+  body:  {name:"家人和身體", words:["mom","dad","baby","eye","ear","nose","hand","foot","leg","arm","head","lip"]},
+  g1:{name:"小一",words:[]},g2:{name:"小二",words:[]},g3:{name:"小三",words:[]},g4:{name:"小四",words:[]},g5:{name:"小五",words:[]},g6:{name:"小六",words:[]},
+  custom:{name:"自訂", words:[]}
+};
+const SIZES=[8,12,16], COPIES=[2,4];
+const DICT={
+  cat:["🐱","貓"],dog:["🐶","狗"],pig:["🐷","豬"],sun:["☀️","太陽"],hat:["👒","帽子"],bed:["🛏️","床"],cup:["☕","杯子"],box:["📦","盒子"],
+  bus:["🚌","公車"],red:["🔴","紅色"],pen:["🖊️","筆"],map:["🗺️","地圖"],bat:["🦇","蝙蝠"],fox:["🦊","狐狸"],hen:["🐔","母雞"],big:["🐘","大的"],
+  top:["🔝","上面"],run:["🏃","跑"],cow:["🐮","牛"],bee:["🐝","蜜蜂"],owl:["🦉","貓頭鷹"],duck:["🦆","鴨子"],fish:["🐟","魚"],frog:["🐸","青蛙"],
+  bear:["🐻","熊"],lion:["🦁","獅子"],goat:["🐐","山羊"],blue:["🔵","藍色"],pink:["🌸","粉紅色"],green:["🟢","綠色"],black:["⚫","黑色"],white:["⚪","白色"],
+  brown:["🟤","咖啡色"],yellow:["🟡","黃色"],purple:["🟣","紫色"],orange:["🟠","橘色"],mom:["👩","媽媽"],dad:["👨","爸爸"],baby:["👶","寶寶"],eye:["👁️","眼睛"],
+  ear:["👂","耳朵"],nose:["👃","鼻子"],hand:["✋","手"],foot:["🦶","腳"],leg:["🦵","腿"],arm:["💪","手臂"],head:["🙂","頭"],lip:["👄","嘴唇"],
+  apple:["🍎","蘋果"],ball:["⚽","球"],car:["🚗","車子"],egg:["🥚","蛋"],milk:["🥛","牛奶"],cake:["🍰","蛋糕"],book:["📖","書"],tree:["🌳","樹"],
+  star:["⭐","星星"],moon:["🌙","月亮"],rain:["🌧️","下雨"],bird:["🐦","鳥"],ant:["🐜","螞蟻"],banana:["🍌","香蕉"],water:["💧","水"],rice:["🍚","飯"],
+  boy:["👦","男孩"],girl:["👧","女孩"],rabbit:["🐰","兔子"],horse:["🐴","馬"],sheep:["🐑","綿羊"],house:["🏠","房子"],door:["🚪","門"],shoe:["👟","鞋子"],
+  sock:["🧦","襪子"],bag:["🎒","包包"],ice:["🧊","冰"],hot:["🔥","熱的"],cold:["🥶","冷的"],pizza:["🍕","披薩"],bread:["🍞","麵包"],cookie:["🍪","餅乾"],
+  flower:["🌷","花"],cloud:["☁️","雲"],snow:["❄️","雪"],happy:["😄","開心"],sad:["😢","難過"],ship:["🚢","船"],kite:["🪁","風箏"],key:["🔑","鑰匙"],
+  tiger:["🐯","老虎"],zebra:["🦓","斑馬"],monkey:["🐒","猴子"],panda:["🐼","熊貓"],smile:["😊","微笑"],cap:["🧢","棒球帽"],cut:["✂️","剪"],
+  pin:["📌","圖釘"],pan:["🍳","平底鍋"],bad:["👎","壞的"],bug:["🐛","蟲"]
+};
+const SENT={
+  cat:"I have a cat.",dog:"The dog can run.",pig:"The pig is pink.",sun:"The sun is hot.",hat:"I like my hat.",bed:"I go to bed.",
+  cup:"I drink from a cup.",box:"The toy is in the box.",bus:"We ride the bus.",red:"The apple is red.",pen:"I write with a pen.",
+  map:"Look at the map.",bat:"The bat can fly.",fox:"The fox is orange.",hen:"The hen has an egg.",big:"The elephant is big.",
+  top:"The cat is on top of the box.",run:"I can run fast.",cow:"The cow says moo.",bee:"The bee is on the flower.",owl:"The owl says hoo.",
+  duck:"The duck can swim.",fish:"The fish is in the water.",frog:"The frog can jump.",bear:"The bear is big.",lion:"The lion can roar.",
+  goat:"The goat eats grass.",blue:"The sky is blue.",pink:"I like pink.",green:"The tree is green.",black:"The cat is black.",
+  white:"The snow is white.",brown:"The bear is brown.",yellow:"The banana is yellow.",purple:"I have a purple crayon.",orange:"I eat an orange.",
+  mom:"I love my mom.",dad:"My dad is tall.",baby:"The baby is sleeping.",eye:"I see with my eyes.",ear:"I hear with my ears.",
+  nose:"I smell with my nose.",hand:"Clap your hands.",foot:"Stomp your foot.",leg:"I hop on one leg.",arm:"Wave your arm.",
+  head:"Touch your head.",lip:"Smack your lips.",apple:"I eat an apple.",ball:"Kick the ball.",car:"The car is fast.",egg:"I eat an egg.",
+  milk:"I drink milk.",cake:"I like cake.",book:"I read a book.",tree:"The bird is in the tree.",star:"I see a star.",moon:"The moon is bright.",
+  rain:"I like the rain.",bird:"The bird can sing.",ant:"The ant is small.",banana:"The monkey eats a banana.",water:"I drink water.",
+  rice:"I eat rice.",boy:"He is a boy.",girl:"She is a girl.",rabbit:"The rabbit can hop.",horse:"I ride a horse.",sheep:"The sheep says baa.",
+  house:"This is my house.",door:"Open the door.",shoe:"Put on your shoe.",sock:"I have a red sock.",bag:"My bag is big.",ice:"The ice is cold.",
+  hot:"The soup is hot.",cold:"I feel cold.",pizza:"I like pizza.",bread:"I eat bread.",cookie:"I want a cookie.",flower:"The flower is pretty.",
+  cloud:"The cloud is white.",snow:"I play in the snow.",happy:"I am happy.",sad:"The boy is sad.",ship:"The ship is on the sea.",
+  kite:"I fly a kite.",key:"I have a key.",tiger:"The tiger is big.",zebra:"The zebra has stripes.",monkey:"The monkey can climb.",
+  panda:"The panda eats bamboo.",smile:"I smile at you.",cap:"I wear a cap.",cut:"I cut the paper.",pin:"This is a pin.",
+  pan:"Mom cooks in the pan.",bad:"That is bad.",bug:"The bug is small."
+};
+/* Sticker album: one new sticker for every 5 stars (best stars per level, so replaying for more stars also earns stickers).
+   Stickers fill the album page by page, in random order within a page. */
+const STAR_PER_STICKER=5;
+const ALBUM=[
+  {name:"甜點派對",bg:"#FFE3EC",ink:"#C2416B",items:[["🧁","cupcake","杯子蛋糕"],["🍰","cake","蛋糕"],["🍩","donut","甜甜圈"],["🍪","cookie","餅乾"],["🍭","lollipop","棒棒糖"],["🍬","candy","糖果"],["🍓","strawberry","草莓"],["🍦","ice cream","冰淇淋"],["🍫","chocolate","巧克力"],["🥞","pancake","鬆餅"],["🍡","dango","糰子"],["🧃","juice","果汁"]]},
+  {name:"夢幻公主",bg:"#EFE4FF",ink:"#7B4CC2",items:[["👑","crown","皇冠"],["💎","diamond","鑽石"],["🏰","castle","城堡"],["🦄","unicorn","獨角獸"],["🌈","rainbow","彩虹"],["🎀","ribbon","蝴蝶結"],["🪄","magic wand","魔法棒"],["👗","dress","洋裝"],["👠","shoes","高跟鞋"],["💍","ring","戒指"],["🪞","mirror","鏡子"],["🫖","teapot","茶壺"]]},
+  {name:"可愛動物",bg:"#FFF1D2",ink:"#B26B00",items:[["🐰","bunny","兔兔"],["🐱","kitty","貓咪"],["🐼","panda","熊貓"],["🐨","koala","無尾熊"],["🦊","fox","狐狸"],["🐹","hamster","倉鼠"],["🐧","penguin","企鵝"],["🐥","chick","小雞"],["🐢","turtle","烏龜"],["🦔","hedgehog","刺蝟"],["🐶","puppy","小狗"],["🐻","teddy bear","小熊"]]},
+  {name:"秘密花園",bg:"#E1F5E3",ink:"#2F8A45",items:[["🌷","tulip","鬱金香"],["🌻","sunflower","向日葵"],["🌸","blossom","櫻花"],["🌺","hibiscus","扶桑花"],["🌼","daisy","雛菊"],["🍄","mushroom","香菇"],["🦋","butterfly","蝴蝶"],["🐞","ladybug","瓢蟲"],["🐝","bee","蜜蜂"],["🐌","snail","蝸牛"],["🍀","clover","幸運草"],["🌙","moon","月亮"]]},
+  {name:"海底世界",bg:"#DBF0FA",ink:"#2A7FB0",items:[["🐠","fish","小魚"],["🐬","dolphin","海豚"],["🐳","whale","鯨魚"],["🦀","crab","螃蟹"],["🐙","octopus","章魚"],["🐚","shell","貝殼"],["🐡","puffer fish","河豚"],["🦭","seal","海豹"],["🦐","shrimp","蝦子"],["🦑","squid","魷魚"],["🫧","bubbles","泡泡"],["⛵","sailboat","帆船"]]},
+  {name:"水果樂園",bg:"#FFEBD9",ink:"#C25A1B",items:[["🍎","apple","蘋果"],["🍊","orange","橘子"],["🍋","lemon","檸檬"],["🍉","watermelon","西瓜"],["🍇","grapes","葡萄"],["🍑","peach","水蜜桃"],["🍒","cherry","櫻桃"],["🥝","kiwi","奇異果"],["🍍","pineapple","鳳梨"],["🥭","mango","芒果"],["🍐","pear","西洋梨"],["🫐","blueberry","藍莓"]]},
+  {name:"派對時間",bg:"#FCE4F6",ink:"#B03A93",items:[["🎂","birthday cake","生日蛋糕"],["🎈","balloon","氣球"],["🎁","present","禮物"],["🎉","party popper","拉炮"],["🎊","confetti","彩帶球"],["🪅","pinata","皮納塔"],["🎵","music","音樂"],["🎨","paint","顏料"],["🧸","teddy","泰迪熊"],["🪀","yo-yo","溜溜球"],["🎠","carousel","旋轉木馬"],["🎡","ferris wheel","摩天輪"]]},
+  {name:"夢幻天空",bg:"#E3E8FF",ink:"#4553B8",items:[["☁️","cloud","雲朵"],["🌙","crescent","彎月"],["⭐","star","星星"],["🌈","rainbow","彩虹"],["🪐","planet","行星"],["☀️","sun","太陽"],["🎈","red balloon","紅氣球"],["🪁","kite","風箏"],["🌟","glowing star","閃亮星"],["☄️","comet","彗星"],["🦢","swan","天鵝"],["🕊️","dove","鴿子"]]}
+];
+const STICKER_TOTAL=ALBUM.reduce((n,p)=>n+p.items.length,0);
+/* Level mode: grades 大班 → 小六. Each grade adds new words; the rest of every board is review
+   (last level's new words first, then the least-practised words), so earlier words keep coming back.
+   Difficulty comes from the number of words on the board and the time limit. */
+const CURRIC=[
+  "cat","dog","pig","sun","hat","bed","cup","box","bus","hen","fox","red",
+  "cow","ant","owl","bat","car","cap","bug",
+  "mom","dad","egg","pen","map","bee","duck","fish","frog","star",
+  "boy","girl","bag","key","leg","arm","eye","ear",
+  "moon","milk","cake","ball","bird","tree","book","bear","lion","kite",
+  "goat","pink","blue",
+  "apple","green","house","water","happy","horse","sheep","zebra","yellow","rabbit"
+];
+const GRADE_WORDS={"G1": [["crayon", "🖍️", "蠟筆", "I draw with a crayon."], ["pencil", "✏️", "鉛筆", "I write with a pencil."], ["ruler", "📏", "尺", "I have a long ruler."], ["desk", "", "書桌", "This is my desk."], ["chair", "🪑", "椅子", "Sit on the chair."], ["school", "🏫", "學校", "I go to school."], ["teacher", "🧑‍🏫", "老師", "My teacher is nice."], ["friend", "🤗", "朋友", "She is my friend."], ["one", "1️⃣", "一", "I have one dog."], ["two", "2️⃣", "二", "I have two hands."], ["three", "3️⃣", "三", "I see three cats."], ["four", "4️⃣", "四", "A cat has four legs."], ["five", "5️⃣", "五", "I can count to five."], ["six", "6️⃣", "六", "I have six pens."], ["seven", "7️⃣", "七", "I see seven stars."], ["eight", "8️⃣", "八", "An octopus has eight arms."], ["nine", "9️⃣", "九", "I have nine books."], ["ten", "🔟", "十", "I have ten toes."], ["sit", "🪑", "坐", "Please sit down."], ["stand", "🧍", "站", "Please stand up."], ["jump", "🦘", "跳", "I can jump high."], ["swim", "🏊", "游泳", "I can swim."], ["sing", "🎤", "唱歌", "I like to sing."], ["dance", "💃", "跳舞", "We dance together."], ["eat", "🍽️", "吃", "I eat lunch."], ["drink", "🥤", "喝", "I drink juice."], ["sleep", "😴", "睡覺", "I sleep at night."], ["play", "🧸", "玩", "Let's play together."], ["look", "👀", "看", "Look at me."], ["open", "📂", "打開", "Open your book."], ["close", "🚪", "關上", "Close the door."], ["grandma", "👵", "奶奶", "I love my grandma."], ["grandpa", "👴", "爺爺", "My grandpa is kind."], ["sister", "👧", "姊妹", "My sister is cute."], ["brother", "👦", "兄弟", "My brother is tall."], ["toy", "🧸", "玩具", "This is my toy."], ["doll", "🪆", "娃娃", "I have a doll."], ["robot", "🤖", "機器人", "The robot can walk."], ["lunch", "🍱", "午餐", "It is time for lunch."], ["morning", "🌅", "早上", "Good morning, Mom."], ["black", "⚫", "黑色", "The cat is black."], ["white", "⚪", "白色", "The snow is white."], ["brown", "🟤", "咖啡色", "The bear is brown."], ["purple", "🟣", "紫色", "I have a purple crayon."], ["orange", "🟠", "橘色", "I eat an orange."], ["nose", "👃", "鼻子", "I smell with my nose."], ["hand", "✋", "手", "Clap your hands."], ["foot", "🦶", "腳", "Stomp your foot."], ["head", "🙂", "頭", "Touch your head."], ["baby", "👶", "寶寶", "The baby is sleeping."], ["family", "👪", "家庭", "I love my family."], ["aunt", "", "阿姨", "My aunt is nice."], ["uncle", "", "叔叔", "My uncle is tall."], ["tiger", "🐯", "老虎", "The tiger is big."], ["monkey", "🐒", "猴子", "The monkey can climb."], ["panda", "🐼", "熊貓", "The panda eats bamboo."], ["snake", "🐍", "蛇", "The snake is long."], ["mouse", "🐭", "老鼠", "The mouse is small."], ["turtle", "🐢", "烏龜", "The turtle is slow."], ["eraser", "", "橡皮擦", "I have a pink eraser."], ["paper", "📄", "紙", "I need some paper."], ["glue", "", "膠水", "Use glue to stick it."], ["hello", "👋", "你好", "Hello, I am Amy."], ["bye", "👋", "再見", "Bye, see you tomorrow."], ["yes", "✔️", "是", "Yes, I can."], ["no", "❌", "不", "No, thank you."], ["please", "🙏", "請", "Please help me."], ["thank", "🙏", "謝謝", "Thank you, Mom."], ["door", "🚪", "門", "Open the door."], ["shoe", "👟", "鞋子", "Put on your shoe."]], "G2": [["rainy", "🌧️", "下雨的", "It is rainy today."], ["sunny", "☀️", "晴朗的", "It is sunny today."], ["windy", "🌬️", "颳風的", "It is windy outside."], ["cloudy", "☁️", "多雲的", "It is cloudy today."], ["hot", "🔥", "熱的", "The soup is hot."], ["cold", "🥶", "冷的", "I feel cold."], ["juice", "🧃", "果汁", "I drink apple juice."], ["tea", "🍵", "茶", "Grandpa drinks tea."], ["soup", "🍲", "湯", "The soup is good."], ["noodles", "🍜", "麵", "I like noodles."], ["rice", "🍚", "飯", "I eat rice."], ["bread", "🍞", "麵包", "I eat bread."], ["cookie", "🍪", "餅乾", "I want a cookie."], ["pizza", "🍕", "披薩", "I like pizza."], ["banana", "🍌", "香蕉", "The monkey eats a banana."], ["grape", "🍇", "葡萄", "The grape is purple."], ["lemon", "🍋", "檸檬", "The lemon is sour."], ["shirt", "👕", "襯衫", "I wear a blue shirt."], ["dress", "👗", "洋裝", "She has a pink dress."], ["skirt", "", "裙子", "My skirt is red."], ["pants", "👖", "褲子", "My pants are long."], ["coat", "🧥", "外套", "Put on your coat."], ["glasses", "👓", "眼鏡", "Grandma wears glasses."], ["park", "🏞️", "公園", "We play in the park."], ["zoo", "🦁", "動物園", "We go to the zoo."], ["store", "🏪", "商店", "I go to the store."], ["farm", "🚜", "農場", "The cow lives on a farm."], ["beach", "🏖️", "海灘", "We play on the beach."], ["kitchen", "🍳", "廚房", "Mom is in the kitchen."], ["bathroom", "🛁", "浴室", "The bathroom is clean."], ["bedroom", "🛏️", "臥室", "This is my bedroom."], ["garden", "🌻", "花園", "The garden is pretty."], ["window", "🪟", "窗戶", "Open the window."], ["table", "", "桌子", "Put the cup on the table."], ["clock", "🕰️", "時鐘", "The clock is on the wall."], ["phone", "📱", "電話", "Dad has a new phone."], ["umbrella", "☂️", "雨傘", "Take your umbrella."], ["bike", "🚲", "腳踏車", "I ride my bike."], ["train", "🚆", "火車", "The train is fast."], ["plane", "✈️", "飛機", "The plane can fly."], ["donut", "🍩", "甜甜圈", "I eat a donut."], ["peach", "🍑", "水蜜桃", "The peach is sweet."], ["cherry", "🍒", "櫻桃", "The cherry is red."], ["watermelon", "🍉", "西瓜", "I eat watermelon in summer."], ["strawberry", "🍓", "草莓", "I like strawberry cake."], ["coffee", "☕", "咖啡", "Dad drinks coffee."], ["meat", "🥩", "肉", "I eat meat."], ["uniform", "", "制服", "I wear my school uniform."], ["sweater", "🧶", "毛衣", "My sweater is warm."], ["jacket", "", "夾克", "Put on your jacket."], ["scarf", "🧣", "圍巾", "My scarf is long."], ["gloves", "🧤", "手套", "I wear gloves in winter."], ["boots", "👢", "靴子", "My boots are red."], ["sock", "🧦", "襪子", "I have a red sock."], ["sofa", "🛋️", "沙發", "The cat is on the sofa."], ["lamp", "💡", "燈", "Turn on the lamp."], ["wall", "", "牆壁", "The clock is on the wall."], ["floor", "", "地板", "The toy is on the floor."], ["truck", "🚚", "卡車", "The truck is big."], ["taxi", "🚕", "計程車", "We take a taxi."], ["ship", "🚢", "船", "The ship is on the sea."], ["boat", "⛵", "小船", "The boat is on the lake."], ["rocket", "🚀", "火箭", "The rocket goes up."], ["snowy", "❄️", "下雪的", "It is snowy today."], ["warm", "🌤️", "溫暖的", "It is warm today."], ["cool", "😎", "涼爽的", "It is cool in fall."], ["flower", "🌷", "花", "The flower is pretty."], ["cloud", "☁️", "雲", "The cloud is white."], ["sad", "😢", "難過", "The boy is sad."], ["pocket", "", "口袋", "The key is in my pocket."]], "G3": [["tall", "🦒", "高的", "The giraffe is tall."], ["short", "", "短的", "The pencil is short."], ["long", "🐍", "長的", "The snake is long."], ["fast", "🐆", "快的", "A rabbit is fast."], ["slow", "🐢", "慢的", "The turtle is slow."], ["old", "👴", "老的", "My grandpa is old."], ["young", "👶", "年輕的", "The baby is young."], ["new", "✨", "新的", "I have a new bag."], ["clean", "🧼", "乾淨的", "My hands are clean."], ["dirty", "", "髒的", "My shoes are dirty."], ["hungry", "🤤", "餓的", "I am hungry."], ["thirsty", "🥤", "口渴的", "I am thirsty."], ["tired", "😪", "累的", "I am tired."], ["angry", "😠", "生氣的", "Dad is angry."], ["scared", "😨", "害怕的", "The cat is scared."], ["sick", "🤒", "生病的", "I am sick today."], ["pretty", "🌸", "漂亮的", "The flower is pretty."], ["cute", "🥰", "可愛的", "The puppy is cute."], ["strong", "💪", "強壯的", "The man is strong."], ["small", "🐜", "小的", "The ant is small."], ["music", "🎵", "音樂", "I like music."], ["art", "🎨", "美術", "Art class is fun."], ["math", "➕", "數學", "I like math."], ["class", "🏫", "課", "Our class is big."], ["homework", "📝", "功課", "I do my homework."], ["read", "📖", "讀", "I read every day."], ["write", "✍️", "寫", "I can write my name."], ["draw", "🖍️", "畫", "I draw a cat."], ["listen", "👂", "聽", "Listen to the teacher."], ["speak", "🗣️", "說", "Please speak slowly."], ["walk", "🚶", "走路", "I walk to school."], ["ride", "🚲", "騎", "I ride a bike."], ["fly", "🦅", "飛", "Birds can fly."], ["climb", "🧗", "爬", "I can climb the tree."], ["cook", "🧑‍🍳", "煮", "Mom can cook."], ["wash", "🧼", "洗", "Wash your hands."], ["help", "🤝", "幫忙", "I help my mom."], ["like", "👍", "喜歡", "I like you."], ["love", "❤️", "愛", "I love my family."], ["want", "🙋", "想要", "I want an apple."], ["run", "🏃", "跑", "I can run fast."], ["come", "", "來", "Come here, please."], ["go", "🚶", "去", "Let's go to the park."], ["get", "", "得到", "I get a gift."], ["give", "🎁", "給", "Give me the ball."], ["take", "", "拿", "Take a cookie."], ["make", "🛠️", "做", "I make a cake."], ["see", "👀", "看見", "I see a bird."], ["say", "💬", "說", "Say hello to Grandma."], ["tell", "", "告訴", "Tell me a story."], ["ask", "🙋", "問", "Ask your teacher."], ["find", "🔍", "找到", "I find my key."], ["stop", "🛑", "停", "Stop at the red light."], ["wait", "⏳", "等", "Wait for me."], ["catch", "", "接住", "Catch the ball."], ["throw", "", "丟", "Throw the ball to me."], ["kick", "🦵", "踢", "Kick the ball."], ["carry", "", "搬", "I carry my bag."], ["brush", "🪥", "刷", "Brush your teeth."], ["cry", "😢", "哭", "The baby can cry."], ["laugh", "😂", "笑", "We laugh a lot."], ["smile", "😊", "微笑", "I smile at you."], ["shout", "📣", "大叫", "Don't shout."], ["good", "👍", "好的", "You are a good girl."], ["bad", "👎", "壞的", "That is bad."], ["little", "🐣", "小的", "I have a little dog."], ["heavy", "🏋️", "重的", "The box is heavy."], ["soft", "☁️", "軟的", "The bed is soft."], ["hard", "🪨", "硬的", "The rock is hard."], ["wet", "💦", "濕的", "My shoes are wet."], ["dry", "🌵", "乾的", "The towel is dry."], ["full", "", "飽的", "I am full."], ["empty", "", "空的", "The box is empty."], ["shy", "😳", "害羞的", "She is shy."], ["kind", "😊", "親切的", "My teacher is kind."]], "G4": [["spring", "🌸", "春天", "Flowers grow in spring."], ["summer", "🏖️", "夏天", "Summer is hot."], ["fall", "🍂", "秋天", "The leaves are red in fall."], ["winter", "⛄", "冬天", "It snows in winter."], ["week", "📅", "星期", "There are seven days in a week."], ["month", "🗓️", "月", "My birthday is this month."], ["year", "🎆", "年", "Happy new year!"], ["today", "📆", "今天", "Today is a good day."], ["night", "🌃", "晚上", "Good night, Dad."], ["birthday", "🎂", "生日", "Happy birthday to you!"], ["doctor", "🧑‍⚕️", "醫生", "The doctor is kind."], ["nurse", "🩺", "護士", "The nurse helps sick people."], ["farmer", "🧑‍🌾", "農夫", "The farmer has a cow."], ["chef", "🧑‍🍳", "廚師", "The chef cooks food."], ["police", "👮", "警察", "The police help us."], ["driver", "🚕", "司機", "The bus driver is nice."], ["singer", "🎤", "歌手", "She is a singer."], ["student", "🧑‍🎓", "學生", "I am a student."], ["tooth", "🦷", "牙齒", "I lost a tooth."], ["face", "🙂", "臉", "Wash your face."], ["hair", "💇", "頭髮", "Her hair is long."], ["mouth", "👄", "嘴巴", "Open your mouth."], ["finger", "☝️", "手指", "I have ten fingers."], ["knee", "🦵", "膝蓋", "I hurt my knee."], ["shoulder", "🤷", "肩膀", "Touch your shoulder."], ["breakfast", "🥞", "早餐", "I eat breakfast at home."], ["dinner", "🍽️", "晚餐", "We eat dinner together."], ["fruit", "🍎", "水果", "I like fruit."], ["vegetable", "🥦", "蔬菜", "A carrot is a vegetable."], ["carrot", "🥕", "紅蘿蔔", "The rabbit eats a carrot."], ["tomato", "🍅", "番茄", "The tomato is red."], ["potato", "🥔", "馬鈴薯", "I like potato chips."], ["corn", "🌽", "玉米", "The corn is yellow."], ["sandwich", "🥪", "三明治", "I eat a sandwich."], ["hamburger", "🍔", "漢堡", "I want a hamburger."], ["chicken", "🍗", "雞肉", "I like chicken."], ["candy", "🍬", "糖果", "Do not eat too much candy."], ["chocolate", "🍫", "巧克力", "I love chocolate."], ["dessert", "🍮", "甜點", "We eat dessert after dinner."], ["salad", "🥗", "沙拉", "The salad is green."], ["eleven", "", "十一", "I have eleven pens."], ["twelve", "", "十二", "There are twelve months in a year."], ["thirteen", "", "十三", "My sister is thirteen."], ["fourteen", "", "十四", "I see fourteen birds."], ["fifteen", "", "十五", "I have fifteen books."], ["sixteen", "", "十六", "There are sixteen cards."], ["seventeen", "", "十七", "My brother is seventeen."], ["eighteen", "", "十八", "I count to eighteen."], ["nineteen", "", "十九", "There are nineteen kids."], ["twenty", "", "二十", "I have twenty toes and fingers."], ["thirty", "", "三十", "There are thirty days in June."], ["forty", "", "四十", "Grandpa walks forty minutes."], ["fifty", "", "五十", "I have fifty stickers."], ["hundred", "💯", "一百", "I can count to one hundred."], ["hour", "⏰", "小時", "Wait one hour."], ["minute", "⏱️", "分鐘", "Wait a minute."], ["time", "⌚", "時間", "What time is it?"], ["early", "🌅", "早的", "I get up early."], ["late", "", "晚的", "Don't be late."], ["elephant", "🐘", "大象", "The elephant is big."], ["giraffe", "🦒", "長頸鹿", "The giraffe has a long neck."], ["kangaroo", "🦘", "袋鼠", "The kangaroo can jump."], ["penguin", "🐧", "企鵝", "The penguin can swim."], ["dolphin", "🐬", "海豚", "The dolphin is smart."], ["whale", "🐳", "鯨魚", "The whale is huge."], ["shark", "🦈", "鯊魚", "The shark has big teeth."], ["butterfly", "🦋", "蝴蝶", "The butterfly is pretty."], ["spider", "🕷️", "蜘蛛", "The spider has eight legs."], ["dinosaur", "🦖", "恐龍", "The dinosaur is big."], ["bowl", "🥣", "碗", "I eat rice in a bowl."], ["spoon", "🥄", "湯匙", "I eat soup with a spoon."], ["fork", "🍴", "叉子", "I use a fork."], ["knife", "🔪", "刀子", "Be careful with the knife."], ["bottle", "", "瓶子", "The bottle is full."], ["towel", "", "毛巾", "Dry your hands with a towel."], ["soap", "🧼", "肥皂", "Wash with soap."], ["toothbrush", "🪥", "牙刷", "This is my toothbrush."], ["blanket", "", "毯子", "The blanket is warm."], ["pillow", "", "枕頭", "My pillow is soft."], ["mirror", "🪞", "鏡子", "Look in the mirror."]], "G5": [["library", "📚", "圖書館", "I read in the library."], ["hospital", "🏥", "醫院", "The doctor works in a hospital."], ["museum", "🏛️", "博物館", "We visit the museum."], ["station", "🚉", "車站", "The train is at the station."], ["market", "🛒", "市場", "Mom buys fish at the market."], ["restaurant", "🍽️", "餐廳", "We eat at a restaurant."], ["city", "🏙️", "城市", "Taipei is a big city."], ["country", "🌏", "國家", "Taiwan is my country."], ["mountain", "⛰️", "山", "The mountain is high."], ["river", "🏞️", "河", "The river is long."], ["ocean", "🌊", "海洋", "Fish live in the ocean."], ["island", "🏝️", "島", "Taiwan is an island."], ["forest", "🌲", "森林", "Bears live in the forest."], ["sky", "🌌", "天空", "The sky is blue."], ["earth", "🌍", "地球", "We live on the earth."], ["left", "⬅️", "左邊", "Turn left here."], ["right", "➡️", "右邊", "Turn right at the park."], ["front", "", "前面", "Stand in front of me."], ["behind", "", "後面", "The cat is behind the door."], ["under", "⬇️", "下面", "The ball is under the bed."], ["between", "", "中間", "The dog is between the cats."], ["near", "📍", "附近", "The park is near my house."], ["excited", "🤩", "興奮的", "I am excited today."], ["proud", "😊", "驕傲的", "Mom is proud of me."], ["worried", "😟", "擔心的", "Don't be worried."], ["surprised", "😮", "驚訝的", "I am surprised!"], ["bored", "🥱", "無聊的", "I am bored at home."], ["buy", "🛍️", "買", "I buy a new book."], ["sell", "🏷️", "賣", "They sell fruit."], ["send", "📮", "寄", "I send a letter."], ["visit", "🏡", "拜訪", "We visit Grandma."], ["travel", "🧳", "旅行", "We travel by train."], ["watch", "📺", "看", "I watch TV."], ["learn", "🧠", "學習", "I learn English."], ["teach", "🧑‍🏫", "教", "She can teach math."], ["think", "🤔", "想", "I think it is good."], ["know", "💡", "知道", "I know her name."], ["remember", "📌", "記得", "I remember your name."], ["forget", "😵", "忘記", "Don't forget your bag."], ["finish", "🏁", "完成", "I finish my homework."], ["soccer", "⚽", "足球", "I play soccer."], ["tennis", "🎾", "網球", "I play tennis."], ["badminton", "🏸", "羽毛球", "We play badminton."], ["volleyball", "🏐", "排球", "I like volleyball."], ["jog", "🏃", "慢跑", "I jog in the park."], ["hike", "🥾", "健行", "We hike on the mountain."], ["skate", "⛸️", "溜冰", "I can skate."], ["piano", "🎹", "鋼琴", "I play the piano."], ["guitar", "🎸", "吉他", "He plays the guitar."], ["violin", "🎻", "小提琴", "She plays the violin."], ["drum", "🥁", "鼓", "I play the drum."], ["song", "🎶", "歌", "I sing a song."], ["movie", "🎬", "電影", "We watch a movie."], ["game", "🎮", "遊戲", "Let's play a game."], ["story", "", "故事", "Read me a story."], ["comic", "", "漫畫", "I read a comic book."], ["photo", "📸", "照片", "Take a photo."], ["hobby", "", "嗜好", "My hobby is drawing."], ["fever", "🤒", "發燒", "I have a fever."], ["cough", "😷", "咳嗽", "I have a cough."], ["headache", "🤕", "頭痛", "I have a headache."], ["medicine", "💊", "藥", "Take your medicine."], ["dentist", "🦷", "牙醫", "I visit the dentist."], ["pilot", "🧑‍✈️", "飛行員", "The pilot flies a plane."], ["firefighter", "🧑‍🚒", "消防員", "The firefighter is brave."], ["scientist", "🧑‍🔬", "科學家", "I want to be a scientist."], ["artist", "🧑‍🎨", "藝術家", "The artist draws a picture."], ["engineer", "", "工程師", "My mom is an engineer."], ["writer", "✍️", "作家", "The writer writes books."], ["vet", "", "獸醫", "The vet helps sick dogs."], ["clerk", "", "店員", "The clerk is friendly."], ["brave", "🦁", "勇敢的", "Be brave!"], ["smart", "🧠", "聰明的", "You are smart."], ["funny", "🤣", "好笑的", "The clown is funny."], ["friendly", "🤗", "友善的", "The dog is friendly."], ["lazy", "🦥", "懶惰的", "The cat is lazy."], ["honest", "", "誠實的", "Be honest."], ["polite", "🙇", "有禮貌的", "Be polite to others."], ["lucky", "🍀", "幸運的", "I am lucky."], ["rich", "💰", "有錢的", "The king is rich."]], "G6": [["important", "⭐", "重要的", "This is important."], ["interesting", "🧐", "有趣的", "The book is interesting."], ["different", "🔀", "不同的", "We are different."], ["favorite", "💖", "最喜歡的", "Pink is my favorite color."], ["beautiful", "🌺", "美麗的", "The garden is beautiful."], ["delicious", "😋", "好吃的", "The cake is delicious."], ["dangerous", "⚠️", "危險的", "Fire is dangerous."], ["expensive", "💰", "昂貴的", "The car is expensive."], ["famous", "🌟", "有名的", "She is a famous singer."], ["popular", "👍", "受歡迎的", "The game is popular."], ["healthy", "🥗", "健康的", "Fruit is healthy."], ["careful", "🦺", "小心的", "Be careful!"], ["quiet", "🤫", "安靜的", "Please be quiet."], ["busy", "🐝", "忙碌的", "Dad is busy today."], ["easy", "👌", "簡單的", "This test is easy."], ["difficult", "🧩", "困難的", "Math is difficult."], ["computer", "💻", "電腦", "I use a computer."], ["internet", "🌐", "網路", "I learn on the internet."], ["email", "📧", "電子郵件", "I send an email."], ["camera", "📷", "相機", "Take a photo with the camera."], ["picture", "🖼️", "圖畫", "Look at this picture."], ["dictionary", "📕", "字典", "Look it up in the dictionary."], ["science", "🔬", "科學", "I like science class."], ["history", "📜", "歷史", "History is interesting."], ["sport", "⚽", "運動", "Soccer is my favorite sport."], ["basketball", "🏀", "籃球", "I play basketball."], ["baseball", "⚾", "棒球", "Baseball is popular in Taiwan."], ["festival", "🏮", "節日", "We love the Lantern Festival."], ["holiday", "🎉", "假日", "Today is a holiday."], ["vacation", "🏝️", "假期", "We go to the beach on vacation."], ["weather", "🌦️", "天氣", "The weather is nice."], ["temperature", "🌡️", "溫度", "The temperature is high."], ["environment", "🌳", "環境", "Keep the environment clean."], ["future", "🚀", "未來", "I want to be a doctor in the future."], ["dream", "💭", "夢想", "I have a big dream."], ["problem", "❓", "問題", "I can solve the problem."], ["answer", "✅", "答案", "I know the answer."], ["question", "❔", "問題", "May I ask a question?"], ["because", "💬", "因為", "I am happy because it is sunny."], ["together", "🤝", "一起", "Let's play together."], ["airport", "🛫", "機場", "We go to the airport."], ["bank", "🏦", "銀行", "Dad works at a bank."], ["supermarket", "🛒", "超市", "We shop at the supermarket."], ["bookstore", "📚", "書店", "I buy books at the bookstore."], ["playground", "🛝", "遊樂場", "We play on the playground."], ["classroom", "🏫", "教室", "Our classroom is clean."], ["office", "🏢", "辦公室", "Mom works in an office."], ["hotel", "🏨", "飯店", "We stay at a hotel."], ["temple", "🛕", "廟", "We visit the temple."], ["yesterday", "", "昨天", "I was sick yesterday."], ["tomorrow", "", "明天", "See you tomorrow."], ["weekend", "", "週末", "We play on the weekend."], ["afternoon", "🌇", "下午", "I nap in the afternoon."], ["evening", "🌆", "傍晚", "We eat dinner in the evening."], ["always", "", "總是", "I always brush my teeth."], ["usually", "", "通常", "I usually walk to school."], ["sometimes", "", "有時", "I sometimes play games."], ["never", "", "從不", "I never give up."], ["idea", "💡", "主意", "That is a good idea."], ["plan", "🗺️", "計畫", "We have a plan."], ["goal", "🥅", "目標", "My goal is to read more."], ["message", "💌", "訊息", "I send a message."], ["letter", "✉️", "信", "I write a letter."], ["gift", "🎁", "禮物", "This gift is for you."], ["money", "💵", "錢", "I save my money."], ["price", "🏷️", "價錢", "The price is low."], ["color", "🎨", "顏色", "What color is it?"], ["shape", "🔷", "形狀", "A star is a shape."], ["size", "📏", "尺寸", "What size is it?"], ["believe", "", "相信", "I believe in you."], ["understand", "", "了解", "I understand now."], ["practice", "🏋️", "練習", "I practice every day."], ["agree", "", "同意", "I agree with you."], ["decide", "", "決定", "I decide to go."], ["explain", "", "解釋", "Please explain it."], ["borrow", "", "借", "Can I borrow a pen?"], ["return", "↩️", "歸還", "Return the book."], ["share", "🤲", "分享", "Share your toys."], ["invite", "💌", "邀請", "I invite you to my party."], ["prepare", "", "準備", "I prepare for the test."], ["protect", "🛡️", "保護", "Protect the earth."], ["special", "✨", "特別的", "You are special."], ["wonderful", "🌈", "很棒的", "What a wonderful day!"], ["terrible", "😖", "糟糕的", "The weather is terrible."], ["excellent", "🏅", "優秀的", "Excellent work!"]]};
+// add grade words to the picture/meaning dictionary and the sentence list
+Object.keys(GRADE_WORDS).forEach(g=>GRADE_WORDS[g].forEach(([w,e,z,snt])=>{if(!DICT[w]||!DICT[w][0])DICT[w]=[e||"",z];if(!SENT[w])SENT[w]=snt}));
+const GW=g=>GRADE_WORDS[g].map(r=>r[0]);
+const TIERS=[
+  {key:"K", name:"大班",en:"kindergarten",color:"var(--t1)",words:CURRIC},
+  {key:"G1",name:"小一",en:"grade one",  color:"var(--t2)",words:GW("G1"),board:[4,8],per:[10,6],pen:3},
+  {key:"G2",name:"小二",en:"grade two",  color:"var(--t3)",words:GW("G2"),board:[6,8],per:[9,5],pen:3},
+  {key:"G3",name:"小三",en:"grade three",color:"var(--t4)",words:GW("G3"),board:[6,8],per:[8,5],pen:4},
+  {key:"G4",name:"小四",en:"grade four", color:"var(--t5)",words:GW("G4"),board:[8,8],per:[8,5],pen:4},
+  {key:"G5",name:"小五",en:"grade five", color:"var(--t6)",words:GW("G5"),board:[8,8],per:[7,4.5],pen:4},
+  {key:"G6",name:"小六",en:"grade six",  color:"var(--t7)",words:GW("G6"),board:[8,8],per:[7,4],pen:5}
+];
+// 大班 keeps its gentle four-part ramp (one new word at a time); later grades add two new words per level.
+const KSUB=[   // 大班 is split into four parts by progress; each part has its own board size and time
+  {board:[3,6],per:[15,12],pen:2,pics:true},
+  {board:[4,8],per:[10,8], pen:3,pics:true},
+  {board:[6,8],per:[7,6],  pen:3,pics:false},
+  {board:[8,8],per:[5,4],  pen:4,pics:false}
+];
+const LEVELS=[];
+(function(){
+  const lerp=(a,f)=>a[0]+(a[1]-a[0])*f, half=x=>Math.round(x*2)/2;
+  let all=[];
+  TIERS.forEach((t,ti)=>{
+    // plan: how many new words each level brings (every third level is review only)
+    const step=ti===0?1:2, plan=[];
+    let intro=0;
+    while(intro<t.words.length){
+      const li=plan.length;
+      const nN=li%3===2?0:Math.min(t.words.length-intro,(ti===0&&li===0)?3:step);
+      plan.push(nN);intro+=nN;
+    }
+    if(plan[plan.length-1]!==0)plan.push(0);          // every grade ends with a big review
+    const n=plan.length;intro=0;
+    plan.forEach((nN,li)=>{
+      const f=n>1?li/(n-1):0;
+      let r;
+      if(ti===0){const seg=Math.min(3,Math.floor(f*4)),k=KSUB[seg],lf=Math.min(1,f*4-seg);
+        r={board:Math.round(lerp(k.board,lf)),per:half(lerp(k.per,lf)),pen:k.pen,pics:k.pics}}
+      else r={board:Math.round(lerp(t.board,f)),per:half(lerp(t.per,f)),pen:t.pen,pics:false};
+      const newWords=t.words.slice(intro,intro+nN);
+      const gradeLearned=t.words.slice(0,intro), learned=all.concat(gradeLearned);
+      intro+=nN;
+      const last=li===n-1;
+      const cap=ti===0?(f<0.5?0:Math.min(0.5,(f-0.5)*1.2)):ti===1?0.6+0.4*f:1;
+      // every second review level (from 大班 13 on) is a fill-in-the-letters level; the grade's last level stays a big review
+      const isFill=!newWords.length&&!last&&li%6===5&&!(ti===0&&li<12);
+      LEVELS.push({cap,fill:isFill,id:t.key+"-"+(li+1),num:li+1,label:t.name+" "+(li+1),tier:ti,last,newWords,learned,gradeLearned,
+        board:Math.min(r.board,learned.length+newWords.length),copies:2,per:r.per,pen:r.pen,pics:r.pics,review:!newWords.length,
+        name:newWords.length?"新字："+newWords.join("、"):(last?"大複習":isFill?"填空練習":"複習")});
+    });
+    t.count=n;
+    const L0=LEVELS[LEVELS.length-n], L1=LEVELS[LEVELS.length-1];
+    t.note="共 "+t.words.length+" 個字・"+n+" 關・每對 "+L0.per+"→"+L1.per+" 秒・配錯扣 "+(L0.pen===L1.pen?L0.pen:L0.pen+"→"+L1.pen)+" 秒";
+    all=all.concat(t.words);
+  });
+})();
+[1,2,3,4,5,6].forEach(n=>SETS["g"+n].words=GW("G"+n));
+let practice={};   // how many times each word has been matched; mistakes lower it so the word comes back sooner
+
+let CUSTOM_ZH={}, badWords=[];
+function meaning(w){
+  const d=DICT[w];
+  if(CUSTOM_ZH[w])return [d?d[0]:"",CUSTOM_ZH[w]];
+  return d||null;
+}
+
+const store={
+  get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}},
+  set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+};
+let cfg=Object.assign({set:"cvc",size:12,copies:2,pics:false,zh:true,dev:false,cap:0,play:"match",music:true},store.get("sp-cfg",{}));
+if(!SETS[cfg.set])cfg.set="cvc";
+/* players: each has a name, a character, and their own stars / stickers / practice record */
+const CHARS={
+  girl:   {name:"小公主",  stages:[["👧","小女孩"],["🎒","小學生"],["💃","舞蹈女孩"],["👩","大女孩"],["👸","公主"],["👑","女王"],["🌟","超級巨星"]]},
+  fairy:  {name:"花仙子",  stages:[["🌱","小種子"],["🌿","小嫩芽"],["🌷","小花苞"],["🌸","花仙子"],["🦋","蝴蝶仙子"],["🧚‍♀️","仙子"],["✨","仙子女王"]]},
+  mermaid:{name:"美人魚",  stages:[["🫧","小泡泡"],["🐚","小貝殼"],["🐠","小魚兒"],["🐬","小海豚"],["🧜‍♀️","美人魚"],["💎","珍珠公主"],["🔱","海洋女王"]]},
+  unicorn:{name:"獨角獸",  stages:[["🥚","神奇蛋"],["🐣","小寶寶"],["🐴","小馬"],["🎠","旋轉木馬"],["🦄","獨角獸"],["🌈","彩虹獨角獸"],["💫","星光獨角獸"]]}
+};
+let profiles=store.get("sp-profiles",null);
+if(!Array.isArray(profiles)||!profiles.length){
+  profiles=[{id:"p"+Date.now(),name:"小玩家",char:"girl",stars:store.get("sp-stars3",{})||{},stickers:store.get("sp-stickers",[])||[],practice:store.get("sp-practice",{})||{}}];
+}
+profiles.forEach(p=>{
+  p.stars=p.stars||{};p.certs=p.certs||{};
+  Object.keys(p.stars).forEach(k=>{const m=/^([1-4])-(\d+)$/.exec(k);if(m){p.stars["K-"+((m[1]-1)*15+Number(m[2]))]=p.stars[k];delete p.stars[k]}});
+  if(p.done&&!p.certs.K){p.certs.K=p.done;delete p.done}
+});
+let curP=profiles.find(p=>p.id===store.get("sp-current",""))||profiles[0];
+if(!CHARS[curP.char])curP.char="girl";
+let starsSaved=curP.stars, stickers=curP.stickers;
+practice=curP.practice;
+// Writing the whole record to storage on every tap can make a phone stutter mid-game,
+// so saves are batched and written when the page is idle (and always when the page is hidden).
+let saveTimer=null;
+function flushSave(){clearTimeout(saveTimer);saveTimer=null;store.set("sp-profiles",profiles);store.set("sp-current",curP.id)}
+function saveProfiles(now){
+  if(now){flushSave();return}
+  if(saveTimer)return;
+  saveTimer=setTimeout(()=>{(window.requestIdleCallback||(f=>f()))(flushSave,{timeout:1500})},1200);
+}
+document.addEventListener("visibilitychange",()=>{if(document.hidden&&saveTimer)flushSave()});
+window.addEventListener("pagehide",()=>{if(saveTimer)flushSave()});
+saveProfiles();
+function look(ti){return CHARS[curP.char].stages[ti]}             // [icon, name] of this player's character at tier ti
+function stageNow(){let t=0;TIERS.forEach((_,ti)=>{if(isOpen(LEVELS.findIndex(L=>L.tier===ti)))t=ti});return t}
+const $=id=>document.getElementById(id);
+
+/* ---------- custom word rows ---------- */
+let customRows=store.get("sp-custom-rows",null);
+if(!Array.isArray(customRows)){
+  const old=store.get("sp-custom","")||"";
+  customRows=old.replace(/\s*[=:：]\s*/g,"=").split(/[\s,，、;；]+/).filter(Boolean).map(t=>{const [w,zh]=t.split("=");return {w:w||"",zh:zh||""}});
+}
+while(customRows.length<3)customRows.push({w:"",zh:""});
+function saveCustom(){store.set("sp-custom-rows",customRows)}
+function renderCustom(focusIdx){
+  const box=$("customList");box.innerHTML="";
+  customRows.forEach((r,i)=>{
+    const row=document.createElement("div");row.className="crow";
+    const en=document.createElement("input");en.type="text";en.id="cw-"+i;en.value=r.w;en.placeholder="英文，例如 dog";
+    en.setAttribute("autocapitalize","off");en.setAttribute("autocorrect","off");en.spellcheck=false;en.lang="en";en.enterKeyHint="next";en.setAttribute("aria-label","第 "+(i+1)+" 個英文單字");
+    const zh=document.createElement("input");zh.type="text";zh.id="cz-"+i;zh.value=r.zh;zh.enterKeyHint="next";zh.setAttribute("aria-label","第 "+(i+1)+" 個中文意思");
+    const ph=()=>{const d=DICT[en.value.trim().toLowerCase()];zh.placeholder=d?d[1]+"（自動）":"中文（可不填）"};ph();
+    en.oninput=()=>{r.w=en.value;ph();saveCustom();$("err").hidden=true};
+    zh.oninput=()=>{r.zh=zh.value;saveCustom()};
+    en.onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();zh.focus()}};
+    zh.onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();if(i===customRows.length-1)addRow();else $("cw-"+(i+1)).focus()}};
+    const del=document.createElement("button");del.type="button";del.className="xbtn";del.textContent="✕";del.setAttribute("aria-label","刪除這個單字");
+    del.onclick=()=>{customRows.splice(i,1);if(!customRows.length)customRows.push({w:"",zh:""});saveCustom();renderCustom()};
+    row.append(en,zh,del);box.appendChild(row);
+  });
+  if(focusIdx!=null){const f=$("cw-"+focusIdx);if(f)f.focus()}
+}
+function addRow(){customRows.push({w:"",zh:""});saveCustom();renderCustom(customRows.length-1)}
+$("addRow").onclick=addRow;
+renderCustom();
+
+/* ---------- speech ---------- */
+const synth=window.speechSynthesis||null;
+let voice=null, zhVoice=null, enVoices=[];
+const ROBOTIC=/Albert|Bad News|Bahh|Bells|Boing|Bubbles|Cellos|Deranged|Fred|Good News|Hysterical|Jester|Junior|Organ|Ralph|Superstar|Trinoids|Whisper|Wobble|Zarvox|Grandma|Grandpa|Eddy|Flo|Reed|Rocko|Sandy|Shelley/i;
+function vScore(v){
+  let s=0;
+  if(/^en[-_]US/i.test(v.lang))s+=3; else if(/^en[-_](GB|AU|IE|CA|NZ)/i.test(v.lang))s+=2;
+  if(/premium|enhanced|natural|neural|wavenet/i.test(v.name))s+=6;
+  if(/Ava|Zoe|Samantha|Aria|Jenny|Michelle|Allison|Susan|Google US English|Karen|Serena|Kate|Emma/i.test(v.name))s+=2;
+  if(/compact/i.test(v.name))s-=1;
+  if(ROBOTIC.test(v.name))s-=10;
+  return s;
+}
+function pickVoice(){
+  if(!synth)return;
+  const vs=synth.getVoices()||[];
+  enVoices=vs.filter(v=>/^en/i.test(v.lang)).sort((a,b)=>vScore(b)-vScore(a));
+  const saved=store.get("sp-voice","");
+  voice=enVoices.find(v=>v.name===saved)||enVoices[0]||null;
+  const sel=$("voiceSel");
+  sel.innerHTML="";
+  enVoices.forEach(v=>{const o=document.createElement("option");o.value=v.name;o.textContent=v.name+" · "+v.lang;if(voice&&v.name===voice.name)o.selected=true;sel.appendChild(o)});
+  const zh=vs.filter(v=>/^zh[-_](TW|Hant)/i.test(v.lang));
+  zhVoice=zh.find(v=>/premium|enhanced/i.test(v.name))||zh.find(v=>/Mei-?Jia|美佳/i.test(v.name))||zh[0]||vs.find(v=>/^zh/i.test(v.lang))||null;
+}
+if(synth){pickVoice();synth.addEventListener&&synth.addEventListener("voiceschanged",pickVoice);}
+else {$("noVoice").hidden=false;$("voiceGrp").hidden=true;}
+$("voiceSel").onchange=e=>{voice=enVoices.find(v=>v.name===e.target.value)||voice;store.set("sp-voice",voice?voice.name:"")};
+$("tryBtn").onclick=()=>{if(!synth)return;synth.cancel();speakU(utter("Hi! Let's spell. Dog.",0.9))};
+
+let token=0, timers=[], busy=false, busyTimer=null;
+function setBusy(on,ms){
+  busy=on; clearTimeout(busyTimer);
+  $("board").classList.toggle("busy",on);
+  if(on)busyTimer=setTimeout(()=>setBusy(false),ms);   // safety net in case the voice never reports it finished
+}
+/* Safe speech for iPhone/iPad.
+   After an iOS update the saved voice can be listed but silent, or the speech queue can get stuck.
+   speakU() resumes a stuck queue, and if nothing starts talking within a couple of seconds it
+   retries the same lines with the phone's default voice and remembers that choice. */
+let speechWatch=null, voiceFailed=false;
+function speakU(u){
+  if(!synth)return;
+  try{if(synth.paused)synth.resume()}catch(e){}
+  if(!speechWatch){
+    speechWatch={queue:[],started:false};
+    const w=speechWatch;
+    setTimeout(()=>{
+      if(speechWatch!==w)return;
+      speechWatch=null;
+      if(w.started||!w.queue.length||synth.speaking)return;
+      // nothing played: fall back to the default voice and say it again
+      if(voice||!voiceFailed){
+        voiceFailed=true;voice=null;zhVoice=null;store.set("sp-voice","");
+        try{synth.cancel()}catch(e){}
+        w.queue.forEach(old=>{
+          const c=new SpeechSynthesisUtterance(old.text);
+          c.lang=old.lang;c.rate=old.rate;c.pitch=old.pitch;c.volume=old.volume;
+          c.onstart=old.onstart;c.onend=old.onend;c.onerror=old.onerror;
+          synth.speak(c);
+        });
+        showVoiceNote();
+      }
+    },3500);
+  }
+  const w=speechWatch;w.queue.push(u);
+  const prev=u.onstart;
+  u.onstart=e=>{w.started=true;prev&&prev(e)};
+  synth.speak(u);
+}
+function showVoiceNote(){
+  const n=$("voiceNote");if(!n)return;
+  n.hidden=false;clearTimeout(n._t);n._t=setTimeout(()=>n.hidden=true,6000);
+}
+// coming back to the page after the phone slept can leave the queue stuck
+document.addEventListener("visibilitychange",()=>{if(!document.hidden){primed=false;if(synth){try{synth.cancel()}catch(e){}}}});
+function utter(text,rate){
+  const u=new SpeechSynthesisUtterance(text);
+  u.lang="en-US"; if(voice)u.voice=voice; u.rate=rate; u.pitch=1;
+  return u;
+}
+/* say(word, card, opts, onSpelled, onFinish)
+   opts (on a match): {got:true, zh:bool, sent:true} -> after the spelling: reward jingle, Chinese meaning, example sentence */
+function say(word,card,opts,onSpelled,onFinish){
+  opts=opts||{};
+  const t=++token;
+  timers.forEach(clearTimeout); timers=[];
+  const capd=!!(card&&card.dataset.cap);              // this card starts with a capital letter
+  showStrip(word,opts.got,capd?capFirst(word):word);
+  light(-1,card);
+  const letters=[...word];
+  const m=meaning(word);
+  const extras=[];
+  if(opts.zh&&m)extras.push({text:m[1],zh:true});
+  if(opts.sent)extras.push({text:sentence(word),sent:true});
+  setBusy(true,2500+letters.length*1100+extras.length*4500);
+  const finish=()=>{if(t===token)setTimeout(()=>{if(t===token){setBusy(false);onFinish&&onFinish()}},250)};
+  if(!synth){
+    letters.forEach((c,i)=>timers.push(setTimeout(()=>{if(t===token)light(i,card)},700+i*650)));
+    timers.push(setTimeout(()=>{
+      if(t!==token)return;
+      light(null,card);onSpelled&&onSpelled();
+      const s=extras.find(x=>x.sent); if(s)showSent(s.text,word);
+      timers.push(setTimeout(finish,extras.length?2500:0));
+    },700+letters.length*650));
+    return;
+  }
+  const wasTalking=synth.speaking||synth.pending;
+  if(wasTalking)synth.cancel();
+  const go=()=>{
+    if(t!==token)return;
+    speakU(utter(word,0.85));
+    letters.forEach((c,i)=>{
+      const u=utter(i===0&&capd?"capital "+c:c,0.8);  // lowercase letters, so only a real capital is announced
+      u.onstart=()=>{if(t===token)light(i,card)};
+      u.onerror=()=>{if(t===token)setBusy(false)};
+      if(i===letters.length-1)u.onend=()=>{
+        if(t!==token)return;
+        light(null,card);
+        onSpelled&&onSpelled();          // reward jingle plays while the meaning starts
+        if(!extras.length)finish();
+      };
+      speakU(u);
+    });
+    // queue the meaning and the sentence right away, so the voice goes straight on without waiting
+    extras.forEach((x,k)=>{
+      let z;
+      if(x.zh){z=new SpeechSynthesisUtterance(x.text);z.lang="zh-TW";if(zhVoice)z.voice=zhVoice;z.rate=0.95}
+      else{z=utter(x.text,0.85);z.onstart=()=>{if(t===token)showSent(x.text,word)}}
+      z.onerror=()=>{if(t===token)setBusy(false)};
+      if(k===extras.length-1)z.onend=finish;
+      speakU(z);
+    });
+  };
+  if(wasTalking)timers.push(setTimeout(go,30)); else go();
+}
+function sentence(w){return SENT[w]||("I can spell "+w+".")}
+function showSent(text,word){
+  const old=strip.querySelector(".sent");if(old)old.remove();
+  const el=document.createElement("span");el.className="sent";
+  text.split(" ").forEach((tok,i)=>{
+    if(i)el.appendChild(document.createTextNode(" "));
+    const bare=tok.toLowerCase().replace(/[^a-z]/g,"");
+    if(bare.startsWith(word)){const b=document.createElement("b");b.textContent=tok;el.appendChild(b)}
+    else el.appendChild(document.createTextNode(tok));
+  });
+  strip.appendChild(el);
+}
+function cheer(text){ if(synth){ speakU(utter(text,0.9)); } }
+
+/* ---------- little sounds ---------- */
+let actx=null, unlocked=false;
+/* iPhone speaker fix: inside every tap, switch the page to "playback" audio and play a tiny silent clip
+   through an <audio> element. That moves the page onto the media audio route, so speech comes out of the
+   loudspeaker (not only headphones) even when the phone is set to silent. */
+let silentEl=null;
+function silentWav(){
+  const n=400,buf=new Uint8Array(44+n),dv=new DataView(buf.buffer),w=(o,t)=>[...t].forEach((c,i)=>buf[o+i]=c.charCodeAt(0));
+  w(0,"RIFF");dv.setUint32(4,36+n,true);w(8,"WAVEfmt ");dv.setUint32(16,16,true);dv.setUint16(20,1,true);dv.setUint16(22,1,true);
+  dv.setUint32(24,8000,true);dv.setUint32(28,8000,true);dv.setUint16(32,1,true);dv.setUint16(34,8,true);w(36,"data");dv.setUint32(40,n,true);
+  buf.fill(128,44);
+  let bin="";buf.forEach(b=>bin+=String.fromCharCode(b));return "data:audio/wav;base64,"+btoa(bin);
+}
+let primed=false;
+function primeSpeaker(){
+  // Once is enough: switching the audio route takes the iPhone a moment, so doing it before every word
+  // delays the speech. Prime on the first tap, and again only after the page was in the background.
+  if(primed)return;
+  if(busy||lock||(synth&&(synth.speaking||synth.pending)))return;
+  primed=true;
+  setPlayback();
+  try{
+    if(!silentEl){silentEl=new Audio(silentWav());silentEl.setAttribute("playsinline","");silentEl.preload="auto"}
+    silentEl.currentTime=0;const pr=silentEl.play();
+    if(pr&&pr.then)pr.then(()=>{if(actx&&actx.state!=="running"&&!talkingNow())actx.resume()}).catch(()=>{});
+  }catch(e){}
+}
+function wakeAudio(){
+  try{
+    if(!actx){const AC=window.AudioContext||window.webkitAudioContext;if(AC){actx=new AC();watchCtx()}}
+    if(actx&&actx.state!=="running"&&!talkingNow())actx.resume();
+  }catch(e){}
+}
+function talkingNow(){return !!(synth&&(synth.speaking||synth.pending))}
+function watchCtx(){
+  if(!actx||actx._watched)return;actx._watched=true;
+  // (no automatic resume here: the next tap wakes it, so it never interrupts a word being spoken)
+}
+document.addEventListener("pointerdown",e=>{primeSpeaker();wakeAudio()},true);
+document.addEventListener("touchend",wakeAudio,true);
+document.addEventListener("click",wakeAudio,true);
+function setPlayback(){try{if(navigator.audioSession&&navigator.audioSession.type!=="playback")navigator.audioSession.type="playback"}catch(e){}}
+setPlayback();
+function unlockAudio(){
+  setPlayback();
+  wakeAudio();
+  if(synth&&!unlocked){try{synth.cancel();const u=new SpeechSynthesisUtterance("hi");u.lang="en-US";u.volume=0;u.rate=2;synth.speak(u);
+    const z=new SpeechSynthesisUtterance("好");z.lang="zh-TW";if(zhVoice)z.voice=zhVoice;z.volume=0;z.rate=2;synth.speak(z);
+    unlocked=true}catch(e){}}  // unlock speech on iPhone/iPad (inside the tap)
+}
+function tone(freqs,dur,type){
+  if(!actx)return;
+  const now=actx.currentTime;
+  freqs.forEach((f,i)=>{
+    const o=actx.createOscillator(),g=actx.createGain();
+    o.type=type||"sine"; o.frequency.value=f;
+    g.gain.setValueAtTime(0.0001,now+i*0.09);
+    g.gain.exponentialRampToValueAtTime(0.18,now+i*0.09+0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001,now+i*0.09+dur);
+    o.connect(g).connect(actx.destination); o.start(now+i*0.09); o.stop(now+i*0.09+dur+0.05);
+  });
+}
+/* ---------- sound effects (all made with Web Audio, no files needed) ---------- */
+const SFX={
+  _out(){ if(!actx)return null; if(actx.state!=="running"&&!talkingNow()){try{actx.resume()}catch(e){}} if(!SFX.bus){SFX.bus=actx.createGain();SFX.bus.gain.value=0.9;SFX.bus.connect(actx.destination)} return SFX.bus },
+  // one note with a soft attack and release; slide = target frequency for a pitch glide
+  note(f,at,dur,{type="triangle",vol=0.2,slide=0,attack=0.012}={}){
+    const out=SFX._out();if(!out)return;
+    const t=actx.currentTime+0.01+at,o=actx.createOscillator(),g=actx.createGain();
+    o.type=type;o.frequency.setValueAtTime(f,t);
+    if(slide)o.frequency.exponentialRampToValueAtTime(slide,t+dur);
+    g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(vol,t+attack);g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+    o.connect(g).connect(out);o.start(t);o.stop(t+dur+0.05);
+  },
+  // short burst of filtered noise (for pops and whooshes)
+  noise(at,dur,{vol=0.15,freq=1800,q=1.2,type="bandpass"}={}){
+    const out=SFX._out();if(!out)return;
+    const t=actx.currentTime+0.01+at,len=Math.ceil(actx.sampleRate*dur),buf=actx.createBuffer(1,len,actx.sampleRate),d=buf.getChannelData(0);
+    for(let i=0;i<len;i++)d[i]=(Math.random()*2-1)*(1-i/len);
+    const src=actx.createBufferSource(),f=actx.createBiquadFilter(),g=actx.createGain();
+    src.buffer=buf;f.type=type;f.frequency.value=freq;f.Q.value=q;g.gain.value=vol;
+    src.connect(f).connect(g).connect(out);src.start(t);
+  },
+  // 1. cards disappear: bubble pop + a little sparkle
+  pop(){
+    SFX.note(380,0,0.12,{type:"sine",vol:0.35,slide:1400,attack:0.004});
+    SFX.noise(0,0.06,{vol:0.12,freq:2500});
+    [1568,2093,2637].forEach((f,i)=>SFX.note(f,0.08+i*0.05,0.22,{type:"sine",vol:0.07}));
+  },
+  // 2. wrong pair: cartoon "bonk" that wobbles down
+  wrong(){
+    SFX.note(330,0,0.14,{type:"square",vol:0.08,slide:220});
+    SFX.note(250,0.14,0.26,{type:"square",vol:0.08,slide:150});
+    SFX.noise(0,0.05,{vol:0.08,freq:400,type:"lowpass"});
+  },
+  // 3. level cleared: short fanfare
+  fanfare(){
+    const mel=[[523,0,.14],[659,.14,.14],[784,.28,.14],[1047,.42,.5]];
+    mel.forEach(([f,at,d])=>{SFX.note(f,at,d+0.1,{type:"square",vol:0.07});SFX.note(f/2,at,d+0.1,{type:"triangle",vol:0.12})});
+    [[1319,.42],[1568,.42]].forEach(([f,at])=>SFX.note(f,at,0.55,{type:"triangle",vol:0.07}));
+    [2093,2637,3136,3951].forEach((f,i)=>SFX.note(f,0.6+i*0.06,0.3,{type:"sine",vol:0.05}));
+  },
+  // 4. each star: bright chime, a little higher for every star
+  star(k){
+    const base=[880,1109,1319][k]||1319;
+    SFX.note(base,0,0.5,{type:"sine",vol:0.22});
+    SFX.note(base*2,0,0.35,{type:"sine",vol:0.06});
+    SFX.note(base*1.5,0.06,0.4,{type:"triangle",vol:0.08});
+    SFX.noise(0,0.18,{vol:0.05,freq:7000,q:0.7,type:"highpass"});
+  },
+  // time ran out: three sad steps down
+  timeup(){[392,349,294].forEach((f,i)=>SFX.note(f,i*0.22,0.3,{type:"triangle",vol:0.18}))},
+  // light tick for picking a card / placing a letter
+  tick(p){SFX.note(p||660,0,0.08,{type:"sine",vol:0.15})}
+};
+
+
+
+/* reward jingle after a successful match: quick rising arpeggio + sparkle */
+function reward(){
+  if(!actx)return;
+  const now=actx.currentTime+0.02;
+  const play=(f,at,dur,type,vol)=>{
+    const o=actx.createOscillator(),g=actx.createGain();
+    o.type=type;o.frequency.value=f;
+    g.gain.setValueAtTime(0.0001,now+at);
+    g.gain.exponentialRampToValueAtTime(vol,now+at+0.015);
+    g.gain.exponentialRampToValueAtTime(0.0001,now+at+dur);
+    o.connect(g).connect(actx.destination);o.start(now+at);o.stop(now+at+dur+0.05);
+  };
+  [784,988,1175,1568].forEach((f,i)=>play(f,i*0.07,0.22,"triangle",0.2));
+  [2093,2637,3136].forEach((f,i)=>play(f,0.3+i*0.05,0.3,"sine",0.06));
+}
+
+/* ---------- strip ---------- */
+const strip=$("strip");
+function capFirst(w){return w.charAt(0).toUpperCase()+w.slice(1)}
+function showStrip(word,matched,disp){
+  strip.innerHTML="";
+  const g=document.createElement("span");g.className="letters";
+  [...(disp||word)].forEach((c,i)=>{const s=document.createElement("span");s.className="lt"+(disp&&i===0&&c!==word.charAt(0)?" capl":"");s.textContent=c;g.appendChild(s)});
+  strip.appendChild(g);
+  const m=meaning(word);
+  if(m){
+    const box=document.createElement("span");box.className="mean"+(matched?" got":"");
+    if(m[0]){const e=document.createElement("b");e.textContent=m[0];box.appendChild(e)}
+    const z=document.createElement("span");z.textContent=m[1];box.appendChild(z);
+    strip.appendChild(box);
+  }
+}
+function light(i,card){
+  const ls=strip.querySelectorAll(".lt");
+  strip.classList.toggle("word",i===-1||i===null);
+  ls.forEach((el,k)=>{el.classList.toggle("on",k===i);el.classList.toggle("done",i!==null&&i>=0&&k<i)});
+  if(card){card.querySelectorAll(".w span").forEach((el,k)=>el.classList.toggle("on",k===i))}
+}
+
+/* ---------- settings UI ---------- */
+function chips(el,items,cur,onPick){
+  el.innerHTML="";
+  items.forEach(([val,label])=>{
+    const b=document.createElement("button");b.type="button";b.className="chip";b.textContent=label;
+    b.setAttribute("aria-pressed",String(val===cur));
+    b.onclick=()=>{onPick(val);};
+    el.appendChild(b);
+  });
+}
+function renderSettings(){
+  chips($("setChips"),Object.keys(SETS).map(k=>[k,SETS[k].name]),cfg.set,v=>{cfg.set=v;renderSettings()});
+  chips($("sizeChips"),SIZES.map(n=>[n,n+" 張"]),cfg.size,v=>{cfg.size=v;renderSettings()});
+  chips($("copyChips"),COPIES.map(n=>[n,n+" 張"]),cfg.copies,v=>{cfg.copies=v;renderSettings()});
+  chips($("playChips"),[["match","對對碰"],["fill","填空拼字"]],cfg.play,v=>{cfg.play=v;renderSettings()});
+  chips($("capChips"),[[0,"不要"],[0.5,"一半的字"],[1,"每個字"]],cfg.cap,v=>{cfg.cap=v;renderSettings()});
+  chips($("picChips"),[[false,"不顯示"],[true,"顯示在卡片上"]],cfg.pics,v=>{cfg.pics=v;renderSettings()});
+  chips($("devChips"),[[false,"關"],[true,"開"]],cfg.dev,v=>{cfg.dev=v;store.set("sp-cfg",cfg);renderSettings();$("devBar").hidden=!cfg.dev});
+  chips($("zhChips"),[[true,"要"],[false,"不要"]],cfg.zh,v=>{cfg.zh=v;store.set("sp-cfg",cfg);renderSettings()});
+  $("customGrp").hidden=cfg.set!=="custom";
+  $("err").hidden=true;
+}
+
+function wordPool(){
+  if(cfg.set!=="custom")return SETS[cfg.set].words.slice();
+  const seen=new Set(), out=[];CUSTOM_ZH={};badWords=[];
+  customRows.forEach(r=>{
+    const raw=(r.w||"").trim(), w=raw.toLowerCase();
+    if(!w)return;
+    if(!/^[a-z]+$/.test(w)||w.length>12){badWords.push(raw);return}
+    if(seen.has(w))return;
+    seen.add(w);out.push(w);
+    const z=(r.zh||"").trim(); if(z)CUSTOM_ZH[w]=z;
+  });
+  return out;
+}
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+
+/* ---------- game ---------- */
+const board=$("board");
+let mode="free", cur=0, mistakes=0, started=false;
+let words=[], sel=null, lock=false, left=0, pairsTotal=0, pairsGot=0, boardPics=false;
+
+function freeOpts(){
+  const pool=wordPool();
+  if(cfg.set==="custom"&&badWords.length){$("err").textContent="英文欄只能打英文字母，請檢查："+badWords.join("、");$("err").hidden=false;return null}
+  if(pool.length<1){$("err").textContent="請至少輸入一個英文單字。";$("err").hidden=false;return null}
+  return {words:shuffle(pool).slice(0,cfg.size/cfg.copies),size:cfg.size,copies:cfg.copies,pics:cfg.pics,cap:cfg.cap,fill:cfg.play==="fill",maxWords:Math.min(8,cfg.size/cfg.copies),distract:3};
+}
+function levelOpts(i){
+  const L=LEVELS[i];
+  const need=L.board-L.newWords.length;
+  const byPractice=a=>shuffle(a.slice()).sort((x,y)=>(practice[x]||0)-(practice[y]||0));
+  const prevNew=(i>0&&LEVELS[i-1].tier===L.tier)?LEVELS[i-1].newWords.slice(0,need):[];   // last level's new words come back right away
+  const fresh=byPractice(L.gradeLearned.filter(w=>!prevNew.includes(w)));                    // this grade, least-practised first
+  const older=byPractice(L.learned.filter(w=>!L.gradeLearned.includes(w)&&!prevNew.includes(w))); // earlier grades
+  const oldSlots=L.tier>0?Math.min(older.length,Math.max(1,Math.round(need/4))):0;
+  let review=prevNew.concat(older.slice(0,oldSlots));
+  review=review.concat(fresh.filter(w=>!review.includes(w)),older.filter(w=>!review.includes(w))).slice(0,need);
+  return {words:L.newWords.concat(review),size:L.board*L.copies,copies:L.copies,pics:L.pics,newWords:L.newWords,per:L.per,pen:L.pen,cap:L.cap,fill:L.fill,maxWords:6,distract:L.tier===0?2:3};
+}
+function build(o){
+  if(o.fill){buildFill(o);return}
+  board.classList.remove("fillmode");fill=null;
+  const need=o.size/o.copies;
+  const newW=o.newWords||[];
+  words=o.words.slice(0,need);
+  const deck=[];
+  // capital-letter pairs: in some pairs one card is written with a capital first letter (Dog ↔ dog)
+  const capN=o.cap?Math.min(need,Math.max(1,Math.round(o.cap*need))):0;
+  const capSet=new Set(shuffle(words.slice()).slice(0,capN));
+  // if a custom list is short, repeat words so the board stays full (each word still appears an even number of times)
+  for(let k=0;k<need;k++){const w=words[k%words.length];for(let c=0;c<o.copies;c++)deck.push({w,cap:c%2===0&&capSet.has(w)})}
+  shuffle(deck);
+  board.innerHTML="";
+  boardPics=o.pics;
+  const maxLen=Math.max(...words.map(w=>w.length));
+  const cols=o.size===6?3:o.size===8?(window.innerWidth>560?4:2):(maxLen>=8&&window.innerWidth<560?3:4);
+  board.style.setProperty("--cols",cols);
+  deck.forEach(({w,cap})=>{
+    const shown=cap?capFirst(w):w;
+    const b=document.createElement("button");
+    b.type="button";b.className="card";b.dataset.word=w;b.setAttribute("aria-label",shown);
+    if(cap)b.dataset.cap="1";
+    const n=w.length, fs=n<=3?2.1:n===4?1.8:n===5?1.5:n===6?1.25:n===7?1.1:n<=9?0.95:0.82;
+    const f2=cols===3&&n>=7?fs*1.2:fs;   // wider cards in three columns, so long words can be bigger
+    b.style.setProperty("--fs",`clamp(${f2*0.9}rem, ${f2*3.2}vw, ${f2*1.4}rem)`);
+    const m=meaning(w), isNew=newW.includes(w);
+    if(isNew){const n=document.createElement("span");n.className="newtag";n.textContent="新";b.appendChild(n)}
+    if((o.pics||isNew)&&m&&m[0]){const p=document.createElement("span");p.className="pic";p.textContent=m[0];b.appendChild(p)}
+    const inner=document.createElement("span");inner.className="w";
+    [...shown].forEach(c=>{const s=document.createElement("span");s.textContent=c;inner.appendChild(s)});
+    b.appendChild(inner);
+    b.onclick=()=>tap(b);
+    board.appendChild(b);
+  });
+  sel=null;lock=false;left=deck.length;pairsTotal=deck.length/2;pairsGot=0;mistakes=0;
+  renderProgress();
+  if(newW.length){
+    strip.innerHTML="";
+    const h=document.createElement("span");h.className="hint";
+    h.textContent="這關的新單字："+newW.map(w=>{const m=meaning(w);return (m&&m[0]?m[0]:"")+" "+w}).join("　");
+    strip.appendChild(h);
+  }else{
+    strip.innerHTML='<span class="hint">點一張卡片聽聽看 👂</span>';
+  }
+  if(capN){const ex=[...capSet][0];const h=document.createElement("span");h.className="hint caphint";
+    h.textContent="🔠 大寫開頭也是同一個字："+capFirst(ex)+" = "+ex;strip.appendChild(h)}
+  penalty=o.pen||0; gameOver=false; gameId++;
+  // seconds per pair, plus a little extra for every letter past four
+  setupTimer(o.per?Math.round(words.reduce((t,w)=>t+(o.copies/2)*(o.per+Math.max(0,w.length-4)*0.6),0)):0);
+}
+
+/* ---------- fill-in-the-letters review: picture + first letter, tap the missing letters in order ---------- */
+let fill=null;   // {list, idx, pos, tiles}
+function buildFill(o){
+  const n=Math.min(o.words.length,o.maxWords||6);
+  words=shuffle(o.words.slice(0,n));
+  board.classList.add("fillmode");board.innerHTML="";board.style.removeProperty("--cols");
+  fill={list:words,idx:0,pos:1,distract:o.distract||2};
+  sel=null;lock=false;left=words.length*2;pairsTotal=words.length;pairsGot=0;mistakes=0;
+  renderProgress();
+  strip.innerHTML='<span class="hint">✏️ 看圖，把字母一個一個按出來</span>';
+  penalty=o.pen||0; gameOver=false; gameId++;
+  // seconds per word: a base plus time for every letter she has to find
+  setupTimer(o.per?Math.round(words.reduce((t,w)=>t+o.per*1.2+(w.length-1)*1.4,0)):0);
+  showFillWord();
+}
+function showFillWord(){
+  const w=fill.list[fill.idx], m=meaning(w);
+  fill.pos=1;
+  board.innerHTML="";
+  const card=document.createElement("div");card.className="fcard";
+  const top=document.createElement("div");top.className="fpicrow";
+  const pic=document.createElement("div");pic.className="fpic"+(m&&m[0]?"":" txt");pic.textContent=m&&m[0]?m[0]:(m?m[1]:"?");
+  const hear=document.createElement("button");hear.type="button";hear.className="fhear";hear.textContent="🔊";hear.setAttribute("aria-label","再聽一次");
+  hear.onclick=()=>{if(!busy&&synth){synth.cancel();speakU(utter(w,0.8))}};
+  top.append(pic,hear);
+  const zh=document.createElement("div");zh.className="fzh";zh.textContent=m&&m[0]?m[1]:"";
+  const slots=document.createElement("div");slots.className="fslots";slots.id="fslots";
+  [...w].forEach((c,i)=>{const s=document.createElement("span");s.className="fslot"+(i===0?" given":"")+(i===1?" next":"");s.textContent=i===0?c:"";slots.appendChild(s)});
+  const fs=w.length<=4?2.2:w.length<=6?1.8:w.length<=8?1.45:1.2;
+  slots.style.setProperty("--fz",fs+"rem");
+  // tiles: every missing letter plus a few letters that are not in the word
+  const need=[...w.slice(1)];
+  const pool="abcdefghijklmnopqrstuvwxyz".split("").filter(c=>!w.includes(c));
+  const extra=shuffle(pool).slice(0,fill.distract);
+  const tiles=document.createElement("div");tiles.className="ftiles";
+  shuffle(need.concat(extra)).forEach(c=>{
+    const b=document.createElement("button");b.type="button";b.className="ftile";b.textContent=c;
+    b.onclick=()=>fillTap(b);
+    tiles.appendChild(b);
+  });
+  card.append(top,zh,slots,tiles);board.appendChild(card);
+  // say the word once so she knows what to spell
+  if(synth&&!isPaused()){const wasTalking=synth.speaking||synth.pending;if(wasTalking)synth.cancel();setTimeout(()=>speakU(utter(w,0.8)),wasTalking?120:250)}
+}
+function fillTap(b){
+  if(busy||lock||gameOver||!fill)return;
+  const w=fill.list[fill.idx], want=w[fill.pos], c=b.textContent;
+  if(c===want){
+    b.classList.add("used");b.disabled=true;
+    const slots=document.querySelectorAll("#fslots .fslot");
+    slots[fill.pos].textContent=c;slots[fill.pos].classList.remove("next");slots[fill.pos].classList.add("ok");
+    fill.pos++;
+    if(fill.pos<w.length){slots[fill.pos].classList.add("next");SFX.tick(660+fill.pos*30);if(synth){if(synth.speaking||synth.pending)synth.cancel();speakU(utter(c,0.9))}return}
+    // word finished
+    SFX.pop();
+    pairsGot++;renderProgress();left-=2;
+    practice[w]=(practice[w]||0)+1;bump(w,0);saveProfiles();
+    document.querySelector(".fcard").classList.add("done");
+    const last=fill.idx>=fill.list.length-1;
+    if(last)timerRunning=false;
+    say(w,null,{got:true,zh:cfg.zh,sent:true},reward,()=>{
+      if(gameOver)return;
+      if(last){const g=gameId;setTimeout(()=>{if(g===gameId)win()},400)}
+      else{fill.idx++;showFillWord()}
+    });
+  }else{
+    lock=true;mistakes++;bump(w,1);practice[w]=Math.max(0,(practice[w]||0)-1);saveProfiles();
+    b.classList.add("bad");SFX.wrong();
+    if(timeTotal&&penalty){
+      timeLeft=Math.max(0,timeLeft-penalty);renderTimer();
+      const pb=$("penalty");pb.textContent="−"+penalty+" 秒";pb.classList.remove("show");void pb.offsetWidth;pb.classList.add("show");
+      if(timeLeft<=0){setTimeout(timeUp,600)}
+    }
+    setTimeout(()=>{b.classList.remove("bad");lock=false},600);
+  }
+}
+
+/* ---------- timer: only counts while she is looking, pauses while the voice is talking ---------- */
+let timeTotal=0, timeLeft=0, timerRunning=false, penalty=0, gameOver=false, gameId=0;
+function setupTimer(sec){
+  timeTotal=sec;timeLeft=sec;timerRunning=false;lastTimerUI="";
+  $("timerRow").hidden=!sec;
+  renderTimer();
+}
+let lastTimerUI="";
+function renderTimer(){
+  if(!timeTotal)return;
+  const r=Math.max(0,timeLeft/timeTotal), paused=timerRunning&&isPaused();
+  const key=Math.round(r*400)+"|"+paused;            // ~quarter-percent steps
+  if(key===lastTimerUI)return;
+  lastTimerUI=key;
+  const row=$("timerRow");
+  $("timerFill").style.transform="scaleX("+r+")";      // transform is cheaper to animate than width
+  row.classList.toggle("low",r<0.25);
+  row.classList.toggle("paused",paused);
+  const txt=Math.ceil(timeLeft)+" 秒", ts=$("timerSec");
+  if(ts.textContent!==txt)ts.textContent=txt;
+}
+let OVERLAYS=null;
+function isPaused(){
+  if(!OVERLAYS)OVERLAYS=[...document.querySelectorAll(".overlay")];
+  return busy||lock||OVERLAYS.some(o=>!o.hidden);
+}
+setInterval(()=>{
+  if(!timerRunning)return;
+  if(!isPaused()){timeLeft-=0.1; if(timeLeft<=0){timeLeft=0;renderTimer();timeUp();return}}
+  renderTimer();
+},100);
+function timeUp(){
+  if(gameOver)return; gameOver=true;
+  timerRunning=false;started=false;sel=null;
+  token++;timers.forEach(clearTimeout);timers=[];if(synth)synth.cancel();setBusy(false);
+  SFX.timeup();
+  cheer("Time's up! Let's try again.");
+  fillLearned();
+  $("winStars").textContent="⏰";
+  $("winTitle").textContent="時間到了！";
+  $("winSub").textContent="沒關係，已經消掉 "+pairsGot+" 對了。再試一次會更快！先聽聽這關的單字：";
+  $("nextBtn").hidden=true;
+  $("replayBtn").textContent="再試一次";
+  $("changeBtn").textContent="關卡地圖";
+  $("winOv").hidden=false;
+}
+function setTitle(){
+  $("devBar").hidden=!cfg.dev;
+  const t=$("title");
+  if(mode==="level"){
+    const L=LEVELS[cur];
+    t.style.setProperty("--tc",TIERS[L.tier].color);
+    t.innerHTML="";
+    const tag=document.createElement("span");tag.className="lvtag";tag.textContent=L.label;
+    const lk=look(L.tier),ic=document.createElement("span"),nm=document.createElement("span");ic.textContent=lk[0];nm.className="tname";nm.textContent=" "+lk[1];t.append(tag,ic,nm);
+  }else{
+    t.innerHTML="拼字<span>消消樂</span>";
+  }
+}
+function hideAll(){["homeOv","mapOv","startOv","winOv","bookOv","giftOv","playerOv","editOv","endOv","certOv","statsOv"].forEach(id=>$(id).hidden=true)}
+function startLevel(i){
+  unlockAudio();
+  mode="level";cur=i;
+  build(levelOpts(i));setTitle();started=true;hideAll();
+  if(timeTotal)timerRunning=true;   // countdown starts as soon as the level opens
+}
+function startFree(){
+  unlockAudio();
+  const o=freeOpts(); if(!o)return false;
+  store.set("sp-cfg",cfg);
+  mode="free";build(o);setTitle();started=true;hideAll();
+  return true;
+}
+function renderProgress(){
+  const p=$("progress");p.innerHTML="";
+  for(let i=0;i<pairsTotal;i++){const d=document.createElement("i");if(i<pairsGot)d.className="got";p.appendChild(d)}
+}
+function tap(card){
+  if(busy||lock||card.classList.contains("match")||card.classList.contains("gone"))return;
+  const isMatch=!!sel&&sel!==card&&sel.dataset.word===card.dataset.word;
+  say(card.dataset.word,card,isMatch?{got:true,zh:cfg.zh,sent:true}:null,isMatch?reward:null,()=>{if(isMatch&&left===0){const g=gameId;setTimeout(()=>{if(g===gameId)win()},500)}});
+  if(sel===card){return}          // tapping the same card again just repeats it
+  if(!sel){sel=card;card.classList.add("sel");SFX.tick();return}
+  const a=sel,b=card;sel=null;
+  b.classList.add("sel");
+  if(isMatch){
+    a.classList.remove("sel");b.classList.remove("sel");
+    a.classList.add("match");b.classList.add("match");
+    setTimeout(SFX.pop,380);           // when the cards start to pop away
+    pairsGot++;renderProgress();left-=2;
+    practice[b.dataset.word]=(practice[b.dataset.word]||0)+1;bump(b.dataset.word,0);saveProfiles();
+    setTimeout(()=>{a.classList.add("gone");b.classList.add("gone")},1100);
+    if(left===0){timerRunning=false;const g=gameId;setTimeout(()=>{if(g===gameId&&!gameOver)win()},20000)}   // safety: win normally fires when the last speech ends
+  }else{
+    lock=true;mistakes++;
+    if(timeTotal&&penalty){
+      timeLeft=Math.max(0,timeLeft-penalty);renderTimer();
+      const pb=$("penalty");pb.textContent="−"+penalty+" 秒";pb.classList.remove("show");void pb.offsetWidth;pb.classList.add("show");
+      if(timeLeft<=0){setTimeout(timeUp,600)}
+    }
+    [a.dataset.word,b.dataset.word].forEach(w=>{practice[w]=Math.max(0,(practice[w]||0)-1);bump(w,1)});saveProfiles();
+    a.classList.add("bad");b.classList.add("bad");
+    SFX.wrong();
+    setTimeout(()=>{a.classList.remove("sel","bad");b.classList.remove("sel","bad");lock=false},900);
+  }
+}
+// stars come from time left; three stars also needs a perfect run (no wrong pairs)
+const STAR3=0.6, STAR2=0.35;
+function starCount(){const r=timeTotal?timeLeft/timeTotal:1;return (r>=STAR3&&mistakes===0)?3:r>=STAR2?2:1}
+function starHTML(n){return "★".repeat(n)+'<span class="off">'+"★".repeat(3-n)+"</span>"}
+function totalStars(){return LEVELS.reduce((s,L)=>s+(starsSaved[L.id]||0),0)}
+// levels open strictly in order: everything up to the first level that has never been cleared.
+// (a level cleared out of order, e.g. in test mode, does not open the one after it)
+function frontierOf(stars){let i=0;while(i<LEVELS.length-1&&(stars[LEVELS[i].id]||0)>0)i++;return i}
+function isOpen(i){return i<=frontierOf(starsSaved)}
+function canPlay(i){return cfg.dev||isOpen(i)}   // test mode opens every level without changing the real unlock record
+/* picture meter: ★ ★ → 🎁, filled stars = stars already counted toward the next sticker */
+function fillMeter(el){
+  el.innerHTML="";
+  if(stickers.length>=STICKER_TOTAL){el.textContent="🎉 貼紙全部收集完了！";return}
+  const have=Math.max(0,Math.min(STAR_PER_STICKER,totalStars()-stickers.length*STAR_PER_STICKER));
+  for(let i=0;i<STAR_PER_STICKER;i++){const st=document.createElement("span");st.className="gm-s"+(i<have?" on":"");st.textContent="★";el.appendChild(st)}
+  const ar=document.createElement("span");ar.className="gm-a";ar.textContent="→";
+  const g=document.createElement("span");g.className="gm-g";g.textContent="🎁";
+  el.append(ar,g);
+  el.setAttribute("aria-label","下一個禮物還差 "+(STAR_PER_STICKER-have)+" 顆星");
+}
+function awardStickers(){
+  const due=Math.min(STICKER_TOTAL,Math.floor(totalStars()/STAR_PER_STICKER)), got=[];
+  while(stickers.length<due){
+    const page=ALBUM.findIndex((p,pi)=>p.items.some((_,ii)=>!stickers.includes(pi+"-"+ii)));
+    if(page<0)break;
+    const free=ALBUM[page].items.map((_,ii)=>page+"-"+ii).filter(id=>!stickers.includes(id));
+    const id=free[Math.floor(Math.random()*free.length)];
+    stickers.push(id);got.push(id);
+  }
+  if(got.length)saveProfiles(true);
+  return got;
+}
+function stickerOf(id){const [p,i]=id.split("-").map(Number);return {page:p,item:ALBUM[p].items[i],pg:ALBUM[p]}}
+/* gift box: she taps to open each new sticker, then it goes into the album */
+function runGifts(list,done){
+  const ov=$("giftOv");let k=0;
+  const show=()=>{
+    const {item,pg}=stickerOf(list[k]);
+    ov.style.setProperty("--pg",pg.bg);ov.style.setProperty("--pink",pg.ink);
+    $("giftTitle").textContent=list.length>1?"新貼紙 "+(k+1)+" / "+list.length:"你得到新貼紙了！";
+    $("giftBox").hidden=false;$("giftHint").hidden=false;$("giftReveal").hidden=true;$("giftNext").hidden=true;
+    $("giftSticker").textContent=item[0];$("giftName").textContent=item[1]+"  "+item[2];
+    $("giftPage").textContent="收進「"+pg.name+"」那一頁";
+    ov.hidden=false;
+  };
+  $("giftBox").onclick=()=>{
+    const {item}=stickerOf(list[k]);
+    $("giftBox").hidden=true;$("giftHint").hidden=true;$("giftReveal").hidden=false;
+    burst($("giftReveal"));reward();
+    const showNext=()=>{$("giftNext").textContent=k<list.length-1?"打開下一個禮物":"收進貼紙簿";$("giftNext").hidden=false};
+    if(synth){synth.cancel();const u=utter("You got "+(/^[aeiou]/.test(item[1])?"an ":"a ")+item[1]+" sticker!",0.9);let d=false;const fin=()=>{if(!d){d=true;setTimeout(showNext,250)}};u.onend=fin;u.onerror=fin;setTimeout(fin,4500);setTimeout(()=>speakU(u),500)}
+    else setTimeout(showNext,1200);
+  };
+  $("giftNext").onclick=()=>{k++;if(k<list.length)show();else{ov.hidden=true;done&&done()}};
+  show();
+}
+function burst(host){
+  host.querySelectorAll(".spark").forEach(e=>e.remove());
+  const marks=["✨","💖","⭐","✨","💗","🌟","✨","💕"];
+  marks.forEach((m,i)=>{
+    const sp=document.createElement("span");sp.className="spark";sp.textContent=m;
+    const a=i/marks.length*Math.PI*2;
+    sp.style.setProperty("--dx",Math.cos(a)*110+"px");sp.style.setProperty("--dy",Math.sin(a)*90+"px");
+    host.appendChild(sp);
+  });
+}
+/* sticker album */
+let bookPage=0;
+/* the album can be opened from anywhere; "back" returns to where it was opened (the game timer pauses meanwhile) */
+let bookRet=null;
+function openBook(ret){
+  bookRet=ret||openHome;
+  hideAll();
+  const firstNew=ALBUM.findIndex((p,pi)=>p.items.some((_,ii)=>!stickers.includes(pi+"-"+ii)));
+  bookPage=Math.max(0,stickers.length?stickerOf(stickers[stickers.length-1]).page:0);
+  renderBook();$("bookOv").hidden=false;
+}
+function renderBook(){
+  const pg=ALBUM[bookPage];
+  $("bookCount").textContent="已收集 "+stickers.length+" / "+STICKER_TOTAL+" 張";
+  const tabs=$("bookTabs");tabs.innerHTML="";
+  ALBUM.forEach((p,pi)=>{
+    const have=p.items.filter((_,ii)=>stickers.includes(pi+"-"+ii)).length;
+    const b=document.createElement("button");b.type="button";b.className="btab";b.setAttribute("aria-pressed",String(pi===bookPage));
+    b.style.setProperty("--pg",p.bg);b.style.setProperty("--pink",p.ink);
+    b.textContent=p.items[0][0]+" "+p.name+" "+have+"/"+p.items.length;
+    b.onclick=()=>{bookPage=pi;renderBook()};tabs.appendChild(b);
+  });
+  const page=$("bookPage");page.style.setProperty("--pg",pg.bg);page.style.setProperty("--pink",pg.ink);
+  page.innerHTML="";
+  const h=document.createElement("div");h.className="pgname";h.textContent=pg.name;page.appendChild(h);
+  const grid=document.createElement("div");grid.className="sgrid";
+  pg.items.forEach((it,ii)=>{
+    const id=bookPage+"-"+ii, own=stickers.includes(id);
+    const cell=document.createElement("button");cell.type="button";cell.className="scell"+(own?" own":"");
+    if(own){
+      const st=document.createElement("span");st.className="stk";st.textContent=it[0];
+      st.style.setProperty("--r",(((ii*37)%13)-6)+"deg");
+      const lb=document.createElement("span");lb.className="slabel";lb.textContent=it[1];
+      cell.append(st,lb);cell.setAttribute("aria-label",it[1]+" "+it[2]);
+      cell.onclick=()=>{st.classList.remove("boing");void st.offsetWidth;st.classList.add("boing");if(synth){synth.cancel();speakU(utter(it[1],0.85))}};
+    }else{
+      const q=document.createElement("span");q.className="sq";q.textContent="?";cell.appendChild(q);cell.disabled=true;cell.setAttribute("aria-label","還沒拿到");
+    }
+    grid.appendChild(cell);
+  });
+  page.appendChild(grid);
+}
+function fillLearned(){
+  const l=$("learned");l.innerHTML="";
+  words.forEach(w=>{
+    const b=document.createElement("button");b.type="button";
+    const m=meaning(w);
+    b.textContent=(m&&m[0]?m[0]+" ":"")+w;
+    if(m){const s=document.createElement("small");s.textContent=" "+m[1];b.appendChild(s)}
+    b.onclick=()=>{if(!busy)say(w,null,{zh:cfg.zh,sent:true})};l.appendChild(b);
+  });
+}
+function win(){
+  if(gameOver)return; gameOver=true;
+  started=false;timerRunning=false;
+  if(mode!=="level")cheer("Great job!");
+  SFX.fanfare();
+  fillLearned();
+  $("replayBtn").textContent="再玩一次";
+  if(mode==="level"){
+    const L=LEVELS[cur], n=starCount();
+    const prev=starsSaved[L.id]||0;
+    if(n>prev){starsSaved[L.id]=n;saveProfiles(true)}
+    const box=$("winStars");box.innerHTML="";
+    const ss=[0,1,2].map(()=>{const e=document.createElement("span");e.className="s";e.textContent="★";box.appendChild(e);return e});
+    for(let k=0;k<n;k++)setTimeout(()=>{ss[k].classList.add("on");SFX.star(k)},1150+k*650);   // after the fanfare
+    // keep every button hidden until the stars have popped in and the result has been spoken
+    const ov=$("winOv"), g=gameId;ov.classList.add("reveal");
+    let shown=false;
+    const gifts=awardStickers();
+    const gradeWin=L.last;
+    if(gradeWin&&!curP.certs[TIERS[L.tier].key]){curP.certs[TIERS[L.tier].key]=new Date().toISOString().slice(0,10);saveProfiles()}
+    const reveal=()=>{if(shown||g!==gameId)return;shown=true;
+      const after=()=>{ov.classList.remove("reveal");if(gradeWin)showCert(L.tier,true)};
+      if(gifts.length)runGifts(gifts,after); else after()};
+    const t0=1150+n*650+300;
+    setTimeout(()=>{
+      if(g!==gameId)return;
+      const line=n===3?"Wow! You got three stars!":n===2?"Great job! You got two stars!":"Good job! You got one star!";
+      if(synth){const u=utter(line,0.9);u.onend=()=>setTimeout(reveal,300);u.onerror=reveal;speakU(u)}
+      else setTimeout(reveal,600);
+    },t0);
+    setTimeout(reveal,t0+5000);   // safety net if the voice never reports it finished
+    $("winTitle").textContent=L.label+" 過關了！";
+    const secs=Math.ceil(timeLeft);
+    const r=timeTotal?timeLeft/timeTotal:1;
+    let sub=n===3?"太厲害了！一次都沒配錯，還剩 "+secs+" 秒。"
+      :n===2?(r>=STAR3?"很棒！還剩 "+secs+" 秒。下次一次都不配錯，就有三顆星。":"很棒！還剩 "+secs+" 秒。再快一點、不配錯，就有三顆星。")
+      :"過關了！還剩 "+secs+" 秒，再快一點可以拿更多星星。";
+    if(L.last&&cur<LEVELS.length-1)sub+=" "+TIERS[L.tier].name+"完成了！"+curP.name+" 長大了，變成 "+look(L.tier+1).join(" ")+"！";
+    if(cur===LEVELS.length-1)sub="全部關卡都完成了，你是拼字小達人！";
+
+    $("winSub").textContent=sub;
+    fillMeter($("winGift"));$("winGift").hidden=false;
+    $("nextBtn").hidden=cur>=LEVELS.length-1;
+    $("changeBtn").textContent="關卡地圖";
+  }else{
+    $("winStars").innerHTML="★★★";
+    $("winTitle").textContent="全部消完了！";
+    $("winGift").hidden=true;
+    $("winSub").textContent="再點一次今天的單字，聽聽怎麼拼：";
+    $("nextBtn").hidden=true;
+    $("changeBtn").textContent="換單字";
+  }
+  $("winOv").hidden=false;
+}
+
+/* ---------- screens ---------- */
+function openHome(){
+  hideAll();
+  const ts=totalStars();
+  $("homeStars").textContent=ts?"已經拿到 "+ts+" / "+LEVELS.length*3+" 顆星":"一關一關往上挑戰";
+  $("bookSub").textContent="已收集 "+stickers.length+" / "+STICKER_TOTAL+" 張・下一個禮物：";
+  fillMeter($("homeGift"));
+  const st=stageNow();
+  $("whoAv").textContent=look(st)[0];
+  $("whoName").textContent="嗨，"+curP.name+"！";
+  $("whoStage").textContent="現在是 "+look(st)[1]+"・★ "+ts;
+  const nc=Object.keys(curP.certs).length;
+  $("toEnd").hidden=!nc;$("certSub").textContent="已拿到 "+nc+" / "+TIERS.length+" 張";
+  $("resumeBtn").hidden=!(started&&left>0);
+  $("resumeSub").textContent=mode==="level"?LEVELS[cur].label+" "+look(LEVELS[cur].tier).join(" "):"自由練習";
+  $("homeOv").hidden=false;
+}
+let mapGrade=-1;
+function openMap(grade){
+  hideAll();
+  let firstOpenUnplayed=-1;
+  LEVELS.forEach((L,i)=>{if(firstOpenUnplayed<0&&isOpen(i)&&!starsSaved[L.id])firstOpenUnplayed=i});
+  if(typeof grade==="number")mapGrade=grade;
+  else mapGrade=firstOpenUnplayed>=0?LEVELS[firstOpenUnplayed].tier:(mode==="level"?LEVELS[cur].tier:0);
+  const firstOf=ti=>LEVELS.findIndex(L=>L.tier===ti);
+  // grade tabs: open grades show the character stage, locked ones are dark
+  const tabs=$("gradeTabs");tabs.innerHTML="";
+  TIERS.forEach((t,ti)=>{
+    const open=canPlay(firstOf(ti)), got=!!curP.certs[t.key];
+    const b=document.createElement("button");b.type="button";b.className="gtab"+(open?"":" dark");
+    b.style.setProperty("--tc",t.color);b.setAttribute("aria-pressed",String(ti===mapGrade));
+    const ic=document.createElement("span");ic.className="gic";ic.textContent=look(ti)[0];
+    const nm=document.createElement("span");nm.textContent=t.name+(got?" 🏆":"");
+    b.append(ic,nm);
+    if(open)b.onclick=()=>openMap(ti); else {b.disabled=true;b.setAttribute("aria-label",t.name+" 還沒解鎖")}
+    tabs.appendChild(b);
+  });
+  const box=$("mapList");box.innerHTML="";
+  const t=TIERS[mapGrade], ti=mapGrade, base=firstOf(ti);
+  const sec=document.createElement("section");sec.className="tier";sec.style.setProperty("--tc",t.color);
+  const h=document.createElement("div");h.className="tierhead";
+  const ic=document.createElement("span");ic.className="ticon";ic.textContent=look(ti)[0];
+  const tx=document.createElement("div");tx.className="ttext";
+  const gs=LEVELS.filter(L=>L.tier===ti).reduce((n,L)=>n+(starsSaved[L.id]||0),0);
+  const b=document.createElement("b");b.textContent=t.name+"・"+look(ti)[1];
+  const n=document.createElement("small");n.textContent=t.note+"・★ "+gs+" / "+t.count*3;
+  tx.append(b,n);h.append(ic,tx);sec.appendChild(h);
+  const grid=document.createElement("div");grid.className="lvls";
+  for(let k=0;k<t.count;k++){
+    const i=base+k, L=LEVELS[i], open=canPlay(i), st=starsSaved[L.id]||0;
+    const btn=document.createElement("button");btn.type="button";
+    if(!open){
+      btn.className="lvl locked";btn.textContent="🔒";btn.disabled=true;btn.setAttribute("aria-label","還沒解鎖");
+      grid.appendChild(btn);continue;
+    }
+    btn.className="lvl"+(i===firstOpenUnplayed?" next":"");
+    const num=document.createElement("span");num.className="num";num.textContent=L.num;
+    const nm=document.createElement("span");nm.className="nm";
+    nm.textContent=L.fill?"✏️ "+L.name:L.review?"🔁 "+L.name:L.newWords.map(w=>{const m=meaning(w);return (m&&m[0]?m[0]+" ":"")+w}).join(" ");
+    const sr=document.createElement("span");sr.className="st";sr.innerHTML=starHTML(st);
+    btn.append(num,nm,sr);
+    btn.setAttribute("aria-label",L.label+" "+L.name+"，"+st+" 顆星");
+    btn.onclick=()=>startLevel(i);
+    grid.appendChild(btn);
+  }
+  sec.appendChild(grid);box.appendChild(sec);
+  $("mapDev").hidden=!cfg.dev;
+  $("mapStars").textContent="★ "+totalStars()+" / "+LEVELS.length*3;
+  fillMeter($("mapGift"));
+  $("mapOv").hidden=false;
+  const at=tabs.querySelector('[aria-pressed="true"]');if(at&&at.scrollIntoView)at.scrollIntoView({block:"nearest",inline:"center"});
+  const nx=box.querySelector(".lvl.next");if(nx&&nx.scrollIntoView)nx.scrollIntoView({block:"center"});
+}
+function openPlayers(){
+  hideAll();
+  const box=$("playerList");box.innerHTML="";
+  profiles.forEach(p=>{
+    const stars=LEVELS.reduce((n,L)=>n+((p.stars||{})[L.id]||0),0);
+    const tier=LEVELS[frontierOf(p.stars||{})].tier;
+    const ch=CHARS[p.char]||CHARS.girl, stg=ch.stages[tier];
+    const row=document.createElement("div");row.className="prow"+(p.id===curP.id?" cur":"");
+    const pick=document.createElement("button");pick.type="button";pick.className="ppick";
+    const av=document.createElement("span");av.className="wav";av.textContent=stg[0];
+    const tx=document.createElement("span");tx.className="wtx";
+    const b=document.createElement("b");b.textContent=p.name+(p.id===curP.id?"（現在）":"");
+    const sm=document.createElement("small");sm.textContent=stg[1]+"・★ "+stars+"・貼紙 "+(p.stickers||[]).length;
+    tx.append(b,sm);pick.append(av,tx);
+    pick.onclick=()=>switchPlayer(p.id);
+    const ed=document.createElement("button");ed.type="button";ed.className="pill";ed.textContent="編輯";
+    ed.onclick=()=>openEditor(p.id);
+    row.append(pick,ed);box.appendChild(row);
+  });
+  $("playerOv").hidden=false;
+}
+function switchPlayer(id){
+  curP=profiles.find(p=>p.id===id)||curP;
+  starsSaved=curP.stars;stickers=curP.stickers;practice=curP.practice;
+  saveProfiles();
+  started=false;mode="level";cur=0;build(levelOpts(0));setTitle();
+  openHome();
+}
+let editId=null, editChar="girl", delArmed=false, resetArmed=false;
+function openEditor(id){
+  hideAll();
+  editId=id;delArmed=false;
+  const p=profiles.find(x=>x.id===id);
+  $("editTitle").textContent=p?"編輯玩家":"新玩家";
+  $("pName").value=p?p.name:"";
+  editChar=p?p.char:"girl";
+  $("pDel").hidden=!p||profiles.length<2;$("pDel").textContent="刪除這個玩家";
+  resetArmed=false;$("pReset").hidden=!p;$("pReset").textContent="重置紀錄";
+  $("pErr").hidden=true;
+  renderChars();
+  $("editOv").hidden=false;
+}
+function renderChars(){
+  const box=$("charList");box.innerHTML="";
+  Object.keys(CHARS).forEach(k=>{
+    const c=CHARS[k];
+    const b=document.createElement("button");b.type="button";b.className="charc";b.setAttribute("aria-pressed",String(k===editChar));
+    const row=document.createElement("span");row.className="cstages";
+    c.stages.forEach((st,i)=>{const e=document.createElement("span");e.textContent=st[0];row.appendChild(e);if(i<3){const a=document.createElement("i");a.textContent="›";row.appendChild(a)}});
+    const nm=document.createElement("span");nm.className="cname";nm.textContent=c.name+"："+c.stages.map(x=>x[1]).join(" → ");
+    b.append(row,nm);
+    b.onclick=()=>{editChar=k;renderChars()};
+    box.appendChild(b);
+  });
+}
+$("pSave").onclick=()=>{
+  const name=$("pName").value.trim();
+  if(!name){$("pErr").textContent="請幫玩家取個名字。";$("pErr").hidden=false;return}
+  let p=profiles.find(x=>x.id===editId);
+  if(p){p.name=name;p.char=editChar;saveProfiles();openPlayers();}
+  else{p={id:"p"+Date.now(),name,char:editChar,stars:{},stickers:[],practice:{}};profiles.push(p);switchPlayer(p.id);}
+};
+$("pCancel").onclick=()=>openPlayers();
+$("pDel").onclick=()=>{
+  if(!delArmed){delArmed=true;$("pDel").textContent="再按一次確定刪除（紀錄會不見）";return}
+  profiles=profiles.filter(x=>x.id!==editId);
+  if(curP.id===editId){switchPlayer(profiles[0].id);openPlayers();}
+  else{saveProfiles();openPlayers();}
+};
+/* reset: keeps name and character, clears stars, stickers, certificates and word practice */
+$("pReset").onclick=()=>{
+  if(!resetArmed){resetArmed=true;$("pReset").textContent="再按一次確定重置（星星、貼紙和證書會清空）";return}
+  const p=profiles.find(x=>x.id===editId);if(!p)return;
+  p.stars={};p.stickers=[];p.practice={};p.certs={};p.wstats={};delete p.done;
+  if(curP.id===p.id){switchPlayer(p.id);openPlayers()}else{saveProfiles();openPlayers()}
+};
+$("addPlayer").onclick=()=>openEditor(null);
+$("playerBack").onclick=()=>openHome();
+$("whoBtn").onclick=()=>openPlayers();
+function openFree(){hideAll();renderSettings();renderCustom();$("startOv").hidden=false}
+
+/* ---------- designer test mode: finish the current board instantly ---------- */
+function devFinish(n){
+  if(gameOver||!started)return;
+  token++;timers.forEach(clearTimeout);timers=[];if(synth)synth.cancel();setBusy(false);lock=false;sel=null;
+  board.querySelectorAll(".card").forEach(c=>{c.classList.remove("sel","bad");c.classList.add("gone")});
+  timerRunning=false;
+  if(n===0){timeLeft=0;renderTimer();timeUp();return}
+  pairsGot=pairsTotal;left=0;renderProgress();
+  mistakes=n===3?0:mistakes;
+  if(timeTotal){timeLeft=timeTotal*(n===3?0.8:n===2?0.45:0.1);renderTimer()}
+  win();
+}
+document.querySelectorAll("#devBar button").forEach(b=>b.onclick=()=>devFinish(Number(b.dataset.s)));
+
+/* ---------- ending ---------- */
+let confettiRun=0;
+function showCert(g,withVoice){
+  hideAll();
+  const t=TIERS[g], stg=CHARS[curP.char].stages, final=g===TIERS.length-1;
+  const to=Math.min(g+1,stg.length-1), hero=stg[to];
+  const ov=$("endOv");ov.classList.add("reveal");
+  // growth line up to the new form, then the new form appears big
+  const evo=$("endEvo");evo.innerHTML="";
+  stg.slice(0,to+1).forEach((st,i)=>{
+    const e=document.createElement("span");e.className="evs";e.textContent=st[0];e.style.animationDelay=(0.3+i*0.35)+"s";evo.appendChild(e);
+    if(i<to){const a=document.createElement("i");a.textContent="›";a.style.animationDelay=(0.45+i*0.35)+"s";evo.appendChild(a)}
+  });
+  const heroEl=$("endHero");heroEl.textContent=hero[0];heroEl.style.animationDelay=(0.4+(to+1)*0.35)+"s";
+  $("endTop").textContent=final?"🎉 全部破關了！🎉":"🎉 "+t.name+" 完成了！🎉";
+  $("endTitle").textContent=final?curP.name+" 成為 "+hero[1]+" 了！":curP.name+" 長大變成 "+hero[1]+" 了！";
+  $("certHead").textContent=t.name+" 拼字證書";
+  $("certName").textContent=curP.name;
+  $("certWords").textContent=t.words.length;
+  const gs=LEVELS.filter(L=>L.tier===g).reduce((n,L)=>n+(starsSaved[L.id]||0),0);
+  $("certStars").textContent=gs+" / "+t.count*3;
+  $("certStk").textContent=stickers.length+" / "+STICKER_TOTAL;
+  const d=curP.certs[t.key];$("certDate").textContent=d?d.replace(/-/g," / "):"";
+  const ew=$("endWords");ew.innerHTML="";
+  t.words.forEach(w=>{
+    const b=document.createElement("button");b.type="button";const m=meaning(w);
+    b.textContent=(m&&m[0]?m[0]+" ":"")+w;
+    b.onclick=()=>{if(!busy)say(w,null,{zh:cfg.zh,sent:true})};
+    ew.appendChild(b);
+  });
+  $("endNext").hidden=final||!canPlay(LEVELS.findIndex(L=>L.tier===g+1));
+  if(!final)$("endNext").textContent="開始 "+TIERS[g+1].name+" →";
+  ov.hidden=false;
+  confetti();
+  SFX.fanfare();
+  const t0=(0.4+(to+1)*0.35)*1000+600;
+  let shown=false;const done=()=>{if(!shown){shown=true;ov.classList.remove("reveal")}};
+  setTimeout(()=>{
+    reward();
+    if(withVoice&&synth){
+      synth.cancel();
+      const lines=final?["Congratulations! You finished every level!","You are a spelling star!"]
+                       :["Congratulations! You finished "+t.en+"!","You are a spelling star!"];
+      if(/^[A-Za-z][A-Za-z \-]*$/.test(curP.name))lines.push("Great job, "+curP.name+"!");
+      lines.forEach((l,i)=>{const u=utter(l,0.9);if(i===lines.length-1){u.onend=()=>setTimeout(done,300);u.onerror=done}speakU(u)});
+      setTimeout(done,9000);
+    }else setTimeout(done,600);
+  },t0);
+}
+function openCerts(){
+  hideAll();
+  const box=$("certList");box.innerHTML="";
+  TIERS.forEach((t,ti)=>{
+    const d=curP.certs[t.key];
+    const b=document.createElement("button");b.type="button";b.className="certc"+(d?"":" dark");b.style.setProperty("--tc",t.color);
+    const ic=document.createElement("span");ic.className="cic";ic.textContent=d?"🏆":"🔒";
+    const tx=document.createElement("span");tx.className="wtx";
+    const nb=document.createElement("b");nb.textContent=t.name+" 拼字證書";
+    const sm=document.createElement("small");sm.textContent=d?d.replace(/-/g," / ")+"・"+t.words.length+" 個字":"還沒拿到";
+    tx.append(nb,sm);b.append(ic,tx);
+    if(d)b.onclick=()=>showCert(ti,true); else b.disabled=true;
+    box.appendChild(b);
+  });
+  $("certCount").textContent=Object.keys(curP.certs).length+" / "+TIERS.length;
+  $("certOv").hidden=false;
+}
+function confetti(){
+  const cv=$("confetti"),ctx=cv.getContext&&cv.getContext("2d");if(!ctx)return;
+  if(window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches)return;
+  const run=++confettiRun, dpr=window.devicePixelRatio||1;
+  const W=cv.clientWidth,H=cv.clientHeight;cv.width=W*dpr;cv.height=H*dpr;ctx.scale(dpr,dpr);
+  const cols=["#FF8FB1","#FFC83D","#8FD3FF","#B49CFF","#7DDC9A","#FFFFFF"];
+  const ps=Array.from({length:150},()=>({x:Math.random()*W,y:-20-Math.random()*H,w:6+Math.random()*7,h:8+Math.random()*10,
+    vy:1.6+Math.random()*2.6,vx:-1+Math.random()*2,r:Math.random()*6,vr:-.15+Math.random()*.3,c:cols[Math.floor(Math.random()*cols.length)]}));
+  const t0=performance.now();
+  (function frame(t){
+    if(run!==confettiRun||$("endOv").hidden){ctx.clearRect(0,0,W,H);return}
+    ctx.clearRect(0,0,W,H);
+    const fading=t-t0>7000;
+    ps.forEach(p=>{p.y+=p.vy;p.x+=p.vx+Math.sin((t/600)+p.r)*.6;p.r+=p.vr;
+      if(p.y>H+20){if(fading)return;p.y=-20;p.x=Math.random()*W}
+      ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.r);ctx.fillStyle=p.c;ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h);ctx.restore()});
+    if(t-t0<12000)requestAnimationFrame(frame);else ctx.clearRect(0,0,W,H);
+  })(t0);
+}
+$("toEnd").onclick=()=>{unlockAudio();openCerts()};
+$("certBack").onclick=()=>openHome();
+$("endCerts").onclick=()=>openCerts();
+$("endNext").onclick=()=>{const g=TIERS.findIndex(t=>!curP.certs[t.key]);openMap(g<0?TIERS.length-1:g)};
+$("endBook").onclick=()=>openBook(openHome);
+$("endHome").onclick=()=>openHome();
+
+/* ---------- word statistics ---------- */
+// wstats[word] = [times matched, times in a wrong pair]
+function ensureStats(p){
+  if(!p.wstats){p.wstats={};Object.keys(p.practice||{}).forEach(w=>{if(p.practice[w]>0)p.wstats[w]=[p.practice[w],0]})}
+  return p.wstats;
+}
+function bump(w,k){const st=ensureStats(curP);st[w]=st[w]||[0,0];st[w][k]++}
+function unlockedWords(){const L=LEVELS[frontierOf(starsSaved)];return L.learned.concat(L.newWords)}
+let statSort="grade";
+function openStats(){
+  hideAll();
+  const st=ensureStats(curP), un=new Set(unlockedWords());
+  const allW=TIERS.flatMap(t=>t.words), total=allW.length, nUn=un.size;
+  const count=w=>(st[w]||[0,0])[0], miss=w=>(st[w]||[0,0])[1];
+  // donut: unlocked vs locked
+  const R=54,C=2*Math.PI*R,frac=nUn/total;
+  $("statDonut").innerHTML=`<svg viewBox="0 0 140 140" role="img" aria-label="已解鎖 ${nUn} 個單字，共 ${total} 個">
+    <circle cx="70" cy="70" r="${R}" fill="none" stroke="#E4EEF4" stroke-width="18"/>
+    <circle cx="70" cy="70" r="${R}" fill="none" stroke="#4FAE63" stroke-width="18" stroke-linecap="round"
+      stroke-dasharray="${(C*frac).toFixed(1)} ${C.toFixed(1)}" transform="rotate(-90 70 70)"/>
+    <text x="70" y="68" text-anchor="middle" font-size="30" font-weight="800" fill="#22324A" font-family="Baloo 2, sans-serif">${nUn}</text>
+    <text x="70" y="90" text-anchor="middle" font-size="13" fill="#5A6E86">/ ${total} 個字</text></svg>`;
+  const totalPlays=[...un].reduce((n,w)=>n+count(w),0);
+  $("statUn").textContent=nUn;$("statLock").textContent=total-nUn;$("statPlays").textContent=totalPlays;
+  // per-grade bars
+  const gb=$("statGrades");gb.innerHTML="";
+  TIERS.forEach(t=>{
+    const u=t.words.filter(w=>un.has(w)).length;
+    const row=document.createElement("div");row.className="gbar";row.style.setProperty("--tc",t.color);
+    row.innerHTML=`<span class="gl"></span><span class="track"><i style="width:${(u/t.words.length*100).toFixed(1)}%"></i></span><span class="gv">${u} / ${t.words.length}</span>`;
+    row.querySelector(".gl").textContent=t.name;
+    gb.appendChild(row);
+  });
+  // mastery: how many unlocked words sit at each practice level
+  const lv=[["還沒配對過",w=>count(w)===0,"#C9D6E0"],["剛學 1–2 次",w=>count(w)>=1&&count(w)<=2,"#FFC83D"],["熟悉 3–5 次",w=>count(w)>=3&&count(w)<=5,"#7DB9E8"],["精通 6 次以上",w=>count(w)>=6,"#4FAE63"]];
+  const ms=$("statMastery");ms.innerHTML="";
+  const bar=document.createElement("div");bar.className="mbar";
+  const leg=document.createElement("div");leg.className="mleg";
+  lv.forEach(([name,f,col])=>{
+    const n=[...un].filter(f).length;
+    if(n){const seg=document.createElement("i");seg.style.flex=n;seg.style.background=col;seg.title=name+" "+n;bar.appendChild(seg)}
+    const li=document.createElement("span");li.innerHTML=`<b style="background:${col}"></b>`;li.append(name+" "+n);leg.appendChild(li);
+  });
+  if(!nUn){const seg=document.createElement("i");seg.style.flex=1;seg.style.background="#E4EEF4";bar.appendChild(seg)}
+  ms.append(bar,leg);
+  // words that need practice: most misses, then fewest matches
+  const need=[...un].sort((a,b)=>(miss(b)-count(b)*0.5)-(miss(a)-count(a)*0.5)).slice(0,6);
+  const nb=$("statNeed");nb.innerHTML="";
+  need.forEach(w=>nb.appendChild(wordChip(w,count(w),miss(w))));
+  renderStatList();
+  $("statsOv").hidden=false;
+}
+function wordChip(w,c,m){
+  const b=document.createElement("button");b.type="button";b.className="wchip";
+  const mm=meaning(w);
+  const lvl=c===0?0:c<=2?1:c<=5?2:3;b.dataset.lv=lvl;
+  b.innerHTML=`<span class="we"></span><span class="ww"></span><span class="wc">${c}</span>`;
+  b.querySelector(".we").textContent=mm&&mm[0]?mm[0]:"";
+  b.querySelector(".ww").textContent=w;
+  b.setAttribute("aria-label",w+" 配對 "+c+" 次，配錯 "+m+" 次");
+  b.title="配對 "+c+" 次・配錯 "+m+" 次";
+  b.onclick=()=>{if(!busy)say(w,null,{zh:cfg.zh,sent:true})};
+  return b;
+}
+function renderStatList(){
+  const st=ensureStats(curP), un=new Set(unlockedWords());
+  const count=w=>(st[w]||[0,0])[0], miss=w=>(st[w]||[0,0])[1];
+  chips($("statSortChips"),[["grade","依年級"],["least","練最少"],["most","練最多"]],statSort,v=>{statSort=v;renderStatList()});
+  const box=$("statList");box.innerHTML="";
+  const addGroup=(title,list,color,lockedN)=>{
+    const sec=document.createElement("div");sec.className="wgroup";
+    const h=document.createElement("div");h.className="wgh";h.style.setProperty("--tc",color||"var(--ink)");h.textContent=title;sec.appendChild(h);
+    const g=document.createElement("div");g.className="wgrid";
+    list.forEach(w=>g.appendChild(wordChip(w,count(w),miss(w))));
+    if(lockedN){const l=document.createElement("span");l.className="wlocked";l.textContent="🔒 還有 "+lockedN+" 個字沒解鎖";g.appendChild(l)}
+    sec.appendChild(g);box.appendChild(sec);
+  };
+  if(statSort==="grade"){
+    TIERS.forEach(t=>{const u=t.words.filter(w=>un.has(w));if(u.length||t===TIERS[0])addGroup(t.name,u,t.color,t.words.length-u.length)});
+  }else{
+    const list=[...un].sort((a,b)=>statSort==="least"?count(a)-count(b):count(b)-count(a));
+    addGroup(statSort==="least"?"練最少的在前面":"練最多的在前面",list);
+  }
+}
+$("toStats").onclick=()=>{unlockAudio();openStats()};
+$("statsBack").onclick=()=>openHome();
+
+/* ---------- sound check ---------- */
+function diag(lines){$("diagOut").textContent=lines.join("\n")}
+function diagBase(){
+  const vs=synth?(synth.getVoices()||[]):[];
+  return [
+    "語音功能："+(synth?"有":"沒有"),
+    "英文聲音數量："+vs.filter(v=>/^en/i.test(v.lang)).length+"（全部 "+vs.length+"）",
+    "目前選的聲音："+(voice?voice.name+" "+voice.lang:"手機預設"),
+    "播放模式："+(navigator.audioSession?navigator.audioSession.type:"不支援"),
+    "音效系統："+(actx?actx.state:"還沒啟動"),
+    "瀏覽器："+navigator.userAgent.replace(/^.*?\(/,"(").slice(0,90)
+  ];
+}
+function diagSpeak(useChosen){
+  unlockAudio();
+  const out=diagBase();
+  if(!synth){out.push("結果：這個畫面不支援語音");diag(out);return}
+  try{synth.cancel()}catch(e){}
+  const u=new SpeechSynthesisUtterance("dog");
+  u.lang="en-US";u.rate=0.9;
+  if(useChosen&&voice)u.voice=voice;
+  const t0=Date.now();let st="還沒開始";
+  const show=()=>diag(out.concat(["測試："+(useChosen?"選的聲音":"預設聲音"),"狀態："+st,"speaking="+synth.speaking+" pending="+synth.pending+" paused="+synth.paused]));
+  u.onstart=()=>{st="開始唸了（"+(Date.now()-t0)+" 毫秒）";show()};
+  u.onend=()=>{st+="，唸完了";show()};
+  u.onerror=e=>{st="錯誤："+(e&&e.error||"unknown");show()};
+  synth.speak(u);   // called directly inside the tap
+  show();
+  setTimeout(()=>{if(st==="還沒開始"){st="3 秒都沒有開始（被擋住或卡住）";show()}},3000);
+}
+$("chkDing").onclick=()=>{unlockAudio();reward();setTimeout(()=>diag(diagBase().concat(["測試：叮一聲（有聽到的話，音效正常）"])),300)};
+$("chkDefault").onclick=()=>diagSpeak(false);
+$("chkChosen").onclick=()=>diagSpeak(true);
+
+/* ---------- buttons ---------- */
+$("toMap").onclick=()=>{unlockAudio();openMap()};
+$("toFree").onclick=()=>{unlockAudio();openFree()};
+$("resumeBtn").onclick=()=>{unlockAudio();hideAll()};
+$("mapBack").onclick=openHome;
+$("toBook").onclick=()=>{unlockAudio();openBook(openHome)};
+$("bookBack").onclick=()=>{const r=bookRet;bookRet=null;(r||openHome)()};
+$("bookBtn").onclick=()=>{unlockAudio();openBook(()=>hideAll())};                 // back to the game
+$("mapGift").onclick=()=>openBook(()=>openMap(mapGrade));
+$("winGift").onclick=()=>openBook(()=>{$("winOv").hidden=false});
+$("freeBack").onclick=openHome;
+$("goBtn").onclick=()=>startFree();
+$("menuBtn").onclick=openHome;
+$("againBtn").onclick=()=>{if(busy)return; mode==="level"?startLevel(cur):startFree()};
+$("nextBtn").onclick=()=>{if(cur<LEVELS.length-1&&canPlay(cur+1))startLevel(cur+1)};
+$("replayBtn").onclick=()=>{mode==="level"?startLevel(cur):startFree()};
+$("changeBtn").onclick=()=>{mode==="level"?openMap():openFree()};
+
+renderSettings();
+build(levelOpts(0));   // a board ready behind the home screen
+openHome();
+})();
+</script>
+
+</body></html>

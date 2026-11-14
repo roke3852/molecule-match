@@ -1,0 +1,632 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px/1.5 system-ui,-apple-system,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style></head><body><title>嗅覺練習日誌</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@500;700&family=Noto+Sans+TC:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one column, apothecary shelf list → bottle detail with tasting card and log. Amber-glass accent on cool grey paper. */
+:root{
+  --bg:#F1F3F1; --surface:#FFFFFF; --ink:#1D2320; --muted:#5F6964; --line:#D8DDD9;
+  --amber:#9C5A14; --amber-soft:#F6E9D8; --focus:#2F6FB0;
+  --citrus:#B48E00; --floral:#B9466E; --fruity:#7E4699; --gourmand:#86532F;
+  --woody:#5E6630; --spicy:#AE4A22; --musk:#677789; --green:#3F7A4A;
+  --display:"Noto Serif TC","Songti TC",serif;
+  --body:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#131615; --surface:#1B1F1D; --ink:#E6EAE7; --muted:#9AA49F; --line:#2D3330;
+  --amber:#E2A25C; --amber-soft:#2E2418; --focus:#7FB3EA;
+  --citrus:#E2C24A; --floral:#E88AAB; --fruity:#BD92D6; --gourmand:#CD9A75;
+  --woody:#AFB86E; --spicy:#EE8C63; --musk:#A7B6C6; --green:#86C79A; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#131615; --surface:#1B1F1D; --ink:#E6EAE7; --muted:#9AA49F; --line:#2D3330;
+  --amber:#E2A25C; --amber-soft:#2E2418; --focus:#7FB3EA;
+  --citrus:#E2C24A; --floral:#E88AAB; --fruity:#BD92D6; --gourmand:#CD9A75;
+  --woody:#AFB86E; --spicy:#EE8C63; --musk:#A7B6C6; --green:#86C79A; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.65}
+.wrap{max-width:760px;margin:0 auto;padding-block:20px 64px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1,h2,h3{text-wrap:balance;margin:0}
+button,input,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.eyebrow{font-size:12px;letter-spacing:.08em;color:var(--muted)}
+
+/* header */
+.top{display:flex;flex-direction:column;gap:6px;margin-bottom:18px}
+.top h1{font-family:var(--display);font-size:28px;font-weight:700;letter-spacing:.02em}
+.progress{display:flex;align-items:center;gap:12px;font-size:13px;color:var(--muted)}
+.bar{flex:1;height:6px;background:var(--line);border-radius:3px;overflow:hidden;max-width:220px}
+.bar i{display:block;height:100%;background:var(--amber);border-radius:3px;transition:width .3s}
+.status{font-size:12px;color:var(--muted)}
+
+/* filters */
+.filters{display:flex;flex-direction:column;gap:10px;margin-bottom:14px}
+.seg{display:flex;gap:6px;flex-wrap:wrap}
+.chip{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:4px 12px;font-size:13px;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.dot{width:9px;height:9px;border-radius:50%;flex:none;background:var(--c)}
+.search{width:100%;border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:8px 12px}
+
+/* shelf list */
+.shelf{list-style:none;margin:0;padding:0;background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.shelf li+li{border-top:1px solid var(--line)}
+.row{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;padding:12px 14px;width:100%;background:none;border:0;text-align:left;cursor:pointer}
+.row:hover{background:var(--amber-soft)}
+.vial{width:38px;height:38px;border-radius:50%;border:2px solid var(--c);display:grid;place-items:center;font-family:var(--mono);font-size:11px;color:var(--c);font-weight:500}
+.row .name{min-width:0}
+.row .zh{font-weight:700;font-size:16px}
+.row .en{color:var(--muted);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row .meta{text-align:right;font-size:12px;color:var(--muted);white-space:nowrap}
+.row .meta b{display:block;font-size:15px;color:var(--ink);font-weight:500}
+.row .meta b.zero{color:var(--line)}
+.empty{padding:24px;text-align:center;color:var(--muted)}
+
+/* detail */
+#detailView{touch-action:pan-y}
+#detailView.dragging{transition:none}
+#detailView.settle{transition:transform .22s ease,opacity .22s ease}
+.back{border:0;background:none;color:var(--amber);cursor:pointer;padding:4px 0;font-size:14px;margin-bottom:10px}
+.label{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px;display:flex;flex-direction:column;gap:14px}
+.label-head{display:flex;gap:14px;align-items:flex-start}
+.label-head .vial{width:54px;height:54px;font-size:13px;border-width:3px}
+.label h2{font-family:var(--display);font-size:26px;font-weight:700}
+.label .en{color:var(--muted)}
+.specs{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px 16px;margin:0;padding:12px 0;border-top:1px dashed var(--line);border-bottom:1px dashed var(--line)}
+.specs div{min-width:0}
+.specs dt{font-size:11px;letter-spacing:.08em;color:var(--muted)}
+.specs dd{margin:0;font-size:14px}
+.notes{display:flex;flex-wrap:wrap;gap:6px}
+.notes span{font-size:12px;padding:2px 10px;border-radius:999px;background:var(--amber-soft);color:var(--amber)}
+.desc{margin:0;max-width:62ch}
+.sub h3{font-size:13px;letter-spacing:.06em;color:var(--muted);font-weight:500;margin-bottom:2px}
+.sub p{margin:0;max-width:62ch}
+.tip{background:var(--amber-soft);border-radius:10px;padding:12px 14px}
+.tip h3{color:var(--amber)}
+.mol{display:grid;grid-template-columns:minmax(0,320px) 1fr;gap:16px;align-items:center;background:var(--bg);border-radius:12px;padding:12px 14px}
+@media (max-width:560px){.mol{grid-template-columns:1fr}}
+.mol canvas{width:100%;max-width:320px;height:auto;aspect-ratio:3/2;display:block;margin:0 auto}
+.mol-info{display:flex;flex-direction:column;gap:6px;min-width:0;font-size:14px}
+.mol-info .formula{font-family:var(--mono);font-size:18px;font-weight:500}
+.mol-info .smi{font-family:var(--mono);font-size:12px;color:var(--muted);overflow-wrap:anywhere}
+.mol-info p{margin:0}
+.fgs{display:flex;flex-direction:column;gap:6px;padding:8px 0;border-top:1px dashed var(--line);border-bottom:1px dashed var(--line)}
+.fgs .k{font-size:11px;letter-spacing:.08em;color:var(--muted)}
+.fg-list{display:flex;flex-wrap:wrap;gap:6px}
+.fg{display:inline-flex;align-items:baseline;gap:6px;border:1px solid var(--amber);border-radius:8px;padding:3px 9px;font-size:13px;background:var(--surface)}
+.fg b{font-weight:700;color:var(--amber)}
+.fg code{font-family:var(--mono);font-size:12px}
+.fg em{font-style:normal;font-size:11px;color:var(--muted)}
+
+/* form */
+.section-title{font-family:var(--display);font-size:19px;margin:26px 0 10px}
+form.log{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:16px}
+.field{display:flex;flex-direction:column;gap:6px}
+.field>label,.field>.lbl{font-size:13px;font-weight:500}
+.scale{display:flex;gap:6px;flex-wrap:wrap}
+.scale button{width:44px;height:38px;border:1px solid var(--line);border-radius:8px;background:var(--bg);cursor:pointer;font-family:var(--mono)}
+.scale button[aria-pressed="true"]{background:var(--amber);border-color:var(--amber);color:var(--surface)}
+.scale-hint{font-size:12px;color:var(--muted);display:flex;justify-content:space-between;max-width:250px}
+.tags{display:flex;flex-wrap:wrap;gap:6px}
+.tags .chip[aria-pressed="true"]{background:var(--amber);border-color:var(--amber);color:var(--surface)}
+input[type=text],input[type=date],textarea{border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:8px 10px;width:100%}
+textarea{min-height:96px;resize:vertical}
+.field{min-width:0}
+input[type=date]{-webkit-appearance:none;appearance:none;display:block;min-width:0;max-width:100%;min-height:40px;text-align:left}
+.swatches{display:flex;flex-wrap:wrap;gap:8px}
+.sw{display:inline-flex;flex-direction:column;align-items:center;gap:3px;background:none;border:0;padding:2px;cursor:pointer;font-size:11px;color:var(--muted);width:44px}
+.sw i{width:34px;height:34px;border-radius:50%;background:var(--sw);border:1px solid var(--line);display:block;transition:transform .15s}
+.sw[aria-pressed="true"]{color:var(--ink);font-weight:700}
+.sw[aria-pressed="true"] i{outline:2px solid var(--ink);outline-offset:2px;transform:scale(1.05)}
+.entry .cols{display:flex;gap:6px;align-items:center;flex-wrap:wrap;font-size:12px;color:var(--muted)}
+.entry .cols i{width:14px;height:14px;border-radius:50%;background:var(--sw);border:1px solid var(--line);display:inline-block}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:480px){.row2{grid-template-columns:1fr}}
+.actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.primary{background:var(--amber);color:var(--surface);border:0;border-radius:10px;padding:10px 20px;font-weight:700;cursor:pointer}
+.primary:disabled{opacity:.5;cursor:default}
+.ghost{background:none;border:1px solid var(--line);border-radius:10px;padding:9px 16px;cursor:pointer}
+.msg{font-size:13px;color:var(--muted)}
+
+/* history */
+.hist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+.entry{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:6px}
+.entry-head{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font-size:13px;color:var(--muted)}
+.entry .like{font-size:13px}
+.entry p{margin:0;white-space:pre-wrap;overflow-wrap:anywhere}
+.entry .tags span{font-size:12px;border:1px solid var(--line);border-radius:999px;padding:1px 8px}
+.entry-actions{display:flex;gap:18px}
+.note-head{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.note-head label{font-size:13px;font-weight:500}
+.ai-btn{border:1px solid var(--amber);color:var(--amber);background:none;border-radius:999px;padding:3px 12px;font-size:13px;cursor:pointer}
+.ai-btn:disabled{opacity:.55;cursor:default}
+.ai-box{background:var(--amber-soft);border-radius:10px;padding:12px 14px;white-space:pre-wrap;overflow-wrap:anywhere;font-size:14px}
+.ai-box .ai-k{display:block;font-size:12px;color:var(--amber);letter-spacing:.06em;margin-bottom:4px}
+.entry details{font-size:13px}
+.entry summary{cursor:pointer;color:var(--amber)}
+.entry details p{margin-top:6px;color:var(--muted)}
+.entry.editing{border-color:var(--amber);box-shadow:0 0 0 1px var(--amber)}
+.editing-badge{font-size:12px;color:var(--amber);font-family:var(--body);font-weight:500;margin-left:8px}
+.del{border:0;background:none;color:var(--muted);cursor:pointer;font-size:12px;padding:0}
+.del.confirm{color:var(--spicy);font-weight:700}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+  <div id="listView">
+    <header class="top">
+      <span class="eyebrow" id="eyebrow">SMELL TRAINING</span>
+      <h1>嗅覺練習日誌</h1>
+      <div class="progress"><div class="bar"><i id="pbar" style="width:0"></i></div><span id="ptext" class="mono">0 / 24 已練習</span></div>
+      <span class="status" id="status">正在讀取紀錄…</span>
+    </header>
+    <div class="filters">
+      <div class="seg" id="kindSeg" role="group" aria-label="類型"></div>
+      <div class="seg" id="famSeg" role="group" aria-label="香調"></div>
+      <input class="search" id="q" type="search" placeholder="搜尋中文、英文或 CAS 號" aria-label="搜尋">
+    </div>
+    <ul class="shelf" id="shelf"></ul>
+  </div>
+  <div id="detailView" hidden></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/smiles-drawer@2.0.1/dist/smiles-drawer.min.js"></script>
+<script>
+const FAM={citrus:'柑橘',floral:'花香',fruity:'果香',gourmand:'美食調',woody:'木質煙燻',spicy:'辛香',musk:'麝香',green:'青綠草本'};
+const S=[
+ {id:'a6',k:'s',code:'A6',zh:'檸烯',en:'Limonene',cas:'5989-27-5',cls:'萜烯類',fam:'citrus',notes:['橘子皮','明亮','清新'],
+  desc:'柑橘果皮精油的主成分，甜橙皮油裡可佔九成以上。氣味就是剝開橘子那一瞬間噴出的甜亮果皮香。揮發很快，在香水裡屬於前調。',
+  where:'甜橙、檸檬、葡萄柚的果皮',tip:'聞一次後等 30 秒再聞試香紙，感受它散得多快。再拿檸檬、青檸對照，找出三者共有的那層底色。'},
+ {id:'a9',k:'s',code:'A9',zh:'檸檬醛',en:'Citral',cas:'5392-40-5',cls:'醛類',fam:'citrus',notes:['檸檬','檸檬草','尖銳'],
+  desc:'由香葉醛與橙花醛兩種異構物組成。它是「檸檬味」本身的來源，比檸烯更尖、更酸利，也帶檸檬草的草本感。',
+  where:'檸檬草、山雞椒（馬告）、檸檬香桃木',tip:'和 A6 檸烯並排聞：檸烯是果皮的甜亮，檸檬醛是酸利的檸檬感。合起來大致就是檸檬的輪廓。'},
+ {id:'a12',k:'s',code:'A12',zh:'橙花醇',en:'Nerol',cas:'106-25-2',cls:'醇類',fam:'floral',notes:['玫瑰','甜','微柑橘'],
+  desc:'甜美柔和的玫瑰花香，帶一點柑橘感。它是香葉醇的幾何異構物，氣味比香葉醇更清新、細緻。',
+  where:'橙花油、玫瑰、香蜂草',tip:'和荔枝對照，找荔枝香裡的玫瑰面；再和桂花、梔子比較花香的「重量」。'},
+ {id:'a15',k:'s',code:'A15',zh:'芳樟醇',en:'Linalool',cas:'78-70-6',cls:'醇類',fam:'floral',notes:['薰衣草','清新花香','微木質'],
+  desc:'清新的花香，帶淡淡木質與柑橘感。它是薰衣草和佛手柑的核心成分之一，也是植物界最常見的香氣分子之一。',
+  where:'薰衣草、佛手柑、芫荽籽、花梨木',tip:'想像薰衣草拿掉草本和樟腦那一層。試著把它放在檸烯和橙花醇之間，描述它偏哪一邊。'},
+ {id:'b12',k:'s',code:'B12',zh:'庚酸乙酯',en:'Ethyl Heptanoate',cas:'106-30-9',cls:'酯類',fam:'fruity',notes:['葡萄','酒香','熟果'],
+  desc:'帶葡萄、鳳梨和白蘭地感的熟成果香。酯類常是水果香氣的來源，這支偏發酵、偏酒感。',
+  where:'葡萄酒、白蘭地、熟透的水果',tip:'和蘋果、接骨木對照，看看它像不像這些果香裡「酒酒的」那一部分。'},
+ {id:'b19',k:'s',code:'B19',zh:'δ-十一內酯',en:'δ-Undecalactone',cas:'710-04-3',cls:'內酯類',fam:'fruity',notes:['奶油桃','椰子','滑順'],
+  desc:'奶油般的桃子與椰子香，柔軟圓潤。內酯類是桃、杏和乳製品香氣的關鍵，給氣味一種「絲滑」的質地。',
+  where:'桃、杏、奶油、椰子',tip:'和杏仁、桃花、梔子比較。注意它的奶滑質地，而不只是水果味。'},
+ {id:'b24',k:'s',code:'B24',zh:'水楊酸丁酯',en:'Butyl Salicylate',cas:'2052-14-4',cls:'酯類',fam:'floral',notes:['溫和甜香','草本','香脂'],
+  desc:'溫和的甜香，帶草本與香脂感。有人會聞到很淡的冬青（類似痠痛貼布）影子，但比水楊酸甲酯柔和得多。調香時常用來撐起花香。',
+  where:'多為合成，常見於花香調香水的基底',tip:'它的氣味很低調，先聞別的再回來聞會更明顯。試著描述它「像什麼都不像」的那種柔和。'},
+ {id:'c3',k:'s',code:'C3',zh:'愈創木酚',en:'Guaiacol',cas:'90-05-1',cls:'酚類',fam:'woody',notes:['煙燻','焦香','藥味'],
+  desc:'煙燻、焦香，帶一點藥水味的酚類氣味。烘焙咖啡、泥煤威士忌、燃燒木頭的氣味裡都有它。濃度高時刺鼻，稀釋後才出現溫暖的煙燻感。',
+  where:'烘焙咖啡豆、泥煤威士忌、木煙',tip:'用很少的量。和「愈創木」對照，你會發現名字相近，氣味卻差很多。'},
+ {id:'elderberry',k:'a',code:'ACC',qty:3,zh:'接骨木',en:'Elderberry',fam:'fruity',notes:['深色莓果','微酸','紅酒感'],
+  desc:'深色莓果香，帶微酸、果醬和紅酒般的感覺，有時透出一點花香。接骨木的「果」和「花」氣味不同，接骨木花偏蜜香、麝香葡萄。',
+  where:'常見骨架：莓果類酯類、β-大馬酮（實際配方由廠商決定）',tip:'和藍莓、黑醋栗排成一列，練習分辨三種深色莓果。'},
+ {id:'apple',k:'a',code:'ACC',zh:'蘋果',en:'Apple',fam:'fruity',notes:['果肉','青脆','甜'],
+  desc:'青脆果肉與果皮的甜香。紅蘋果感和青蘋果感來自不同的分子。',
+  where:'常見骨架：2-甲基丁酸乙酯（紅蘋果）、乙酸己酯（青蘋果皮）、β-大馬酮',tip:'聞的時候判斷它偏紅蘋果還是青蘋果，再和 B12 庚酸乙酯比較。'},
+ {id:'darkchoc',k:'a',code:'ACC',zh:'黑巧克力',en:'Dark Chocolate',fam:'gourmand',notes:['苦甜','烘焙','香草'],
+  desc:'烘焙後的苦甜感，加上可可粉和一點香草。',
+  where:'常見骨架：吡嗪類（烘焙感）、香草醛',tip:'和可可豆對照：差別多半在甜度、香草和奶感。'},
+ {id:'blueberry',k:'a',code:'ACC',zh:'藍莓',en:'Blueberry',fam:'fruity',notes:['柔甜','果醬','微花香'],
+  desc:'柔和甜美、略帶果醬感的莓果香，比黑醋栗溫和，少了青綠和硫化物感。',
+  where:'常見骨架：果香酯類、芳樟醇',tip:'和黑醋栗、接骨木比較，描述它「圓」在哪裡。'},
+ {id:'blackcurrant',k:'a',code:'ACC',zh:'黑醋栗',en:'Blackcurrant',fam:'fruity',notes:['酸甜','葉片青綠','硫化物感'],
+  desc:'酸甜的深色果香，帶獨特的青綠葉片感，甚至有點像貓尿的硫化物味。這股怪味正是黑醋栗芽的辨識特徵。',
+  where:'常見骨架：含硫化合物（如 8-巰基薄荷酮）、果香酯類',tip:'找找看那股「綠綠又有點臭」的味道，它是黑醋栗和其他莓果的分界。'},
+ {id:'lemon',k:'a',code:'ACC',zh:'檸檬',en:'Lemon',fam:'citrus',notes:['酸亮','果皮','清新'],
+  desc:'酸亮清新的檸檬皮香。',
+  where:'常見骨架：檸烯、檸檬醛',tip:'對照 A6 檸烯和 A9 檸檬醛，試著從這瓶裡「拆」出它們。'},
+ {id:'osmanthus',k:'a',code:'ACC',zh:'桂花',en:'Osmanthus',fam:'floral',notes:['杏桃','花香','茶感'],
+  desc:'杏桃般的果香花香，帶一點皮革和烏龍茶的感覺。',
+  where:'常見骨架：β-紫羅蘭酮、γ-癸內酯、芳樟醇',tip:'和 B19 δ-十一內酯對照，找桂花裡的杏桃奶滑感。'},
+ {id:'peachblossom',k:'a',code:'ACC',zh:'桃花',en:'Peach Blossom',fam:'floral',notes:['粉嫩','輕柔','微桃香'],
+  desc:'粉嫩輕柔的花香，帶淡淡桃子果香。真實桃花香氣很淡，市售桃花多是想像性的調配。',
+  where:'幻想調，無固定骨架',tip:'描述它給你的畫面或顏色。這類幻想調很適合練習「聯想」。'},
+ {id:'cocoa',k:'a',code:'ACC',zh:'可可豆／可哥果',en:'Cocoa',fam:'gourmand',notes:['可可粉','乾燥','微苦'],
+  desc:'比黑巧克力更原始、乾燥、帶粉感的可可，甜味較少。',
+  where:'常見骨架：吡嗪類、異戊醛（麥芽、可可感）',tip:'和黑巧克力並排，練習分辨「原料」與「成品」的差異。'},
+ {id:'whitemusk',k:'a',code:'ACC',zh:'白麝香',en:'White Musk',fam:'musk',notes:['乾淨','洗衣感','柔軟'],
+  desc:'乾淨的洗衣感，柔軟得像曬過的棉被。由合成麝香組成。每個人對麝香的敏感度差很多，有些人對特定麝香分子幾乎聞不到。',
+  where:'常見骨架：大環麝香、多環麝香',tip:'如果聞不太到，換個時間或聞試香紙乾掉後的尾韻。聞不到也是一種有用的紀錄。'},
+ {id:'nutmeg',k:'a',code:'ACC',zh:'肉豆蔻',en:'Nutmeg',fam:'spicy',notes:['溫暖辛香','甜','松木'],
+  desc:'溫暖的辛香，帶甜和一點松木、樟腦感。',
+  where:'常見骨架：檜烯、α-蒎烯、肉豆蔻醚',tip:'想想它出現在哪些食物裡（南瓜派、熱紅酒），把記憶寫下來。'},
+ {id:'litchi',k:'a',code:'ACC',zh:'荔枝',en:'Litchi',fam:'fruity',notes:['多汁','甜','玫瑰感'],
+  desc:'多汁甜美的熱帶果香，帶明顯的玫瑰感。',
+  where:'常見骨架：玫瑰醚、香葉醇、芳樟醇',tip:'和 A12 橙花醇對照，找荔枝裡的玫瑰面。'},
+ {id:'gardenia',k:'a',code:'ACC',zh:'梔子花',en:'Gardenia',fam:'floral',notes:['濃郁白花','青綠','奶感'],
+  desc:'濃郁的乳白花香，帶綠意和一點椰子般的奶感。天然梔子很難萃取，市售幾乎都是調配。',
+  where:'常見骨架：乙酸苄酯、苯甲酸甲酯、內酯類',tip:'和桂花、桃花比較花香的濃淡，排出三者的「重量」順序。'},
+ {id:'guaiacwood',k:'a',code:'ACC',zh:'愈創木',en:'Guaiac Wood',fam:'woody',notes:['柔和煙燻','木質','微玫瑰'],
+  desc:'柔和的煙燻木質，帶一點玫瑰和茶感，比 C3 愈創木酚溫潤許多。',
+  where:'常見骨架：愈創木醇',tip:'和 C3 愈創木酚並排，描述兩種煙燻感的差別。'},
+ {id:'almond',k:'a',code:'ACC',zh:'杏仁',en:'Almond',fam:'gourmand',notes:['苦杏仁','杏仁膏','甜'],
+  desc:'苦杏仁、杏仁豆腐般的甜香。這是少數幾乎由單一分子主導的氣味，辨識度很高。',
+  where:'常見骨架：苯甲醛',tip:'很適合當「錨點」：每次練習先聞它確認狀態，再聞較難的。'},
+ {id:'lime',k:'a',code:'ACC',zh:'青檸',en:'Lime',fam:'citrus',notes:['青綠','微苦','辛香'],
+  desc:'比檸檬更青綠，帶一點苦和辛香。蒸餾萊姆油會有可樂般的氣味。',
+  where:'常見骨架：檸烯、γ-萜品烯、檸檬醛',tip:'和檸檬直接比較，說出青檸多了什麼。'},
+ {id:'a3',k:'s',code:'A3',zh:'苯乙醇',en:'Phenethyl Alcohol',cas:'60-12-8',cls:'醇類',fam:'floral',notes:['玫瑰','蜂蜜','柔和'],
+  desc:'溫和甜美的玫瑰花香，帶一點蜂蜜和麵包般的感覺。它是玫瑰香氣的核心分子，也是酵母發酵的產物，所以啤酒、清酒、麵包裡都有它。',
+  where:'玫瑰、康乃馨、啤酒、清酒、發酵麵團',tip:'先單聞它，再疊上 A11 香葉醇，玫瑰會從柔軟的花瓣變成鮮豔的花。也和 C10 苯基乙酸乙酯比較，兩者只差一個酯基。'},
+ {id:'a11',k:'s',code:'A11',zh:'香葉醇',en:'Geraniol',cas:'106-24-1',cls:'醇類',fam:'floral',notes:['玫瑰','天竺葵','微柑橘'],
+  desc:'鮮明的玫瑰與天竺葵花香，比橙花醇更濃、更甜。它是玫瑰精油和天竺葵精油的主要成分。',
+  where:'玫瑰、天竺葵、玫瑰草、檸檬香茅',tip:'和 A12 橙花醇並排。兩者是同一個分子的 E/Z 異構物，只差雙鍵的方向，描述你聞到的差別。'},
+ {id:'b22',k:'s',code:'B22',zh:'α-紫羅蘭酮',en:'alpha-Ionone',cas:'127-41-3',cls:'酮類',fam:'floral',notes:['紫羅蘭','粉感','微木質'],
+  desc:'粉粉的紫羅蘭花香，帶一點木質和覆盆子感。它由類胡蘿蔔素分解而來，所以許多花、水果和茶裡都有它。有些人對紫羅蘭酮的嗅覺比較遲鈍。',
+  where:'紫羅蘭、桂花、覆盆子、紅茶',tip:'和桂花對照，找桂花裡的粉感；再和草莓比較，找它的果香面。'},
+ {id:'c10',k:'s',code:'C10',zh:'苯基乙酸乙酯',en:'Ethyl Phenylacetate',cas:'101-97-3',cls:'酯類',fam:'gourmand',notes:['蜂蜜','甜','微花香'],
+  desc:'濃郁的蜂蜜甜香，稀釋後帶出玫瑰般的花香。許多「蜂蜜味」的描述背後就是這個分子。',
+  where:'蜂蜜、葡萄酒、可可',tip:'和 A3 苯乙醇比較：一個是玫瑰，一個是蜂蜜。高濃度很膩，試香紙沾少一點。'},
+ {id:'a28',k:'s',code:'A28',zh:'二氫茉莉酮酸甲酯',en:'Hedione',cas:'24851-98-7',cls:'酯類',fam:'floral',notes:['透明茉莉','清新','柑橘感'],
+  desc:'輕盈透明的茉莉花香，帶一點柑橘和綠意。氣味不強，但會讓整體香氣打開、擴散，是現代香水最常用的分子之一。',
+  where:'茉莉（天然含有類似的茉莉酮酸甲酯）、多數現代香水',tip:'它很淡，試香紙要靠近一點、多聞幾次。再和大花茉莉比較，感受茉莉少了濃郁白花與動物感之後的樣子。'},
+ {id:'c15',k:'s',code:'C15',zh:'茶香酮',en:'Theaspirane',cas:'36431-72-8',cls:'螺環醚',fam:'green',notes:['紅茶','烏龍','微果香'],
+  desc:'帶果香的茶葉香，像紅茶、烏龍茶，也有一點黑醋栗和樟腦感。名字叫「酮」，結構上其實是醚。它和紫羅蘭酮一樣來自類胡蘿蔔素的分解。',
+  where:'紅茶、烏龍茶、覆盆子、榅桲',tip:'和紅茶並排：紅茶是完整的茶香，茶香酮是其中帶果香的那一面。'},
+ {id:'bergamot',k:'a',code:'ACC',zh:'香檸檬',en:'Bergamot',fam:'citrus',notes:['柑橘','花香','伯爵茶'],
+  desc:'柑橘裡最優雅的一支，帶花香和一點苦。伯爵茶的香氣就是它。',
+  where:'常見骨架：檸烯、芳樟醇、乙酸芳樟酯',tip:'和 A15 芳樟醇、A6 檸烯對照，找出香檸檬怎麼把柑橘和花香接在一起。'},
+ {id:'lavender',k:'a',code:'ACC',zh:'薰衣草',en:'Lavender',fam:'floral',notes:['草本花香','清新','微樟腦'],
+  desc:'清新的草本花香，帶一點樟腦和乾草感。',
+  where:'常見骨架：芳樟醇、乙酸芳樟酯、樟腦、1,8-桉葉素',tip:'和 A15 芳樟醇比較：完整的薰衣草多了哪些草本和清涼感？'},
+ {id:'strawberry',k:'a',code:'ACC',zh:'草莓',en:'Strawberry',fam:'fruity',notes:['甜','果醬','微焦糖'],
+  desc:'甜美多汁的草莓香，帶果醬和一點焦糖般的甜。',
+  where:'常見骨架：呋喃酮（焦糖甜感）、果香酯類',tip:'和焦糖比較，找草莓裡那股焦糖甜；再和藍莓、黑醋栗排成一列。'},
+ {id:'grass',k:'a',code:'ACC',zh:'野青草',en:'Fresh Grass',fam:'green',notes:['剛割的草','青綠','清脆'],
+  desc:'剛割過的草地氣味，青綠、清脆、帶水分感，是最標準的「青綠」參考。',
+  where:'常見骨架：順-3-己烯醇（葉醇）、順-3-己烯醛',tip:'把它當作青綠的基準。之後在其他香氣裡聞到類似的感覺，就回來對照。'},
+ {id:'vanilla',k:'a',code:'ACC',zh:'香草',en:'Vanilla',fam:'gourmand',notes:['甜','奶油感','溫暖'],
+  desc:'溫暖甜美的香草，帶奶油和一點煙燻、木質感。',
+  where:'常見骨架：香草醛、乙基香草醛',tip:'和黑巧克力、焦糖並排，找出它們共有的那層甜。'},
+ {id:'passionfruit',k:'a',code:'ACC',zh:'百香果',en:'Passion Fruit',fam:'fruity',notes:['酸甜','熱帶','微硫化物感'],
+  desc:'酸甜的熱帶果香，帶一點獨特、略帶硫化物的青綠感。',
+  where:'常見骨架：果香酯類、含硫化合物（如 3-巰基己醇）',tip:'和黑醋栗比較：兩者都有那股含硫的怪味，正是它們的辨識特徵。'},
+ {id:'caramel',k:'a',code:'ACC',zh:'焦糖',en:'Caramel',fam:'gourmand',notes:['焦糖','甜','微苦'],
+  desc:'熬糖的甜香，帶一點焦和奶感。',
+  where:'常見骨架：呋喃酮、麥芽酚、環酮類',tip:'和草莓比較，草莓的甜裡有一部分就是同樣的呋喃酮。'},
+ {id:'jasmine',k:'a',code:'ACC',zh:'大花茉莉',en:'Jasmine',fam:'floral',notes:['濃郁白花','甜','微動物感'],
+  desc:'濃郁的白花香，甜美，帶一點果香和動物感。',
+  where:'常見骨架：乙酸苄酯、芳樟醇、茉莉酮、吲哚、茉莉酮酸甲酯',tip:'和 A28 Hedione 對照，看看茉莉加上乙酸苄酯和吲哚後變得多濃。'},
+ {id:'orangeblossom',k:'a',code:'ACC',zh:'苦橙花',en:'Orange Blossom',fam:'floral',notes:['白花','蜂蜜','柑橘'],
+  desc:'甜美的白花香，帶蜂蜜和柑橘感。',
+  where:'常見骨架：芳樟醇、鄰氨基苯甲酸甲酯、橙花醇',tip:'和 A12 橙花醇、A15 芳樟醇對照，找出它們在苦橙花裡的位置。'},
+ {id:'rosemary',k:'a',code:'ACC',zh:'迷迭香',en:'Rosemary',fam:'green',notes:['草本','清涼','樟腦'],
+  desc:'清涼的草本香，帶樟腦和松木感。',
+  where:'常見骨架：1,8-桉葉素、樟腦、α-蒎烯',tip:'和小荳蔻比較：兩者都有桉葉素的清涼，一個偏草本、一個偏辛香。'},
+ {id:'cardamom',k:'a',code:'ACC',zh:'小荳蔻',en:'Cardamom',fam:'spicy',notes:['清涼辛香','柑橘','甜'],
+  desc:'帶清涼感的甜辛香，有一點柑橘和花香。',
+  where:'常見骨架：1,8-桉葉素、乙酸萜品酯、芳樟醇',tip:'和肉豆蔻比較兩種辛香，再和迷迭香比較清涼感。'},
+ {id:'blacktea',k:'a',code:'ACC',zh:'紅茶',en:'Black Tea',fam:'green',notes:['茶葉','乾果','微麥芽'],
+  desc:'乾燥茶葉的香氣，帶乾果、麥芽和一點蜂蜜感。',
+  where:'常見骨架：茶香酮、紫羅蘭酮、芳樟醇、香葉醇',tip:'和 C15 茶香酮、B22 α-紫羅蘭酮對照，試著把紅茶拆開來聞。'}
+];
+const BY=Object.fromEntries(S.map(s=>[s.id,s]));
+document.getElementById('eyebrow').textContent='SMELL TRAINING · '+S.length+' BOTTLES';
+/* 淺焙咖啡：這支香氣在淺焙杯測中對應的風味詞與常見產區 */
+const COFFEE={
+ a6:['柑橘皮、明亮酸質','肯亞、水洗衣索比亞。剛沖好熱的時候最明顯，是「柳橙皮」描述的來源之一。'],
+ a9:['檸檬、檸檬草','水洗衣索比亞（耶加雪菲）。杯測單上的「檸檬」「檸檬草」多半指這種尖亮感。'],
+ a15:['花香、佛手柑','藝伎、水洗衣索比亞。淺焙咖啡花香最主要的分子，烘得越深越少。'],
+ a12:['玫瑰、橙花','藝伎、衣索比亞古吉。常和芳樟醇一起構成「茉莉、橙花」的印象。'],
+ b12:['葡萄、紅酒、發酵感','日曬衣索比亞、厭氧處理。描述成「紅酒」「葡萄」的杯子常有這類酯香。'],
+ b19:['桃子、杏桃','藝伎、哥倫比亞、日曬處理。放涼一點後的「白桃」「奶滑感」。'],
+ lemon:['檸檬','水洗衣索比亞、肯亞。拿來校準「檸檬酸」與「柑橘酸」的差別。'],
+ lime:['萊姆、青檸','肯亞、哥倫比亞。比檸檬更青、更尖的酸質。'],
+ elderberry:['深色莓果','肯亞（SL28/SL34）。常和黑醋栗一起出現在杯測描述。'],
+ blackcurrant:['黑醋栗','肯亞的招牌風味，帶一點番茄葉、青綠的鹹鮮感。'],
+ blueberry:['藍莓','日曬衣索比亞（古吉、西達摩）。經典的「藍莓炸彈」。'],
+ apple:['蘋果、青蘋果','哥倫比亞、瓜地馬拉、水洗中美洲。蘋果酸的清脆感。'],
+ litchi:['荔枝','藝伎、厭氧處理、部分雲南豆。多汁、帶玫瑰的熱帶感。'],
+ osmanthus:['桂花、杏桃','衣索比亞、部分台灣阿里山豆。花香裡帶杏桃的甜。'],
+ peachblossom:['淡雅花香','水洗衣索比亞。若咖啡的花香「輕、粉、說不出名字」，可拿它當參考。'],
+ almond:['杏仁、堅果','淺焙偏中的巴西、中美洲。淺焙裡通常只在尾韻出現。'],
+ a3:['玫瑰','藝伎、衣索比亞。帶蜂蜜感的玫瑰花香，常和香葉醇一起出現。'],
+ a11:['玫瑰、茉莉','藝伎、水洗衣索比亞。和芳樟醇一起構成淺焙咖啡最典型的花香骨架。'],
+ b22:['紫羅蘭、紅茶','衣索比亞、部分肯亞。杯測單上的「紫羅蘭」多半指這種粉粉的花香。'],
+ c10:['蜂蜜','蜜處理、日曬處理。「蜂蜜甜」「花蜜」描述的主要來源之一。'],
+ a28:['茉莉','藝伎、水洗衣索比亞。最接近咖啡裡那種輕盈、飄出來的茉莉感。'],
+ c15:['紅茶、烏龍','藝伎、衣索比亞。「像紅茶」「茶感」的杯子常有這類香氣。'],
+ bergamot:['佛手柑、伯爵茶','藝伎、水洗衣索比亞。花香加柑橘的「伯爵茶」描述就是它。'],
+ jasmine:['茉莉','藝伎、水洗衣索比亞。拿來當真正的茉莉參考，和咖啡的茉莉感比較。'],
+ orangeblossom:['橙花','水洗衣索比亞、哥倫比亞。帶蜂蜜和柑橘的白花香。'],
+ caramel:['焦糖','淺焙偏中的中南美洲。淺焙的焦糖感偏淡，多在放涼後的甜感裡出現。'],
+ vanilla:['香草','部分中南美洲與厭氧處理。淺焙裡少見，多在尾韻帶出奶甜感。'],
+ strawberry:['草莓','日曬衣索比亞、厭氧處理。「草莓果醬」是日曬豆的經典描述。'],
+ passionfruit:['百香果','肯亞、厭氧處理、部分哥倫比亞。熱帶感的酸甜。'],
+ blacktea:['紅茶','藝伎、衣索比亞。描述成「紅茶感」「茶感」的杯子，可以拿它校準。'],
+ cardamom:['小荳蔻','部分日曬衣索比亞與葉門。帶清涼感的甜辛香，少見但很好認。'],
+ cocoa:['可可、可可碎粒','淺焙偏中的中南美洲。淺焙的可可感偏乾、偏果，不像深焙那麼苦。']
+};
+const MOL={
+ a6:{smi:'CC1=CC[C@@H](CC1)C(=C)C',f:'C10H16',mw:'136.24',fg:'單環單萩烯，兩個雙鍵、沒有含氧官能基，所以極易揮發、不溶於水。這支是 (R)-(+) 型，對映異構物 (S)-(−) 型聞起來偏松針與松節油。'},
+ a9:{smi:'CC(C)=CCCC(C)=CC=O',f:'C10H16O',mw:'152.24',fg:'醡基與雙鍵共軛（C=C–CHO），醡基帶來尖銳的氣味。右側雙鍵為 E 型是香葉醡、Z 型是橙花醡，檬檬醡是兩者混合。'},
+ a12:{smi:'CC(=CCC/C(=C\\CO)/C)C',f:'C10H18O',mw:'154.25',fg:'一級醇（–CH₂OH），C2=C3 雙鍵為 Z 構型。同一個骨架換成 E 構型就是香葉醇，氣味更濃的玫瑰。和芳樟醇分子式相同。'},
+ a15:{smi:'CC(C)=CCCC(C)(O)C=C',f:'C10H18O',mw:'154.25',fg:'三級醇，羥基接在帶乙烯基的碳上。和橙花醇是同分子式的異構物，只是羥基位置不同，氣味就從玫瑰變成薰衣草。'},
+ b12:{smi:'CCCCCCC(=O)OCC',f:'C9H18O2',mw:'158.24',fg:'由庚酸和乙醇縮合而成的酯（–COO–）。低分子量的酯類是水果香的主要來源。'},
+ b19:{smi:'CCCCCCC1CCCC(=O)O1',f:'C11H20O2',mw:'184.28',fg:'六員環的內酯（環狀酯），帶一條己基側鏈。內酯的環大小和側鏈長度會決定它偏桃、偏椰子還是偏奶。'},
+ b24:{smi:'CCCCOC(=O)c1ccccc1O',f:'C11H14O3',mw:'194.23',fg:'苯環上相鄰（鄰位）的酚羥基與丁酯基，兩者形成分子內氫鍵。丁基換成甲基就是氣味強烈的水楊酸甲酯（冬青油）。'},
+ a3:{smi:'OCCc1ccccc1',f:'C8H10O',mw:'122.16',fg:'苯環接上兩個碳的一級醇。分子小、結構簡單，卻是玫瑰最核心的香氣。'},
+ a11:{smi:'CC(C)=CCC/C(C)=C/CO',f:'C10H18O',mw:'154.25',fg:'和橙花醇是幾何異構物，這支的 C2=C3 雙鍵是 E 構型。只差雙鍵方向，氣味就從清新變成濃郁的玫瑰。'},
+ b22:{smi:'CC1=CCCC(C)(C)C1/C=C/C(C)=O',f:'C13H20O',mw:'192.30',fg:'由 β-胡蘿蔔素斷裂形成。環上三個甲基，加上一條與雙鍵共軛的酮側鏈；環內雙鍵的位置決定是 α 還是 β 型。'},
+ c10:{smi:'CCOC(=O)Cc1ccccc1',f:'C10H12O2',mw:'164.20',fg:'苯乙酸和乙醇形成的酯。苯乙醇是 Ph–CH₂CH₂–OH，這支是 Ph–CH₂–COO–Et。'},
+ a28:{smi:'CCCCCC1C(CC(=O)OC)CCC1=O',f:'C13H22O3',mw:'226.31',fg:'五員環酮加上甲酯側鏈與戊基。和茉莉酮酸甲酯相比，側鏈雙鍵被氫化（所以叫二氫），氣味更輕、更透明。'},
+ c15:{smi:'CC1CCC2(O1)C(C)=CCCC2(C)C',f:'C13H22O',mw:'194.31',fg:'螺環醚，兩個環共用一個碳原子。名字有「酮」，但結構上沒有羰基。和紫羅蘭酮一樣有 13 個碳，都來自類胡蘿蔔素。'},
+ c3:{smi:'COc1ccccc1O',f:'C7H8O2',mw:'124.14',fg:'苯環上鄰位的甲氧基與酚羥基。木質素燃燒或烘焙時裂解產生，所以和煙燻、咖啡、泥煤威士忌的氣味連在一起。'}
+};
+const FG={
+ a6:[['碳碳雙鍵','C=C','×2，環內＋環外'],['六員碳環','環己烯','']],
+ a9:[['醡基','–CHO',''],['碳碳雙鍵','C=C','×2，一個與醡基共軛']],
+ a12:[['一級羥基','–CH₂OH',''],['碳碳雙鍵','C=C','×2，其中一個 Z 型']],
+ a15:[['三級羥基','R₃C–OH',''],['碳碳雙鍵','C=C','×2，含末端乙烯基']],
+ b12:[['酯基','–COO–','庚酸＋乙醇']],
+ b19:[['內酯（環狀酯）','–C(=O)O–','六員環，δ 位']],
+ b24:[['酯基','–COO–','丁酯'],['酚羥基','Ar–OH',''],['苯環','C₆H₄','鄰位二取代']],
+ a3:[['一級羥基','–CH₂OH',''],['苯環','C₆H₅','單取代']],
+ a11:[['一級羥基','–CH₂OH',''],['碳碳雙鍵','C=C','×2，其中一個 E 型']],
+ b22:[['酮基','C=O','與雙鍵共軛'],['碳碳雙鍵','C=C','×2，環內＋側鏈'],['六員碳環','環己烯','']],
+ c10:[['酯基','–COO–','苯乙酸＋乙醇'],['苯環','C₆H₅','單取代']],
+ a28:[['酮基','C=O','環酮'],['酯基','–COOCH₃','甲酯'],['五員碳環','環戊酮','']],
+ c15:[['環醚','C–O–C','五員環內'],['碳碳雙鍵','C=C','環內'],['螺環','spiro','兩環共用一個碳']],
+ c3:[['酚羥基','Ar–OH',''],['甲氧基（醚）','–OCH₃',''],['苯環','C₆H₄','鄰位二取代']]
+};
+const fgHTML=id=>FG[id]?`<div class="fgs"><span class="k">官能基</span><div class="fg-list">${FG[id].map(([n,f,x])=>`<span class="fg"><b>${n}</b><code>${f}</code>${x?`<em>${x}</em>`:''}</span>`).join('')}</div></div>`:'';
+const sub=f=>f.replace(/(\d+)/g,'<sub>$1</sub>');
+function drawMol(s){
+  const c=$('molCanvas'),fb=$('molFallback'); if(!c)return;
+  if(!window.SmilesDrawer){c.hidden=true;fb.hidden=false;return}
+  const r=document.documentElement,dark=r.dataset.theme==='dark'||(r.dataset.theme!=='light'&&matchMedia('(prefers-color-scheme: dark)').matches);
+  try{
+    const d=new SmilesDrawer.Drawer({width:300,height:200,bondThickness:1.4,bondLength:22,fontSizeLarge:10,fontSizeSmall:7,padding:16});
+    SmilesDrawer.parse(MOL[s.id].smi,t=>{try{d.draw(t,c,dark?'dark':'light',false)}catch(e){c.hidden=true;fb.hidden=false}},()=>{c.hidden=true;fb.hidden=false});
+  }catch(e){c.hidden=true;fb.hidden=false}
+}
+const TAGS=['柑橘','花香','果香','甜','酸','苦','青綠','木質','煙燻','奶香','粉感','辛香','麝香','烘焙','酒感','藥味','皂感','清涼'];
+const COLORS=[['紅','#D2332F'],['橙','#EE8A2A'],['黃','#F2CC2E'],['萊姆綠','#A8D04A'],['綠','#3E8E4F'],['青','#2FA6A0'],['藍','#2F64C2'],['紫','#7A49A8'],['粉紅','#F2A5BE'],['棕','#7B4E2E'],['米白','#EFE6D2'],['白','#FFFFFF'],['灰','#9A9A9A'],['黑','#1A1A1A'],['金','#C9A13B']];
+const HEX=Object.fromEntries(COLORS);
+const esc=t=>String(t??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const $=id=>document.getElementById(id);
+const today=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
+
+/* ---------- storage: db (signed in) or this browser ---------- */
+let entries=[]; let store=null; let mode='loading';
+const LS='scent-journal-entries';
+function lsLoad(){try{return JSON.parse(localStorage.getItem(LS)||'[]')}catch(e){return []}}
+function lsSave(){try{localStorage.setItem(LS,JSON.stringify(entries))}catch(e){}}
+async function initStore(){
+  let db=null,user=null;
+  try{[db,user]=await Promise.all([claude.use('db'),claude.use('user')])}catch(e){}
+  if(db&&user){
+    let uid=null; try{uid=await user.id()}catch(e){}
+    if(uid){
+      store=db.collection('data/users/'+uid);
+      const timer=setTimeout(()=>{if(mode==='loading')setStatus('暫時連不到雲端紀錄，稍後會自動重試。')},10000);
+      store.onSnapshot(snap=>{
+        if(!snap.metadata.fromCache)clearTimeout(timer);
+        mode='db';
+        entries=snap.docs.map(d=>({id:d.id,...d.data()}));
+        setStatus('紀錄已同步到你的帳號，換裝置也看得到。');
+        render();
+      },err=>{clearTimeout(timer);setStatus('雲端紀錄讀取失敗（'+esc(err.code)+'），目前改存在這個瀏覽器。');useLocal()});
+      return;
+    }
+  }
+  useLocal();
+  setStatus('紀錄存在這個瀏覽器。登入 claude.ai 開啟可同步到你的帳號。');
+}
+function useLocal(){mode='local';store=null;entries=lsLoad();render()}
+function setStatus(t){$('status').textContent=t}
+async function addEntry(e){
+  if(store){await store.add(e)}else{entries.push({id:'l'+Date.now(),...e});lsSave();render()}
+}
+async function updateEntry(id,data){
+  if(store){await store.doc(id).set(data)}else{entries=entries.map(x=>x.id===id?{id,...data}:x);lsSave();render()}
+}
+async function removeEntry(id){
+  if(store){await store.doc(id).delete()}else{entries=entries.filter(x=>x.id!==id);lsSave();render()}
+}
+setTimeout(()=>{if(mode==='loading')useLocal()},11000);
+
+/* ---------- list ---------- */
+let kind='all',fam='all';
+function segs(){
+  const kinds=[['all','全部'],['s','單體分子'],['a','調香原料'],['coffee','☕ 淺焙咖啡']];
+  $('kindSeg').innerHTML=kinds.map(([v,t])=>`<button class="chip" aria-pressed="${kind===v}" data-k="${v}">${t}</button>`).join('');
+  $('famSeg').innerHTML=`<button class="chip" aria-pressed="${fam==='all'}" data-f="all">所有香調</button>`+
+    Object.entries(FAM).map(([v,t])=>`<button class="chip" aria-pressed="${fam===v}" data-f="${v}" style="--c:var(--${v})"><span class="dot"></span>${t}</button>`).join('');
+}
+$('kindSeg').onclick=e=>{const b=e.target.closest('[data-k]');if(b){kind=b.dataset.k;render()}};
+$('famSeg').onclick=e=>{const b=e.target.closest('[data-f]');if(b){fam=b.dataset.f;render()}};
+$('q').oninput=()=>render();
+function stats(id){const es=entries.filter(x=>x.scent===id).sort((a,b)=>(b.date||'').localeCompare(a.date||''));return{n:es.length,last:es[0]?.date}}
+function renderList(){
+  segs();
+  const q=$('q').value.trim().toLowerCase();
+  const list=S.filter(s=>(kind==='all'||(kind==='coffee'?!!COFFEE[s.id]:s.k===kind))&&(fam==='all'||s.fam===fam)&&
+    (!q||(s.zh+s.en+(s.cas||'')+s.code).toLowerCase().includes(q)));
+  $('shelf').innerHTML=list.length?list.map(s=>{const st=stats(s.id);return `<li><button class="row" data-id="${s.id}" style="--c:var(--${s.fam})">
+    <span class="vial">${s.k==='s'?s.code:FAM[s.fam].slice(0,1)}</span>
+    <span class="name"><div class="zh">${s.zh}${s.qty?` <span class="mono" style="font-size:12px;color:var(--muted);font-weight:400">×${s.qty}</span>`:''}</div><div class="en">${s.en} · ${s.k==='s'?s.cls:'調香原料'} · ${FAM[s.fam]}</div></span>
+    <span class="meta"><b class="mono ${st.n?'':'zero'}">${st.n}</b>${st.last?st.last.slice(5).replace('-','/'):'未紀錄'}</span></button></li>`}).join('')
+    :'<li class="empty">沒有符合的香氣，換個關鍵字試試。</li>';
+  const done=S.filter(s=>entries.some(x=>x.scent===s.id)).length;
+  $('pbar').style.width=(done/S.length*100)+'%';
+  $('ptext').textContent=`${done} / ${S.length} 已練習 · 共 ${entries.length} 筆`;
+}
+$('shelf').onclick=e=>{const b=e.target.closest('[data-id]');if(b){location.hash=b.dataset.id}};
+
+/* ---------- detail ---------- */
+let form=null;
+function newForm(id){return{id,date:today(),intensity:0,liking:0,tags:[],colors:[],like:'',note:'',ai:''}}
+let aiBusy=false;
+function renderDetail(s){
+  if(!form||form.id!==s.id)form=newForm(s.id);
+  const es=entries.filter(x=>x.scent===s.id).sort((a,b)=>(b.date||'').localeCompare(a.date||'')||(b.ts||0)-(a.ts||0));
+  const scale=(name,lo,hi)=>`<div class="scale" data-scale="${name}">${[1,2,3,4,5].map(n=>`<button type="button" aria-pressed="${form[name]===n}" data-v="${n}">${n}</button>`).join('')}</div><div class="scale-hint"><span>${lo}</span><span>${hi}</span></div>`;
+  $('detailView').innerHTML=`
+  <button class="back" id="back">← 回到香氣清單</button>
+  <article class="label" style="--c:var(--${s.fam})">
+    <div class="label-head"><span class="vial">${s.k==='s'?s.code:FAM[s.fam].slice(0,1)}</span>
+      <div><h2>${s.zh}</h2><div class="en">${s.en}</div></div></div>
+    <dl class="specs">
+      <div><dt>類型</dt><dd>${s.k==='s'?'單體分子 #'+s.code:'調香原料（非精油）'}${s.qty?' ×'+s.qty:''}</dd></div>
+      ${s.cas?`<div><dt>CAS</dt><dd class="mono">${s.cas}</dd></div>`:''}
+      <div><dt>${s.k==='s'?'化學類別':'香調'}</dt><dd>${s.k==='s'?s.cls:FAM[s.fam]}</dd></div>
+      ${s.k==='s'?`<div><dt>香調</dt><dd>${FAM[s.fam]}</dd></div>`:''}
+    </dl>
+    <div class="notes">${s.notes.map(n=>`<span>${n}</span>`).join('')}</div>
+    <p class="desc">${s.desc}</p>
+    ${MOL[s.id]?`<div class="sub"><h3>分子結構</h3><div class="mol"><canvas id="molCanvas" width="300" height="200" aria-label="${s.zh}的結構式"></canvas><p id="molFallback" class="mono" hidden style="margin:0;text-align:center;color:var(--muted)">結構圖載入失敗</p>
+      <div class="mol-info"><span class="formula">${sub(MOL[s.id].f)}</span><span class="mono" style="color:var(--muted);font-size:13px">分子量 ${MOL[s.id].mw} g/mol</span>${fgHTML(s.id)}<p>${MOL[s.id].fg}</p><span class="smi">SMILES：${esc(MOL[s.id].smi)}</span></div></div></div>`:''}
+    <div class="sub"><h3>${s.k==='s'?'在哪裡聞得到':'常見組成'}</h3><p>${s.where}</p></div>
+    ${COFFEE[s.id]?`<div class="sub"><h3>在淺焙咖啡裡</h3><p><b>${COFFEE[s.id][0]}</b>。${COFFEE[s.id][1]}</p></div>`:''}
+    <div class="sub tip"><h3>練習提示</h3><p>${s.tip}</p></div>
+  </article>
+
+  <h3 class="section-title">${form.editId?'編輯紀錄<span class="editing-badge">正在修改 '+esc(form.date)+' 的紀錄</span>':'寫下這次的感想'}</h3>
+  <form class="log" id="logForm">
+    <div class="row2">
+      <div class="field"><label for="f-date">日期</label><input type="date" id="f-date" value="${form.date}"></div>
+      <div class="field"><label for="f-like">它讓你想到什麼</label><input type="text" id="f-like" value="${esc(form.like)}" placeholder="例如：阿嬤家的橘子、冬天的被子"></div>
+    </div>
+    <div class="field"><span class="lbl">強度</span>${scale('intensity','很淡','很強')}</div>
+    <div class="field"><span class="lbl">喜好</span>${scale('liking','不喜歡','很喜歡')}</div>
+    <div class="field"><span class="lbl">你聞到的特徵（可複選）</span><div class="tags" id="f-tags">${TAGS.map(t=>`<button type="button" class="chip" aria-pressed="${form.tags.includes(t)}" data-t="${t}">${t}</button>`).join('')}</div></div>
+    <div class="field"><span class="lbl">顏色聯想（可複選）</span><div class="swatches" id="f-colors">${COLORS.map(([n,h])=>`<button type="button" class="sw" aria-pressed="${form.colors.includes(n)}" data-c="${n}" style="--sw:${h}"><i></i>${n}</button>`).join('')}</div></div>
+    <div class="field"><div class="note-head"><label for="f-note">感想</label><button type="button" class="ai-btn" id="aiBtn" ${aiBusy?'disabled':''}>${aiBusy?'思考中…':'AI 回饋'}</button></div><textarea id="f-note" placeholder="前段、乾掉後有什麼不同？和上次比呢？">${esc(form.note)}</textarea>
+      <div class="ai-box" id="aiBox" ${form.ai?'':'hidden'}><span class="ai-k">AI 回饋（儲存時會一起存進紀錄）</span><span id="aiText">${esc(form.ai)}</span></div></div>
+    <div class="actions"><button class="primary" id="save" type="submit">${form.editId?'更新紀錄':'儲存紀錄'}</button>${form.editId?'<button class="ghost" id="cancelEdit" type="button">取消編輯</button>':''}<span class="msg" id="msg"></span></div>
+  </form>
+
+  <h3 class="section-title">練習紀錄 <span class="mono" style="font-size:14px;color:var(--muted)">${es.length}</span></h3>
+  ${es.length?`<ul class="hist">${es.map(x=>`<li class="entry${form.editId===x.id?' editing':''}">
+    <div class="entry-head"><span class="mono">${esc(x.date)}</span><span class="mono">強度 ${x.intensity||'–'}/5 · 喜好 ${x.liking||'–'}/5</span></div>
+    ${x.like?`<div class="like">聯想：${esc(x.like)}</div>`:''}
+    ${x.tags?.length?`<div class="tags">${x.tags.map(t=>`<span>${esc(t)}</span>`).join('')}</div>`:''}
+    ${x.colors?.length?`<div class="cols">${x.colors.map(c=>`<i style="--sw:${HEX[c]||'transparent'}"></i>${esc(c)}`).join(' ')}</div>`:''}
+    ${x.note?`<p>${esc(x.note)}</p>`:''}
+    ${x.ai?`<details><summary>AI 回饋</summary><p>${esc(x.ai)}</p></details>`:''}
+    <div class="entry-actions"><button class="del" data-edit="${esc(x.id)}">編輯</button><button class="del" data-del="${esc(x.id)}">刪除</button></div></li>`).join('')}</ul>`
+  :'<p class="msg">還沒有紀錄。聞完後在上面寫下第一筆。</p>'}`;
+  bindDetail(s);
+  if(MOL[s.id])drawMol(s);
+}
+function bindDetail(s){
+  $('back').onclick=()=>{location.hash=''};
+  const f=$('logForm');
+  f.querySelectorAll('[data-scale]').forEach(g=>g.onclick=e=>{const b=e.target.closest('[data-v]');if(!b)return;const n=+b.dataset.v;form[g.dataset.scale]=form[g.dataset.scale]===n?0:n;g.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',+x.dataset.v===form[g.dataset.scale]))});
+  $('f-tags').onclick=e=>{const b=e.target.closest('[data-t]');if(!b)return;const t=b.dataset.t;form.tags=form.tags.includes(t)?form.tags.filter(x=>x!==t):[...form.tags,t];b.setAttribute('aria-pressed',form.tags.includes(t))};
+  $('f-colors').onclick=e=>{const b=e.target.closest('[data-c]');if(!b)return;const c=b.dataset.c;form.colors=form.colors.includes(c)?form.colors.filter(x=>x!==c):[...form.colors,c];b.setAttribute('aria-pressed',form.colors.includes(c))};
+  $('f-date').oninput=e=>form.date=e.target.value;
+  $('f-like').oninput=e=>form.like=e.target.value;
+  $('f-note').oninput=e=>form.note=e.target.value;
+  $('aiBtn').onclick=()=>askAI(s);
+  f.onsubmit=async e=>{
+    e.preventDefault();
+    if(!form.note.trim()&&!form.like.trim()&&!form.tags.length&&!form.colors.length&&!form.intensity&&!form.liking){$('msg').textContent='至少填一項再儲存。';return}
+    $('save').disabled=true;$('msg').textContent='儲存中…';
+    try{const data={scent:s.id,date:form.date||today(),intensity:form.intensity,liking:form.liking,tags:form.tags,colors:form.colors,like:form.like.trim(),note:form.note.trim(),ai:form.ai||'',ts:form.ts||Date.now()};
+      const was=!!form.editId;
+      if(was){data.edited=Date.now();await updateEntry(form.editId,data)}else await addEntry(data);
+      form=newForm(s.id);render();$('msg').textContent=was?'已更新。':'已儲存。'}
+    catch(err){$('save').disabled=false;$('msg').textContent='沒有存成功：'+(err?.message||err?.code||'請再試一次')}
+  };
+  if($('cancelEdit'))$('cancelEdit').onclick=()=>{form=newForm(s.id);render()};
+  document.querySelectorAll('[data-edit]').forEach(b=>b.onclick=()=>{
+    const x=entries.find(e=>e.id===b.dataset.edit);if(!x)return;
+    form={id:s.id,editId:x.id,ts:x.ts,date:x.date||today(),intensity:x.intensity||0,liking:x.liking||0,tags:[...(x.tags||[])],colors:[...(x.colors||[])],like:x.like||'',note:x.note||'',ai:x.ai||''};
+    render();$('logForm').scrollIntoView({behavior:'smooth',block:'start'});
+  });
+  document.querySelectorAll('[data-del]').forEach(b=>b.onclick=async()=>{
+    if(!b.classList.contains('confirm')){b.classList.add('confirm');b.textContent='再按一次確認刪除';setTimeout(()=>{b.classList.remove('confirm');b.textContent='刪除'},4000);return}
+    b.disabled=true;try{if(form.editId===b.dataset.del)form=newForm(s.id);await removeEntry(b.dataset.del)}catch(e){b.disabled=false;b.textContent='刪除失敗，再試一次'}
+  });
+}
+
+/* ---------- AI feedback ---------- */
+async function askAI(s){
+  if(aiBusy)return;
+  if(!form.note.trim()&&!form.like.trim()&&!form.tags.length&&!form.colors.length){
+    form.ai='先寫一點感想，或選幾個特徵、顏色，再按 AI 回饋。';render();return}
+  let sample=null; try{sample=await claude.use('sample')}catch(e){}
+  if(!sample){form.ai='這個畫面目前沒辦法使用 AI 回饋（可能需要登入 claude.ai 開啟）。';render();return}
+  const past=entries.filter(x=>x.scent===s.id&&x.id!==form.editId).sort((a,b)=>(b.date||'').localeCompare(a.date||'')).slice(0,3)
+    .map(x=>`- ${x.date}：強度${x.intensity||'?'}、喜好${x.liking||'?'}、特徵[${(x.tags||[]).join('、')}]、顏色[${(x.colors||[]).join('、')}]、聯想：${x.like||''}、感想：${x.note||''}`).join('\n')||'（無）';
+  const shelf=S.map(x=>x.zh+'('+x.en+')').join('、');
+  const prompt=`你是溫和、專業的嗅覺訓練教練。使用者正在做嗅覺練習，請用繁體中文（台灣用語）給回饋。
+
+這次聞的香氣：${s.zh}（${s.en}）${s.cas?'，CAS '+s.cas:''}，${s.k==='s'?'單體分子，'+s.cls:'調香原料（非精油，配方未公開）'}。
+參考特徵：${s.notes.join('、')}。${s.desc}
+
+使用者這次的紀錄：
+強度 ${form.intensity||'未填'}/5，喜好 ${form.liking||'未填'}/5
+特徵：${form.tags.join('、')||'未選'}
+顏色聯想：${form.colors.join('、')||'未選'}
+聯想：${form.like||'未填'}
+感想：${form.note||'未填'}
+
+同一支香氣的過去紀錄：
+${past}
+
+使用者手邊有這些香氣可以比較：${shelf}
+
+請回饋三件事，總共 200 字以內，純文字、不用 Markdown 符號：
+1. 他的描述哪些對到了這支香氣的特徵（具體點出），聯想或顏色背後可能對應的氣味面向。
+2. 下次可以試著留意的一兩個面向或描述詞。
+3. 從他手邊的香氣中推薦一支拿來對照，說明要比較什麼。
+如果有過去紀錄，簡短點出變化。嗅覺感受因人而異，不要說他「錯了」，而是幫他把感受說得更精準。`;
+  aiBusy=true;form.ai='';render();
+  const show=t=>{form.ai=t;const b=$('aiBox'),tx=$('aiText');if(b&&tx){b.hidden=false;tx.textContent=t}};
+  try{
+    const r=await sample(prompt,{modelTier:'default',onText:({text})=>show(text)});
+    show(r.text||'（沒有收到內容）');
+  }catch(err){
+    const c=err?.code;
+    show(c==='not_granted'?'AI 回饋沒有取得權限。':c==='rate_limited'?'使用太頻繁了，稍等一下再試。':(err?.text||'AI 回饋沒有成功，稍後再試。'));
+  }finally{aiBusy=false;const b=$('aiBtn');if(b){b.disabled=false;b.textContent='AI 回饋'}}
+}
+
+/* ---------- routing ---------- */
+let lastView='';
+function render(){
+  const id=location.hash.slice(1); const s=BY[id];
+  $('listView').hidden=!!s; $('detailView').hidden=!s;
+  if(s){
+    // keep in-progress typing when a sync snapshot arrives
+    const focused=document.activeElement?.id;
+    renderDetail(s);
+    if(focused&&$(focused))$(focused).focus();
+    if(lastView!==id)window.scrollTo(0,0);
+  }else renderList();
+  lastView=id;
+}
+window.addEventListener('hashchange',render);
+
+/* ---------- swipe right to go back ---------- */
+(()=>{
+  const v=$('detailView'); let sx=0,sy=0,dx=0,t0=0,track=null;
+  const reset=()=>{v.classList.remove('dragging');v.style.transform='';v.style.opacity=''};
+  v.addEventListener('touchstart',e=>{
+    if(e.touches.length!==1||e.target.closest('input,textarea')){track=null;return}
+    sx=e.touches[0].clientX;sy=e.touches[0].clientY;dx=0;t0=Date.now();track='?';
+  },{passive:true});
+  v.addEventListener('touchmove',e=>{
+    if(!track)return;
+    const mx=e.touches[0].clientX-sx,my=e.touches[0].clientY-sy;
+    if(track==='?'){if(Math.abs(mx)<10&&Math.abs(my)<10)return;track=(mx>0&&Math.abs(mx)>Math.abs(my)*1.3)?'x':null;if(!track)return;v.classList.remove('settle');v.classList.add('dragging')}
+    dx=Math.max(0,mx);v.style.transform=`translateX(${dx}px)`;v.style.opacity=String(1-Math.min(dx/window.innerWidth,1)*.5);
+  },{passive:true});
+  const end=()=>{
+    if(track!=='x'){track=null;return}
+    track=null;const fast=dx>40&&dx/(Date.now()-t0)>.5;
+    v.classList.remove('dragging');v.classList.add('settle');
+    if(dx>window.innerWidth*.3||fast){v.style.transform=`translateX(${window.innerWidth}px)`;v.style.opacity='0';
+      setTimeout(()=>{v.classList.remove('settle');reset();location.hash=''},200)}
+    else{v.style.transform='';v.style.opacity='';setTimeout(()=>v.classList.remove('settle'),230)}
+  };
+  v.addEventListener('touchend',end);v.addEventListener('touchcancel',end);
+})();
+render();
+initStore();
+</script>
+</body></html>

@@ -1,0 +1,753 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>萃取分子模擬器</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC:wght@400;700&family=Noto+Sans+TC:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: lab-bench notebook — parameter strip, twin brewers side by side, then the curves that explain them */
+:root{
+  --bg:#eef0ec; --panel:#fbfbf8; --ink:#1c201d; --muted:#5b645d; --line:#d3d8d0;
+  --accent:#2d6a58; --accent-ink:#ffffff;
+  --water:rgba(120,170,190,.22); --water-edge:rgba(80,130,150,.5);
+  --vessel:#8a938c; --g-dark:#3b2619; --g-light:#c9ab86;
+  --acid:#c99800; --caf:#24859d; --sugar:#d86d1f; --cga:#7f55b5; --bitter:#7a2e22; --fruity:#c23f78; --roasty:#5e7f2c;
+  --f-display:"LXGW WenKai TC","Kaiti TC","STKaiti",serif;
+  --f-body:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#141715; --panel:#1c201e; --ink:#e4e8e3; --muted:#98a29a; --line:#2f3632;
+  --accent:#6fbfa6; --accent-ink:#0f1a16;
+  --water:rgba(110,170,195,.16); --water-edge:rgba(130,185,205,.45);
+  --vessel:#6f7a73; --g-dark:#2a1a10; --g-light:#a98762;
+  --acid:#eec436; --caf:#55b9d3; --sugar:#f2924a; --cga:#b28be3; --bitter:#d0715b; --fruity:#ec7fae; --roasty:#a3c66a;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#141715; --panel:#1c201e; --ink:#e4e8e3; --muted:#98a29a; --line:#2f3632;
+  --accent:#6fbfa6; --accent-ink:#0f1a16;
+  --water:rgba(110,170,195,.16); --water-edge:rgba(130,185,205,.45);
+  --vessel:#6f7a73; --g-dark:#2a1a10; --g-light:#a98762;
+  --acid:#eec436; --caf:#55b9d3; --sugar:#f2924a; --cga:#b28be3; --bitter:#d0715b; --fruity:#ec7fae; --roasty:#a3c66a;
+  color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.6;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 48px}
+.wrap{max-width:1040px;margin:0 auto;display:flex;flex-direction:column;gap:22px}
+h1{font-family:var(--f-display);font-weight:700;font-size:clamp(28px,5vw,40px);line-height:1.15;margin:0;text-wrap:balance}
+h2{font-family:var(--f-display);font-weight:700;font-size:21px;margin:0;text-wrap:balance}
+.lede{color:var(--muted);max-width:62ch;margin:6px 0 0}
+.label{font-size:12px;letter-spacing:.06em;color:var(--muted)}
+.mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px}
+.params{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px 22px}
+.param{display:flex;flex-direction:column;gap:4px;min-width:0}
+.param .row{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.param output{font-family:var(--f-mono);font-size:14px}
+input[type=range]{width:100%;accent-color:var(--accent)}
+.seg{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.seg button{flex:1;background:transparent;border:0;color:var(--ink);font:inherit;font-size:14px;padding:6px 8px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.stage{display:grid;grid-template-columns:minmax(0,420px);justify-content:center;gap:14px}
+.brewer{display:flex;flex-direction:column;gap:8px;min-width:0}
+.brewer header{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+.brewer canvas{width:100%;aspect-ratio:300/330;max-width:100%;display:block}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;border-top:1px solid var(--line);padding-top:8px}
+.stat{min-width:0}
+.stat b{display:block;font-family:var(--f-mono);font-weight:500;font-size:17px;font-variant-numeric:tabular-nums}
+.stat span{font-size:12px;color:var(--muted)}
+.aroma{display:flex;flex-wrap:wrap;gap:4px 16px;font-size:13px}
+.aroma span{display:flex;align-items:center;gap:6px}
+.aroma i{width:10px;height:10px;border-radius:50%;display:block}
+.aroma b{font-family:var(--f-mono);font-weight:500;font-variant-numeric:tabular-nums}
+.aroma small{color:var(--muted);font-size:12px}
+.mix{display:flex;height:12px;border-radius:3px;overflow:hidden;background:var(--line)}
+.mix i{display:block;height:100%}
+.transport{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.play{background:var(--accent);color:var(--accent-ink);border:0;border-radius:8px;font:inherit;font-weight:700;padding:8px 18px;cursor:pointer;min-width:84px}
+.transport input{flex:1;min-width:140px}
+.clock{font-family:var(--f-mono);font-size:20px;min-width:4.5ch}
+.speed{width:auto}
+.speed button{flex:none;padding:6px 10px}
+.legend{display:flex;flex-wrap:wrap;gap:8px}
+.chip{display:flex;align-items:center;gap:7px;border:1px solid var(--line);background:transparent;color:var(--ink);border-radius:999px;padding:4px 12px 4px 9px;font:inherit;font-size:13px;cursor:pointer}
+.chip[aria-pressed="true"]{border-color:var(--ink)}
+.chip i{width:10px;height:10px;border-radius:50%;display:block}
+.chip small{color:var(--muted)}
+.charts{display:grid;grid-template-columns:3fr 2fr;gap:14px}
+.charts .span{grid-column:1 / -1}
+.chartbox{display:flex;flex-direction:column;gap:8px;min-width:0}
+.chartbox canvas{width:100%;height:260px;display:block}
+.key{display:flex;gap:16px;font-size:12px;color:var(--muted);flex-wrap:wrap}
+.key span{display:flex;align-items:center;gap:6px}
+.key svg{display:block}
+.notes{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px}
+.notes p{margin:6px 0 0;max-width:62ch}
+.notes h3{font-size:15px;margin:0}
+.stirbtn{background:transparent;border:1px solid var(--accent);color:var(--accent);border-radius:999px;font:inherit;font-size:13px;padding:3px 12px;cursor:pointer}
+.stirbtn:disabled{opacity:.4;cursor:default}
+.brewer header .r{display:flex;align-items:center;gap:8px}
+[hidden]{display:none!important}
+.plan{grid-column:1 / -1}
+.seg button{white-space:nowrap}
+@media (min-width:720px){.param.wide{grid-column:span 2}}
+.plan .row{flex-wrap:wrap}
+.planrow{display:flex;flex-wrap:wrap;align-items:flex-end;gap:10px 14px}
+.stepper{display:flex;align-items:center;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.stepper button{background:transparent;border:0;color:var(--ink);font:inherit;font-size:17px;width:34px;height:34px;cursor:pointer}
+.stepper button:disabled{opacity:.3;cursor:default}
+.stepper span{min-width:4.2em;text-align:center;font-size:13px}
+.pours{display:flex;flex-wrap:wrap;gap:8px}
+.pour{display:grid;grid-template-columns:auto 72px;gap:4px 6px;align-items:center;border:1px solid var(--line);border-radius:8px;padding:8px 10px}
+.pour .ptitle{grid-column:1 / -1;font-size:12px;font-weight:700}
+.pour small{grid-column:1 / -1}
+.pour label{font-size:11px;color:var(--muted)}
+.pour input{width:72px;font-family:var(--f-mono);font-size:14px;padding:5px 6px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink)}
+.pour small{font-size:10px;color:var(--muted);font-family:var(--f-mono)}
+.savebtn{background:transparent;border:1px solid var(--accent);color:var(--accent);border-radius:8px;font:inherit;font-weight:700;padding:7px 14px;cursor:pointer}
+.saved{display:flex;flex-direction:column;gap:12px}
+.saved-head{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}
+.ghost{background:transparent;border:0;color:var(--muted);font:inherit;font-size:13px;cursor:pointer;padding:4px 6px;border-radius:6px}
+.ghost:hover{color:var(--ink)}
+.ghost.warn{color:var(--bitter)}
+.keyrow{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13px}
+.keyrow span{display:flex;align-items:center;gap:6px}
+.keyrow i{width:12px;height:9px;border-radius:2px;display:block}
+.keyrow small{color:var(--muted)}
+.empty{color:var(--muted);font-size:14px;margin:0;border:1px dashed var(--line);border-radius:8px;padding:14px}
+.runs{display:flex;flex-direction:column}
+.run{display:grid;grid-template-columns:minmax(180px,1.2fr) minmax(0,1.4fr) auto;gap:10px 18px;align-items:center;padding:12px 0;border-top:1px solid var(--line)}
+.run:first-child{border-top:0}
+.run-cols{display:grid;grid-template-columns:minmax(180px,1.2fr) minmax(0,1.4fr) auto;gap:18px;font-size:12px;color:var(--muted);letter-spacing:.06em;padding-bottom:4px;border-bottom:1px solid var(--line)}
+.run-id{display:flex;flex-direction:column;gap:2px;min-width:0}
+.run-id b{font-family:var(--f-mono);font-weight:500;font-size:13px}
+.run-id span{font-size:13px;color:var(--muted);line-height:1.45}
+.res{display:flex;flex-direction:column;gap:5px;min-width:0}
+.res .nums{display:flex;gap:14px;font-family:var(--f-mono);font-variant-numeric:tabular-nums;font-size:14px;flex-wrap:wrap}
+.res .nums small{font-family:var(--f-body);color:var(--muted);font-size:11px;margin-right:4px}
+.res .tag{display:none;font-size:12px;color:var(--muted)}
+.res .mix{height:9px}
+.res .pct{display:flex;font-family:var(--f-mono);font-size:10px;color:var(--muted)}
+.res .pct span{overflow:hidden;white-space:nowrap;text-align:center}
+.run .acts{display:flex;flex-direction:column;align-items:flex-end;gap:2px}
+@media (max-width:720px){
+  .run-cols{display:none}
+  .run{grid-template-columns:1fr auto;gap:8px 12px}
+  .run-id{grid-column:1}.run .acts{grid-column:2;grid-row:1}
+  .res{grid-column:1 / -1}.res .tag{display:block}
+}
+.fine{font-size:12px;color:var(--muted);max-width:80ch}
+@media (max-width:720px){.charts{grid-template-columns:1fr}.stage{gap:10px}.stat b{font-size:15px}.panel{padding:12px}}
+@media (max-width:420px){.stats{grid-template-columns:1fr 1fr}.stats .stat:last-child{grid-column:span 2}}
+</style>
+
+<div class="wrap">
+  <div>
+    <div class="label">手沖實驗筆記 · 擴散萃取模型</div>
+    <h1>注水與浸泡，分子怎麼走出咖啡粉</h1>
+    <p class="lede">選一種沖法、調好參數後按播放，看各類分子怎麼離開咖啡粉。手沖持續用新鮮的水沖刷粉床，濃度差一直很大；浸泡把水和粉關在一起，液體越來越濃，萃取就越來越慢。想比較不同沖法，就各自按「保存結果」，在下方並排對照。</p>
+  </div>
+
+  <section class="panel params" aria-label="沖煮參數">
+    <div class="param"><div class="row"><label for="dose" class="label">粉量</label><output id="doseOut" class="mono"></output></div><input id="dose" type="range" min="10" max="25" step="1" value="15"></div>
+    <div class="param"><div class="row"><label for="ratio" class="label">粉水比</label><output id="ratioOut"></output></div><input id="ratio" type="range" min="12" max="20" step="0.5" value="16"></div>
+    <div class="param"><div class="row"><label for="temp" class="label">水溫</label><output id="tempOut"></output></div><input id="temp" type="range" min="70" max="100" step="1" value="92"></div>
+    <div class="param"><div class="row"><label for="grind" class="label">研磨粒徑</label><output id="grindOut"></output></div><input id="grind" type="range" min="300" max="1200" step="50" value="550"></div>
+    <div class="param wide"><span class="label">沖煮方式</span><div class="seg" role="group" aria-label="沖煮方式"><button id="pPulse" aria-pressed="true">分段注水</button><button id="pCont" aria-pressed="false">一刀流</button><button id="pSwitch" aria-pressed="false">Switch</button><button id="pImm" aria-pressed="false">浸泡</button></div></div>
+    <div class="param wide" id="dripParam"><span class="label">濾杯</span><div class="seg" role="group" aria-label="濾杯" id="segDrip"><button data-v="cone" aria-pressed="true">一般錐形</button><button data-v="v60" aria-pressed="false">V60</button><button data-v="orea" aria-pressed="false">OREA＋蛋糕濾紙</button></div></div>
+    <div class="param plan" id="planParam">
+      <div class="row"><span class="label" id="planTitle">分段注水計畫</span><output id="planOut" class="label"></output></div>
+      <div class="planrow">
+        <div class="stepper" role="group" aria-label="注水次數"><button id="planMinus" aria-label="減少一注">−</button><span id="planN" class="mono"></span><button id="planPlus" aria-label="增加一注">+</button></div>
+        <div class="pours" id="pours"></div>
+        <button class="ghost" id="planEven">依粉水比平均分配</button>
+      </div>
+    </div>
+    <div class="param" id="swModeParam" hidden><span class="label">Switch 閥門順序</span><div class="seg" role="group" aria-label="閥門順序"><button id="swCF" aria-pressed="true">先關後開</button><button id="swOF" aria-pressed="false">先開後關</button></div></div>
+    <div class="param" id="swCloseParam" hidden><div class="row"><label for="swClose" class="label">Switch 關閥時間</label><output id="swCloseOut"></output></div><input id="swClose" type="range" min="0" max="180" step="5" value="30"></div>
+    <div class="param" id="swParam" hidden><div class="row"><label for="swOpen" class="label">Switch 開閥時間</label><output id="swOpenOut"></output></div><input id="swOpen" type="range" min="10" max="300" step="5" value="120"></div>
+    <div class="param"><div class="row"><label for="roast" class="label">烘焙度</label><output id="roastOut"></output></div><input id="roast" type="range" min="1" max="5" step="1" value="3"></div>
+    <div class="param" id="stirPOParam"><span class="label">攪拌</span><div class="seg" role="group" aria-label="手沖攪拌" id="segPO"><button data-v="none" aria-pressed="false">不攪拌</button><button data-v="bloom" aria-pressed="true">悶蒸時攪</button><button data-v="swirl" aria-pressed="false">每注後旋轉</button></div></div>
+    <div class="param" id="stirIMParam" hidden><span class="label">攪拌</span><div class="seg" role="group" aria-label="浸泡攪拌" id="segIM"><button data-v="none" aria-pressed="true">不攪拌</button><button data-v="once" aria-pressed="false">開頭一次</button><button data-v="min" aria-pressed="false">每分鐘</button></div></div>
+    <div class="param" id="steepParam" hidden><div class="row"><label for="steep" class="label">浸泡時間</label><output id="steepOut"></output></div><input id="steep" type="range" min="60" max="900" step="15" value="240"></div>
+  </section>
+
+  <section class="panel" style="display:flex;flex-direction:column;gap:14px">
+    <div class="stage">
+      <div class="brewer" id="brewPO">
+        <header><h2 id="poTitle">注水滲濾</h2><div class="r"><span class="label" id="poPhase">—</span><button class="stirbtn" id="stirPO">攪拌一下</button></div></header>
+        <canvas id="cvPO" aria-label="手沖濾杯動畫"></canvas>
+        <div class="stats">
+          <div class="stat"><b id="poTDS">—</b><span>杯中濃度 TDS</span></div>
+          <div class="stat"><b id="poEY">—</b><span>萃取率 EY</span></div>
+          <div class="stat"><b id="poDrive">—</b><span>濃度梯度</span></div>
+        </div>
+        <div class="mix" id="poMix" aria-label="杯中風味組成"></div>
+        <div class="aroma" id="poAroma" aria-label="香氣"></div>
+      </div>
+      <div class="brewer" id="brewIM" hidden>
+        <header><h2>浸泡萃取</h2><div class="r"><span class="label" id="imPhase">—</span><button class="stirbtn" id="stirIM">攪拌一下</button></div></header>
+        <canvas id="cvIM" aria-label="浸泡壺動畫"></canvas>
+        <div class="stats">
+          <div class="stat"><b id="imTDS">—</b><span>液體濃度 TDS</span></div>
+          <div class="stat"><b id="imEY">—</b><span>萃取率 EY</span></div>
+          <div class="stat"><b id="imDrive">—</b><span>濃度梯度</span></div>
+        </div>
+        <div class="mix" id="imMix" aria-label="液體風味組成"></div>
+        <div class="aroma" id="imAroma" aria-label="香氣"></div>
+      </div>
+    </div>
+    <div class="transport">
+      <button class="play" id="play">播放</button>
+      <span class="clock" id="clock">0:00</span>
+      <input id="scrub" type="range" min="0" max="300" step="0.1" value="0" aria-label="時間">
+      <button class="savebtn" id="save">保存結果</button>
+      <div class="seg speed" role="group" aria-label="播放速度"><button data-s="4" aria-pressed="false">4×</button><button data-s="10" aria-pressed="true">10×</button><button data-s="25" aria-pressed="false">25×</button></div>
+    </div>
+    <div class="legend" id="legend"></div>
+  </section>
+
+  <section class="charts">
+    <div class="panel chartbox">
+      <h2>各類分子被帶出的比例</h2>
+      <div class="key"><span>▼ 攪拌時間點</span><span>縱軸：該分子可溶總量中已離開粉粒的百分比</span></div>
+      <canvas id="chA"></canvas>
+    </div>
+    <div class="panel chartbox">
+      <h2>萃取驅動力</h2>
+      <div class="key"><span>粉粒與緊鄰液體的濃度差，100% 表示周圍是清水</span></div>
+      <canvas id="chB"></canvas>
+    </div>
+    <div class="panel chartbox span">
+      <h2>香氣去向</h2>
+      <div class="key"><span><svg width="26" height="6"><line x1="0" y1="3" x2="26" y2="3" stroke="currentColor" stroke-width="2"/></svg>留在杯中或液體裡</span><span><svg width="26" height="6"><line x1="0" y1="3" x2="26" y2="3" stroke="currentColor" stroke-width="2" stroke-dasharray="4 3"/></svg>已揮發散失</span><span>縱軸：該香氣可溶總量的百分比</span></div>
+      <canvas id="chC"></canvas>
+    </div>
+  </section>
+
+  <section class="panel saved" aria-label="已保存的結果">
+    <div class="saved-head"><h2>保存的結果</h2><div><span class="label" id="saveHint"></span> <button class="ghost" id="clearAll" hidden>清除全部</button></div></div>
+    <div class="keyrow" aria-label="組成條顏色說明"><span><i style="background:var(--acid)"></i>有機酸</span><span><i style="background:var(--caf)"></i>咖啡因</span><span><i style="background:var(--sugar)"></i>糖與甜感</span><span><i style="background:var(--cga)"></i>綠原酸</span><span><i style="background:var(--bitter)"></i>苦味大分子</span><span><i style="background:var(--fruity);border-radius:50%;width:10px;height:10px"></i>花果香</span><span><i style="background:var(--roasty);border-radius:50%;width:10px;height:10px"></i>烘焙香</span><small>色條為杯中各成分的重量占比，數字單位為 %；香氣另列杯中含量（mg）、保留比例，以及揮發到空氣中的比例</small></div>
+    <div class="run-cols" id="runCols" hidden><span>沖法與參數</span><span>結果</span><span></span></div>
+    <div class="runs" id="runs"></div>
+    <p class="empty" id="runsEmpty">還沒有保存的結果。調好參數、播放到想比較的時間點，按「保存結果」，這裡會多一列，記下當下的沖法、濃度、萃取率和杯中組成。換一種沖法再保存一次，就能上下對照。</p>
+  </section>
+
+  <section class="panel notes">
+    <div><h3>為什麼酸先出來</h3><p>有機酸和綠原酸是最先出來的味道成分：浸泡 1 分鐘時，濃度已經有 5 分鐘時的八成五到九成。香氣成分速度居中，類黑素這類苦味大分子最慢。研磨太細，連苦味也一起帶出；太粗則味道還出得來，香氣卻萃不到。</p></div>
+    <div><h3>泡太久、水太燙，酸反而變少</h3><p>浸泡到 14 分鐘，綠原酸會水解成奎尼酸和咖啡酸，綠原酸下降、奎尼酸上升，口感從澀轉向沉悶的酸苦。水溫到 100°C 時，乳酸、醋酸、檸檬酸都比 94°C 少，醋酸會揮發，其他酸也會分解。所以 94°C 左右是酸最多的位置，不是越熱越好。</p></div>
+    <div><h3>注水靠「換水」維持速度</h3><p>濾杯底下一直有液體流走，粉粒周圍的水不斷被稀釋，濃度差維持在高點，所以短時間就能萃得深。研磨越細流速越慢，接觸時間被拉長，苦味大分子也會跟著增加。</p></div>
+    <div><h3>烘焙度改變的是原料</h3><p>烘得越深，有機酸和綠原酸被熱分解得越多，類黑素這類苦味大分子則越來越多。深焙豆結構也比較鬆脆，水更容易滲入，萃取比較快。所以淺焙常用較高水溫、較細研磨來把甜感拉出來，深焙則反過來，降低水溫、放粗研磨來壓住苦味。</p></div>
+    <div><h3>香氣分子來得快、走得也快</h3><p>花果香的酯類、醛類和烘焙香的吡嗪、呋喃類分子都很小，幾乎一碰到熱水就溶出。但它們沸點低，會從熱液體表面揮發。水溫越高、液體在空氣中暴露越久、攪拌越用力，散失越多。淺焙保有較多花果香，深焙的烘焙香較多。香氣在重量上只佔極小一部分，所以不放進組成色條，另外列出杯中含量和保留比例。</p></div>
+    <div><h3>濾杯形狀改變水怎麼走</h3><p>V60 是單一大孔加螺旋肋骨，流速快，研磨度和注水手法決定一切；錐形粉床中間深、邊緣淺，水容易從邊緣濾紙壁直接流走。OREA 搭配蛋糕濾紙是平底，粉床平而淺，濾紙的波浪皺褶讓濾紙不貼杯壁，水比較均勻地穿過整片粉床，旁流也少，所以萃取更均勻。</p></div>
+    <div><h3>Switch：先泡後濾</h3><p>先關後開：聰明杯先關閥，讓粉和水像浸泡一樣待在一起，濃度梯度會慢慢下降。開閥後，液體流過粉床，最後一段變成滲濾，粉粒旁的濃液被帶走，萃取再補一點。開閥時間越晚，越接近浸泡；越早，越接近手沖。先開後關則是先讓悶蒸和前段注水像手沖一樣流過粉床，帶走最早溶出的酸，再關閥浸泡收尾。</p></div>
+    <div><h3>攪拌在攪什麼</h3><p>不攪拌時，剛溶出的分子會堆在粉粒旁邊，形成一層濃液，把濃度差吃掉。攪拌把這層濃液打散到整壺，也讓結塊的乾粉吃到水，所以萃取會突然加快，然後慢慢回落。浸泡對攪拌最敏感；手沖本來就有水流沖刷，攪拌的效果比較小。</p></div>
+    <div><h3>浸泡會自己踩煞車</h3><p>水量固定，液體越濃，粉粒裡外的濃度差越小，萃取逐漸趨近平衡。好處是寬容、不易過萃；代價是同樣時間下，慢分子的比例和手沖不同，口感通常更圓、更厚。</p></div>
+  </section>
+
+  <p class="fine">模型說明：有機酸與綠原酸的速度、溫度與研磨反應依《咖啡香味的科學》表 31–33（出處 JCO Seneory）校正：以浸泡、94°C、一般粒度（設為 650 μm，粗 1000 μm、細 400 μm）、5 分鐘為基準，擬合 1 / 14 分鐘、70 / 100°C、粗 / 細研磨的相對濃度，誤差多在 3% 內。書中數值未標單位，此處當作 mg/L 對照。表 31 印刷時欄位錯開一列，已依表 32、33 的 94°C／5 分鐘欄位對齊後使用。其他成分無實測，依書中圖 63 的快慢順序（味道成分快、香氣居中、高分子苦味慢）設定。每類分子以一階擴散描述，速率 ∝ 擴散常數 × (粉粒內濃度 − 周圍液體濃度)。擴散常數隨溫度呈指數變化（大分子對溫度更敏感），並隨粒徑縮小而增加；粉粒吸水約為粉重 2 倍。濾杯流速依液面高度與粒徑估算。浸泡時把液體分成「粉粒周圍的一層」與「其餘液體」，兩者靠自然對流緩慢交換；攪拌會暫時加快交換、讓粉粒外的邊界層變薄，並讓未濕透的粉團完整吸水，效果在十幾秒內衰減。香氣分子以一階揮發描述：散失速率 ∝ 揮發常數 × 液體中香氣量，隨水溫升高而增加，注水時與攪拌後暫時加快，杯中因溫度較低只算 35%。濾杯以三個係數描述：流出速度倍率（V60 1.35×、OREA 1.2×）、粉床被水均勻穿過的比例（錐形 95%、V60 90%、OREA 100%），以及沿濾紙壁繞過粉床直接流進杯中的旁流比例（錐形 4%、V60 7%、OREA 1.5%）。烘焙度依淺、中、深三個參考點內插：調整各類分子的可溶量（酸與綠原酸隨烘焙遞減、苦味大分子遞增、糖類在中焙最高），並讓深焙的整體萃取速度較快。各類分子的可溶量與速率為教學用的近似值，用來比較趨勢，不是精確的化學測量。</p>
+</div>
+
+<script>
+const CMP=[
+  {id:'acid',  name:'有機酸', sub:'檸檬酸・奎尼酸・醋酸', avail:.0276, k:.070,  b:.124, gc:.82, gfi:1.08},
+  {id:'caf',   name:'咖啡因', sub:'',                 avail:.012, k:.050,  b:.110, gc:.85, gfi:1.06},
+  {id:'sugar', name:'糖與甜感', sub:'蔗糖・焦糖化產物', avail:.075, k:.024,  b:.120, gc:.84, gfi:1.06},
+  {id:'cga',   name:'綠原酸', sub:'澀感、收斂',       avail:.0191, k:.140,  b:.138, gc:.656,gfi:1.11},
+  {id:'bitter',name:'苦味大分子', sub:'類黑素等',      avail:.150, k:.0036, b:.150, gc:.85, gfi:1.25},
+  {id:'fruity',name:'花果香', sub:'酯類・醛類',        avail:.0015,k:.034,  b:.080, gc:.60, gfi:1.06, kv:.0050, vol:true},
+  {id:'roasty',name:'烘焙香', sub:'吡嗪・呋喃類',      avail:.0015,k:.027,  b:.085, gc:.62, gfi:1.06, kv:.0022, vol:true},
+];
+const N=CMP.length;
+const DEG={acid:4.46e-4,acidT:.202,cga:2.9e-4,cgaT:.0283};
+// q: outflow multiplier, u: share of the bed that water passes through evenly, by: share of poured water that slips past the bed along the filter wall
+const DRIPPER={cone:{name:'一般錐形',q:1,u:.95,by:.04},v60:{name:'V60',q:1.35,u:.9,by:.07},orea:{name:'OREA＋蛋糕濾紙',q:1.2,u:1,by:.015}};
+const ROAST={1:{f:[1.4,1,.85,1.7,.6,1.7,.35],k:.85},3:{f:[1,1,1,1,1,1,1],k:1},5:{f:[.55,1.02,.7,.45,1.45,.35,1.8],k:1.22}};
+const VOL=CMP.map((c,i)=>c.vol?i:-1).filter(i=>i>=0), NONVOL=CMP.map((c,i)=>c.vol?-1:i).filter(i=>i>=0);
+function roastAt(r){const a=r<=3?1:3,b=r<=3?3:5,u=(r-a)/2;
+  return {f:ROAST[a].f.map((v,i)=>v+(ROAST[b].f[i]-v)*u),k:ROAST[a].k+(ROAST[b].k-ROAST[a].k)*u};}
+
+// plan = [bloom ml, pour1 ml, ...]; ~4 ml/s, next pour starts once the previous has had time to draw down
+// starts/durs optional: user-set start time and pour duration (s) per pour; a pour never begins before the previous one ends
+function autoDur(ml){return Math.max(2,Math.round(ml/4));}
+function planSegments(plan,starts,durs){
+  const seg=[]; let tStart=0;
+  plan.forEach((ml,i)=>{const d=Math.max(1,(durs&&durs[i]!=null)?durs[i]:autoDur(ml));
+    if(starts&&starts[i]!=null)tStart=starts[i];
+    else if(i===1)tStart=Math.max(40,seg[0].e+25); else if(i>1)tStart=Math.max(seg[i-1].s+30,seg[i-1].e+12);
+    if(i>0)tStart=Math.max(tStart,seg[i-1].e);
+    seg.push({s:tStart,e:tStart+d,rate:ml/d});});
+  return seg;
+}
+// soluble amount vs grind: log-interpolated through 400 / 650 / 1000 μm (gfi = fine, gc = coarse ratio to 650 μm)
+function grindMul(c,g){const L=Math.log;
+  if(g>=650){const u=Math.min(1.4,L(g/650)/L(1000/650));return Math.exp(u*L(c.gc||1));}
+  const u=Math.min(1.4,L(650/g)/L(650/400));return Math.exp(u*L(c.gfi||1));}
+function simulate(method,p){
+  const dose=p.dose, W=dose*p.ratio, Vg=2*dose;
+  const gf=Math.pow(650/p.grind,1.3);
+  const RS=roastAt(p.roast||3);
+  const kk=CMP.map(c=>c.k*RS.k*gf*Math.exp(c.b*(p.temp-93)));
+  const PERC=method==='po'&&p.pattern!=='switch';
+  const DR=PERC?(DRIPPER[p.dripper]||DRIPPER.cone):{q:1,u:1,by:0};
+  const q0=.27*DR.q*Math.pow(p.grind/650,1.6);
+  const stirs=((method==='po'?p.stirPO:p.stirIM)||[]).slice().sort((a,b)=>a-b);
+  const boost=(t,tau)=>{let b=0;for(const s of stirs){if(s>t)break;b+=Math.exp(-(t-s)/tau);}return Math.min(1,b);};
+  const S0=CMP.map((c,i)=>c.avail*RS.f[i]*grindMul(c,p.grind)*dose);
+  let Lz=new Array(N).fill(0);
+  let S=S0.slice(), mn=new Array(N).fill(0), mb=new Array(N).fill(0), cupM=new Array(N).fill(0);
+  let absorbed=0,Vb=0,cupV=0,added=0;
+  const bloomV=Math.min(3*dose,W), rest=W-bloomV;
+  const SW=method==='po'&&p.pattern==='switch';
+  const openFirst=SW&&p.swMode==='openFirst', tcl=openFirst?(p.swClose??30):0, tsw=Math.max(p.swOpen||120,tcl+15);
+  const PL=(method==='po'&&(p.pattern==='pulse'||SW)&&p.plan)?planSegments(p.plan,p.planT,p.planD):null;
+  const closed=t=>SW&&t>=tcl&&t<tsw;
+  function pour(t){
+    if(method==='im') return t<10?W/10:0;
+    if(SW&&!PL) return t<20?W/20:0;
+    if(PL){for(const g of PL) if(t>=g.s&&t<g.e) return g.rate; return 0;}
+    if(t<10) return bloomV/10;
+    return (t>=40&&t<115)?rest/75:0;
+  }
+  const pourEnd = method==='im'?10:SW?Math.max(tsw,PL?PL[PL.length-1].e:20):PL?PL[PL.length-1].e:115;
+  const tmax = method==='im'?p.steep:480;
+  let wasClosed=false;
+  const nearV=t=>(method==='im'||closed(t))?Math.min(Vb,.12*W):Vb;
+  const dt=.25, rec=[];
+  for(let step=0;;step++){
+    const t=step*dt;
+    const inflow=pour(t)*dt;
+    const sb=boost(t,12);
+    if(step%4===0){
+      const Vn=nearV(t); let num=0,den=0;
+      for(let i=0;i<N;i++){const cn=Vb>0?mn[i]/Math.max(Vn,4):0;num+=Math.max(0,S[i]-Vg*cn);den+=S[i];}
+      rec.push({t,S:S.slice(),m:mn.map((v,i)=>v+mb[i]),mn:mn.slice(),mb:mb.slice(),cupM:cupM.slice(),lost:Lz.slice(),Vb,Vn,cupV,abs:absorbed,
+        pouring:inflow>0,closed:closed(t),sv:boost(t,3),drive:absorbed>0?(den>0?num/den:0):1});
+    }
+    if(method==='im'&&t>=tmax) break;
+    if(method==='po'&&((t>pourEnd&&Vb<.5)||t>=tmax)) break;
+    added+=inflow;
+    const byp=absorbed>=Vg?inflow*DR.by:0;
+    if(byp){cupV+=byp;}
+    const inBed=inflow-byp;
+    const toAbs=Math.min(inBed,Vg-absorbed);
+    absorbed+=toAbs; Vb+=inBed-toAbs;
+    // dry clumps: unstirred beds are not fully wetted at first
+    const stirred=stirs.length&&stirs[0]<=t;
+    const wetU = stirred?1 : (method==='po'&&!SW) ? (added>=.5*W?1:.82) : Math.min(1,.88+.12*t/90);
+    const w=absorbed/Vg*wetU*DR.u;
+    const kf=1+.45*sb;               // thinner boundary layer around particles
+    if(SW){const c=closed(t);
+      if(c&&!wasClosed&&Vb>0){const f=1-Math.min(Vb,.12*W)/Vb;for(let i=0;i<N;i++){const d=mn[i]*f;mn[i]-=d;mb[i]+=d;}}
+      if(!c&&wasClosed){for(let i=0;i<N;i++){mn[i]+=mb[i];mb[i]=0;}}
+      wasClosed=c;}
+    const Vn=nearV(t);
+    for(let i=0;i<N;i++){
+      const cn=mn[i]/Math.max(Vn,4);
+      let r=w*kk[i]*kf*(S[i]-Vg*cn)*dt;
+      r=Math.min(r,S[i]); r=Math.max(r,-.5*mn[i]);
+      S[i]-=r; mn[i]+=r;
+    }
+    if((method==='im'||closed(t))&&Vb-Vn>1){
+      // exchange between the layer around the grounds and the rest of the liquid
+      const kx=.012+(inflow>0?.15:0)+.6*boost(t,6);
+      const a=Math.min(1,kx*dt);
+      for(let i=0;i<N;i++){const c=(mn[i]+mb[i])/Vb;const d=(mn[i]-Vn*c)*a;mn[i]-=d;mb[i]+=d;}
+    }
+    if(method==='po'&&Vb>0&&!closed(t)){
+      const out=Math.min(Vb,q0*(1-.2*sb)*Math.sqrt(Vb)*dt), f=out/Vb;
+      for(let i=0;i<N;i++){const d=mn[i]*f;mn[i]-=d;cupM[i]+=d;}
+      cupV+=out; Vb-=out;
+    }
+    // slow chemistry in hot liquid: organic acids break down or (acetic) evaporate, steeply near boiling;
+    // chlorogenic acid hydrolyses into quinic acid (counted with organic acids) and caffeic acid (bitter side)
+    { const kda=DEG.acid*Math.exp(DEG.acidT*(p.temp-94))*dt, kh=DEG.cga*Math.exp(DEG.cgaT*(p.temp-94))*dt;
+      for(const arr of [mn,mb]){
+        const da=arr[0]*kda; arr[0]-=da; Lz[0]+=da;
+        const dh=arr[3]*kh; arr[3]-=dh; arr[0]+=dh*.54; arr[4]+=dh*.46; } }
+    // volatile aroma escapes from hot liquid; pouring and stirring expose more surface, the cup is cooler
+    { const ev=Math.exp(.05*(p.temp-92))*dt, fb=(1+3*boost(t,4))*(inflow>0?1.6:1);
+      for(const i of VOL){const kv=CMP[i].kv*ev;
+        const a=mn[i]*kv*fb, b=mb[i]*kv*fb, c=cupM[i]*kv*.35;
+        mn[i]-=a; mb[i]-=b; cupM[i]-=c; Lz[i]+=a+b+c;} }
+  }
+  return {rec,S0,W,Vg,dose,end:rec[rec.length-1].t,stirs};
+}
+if(typeof module!=='undefined'){module.exports={DEG,grindMul,simulate,VOL,NONVOL,CMP,planSegments,autoDur,DRIPPER};}
+</script>
+<script>
+(function(){
+if(typeof document==='undefined')return;
+const $=id=>document.getElementById(id);
+const P={dose:15,ratio:16,temp:92,grind:550,pattern:'pulse',plan:null,swOpen:120,swMode:'closeFirst',swClose:30,dripper:'cone',steep:240,roast:3,prePO:'bloom',preIM:'none',xPO:[],xIM:[]};
+let simPO,simIM,tMax,t=0,playing=false,speed=10,focus=null,last=0;
+let tok={};
+function readTok(){const cs=getComputedStyle(document.documentElement);
+  ['bg','panel','ink','muted','line','accent','water','water-edge','vessel','g-dark','g-light',...CMP.map(c=>c.id)].forEach(k=>tok[k]=cs.getPropertyValue('--'+k).trim());}
+readTok();
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>{readTok();draw();});
+new MutationObserver(()=>{readTok();draw();}).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+
+const fmtT=s=>{s=Math.max(0,Math.round(s));return Math.floor(s/60)+':'+String(s%60).padStart(2,'0');};
+function labels(){
+  $('doseOut').textContent=P.dose+' g';
+  $('ratioOut').innerHTML='<span class="mono">1:'+(+P.ratio.toFixed(1))+'</span> <span class="label">('+Math.round(P.dose*P.ratio)+' ml)</span>';
+  $('tempOut').innerHTML='<span class="mono">'+P.temp+' °C</span>';
+  const g=P.grind, d=g<450?'細':g<750?'中細':g<950?'中粗':'粗';
+  $('grindOut').innerHTML='<span class="mono">'+g+' μm</span> <span class="label">'+d+'</span>';
+  $('roastOut').innerHTML='<span class="label">'+['極淺焙','淺焙','中焙','中深焙','深焙'][P.roast-1]+'</span>';
+  $('swCloseOut').innerHTML='<span class="mono">'+fmtT(P.swClose)+'</span>';
+  $('swOpenOut').innerHTML='<span class="mono">'+fmtT(P.swOpen)+'</span>';
+  $('steepOut').innerHTML='<span class="mono">'+fmtT(P.steep)+'</span>';
+}
+function evenPlan(n){const W=Math.round(P.dose*P.ratio), b=Math.min(3*P.dose,W), r=W-b, each=Math.floor(r/n/5)*5;
+  const a=[b];for(let i=0;i<n;i++)a.push(i===n-1?r-each*(n-1):each);
+  P.planT=null;P.planD=null;return a;}
+function parseT(str){str=String(str).trim();let m=str.match(/^(\d+)[:：](\d{1,2})$/);if(m)return Math.min(600,+m[1]*60+ +m[2]);
+  m=str.match(/^\d+$/);if(m)return Math.min(600,+str);return null;}
+function renderPlan(){
+  const box=$('pours');box.innerHTML='';const seg=planSegments(P.plan,P.planT,P.planD);
+  P.plan.forEach((ml,i)=>{const d=document.createElement('div');d.className='pour';const id='pour'+i;
+    const fixT=()=>{if(!P.planT)P.planT=seg.map(g=>Math.round(g.s));if(!P.planD)P.planD=seg.map(g=>Math.round(g.e-g.s));};
+    d.innerHTML='<div class="ptitle">'+(i?'第 '+i+' 注':'悶蒸')+'</div>'+
+      '<label for="'+id+'">ml</label><input id="'+id+'" type="number" inputmode="numeric" min="0" max="400" step="5" value="'+ml+'">'+
+      '<label for="'+id+'t">開始</label><input id="'+id+'t" type="text" inputmode="numeric" value="'+fmtT(seg[i].s)+'" aria-label="'+(i?'第 '+i+' 注':'悶蒸')+'開始時間">'+
+      '<label for="'+id+'d">秒數</label><input id="'+id+'d" type="number" inputmode="numeric" min="1" max="120" step="1" value="'+Math.round(seg[i].e-seg[i].s)+'">'+
+      '<small>'+(ml/Math.max(1,seg[i].e-seg[i].s)).toFixed(1)+' ml/s</small>';
+    const [iml,it,idur]=d.querySelectorAll('input');
+    iml.addEventListener('change',e=>{let v=Math.max(0,Math.min(400,Math.round(+e.target.value||0)));
+      P.plan[i]=v;syncRatio();run();});
+    it.addEventListener('change',e=>{const v=parseT(e.target.value);if(v==null){e.target.value=fmtT(seg[i].s);return;}
+      fixT();P.planT[i]=v;run();});
+    idur.addEventListener('change',e=>{const v=Math.max(1,Math.min(120,Math.round(+e.target.value||1)));fixT();P.planD[i]=v;run();});
+    box.appendChild(d);});
+  $('planN').textContent=(P.plan.length-1)+' 注';
+  $('planMinus').disabled=P.plan.length<=2; $('planPlus').disabled=P.plan.length>=7;
+  const W=P.plan.reduce((a,b)=>a+b,0);
+  $('planOut').textContent='合計 '+W+' ml · 最後一注 '+fmtT(seg[seg.length-1].e)+' 結束';
+}
+function syncRatio(){const W=P.plan.reduce((a,b)=>a+b,0);P.ratio=Math.max(1,W)/P.dose;$('ratio').value=P.ratio;}
+function presetTimes(){
+  const po={none:[],bloom:[12],swirl:P.pattern==='pulse'?planSegments(P.plan,P.planT,P.planD).slice(1).map(g=>Math.round(g.e+3)):P.pattern==='switch'?[P.swMode==='openFirst'?12:25,Math.max(30,P.swOpen-5)]:[25,115]}[P.prePO];
+  const im=[];
+  if(P.preIM==='once')im.push(12);
+  if(P.preIM==='min'){im.push(12);for(let s=60;s<P.steep;s+=60)im.push(s);}
+  P.stirPO=po.concat(P.xPO); P.stirIM=im.concat(P.xIM.filter(x=>x<P.steep));
+}
+function run(){
+  if(!P.plan)P.plan=evenPlan(3);
+  labels(); presetTimes(); renderPlan();
+  simPO=simulate('po',P); simIM=simulate('im',P);
+  tMax=isIM()?simIM.end:simPO.end;
+  rememberParams();
+  $('scrub').max=tMax; if(t>tMax)t=tMax; $('scrub').value=t;
+  draw();
+}
+[['dose',1],['ratio',1],['temp',1],['grind',1],['steep',1],['roast',1],['swOpen',1],['swClose',1]].forEach(([id])=>{
+  $(id).addEventListener('input',e=>{P[id]=+e.target.value;if(id==='ratio'||id==='dose')P.plan=evenPlan(P.plan.length-1);run();});
+});
+const PAT={pulse:'pPulse',cont:'pCont',switch:'pSwitch',immersion:'pImm'};
+const isIM=()=>P.pattern==='immersion';
+const METHODN={pulse:'分段注水',cont:'一刀流',switch:'Switch',immersion:'浸泡'};
+function syncVis(){const k=P.pattern,sw=k==='switch';
+  $('swParam').hidden=!sw;$('swModeParam').hidden=!sw;$('swCloseParam').hidden=!(sw&&P.swMode==='openFirst');
+  $('planParam').hidden=!(k==='pulse'||sw);const im=k==='immersion';
+  $('brewPO').hidden=im;$('brewIM').hidden=!im;$('stirPOParam').hidden=im;$('stirIMParam').hidden=!im;$('steepParam').hidden=!im;
+  $('dripParam').hidden=!(k==='pulse'||k==='cont');
+  $('poTitle').textContent=METHODN[k]+((k==='pulse'||k==='cont')?' · '+DRIPPER[P.dripper].name:'');$('planTitle').textContent=sw?'Switch 注水計畫':'分段注水計畫';}
+[['swCF','closeFirst'],['swOF','openFirst']].forEach(([id,m])=>$(id).onclick=()=>{P.swMode=m;
+  $('swCF').setAttribute('aria-pressed',m==='closeFirst');$('swOF').setAttribute('aria-pressed',m==='openFirst');syncVis();run();});
+Object.entries(PAT).forEach(([k,id])=>$(id).onclick=()=>{P.pattern=k;Object.values(PAT).forEach(x=>$(x).setAttribute('aria-pressed',x===id?'true':'false'));syncVis();run();});
+[['segPO','prePO','xPO'],['segIM','preIM','xIM']].forEach(([id,key,x])=>{
+  $(id).querySelectorAll('button').forEach(b=>b.onclick=()=>{P[key]=b.dataset.v;P[x]=[];
+    $(id).querySelectorAll('button').forEach(y=>y.setAttribute('aria-pressed',y===b?'true':'false'));run();});
+});
+$('segDrip').querySelectorAll('button').forEach(b=>b.onclick=()=>{P.dripper=b.dataset.v;
+  $('segDrip').querySelectorAll('button').forEach(y=>y.setAttribute('aria-pressed',y===b?'true':'false'));syncVis();run();});
+$('planMinus').onclick=()=>{if(P.plan.length>2){P.plan=evenPlan(P.plan.length-2);run();}};
+$('planPlus').onclick=()=>{if(P.plan.length<7){P.plan=evenPlan(P.plan.length);run();}};
+$('planEven').onclick=()=>{P.plan=evenPlan(P.plan.length-1);run();};
+$('stirPO').onclick=()=>{if(t<simPO.end-.5){P.xPO.push(Math.round(t*4)/4);run();}};
+$('stirIM').onclick=()=>{if(t<simIM.end-.5){P.xIM.push(Math.round(t*4)/4);run();}};
+
+document.querySelectorAll('.speed button').forEach(b=>b.onclick=()=>{speed=+b.dataset.s;document.querySelectorAll('.speed button').forEach(x=>x.setAttribute('aria-pressed',x===b?'true':'false'));});
+$('scrub').addEventListener('input',e=>{t=+e.target.value;draw();});
+$('play').onclick=()=>{ if(!playing&&t>=tMax-.01)t=0; playing=!playing; $('play').textContent=playing?'暫停':'播放'; last=performance.now(); if(playing)requestAnimationFrame(tick);};
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+function tick(now){ if(!playing)return; const dt=Math.min(.1,(now-last)/1000); last=now; t+=dt*speed;
+  if(t>=tMax){t=tMax;playing=false;$('play').textContent='重播';}
+  $('scrub').value=t; draw(); if(playing)requestAnimationFrame(tick);}
+
+// legend
+const lg=$('legend');
+CMP.forEach(c=>{const b=document.createElement('button');b.className='chip';b.setAttribute('aria-pressed','false');
+  b.innerHTML='<i style="background:var(--'+c.id+')"></i>'+c.name+(c.sub?' <small>'+c.sub+'</small>':'');
+  b.onclick=()=>{focus=focus===c.id?null:c.id;lg.querySelectorAll('.chip').forEach((x,i)=>x.setAttribute('aria-pressed',CMP[i].id===focus?'true':'false'));draw();};
+  lg.appendChild(b);});
+
+function at(sim,tt){
+  const r=sim.rec, n=r.length; if(tt>=r[n-1].t)return Object.assign({done:true},r[n-1]);
+  const i=Math.floor(tt), a=r[Math.min(i,n-1)], b=r[Math.min(i+1,n-1)], f=tt-i;
+  const L=(x,y)=>x+(y-x)*f, LA=(x,y)=>x.map((v,j)=>L(v,y[j]));
+  return {t:tt,S:LA(a.S,b.S),m:LA(a.m,b.m),mn:LA(a.mn,b.mn),mb:LA(a.mb,b.mb),Vn:L(a.Vn,b.Vn),sv:L(a.sv,b.sv),cupM:LA(a.cupM,b.cupM),lost:LA(a.lost,b.lost),Vb:L(a.Vb,b.Vb),cupV:L(a.cupV,b.cupV),abs:L(a.abs,b.abs),pouring:a.pouring,closed:a.closed,drive:L(a.drive,b.drive),done:false};
+}
+
+function rng(seed){let s=seed>>>0;return()=>{s=(s*1664525+1013904223)>>>0;return s/4294967296;};}
+function setup(cv){const dpr=Math.min(2,devicePixelRatio||1),r=cv.getBoundingClientRect();
+  const w=Math.max(10,r.width),h=Math.max(10,r.height);
+  if(cv.width!==Math.round(w*dpr)||cv.height!==Math.round(h*dpr)){cv.width=Math.round(w*dpr);cv.height=Math.round(h*dpr);}
+  const ctx=cv.getContext('2d');ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,w,h);return {ctx,w,h};}
+function mixCol(a,b,f){const pa=hex(a),pb=hex(b);return 'rgb('+pa.map((v,i)=>Math.round(v+(pb[i]-v)*f)).join(',')+')';}
+function hex(h){h=h.replace('#','');if(h.length===3)h=h.split('').map(x=>x+x).join('');return [0,2,4].map(i=>parseInt(h.substr(i,2),16));}
+function dotUnit(sim){return sim.dose*0.24/520;}
+const R=2.3;
+
+function drawGrounds(ctx,rand,count,shape,remFrac){
+  const col=mixCol(tok['g-light'],tok['g-dark'],Math.max(0,Math.min(1,(remFrac-.25)/.75))*(.42+.58*(P.roast-1)/4));
+  ctx.fillStyle=col;
+  for(let i=0;i<count;i++){const [x,y]=shape(rand());const rr=1.8+rand()*2.2;ctx.beginPath();ctx.arc(x,y,rr,0,7);ctx.fill();}
+}
+function dots(ctx,sim,masses,seed,place,tt){
+  const u=dotUnit(sim);
+  CMP.forEach((c,ci)=>{
+    const n=Math.min(400,Math.round(masses[ci]/u)); if(!n)return;
+    const rand=rng(seed*97+ci*7919);
+    ctx.fillStyle=tok[c.id]; ctx.globalAlpha=(focus&&focus!==c.id)?.12:.92;
+    for(let k=0;k<n;k++){const a=rand(),b=rand(),ph=rand()*6.28;
+      const [x,y]=place(a,b);
+      const jx=reduce?0:Math.sin(tt*1.3+ph)*1.6, jy=reduce?0:Math.cos(tt*1.1+ph)*1.2;
+      ctx.beginPath();ctx.arc(x+jx,y+jy,R,0,7);ctx.fill();}
+  });
+  ctx.globalAlpha=1;
+}
+function swirl(ctx,cx,cy,rx,ry,amt,tt){
+  if(amt<.04)return; ctx.save(); ctx.strokeStyle=tok.accent; ctx.globalAlpha=Math.min(1,amt*1.4); ctx.lineWidth=2;
+  const rot=reduce?0:tt*5;
+  for(let k=0;k<3;k++){const a0=rot+k*2.09;ctx.beginPath();ctx.ellipse(cx,cy,rx,ry,0,a0,a0+1.3);ctx.stroke();
+    const ax=cx+rx*Math.cos(a0+1.3), ay=cy+ry*Math.sin(a0+1.3);ctx.beginPath();ctx.arc(ax,ay,2.6,0,7);ctx.fillStyle=tok.accent;ctx.fill();}
+  ctx.restore();
+}
+function remFrac(s,sim){return s.S.reduce((a,b)=>a+b,0)/sim.S0.reduce((a,b)=>a+b,0);}
+
+function drawPO(){
+  const {ctx,w,h}=setup($('cvPO')); const sc=w/300; ctx.save(); ctx.scale(sc,sc);
+  const s=at(simPO,t), sim=simPO;
+  const DK=(P.pattern==='pulse'||P.pattern==='cont')?P.dripper:'cone', flat=DK==='orea';
+  const top=36, tip=176, cx=150, hb=flat?52:15, half=(y)=>hb+(110-hb)*(tip-y)/(tip-top);
+  const bedTop=flat?144:122;
+  // liquid in cone
+  const lvl=Math.min(1,s.Vb/170), ly=bedTop+20-lvl*(bedTop+20-top-8);
+  if(s.Vb>.5){ctx.fillStyle=tok.water;ctx.beginPath();ctx.moveTo(cx-half(ly),ly);ctx.lineTo(cx+half(ly),ly);ctx.lineTo(cx+half(tip-6),tip-6);ctx.lineTo(cx-half(tip-6),tip-6);ctx.closePath();ctx.fill();
+    ctx.strokeStyle=tok['water-edge'];ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(cx-half(ly),ly);ctx.lineTo(cx+half(ly),ly);ctx.stroke();}
+  // grounds bed
+  const wet=s.abs/sim.Vg;
+  drawGrounds(ctx,rng(11),150,(r)=>{const y=bedTop+(tip-8-bedTop)*(flat?r:Math.sqrt(r));const hw=half(y)-4;return [cx+(rng((r*1e6)|0)()*2-1)*hw,y];},wet>0?remFrac(s,sim):1);
+  // dots in cone liquid
+  if(s.Vb>.3) dots(ctx,sim,s.m,3,(a,b)=>{const y=Math.max(ly+3,top)+(tip-10-Math.max(ly+3,top))*a;return [cx+(b*2-1)*(half(y)-5),y];},t);
+  // cone outline
+  ctx.strokeStyle=tok.vessel;ctx.lineWidth=2.2;ctx.lineJoin='round';
+  if(flat){
+    ctx.beginPath();ctx.moveTo(cx-half(top)-6,top-4);ctx.lineTo(cx-half(top),top);ctx.lineTo(cx-hb,tip);ctx.lineTo(cx+hb,tip);ctx.lineTo(cx+half(top),top);ctx.lineTo(cx+half(top)+6,top-4);ctx.stroke();
+    // wave (cake) filter pleats along the walls
+    ctx.strokeStyle=tok.line;ctx.lineWidth=1.2;
+    for(const sgn of [-1,1]){ctx.beginPath();for(let k=0;k<=14;k++){const y=top+4+(tip-top-6)*k/14;const x=cx+sgn*(half(y)-(k%2?7:2));k?ctx.lineTo(x,y):ctx.moveTo(x,y);}ctx.stroke();}
+    ctx.fillStyle=tok.vessel;for(const dx of [-30,-10,10,30])ctx.fillRect(cx+dx-2,tip,4,6);
+  }else{
+    ctx.beginPath();ctx.moveTo(cx-half(top)-6,top-4);ctx.lineTo(cx-half(top),top);ctx.lineTo(cx-15,tip);ctx.lineTo(cx-8,tip+8);ctx.moveTo(cx+15,tip);ctx.lineTo(cx+8,tip+8);ctx.moveTo(cx+15,tip);ctx.lineTo(cx+half(top),top);ctx.lineTo(cx+half(top)+6,top-4);ctx.stroke();
+    if(DK==='v60'){ // spiral ribs
+      ctx.strokeStyle=tok.line;ctx.lineWidth=1.2;
+      for(const sgn of [-1,1])for(let k=0;k<4;k++){const y1=top+10+k*30,y2=y1+34;ctx.beginPath();ctx.moveTo(cx+sgn*(half(y1)-3),y1);ctx.lineTo(cx+sgn*(half(y2)-12),y2);ctx.stroke();}
+    }
+  }
+  swirl(ctx,cx,(Math.max(ly,top)+tip)/2-6,70,14,s.sv,t);
+  if(P.pattern==='switch'){ctx.fillStyle=s.closed?tok.accent:tok.line;ctx.fillRect(cx-14,tip+10,28,5);ctx.fillStyle=tok.muted;ctx.font='11px '+getComputedStyle(document.body).fontFamily;ctx.textAlign='left';ctx.fillText(s.closed?'閥門關':'閥門開',cx+20,tip+16);}
+  // kettle stream
+  if(s.pouring&&!s.done){ctx.strokeStyle=tok['water-edge'];ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(cx+18,0);ctx.quadraticCurveTo(cx+8,top-10,cx+4,Math.min(ly,bedTop));ctx.stroke();}
+  // drip
+  const cupTop=208,cupBot=318,cl=88,cr=212;
+  if(s.Vb>.8&&!s.done&&!s.closed){ctx.strokeStyle=tok['water-edge'];ctx.lineWidth=Math.min(3,.6+s.Vb/50);ctx.setLineDash([3,4]);ctx.lineDashOffset=-t*30;ctx.beginPath();ctx.moveTo(cx,tip+8);ctx.lineTo(cx,cupBot-2-(cupBot-cupTop-10)*Math.min(1,s.cupV/sim.W));ctx.stroke();ctx.setLineDash([]);}
+  // cup
+  const cupLvl=cupBot-(cupBot-cupTop-10)*Math.min(1,s.cupV/sim.W);
+  if(s.cupV>.5){ctx.fillStyle=tok.water;ctx.fillRect(cl+2,cupLvl,cr-cl-4,cupBot-cupLvl-2);
+    dots(ctx,sim,s.cupM,5,(a,b)=>[cl+8+b*(cr-cl-16),cupLvl+4+a*(cupBot-cupLvl-10)],t);}
+  ctx.strokeStyle=tok.vessel;ctx.lineWidth=2.2;ctx.beginPath();ctx.moveTo(cl,cupTop);ctx.lineTo(cl,cupBot);ctx.lineTo(cr,cupBot);ctx.lineTo(cr,cupTop);ctx.stroke();
+  ctx.fillStyle=tok.muted;ctx.font='11px '+getComputedStyle(document.body).fontFamily;ctx.textAlign='right';
+  ctx.fillText(Math.round(s.cupV)+' ml',cr-4,cupTop+12);
+  ctx.restore();
+  return s;
+}
+function drawIM(){
+  const {ctx,w,h}=setup($('cvIM')); const sc=w/300; ctx.save(); ctx.scale(sc,sc);
+  const s=at(simIM,t), sim=simIM;
+  const L=70,Rr=230,T=46,B=312,bedH=36;
+  const total=s.abs+s.Vb, lvl=B-(B-T-20)*Math.min(1,total/sim.W);
+  if(total>.5){ctx.fillStyle=tok.water;ctx.fillRect(L+2,lvl,Rr-L-4,B-lvl-2);
+    ctx.strokeStyle=tok['water-edge'];ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(L+2,lvl);ctx.lineTo(Rr-2,lvl);ctx.stroke();}
+  const wet=s.abs/sim.Vg;
+  const lift=s.sv*(B-lvl)*.55;
+  drawGrounds(ctx,rng(21),170,(r)=>{const rr=rng((r*1e6)|0);const up=lift*rr();return [L+8+rr()*(Rr-L-16),B-6-Math.pow(r,1.4)*bedH-up];},wet>0?remFrac(s,sim):1);
+  // dots: layer next to the grounds vs. the rest of the liquid
+  const topL=lvl+4,botL=B-8, liqH=botL-topL;
+  const nearH=Math.max(bedH+10,liqH*(s.Vb>0?s.Vn/s.Vb:1));
+  if(s.Vb>.3){
+    dots(ctx,sim,s.mn,7,(a,b)=>[L+8+b*(Rr-L-16),Math.max(topL,botL-nearH*a)],t);
+    dots(ctx,sim,s.mb,9,(a,b)=>[L+8+b*(Rr-L-16),topL+a*liqH],t);
+  }
+  swirl(ctx,(L+Rr)/2,topL+liqH*.45,62,20,s.sv,t);
+  if(s.pouring&&!s.done){ctx.strokeStyle=tok['water-edge'];ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(Rr-20,0);ctx.quadraticCurveTo(Rr-40,T,Rr-46,lvl);ctx.stroke();}
+  ctx.strokeStyle=tok.vessel;ctx.lineWidth=2.2;ctx.beginPath();ctx.moveTo(L-6,T-4);ctx.lineTo(L,T);ctx.lineTo(L,B);ctx.lineTo(Rr,B);ctx.lineTo(Rr,T);ctx.lineTo(Rr+6,T-4);ctx.stroke();
+  ctx.fillStyle=tok.muted;ctx.font='11px '+getComputedStyle(document.body).fontFamily;ctx.textAlign='right';
+  ctx.fillText(Math.round(total)+' ml',Rr-6,T+14);
+  ctx.restore();
+  return s;
+}
+
+function stats(prefix,s,sim,kind){
+  const D=kind==='po'?s.cupM:s.m, V=kind==='po'?s.cupV:s.Vb;
+  const tot=D.reduce((a,b)=>a+b,0);
+  $(prefix+'TDS').textContent=V>5?(tot/V*100).toFixed(2)+'%':'—';
+  $(prefix+'EY').textContent=(tot/sim.dose*100).toFixed(1)+'%';
+  $(prefix+'Drive').textContent=Math.round(s.drive*100)+'%';
+  const mix=$(prefix+'Mix'); mix.innerHTML='';
+  const totNV=NONVOL.reduce((a,i)=>a+D[i],0);
+  if(totNV>0)NONVOL.forEach(i=>{const c=CMP[i];const e=document.createElement('i');e.style.width=(D[i]/totNV*100)+'%';e.style.background='var(--'+c.id+')';e.title=c.name+' '+(D[i]/totNV*100).toFixed(0)+'%';mix.appendChild(e);});
+  $(prefix+'Aroma').innerHTML=VOL.map(i=>{const c=CMP[i],keep=D[i]/sim.S0[i]*100,lost=s.lost[i]/sim.S0[i]*100;
+    return '<span><i style="background:var(--'+c.id+')"></i>'+c.name+' <b>'+(D[i]*1000).toFixed(1)+' mg</b> <small>保留 '+keep.toFixed(0)+'% · 散失 '+lost.toFixed(0)+'%</small></span>';}).join('')+
+    (V>5?[0,3].map(i=>'<span><i style="background:var(--'+CMP[i].id+')"></i>'+CMP[i].name+' <b>'+Math.round(D[i]/V*1e6).toLocaleString()+' mg/L</b></span>').join(''):'');
+  let ph;
+  $(kind==='po'?'stirPO':'stirIM').disabled=s.done;
+  if(s.sv>.35&&!s.done)ph='攪拌中';
+  else if(kind==='po'){ph=s.done?'完成 · 杯中 '+Math.round(s.cupV)+' ml':P.pattern==='switch'?(s.pouring?(s.closed?'注水（關閥）':'注水（開閥）'):s.closed?'關閥浸泡':'開閥滴濾'):(s.t<35?'悶蒸':s.pouring?'注水中':'滴濾中');}
+  else{ph=s.done?'浸泡結束，濾出':(s.t<10?'注水':'浸泡中');}
+  $(prefix+'Phase').textContent=ph;
+}
+
+function chart(cv,series,ymax,marks){
+  const {ctx,w,h}=setup(cv);
+  const ml=38,mr=10,mt=14,mb=28, pw=w-ml-mr, ph=h-mt-mb;
+  const X=x=>ml+x/tMax*pw, Y=y=>mt+ph-y/ymax*ph;
+  ctx.font='11px '+getComputedStyle(document.body).fontFamily; ctx.fillStyle=tok.muted; ctx.strokeStyle=tok.line; ctx.lineWidth=1;
+  ctx.textAlign='right';ctx.textBaseline='middle';
+  for(let v=0;v<=ymax+1e-9;v+=ymax/4){ctx.beginPath();ctx.moveTo(ml,Y(v));ctx.lineTo(w-mr,Y(v));ctx.stroke();ctx.fillText(Math.round(v*100)+'%',ml-6,Y(v));}
+  ctx.textAlign='center';ctx.textBaseline='top';
+  const step=tMax>300?60:30;
+  for(let s=0;s<=tMax;s+=step){ctx.fillText(fmtT(s),X(s),h-mb+8);}
+  series.forEach(se=>{ctx.strokeStyle=se.color;ctx.globalAlpha=se.alpha??1;ctx.lineWidth=se.width||2;ctx.setLineDash(se.dash||[]);
+    ctx.beginPath();se.pts.forEach(([x,y],i)=>i?ctx.lineTo(X(x),Y(y)):ctx.moveTo(X(x),Y(y)));ctx.stroke();});
+  ctx.setLineDash([]);ctx.globalAlpha=1;
+  (marks||[]).forEach(mk=>{ctx.beginPath();ctx.moveTo(X(mk.t)-4,mt-8);ctx.lineTo(X(mk.t)+4,mt-8);ctx.lineTo(X(mk.t),mt-1);ctx.closePath();
+    if(mk.hollow){ctx.strokeStyle=tok.accent;ctx.lineWidth=1.3;ctx.fillStyle=tok.panel;ctx.fill();ctx.stroke();}else{ctx.fillStyle=tok.accent;ctx.fill();}});
+  ctx.strokeStyle=tok.ink;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(X(t),mt);ctx.lineTo(X(t),mt+ph);ctx.stroke();
+  series.forEach(se=>{if(se.alpha===.15||!se.mark)return;const p=se.pts.reduce((b,q)=>q[0]<=t?q:b,se.pts[0]);
+    ctx.fillStyle=se.color;ctx.beginPath();ctx.arc(X(p[0]),Y(p[1]),3.2,0,7);ctx.fill();});
+}
+function charts(){
+  const sim=isIM()?simIM:simPO;
+  const A=CMP.map((c,i)=>({color:tok[c.id],alpha:(focus&&focus!==c.id)?.15:1,mark:true,pts:sim.rec.map(r=>[r.t,1-r.S[i]/sim.S0[i]])}));
+  const marks=sim.stirs.map(x=>({t:x}));
+  chart($('chA'),A,1,marks);
+  chart($('chB'),[{color:tok.accent,width:2.4,mark:true,pts:sim.rec.map(r=>[r.t,r.drive])}],1,marks);
+  const po=!isIM(), C=[];
+  VOL.forEach(i=>{const c=CMP[i],al=(focus&&focus!==c.id)?.15:1;
+    C.push({color:tok[c.id],alpha:al,mark:true,pts:sim.rec.map(r=>[r.t,(po?r.cupM[i]+r.m[i]:r.m[i])/sim.S0[i]])});
+    C.push({color:tok[c.id],alpha:al,mark:true,dash:[5,4],pts:sim.rec.map(r=>[r.t,r.lost[i]/sim.S0[i]])});});
+  chart($('chC'),C,1,marks);
+}
+function draw(){
+  if(!simPO)return;
+  if(isIM())stats('im',drawIM(),simIM,'im'); else stats('po',drawPO(),simPO,'po');
+  $('clock').textContent=fmtT(t);
+  charts();
+}
+// ---------- saved runs ----------
+const KEY='brewsim-runs-v1';
+let runs=[]; try{runs=JSON.parse(localStorage.getItem(KEY)||'[]')||[];}catch(e){runs=[];}
+// older rows held both methods side by side: split them into one row per method
+runs=runs.flatMap(r=>r.res?[r]:[{n:r.n,at:r.at,p:r.p,res:r.po},{n:r.n,at:r.at,p:Object.assign({},r.p,{pattern:'immersion'}),res:r.im}]);
+let seq=runs.reduce((m,r)=>Math.max(m,r.n||0),0);
+function persist(){try{localStorage.setItem(KEY,JSON.stringify(runs));}catch(e){}}
+const ROASTN=['極淺焙','淺焙','中焙','中深焙','深焙'];
+const STIRN={po:{none:'不攪拌',bloom:'悶蒸攪',swirl:'每注旋轉'},im:{none:'不攪拌',once:'攪一次',min:'每分鐘攪'}};
+function snap(kind){
+  const sim=kind==='po'?simPO:simIM, s=at(sim,t);
+  const D=kind==='po'?s.cupM:s.m, V=kind==='po'?s.cupV:s.Vb, tot=D.reduce((a,b)=>a+b,0);
+  const totNV=NONVOL.reduce((a,i)=>a+D[i],0);
+  return {tds:V>5?tot/V*100:null,ey:tot/sim.dose*100,drive:s.drive,mix:totNV>0?D.map((v,i)=>CMP[i].vol?null:v/totNV*100):null,
+    aroma:VOL.map(i=>[D[i]/sim.S0[i]*100,s.lost[i]/sim.S0[i]*100,D[i]*1000]),conc:V>5?[D[0]/V*1e6,D[3]/V*1e6]:null,
+    t:Math.min(t,sim.end),done:s.done,extra:(kind==='po'?P.xPO:P.xIM).length};
+}
+function save(){
+  seq++;
+  runs.push({n:seq,at:Date.now(),
+    p:{dose:P.dose,ratio:P.ratio,temp:P.temp,grind:P.grind,roast:P.roast,pattern:P.pattern,dripper:P.dripper,plan:P.plan.slice(),planSeg:planSegments(P.plan,P.planT,P.planD).map(g=>[Math.round(g.s),Math.round(g.e-g.s)]),swOpen:P.swOpen,swMode:P.swMode,swClose:P.swClose,steep:P.steep,prePO:P.prePO,preIM:P.preIM},
+    res:snap(isIM()?'im':'po')});
+  persist(); renderRuns();
+  $('saveHint').textContent='已保存 #'+seq;
+}
+function planTxt(p){return p.plan.map((ml,i)=>p.planSeg?ml+'ml@'+fmtT(p.planSeg[i][0])+'/'+p.planSeg[i][1]+'s':ml).join('、');}
+function resCell(r,kind,p){
+  const d=document.createElement('div');d.className='res';
+  const stir=STIRN[kind][kind==='po'?p.prePO:p.preIM]+(r.extra?' +'+r.extra+'次':'');
+  const when=r.done?'完成':fmtT(r.t)+' 時';
+  d.innerHTML='<div class="nums"><span><small>TDS</small>'+(r.tds==null?'—':r.tds.toFixed(2)+'%')+'</span><span><small>EY</small>'+r.ey.toFixed(1)+'%</span><span><small>梯度</small>'+Math.round(r.drive*100)+'%</span></div>';
+  const bar=document.createElement('div');bar.className='mix';
+  const pct=document.createElement('div');pct.className='pct';
+  if(r.mix)CMP.forEach((c,i)=>{if(c.vol||r.mix[i]==null)return;const e=document.createElement('i');e.style.width=r.mix[i]+'%';e.style.background='var(--'+c.id+')';e.title=c.name+' '+r.mix[i].toFixed(0)+'%';bar.appendChild(e);
+    const q=document.createElement('span');q.style.width=r.mix[i]+'%';q.textContent=r.mix[i]>=7?Math.round(r.mix[i]):'';pct.appendChild(q);});
+  d.appendChild(bar);d.appendChild(pct);
+  if(r.aroma){const a=document.createElement('div');a.className='aroma';
+    a.innerHTML=(r.conc?'<span><small>有機酸</small> <b>'+Math.round(r.conc[0]).toLocaleString()+' mg/L</b></span><span><small>綠原酸</small> <b>'+Math.round(r.conc[1]).toLocaleString()+' mg/L</b></span>':'')+VOL.map((i,j)=>'<span><i style="background:var(--'+CMP[i].id+')"></i>'+CMP[i].name+' <b>'+(r.aroma[j][2]!=null?r.aroma[j][2].toFixed(1)+' mg':r.aroma[j][0].toFixed(0)+'%')+'</b> <small>保留 '+r.aroma[j][0].toFixed(0)+'% · 散失 '+r.aroma[j][1].toFixed(0)+'%</small></span>').join('');d.appendChild(a);}
+  const note=document.createElement('div');note.className='label';note.textContent=when+' · '+stir;d.appendChild(note);
+  return d;
+}
+function renderRuns(){
+  const box=$('runs');box.innerHTML='';
+  $('runsEmpty').hidden=runs.length>0; $('runCols').hidden=!runs.length; $('clearAll').hidden=!runs.length;
+  runs.forEach((r,idx)=>{
+    const row=document.createElement('div');row.className='run';
+    const p=r.p, id=document.createElement('div');id.className='run-id';
+    const im=p.pattern==='immersion';
+    const dn=(p.pattern==='pulse'||p.pattern==='cont')&&p.dripper?' · '+DRIPPER[p.dripper].name:'';
+    id.innerHTML='<b>#'+r.n+' '+(METHODN[p.pattern]||'')+dn+'</b><span>'+ROASTN[p.roast-1]+' · '+p.dose+' g · 1:'+(+(+p.ratio).toFixed(1))+' · '+p.temp+' °C · '+p.grind+' μm<br>'+(im?'浸泡 '+fmtT(p.steep):(p.pattern==='pulse'?(p.plan?'分段 '+planTxt(p):'三注'):p.pattern==='switch'?'Switch '+(p.swMode==='openFirst'?'先開 · '+fmtT(p.swClose)+' 關 · ':'先關 · ')+fmtT(p.swOpen||120)+' 開'+(p.plan?' · '+planTxt(p):''):'一刀流'))+'</span>';
+    const del=document.createElement('button');del.className='ghost del';del.textContent='刪除';del.setAttribute('aria-label','刪除 #'+r.n);
+    del.onclick=()=>{runs.splice(idx,1);persist();renderRuns();};
+    const use=document.createElement('button');use.className='ghost';use.textContent='套用參數';use.setAttribute('aria-label','套用 #'+r.n+' 的參數');
+    use.onclick=()=>{playing=false;$('play').textContent='播放';applyParams(p);t=0;run();$('saveHint').textContent='已套用 #'+r.n+' 的參數';
+      document.querySelector('.params').scrollIntoView({behavior:reduce?'auto':'smooth',block:'start'});};
+    const acts=document.createElement('div');acts.className='acts';acts.appendChild(use);acts.appendChild(del);
+    row.appendChild(id);row.appendChild(resCell(r.res,im?'im':'po',p));row.appendChild(acts);
+    box.appendChild(row);
+  });
+}
+$('save').onclick=save;
+let armed=null;
+$('clearAll').onclick=()=>{const b=$('clearAll');
+  if(armed){clearTimeout(armed);armed=null;runs=[];persist();renderRuns();b.textContent='清除全部';b.classList.remove('warn');$('saveHint').textContent='';return;}
+  b.textContent='再按一次確認清除';b.classList.add('warn');
+  armed=setTimeout(()=>{armed=null;b.textContent='清除全部';b.classList.remove('warn');},3000);};
+renderRuns();
+
+addEventListener('resize',draw);
+document.fonts&&document.fonts.ready.then(draw);
+// ---------- remembered parameters ----------
+const PKEY='brewsim-params-v1';
+const PFIELDS=['dripper','dose','ratio','temp','grind','roast','pattern','plan','planT','planD','swOpen','swMode','swClose','steep','prePO','preIM'];
+function rememberParams(){try{const o={};PFIELDS.forEach(k=>o[k]=P[k]);localStorage.setItem(PKEY,JSON.stringify(o));}catch(e){}}
+function applyParams(o){
+  PFIELDS.forEach(k=>{if(o[k]!==undefined)P[k]=Array.isArray(o[k])?o[k].slice():o[k];});
+  if(o.planSeg&&o.plan){P.planT=o.planSeg.map(x=>x[0]);P.planD=o.planSeg.map(x=>x[1]);}
+  if(!PAT[P.pattern])P.pattern='pulse';
+  P.xPO=[];P.xIM=[];
+  ['dose','ratio','temp','grind','roast','swOpen','swClose','steep'].forEach(k=>{$(k).value=P[k];});
+  Object.entries(PAT).forEach(([k,id])=>$(id).setAttribute('aria-pressed',k===P.pattern?'true':'false'));
+  $('swCF').setAttribute('aria-pressed',P.swMode!=='openFirst');$('swOF').setAttribute('aria-pressed',P.swMode==='openFirst');
+  [['segPO','prePO'],['segIM','preIM'],['segDrip','dripper']].forEach(([id,key])=>$(id).querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===P[key]?'true':'false')));
+  syncVis();
+}
+try{const o=JSON.parse(localStorage.getItem(PKEY)||'null');if(o&&typeof o==='object')applyParams(o);}catch(e){}
+run();
+t=Math.min(75,tMax); $('scrub').value=t; draw();
+})();
+</script>
+
+</body></html>

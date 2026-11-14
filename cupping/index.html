@@ -1,0 +1,550 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>杯測教室</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@600;900&family=Noto+Sans+TC:wght@400;500;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+/* Layout: lab worksheet — single column, sticky tab bar, form-like scoring rows */
+:root{
+  --bg:#eef0ec; --paper:#fafbf8; --ink:#1d211f; --muted:#5d6560; --line:#c9cec8;
+  --accent:#8e2a37; --accent-soft:#f1dfe1; --coffee:#4a2c1d; --crust:#8a6240; --good:#2f6b4a; --warn:#a0621b;
+  --display:"Noto Serif TC",Georgia,serif; --body:"Noto Sans TC",system-ui,sans-serif; --mono:"IBM Plex Mono",ui-monospace,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#141715; --paper:#1d211f; --ink:#e7eae6; --muted:#9aa39d; --line:#343a36;
+  --accent:#e0828e; --accent-soft:#3a2327; --coffee:#8a5a3c; --crust:#b58a5e; --good:#7cc79c; --warn:#e3a85a; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#141715; --paper:#1d211f; --ink:#e7eae6; --muted:#9aa39d; --line:#343a36;
+  --accent:#e0828e; --accent-soft:#3a2327; --coffee:#8a5a3c; --crust:#b58a5e; --good:#7cc79c; --warn:#e3a85a; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.65}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+.wrap{max-width:760px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 48px}
+header h1{font-family:var(--display);font-weight:900;font-size:clamp(28px,7vw,40px);margin:0;letter-spacing:.02em;text-wrap:balance}
+header p{margin:4px 0 0;color:var(--muted);font-size:13px}
+.code{font-family:var(--mono);font-size:12px;color:var(--accent);letter-spacing:.06em}
+nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);display:flex;gap:4px;padding-block:12px;margin-top:12px;border-bottom:1.5px solid var(--ink);overflow-x:auto}
+nav button{flex:1;min-width:max-content;font:500 14px var(--body);border:0;background:none;color:var(--muted);padding:8px 12px;border-radius:6px;cursor:pointer}
+nav button[aria-selected="true"]{background:var(--ink);color:var(--bg)}
+nav button:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+section{display:flex;flex-direction:column;gap:16px;padding-top:20px}
+h2{font-family:var(--display);font-size:22px;margin:0;text-wrap:balance}
+h3{margin:0;font-size:16px}
+.lead{color:var(--muted);margin:0;max-width:62ch}
+.sheet{background:var(--paper);border:1px solid var(--line);border-radius:4px;padding:16px}
+/* steps */
+.steps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.steps li{display:grid;grid-template-columns:44px 1fr;gap:12px;padding:14px 0;border-top:1px solid var(--line)}
+.steps li:first-child{border-top:0}
+.steps .n{font-family:var(--mono);font-weight:600;color:var(--accent);font-size:20px}
+.steps p{margin:2px 0 0;color:var(--muted);font-size:14px}
+.spec{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
+.spec div{border-left:2px solid var(--accent);padding-left:10px}
+.spec b{display:block;font-family:var(--mono);font-size:18px}
+.spec span{font-size:12px;color:var(--muted)}
+/* scale */
+.scale{display:grid;grid-template-columns:repeat(6,1fr);border:1px solid var(--line);border-radius:4px;overflow:hidden;font-size:12px;text-align:center}
+.scale div{padding:8px 2px;border-left:1px solid var(--line)}
+.scale div:first-child{border-left:0}
+.scale b{display:block;font-family:var(--mono);font-size:14px}
+/* attribute guide */
+.attr{border-top:1px solid var(--line)}
+.attr summary{list-style:none;cursor:pointer;display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:14px 0}
+.attr summary::-webkit-details-marker{display:none}
+.attr summary::after{content:"+";font-family:var(--mono);color:var(--accent);font-size:18px}
+.attr[open] summary::after{content:"−"}
+.attr .en{font-family:var(--mono);font-size:12px;color:var(--muted);margin-left:8px}
+.attr .body{padding-bottom:16px;display:flex;flex-direction:column;gap:8px}
+.attr .body p{margin:0;max-width:62ch}
+.tag{display:inline-block;font-size:12px;padding:1px 8px;border-radius:99px;background:var(--accent-soft);color:var(--accent);margin-right:4px}
+.tip{font-size:13px;color:var(--muted)}
+/* scoring */
+.row{display:grid;grid-template-columns:1fr auto;gap:4px 12px;align-items:center;padding:12px 0;border-top:1px solid var(--line)}
+.row:first-of-type{border-top:0}
+.row label{font-weight:500}
+.row .val{font-family:var(--mono);font-weight:600;font-size:18px;min-width:3.4em;text-align:right;font-variant-numeric:tabular-nums}
+.row .word{grid-column:1/-1;font-size:12px;color:var(--muted);margin-top:-2px}
+input[type=range]{grid-column:1/-1;width:100%;accent-color:var(--accent)}
+.ticks{grid-column:1/-1;display:flex;justify-content:space-between;font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:-6px}
+.inten{grid-column:1/-1;display:flex;gap:6px;align-items:center;flex-wrap:wrap;font-size:12px;color:var(--muted)}
+.inten .seg{display:flex;border:1px solid var(--line);border-radius:4px;overflow:hidden}
+.inten .seg button{border:0;border-left:1px solid var(--line);background:var(--paper);color:var(--ink);font:500 12px var(--mono);width:30px;padding:4px 0;cursor:pointer}
+.inten .seg button:first-child{border-left:0}
+.inten .seg button.on{background:var(--ink);color:var(--paper)}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.field{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--muted)}
+select,input[type=number],input[type=text],textarea{font:inherit;font-size:15px;color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:4px;padding:8px}
+textarea{min-height:70px;resize:vertical;width:100%}
+.final{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;background:var(--ink);color:var(--paper);border-radius:4px;padding:16px}
+.final .big{font-family:var(--mono);font-weight:600;font-size:40px;line-height:1}
+.final .calc{font-family:var(--mono);font-size:12px;opacity:.75}
+.final .band{font-size:13px;padding:2px 10px;border:1px solid currentColor;border-radius:99px}
+.btns{display:flex;gap:8px;flex-wrap:wrap}
+.btn{font:500 14px var(--body);border:1px solid var(--ink);background:none;color:var(--ink);padding:8px 14px;border-radius:4px;cursor:pointer}
+.btn.pri{background:var(--accent);border-color:var(--accent);color:var(--paper)}
+.log{display:flex;flex-direction:column}
+.log div{display:grid;grid-template-columns:1fr auto;gap:8px;padding:10px 0;border-top:1px solid var(--line);font-size:14px}
+.log div:first-child{border-top:0}
+.log .s{font-family:var(--mono);font-weight:600}
+.log small{color:var(--muted);display:block}
+.empty{color:var(--muted);font-size:14px;margin:0}
+/* quiz */
+.q{font-size:17px;font-weight:500;margin:0}
+.opts{display:flex;flex-direction:column;gap:8px}
+.opts button{text-align:left;font:inherit;background:var(--paper);color:var(--ink);border:1px solid var(--line);border-radius:4px;padding:10px 12px;cursor:pointer}
+.opts button.right{border-color:var(--good);color:var(--good);font-weight:700}
+.opts button.wrong{border-color:var(--accent);color:var(--accent);text-decoration:line-through}
+.explain{font-size:14px;color:var(--muted);margin:0}
+.progress{font-family:var(--mono);font-size:12px;color:var(--muted)}
+.six{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}
+.six button{display:flex;flex-direction:column;align-items:center;gap:0;padding:8px 0;border:1px solid var(--line);border-radius:4px;background:var(--paper);color:var(--ink);cursor:pointer;font:inherit}
+.six button b{font-family:var(--mono);font-size:18px;line-height:1.2}
+.six button span{font-family:var(--mono);font-size:11px;color:var(--muted)}
+.six button[aria-selected="true"]{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+.six button[aria-selected="true"] span{color:var(--paper);opacity:.75}
+.cmp{display:flex;flex-direction:column}
+.cmp .c{display:grid;grid-template-columns:24px 1fr auto;gap:10px;align-items:center;padding:10px 0;border-top:1px solid var(--line);font-size:14px}
+.cmp .c:first-child{border-top:0}
+.cmp .rk{font-family:var(--mono);font-weight:600;color:var(--accent)}
+.cmp .nm{display:flex;flex-direction:column;gap:5px;min-width:0}
+.cmp .nm>span:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cmp .bar{height:6px;background:var(--line);border-radius:3px;overflow:hidden}
+.cmp .bar i{display:block;height:100%;background:var(--accent)}
+.cmp .s{font-family:var(--mono);font-weight:600;font-variant-numeric:tabular-nums}
+.stage{display:flex;flex-direction:column;gap:8px}
+.hud{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.hud div{border-left:2px solid var(--accent);padding-left:8px}
+.hud span{display:block;font-size:11px;color:var(--muted)}
+.hud b{font-family:var(--mono);font-size:20px;font-variant-numeric:tabular-nums}
+#simSvg{width:100%;max-width:100%;height:auto;display:block}
+#simSvg .table{stroke:var(--line);stroke-width:2}
+#simSvg .cupbody{fill:var(--paper);stroke:var(--ink);stroke-width:1.6;transition:stroke .3s}
+#simSvg .grounds{fill:var(--crust)}
+#simSvg .liq{fill:var(--coffee);transform-box:fill-box;transform-origin:50% 100%;transform:scaleY(0);transition:transform .55s ease}
+#simSvg .liq.full{transform:scaleY(1)}
+#simSvg .crust{fill:var(--crust);opacity:0;transition:opacity .35s}
+#simSvg .crust.on{opacity:1}
+#simSvg .lbl{font:600 12px var(--mono);fill:var(--muted)}
+#simSvg .cup.bad .cupbody{stroke:var(--accent);stroke-width:2.6}
+#simSvg .cup.bad .lbl{fill:var(--accent)}
+#simSvg .wisp{fill:none;stroke:var(--muted);stroke-width:1.6;stroke-linecap:round;opacity:0}
+#simSvg .cup.soft .wisp{animation:rise 2.6s ease-in infinite}
+#simSvg .cup.strong .wisp{animation:rise 1.3s ease-in infinite;stroke:var(--accent);stroke-width:2.2}
+@keyframes rise{0%{opacity:0;transform:translateY(6px)}30%{opacity:.85}100%{opacity:0;transform:translateY(-14px)}}
+#simSvg .tool{opacity:0;transition:transform .45s ease,opacity .3s}
+#simSvg .tool.show{opacity:1}
+#simSvg .kbody{fill:var(--paper);stroke:var(--ink);stroke-width:1.6}
+#simSvg .kline{fill:none;stroke:var(--ink);stroke-width:2.4;stroke-linecap:round}
+#simSvg .stream{stroke:var(--coffee);stroke-width:3;stroke-linecap:round;opacity:0;transition:opacity .15s}
+#simSvg .stream.on{opacity:1}
+#simSvg .sbowl{fill:var(--paper);stroke:var(--ink);stroke-width:1.6}
+#simSvg .mist circle{fill:var(--coffee);opacity:0}
+#simSvg.slurp .mist circle{animation:mist 1.2s ease-out infinite}
+#simSvg.slurp .mist circle:nth-child(2){animation-delay:.2s}#simSvg.slurp .mist circle:nth-child(3){animation-delay:.4s}#simSvg.slurp .mist circle:nth-child(4){animation-delay:.6s}
+@keyframes mist{0%{opacity:0;transform:translateY(4px)}40%{opacity:.8}100%{opacity:0;transform:translateY(-8px)}}
+.simcap{display:flex;flex-direction:column;gap:6px;min-height:150px}
+.simcap p{margin:0;color:var(--muted);max-width:62ch}
+.simbtns .btn{flex:1}
+.dots{display:flex;justify-content:center;gap:6px;flex-wrap:wrap}
+.dots button{width:26px;height:26px;border-radius:50%;border:1px solid var(--line);background:var(--paper);color:var(--muted);font:600 11px var(--mono);cursor:pointer;padding:0}
+.dots button.on{background:var(--accent);border-color:var(--accent);color:var(--paper)}
+.dots button.done{border-color:var(--accent);color:var(--accent)}
+@media (prefers-reduced-motion:reduce){#simSvg *{transition:none!important;animation:none!important}#simSvg .cup.soft .wisp,#simSvg .cup.strong .wisp{opacity:.7}#simSvg.slurp .mist circle{opacity:.7}}
+footer{margin-top:32px;font-size:12px;color:var(--muted)}
+@media (prefers-reduced-motion:no-preference){section{animation:in .25s ease}@keyframes in{from{transform:translateY(4px)}to{transform:none}}}
+</style>
+
+<div class="wrap">
+<header>
+  <div class="code">CFGC:2026.01 · CUPPING FORM FOR GENUS COFFEA</div>
+  <h1>杯測教室</h1>
+  <p>照著台灣咖啡研究室杯測表的欄位，學流程、懂評分、動手練。</p>
+</header>
+
+<nav role="tablist">
+  <button role="tab" data-tab="flow" aria-selected="true">流程</button>
+  <button role="tab" data-tab="sim" aria-selected="false">模擬</button>
+  <button role="tab" data-tab="attrs" aria-selected="false">評分項目</button>
+  <button role="tab" data-tab="score" aria-selected="false">練習計分</button>
+  <button role="tab" data-tab="quiz" aria-selected="false">小測驗</button>
+</nav>
+
+<!-- FLOW -->
+<section id="flow">
+  <h2>一場杯測怎麼進行</h2>
+  <p class="lead">每支樣品準備 3–5 杯（表上的 Replication n=3/4/5），同一支豆子每杯都要一樣，才能抓出瑕疵杯。下列參數是常見的業界做法，實際以你所在杯測場的規範為準。</p>
+  <div class="sheet spec">
+    <div><b>8.25 g</b><span>每 150 ml 水的粉量（約 1:18）</span></div>
+    <div><b>93 °C</b><span>注水溫度，約 92–94 °C</span></div>
+    <div><b>中粗研磨</b><span>比濾紙手沖略粗</span></div>
+    <div><b>3–5 min</b><span>浸泡後破渣</span></div>
+  </div>
+  <ol class="steps sheet">
+    <li><span class="n">1</span><div><h3>記錄烘焙度</h3><p>看熟豆或粉的顏色，在表左側 Roast Level 從 Light 到 Dark 畫記。烘焙度影響你對酸、苦、醇厚的預期。</p></div></li>
+    <li><span class="n">2</span><div><h3>聞乾香 Dry</h3><p>研磨後 15 分鐘內，掀蓋聞粉。在 Fragrance/Aroma 欄的 Dry 刻度記強度（H 高 / L 低），同時寫下香氣描述。</p></div></li>
+    <li><span class="n">3</span><div><h3>注水、計時</h3><p>熱水注滿杯緣，確保粉全部浸濕。開始計時，此時可以先聞一次濕香。</p></div></li>
+    <li><span class="n">4</span><div><h3>破渣聞濕香 Wet</h3><p>3–5 分鐘後用杯測匙推開表面粉層，鼻子靠近吸氣。這是香氣最集中的一刻，記在 Wet 刻度，然後綜合乾濕香給 Fragrance/Aroma 分數。</p></div></li>
+    <li><span class="n">5</span><div><h3>撈渣</h3><p>用兩支湯匙撈掉浮渣與泡沫，每杯之間把匙子在熱水中涮乾淨，避免互相污染。</p></div></li>
+    <li><span class="n">6</span><div><h3>啜吸品嚐</h3><p>約 70 °C 開始啜吸，讓咖啡霧化布滿口腔。評 Flavor、Aftertaste、Acid/Salt、Sweet/Bitter、Mouthfeel。</p></div></li>
+    <li><span class="n">7</span><div><h3>隨溫度下降反覆喝</h3><p>咖啡降溫後甜感、酸質與瑕疵會更明顯。Balance/Harmony 與 Clarity 通常在中低溫段判斷最準。</p></div></li>
+    <li><span class="n">8</span><div><h3>找瑕疵杯、算總分</h3><p>某杯跟其他杯明顯不同（發酵、霉味、生青）就算瑕疵杯。八項加總後 +80，再扣瑕疵分，就是 Final Score。</p></div></li>
+  </ol>
+</section>
+
+<!-- ATTRS -->
+<section id="attrs" hidden>
+  <h2>評分項目與品質尺度</h2>
+  <p class="lead">每一項都用同一把尺打分：-1 到 2。0 是「可接受」的基準點，正分代表比基準好，負分代表有問題。</p>
+  <div class="scale" aria-label="Quality Scale">
+    <div><b>-1.0</b>差/不可接受</div><div><b>0</b>普通/可接受</div><div><b>0.5</b>好</div><div><b>1.0</b>很好</div><div><b>1.5</b>優異</div><div><b>2.0</b>傑出</div>
+  </div>
+  <div class="sheet" id="attrList"></div>
+  <p class="tip">強度刻度（Dry、Wet、Acidity、Sweetness、Body）只記「有多強」，不直接計分。強不等於好：酸很強但尖銳刺口，品質分可能只有 0。</p>
+</section>
+
+<!-- SCORE -->
+<section id="score" hidden>
+  <h2>練習計分</h2>
+  <p class="lead">跟紙本一樣，一張表最多 6 支樣品。點編號切換樣品，填完在下方「本桌比較」看排名。前三支帶入示範數字，可以直接改。</p>
+  <div class="sheet grid2">
+    <label class="field">Replication 每支樣品杯數<select id="dN"><option value="3">n=3（瑕疵每杯 -3.0）</option><option value="4">n=4（瑕疵每杯 -2.5）</option><option value="5" selected>n=5（瑕疵每杯 -2.0）</option></select></label>
+    <label class="field">Session 場次<input type="text" id="sess" value="週日練習"></label>
+  </div>
+  <div class="six" id="sTabs" role="tablist" aria-label="樣品"></div>
+  <div class="sheet grid2">
+    <label class="field">Sample # 樣品名稱<input type="text" id="sName" placeholder="例如：肯亞 AA 水洗"></label>
+    <label class="field">Roast Level 烘焙度（1 淺 – 5 深）<input type="range" id="sRoast" min="1" max="5" step="1" value="3"></label>
+  </div>
+  <div class="sheet" id="scoreRows"></div>
+  <div class="sheet">
+    <h3 style="margin-bottom:8px">Odd / Defect Cup(s)</h3>
+    <label class="field">這支樣品的瑕疵杯數<input type="number" id="dCups" min="0" max="5" value="0"></label>
+    <p class="tip" style="margin:8px 0 0">杯數越多，單一瑕疵杯的扣分越輕，因為它在整批中佔比越小。</p>
+  </div>
+  <label class="field">Notes 風味筆記<textarea id="sNotes" placeholder="乾：… ｜熱：… ｜冷：…"></textarea></label>
+  <div class="final" aria-live="polite">
+    <div><div style="font-size:13px;opacity:.8" id="fLabel">Final Score</div><div class="big" id="fScore">--</div><div class="calc" id="fCalc"></div></div>
+    <span class="band" id="fBand"></span>
+  </div>
+  <div class="sheet"><h3 style="margin-bottom:6px">本桌比較</h3><div class="cmp" id="cmp"></div></div>
+  <div class="btns"><button class="btn pri" id="saveBtn">存整張表</button><button class="btn" id="resetBtn">清空這支樣品</button></div>
+  <div class="sheet"><h3 style="margin-bottom:6px">我的杯測紀錄</h3><div class="log" id="log"></div></div>
+</section>
+
+<!-- SIM -->
+<section id="sim" hidden>
+  <h2>杯測流程模擬</h2>
+  <p class="lead">一支咖啡、5 杯（n=5），從研磨到算分完整走一遍。按「播放」自動進行，也可以一步一步看。</p>
+  <div class="sheet stage">
+    <div class="hud"><div><span>計時</span><b id="hT">--:--</b></div><div><span>水溫</span><b id="hC">—</b></div><div><span>步驟</span><b id="hS">1 / 10</b></div></div>
+    <svg id="simSvg" viewBox="0 0 360 192" role="img" aria-label="五杯杯測模擬">
+<line class="table" x1="6" y1="161" x2="354" y2="161"/>
+<g class="cup" id="cup0">
+<clipPath id="cl0"><path d="M22 100 L74 100 L68 160 L28 160 Z"/></clipPath>
+<path class="wisp" d="M41 96 q-5 -8 0 -16 q5 -8 0 -16"/>
+<path class="wisp" style="animation-delay:.7s" d="M55 96 q5 -8 0 -16 q-5 -8 0 -16"/>
+<path class="cupbody" d="M22 100 L74 100 L68 160 L28 160 Z"/>
+<g clip-path="url(#cl0)">
+<rect class="grounds" x="22" y="150" width="52" height="10"/>
+<rect class="liq" x="22" y="104" width="52" height="56"/>
+<rect class="crust" x="22" y="100" width="52" height="9"/>
+</g>
+<text class="lbl" x="48" y="180" text-anchor="middle">#1</text>
+</g><g class="cup" id="cup1">
+<clipPath id="cl1"><path d="M88 100 L140 100 L134 160 L94 160 Z"/></clipPath>
+<path class="wisp" d="M107 96 q-5 -8 0 -16 q5 -8 0 -16"/>
+<path class="wisp" style="animation-delay:.7s" d="M121 96 q5 -8 0 -16 q-5 -8 0 -16"/>
+<path class="cupbody" d="M88 100 L140 100 L134 160 L94 160 Z"/>
+<g clip-path="url(#cl1)">
+<rect class="grounds" x="88" y="150" width="52" height="10"/>
+<rect class="liq" x="88" y="104" width="52" height="56"/>
+<rect class="crust" x="88" y="100" width="52" height="9"/>
+</g>
+<text class="lbl" x="114" y="180" text-anchor="middle">#2</text>
+</g><g class="cup" id="cup2">
+<clipPath id="cl2"><path d="M154 100 L206 100 L200 160 L160 160 Z"/></clipPath>
+<path class="wisp" d="M173 96 q-5 -8 0 -16 q5 -8 0 -16"/>
+<path class="wisp" style="animation-delay:.7s" d="M187 96 q5 -8 0 -16 q-5 -8 0 -16"/>
+<path class="cupbody" d="M154 100 L206 100 L200 160 L160 160 Z"/>
+<g clip-path="url(#cl2)">
+<rect class="grounds" x="154" y="150" width="52" height="10"/>
+<rect class="liq" x="154" y="104" width="52" height="56"/>
+<rect class="crust" x="154" y="100" width="52" height="9"/>
+</g>
+<text class="lbl" x="180" y="180" text-anchor="middle">#3</text>
+</g><g class="cup" id="cup3">
+<clipPath id="cl3"><path d="M220 100 L272 100 L266 160 L226 160 Z"/></clipPath>
+<path class="wisp" d="M239 96 q-5 -8 0 -16 q5 -8 0 -16"/>
+<path class="wisp" style="animation-delay:.7s" d="M253 96 q5 -8 0 -16 q-5 -8 0 -16"/>
+<path class="cupbody" d="M220 100 L272 100 L266 160 L226 160 Z"/>
+<g clip-path="url(#cl3)">
+<rect class="grounds" x="220" y="150" width="52" height="10"/>
+<rect class="liq" x="220" y="104" width="52" height="56"/>
+<rect class="crust" x="220" y="100" width="52" height="9"/>
+</g>
+<text class="lbl" x="246" y="180" text-anchor="middle">#4</text>
+</g><g class="cup" id="cup4">
+<clipPath id="cl4"><path d="M286 100 L338 100 L332 160 L292 160 Z"/></clipPath>
+<path class="wisp" d="M305 96 q-5 -8 0 -16 q5 -8 0 -16"/>
+<path class="wisp" style="animation-delay:.7s" d="M319 96 q5 -8 0 -16 q-5 -8 0 -16"/>
+<path class="cupbody" d="M286 100 L338 100 L332 160 L292 160 Z"/>
+<g clip-path="url(#cl4)">
+<rect class="grounds" x="286" y="150" width="52" height="10"/>
+<rect class="liq" x="286" y="104" width="52" height="56"/>
+<rect class="crust" x="286" y="100" width="52" height="9"/>
+</g>
+<text class="lbl" x="312" y="180" text-anchor="middle">#5</text>
+</g>
+<g id="kettle" class="tool"><line id="stream" class="stream" x1="0" y1="2" x2="0" y2="38"/>
+<path class="kbody" d="M10 -32 h38 a6 6 0 0 1 6 6 v26 a6 6 0 0 1 -6 6 h-30 a8 8 0 0 1 -8 -8 Z"/>
+<path class="kline" d="M12 -10 L0 0"/><path class="kline" d="M54 -24 q14 8 0 22"/><line class="kline" x1="22" y1="-36" x2="38" y2="-36"/></g>
+<g id="spoon" class="tool"><line class="kline" x1="7" y1="-3" x2="40" y2="-34"/><ellipse class="sbowl" cx="0" cy="0" rx="10" ry="5"/>
+<g class="mist"><circle cx="-6" cy="-12" r="1.8"/><circle cx="4" cy="-18" r="1.5"/><circle cx="-2" cy="-26" r="1.2"/><circle cx="8" cy="-30" r="1"/></g></g>
+</svg>
+  </div>
+  <div class="sheet simcap" aria-live="polite"><div class="code" id="simField"></div><h3 id="simTitle"></h3><p id="simDesc"></p></div>
+  <div class="btns simbtns"><button class="btn" id="simPrev">上一步</button><button class="btn pri" id="simPlay">播放</button><button class="btn" id="simNext">下一步</button></div>
+  <div class="dots" id="simDots"></div>
+</section>
+
+<!-- QUIZ -->
+<section id="quiz" hidden>
+  <h2>小測驗</h2>
+  <div class="sheet" style="display:flex;flex-direction:column;gap:14px">
+    <div class="progress" id="qProg"></div>
+    <p class="q" id="qText"></p>
+    <div class="opts" id="qOpts"></div>
+    <p class="explain" id="qExp" hidden></p>
+    <div class="btns"><button class="btn pri" id="qNext" hidden>下一題</button></div>
+  </div>
+</section>
+
+<footer>表單結構依 CFGC:2026.01（© 2026 Taiwan Coffee Laboratory，CC BY-SA 4.0）。總分計算為依表面欄位的解讀：八項加總 +80，再加上瑕疵扣分。</footer>
+</div>
+
+<script>
+const ATTRS=[
+ {k:"fa",zh:"香氣",en:"Fragrance / Aroma",inten:["Dry","Wet"],def:1,
+  what:"乾香（研磨後的粉）與濕香（注水、破渣時）的整體品質。",
+  look:["花香","果香","焦糖","堅果"],tip:"乾香與濕香分開記強度，分數給的是兩者綜合的「好不好聞」。"},
+ {k:"fl",zh:"風味",en:"Flavor",def:1.5,
+  what:"啜吸時味覺加上鼻後嗅覺的整體印象，是咖啡最核心的一項。",
+  look:["風味清楚可辨","層次","強度與品質"],tip:"想像你在描述給別人聽：嚐得到什麼、好不好喝。"},
+ {k:"af",zh:"餘韻",en:"Aftertaste",def:1,
+  what:"吞下或吐掉後，留在口中的味道長短與好壞。",
+  look:["持續時間","是否乾澀","是否轉苦"],tip:"好的餘韻乾淨、延續風味；差的會變澀或殘留苦味。"},
+ {k:"as",zh:"酸 / 鹹",en:"Acid / Salt",inten:["Acidity"],def:1,
+  what:"酸質的品質。明亮、多汁的酸加分；尖銳、醋酸或帶鹹感扣分。",
+  look:["明亮","多汁","尖銳","鹹"],tip:"Acidity 刻度記強度，方框記品質。淺焙常酸強，但強不等於好。"},
+ {k:"sb",zh:"甜 / 苦",en:"Sweet / Bitter",inten:["Sweetness"],def:1,
+  what:"甜感與苦味之間的平衡與品質。",
+  look:["蜂蜜","焦糖","糖漿感","焦苦"],tip:"降溫後甜感會浮上來，記得低溫時再確認一次。"},
+ {k:"mf",zh:"口感",en:"Mouthfeel",inten:["Body"],def:0.5,
+  what:"咖啡在口中的觸感：質地、重量、滑順或粗糙。",
+  look:["絲滑","奶油感","茶感","粗糙乾澀"],tip:"Body 刻度記厚薄，方框記觸感品質。輕盈但細緻也可以拿高分。"},
+ {k:"bh",zh:"平衡 / 和諧",en:"Balance / Harmony",def:1,
+  what:"各項風味之間是否協調，有沒有某一項突兀地蓋過其他。",
+  look:["整體協調","酸甜比例","缺項"],tip:"問自己：這杯有沒有哪裡怪怪的、搶戲或空掉？"},
+ {k:"cl",zh:"清晰度",en:"Clarity",def:1.5,
+  what:"風味是否乾淨透明、輪廓分明，沒有雜味遮蔽。",
+  look:["乾淨","透亮","混濁","雜味"],tip:"雜味、土味、悶味都會讓清晰度下降。"}
+];
+const WORD=v=>v<=-0.75?"差/不可接受":v<0?"低於可接受":v<0.5?"普通/可接受":v<1?"好":v<1.5?"很好":v<2?"優異":"傑出";
+const DEF={3:-3,4:-2.5,5:-2};
+
+// tabs
+document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>{
+  document.querySelectorAll("nav button").forEach(x=>x.setAttribute("aria-selected",x===b));
+  document.querySelectorAll("section").forEach(s=>s.hidden=s.id!==b.dataset.tab);
+  window.scrollTo({top:0});
+});
+
+// attr guide
+document.getElementById("attrList").innerHTML=ATTRS.map((a,i)=>`
+<details class="attr"${i==0?" open":""} style="${i==0?"border-top:0":""}">
+ <summary><span><b>${a.zh}</b><span class="en">${a.en}</span></span></summary>
+ <div class="body"><p>${a.what}</p>
+ <div>${a.look.map(t=>`<span class="tag">${t}</span>`).join("")}</div>
+ ${a.inten?`<p class="tip">強度刻度：${a.inten.join("、")}（H 高 – L 低）</p>`:""}
+ <p class="tip">${a.tip}</p></div></details>`).join("");
+
+// scoring — 6 samples per sheet
+const blank=()=>({name:"",roast:3,s:Object.fromEntries(ATTRS.map(a=>[a.k,0])),i:{},cups:0,notes:""});
+const EX=[
+ {name:"示範：衣索比亞 水洗",roast:2,s:{fa:1,fl:1.5,af:1,as:1,sb:1,mf:0.5,bh:1,cl:1.5},cups:0,notes:"柑橘、茉莉，尾段紅茶感"},
+ {name:"示範：巴西 日曬",roast:3,s:{fa:0.5,fl:0.5,af:0.5,as:0,sb:1,mf:1,bh:1,cl:0.5},cups:0,notes:"可可、堅果、焦糖"},
+ {name:"示範：哥倫比亞 厭氧",roast:2,s:{fa:1.5,fl:1,af:0.5,as:0.5,sb:0.5,mf:0.5,bh:0,cl:0},cups:1,notes:"熱帶水果、酒感；第 4 杯發酵過頭"}];
+const S=[...EX.map(e=>Object.assign(blank(),e)),blank(),blank(),blank()];
+let cur=0;
+const used=x=>x.name.trim()!=="";
+const nCups=()=>+dN.value;
+function scoreOf(x){const sum=ATTRS.reduce((t,a)=>t+x.s[a.k],0);const c=Math.max(0,Math.min(nCups(),x.cups|0));const ded=DEF[nCups()]*c;return{sum,ded,c,fin:sum+80+ded}}
+const band=f=>f>=90?"傑出":f>=85?"優異":f>=80?"精品等級":"低於精品";
+
+const rows=document.getElementById("scoreRows");
+rows.innerHTML=ATTRS.map(a=>`
+<div class="row">
+ <label for="r_${a.k}">${a.zh} <span style="font-family:var(--mono);font-size:12px;color:var(--muted)">${a.en}</span></label>
+ <span class="val" id="v_${a.k}"></span>
+ <span class="word" id="w_${a.k}"></span>
+ <input type="range" id="r_${a.k}" min="-1" max="2" step="0.5" value="0">
+ <div class="ticks"><span>-1</span><span>0</span><span>1</span><span>2</span></div>
+ ${(a.inten||[]).map(n=>`<div class="inten">${n} 強度 <span class="seg" data-i="${a.k}_${n}">${[1,2,3,4,5].map(x=>`<button type="button" data-v="${x}" aria-label="${n} ${x}">${x}</button>`).join("")}</span><span>L → H</span></div>`).join("")}
+</div>`).join("");
+rows.querySelectorAll(".seg").forEach(s=>s.onclick=e=>{
+  const b=e.target.closest("button");if(!b)return;
+  S[cur].i[s.dataset.i]=+b.dataset.v;
+  s.querySelectorAll("button").forEach(x=>x.classList.toggle("on",x===b));
+});
+const fmt=v=>(v>0?"+":"")+v.toFixed(1);
+
+function loadUI(){
+  const x=S[cur];
+  sName.value=x.name;sRoast.value=x.roast;sNotes.value=x.notes;dCups.value=x.cups;dCups.max=nCups();
+  ATTRS.forEach(a=>document.getElementById("r_"+a.k).value=x.s[a.k]);
+  rows.querySelectorAll(".seg").forEach(s=>{const v=x.i[s.dataset.i]||3;s.querySelectorAll("button").forEach(b=>b.classList.toggle("on",+b.dataset.v===v))});
+  refresh();
+}
+function readUI(){
+  const x=S[cur];
+  x.name=sName.value;x.roast=+sRoast.value;x.notes=sNotes.value;x.cups=Math.max(0,+dCups.value||0);
+  ATTRS.forEach(a=>x.s[a.k]=+document.getElementById("r_"+a.k).value);
+  refresh();
+}
+function refresh(){
+  const x=S[cur];
+  ATTRS.forEach(a=>{const v=x.s[a.k];document.getElementById("v_"+a.k).textContent=fmt(v);document.getElementById("w_"+a.k).textContent=WORD(v)});
+  const r=scoreOf(x);
+  fLabel.textContent=`Final Score · 樣品 ${cur+1}`;
+  fScore.textContent=r.fin.toFixed(2);
+  fCalc.textContent=`${r.sum.toFixed(1)} + 80 − ${Math.abs(r.ded).toFixed(1)}（瑕疵 ${r.c} 杯）`;
+  fBand.textContent=band(r.fin);
+  sTabs.innerHTML=S.map((y,i)=>`<button type="button" role="tab" aria-selected="${i===cur}" data-i="${i}"><b>${i+1}</b><span>${used(y)?scoreOf(y).fin.toFixed(1):"空"}</span></button>`).join("");
+  const list=S.map((y,i)=>({i,y,f:scoreOf(y).fin})).filter(o=>used(o.y)).sort((a,b)=>b.f-a.f);
+  cmp.innerHTML=list.length?list.map((o,k)=>{const w=Math.max(2,Math.min(100,(o.f-72)/24*100));
+    return `<div class="c"><span class="rk">${k+1}</span><span class="nm"><span>#${o.i+1} ${esc(o.y.name)}</span><span class="bar"><i style="width:${w}%"></i></span></span><span class="s">${o.f.toFixed(2)}</span></div>`}).join(""):'<p class="empty">替樣品取個名稱，就會出現在這裡。</p>';
+}
+const esc=s=>s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+sTabs.onclick=e=>{const b=e.target.closest("button");if(!b)return;cur=+b.dataset.i;loadUI()};
+rows.addEventListener("input",readUI);
+[sName,sRoast,sNotes,dCups].forEach(el=>el.addEventListener("input",readUI));
+dN.addEventListener("input",()=>{dCups.max=nCups();refresh()});
+loadUI();
+
+const KEY="cupping-sheets-v2";
+let logData=(()=>{try{return JSON.parse(localStorage.getItem(KEY))||[]}catch(e){return[]}})();
+function renderLog(){
+  const el=document.getElementById("log");
+  if(!logData.length){el.innerHTML='<p class="empty">還沒有紀錄。填完這桌後按「存整張表」，會留在這台裝置的瀏覽器裡。</p>';return}
+  el.innerHTML=logData.slice().reverse().map(r=>`<div><span>${esc(r.session||"杯測")} · n=${r.n}<small>${r.date} · ${r.items.map(it=>`${esc(it.name)} <b>${it.fin.toFixed(2)}</b>`).join("、")}</small></span><span class="s">${r.items.length} 支</span></div>`).join("");
+}
+renderLog();
+saveBtn.onclick=()=>{
+  const items=S.filter(used).map(y=>({name:y.name,fin:scoreOf(y).fin}));
+  if(!items.length){saveBtn.textContent="先替樣品命名";setTimeout(()=>saveBtn.textContent="存整張表",1400);return}
+  logData.push({session:sess.value,n:nCups(),date:new Date().toLocaleDateString("zh-TW"),items});
+  try{localStorage.setItem(KEY,JSON.stringify(logData))}catch(e){}
+  renderLog();saveBtn.textContent="已存入";setTimeout(()=>saveBtn.textContent="存整張表",1200);
+};
+resetBtn.onclick=()=>{S[cur]=blank();loadUI()};
+
+// simulation
+const SIM=[
+ {title:"準備：研磨、排杯",field:"Roast Level",desc:"同一支咖啡磨好分裝 5 杯，每杯 8.25 g。先看粉的顏色，在表左側 Roast Level 記下烘焙度。"},
+ {title:"聞乾香 Dry",field:"Fragrance/Aroma · Dry",desc:"研磨後 15 分鐘內，靠近杯口聞粉。在 Dry 刻度記強度（H–L），香氣描述寫進 Notes。"},
+ {title:"注水",field:"—",t:[0,0],c:[93,93],desc:"約 93 °C 的熱水依序注滿每一杯，確保粉全部浸濕。第一杯注水時開始計時。"},
+ {title:"浸泡，形成渣蓋",field:"Fragrance/Aroma · Wet",t:[0,240],c:[93,86],desc:"咖啡粉浮到表面，結成一層渣蓋。等待期間可以先聞一次濕香。"},
+ {title:"破渣",field:"Fragrance/Aroma · Wet",t:[240,270],c:[86,85],desc:"約 4 分鐘時，用杯測匙推開渣蓋，鼻子貼近吸氣，香氣在這一刻最集中。記下 Wet 強度，再綜合乾香與濕香給分。"},
+ {title:"撈渣",field:"—",t:[270,330],c:[85,82],desc:"用兩支湯匙撈掉浮渣與泡沫。每杯之間把匙子在熱水裡涮乾淨，避免味道互相污染。"},
+ {title:"高溫啜吸",field:"Flavor · Aftertaste · Acid/Salt · Sweet/Bitter · Mouthfeel",t:[330,540],c:[82,70],desc:"約 70 °C 開始。舀一匙用力啜吸，讓咖啡霧化布滿口腔。5 杯都要喝，分數代表整支咖啡的表現。"},
+ {title:"降溫再喝",field:"Balance/Harmony · Clarity · 再確認甜感",t:[540,1200],c:[70,40],desc:"溫度下降後，甜感、酸質平衡和瑕疵都更明顯。在中低溫段判斷平衡與清晰度。"},
+ {title:"找出瑕疵杯",field:"Odd/Defect Cup(s)",t:[1200,1200],c:[40,40],desc:"第 4 杯喝起來有發酵味，跟其他 4 杯不同。在 # 寫下「4」，n=5 時每杯扣 2.0，所以是 -2.0 × 1 = -2.0。"},
+ {title:"算出 Final Score",field:"Total · Final Score",t:[1200,1200],c:[40,40],desc:"示範：八項合計 8.5，加 80，再減瑕疵 2.0，Final Score 是 86.5。這支咖啡的一列就填完了。"}
+];
+const RM=matchMedia("(prefers-reduced-motion: reduce)").matches;
+const cupEls=[0,1,2,3,4].map(k=>document.getElementById("cup"+k));
+const liqs=cupEls.map(g=>g.querySelector(".liq")), crusts=cupEls.map(g=>g.querySelector(".crust"));
+const CX=k=>48+66*k;
+const kettle=document.getElementById("kettle"), spoon=document.getElementById("spoon"), stream=document.getElementById("stream"), simSvg=document.getElementById("simSvg");
+let simTok=0, si=0, playing=false;
+const later=(ms,fn,my)=>setTimeout(()=>{if(my===simTok)fn()},RM?0:ms);
+function tweenSim(a,b,ms,fn,my){if(RM||a===b){fn(b);return}const t0=performance.now();(function f(now){if(my!==simTok)return;const p=Math.min(1,(now-t0)/ms);fn(a+(b-a)*p);if(p<1)requestAnimationFrame(f)})(t0)}
+const mmss=v=>{v=Math.round(v);return Math.floor(v/60)+":"+String(v%60).padStart(2,"0")};
+const place=(el,x,y)=>el.style.transform=`translate(${x}px,${y}px)`;
+simDots.innerHTML=SIM.map((_,i)=>`<button type="button" data-i="${i}" aria-label="第 ${i+1} 步">${i+1}</button>`).join("");
+simDots.onclick=e=>{const b=e.target.closest("button");if(b){setPlay(false);simGo(+b.dataset.i)}};
+function simGo(i){
+  const my=++simTok; si=i; const s=SIM[i];
+  simTitle.textContent=s.title; simField.textContent="填寫欄位 · "+s.field; simDesc.textContent=s.desc;
+  hS.textContent=`${i+1} / ${SIM.length}`;
+  simDots.querySelectorAll("button").forEach((b,k)=>{b.classList.toggle("on",k===i);b.classList.toggle("done",k<i)});
+  simPrev.disabled=i===0; simNext.disabled=i===SIM.length-1;
+  cupEls.forEach((g,k)=>{g.classList.remove("soft","strong","bad");g.querySelector(".lbl").textContent="#"+(k+1)});
+  liqs.forEach(l=>l.classList.toggle("full",i>=3));
+  crusts.forEach(c=>c.classList.toggle("on",i===3||i===4));
+  kettle.classList.toggle("show",i===2); stream.classList.remove("on");
+  spoon.classList.toggle("show",i>=4&&i<=6);
+  simSvg.classList.toggle("slurp",i===6);
+  if([1,3,5,6].includes(i))cupEls.forEach(g=>g.classList.add("soft"));
+  if(i>=8){cupEls[3].classList.add("bad");cupEls[3].querySelector(".lbl").textContent="#4 瑕疵"}
+  if(s.t)tweenSim(s.t[0],s.t[1],1800,v=>hT.textContent=mmss(v),my);else hT.textContent="--:--";
+  if(s.c)tweenSim(s.c[0],s.c[1],1800,v=>hC.textContent=Math.round(v)+"°C",my);else hC.textContent="—";
+  if(i===2){
+    liqs.forEach(l=>l.classList.remove("full")); place(kettle,CX(0)+6,58);
+    [0,1,2,3,4].forEach(k=>{
+      later(k*700,()=>place(kettle,CX(k),62),my);
+      later(k*700+250,()=>{stream.classList.add("on");liqs[k].classList.add("full")},my);
+      later(k*700+600,()=>stream.classList.remove("on"),my);
+    });
+  }
+  if(i===4||i===5){
+    place(spoon,CX(0),78);
+    [0,1,2,3,4].forEach(k=>{
+      later(k*650,()=>place(spoon,CX(k),78),my);
+      later(k*650+250,()=>{place(spoon,CX(k),102);if(i===4){crusts[k].classList.remove("on");cupEls[k].classList.add("strong")}},my);
+      later(k*650+500,()=>place(spoon,CX(k),78),my);
+    });
+    if(i===4)later(5*650+300,()=>cupEls.forEach(g=>{g.classList.remove("strong");g.classList.add("soft")}),my);
+  }
+  if(i===6)place(spoon,CX(1),82);
+  if(playing){
+    if(i<SIM.length-1)later(i===2||i===4||i===5?4600:4000,()=>simGo(i+1),my);
+    else later(3000,()=>setPlay(false),my);
+  }
+}
+function setPlay(p){playing=p;simPlay.textContent=p?"暫停":(si===SIM.length-1?"重新播放":"播放")}
+simPlay.onclick=()=>{if(playing){setPlay(false);simTok++;return}setPlay(true);simGo(si===SIM.length-1?0:si)};
+simPrev.onclick=()=>{setPlay(false);if(si>0)simGo(si-1)};
+simNext.onclick=()=>{setPlay(false);if(si<SIM.length-1)simGo(si+1)};
+simGo(0);
+
+// quiz
+const QS=[
+ {q:"品質尺度上，「0」代表什麼？",o:["差/不可接受","普通/可接受","好","傑出"],a:1,e:"0 是基準點 Fair/Acceptable；-1 是不可接受，2 是傑出。"},
+ {q:"八項都打 1.0、沒有瑕疵杯，最終分數是？",o:["80","84","88","96"],a:2,e:"8 × 1.0 = 8，加 80 得 88。"},
+ {q:"每支樣品 n=4 杯，其中 1 杯是瑕疵杯，扣幾分？",o:["-2.0","-2.5","-3.0","-4.0"],a:1,e:"n=4 的常數是 -2.5，乘以 1 杯 = -2.5。"},
+ {q:"為什麼杯數越多（n=5），每杯瑕疵的扣分越少？",o:["因為杯數多比較貴","因為單杯在整批中的比例變小","因為後面的杯子比較不重要","表上寫錯了"],a:1,e:"5 杯裡 1 杯有問題，代表整批的瑕疵比例比 3 杯中 1 杯低。"},
+ {q:"破渣通常在注水後多久？",o:["30 秒","1 分鐘","3–5 分鐘","10 分鐘"],a:2,e:"約 3–5 分鐘，粉層浮起形成渣蓋，推開時香氣最集中。"},
+ {q:"Acidity 刻度標在 H（很強），代表 Acid/Salt 方框一定要給高分嗎？",o:["是，越強越好","不一定，強度和品質分開評","是，要給 2.0","應該給負分"],a:1,e:"刻度記強度，方框記品質。尖銳刺口的強酸可能只有 0 或負分。"},
+ {q:"哪個項目在咖啡降溫後最值得再確認？",o:["乾香 Dry","濕香 Wet","甜感與平衡","烘焙度"],a:2,e:"降溫後甜感、酸質平衡與瑕疵更容易被察覺。"},
+ {q:"喝到雜味、土味，主要會拉低哪一項？",o:["Clarity 清晰度","Roast Level","Replication","Mouthfeel 強度"],a:0,e:"雜味讓風味不再透明分明，Clarity 會先掉分。"}
+];
+let qi=0,qs=0,order=[];
+function startQuiz(){order=QS.map((_,i)=>i).sort(()=>Math.random()-.5);qi=0;qs=0;showQ()}
+function showQ(){
+  qExp.hidden=true;qNext.hidden=true;
+  if(qi>=order.length){qProg.textContent="完成";qText.textContent=`答對 ${qs} / ${QS.length} 題`;qOpts.innerHTML="";qNext.textContent="再測一次";qNext.hidden=false;qNext.onclick=startQuiz;return}
+  const Q=QS[order[qi]];
+  qProg.textContent=`第 ${qi+1} / ${QS.length} 題 · 答對 ${qs}`;
+  qText.textContent=Q.q;
+  qOpts.innerHTML=Q.o.map((t,i)=>`<button type="button" data-i="${i}">${t}</button>`).join("");
+  qOpts.onclick=e=>{const b=e.target.closest("button");if(!b||qOpts.dataset.done==="1")return;
+    qOpts.dataset.done="1";const pick=+b.dataset.i;if(pick===Q.a)qs++;
+    qOpts.querySelectorAll("button").forEach((x,i)=>{if(i===Q.a)x.classList.add("right");else if(i===pick)x.classList.add("wrong")});
+    qExp.textContent=Q.e;qExp.hidden=false;qNext.textContent="下一題";qNext.hidden=false;qNext.onclick=()=>{qi++;showQ()}};
+  qOpts.dataset.done="0";
+}
+startQuiz();
+</script>
+
+</body></html>

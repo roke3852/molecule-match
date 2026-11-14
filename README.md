@@ -8,6 +8,16 @@
 |---|---|
 | `molecule/` | 分子消消樂 |
 | `coffee-expo/` | 2026 台灣咖啡展 逛展地圖 |
+| `fukuoka-trip/` | 福岡 5大2小 8天7夜 |
+| `spelling/` | 拼字消消樂 |
+| `molecule-reactions/` | 分子反應圖鑑 |
+| `extraction-sim/` | 萃取分子模擬器 |
+| `cupping/` | 杯測教室 |
+| `smell-training/` | 嗅覺練習日誌 |
+| `yoshi-combos/` | 耀西連招手冊 |
+| `mtx-sim/` | 小台指期模擬器 |
+| `taiflex-tracker/` | 台虹 分點追蹤 |
+| `eink-notes/` | 元太法說會筆記 |
 
 ## 新增 App
 1. 建一個新資料夾，例如 `my-app/`，把 App 的 `index.html` 放進去
