@@ -141,6 +141,20 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
 }
 .beansel{width:100%;font:inherit;font-size:15px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:7px 10px}
 .param.champ{grid-column:1 / -1}
+.scorep{display:flex;flex-direction:column;gap:12px}
+.sc-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.sc-top{display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:center}
+.sc-big{display:flex;flex-direction:column;align-items:center;min-width:84px}
+.sc-big b{font-family:var(--f-mono);font-weight:500;font-size:46px;line-height:1}
+.sc-parts{display:flex;flex-direction:column;gap:7px;min-width:0}
+.sc-part{display:grid;grid-template-columns:4.6em 1fr 2.4em;gap:8px;align-items:center;font-size:13px}
+.sc-part .bar{height:8px;border-radius:4px;background:var(--line);overflow:hidden}
+.sc-part .bar i{display:block;height:100%;background:var(--accent);border-radius:4px}
+.sc-part .v{font-family:var(--f-mono);font-size:12px;text-align:right}
+.sc-part small{grid-column:2 / -1;font-size:11px;color:var(--muted);margin-top:-5px}
+.sc-diag{margin:0;padding-left:18px;font-size:14px;display:flex;flex-direction:column;gap:4px}
+.sc-chart svg{width:100%;max-width:520px;display:block}
+@media (max-width:420px){.sc-top{grid-template-columns:1fr}.sc-big{flex-direction:row;gap:10px;align-items:baseline}}
 .champinfo{display:flex;flex-direction:column;gap:4px;margin-top:6px;font-size:13px;line-height:1.55;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px 12px}
 .champinfo b{font-size:14px}
 .champinfo .mono{font-size:12px}
@@ -314,7 +328,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
     <div class="param"><div class="row"><label for="dose" class="label">粉量</label><output id="doseOut" class="mono"></output></div><input id="dose" type="range" min="10" max="25" step="1" value="15"></div>
     <div class="param"><div class="row"><label for="ratio" class="label">粉水比</label><output id="ratioOut"></output></div><input id="ratio" type="range" min="12" max="20" step="0.5" value="16"></div>
     <div class="param"><div class="row"><label for="temp" class="label">水溫</label><output id="tempOut"></output></div><input id="temp" type="range" min="70" max="100" step="1" value="92"></div>
-    <div class="param"><div class="row"><label for="grind" class="label">研磨粒徑</label><output id="grindOut"></output></div><input id="grind" type="range" min="300" max="1200" step="50" value="550"></div>
+    <div class="param"><div class="row"><label for="grind" class="label">研磨粒徑</label><output id="grindOut"></output></div><input id="grind" type="range" min="300" max="1200" step="50" value="650"></div>
     <div class="param wide"><span class="label">沖煮方式</span><div class="seg" role="group" aria-label="沖煮方式"><button id="pPulse" aria-pressed="true">分段注水</button><button id="pCont" aria-pressed="false">一刀流</button><button id="pSwitch" aria-pressed="false">Switch</button><button id="pImm" aria-pressed="false">浸泡</button></div></div>
     <div class="param wide" id="dripParam"><span class="label">濾杯</span><div class="seg" role="group" aria-label="濾杯" id="segDrip"><button data-v="cone" aria-pressed="true">一般錐形</button><button data-v="v60" aria-pressed="false">V60</button><button data-v="orea" aria-pressed="false">OREA＋蛋糕濾紙</button></div></div>
     <div class="param plan" id="planParam">
@@ -368,6 +382,13 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
     <div class="legend" id="legend"></div>
   </section>
 
+  <section class="panel scorep" id="scorePanel" aria-label="沖煮評分">
+    <div class="sc-head"><h2>這杯的評分</h2><span class="label">以沖完的整杯計算</span></div>
+    <div class="sc-top"><div class="sc-big"><b id="scTotal">—</b><span id="scGrade" class="label"></span></div><div class="sc-parts" id="scParts"></div></div>
+    <ul class="sc-diag" id="scDiag"></ul>
+    <div class="sc-chart"><div class="key"><span>沖煮控制圖：橫軸萃取率、縱軸濃度。方框是理想區間，灰點是歷屆冠軍配方在這個模型裡的位置。</span></div><svg id="scChart" viewBox="0 0 340 230" role="img" aria-label="沖煮控制圖"></svg></div>
+  </section>
+
   <section class="charts">
     <div class="panel chartbox">
       <h2>各類分子被帶出的比例</h2>
@@ -406,7 +427,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
     <div><h3>浸泡會自己踩煞車</h3><p>水量固定，液體越濃，粉粒裡外的濃度差越小，萃取逐漸趨近平衡。好處是寬容、不易過萃；代價是同樣時間下，慢分子的比例和手沖不同，口感通常更圓、更厚。</p></div>
   </section>
 
-  <p class="fine">模型說明：有機酸與綠原酸的速度、溫度與研磨反應依《咖啡香味的科學》表 31–33（出處 JCO Seneory）校正：以浸泡、94°C、一般粒度（設為 650 μm，粗 1000 μm、細 400 μm）、5 分鐘為基準，擬合 1 / 14 分鐘、70 / 100°C、粗 / 細研磨的相對濃度，誤差多在 3% 內。書中數值未標單位，此處當作 mg/L 對照。表 31 印刷時欄位錯開一列，已依表 32、33 的 94°C／5 分鐘欄位對齊後使用。其他成分無實測，依書中圖 63 的快慢順序（味道成分快、香氣居中、高分子苦味慢）設定。每類分子以一階擴散描述，速率 ∝ 擴散常數 × (粉粒內濃度 − 周圍液體濃度)。擴散常數隨溫度呈指數變化（大分子對溫度更敏感），並隨粒徑縮小而增加；粉粒吸水約為粉重 2 倍。濾杯流速依液面高度與粒徑估算。浸泡時把液體分成「粉粒周圍的一層」與「其餘液體」，兩者靠自然對流緩慢交換；攪拌會暫時加快交換、讓粉粒外的邊界層變薄，並讓未濕透的粉團完整吸水，效果在十幾秒內衰減。香氣分子以一階揮發描述：散失速率 ∝ 揮發常數 × 液體中香氣量，隨水溫升高而增加，注水時與攪拌後暫時加快，杯中因溫度較低只算 35%。濾杯以三個係數描述：流出速度倍率（V60 1.35×、OREA 1.2×）、粉床被水均勻穿過的比例（錐形 95%、V60 90%、OREA 100%），以及沿濾紙壁繞過粉床直接流進杯中的旁流比例（錐形 4%、V60 7%、OREA 1.5%）。烘焙度依淺、中、深三個參考點內插：調整各類分子的可溶量（酸與綠原酸隨烘焙遞減、苦味大分子遞增、糖類在中焙最高），並讓深焙的整體萃取速度較快。各類分子的可溶量與速率為教學用的近似值，用來比較趨勢，不是精確的化學測量。</p>
+  <p class="fine">模型說明：有機酸與綠原酸的速度、溫度與研磨反應依《咖啡香味的科學》表 31–33（出處 JCO Seneory）校正：以浸泡、94°C、一般粒度（設為 650 μm，粗 1000 μm、細 400 μm）、5 分鐘為基準，擬合 1 / 14 分鐘、70 / 100°C、粗 / 細研磨的相對濃度，誤差多在 3% 內。書中數值未標單位，此處當作 mg/L 對照。表 31 印刷時欄位錯開一列，已依表 32、33 的 94°C／5 分鐘欄位對齊後使用。其他成分無實測，依書中圖 63 的快慢順序（味道成分快、香氣居中、高分子苦味慢）設定。每類分子以一階擴散描述，速率 ∝ 擴散常數 × (粉粒內濃度 − 周圍液體濃度)。擴散常數隨溫度呈指數變化（大分子對溫度更敏感），並隨粒徑縮小而增加；粉粒吸水約為粉重 2 倍。濾杯流速依液面高度與粒徑估算。浸泡時把液體分成「粉粒周圍的一層」與「其餘液體」，兩者靠自然對流緩慢交換；攪拌會暫時加快交換、讓粉粒外的邊界層變薄，並讓未濕透的粉團完整吸水，效果在十幾秒內衰減。香氣分子以一階揮發描述：散失速率 ∝ 揮發常數 × 液體中香氣量，隨水溫升高而增加，注水時與攪拌後暫時加快，杯中因溫度較低只算 35%。濾杯以三個係數描述：流出速度倍率（V60 1.35×、OREA 1.2×）、粉床被水均勻穿過的比例（錐形 95%、V60 90%、OREA 100%），以及沿濾紙壁繞過粉床直接流進杯中的旁流比例（錐形 4%、V60 7%、OREA 1.5%）。烘焙度依淺、中、深三個參考點內插：調整各類分子的可溶量（酸與綠原酸隨烘焙遞減、苦味大分子遞增、糖類在中焙最高），並讓深焙的整體萃取速度較快。各類分子的可溶量與速率為教學用的近似值，用來比較趨勢，不是精確的化學測量。手沖的流速與注水攪動另以 2016–2025 世界手沖冠軍配方校正：讓各配方的滴濾時間接近比賽實際時間、萃取率落在約 19% 附近。評分的理想區間參考 SCA 沖煮控制圖（EY 18–22%），濃度上限放寬到 1.55% 以涵蓋冠軍杯；風味平衡的界線也以冠軍杯在模型中的表現為準。</p>
 </div>
 </section>
 <section id="gameView" hidden>
@@ -563,6 +584,7 @@ function planSegments(plan,starts,durs){
 function grindMul(c,g){const L=Math.log;
   if(g>=650){const u=Math.min(1.4,L(g/650)/L(1000/650));return Math.exp(u*L(c.gc||1));}
   const u=Math.min(1.4,L(650/g)/L(650/400));return Math.exp(u*L(c.gfi||1));}
+var CAL={q0:.45,qn:1.1,pa:2,pd:4};  // percolation flow and pour-agitation, fitted to World Brewers Cup champion recipes (drawdown time, EY ≈ 19%)
 function simulate(method,p){
   const dose=p.dose, W=dose*p.ratio, Vg=2*dose;
   const gf=Math.pow(650/p.grind,1.3);
@@ -570,7 +592,7 @@ function simulate(method,p){
   const kb=CMP.map(c=>c.k*RS.k*gf), kk=new Array(N);
   const PERC=method==='po'&&p.pattern!=='switch';
   const DR=PERC?(DRIPPER[p.dripper]||DRIPPER.cone):{q:1,u:1,by:0};
-  const q0=.27*DR.q*Math.pow(p.grind/650,1.6);
+  const q0=CAL.q0*DR.q*Math.pow(p.grind/650,CAL.qn);
   const stirs=((method==='po'?p.stirPO:p.stirIM)||[]).slice().sort((a,b)=>a-b);
   const boost=(t,tau)=>{let b=0;for(const s of stirs){if(s>t)break;b+=Math.exp(-(t-s)/tau);}return Math.min(1,b);};
   const S0=CMP.map((c,i)=>c.avail*RS.f[i]*grindMul(c,p.grind)*dose*(p.bean&&p.bean[i]!=null?p.bean[i]:1));
@@ -596,8 +618,8 @@ function simulate(method,p){
     return (t>=40&&t<115)?rest/75:0;
   }
   const pourEnd = method==='im'?10:SW?Math.max(VW?VW[VW.length-1][1]:tsw,PL?PL[PL.length-1].e:20):PL?PL[PL.length-1].e:115;
-  const tmax = method==='im'?p.steep:480;
-  let wasClosed=false;
+  const tmax = method==='im'?p.steep:Math.max(480,pourEnd+240);
+  let wasClosed=false, pAg=0;
   const nearV=t=>(method==='im'||closed(t))?Math.min(Vb,.12*W):Vb;
   const dt=.25, rec=[];
   for(let step=0;;step++){
@@ -624,7 +646,9 @@ function simulate(method,p){
     const stirred=stirs.length&&stirs[0]<=t;
     const wetU = stirred?1 : (method==='po'&&!SW) ? (added>=.5*W?1:.82) : Math.min(1,.88+.12*t/90);
     const w=absorbed/Vg*wetU*DR.u;
-    const kf=1+.45*sb;               // thinner boundary layer around particles
+    // thinner boundary layer around particles: stirring, and in percolation the turbulence of the incoming water (decays after a pour)
+    if(method==='po'){pAg=inflow>0?1:pAg*Math.exp(-dt/Math.max(.1,CAL.pd||.1));}
+    const kf=1+.45*sb+(method==='po'?CAL.pa*pAg:0);
     if(SW){const c=closed(t);
       if(c&&!wasClosed&&Vb>0){const f=1-Math.min(Vb,.12*W)/Vb;for(let i=0;i<N;i++){const d=mn[i]*f;mn[i]-=d;mb[i]+=d;}}
       if(!c&&wasClosed){for(let i=0;i<N;i++){mn[i]+=mb[i];mb[i]=0;}}
@@ -709,12 +733,21 @@ const CHAMPS=[
   note:'96°C 悶蒸 30 g → 0:30 注 90 g → 等 30 秒，用 Melodrip 注入 80°C 的 90 g，總時間約 2:15。Solo Dripper 用一般錐形近似。',src:'https://honestcoffeeguide.com/brew-recipes/george-jinyang-peng-2025-wbc/'},
 ];
 
+// Perceived cup profile (0–10 per flavor) from a brew result {tds, c (g/L), share}.
+// Share windows [p05, median, p95] come from a sweep of everyday brewing parameters with the calibrated model.
+const PROFILE_SH={acid:[0.04763,0.1411,0.2581,0],sugar:[0.2024,0.333,0.4351,2],cga:[0.02937,0.09479,0.1709,3],bitter:[0.184,0.3887,0.7041,4],fruity:[0.0005324,0.005202,0.01734,5],roasty:[0.001375,0.003868,0.01345,6]};
+function cupProfile(r){const Lg=Math.log,cl=v=>Math.max(0,Math.min(10,v));
+  const dim=k=>{const [a,m,b,i]=PROFILE_SH[k];const s=k==='bitter'?r.share[4]+0.8*r.share[1]:r.share[i];return 5+8*Lg(s/m)/Lg(b/a)+1.5*Lg(r.tds/1.25);};
+  const B=cl(dim('bitter'));
+  return {tds:cl((r.tds-0.7)/(1.9-0.7)*10),acid:cl(dim('acid')),sweet:cl(dim('sugar')-0.3*Math.max(0,B-6)),bitter:B,astr:cl(dim('cga')),
+    fruity:cl(dim('fruity')),roasty:cl(dim('roasty')),caf:cl(r.c[1]*10)};}
+
 </script>
 <script>
 (function(){
 if(typeof document==='undefined')return;
 const $=id=>document.getElementById(id);
-const P={dose:15,ratio:16,temp:92,grind:550,pattern:'pulse',plan:null,swOpen:120,swMode:'closeFirst',swClose:30,dripper:'cone',steep:240,roast:3,beanId:null,prePO:'bloom',preIM:'none',xPO:[],xIM:[]};
+const P={dose:15,ratio:16,temp:92,grind:650,pattern:'pulse',plan:null,swOpen:120,swMode:'closeFirst',swClose:30,dripper:'cone',steep:240,roast:3,beanId:null,prePO:'bloom',preIM:'none',xPO:[],xIM:[]};
 let simPO,simIM,tMax,t=0,playing=false,speed=10,focus=null,last=0;
 let tok={};
 function readTok(){const cs=getComputedStyle(document.documentElement);
@@ -780,6 +813,63 @@ function simP(){const b=curBean();return Object.assign({},P,b?{roast:b.roast,bea
     h+='<option value="'+b.id+'">'+b.name+'｜'+b.sub+'｜'+ROAST_NAME(b.roast)+'</option>';});
   sel.innerHTML=h+'</optgroup>';
   sel.addEventListener('change',e=>{P.beanId=e.target.value||null;run();});})();
+// ---- brew score: ideal EY/TDS zones follow the SCA brewing chart, widened to include the champion cups in this model;
+// flavor-balance limits are set so the 2016–2025 champion recipes land inside them (sweet ≥5.5, bitter ≤6.5, astringency ≤7.5, acidity 3.5–8) ----
+const IDEAL={ey:[18,22],tds:[1.2,1.55]};
+function cupOf(D,V,dose,S0){const tot=D.reduce((a,b)=>a+b,0);if(V<5||tot<=0)return null;
+  return {tds:tot/V*100,ey:tot/dose*100,c:D.map(x=>x/V*1000),share:D.map(x=>x/tot),aroma:(D[5]+D[6])/(S0[5]+S0[6])};}
+function bandScore(v,[lo,hi],w){const d=v<lo?lo-v:v>hi?v-hi:0;return Math.exp(-((d/w)**2));}
+function brewScore(cup){
+  const pf=cupProfile(cup);
+  const ex=(v,lim,up)=>Math.exp(-((Math.max(0,up?v-lim:lim-v)/2.2)**2));
+  const B=[{v:ex(pf.sweet,5.5,false),m:'甜感不足（甜 '+pf.sweet.toFixed(1)+'）：試試糖分較多的豆子（蜜處理、日曬），或讓萃取停在中段。'},
+    {v:ex(pf.bitter,6.5,true),m:'苦味突出（苦 '+pf.bitter.toFixed(1)+'）：降低水溫或磨粗一點，少帶出苦味大分子。'},
+    {v:ex(pf.astr,7.5,true),m:'澀感明顯（澀 '+pf.astr.toFixed(1)+'）：綠原酸比例偏高，淺焙豆萃取太短時常見；可以稍微拉長萃取。'},
+    {v:ex(pf.acid,8,true),m:'酸質很尖（酸 '+pf.acid.toFixed(1)+'）：可以提高水溫或磨細，讓甜感跟上。'},
+    {v:ex(pf.acid,3.5,false),m:'酸質不足（酸 '+pf.acid.toFixed(1)+'）：喝起來較平；淺一點的烘焙或低一點的水溫能保留酸。'}];
+  const bal=B.reduce((a,x)=>a+x.v,0)/B.length;
+  const aro=Math.max(0,Math.min(1,(cup.aroma-.4)/.35));
+  const parts=[{k:'萃取率',s:bandScore(cup.ey,IDEAL.ey,2.5),w:35,v:cup.ey.toFixed(1)+'%',n:'理想 18–22%'},
+    {k:'濃度',s:bandScore(cup.tds,IDEAL.tds,.15),w:25,v:cup.tds.toFixed(2)+'%',n:'理想 1.20–1.55%'},
+    {k:'風味平衡',s:bal,w:30,v:'',n:'甜 '+pf.sweet.toFixed(1)+'・酸 '+pf.acid.toFixed(1)+'・苦 '+pf.bitter.toFixed(1)+'・澀 '+pf.astr.toFixed(1)},
+    {k:'香氣保留',s:aro,w:10,v:Math.round(cup.aroma*100)+'%',n:'花果香、烘焙香留在杯中的比例'}];
+  const total=parts.reduce((a,p)=>a+p.s*p.w,0)/parts.reduce((a,p)=>a+p.w,0)*100;
+  const diag=[],eyS=parts[0].s,tdS=parts[1].s;
+  if(eyS<.9&&cup.ey<IDEAL.ey[0])diag.push('萃取不足（EY '+cup.ey.toFixed(1)+'%）：容易偏酸、單薄。可以磨細一點、提高水溫，或拉長接觸時間。');
+  if(eyS<.9&&cup.ey>IDEAL.ey[1])diag.push('萃取過度（EY '+cup.ey.toFixed(1)+'%）：容易苦、澀、口感乾。可以磨粗一點、降低水溫，或縮短接觸時間。');
+  if(tdS<.9&&cup.tds<IDEAL.tds[0])diag.push('濃度偏淡（TDS '+cup.tds.toFixed(2)+'%）：把粉水比調濃一點，例如 1:16 → 1:15。');
+  if(tdS<.9&&cup.tds>IDEAL.tds[1])diag.push('濃度偏濃（TDS '+cup.tds.toFixed(2)+'%）：加一點水，例如 1:15 → 1:16。');
+  B.filter(x=>x.v<.8).sort((a,b)=>a.v-b.v).slice(0,2).forEach(x=>diag.push(x.m));
+  if(aro<.4)diag.push('香氣散失較多：水溫高、注水和攪拌次數多，都會讓香氣揮發。');
+  if(!diag.length)diag.push(total>=85?'萃取率、濃度和風味平衡都在理想範圍，這杯很好。':'各項都只差一點，微調研磨或水溫試試。');
+  return {total,parts,diag,pf};
+}
+const gradeOf=t=>t>=90?'冠軍水準':t>=80?'很好':t>=70?'不錯':t>=60?'普通':'需要調整';
+let CHAMP_PTS=null;
+function champPoints(){if(CHAMP_PTS)return CHAMP_PTS;
+  CHAMP_PTS=CHAMPS.map(c=>{const b=BEANS.find(x=>x.id===c.bean);
+    const s=simulate('po',{dose:c.dose,ratio:c.water/c.dose,temp:c.temp,grind:c.grind,roast:b.roast,bean:b.f,pattern:c.pattern,dripper:c.dripper,plan:c.plan,planT:c.planT,planD:c.planD,planTemp:c.planTemp||null,valveWins:c.valveWins||null,swMode:'closeFirst',swOpen:c.valveWins?c.valveWins[0][1]:120,stirPO:[]});
+    const r=s.rec[s.rec.length-1];const cup=cupOf(r.cupM,r.cupV,c.dose,s.S0);return {y:c.year,tds:cup.tds,ey:cup.ey,score:brewScore(cup).total};});
+  return CHAMP_PTS;}
+function renderScore(){
+  const im=isIM(),sim=im?simIM:simPO,r=sim.rec[sim.rec.length-1];
+  const cup=im?cupOf(r.m,r.Vb,sim.dose,sim.S0):cupOf(r.cupM,r.cupV,sim.dose,sim.S0);
+  if(!cup){$('scTotal').textContent='—';return;}
+  const S=brewScore(cup);
+  $('scTotal').textContent=Math.round(S.total);$('scGrade').textContent=gradeOf(S.total);
+  $('scParts').innerHTML=S.parts.map(p=>'<div class="sc-part"><span>'+p.k+'</span><div class="bar"><i style="width:'+Math.round(p.s*100)+'%"></i></div><span class="v">'+Math.round(p.s*100)+'</span><small>'+(p.v?p.v+'・':'')+p.n+'</small></div>').join('');
+  $('scDiag').innerHTML=S.diag.map(d=>'<li>'+d+'</li>').join('');
+  const X0=12,X1=28,Y0=.8,Y1=2.0,L=40,T=22,W=290,H=172;
+  const px=v=>L+(Math.max(X0,Math.min(X1,v))-X0)/(X1-X0)*W, py=v=>T+H-(Math.max(Y0,Math.min(Y1,v))-Y0)/(Y1-Y0)*H;
+  let g='<rect x="'+px(IDEAL.ey[0])+'" y="'+py(IDEAL.tds[1])+'" width="'+(px(IDEAL.ey[1])-px(IDEAL.ey[0]))+'" height="'+(py(IDEAL.tds[0])-py(IDEAL.tds[1]))+'" fill="var(--accent)" opacity=".12" stroke="var(--accent)" stroke-opacity=".5"/>';
+  for(let v=12;v<=28;v+=4)g+='<line x1="'+px(v)+'" x2="'+px(v)+'" y1="'+T+'" y2="'+(T+H)+'" stroke="var(--line)"/><text x="'+px(v)+'" y="'+(T+H+14)+'" font-size="10" text-anchor="middle" fill="var(--muted)">'+v+'%</text>';
+  for(let v=.8;v<=2.001;v+=.4)g+='<line x1="'+L+'" x2="'+(L+W)+'" y1="'+py(v)+'" y2="'+py(v)+'" stroke="var(--line)"/><text x="'+(L-5)+'" y="'+(py(v)+3)+'" font-size="10" text-anchor="end" fill="var(--muted)">'+v.toFixed(1)+'</text>';
+  g+='<text x="'+(L+W)+'" y="'+(T+H+27)+'" font-size="10" text-anchor="end" fill="var(--muted)">萃取率 EY</text><text x="4" y="11" font-size="10" fill="var(--muted)">TDS %</text>';
+  champPoints().forEach(c=>{g+='<circle cx="'+px(c.ey)+'" cy="'+py(c.tds)+'" r="3.5" fill="var(--muted)" opacity=".7"/><text x="'+(px(c.ey)+5)+'" y="'+(py(c.tds)-4)+'" font-size="8.5" fill="var(--muted)">'+"'"+String(c.y).slice(2)+'</text>';});
+  g+='<circle cx="'+px(cup.ey)+'" cy="'+py(cup.tds)+'" r="7" fill="var(--bitter)" stroke="var(--panel)" stroke-width="2"/><text x="'+(px(cup.ey)+10)+'" y="'+(py(cup.tds)+4)+'" font-size="11" font-weight="700" fill="var(--ink)">這杯 '+Math.round(S.total)+'</text>';
+  $('scChart').innerHTML=g;
+}
+
 let champSnap=null;
 const champKey=()=>JSON.stringify(PFIELDS.map(k=>P[k]));
 (function(){const sel=$('champSel');
@@ -803,7 +893,7 @@ function showChamp(c){const b=BEANS.find(x=>x.id===c.bean),box=$('champInfo');
 function run(){
   if(!P.plan)P.plan=evenPlan(3);
   labels(); presetTimes(); renderPlan();
-  const PP=simP(); simPO=simulate('po',PP); simIM=simulate('im',PP);
+  const PP=simP(); simPO=simulate('po',PP); simIM=simulate('im',PP); renderScore();
   tMax=isIM()?simIM.end:simPO.end;
   rememberParams();
   $('scrub').max=tMax; if(t>tMax)t=tMax; $('scrub').value=t;
@@ -1040,7 +1130,7 @@ function snap(kind){
   const totNV=NONVOL.reduce((a,i)=>a+D[i],0);
   return {tds:V>5?tot/V*100:null,ey:tot/sim.dose*100,drive:s.drive,mix:totNV>0?D.map((v,i)=>CMP[i].vol?null:v/totNV*100):null,
     aroma:VOL.map(i=>[D[i]/sim.S0[i]*100,s.lost[i]/sim.S0[i]*100,D[i]*1000]),conc:V>5?[D[0]/V*1e6,D[3]/V*1e6]:null,
-    t:Math.min(t,sim.end),done:s.done,extra:(kind==='po'?P.xPO:P.xIM).length};
+    t:Math.min(t,sim.end),done:s.done,extra:(kind==='po'?P.xPO:P.xIM).length,score:(c=>c?Math.round(brewScore(c).total):null)(cupOf(D,V,sim.dose,sim.S0))};
 }
 function save(){
   seq++;
@@ -1055,7 +1145,7 @@ function resCell(r,kind,p){
   const d=document.createElement('div');d.className='res';
   const stir=STIRN[kind][kind==='po'?p.prePO:p.preIM]+(r.extra?' +'+r.extra+'次':'');
   const when=r.done?'完成':fmtT(r.t)+' 時';
-  d.innerHTML='<div class="nums"><span><small>TDS</small>'+(r.tds==null?'—':r.tds.toFixed(2)+'%')+'</span><span><small>EY</small>'+r.ey.toFixed(1)+'%</span><span><small>梯度</small>'+Math.round(r.drive*100)+'%</span></div>';
+  d.innerHTML='<div class="nums"><span><small>TDS</small>'+(r.tds==null?'—':r.tds.toFixed(2)+'%')+'</span><span><small>EY</small>'+r.ey.toFixed(1)+'%</span><span><small>梯度</small>'+Math.round(r.drive*100)+'%</span>'+(r.score!=null?'<span><small>評分</small><b>'+r.score+'</b></span>':'')+'</div>';
   const bar=document.createElement('div');bar.className='mix';
   const pct=document.createElement('div');pct.className='pct';
   if(r.mix)CMP.forEach((c,i)=>{if(c.vol||r.mix[i]==null)return;const e=document.createElement('i');e.style.width=r.mix[i]+'%';e.style.background='var(--'+c.id+')';e.title=c.name+' '+r.mix[i].toFixed(0)+'%';bar.appendChild(e);
@@ -1141,39 +1231,33 @@ const SAY={
 };
 const LEVELS=[
  {name:'阿明',role:'上班族',color:'#7a4b2a',quote:'早上開會前一定要一杯濃的，要有烤堅果、焦糖那種香氣。酸的我真的不行。',
-  want:{tds:[8,2],roasty:[8,2],acid:[2,2],bitter:[6,1]},target:60,best:94,
+  want:{tds:[8,2],roasty:[8,2],acid:[2,2],bitter:[6,1]},target:82,best:94,
   hint:'深焙豆烘焙香多、酸少。粉水比往 1:13 左右調，杯子會更濃。',ok:'就是這個味道，今天的會議撐得住了！'},
  {name:'小美',role:'大學生',color:'#c23f78',quote:'我喜歡像果汁一樣的咖啡，酸酸亮亮、有莓果和花香。淡一點沒關係，苦的不要。',
-  want:{acid:[7,2],fruity:[8,2],bitter:[2,2],tds:[4,1]},target:65,best:97,
+  want:{acid:[7,2],fruity:[8,2],bitter:[2,2],tds:[4,1]},target:70,best:99,
   hint:'淺焙的衣索比亞、肯亞豆花果香和酸最多。水溫低一點、研磨粗一點，慢慢才出來的苦味大分子就少。',ok:'哇，好像在喝莓果茶，好喜歡！'},
  {name:'林奶奶',role:'老顧客',color:'#6b7f3a',quote:'醫生說我胃不好，酸的要少喝。我喜歡甜甜順順的，不要刮舌頭。',
-  want:{acid:[2,2],sweet:[7,2],astr:[2,2],bitter:[4,1],tds:[5,1]},target:70,best:85,
+  want:{acid:[2,2],sweet:[7,2],astr:[2,2],bitter:[4,1],tds:[5,1]},target:72,best:88,
   hint:'巴西、曼特寧這類豆子酸和綠原酸都少。澀感來自綠原酸，它出得很快；把萃取拉長，杯中其他成分變多，澀的比例就下降。',ok:'順口又甜，這杯我可以慢慢喝完。'},
  {name:'Leo',role:'甜點師',color:'#d86d1f',quote:'要搭我的檸檬塔：甜感要夠，帶一點明亮的酸和果香，尾韻乾淨，不能苦也不能澀。',
-  want:{sweet:[8,3],bitter:[3,2],astr:[3,2],acid:[5,1],fruity:[7,1],tds:[5,1]},target:70,best:82,
+  want:{sweet:[8,3],bitter:[3,2],astr:[3,2],acid:[5,1],fruity:[7,1],tds:[5,1]},target:75,best:89,
   hint:'糖出得比酸慢、比苦快。萃取在中段停下來甜最突出，挑本身糖多的豆子也有幫助。',ok:'甜感撐得住檸檬塔的酸，完美搭配。'},
  {name:'Kevin',role:'拿鐵控',color:'#5e4a3a',quote:'我要加一大杯牛奶，咖啡要夠濃才不會被蓋掉。烘焙香要明顯，但別澀。',
-  want:{tds:[9,3],roasty:[8,2],astr:[3,2],bitter:[7,1],sweet:[6,1]},target:78,best:94,
+  want:{tds:[9,3],roasty:[8,2],astr:[3,2],bitter:[7,1],sweet:[6,1]},target:90,best:99,
   hint:'濃度主要看粉水比，1:12 左右才撐得住牛奶。深焙豆提供烘焙香，研磨細一點讓萃取更完整。',ok:'加了牛奶還是很有存在感，讚！'},
  {name:'Iris',role:'夜貓作家',color:'#24859d',quote:'晚上趕稿想喝杯香的，但咖啡因一多就睡不著。最好有花香，不要太濃。',
-  want:{caf:[1,3],fruity:[7,2],tds:[4,1],bitter:[3,1]},target:82,best:99,
+  want:{caf:[1,3],fruity:[7,2],tds:[4,1],bitter:[3,1]},target:80,best:91,
   hint:'咖啡因幾乎一沖就出來，靠手法很難壓低。看看豆架上有沒有特別的豆子。',ok:'好香，而且今晚應該睡得著。謝謝你！'},
  {name:'王老師',role:'杯測評審',color:'#7f55b5',quote:'我只看平衡：中等濃度、酸甜清楚、花果香乾淨，苦澀都要收得住，烘焙香點到為止。',
-  want:{tds:[6,1],acid:[6,1],sweet:[8,1],bitter:[3,1],astr:[3,1],fruity:[8,1],roasty:[4,1]},target:70,best:78,
-  hint:'七個面向都要顧到。日曬豆糖和花果香都多；水溫低、研磨細，能保留香氣又不會萃出太多苦。',ok:'乾淨、平衡、有層次。這杯我給高分。'},
+  want:{tds:[6,1],acid:[6,1],sweet:[8,1],bitter:[3,1],astr:[3,1],fruity:[8,1],roasty:[4,1]},target:74,best:86,
+  hint:'七個面向都要顧到。日曬豆糖和花果香都多；研磨放粗一點、分段注水，讓苦味不要跟著一起出來。',ok:'乾淨、平衡、有層次。這杯我給高分。'},
  {name:'陳先生',role:'老饕',color:'#3b2619',quote:'我只喝深焙，但最討厭焦苦和澀。要濃、要甜、烘焙香飽滿，酸一點點就好。',
-  want:{tds:[7,1],sweet:[7,1],bitter:[5,1],astr:[2,1],roasty:[8,1],acid:[2,1]},target:72,best:80,
-  hint:'深焙豆苦味大分子多，萃太深就焦苦。降一點水溫，或用較細研磨配短接觸，讓甜先出來、苦還沒追上。',ok:'深焙卻不焦苦，難得。你有兩下子。'},
+  want:{tds:[7,1],sweet:[7,1],bitter:[5,1],astr:[2,1],roasty:[8,1],acid:[2,1]},target:76,best:88,
+  hint:'深焙豆苦味大分子多，萃太深就焦苦。研磨放粗一點、用流速快的濾杯縮短接觸，讓甜先出來、苦還沒追上。',ok:'深焙卻不焦苦，難得。你有兩下子。'},
 ];
 
 // ---- flavor perception ----
-const Lg=Math.log, cl=v=>Math.max(0,Math.min(10,v));
-const SH={acid:[0.0476,0.1331,0.2835,0],sugar:[0.1991,0.3214,0.4312,2],cga:[0.0328,0.0888,0.1893,3],bitter:[0.1087,0.3478,0.666,4],fruity:[0.0006,0.0034,0.0141,5],roasty:[0.002,0.0063,0.0172,6]};
-function dim(r,k){const [a,m,b,i]=SH[k];let s=r.share[i];if(k==='bitter')s=r.share[4]+0.8*r.share[1];
-  return 5+8*Lg(s/m)/Lg(b/a)+1.5*Lg(r.tds/1.25);}
-function profile(r){const B=cl(dim(r,'bitter'));
-  return {tds:cl((r.tds-0.7)/(1.9-0.7)*10),acid:cl(dim(r,'acid')),sweet:cl(dim(r,'sugar')-0.3*Math.max(0,B-6)),bitter:B,astr:cl(dim(r,'cga')),
-    fruity:cl(dim(r,'fruity')),roasty:cl(dim(r,'roasty')),caf:cl(r.c[1]*10)};}
+const profile=cupProfile;
 const part=(v,t)=>Math.exp(-(((v-t)/2.6)**2));
 function score(pf,want){let s=0,w=0;for(const k in want){const [t,wt]=want[k];s+=wt*part(pf[k],t);w+=wt;}return 100*s/w;}
 
