@@ -208,6 +208,33 @@ textarea:focus,input:focus,select:focus{outline:none;border-color:var(--maple)}
 .node.sel circle,.node.sel rect{stroke:#ffd166;stroke-width:4}
 .nn{font-size:13px;font-weight:900;fill:#fff}.nn.s{font-size:9.5px}
 .nl{font-size:10.5px;fill:#4a3f38;font-weight:700;paint-order:stroke;stroke:#fffdf9;stroke-width:4px}
+.gsvg.ovw{overflow:hidden;border-radius:18px;background:#e3eef5;touch-action:manipulation}
+.land{fill:#f3ebe1;stroke:#e2d5c6;stroke-width:1.5}
+.land-t{fill:#d4c4b2;font-weight:900;letter-spacing:6px;text-anchor:start!important}
+.reg{cursor:pointer}.reg>rect{fill:#fffdf9;stroke:var(--c);opacity:1;transition:opacity .2s}
+.reg.dim{opacity:.35}.reg.foc>rect{fill:#fffaf5}
+.rn{fill:#2b2420;font-weight:900;text-anchor:start!important}.rc{fill:#9a8a7d;text-anchor:start!important}
+.sub>rect{fill:color-mix(in srgb,var(--c) 7%,#fff);stroke:var(--c);stroke-opacity:.35;stroke-dasharray:3 3}
+.reg.foc .sub{cursor:pointer}.reg.foc .sub>rect{stroke-opacity:.8;stroke-dasharray:none;fill:color-mix(in srgb,var(--c) 10%,#fff)}
+.reg.foc .sub.empty>rect{fill:#faf6f1;stroke-opacity:.25;stroke-dasharray:3 3}
+.sub.dim{opacity:.4}.sub.foc>rect{fill:#fff;stroke-opacity:1}
+.sn{fill:#2b2420;font-weight:900}.sc2{fill:#8a7a6d}
+.pl{cursor:pointer}.pl circle,.pl rect{stroke:#fff;filter:drop-shadow(0 1px 1px rgba(0,0,0,.25))}
+.pl.sel circle,.pl.sel rect{stroke:#ffd166}
+.dd.mini text{display:none}
+.zooming text{opacity:0}
+.gsvg text{transition:opacity .15s}
+.crumb{display:flex;align-items:center;gap:4px;padding:0 2px 8px;flex-wrap:wrap;font-size:13px}
+.crumb button{padding:4px 10px;border-radius:999px;background:#fff;border:1.5px solid var(--line);font-weight:700;color:var(--sub)}
+.crumb button.on{color:var(--ink);border-color:var(--ink)}
+.crumb span{color:var(--sub)}
+.crumb .back{margin-left:auto;background:var(--ink);color:#fff;border-color:var(--ink)}
+.grow{display:flex;gap:10px;align-items:center;padding:10px 6px;border-top:1px solid var(--line);cursor:pointer}
+.grow>i{flex:0 0 12px;height:34px;border-radius:6px}
+.gdots{display:flex;gap:3px;flex-wrap:wrap;justify-content:flex-end;max-width:120px}
+.gdots em{font-style:normal;width:20px;height:20px;border-radius:50%;color:#fff;font-size:10.5px;font-weight:900;display:grid;place-items:center}
+.go{color:var(--sub);font-size:20px}
+.clr{margin-left:8px;font-size:11.5px;padding:2px 8px;border-radius:999px;border:1px solid var(--line);background:#fff;color:var(--sub)}
 #ginfo{margin:10px 12px 0;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:6px 12px}
 .gi-h{font-weight:900;font-size:14px;padding:8px 0 4px}
 .gi-e{font-size:13px;color:var(--sub);padding:10px 0}
@@ -634,37 +661,103 @@ const LL={'福岡空港 国際線ターミナル':[33.5848,130.4443],'Hotel Mont
  'ブルーウィングもじ':[33.9478,130.9627],'小倉城':[33.8844,130.8743],'小倉駅':[33.8868,130.8822],'大濠公園':[33.5861,130.3764],'櫛田神社':[33.5931,130.4107],'博多駅 マイング':[33.5900,130.4199],
  '福岡塔':[33.5933,130.3515],'福岡タワー':[33.5933,130.3515]};
 const HOTEL=[33.5848,130.4047];
-const AREAS=[
- {k:'umi',n:'海之中道',x:105,y:62,t:ll=>ll[0]>33.63&&ll[1]<130.5},
- {k:'moji',n:'門司港・小倉',x:300,y:62,t:ll=>ll[0]>33.8},
- {k:'momo',n:'百道・巨蛋',x:52,y:170,t:ll=>ll[1]<130.37},
- {k:'ten',n:'天神・大濠',x:135,y:178,t:ll=>ll[1]<130.405&&ll[1]<131},
- {k:'haka',n:'博多・中洲・機場',x:228,y:178,t:ll=>ll[1]<130.5&&ll[0]>33.55},
- {k:'dazai',n:'太宰府',x:205,y:285,t:ll=>ll[1]<130.6&&ll[0]<33.56&&ll[0]>33.45},
- {k:'yufu',n:'由布院・動物園',x:300,y:370,t:ll=>ll[1]>131}];
-const areaOf=ll=>AREAS.find(a=>a.t(ll))||AREAS[3];
 const llOf=s=>LL[s.q]||LL[s.n]||null;
 let mapDay=-1,mapSel=null;
 const trunc=(t,n)=>t.length>n?t.slice(0,n)+'…':t;
 function renderMapChips(){$('#mchips').innerHTML=`<button class="${mapDay<0?'on':''}" data-d="-1" style="--c:#2b2420">全部</button>`+DAYS.map((d,i)=>`<button class="${i===mapDay?'on':''}" data-d="${i}" style="--c:${d.c}">D${i+1} ${d.date.split('/')[1]}日</button>`).join('')}
-function drawMap(){renderMapChips();mapDay<0?drawOverview():drawDayMap()}
+function drawMap(){renderMapChips();if(mapDay<0){if(!$('#ovsvg'))vb=targetVB();drawOverview()}else drawDayMap()}
+const REG=[
+ {k:'kita',n:'北九州・門司',x:226,y:20,w:126,h:138,c:'#8f2d56',t:ll=>ll[0]>33.8,subs:[
+   {k:'kara',n:'唐戶市場',x:292,y:62,w:52,h:34,t:ll=>ll[1]<130.955&&ll[0]>33.95},
+   {k:'moji',n:'門司港',x:286,y:102,w:58,h:50,t:ll=>ll[0]>33.92},
+   {k:'koku',n:'小倉',x:234,y:106,w:46,h:46,t:()=>true}]},
+ {k:'oita',n:'大分',x:236,y:292,w:116,h:132,c:'#3f7d5c',t:ll=>ll[1]>131,subs:[
+   {k:'zoo',n:'九州自然動物園',x:244,y:340,w:100,h:34,t:ll=>ll[0]>33.3},
+   {k:'yufu',n:'由布院',x:244,y:380,w:100,h:36,t:()=>true}]},
+ {k:'daz',n:'太宰府',x:118,y:258,w:104,h:92,c:'#b5651d',t:ll=>ll[0]<33.55&&ll[1]<131,subs:[
+   {k:'tenman',n:'天滿宮・參道',x:126,y:302,w:54,h:42,t:ll=>ll[1]<130.54},
+   {k:'kama',n:'竈門神社',x:184,y:302,w:30,h:42,t:()=>true}]},
+ {k:'fuk',n:'福岡市區',x:10,y:40,w:202,h:202,c:'#c8442b',t:()=>true,subs:[
+   {k:'umi',n:'海之中道',x:112,y:64,w:92,h:40,t:ll=>ll[0]>33.63},
+   {k:'momo',n:'百道・巨蛋',x:18,y:112,w:62,h:66,t:ll=>ll[1]<130.37},
+   {k:'ten',n:'天神・大濠',x:86,y:112,w:60,h:66,t:ll=>ll[1]<130.405},
+   {k:'haka',n:'博多・中洲',x:152,y:112,w:52,h:66,t:ll=>ll[1]<130.43},
+   {k:'air',n:'機場・LaLaport',x:112,y:186,w:92,h:48,t:()=>true}]}];
+const WORLD=[0,0,360,440];
+let zr=null,zs=null,zp=null,vb=WORLD.slice(),vbAnim=0;
+function allPts(){const out=[];DAYS.forEach((_,day)=>D(day).stops.forEach((s,i)=>{const ll=llOf(s);if(!ll)return;const r=REG.find(R=>R.t(ll));const sb=r.subs.find(x=>x.t(ll));out.push({day,i,s,ll,r:r.k,sb:sb.k,pk:ll[0].toFixed(4)+','+ll[1].toFixed(4)})}));return out}
+const regBy=k=>REG.find(r=>r.k===k),subBy=k=>{for(const r of REG){const s=r.subs.find(x=>x.k===k);if(s)return s}};
+function fitVB(b,pad){const A=WORLD[2]/WORLD[3];let w=b.w+pad*2,h=b.h+pad*2;if(w/h<A)w=h*A;else h=w/A;return[b.x+b.w/2-w/2,b.y+b.h/2-h/2,w,h]}
+function targetVB(){if(zs)return fitVB(subBy(zs),Math.max(subBy(zs).w,subBy(zs).h)*.18);if(zr)return fitVB(regBy(zr),10);return WORLD.slice()}
+function dayDots(days,cx,cy,r,k,cls){return days.map((d,j)=>{const x=cx-(days.length-1)*r*1.15+j*r*2.3;return `<g class="dd${cls||''}" data-d="${d}"><circle cx="${x}" cy="${cy}" r="${r}" fill="${DAYS[d].c}" style="stroke-width:${1.5*k}px"/><text x="${x}" y="${cy+r*.38}" style="font-size:${r*1.1}px">${d+1}</text></g>`}).join('')}
+function placesIn(sb,pts,k){const box=subBy(sb);const g={};pts.filter(p=>p.sb===sb).forEach(p=>{(g[p.pk]=g[p.pk]||{ll:p.ll,items:[]}).items.push(p)});
+ const arr=Object.entries(g).map(([pk,v])=>({pk,...v}));if(!arr.length)return arr;
+ const la=arr.map(a=>a.ll[0]),lo=arr.map(a=>a.ll[1]);const px=box.w*.2,py=box.h*.24;
+ const mnla=Math.min(...la),mxla=Math.max(...la),mnlo=Math.min(...lo),mxlo=Math.max(...lo);
+ arr.forEach(a=>{a.x=box.x+px+(mxlo>mnlo?(a.ll[1]-mnlo)/(mxlo-mnlo):.5)*(box.w-2*px);a.y=box.y+py+(mxla>mnla?(mxla-a.ll[0])/(mxla-mnla):.5)*(box.h-2*py)});
+ const sx=70*k,sy=40*k;for(let it=0;it<200;it++){for(let a=0;a<arr.length;a++)for(let b=a+1;b<arr.length;b++){const A=arr[a],B=arr[b];let dx=B.x-A.x,dy=B.y-A.y;if(Math.abs(dx)<1e-6&&Math.abs(dy)<1e-6){dx=.1;dy=.2}
+  const e=Math.hypot(dx/sx,dy/sy);if(e<1){const p=(1-e)/2/e*.5;A.x-=dx*p;A.y-=dy*p;B.x+=dx*p;B.y+=dy*p}}
+  arr.forEach(a=>{a.x=Math.max(box.x+12*k,Math.min(box.x+box.w-12*k,a.x));a.y=Math.max(box.y+14*k,Math.min(box.y+box.h-16*k,a.y))})}
+ return arr}
 function drawOverview(){
- const by={};AREAS.forEach(a=>by[a.k]={a,items:[]});
- DAYS.forEach((_,day)=>D(day).stops.forEach(s=>{const ll=llOf(s);if(ll)by[areaOf(ll).k].items.push({day,s})}));
- let g=`<svg viewBox="0 0 360 430" class="gsvg"><rect x="0" y="0" width="360" height="110" rx="18" class="sea"/><text x="16" y="24" class="sea-t">〜 海 〜</text>`;
- // links from hotel area
- const ten=AREAS[3];AREAS.forEach(a=>{if(a!==ten&&by[a.k].items.length)g+=`<line x1="${ten.x}" y1="${ten.y}" x2="${a.x}" y2="${a.y}" class="lnk"/>`});
- AREAS.forEach(a=>{const it=by[a.k].items;if(!it.length)return;const days=[...new Set(it.map(x=>x.day))];const r=26+Math.min(14,it.length*1.3);
-  g+=`<g class="area${mapSel===a.k?' sel':''}" data-a="${a.k}"><circle cx="${a.x}" cy="${a.y}" r="${r}"/>
-  <text x="${a.x}" y="${a.y-3}" class="an">${a.n.split('・')[0]}</text><text x="${a.x}" y="${a.y+12}" class="ac">${it.length} 站</text>`;
-  days.forEach((d,j)=>{const ang=-Math.PI/2+(j-(days.length-1)/2)*0.42;const bx=a.x+Math.cos(ang)*(r+2),by2=a.y+Math.sin(ang)*(r+2);
-   g+=`<g class="dd" data-d="${d}"><circle cx="${bx}" cy="${by2}" r="10" fill="${DAYS[d].c}"/><text x="${bx}" y="${by2+3.5}">${d+1}</text></g>`});
+ const T=targetVB(),k=T[2]/WORLD[2],pts=allPts();
+ let svg=$('#ovsvg');if(!svg){$('#gmap').innerHTML=`<div class="crumb" id="crumb"></div><svg id="ovsvg" class="gsvg ovw" viewBox="${vb.join(' ')}"></svg>`;svg=$('#ovsvg')}
+ let g=`<rect x="-400" y="-400" width="1200" height="1300" class="sea"/>
+ <rect x="4" y="30" width="352" height="406" rx="34" class="land"/><text x="22" y="424" class="land-t" style="font-size:${15}px">九 州</text>
+ <text x="18" y="20" class="sea-t" style="font-size:${11}px">〜 玄界灘 〜</text>`;
+ const fuk=regBy('fuk'),hx=fuk.subs[2].x+fuk.subs[2].w/2,hy=fuk.subs[2].y+fuk.subs[2].h/2;
+ if(!zr)REG.forEach(R=>{if(R.k!=='fuk')g+=`<line x1="${hx}" y1="${hy}" x2="${R.x+R.w/2}" y2="${R.y+R.h/2}" class="lnk"/>`});
+ REG.forEach(R=>{const rp=pts.filter(p=>p.r===R.k);const foc=zr===R.k,dim=zr&&!foc;
+  g+=`<g class="reg${foc?' foc':''}${dim?' dim':''}" data-r="${R.k}"><rect x="${R.x}" y="${R.y}" width="${R.w}" height="${R.h}" rx="${foc?6:14}" style="--c:${R.c};stroke-width:${2*k}px"/>`;
+  if(!zr){g+=`<text x="${R.x+12}" y="${R.y+22}" class="rn" style="font-size:15px">${R.n}</text><text x="${R.x+12}" y="${R.y+38}" class="rc" style="font-size:11px">${rp.length} 站・點我放大</text>`}
+  else if(foc&&!zs){g+=`<text x="${R.x+6*k+2}" y="${R.y+16*k+2}" class="rn" style="font-size:${14*k}px">${R.n}</text>`}
+  R.subs.forEach(S=>{const sp=rp.filter(p=>p.sb===S.k);const sf=zs===S.k;
+   g+=`<g class="sub${sf?' foc':''}${zs&&!sf?' dim':''}${sp.length?'':' empty'}" data-s="${S.k}" data-r="${R.k}"><rect x="${S.x}" y="${S.y}" width="${S.w}" height="${S.h}" rx="${(zs?4:8)*k}" style="--c:${R.c};stroke-width:${1.4*k}px"/>`;
+   if(foc&&!zs){const cx=S.x+S.w/2,cy=S.y+S.h/2;g+=`<text x="${cx}" y="${cy-2*k}" class="sn" style="font-size:${12*k}px">${S.n}</text><text x="${cx}" y="${cy+12*k}" class="sc2" style="font-size:${10*k}px">${sp.length} 站</text>`;
+    const ds=[...new Set(sp.map(p=>p.day))].sort((a,b)=>a-b);if(ds.length)g+=dayDots(ds,cx,S.y+S.h-9*k,6.5*k,k)}
+   if(sf){g+=`<text x="${S.x+5*k}" y="${S.y+13*k}" class="rn" style="font-size:${12*k}px;text-anchor:start">${S.n}</text>`;
+    placesIn(S.k,pts,k).forEach(P=>{const nm=trunc(P.items[0].s.n.replace(/[【】]/g,'').replace(/^(前往|先上山：|搭乘?|抵達|輕鬆返回|啟程舒適返回)/,''),7);const sel=zp===P.pk;
+     const ds=[...new Set(P.items.map(p=>p.day))].sort((a,b)=>a-b);const isH=P.ll[0]===HOTEL[0]&&P.ll[1]===HOTEL[1];
+     g+=`<g class="pl${sel?' sel':''}" data-p="${P.pk}">${isH?`<rect x="${P.x-10*k}" y="${P.y-10*k}" width="${20*k}" height="${20*k}" rx="${5*k}" fill="#2b2420" style="stroke-width:${2.5*k}px"/>`:`<circle cx="${P.x}" cy="${P.y}" r="${10*k}" fill="${R.c}" style="stroke-width:${2.5*k}px"/>`}
+     <text x="${P.x}" y="${P.y+3.6*k}" class="nn" style="font-size:${isH?9*k:11*k}px">${isH?'🏨':P.items.length}</text>
+     <text x="${P.x}" y="${P.y+21*k}" class="nl" style="font-size:${10*k}px;stroke-width:${3.5*k}px">${esc(isH?'飯店':nm)}</text>${dayDots(ds,P.x,P.y-15*k,4.2*k,k,' mini')}</g>`})}
+   g+='</g>'});
+  if(!zr){const ds=[...new Set(rp.map(p=>p.day))].sort((a,b)=>a-b);g+=dayDots(ds,R.x+R.w/2,R.y+R.h-14,8.5,1)}
   g+='</g>'});
- g+=`<g class="htl"><rect x="${ten.x-9}" y="${ten.y+30}" width="18" height="18" rx="4"/><text x="${ten.x}" y="${ten.y+43}">🏨</text></g></svg>`;
- $('#gmap').innerHTML=g;
- const a=mapSel&&by[mapSel];
- $('#ginfo').innerHTML=a?`<div class="gi-h">${a.a.n}</div>`+a.items.map(({day,s})=>itemRow(day,s)).join(''):'<div class="gi-e">點圓圈看那一區有哪些行程；點小色點直接看那一天。</div>';
+ if(!zs)g+=`<g class="htl" pointer-events="none"><rect x="${hx-7*k}" y="${hy+(zr?16:22)*k}" width="${14*k}" height="${14*k}" rx="${3*k}"/><text x="${hx}" y="${hy+(zr?26:32)*k}" style="font-size:${8*k}px">🏨</text></g>`;
+ svg.innerHTML=g;
+ // breadcrumb
+ const R=zr&&regBy(zr),S=zs&&subBy(zs);
+ $('#crumb').innerHTML=`<button data-z="0" class="${!zr?'on':''}">全部</button>${R?`<span>›</span><button data-z="1" class="${!zs?'on':''}">${R.n}</button>`:''}${S?`<span>›</span><button class="on">${S.n}</button>`:''}${zr?'<button class="back" data-z="up">↩ 返回</button>':''}`;
+ // info
+ let h='';
+ if(!zr){h=`<div class="gi-e">點大區塊放大，再點小區塊看裡面的景點；點彩色小圓點直接看那一天的路線。</div>`+REG.slice().reverse().map(R=>{const rp=pts.filter(p=>p.r===R.k);const ds=[...new Set(rp.map(p=>p.day))].sort((a,b)=>a-b);
+  return `<div class="grow" data-r="${R.k}"><i style="background:${R.c}"></i><div class="gi-m"><b>${R.n}</b><span>${rp.length} 站</span></div><div class="gdots">${ds.map(d=>`<em style="background:${DAYS[d].c}">${d+1}</em>`).join('')}</div><span class="go">›</span></div>`}).join('')}
+ else if(!zs){h=`<div class="gi-h" style="color:${R.c}">${R.n}</div>`+R.subs.map(S=>{const sp=pts.filter(p=>p.sb===S.k);if(!sp.length)return'';const ds=[...new Set(sp.map(p=>p.day))].sort((a,b)=>a-b);
+  return `<div class="grow" data-s="${S.k}"><i style="background:${R.c}"></i><div class="gi-m"><b>${S.n}</b><span>${sp.length} 站</span></div><div class="gdots">${ds.map(d=>`<em style="background:${DAYS[d].c}">${d+1}</em>`).join('')}</div><span class="go">›</span></div>`}).join('')}
+ else{let sp=pts.filter(p=>p.sb===zs);if(zp)sp=sp.filter(p=>p.pk===zp);sp.sort((a,b)=>a.day-b.day||a.i-b.i);
+  h=`<div class="gi-h" style="color:${R.c}">${S.n}${zp?`・${esc(sp[0]?sp[0].s.n:'')}<button class="clr" data-z="clr">看全部</button>`:''}</div>`+sp.map(p=>itemRow(p.day,p.s)).join('')}
+ $('#ginfo').innerHTML=h;
+ animVB(T);
 }
+function animVB(T){const svg=$('#ovsvg');if(!svg)return;const from=vb.slice();if(from.every((v,i)=>Math.abs(v-T[i])<.01)){svg.setAttribute('viewBox',T.join(' '));return}
+ const id=++vbAnim,t0=performance.now(),dur=420;svg.classList.add('zooming');
+ const step=now=>{if(id!==vbAnim)return;let t=Math.min(1,(now-t0)/dur);const e=t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;vb=from.map((v,i)=>v+(T[i]-v)*e);svg.setAttribute('viewBox',vb.join(' '));
+  if(t<1)requestAnimationFrame(step);else svg.classList.remove('zooming')};requestAnimationFrame(step)}
+function zoomTo(r,s,p){zr=r;zs=s;zp=p||null;drawOverview()}
+$('#gmap').addEventListener('click',e=>{
+ const cz=e.target.closest('[data-z]');if(cz){const z=cz.dataset.z;if(z==='0')zoomTo(null,null);else if(z==='1')zoomTo(zr,null);else if(z==='up')zs?zoomTo(zr,null):zoomTo(null,null);return}
+ const dd=e.target.closest('.dd');if(dd&&!(zs&&dd.classList.contains('mini'))){mapDay=+dd.dataset.d;mapSel=null;drawMap();return}
+ if(mapDay>=0){const nd=e.target.closest('.node');if(nd){const items=JSON.parse($('#gmap').dataset.nodes)[+nd.dataset.n];mapSel=items[0];drawMap();
+  const el=document.querySelector(`.gi[data-i="${mapSel}"]`);if(el)el.scrollIntoView({block:'nearest',behavior:'smooth'})}return}
+ const pl=e.target.closest('.pl');if(pl){zp=zp===pl.dataset.p?null:pl.dataset.p;drawOverview();return}
+ const sb=e.target.closest('.sub');
+ if(zr&&!zs&&sb&&sb.dataset.r===zr&&!sb.classList.contains('empty')){zoomTo(zr,sb.dataset.s);return}
+ const rg=e.target.closest('.reg');
+ if(zs){if(!sb||sb.dataset.s!==zs)zoomTo(zr,null);return}
+ if(zr){if(!rg||rg.dataset.r!==zr)zoomTo(null,null);return}
+ if(rg)zoomTo(rg.dataset.r,null)});
+
 function layoutDay(day){const st=D(day).stops;const nodes=[],idx={};
  const pts=st.map(s=>llOf(s));let last=HOTEL;
  st.forEach((s,i)=>{let ll=pts[i];if(!ll){ll=[last[0]-0.003,last[1]+0.003]}last=ll;const key=ll[0].toFixed(3)+','+ll[1].toFixed(3);
@@ -679,7 +772,7 @@ function layoutDay(day){const st=D(day).stops;const nodes=[],idx={};
  for(let it=0;it<200;it++){for(let a=0;a<nodes.length;a++)for(let b=a+1;b<nodes.length;b++){const A=nodes[a],B=nodes[b];let dx=B.x-A.x,dy=B.y-A.y;if(Math.abs(dx)<.01&&Math.abs(dy)<.01){dx=.5;dy=1}
   const e=Math.hypot(dx/108,dy/56);if(e<1){const p=(1-e)/2/e*.5;A.x-=dx*p;A.y-=dy*p;B.x+=dx*p;B.y+=dy*p}}nodes.forEach(clamp)}
  return {nodes,W,H,order:st.map((_,i)=>nodes.find(n=>n.items.includes(i)))}}
-function drawDayMap(){const day=mapDay,d=D(day),col=DAYS[day].c;const {nodes,W,H,order}=layoutDay(day);
+function drawDayMap(){const day=mapDay,d=D(day),col=DAYS[day].c;const {nodes,W,H,order}=layoutDay(day);vbAnim++;
  let g=`<svg viewBox="0 0 ${W} ${H}" class="gsvg"><rect x="1" y="1" width="${W-2}" height="${H-2}" rx="18" class="pad"/>`;
  const path=order.filter((n,i)=>i===0||n!==order[i-1]);
  for(let i=1;i<path.length;i++){const a=path[i-1],b=path[i];g+=`<line x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}" stroke="${col}" class="route"/>`;
@@ -697,11 +790,9 @@ function itemRow(day,s,i,on){const ll=llOf(s);const nav=ll?`https://www.google.c
  return `<div class="gi${on?' on':''}" ${i!=null?`data-i="${i}"`:''}><i style="background:${DAYS[day].c}">${i!=null?i+1:'D'+(day+1)}</i><div class="gi-m"><div class="gi-t">${esc(s.t)}${i==null?`・Day ${day+1}`:''}</div><b>${esc(s.n)}</b><span>${trIcon(s.tr)[0]} ${esc(s.tr)}</span></div>
  <div class="gi-a"><a href="${nav}" target="_blank" rel="noopener">🧭</a><a href="#trip" data-go="${day}" data-id="${s.id}">📋</a></div></div>`}
 $('#mchips').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;mapDay=+b.dataset.d;mapSel=null;drawMap()});
-$('#gmap').addEventListener('click',e=>{const dd=e.target.closest('.dd');if(dd){mapDay=+dd.dataset.d;mapSel=null;drawMap();return}
- const ar=e.target.closest('.area');if(ar){mapSel=mapSel===ar.dataset.a?null:ar.dataset.a;drawMap();return}
- const nd=e.target.closest('.node');if(nd){const items=JSON.parse($('#gmap').dataset.nodes)[+nd.dataset.n];mapSel=items[0];drawMap();
-  const el=document.querySelector(`.gi[data-i="${mapSel}"]`);if(el)el.scrollIntoView({block:'nearest',behavior:'smooth'})}});
-$('#ginfo').addEventListener('click',e=>{if(e.target.closest('a'))return;const r=e.target.closest('.gi[data-i]');if(!r)return;mapSel=+r.dataset.i;drawMap()});
+$('#ginfo').addEventListener('click',e=>{if(e.target.closest('a'))return;const cz=e.target.closest('[data-z="clr"]');if(cz){zp=null;drawOverview();return}
+ const gr=e.target.closest('.grow');if(gr){gr.dataset.r?zoomTo(gr.dataset.r,null):zoomTo(zr,gr.dataset.s);return}
+const r=e.target.closest('.gi[data-i]');if(!r)return;mapSel=+r.dataset.i;drawMap()});
 document.addEventListener('click',e=>{const a=e.target.closest('[data-go]');if(!a)return;curDay=+a.dataset.go;S.set('day',curDay);renderChips();renderDay();
  setTimeout(()=>{const el=document.querySelector(`.stop[data-id="${a.dataset.id}"]`);if(el){el.classList.add('open');el.scrollIntoView({block:'center'})}},80)});
 function showMap(day){if(day!=null){mapDay=day;mapSel=null}location.hash='map'}
