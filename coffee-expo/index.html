@@ -89,7 +89,7 @@ nav.tabs button.on{color:var(--accent);border-color:var(--accent);font-weight:70
 <body>
 <header id="hdr">
   <h1>☕ 2026 台灣咖啡展 · 南港1館 4F</h1>
-  <div class="sub">點展位看介紹 · 打勾記錄已逛 · 深咖啡底＝名店；靛藍粗框＋★＝我的重點／知名品牌</div>
+  <div class="sub">雙指縮放地圖 · 點展位看介紹 · 打勾記錄已逛 · 深咖啡底＝名店；靛藍粗框＋★＝我的重點／知名品牌</div>
   <div class="prog"><span id="progtx">已逛 0 / 0</span><div class="bar"><i id="progbar"></i></div></div>
 </header>
 <nav class="tabs">
@@ -673,9 +673,57 @@ function showView(v){
 }
 document.querySelectorAll("nav.tabs button").forEach(b=>b.onclick=()=>showView(b.dataset.v));
 
-// zoom
-document.getElementById("zi").onclick=()=>{zoom=Math.min(4,zoom*1.4);setZoom();};
-document.getElementById("zo").onclick=()=>{zoom=Math.max(1,zoom/1.4);setZoom();};
+// zoom（按鈕＋雙指縮放＋觸控板／Ctrl 滾輪）
+const ZMIN=1, ZMAX=6;
+const wrapEl=document.getElementById("mapwrap");
+function zoomAt(nz, cx, cy){
+  nz=Math.min(ZMAX,Math.max(ZMIN,nz));
+  const r=wrapEl.getBoundingClientRect();
+  if(cx==null){cx=r.left+r.width/2; cy=r.top+r.height/2;}
+  const ox=cx-r.left, oy=cy-r.top;
+  const oldW=svg.clientWidth||1;
+  const px=wrapEl.scrollLeft+ox, py=wrapEl.scrollTop+oy;
+  zoom=nz; setZoom();
+  const k=(svg.clientWidth||1)/oldW;
+  wrapEl.scrollLeft=px*k-ox; wrapEl.scrollTop=py*k-oy;
+}
+document.getElementById("zi").onclick=()=>zoomAt(zoom*1.4);
+document.getElementById("zo").onclick=()=>zoomAt(zoom/1.4);
+let pinch=null, pinchRaf=0, suppressClick=false;
+function tdist(t){return Math.hypot(t[0].clientX-t[1].clientX,t[0].clientY-t[1].clientY);}
+function tmid(t){return [(t[0].clientX+t[1].clientX)/2,(t[0].clientY+t[1].clientY)/2];}
+wrapEl.addEventListener("touchstart",e=>{
+  if(e.touches.length===2){
+    const [mx,my]=tmid(e.touches);
+    pinch={d:tdist(e.touches),z:zoom,mx,my}; suppressClick=true;
+  }
+},{passive:true});
+wrapEl.addEventListener("touchmove",e=>{
+  if(!pinch||e.touches.length!==2) return;
+  e.preventDefault();
+  const d=tdist(e.touches), [mx,my]=tmid(e.touches);
+  cancelAnimationFrame(pinchRaf);
+  pinchRaf=requestAnimationFrame(()=>{
+    // 兩指移動＝拖曳地圖
+    wrapEl.scrollLeft-=mx-pinch.mx; wrapEl.scrollTop-=my-pinch.my;
+    pinch.mx=mx; pinch.my=my;
+    zoomAt(pinch.z*d/pinch.d, mx, my);
+  });
+},{passive:false});
+wrapEl.addEventListener("touchend",e=>{
+  if(e.touches.length<2) pinch=null;
+  if(e.touches.length===0) setTimeout(()=>suppressClick=false,350);
+});
+// 縮放手勢結束時不要誤觸攤位
+wrapEl.addEventListener("click",e=>{ if(suppressClick){e.stopPropagation();e.preventDefault();} },true);
+// Safari 的 gesture 事件：避免整頁被放大
+["gesturestart","gesturechange"].forEach(ev=>wrapEl.addEventListener(ev,e=>e.preventDefault(),{passive:false}));
+// 電腦：觸控板雙指縮放／Ctrl＋滾輪
+wrapEl.addEventListener("wheel",e=>{
+  if(!e.ctrlKey) return;
+  e.preventDefault();
+  zoomAt(zoom*Math.exp(-e.deltaY*0.01), e.clientX, e.clientY);
+},{passive:false});
 window.addEventListener("resize",setZoom);
 
 // reset
