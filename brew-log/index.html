@@ -129,6 +129,34 @@ const SEED = [{
   },
   summary:"整體酸甜平衡，TDS 偏高，帶來一點後段負面風味。可能因為注水不穩定，悶蒸偏離預期，產生些微苦味。"
 },{
+  id:"2026-11-14-0", date:"2026-11-14", title:"布爾 30cl 60-40 96", recipe:"60-40",
+  bean:"衣索比亞 西達摩 布爾薩 蒙塔莎處理廠 萊吉斯 74185", process:"日曬",
+  roast:"淺", agtron:80,
+  grinder:"Comandante C40 MK4", clicks:30, micron:900,
+  temp:96, dripper:"Orea Brewer（OREA-O）", filter:"93 蛋糕濾紙",
+  dose:12, water:200.6, yield:179.0, tds:1.23, ey:18.3, time:134,
+  pours:[
+    {ml:60, rate:4, wait:40},
+    {ml:40, rate:4, wait:30},
+    {ml:50, rate:4, wait:30},
+    {ml:50, rate:4, wait:30}
+  ],
+  endNote:"2:14 流乾",
+  potAroma:"甜桃香（相較 50-50、40-60 的草本香，香氣更正面）",
+  taste:{
+    hot:{aroma:0, aromaBack:0, acid:3.5, sweet:3.5, bitter:0, body:2.5, astr:0, finish:1,
+         finishNote:"回甘持久（喉嚨）",
+         desc:"60-40 注水高度的酸甜平衡，圓潤的酸甜滋味，口感比茶感再厚一點，順滑易入喉、清爽。無明顯負面風味。（相較之下 40-60 是明亮的酸值，酸大於甜）"},
+    warm:{label:"中溫", aroma:1, aromaNote:"前：焦糖", aromaBack:1, aromaBackNote:"柑橘香", acid:3.5, sweet:3.5, bitter:0, body:2.5, astr:0.5, finish:1,
+         finishNote:"喉嚨回甘",
+         desc:"依舊酸甜平衡，body 稍微下降，茶感、清爽。"},
+    room:{aroma:1, aromaNote:"前：焦糖", aromaBack:null, acid:3, sweet:3, bitter:0, body:2, astr:0, finish:1,
+         finishNote:"喉嚨回甘",
+         desc:"常溫下的檸檬酸清爽明亮，依舊酸甜平衡，口感清淡。"}
+  },
+  summary:"60-40 整體酸感下降，酸甜較為平衡，在此研磨度下依舊沒有太明顯負面風味，打入好球帶的風味。",
+  next:["維持 60-40，研磨調細到 29 格，看能否在維持酸甜平衡下增加整體風味濃郁度"]
+},{
   id:"2026-11-14-a", date:"2026-11-14", title:"布爾 29cl 60-40 96", recipe:"60-40",
   bean:"衣索比亞 西達摩 布爾薩 蒙塔莎處理廠 萊吉斯 74185", process:"日曬",
   roast:"淺", agtron:80,
@@ -158,7 +186,7 @@ const SEED = [{
   summary:"高溫風味偏正向，常溫偏中性。60-40 酸甜平衡的特性還在，但後段風味增加，稍微降低了整體風味的乾淨度。",
   next:["調整回 30 格，維持 60-40","注水由「繞繞中中」改為「繞繞繞中」，增加中間的擾動度，看能否增加一點 body"]
 }];
-SEED[0].recipe="60-40"; SEED[0].title="布爾 30cl 60-40 96"; SEED[0].taste.warm.label="中常溫";
+SEED[0].recipe="60-40"; SEED[0].title="記錄 10/26/26"; SEED[0].taste.warm.label="中常溫";
 
 const LS = "roke-brewlog-v1";
 let store = {added:[], deleted:[], edited:{}};
@@ -242,13 +270,15 @@ function controlChart(list, opts={}){
   ZONES.forEach(([n,i,j])=>{ s+=`<text class="zone" x="${X(cx[i])}" y="${Y(cy[j])+5}" text-anchor="middle" ${i==1&&j==1?'style="fill:rgba(124,203,185,.6)"':''}>${n}</text>`; });
   s+=`<text class="ax" x="${L+pw/2}" y="${H-2}" text-anchor="middle" style="font-family:var(--f-body)">萃取率 EY (%)</text>`;
   s+=`<text class="ax" transform="translate(10 ${T+ph/2}) rotate(-90)" text-anchor="middle" style="font-family:var(--f-body)">TDS (%)</text>`;
-  list.forEach(b=>{
+  const placed=[];
+  list.slice().sort((a,b)=>b.tds-a.tds).forEach(b=>{
     if(b.ey==null||b.tds==null) return;
     const px=X(Math.min(x1,Math.max(x0,b.ey))), py=Y(Math.min(y1,Math.max(y0,b.tds)));
     const hl = opts.focus===b.id;
     if(hl) s+=`<line x1="${L}" x2="${px}" y1="${py}" y2="${py}" stroke="#fff" stroke-dasharray="3 3" opacity=".7"/><line x1="${px}" x2="${px}" y1="${py}" y2="${T+ph}" stroke="#fff" stroke-dasharray="3 3" opacity=".7"/>`;
     s+=`<g data-open="${b.id}" style="cursor:pointer"><circle cx="${px}" cy="${py}" r="16" fill="transparent"/><circle cx="${px}" cy="${py}" r="${hl?8:7}" fill="${beanColor(b.bean)}" stroke="#121a2a" stroke-width="2"/></g>`;
-    if(!opts.focus) s+=`<text class="ax" x="${px}" y="${py+20}" text-anchor="middle" style="fill:var(--ink)">${b.date.slice(5).replace("-","/")}${b.clicks!=null?` ${b.clicks}格`:""}</text>`;
+    if(!opts.focus){ let ly=py+4; const lx=px+11; while(placed.some(q=>Math.abs(q[0]-lx)<80&&Math.abs(q[1]-ly)<13)) ly+=13; placed.push([lx,ly]);
+      s+=`<text class="ax" x="${lx}" y="${ly}" style="paint-order:stroke;stroke:#172034;stroke-width:3px;fill:var(--ink)">${b.date.slice(5).replace("-","/")}${b.clicks!=null?` ${b.clicks}格`:""}</text>`; }
   });
   return s+`</svg>`;
 }
