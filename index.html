@@ -8,50 +8,225 @@
 <meta name="theme-color" content="#3b2a20">
 <title>Roke 的 App</title>
 <style>
-:root{--bg:#f6f1ea;--card:#fff;--ink:#2b2018;--mute:#8a7a6c;--line:#e4d9cc;--accent:#3b2a20}
+:root{--bg:#f6f1ea;--card:#fff;--ink:#2b2018;--mute:#8a7a6c;--line:#e4d9cc;--accent:#3b2a20;--star:#f5a524;--new:#e5484d}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;padding:calc(20px + env(safe-area-inset-top)) 16px calc(24px + env(safe-area-inset-bottom))}
 main{max-width:640px;margin:0 auto}
 h1{font-size:26px;margin:4px 0 4px}
-.sub{color:var(--mute);font-size:14px;margin-bottom:20px}
+.sub{color:var(--mute);font-size:14px;margin-bottom:14px}
+.bar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:14px}
+.bar label{font-size:13px;color:var(--mute)}
+select,.btn{font:inherit;font-size:14px;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:10px;padding:7px 10px}
+.btn{cursor:pointer}
+.btn.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+.notice{background:#fff4e5;border:1px solid #f3d5a8;color:#7a4b12;border-radius:12px;padding:10px 12px;font-size:14px;margin-bottom:14px;display:flex;gap:8px;align-items:flex-start}
+.notice b{color:var(--new)}
+.notice .x{margin-left:auto;background:none;border:0;font-size:16px;color:#7a4b12;cursor:pointer;padding:0 2px}
+h2{font-size:15px;color:var(--mute);margin:18px 2px 8px;font-weight:600}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
-a.app{display:flex;gap:14px;align-items:center;text-decoration:none;color:inherit;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;transition:transform .12s,box-shadow .12s}
-a.app:active{transform:scale(.98)}
-a.app:hover{box-shadow:0 4px 14px rgba(59,42,32,.12)}
-.ic{width:56px;height:56px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:30px;flex:none}
+.app{position:relative;display:flex;gap:14px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 44px 14px 14px;transition:transform .12s,box-shadow .12s}
+.app:hover{box-shadow:0 4px 14px rgba(59,42,32,.12)}
+.app:active{transform:scale(.98)}
+.app a.cover{position:absolute;inset:0;border-radius:16px;z-index:1}
+.ic{width:56px;height:56px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:30px;flex:none;position:relative}
+.dot{position:absolute;top:-4px;right:-4px;background:var(--new);color:#fff;font-size:10px;font-weight:700;border-radius:8px;padding:1px 5px;border:2px solid var(--card)}
 .nm{font-size:17px;font-weight:700}
 .ds{font-size:13px;color:var(--mute);margin-top:3px;line-height:1.4}
-.tag{display:inline-block;font-size:11px;padding:1px 7px;border-radius:8px;background:#efe6da;color:#6b5646;margin-top:6px}
-footer{margin-top:28px;font-size:12px;color:var(--mute);text-align:center}
+.meta{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;align-items:center}
+.tag{display:inline-block;font-size:11px;padding:1px 7px;border-radius:8px;background:#efe6da;color:#6b5646}
+.ver{font-size:11px;padding:1px 7px;border-radius:8px;background:#eef2f6;color:#475569;font-variant-numeric:tabular-nums}
+.ver.new{background:#fde8e8;color:var(--new);font-weight:700}
+.note{font-size:12px;color:#7a4b12;background:#fff4e5;border-radius:8px;padding:4px 8px;margin-top:6px;line-height:1.4}
+.star{position:absolute;top:8px;right:8px;z-index:2;width:34px;height:34px;border:0;background:none;font-size:22px;line-height:1;cursor:pointer;color:#cbbfb2;border-radius:10px}
+.star.on{color:var(--star)}
+.mv{position:absolute;right:8px;bottom:8px;z-index:2;display:none;flex-direction:column;gap:4px}
+.editing .mv{display:flex}
+.editing .star{display:none}
+.editing a.cover{display:none}
+.mv button{width:32px;height:28px;border:1px solid var(--line);background:#faf6f0;border-radius:8px;font-size:13px;cursor:pointer}
+.mv button:disabled{opacity:.3}
+.editing .app{padding-right:52px}
+.empty{color:var(--mute);font-size:13px;padding:6px 2px}
+footer{margin-top:28px;font-size:12px;color:var(--mute);text-align:center;line-height:1.6}
 </style>
 </head>
 <body>
 <main>
   <h1>Roke 的 App</h1>
-  <div class="sub">點一下就能打開</div>
-  <div class="grid" id="grid"></div>
-  <footer>新增 App：把它放進一個新資料夾，再在這頁的 APPS 清單加一行。</footer>
+  <div class="sub">點一下就能打開・點 ☆ 加入我的最愛</div>
+
+  <div class="bar">
+    <label for="sort">排序</label>
+    <select id="sort">
+      <option value="default">預設</option>
+      <option value="recent">最近使用</option>
+      <option value="freq">最常使用</option>
+      <option value="updated">最近更新</option>
+      <option value="name">名稱</option>
+      <option value="custom">自訂順序</option>
+    </select>
+    <button class="btn" id="editBtn" hidden>調整順序</button>
+  </div>
+
+  <div id="notice"></div>
+  <div id="list"></div>
+
+  <footer>新增或更新 App：在這頁的 APPS 清單加一行或改 ver / updated / note。<br>版本號一變，首頁就會在那個 App 上顯示「新版」。</footer>
 </main>
 <script>
-// 新增 App：在這裡加一行 { path, name, desc, icon, color, tag }
+/* 新增 App：加一行 { path, name, desc, icon, color, tag, ver, updated, note }
+   更新 App：把 ver 往上加、updated 改成今天、note 寫這次改了什麼 */
 const APPS = [
-  { path:"molecule/",    name:"分子消消樂",          desc:"分子模型配對遊戲，認識官能基與分子結構", icon:"🧪", color:"#dbeafe", tag:"遊戲" },
-  { path:"coffee-expo/", name:"2026 台灣咖啡展 逛展地圖", desc:"南港1館 4F 互動平面圖、名店標示、已逛紀錄與筆記", icon:"☕", color:"#efe0c8", tag:"11/13–11/16" },
-  { path:"fukuoka-trip/", name:"福岡 5大2小 8天7夜", desc:"每日行程時間軸、地圖導航、待辦打包清單、計程車與買票日文卡", icon:"🍁", color:"#fbe0d6", tag:"11/21–11/28" },
-  { path:"spelling/",           name:"拼字消消樂",     desc:"英文拼字配對遊戲，點單字聽發音與字母", icon:"🔤", color:"#fef3c7", tag:"遊戲" },
-  { path:"molecule-reactions/", name:"分子反應圖鑑",   desc:"用分子模型看懂光合作用、水果香氣、咖啡風味等化學反應", icon:"⚗️", color:"#dcfce7", tag:"學習" },
-  { path:"extraction-sim/",     name:"萃取分子模擬器", desc:"模擬手沖咖啡萃取時各種風味分子的溶出", icon:"🫖", color:"#ede0d4", tag:"咖啡" },
-  { path:"cupping/",            name:"杯測教室",       desc:"咖啡杯測流程與風味評分練習", icon:"☕", color:"#f5e6d3", tag:"咖啡" },
-  { path:"smell-training/",     name:"嗅覺練習日誌",   desc:"香氣材料嗅覺練習與紀錄", icon:"👃", color:"#fce7f3", tag:"練習" },
-  { path:"yoshi-combos/",       name:"耀西連招手冊",   desc:"任天堂明星大亂鬥 耀西連招整理", icon:"🦖", color:"#d9f99d", tag:"遊戲" },
-  { path:"mtx-sim/",            name:"小台指期模擬器", desc:"模擬下單、保證金、風險指標，可手動控制指數", icon:"📈", color:"#e0e7ff", tag:"投資" },
-  { path:"eink-notes/",         name:"元太法說會筆記", desc:"元太 法說會重點整理", icon:"📝", color:"#f1f5f9", tag:"投資" }
+  { path:"molecule/",    name:"分子消消樂",          desc:"分子模型配對遊戲，認識官能基與分子結構", icon:"🧪", color:"#dbeafe", tag:"遊戲",
+    ver:"1.1", updated:"2026-11-14", note:"卡片改用示性式，看得出官能基；配對成功另顯示分子式" },
+  { path:"coffee-expo/", name:"2026 台灣咖啡展 逛展地圖", desc:"南港1館 4F 互動平面圖、名店標示、已逛紀錄與筆記", icon:"☕", color:"#efe0c8", tag:"11/13–11/16",
+    ver:"1.5", updated:"2026-11-14", note:"釘選按鈕放大；我的位置改成紅色大頭針＋攤位紅框高亮" },
+  { path:"fukuoka-trip/", name:"福岡 5大2小 8天7夜", desc:"每日行程時間軸、地圖導航、待辦打包清單、計程車與買票日文卡", icon:"🍁", color:"#fbe0d6", tag:"11/21–11/28",
+    ver:"1.6", updated:"2026-11-14", note:"地圖加入大區塊，點一下放大分解成小區塊再看景點" },
+  { path:"spelling/",           name:"拼字消消樂",     desc:"英文拼字配對遊戲，點單字聽發音與字母", icon:"🔤", color:"#fef3c7", tag:"遊戲", ver:"1.0", updated:"2026-11-14" },
+  { path:"molecule-reactions/", name:"分子反應圖鑑",   desc:"用分子模型看懂光合作用、水果香氣、咖啡風味等化學反應", icon:"⚗️", color:"#dcfce7", tag:"學習", ver:"1.0", updated:"2026-11-14" },
+  { path:"extraction-sim/",     name:"萃取分子模擬器", desc:"模擬手沖咖啡萃取時各種風味分子的溶出", icon:"🫖", color:"#ede0d4", tag:"咖啡", ver:"1.0", updated:"2026-11-14" },
+  { path:"cupping/",            name:"杯測教室",       desc:"咖啡杯測流程與風味評分練習", icon:"☕", color:"#f5e6d3", tag:"咖啡", ver:"1.0", updated:"2026-11-14" },
+  { path:"smell-training/",     name:"嗅覺練習日誌",   desc:"香氣材料嗅覺練習與紀錄", icon:"👃", color:"#fce7f3", tag:"練習", ver:"1.0", updated:"2026-11-14" },
+  { path:"yoshi-combos/",       name:"耀西連招手冊",   desc:"任天堂明星大亂鬥 耀西連招整理", icon:"🦖", color:"#d9f99d", tag:"遊戲", ver:"1.0", updated:"2026-11-14" },
+  { path:"mtx-sim/",            name:"小台指期模擬器", desc:"模擬下單、保證金、風險指標，可手動控制指數", icon:"📈", color:"#e0e7ff", tag:"投資", ver:"1.0", updated:"2026-11-14" },
+  { path:"eink-notes/",         name:"元太法說會筆記", desc:"元太 法說會重點整理", icon:"📝", color:"#f1f5f9", tag:"投資", ver:"1.0", updated:"2026-11-14" }
 ];
-document.getElementById("grid").innerHTML = APPS.map(a=>`
-  <a class="app" href="${a.path}">
-    <div class="ic" style="background:${a.color}">${a.icon}</div>
-    <div><div class="nm">${a.name}</div><div class="ds">${a.desc}</div>${a.tag?`<span class="tag">${a.tag}</span>`:""}</div>
-  </a>`).join("");
+
+/* ---------- 本機儲存（每支手機/瀏覽器各自記錄） ---------- */
+const KEY = "roke-hub-v1";
+function load(){ try{ return JSON.parse(localStorage.getItem(KEY)) || null }catch(e){ return null } }
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)) }catch(e){} }
+let S = load();
+if(!S){ /* 第一次打開：把目前版本都當成看過，不要整頁都是「新版」 */
+  S = { fav:[], sort:"default", order:[], seen:{}, opens:{}, last:{}, hideNotice:"" };
+  APPS.forEach(a => S.seen[a.path] = a.ver);
+  save();
+}
+["fav","order"].forEach(k => S[k] = S[k] || []);
+["seen","opens","last"].forEach(k => S[k] = S[k] || {});
+/* 新加入目錄的 App 也直接視為已看過 */
+APPS.forEach(a => { if(!(a.path in S.seen)) S.seen[a.path] = a.ver; });
+save();
+
+let editing = false;
+const isNew = a => S.seen[a.path] !== a.ver;
+const isFav = a => S.fav.includes(a.path);
+const fmtDate = d => { const [y,m,dd] = d.split("-"); return `${+m}/${+dd}` };
+
+function customIndex(){
+  const idx = {}; let n = 0;
+  S.order.forEach(p => { if(APPS.some(a=>a.path===p) && !(p in idx)) idx[p] = n++; });
+  APPS.forEach(a => { if(!(a.path in idx)) idx[a.path] = n++; });
+  return idx;
+}
+function sorted(list){
+  const def = Object.fromEntries(APPS.map((a,i)=>[a.path,i]));
+  const tie = (a,b) => def[a.path]-def[b.path];
+  const arr = list.slice();
+  switch(S.sort){
+    case "recent":  arr.sort((a,b)=>(S.last[b.path]||0)-(S.last[a.path]||0) || tie(a,b)); break;
+    case "freq":    arr.sort((a,b)=>(S.opens[b.path]||0)-(S.opens[a.path]||0) || tie(a,b)); break;
+    case "updated": arr.sort((a,b)=>(b.updated||"").localeCompare(a.updated||"") || isNew(b)-isNew(a) || tie(a,b)); break;
+    case "name":    arr.sort((a,b)=>a.name.localeCompare(b.name,"zh-Hant")); break;
+    case "custom":  { const ci = customIndex(); arr.sort((a,b)=>ci[a.path]-ci[b.path]); break; }
+    default:        arr.sort(tie);
+  }
+  return arr;
+}
+
+function card(a, i, n){
+  const nw = isNew(a);
+  return `<div class="app" data-p="${a.path}">
+    <a class="cover" href="${a.path}" aria-label="${a.name}"></a>
+    <div class="ic" style="background:${a.color}">${a.icon}${nw?`<span class="dot">新</span>`:""}</div>
+    <div>
+      <div class="nm">${a.name}</div>
+      <div class="ds">${a.desc}</div>
+      <div class="meta">
+        ${a.tag?`<span class="tag">${a.tag}</span>`:""}
+        ${a.ver?`<span class="ver${nw?" new":""}">v${a.ver}${nw?" 新版":""}${a.updated?" · "+fmtDate(a.updated):""}</span>`:""}
+      </div>
+      ${nw && a.note ? `<div class="note">更新：${a.note}</div>` : ""}
+    </div>
+    <button class="star${isFav(a)?" on":""}" data-fav="${a.path}" aria-label="我的最愛">${isFav(a)?"★":"☆"}</button>
+    <div class="mv">
+      <button data-up="${a.path}" ${i===0?"disabled":""} aria-label="上移">▲</button>
+      <button data-down="${a.path}" ${i===n-1?"disabled":""} aria-label="下移">▼</button>
+    </div>
+  </div>`;
+}
+
+function section(title, list){
+  if(!list.length) return "";
+  return `<h2>${title}</h2><div class="grid">${list.map((a,i)=>card(a,i,list.length)).join("")}</div>`;
+}
+
+function render(){
+  document.getElementById("sort").value = S.sort;
+  const eb = document.getElementById("editBtn");
+  eb.hidden = S.sort !== "custom";
+  eb.textContent = editing ? "完成" : "調整順序";
+  eb.classList.toggle("on", editing);
+
+  /* 版本提示 */
+  const news = APPS.filter(isNew);
+  const sig = news.map(a=>a.path+a.ver).join("|");
+  document.getElementById("notice").innerHTML = news.length && S.hideNotice !== sig
+    ? `<div class="notice">🔔<div><b>${news.length} 個 App 有新版</b>：${news.map(a=>`${a.name} v${a.ver}`).join("、")}</div><button class="x" id="closeNotice" aria-label="關閉">✕</button></div>`
+    : "";
+
+  const all = sorted(APPS);
+  const favs = all.filter(isFav), rest = all.filter(a=>!isFav(a));
+  const el = document.getElementById("list");
+  el.className = editing ? "editing" : "";
+  el.innerHTML = favs.length
+    ? section("⭐ 我的最愛", favs) + section("全部 App", rest)
+    : section("全部 App", rest);
+}
+
+/* 在自訂順序中移動（只在同一區塊內跟上下一個交換） */
+function move(path, dir){
+  const all = sorted(APPS);
+  const group = all.filter(a => isFav(a) === S.fav.includes(path));
+  const i = group.findIndex(a=>a.path===path), j = i + dir;
+  if(j<0 || j>=group.length) return;
+  const order = all.map(a=>a.path);
+  const pi = order.indexOf(path), pj = order.indexOf(group[j].path);
+  [order[pi], order[pj]] = [order[pj], order[pi]];
+  S.order = order; save(); render();
+}
+
+document.getElementById("sort").addEventListener("change", e=>{
+  S.sort = e.target.value;
+  if(S.sort === "custom" && !S.order.length) S.order = APPS.map(a=>a.path);
+  if(S.sort !== "custom") editing = false;
+  save(); render();
+});
+document.getElementById("editBtn").addEventListener("click", ()=>{ editing = !editing; render(); });
+
+document.getElementById("list").addEventListener("click", e=>{
+  const f = e.target.closest("[data-fav]");
+  if(f){ e.preventDefault();
+    const p = f.dataset.fav;
+    S.fav = S.fav.includes(p) ? S.fav.filter(x=>x!==p) : [...S.fav, p];
+    save(); render(); return; }
+  const up = e.target.closest("[data-up]");   if(up){ move(up.dataset.up,-1); return; }
+  const dn = e.target.closest("[data-down]"); if(dn){ move(dn.dataset.down,1); return; }
+  const a = e.target.closest("a.cover");
+  if(a){ /* 記錄使用次數、最後使用時間，並把這版標成已看過 */
+    const p = a.closest(".app").dataset.p, app = APPS.find(x=>x.path===p);
+    S.opens[p] = (S.opens[p]||0) + 1; S.last[p] = Date.now(); S.seen[p] = app.ver; save();
+  }
+});
+document.getElementById("notice").addEventListener("click", e=>{
+  if(e.target.id === "closeNotice"){
+    S.hideNotice = APPS.filter(isNew).map(a=>a.path+a.ver).join("|"); save(); render();
+  }
+});
+/* 從 App 返回首頁時（iOS 的返回快取）重新整理狀態 */
+window.addEventListener("pageshow", ()=>{ S = load() || S; render(); });
+render();
 </script>
 </body>
 </html>
