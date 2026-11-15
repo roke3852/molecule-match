@@ -415,6 +415,8 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
 .bl-zone{display:flex;gap:16px;font-size:13px;margin-top:6px;color:var(--muted)}
 .bl-zone b{font-family:var(--f-mono);color:var(--ink);font-weight:500}
 .bed-db{display:flex;flex-direction:column;gap:2px}
+.bed-note{margin-top:12px;font-size:14px;line-height:1.75;border-top:1px solid var(--line);padding-top:8px}
+.bed-note p{margin:6px 0 0}
 .db-key{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:13px;margin-bottom:6px;align-items:center}
 .db-key span{display:flex;align-items:center;gap:6px}.db-key .lab{color:var(--muted);font-size:12px}
 .db-key i{position:static!important;transform:none!important}
@@ -685,11 +687,13 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
     <h2>每一層的萃取率</h2>
     <p class="label" style="margin:4px 0 10px">兩種濾杯的粉層厚度不同，所以每個位置都依自己的厚度切成 5 等份再比較（錐形中心的 5 層比邊緣厚）。點越靠右萃得越多，兩點之間的線越長差得越多。</p>
     <div class="bed-db" id="bedLay"></div>
+    <div class="bed-note" id="bedLayNote"></div>
   </section>
 
   <section class="panel">
     <h2>比較</h2>
     <table class="mic-tbl" id="bedTbl"></table>
+    <div class="bed-note" id="bedTblNote"></div>
   </section>
 
   <section class="panel mic-notes">
@@ -2920,6 +2924,41 @@ function dumbbell(){const a=bedStats(runs.A,si),b=bedStats(runs.B,si),BN=['最�
   return '<div class="db-key"><span><i class="pa"></i>'+META.A.h+'</span><span><i class="pb"></i>'+META.B.h+'</span><span class="lab">右欄＝右邊減左邊（萃取率 %）</span></div>'+
     rows.map(row).join('')+'<div class="db-sep"></div>'+zones.map(row).join('')+
     '<div class="db-row axis"><span class="nm"></span><div class="db-track">'+ticks.map(v=>'<span style="left:'+X(v)+'">'+v+'%</span>').join('')+'</div><span class="dv"></span></div>';}
+// 圖表下方的分析文字：依目前的設定與數字自動產生
+const f1=v=>Math.abs(v).toFixed(1);
+function layNote(){const a=bedStats(runs.A,si),b=bedStats(runs.B,si),A=META.A.h,B=META.B.h,BN=['最上層','上層','中層','下層','最下層'];
+  const t=runs.A.snaps[si].t;if(t<runs.A.ends.bloom+5)return '<p>還在悶蒸，萃取才剛開始，拉到後面再看各層的差別。</p>';
+  const out=[];const d=a.bands.map((x,i)=>({i,d:b.bands[i].ey-x.ey})).sort((x,y)=>Math.abs(y.d)-Math.abs(x.d))[0];
+  const hiS=d.d>0?B:A,loS=d.d>0?A:B;
+  let why='';
+  const moreWall=a.wallN>b.wallN?A:b.wallN>a.wallN?B:null;
+  if(d.i===0&&pour!=='k10'&&moreWall===loS)why='最上層的粉有一部分被水柱推到杯壁上，水位一降就露出水面萃不到；'+loS+'被推上去的粉比較多，所以這層被拉低。';
+  else if(cmp==='prep')why=d.i>=3?'這是悶蒸時最容易吸不到水的位置（'+(pdrip==='cone'?'錐尖、':'')+'粉層深處），整粉讓它們早一點濕透、早一點開始萃取。':'沒整粉時這層有些結塊、被 CO₂ 包住的粉晚濕，比較晚開始萃取；整粉後每一層都比較早吸到水。';
+  else if(d.i>=3&&loS==='錐形')why='越下層碰到的水越濃，萃取越慢；錐形中心的粉層特別厚，最下層最吃虧。';
+  out.push(Math.abs(d.d)<.3?'<p><b>各層差距都很小</b>：最多只差 '+f1(d.d)+'%（「'+BN[d.i]+'」）。</p>':'<p><b>差最多的是「'+BN[d.i]+'」</b>：'+hiS+'比'+loS+'多 '+f1(d.d)+'%。'+why+'</p>');
+  const g=s=>s.bands[0].ey-s.bands[4].ey;const gA=g(a),gB=g(b);
+  const gTxt=(n,v)=>n+(Math.abs(v)<.3?'上下幾乎一樣':v>0?'上層比下層多 '+f1(v)+'%':'下層反而比上層多 '+f1(v)+'%');
+  let gw='';if(pour==='k10')gw='低擾動時粉層維持原狀，上層一直碰到新鮮的水，所以上層萃得多、分層保留得住。';
+  else if(gA<0||gB<0)gw='一般注水把上層的粉推到杯壁、萃不到，原本「上多下少」的分層被打亂，甚至反過來。';
+  else gw='上層先碰到新鮮的水，所以萃得比下層多。';
+  out.push('<p><b>上下分層</b>：'+gTxt(A,gA)+'；'+gTxt(B,gB)+'。'+gw+(bedStirs(stir).length>1?'多次攪拌讓上下層交換位置，差距也會縮小。':'')+'</p>');
+  const ce=s=>s.edge-s.center;const cA=ce(a),cB=ce(b);
+  out.push('<p><b>中心和邊緣</b>：'+A+(Math.abs(cA)<.3?'中心、邊緣差不多':cA>0?'邊緣比中心多 '+f1(cA)+'%':'中心比邊緣多 '+f1(cA)+'%')+'，'+B+(Math.abs(cB)<.3?'中心、邊緣差不多':cB>0?'邊緣比中心多 '+f1(cB)+'%':'中心比邊緣多 '+f1(cB)+'%')+'。'+
+    (cmp==='drip'?'錐形邊緣粉層薄、阻力小，比較多新鮮的水從邊緣流過，中心深處碰到的是走了很長一段的濃水；平底每個位置厚度一樣，左右幾乎沒有差別。':'整粉不會改變濾杯形狀造成的中心、邊緣差，只是讓每個位置都更早、更完整地吸到水。')+'</p>');
+  const m=b.mean-a.mean;
+  out.push('<p><b>整杯平均</b>：'+(Math.abs(m)<.5?(Math.abs(m)<.05?'幾乎沒有差別':'只差 '+f1(m)+'%')+'，兩邊萃出的總量差不多，差別在「萃取怎麼分佈」。分佈越不平均，杯子裡混著萃得多和萃得少的粉，風味層次較多，但也可能同時有過萃的苦和不足的酸。':B+(m>0?'多':'少')+' '+f1(m)+'%。')+'</p>');
+  return out.join('');}
+function tblNote(){const a=bedStats(runs.A,si),b=bedStats(runs.B,si),A=META.A.h,B=META.B.h,out=[];
+  const t=runs.A.snaps[si].t;if(t<runs.A.ends.bloom+5)return '';
+  const evenS=a.uni>b.uni?A:B,rA=a.hi-a.lo,rB=b.hi-b.lo;
+  out.push('<p><b>均勻度</b>：'+(Math.abs(a.uni-b.uni)<.01?'兩邊差不多。':evenS+'比較均勻（最高格和最低格差 '+f1(Math.min(rA,rB))+'%，另一邊差 '+f1(Math.max(rA,rB))+'%）。')+
+    (pour!=='k10'?'兩邊的最低格都是被推到杯壁上的粉，這是一般注水的通病。':'')+'</p>');
+  const dA=parseInt(dryAt(runs.A,runs.A.ends.bloom)),dB=parseInt(dryAt(runs.B,runs.B.ends.bloom));
+  out.push('<p><b>悶蒸結束時還沒濕的粉</b>：'+A+' '+dA+'%、'+B+' '+dB+'%。'+(cmp==='prep'?'整粉把這個比例大幅降低：佈粉針打散結塊，挖洞讓水直達深處。':(bedStirs(stir).length?'有攪拌，粉團都被打散了。':'沒攪拌也沒整粉時，有些粉被結塊和 CO₂ 包住，悶蒸水進不去。可以切到「沒整粉 vs 有整粉」看整粉的效果。'))+'</p>');
+  out.push('<p><b>水流最多÷最少</b>：'+A+' '+flowSkew(runs.A)+'、'+B+' '+flowSkew(runs.B)+'。'+(cmp==='drip'?'錐形的偏差主要來自形狀（邊緣淺、中心深）；平底形狀一致，偏差只來自粉床鬆緊不一。':'整粉後粉床鬆緊一致，水比較不會偏走某幾條路；剩下的偏差是濾杯形狀造成的。')+'</p>');
+  if(pour!=='k10'&&(a.crater||b.crater))out.push('<p><b>凹洞與杯壁粉</b>：一般注水會在中心挖出約 '+Math.max(a.crater,b.crater)+' 層深的凹洞，被推到杯壁上的粉萃取率只有 '+f1(Math.min(a.wall??99,b.wall??99))+'–'+f1(Math.max(a.wall??0,b.wall??0))+'%，明顯低於平均。改用粕谷 10 段這種低擾動注水，就不會有這圈萃不到的粉。</p>');
+  if(runs.A.ends.end!==runs.B.ends.end)out.push('<p><b>滴完時間</b>：兩邊差 '+Math.abs(runs.A.ends.end-runs.B.ends.end)+' 秒。</p>');
+  return out.join('');}
 function dryAt(R,t){const s=R.snaps[Math.min(t,R.snaps.length-1)];let d=0,n=0;s.cols.forEach(c=>c.cells.forEach(e=>{n++;if(e.dry)d++;}));return Math.round(d/n*100)+'%';}
 function flowSkew(R){const s=R.snaps[Math.min(70,R.snaps.length-1)];const q=s.cols.map(c=>c.q).filter(v=>v>0);return (Math.max(...q)/Math.min(...q)).toFixed(1)+' 倍';}
 function table(){const a=bedStats(runs.A,si),b=bedStats(runs.B,si),f=v=>v.toFixed(1)+'%';
@@ -2941,7 +2980,7 @@ function capDrip(t,E){const st=bedStirs(stir),k10=pour==='k10';
   if(t<E.pourEnd)return k10?'粕谷 10 段：每 15 秒小注 30 g，水柱細、擾動小，粉層幾乎維持原本的樣子，上下分層一直存在：上層碰到新鮮的水萃得多，下層碰到變濃的水萃得少。':'注水中：水柱把中心的粉往外推，中心慢慢凹下去，粉被推到杯壁上（藍框的格子）。原本的上下層被打亂；中心變薄、阻力小，水大多從凹洞往下流（藍色箭頭越明顯，流過的水越多）。';
   if(t<runs.A.ends.end)return (k10?'水快滴完：流速越來越慢，萃取也跟著放慢。':'水位下降：杯壁高處的粉最先露出水面，之後幾乎不再萃取；剩下的水集中從中心凹洞流走。')+(stir==='multi'?'多次攪拌讓細粉沉到底部，堵住濾紙，滴得比較慢。':'');
   return k10?'滴完了。低擾動讓分層保留下來：錐形上下、中心邊緣的深淺差得多；平底只有上下層有些差別。':'滴完了。中心形成凹洞，杯壁上那圈粉（藍框）萃得最少，凹洞底部附近的粉萃得多；原本的分層已經被打亂。';}
-function render(){if(!runs)build();draw('A');draw('B');$('bedLay').innerHTML=dumbbell();table();
+function render(){if(!runs)build();draw('A');draw('B');$('bedLay').innerHTML=dumbbell();$('bedLayNote').innerHTML=layNote();$('bedTblNote').innerHTML=tblNote();table();
   $('bedTime').value=si;$('bedClock').textContent=fmt(runs.A.snaps[si].t);$('bedCap').textContent=caption();}
 function frame(now){if(!playing)return;const dt=Math.min(.1,(now-last)/1000);last=now;acc+=dt*10;while(acc>=1){acc-=1;si++;}
   const n=runs.A.snaps.length-1;if(si>=n){si=n;stop();}render();if(playing)raf=requestAnimationFrame(frame);}
