@@ -31,7 +31,7 @@ header p{margin:0;color:var(--muted);font-size:13px}
 .qmid{flex:1;min-width:0;text-align:center;line-height:1.25}
 .qmid span{display:block;font-size:11px;color:var(--accent);font-weight:700}
 .qmid b{display:block;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.gamebox[hidden],.tut[hidden],.qnav[hidden]{display:none}
+.gamebox[hidden],#gslot[hidden],.tut[hidden],.qnav[hidden]{display:none}
 .hud{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0 8px}
 .hud div{background:#f3ebdf;border-radius:12px;padding:8px;text-align:center}
 .hud span{display:block;font-size:11px;color:var(--muted)}
@@ -40,7 +40,7 @@ header p{margin:0;color:var(--muted);font-size:13px}
 .timebar{height:8px;background:#eee3d4;border-radius:8px;overflow:hidden}
 .timebar i{display:block;height:100%;width:100%;background:#16a34a;transition:background .3s}
 .gchips{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
-.gchips button{font-family:inherit;font-size:15px;padding:10px 13px;border-radius:12px;border:1px solid var(--line);background:#fff;color:var(--ink);cursor:pointer;font-weight:600}
+.gchips button{font-family:inherit;font-size:16px;padding:12px 14px;min-height:46px;border-radius:12px;border:1px solid var(--line);background:#fff;color:var(--ink);cursor:pointer;font-weight:600}
 .gchips button:disabled{opacity:.4;cursor:default}
 .gchips button.done{background:#e6f4ea;border-color:#9fd3ad;color:var(--ok);text-decoration:line-through}
 .gchips button.bad{animation:shake .4s;background:var(--warn-soft);border-color:#f0a3a3;color:var(--warn)}
@@ -51,6 +51,11 @@ header p{margin:0;color:var(--muted);font-size:13px}
 .result .rank{font-size:54px;font-weight:800;color:var(--accent);line-height:1}
 .result .score{font-size:20px;font-weight:700;margin:4px 0}
 .result p{margin:4px 0;font-size:14px;color:var(--muted)}
+.gaming .stage svg{max-height:48vh;width:auto;max-width:100%;margin:0 auto}
+#gslot{margin-bottom:10px}
+#gslot .gchips{margin-top:8px}
+#gslot .nav{margin-top:10px}
+#gslot .result{margin-top:10px}
 .rule{font-size:12px;color:var(--muted);margin-top:12px;line-height:1.6}
 .toast{position:absolute;left:50%;top:10px;transform:translateX(-50%);background:var(--ink);color:#fff;font-size:13px;padding:5px 12px;border-radius:20px;opacity:0;transition:opacity .25s;pointer-events:none;white-space:nowrap}
 .toast.show{opacity:.92}
@@ -115,6 +120,7 @@ header p{margin:0;color:var(--muted);font-size:13px}
       <div class="qmid"><span id="qno"></span><b id="qtitle"></b></div>
       <button id="qnext" class="next" aria-label="下一步">›</button>
     </div>
+    <div id="gslot" hidden></div>
     <div class="stage" id="stage">
       <svg id="svg" viewBox="0 0 400 600" aria-label="磨豆機剖面示意圖"></svg>
       <div class="toast" id="toast"></div>
@@ -337,6 +343,9 @@ function go(i){const n=steps().length;
   if(i>=n){ if(mode==='dis'){setMode('asm');return;} else {step=0;render();return;} }
   step=Math.max(0,Math.min(n-1,i));render();}
 function setMode(m){gameStop();mode=m;step=0;
+  const slot=$('gslot'), box=$('game');
+  if(m==='game'){['segK','gMsg','gChips','gStart','gResult'].forEach(id=>{const el=$(id);slot.appendChild(id==='gStart'?el.parentNode:el)});}
+  slot.hidden=m!=='game';document.body.classList.toggle('gaming',m==='game');
   $('tut').hidden=m==='game';$('game').hidden=m!=='game';$('qprev').hidden=$('qnext').hidden=m==='game';document.querySelectorAll('#segM button').forEach(b=>b.classList.toggle('on',b.dataset.m===m));
   // 切換時先把零件瞬間放到起始狀態
   svg.querySelectorAll('.part').forEach(el=>el.style.transition='none');render();svg.getBoundingClientRect();
