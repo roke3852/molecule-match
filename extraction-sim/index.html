@@ -683,7 +683,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
 
   <section class="panel">
     <h2>每一層的萃取率</h2>
-    <p class="label" style="margin:4px 0 10px">由上而下；點越靠右萃得越多，兩點之間的線越長差得越多</p>
+    <p class="label" style="margin:4px 0 10px">兩種濾杯的粉層厚度不同，所以每個位置都依自己的厚度切成 5 等份再比較（錐形中心的 5 層比邊緣厚）。點越靠右萃得越多，兩點之間的線越長差得越多。</p>
     <div class="bed-db" id="bedLay"></div>
   </section>
 
@@ -2825,11 +2825,15 @@ function bedStats(run,si){
   const s=run.snaps[Math.min(si,run.snaps.length-1)],W=run.cols.map(c=>c.w),acc={};let a=0,w=0;const vals=[];let mv=0,mvw=0,mvn=0;
   s.cols.concat([{cells:s.wall.L.concat(s.wall.R)}]).forEach(c=>c.cells.forEach(e=>{const ww=W[e.c0],v=e.E*BED_EYMAX;(acc[e.r0]=acc[e.r0]||[0,0]);acc[e.r0][0]+=v*ww;acc[e.r0][1]+=ww;a+=v*ww;w+=ww;vals.push([v,ww]);if(e.mv){mv+=v*ww;mvw+=ww;mvn++;}}));
   const rows=Object.keys(acc).map(Number).sort((x,y)=>x-y).map(r=>({r,ey:acc[r][0]/acc[r][1]}));
+  // 固定 5 層：每個位置依它自己的粉層厚度切成 5 等份，錐形和平底才能逐層對照
+  const NB=5,bk=Array.from({length:NB},()=>[0,0]);
+  s.cols.concat([{cells:s.wall.L.concat(s.wall.R)}]).forEach(c=>c.cells.forEach(e=>{const d0=run.cols[e.c0].d0,k=Math.min(NB-1,Math.floor((e.r0+.5)/d0*NB)),ww=W[e.c0];bk[k][0]+=e.E*BED_EYMAX*ww;bk[k][1]+=ww;}));
+  const bands=bk.map((x,i)=>({r:i,ey:x[1]?x[0]/x[1]:null}));
   const mean=a/w,sd=Math.sqrt(vals.reduce((x,[v,ww])=>x+ww*(v-mean)**2,0)/w);
   const zone=f=>{let a=0,w=0;s.cols.forEach(c=>c.cells.forEach(e=>{if(f(Math.abs(run.cols[e.c0].x))&&!e.mv){a+=e.E*BED_EYMAX*W[e.c0];w+=W[e.c0];}}));return w?a/w:0;};
   const eys=rows.map(x=>x.ey);
   const crater=Math.max(0,...s.cols.map((c,i)=>c.s-(run.cols[i].b-run.cols[i].d0)));
-  return {rows,mean,sd,uni:Math.max(0,1-sd/mean),spread:Math.max(...eys)-Math.min(...eys),center:zone(x=>x<.35),edge:zone(x=>x>=.65),
+  return {rows,bands,mean,sd,uni:Math.max(0,1-sd/mean),spread:Math.max(...eys)-Math.min(...eys),center:zone(x=>x<.35),edge:zone(x=>x>=.65),
     lo:Math.min(...vals.map(v=>v[0])),hi:Math.max(...vals.map(v=>v[0])),wall:mvn?mv/mvw:null,wallN:mvn,crater};
 }
 if(typeof module!=='undefined')module.exports={bedRun,bedStats,BED_DRIP};
@@ -2899,8 +2903,8 @@ function layers(key){const R=runs[key],st=bedStats(R,si);
   return '<h3>'+META[key].t+'</h3>'+st.rows.map((x,i)=>'<div class="bl-row"><span>'+(i===0?'第 1 層（最上）':i===st.rows.length-1?'第 '+(i+1)+' 層（最下）':'第 '+(i+1)+' 層')+'</span><div><i style="width:'+Math.max(2,(x.ey-8)/(HI-8)*100)+'%;background:'+col(x.ey)+'"></i></div><b>'+x.ey.toFixed(1)+'</b></div>').join('')+
     '<div class="bl-zone"><span>中心 <b>'+st.center.toFixed(1)+'%</b></span><span>邊緣 <b>'+st.edge.toFixed(1)+'%</b></span>'+(st.wall!=null?'<span>杯壁高處 <b>'+st.wall.toFixed(1)+'%</b></span>':'')+'</div>';}
 // 合併比較圖：每一層一列，空心點＝左邊、實心點＝右邊，連線長度就是差距
-function dumbbell(){const a=bedStats(runs.A,si),b=bedStats(runs.B,si),n=Math.max(a.rows.length,b.rows.length);
-  const rows=[];for(let i=0;i<n;i++)rows.push({n:i===0?'第 1 層（最上）':i===n-1?'第 '+n+' 層（最下）':'第 '+(i+1)+' 層',a:a.rows[i]?a.rows[i].ey:null,b:b.rows[i]?b.rows[i].ey:null});
+function dumbbell(){const a=bedStats(runs.A,si),b=bedStats(runs.B,si),BN=['最上層','上層','中層','下層','最下層'];
+  const rows=a.bands.map((x,i)=>({n:BN[i],a:x.ey,b:b.bands[i].ey}));
   const zones=[{n:'中心',a:a.center,b:b.center},{n:'邊緣',a:a.edge,b:b.edge}];
   if(a.wall!=null||b.wall!=null)zones.push({n:'杯壁高處',a:a.wall,b:b.wall});
   zones.push({n:'整杯平均',a:a.mean,b:b.mean,avg:1});
@@ -2919,7 +2923,7 @@ function dumbbell(){const a=bedStats(runs.A,si),b=bedStats(runs.B,si),n=Math.max
 function dryAt(R,t){const s=R.snaps[Math.min(t,R.snaps.length-1)];let d=0,n=0;s.cols.forEach(c=>c.cells.forEach(e=>{n++;if(e.dry)d++;}));return Math.round(d/n*100)+'%';}
 function flowSkew(R){const s=R.snaps[Math.min(70,R.snaps.length-1)];const q=s.cols.map(c=>c.q).filter(v=>v>0);return (Math.max(...q)/Math.min(...q)).toFixed(1)+' 倍';}
 function table(){const a=bedStats(runs.A,si),b=bedStats(runs.B,si),f=v=>v.toFixed(1)+'%';
-  const top=s=>s.rows[0].ey,bot=s=>s.rows[s.rows.length-1].ey;
+  const top=s=>s.bands[0].ey,bot=s=>s.bands[s.bands.length-1].ey;
   const rows=[['平均萃取率',f(a.mean),f(b.mean)],['最高格－最低格',f(a.hi-a.lo),f(b.hi-b.lo)],['最上層－最下層',f(top(a)-bot(a)),f(top(b)-bot(b))],['邊緣－中心',f(a.edge-a.center),f(b.edge-b.center)],['均勻度（越高越均勻）',(a.uni*100).toFixed(0),(b.uni*100).toFixed(0)],['悶蒸結束時還沒濕的粉',dryAt(runs.A,runs.A.ends.bloom),dryAt(runs.B,runs.B.ends.bloom)],['水流最多÷最少的位置',flowSkew(runs.A),flowSkew(runs.B)],['中心凹陷',a.crater?'約 '+a.crater+' 層':'沒有',b.crater?'約 '+b.crater+' 層':'沒有'],['被推到杯壁上的粉',a.wall!=null?f(a.wall):'—',b.wall!=null?f(b.wall):'—'],['滴完時間',fmt(runs.A.ends.end),fmt(runs.B.ends.end)]];
   $('bedTbl').innerHTML='<thead><tr><th>'+fmt(runs.A.snaps[si].t)+'</th><th>'+META.A.h+'</th><th>'+META.B.h+'</th></tr></thead><tbody>'+rows.map(r=>'<tr><td>'+r[0]+'</td><td>'+r[1]+'</td><td>'+r[2]+'</td></tr>').join('')+'</tbody>';}
 function caption(){const t=runs.A.snaps[si].t,E=runs.A.ends;if(cmp==='prep')return capPrep(t,E);return capDrip(t,E);}
