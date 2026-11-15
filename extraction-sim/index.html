@@ -409,6 +409,15 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
 .mic-notes p{margin:8px 0 0}
 .bed h1{font-size:clamp(26px,6vw,36px)}
 .bed-ctl{display:flex;flex-direction:column;gap:12px}
+.bed-ctl h2 .label{font-size:12px;font-weight:400;margin-left:6px}
+.bed-cmp{display:flex;flex-direction:column;gap:10px;border:2px solid var(--accent)}
+.bed-cmp .label{margin:0}
+.cmp-cards{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.cmp-cards button{display:flex;flex-direction:column;align-items:flex-start;gap:3px;text-align:left;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);cursor:pointer;font:inherit}
+.cmp-cards button b{font-size:16px}.cmp-cards button span{font-size:13px;font-weight:700;color:var(--accent)}.cmp-cards button small{font-size:11.5px;color:var(--muted);line-height:1.45}
+.cmp-cards button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.cmp-cards button[aria-pressed="true"] span,.cmp-cards button[aria-pressed="true"] small{color:var(--accent-ink)}
+.cmp-extra{display:flex;flex-direction:column;gap:12px;border-top:1px solid var(--line);padding-top:10px}
 .bed-duo{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .bed-one{padding:10px;display:flex;flex-direction:column;gap:6px;min-width:0}
 .bed-one header{display:flex;flex-direction:column}
@@ -679,11 +688,22 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
     <p class="lede">把濾杯裡的粉床切成一格一格：橫的是深度（上層到下層），直的是位置（中心到邊緣）。水從上往下流，每一格粉的萃取速度，取決於流過它的水還有多「新鮮」。顏色越深代表那一格萃得越多。</p>
   </div>
 
+  <section class="panel bed-cmp">
+    <h2>你想比較什麼？</h2>
+    <p class="label">選了之後，下方的兩張圖、每層萃取率、比較表和分析文字都會跟著換成這組對照。</p>
+    <div class="cmp-cards" id="bedCmp" role="group" aria-label="比較">
+      <button data-v="drip" aria-pressed="true"><b>濾杯形狀</b><span>錐形 vs 平底</span><small>同樣的手法，看粉層形狀造成的差異</small></button>
+      <button data-v="prep" aria-pressed="false"><b>整粉</b><span>沒整粉 vs 有整粉</span><small>同一個濾杯，看佈粉針、挖洞的效果</small></button>
+    </div>
+    <div class="cmp-extra" id="bedCmpExtra" hidden>
+      <div class="param" id="bedPDripP"><span class="label">用哪一種濾杯比較</span><div class="seg" id="bedPDrip" role="group" aria-label="濾杯"><button data-v="cone" aria-pressed="true">錐形</button><button data-v="flat" aria-pressed="false">平底</button></div></div>
+    </div>
+  </section>
+
   <section class="panel bed-ctl">
+    <h2 id="bedCondTitle">沖煮條件<span class="label">（左右兩邊相同）</span></h2>
     <div class="param"><span class="label">注水方式</span><div class="seg" id="bedPour" role="group" aria-label="注水方式"><button data-v="normal" aria-pressed="true">一般注水</button><button data-v="k10" aria-pressed="false">粕谷 10 段（低擾動）</button></div></div>
-    <div class="param"><span class="label">比較</span><div class="seg" id="bedCmp" role="group" aria-label="比較"><button data-v="drip" aria-pressed="true">錐形 vs 平底</button><button data-v="prep" aria-pressed="false">沒整粉 vs 有整粉</button></div></div>
-    <div class="param" id="bedPDripP" hidden><span class="label">濾杯</span><div class="seg" id="bedPDrip" role="group" aria-label="濾杯"><button data-v="cone" aria-pressed="true">錐形</button><button data-v="flat" aria-pressed="false">平底</button></div></div>
-    <div class="param"><span class="label" id="bedPrepLab">注水前整粉</span><div class="seg" id="bedPrep" role="group" aria-label="注水前整粉"><button data-v="wdt" aria-pressed="false">佈粉針</button><button data-v="dig" aria-pressed="false">中心挖洞</button></div></div>
+    <div class="param" id="bedPrepP"><span class="label" id="bedPrepLab">注水前整粉</span><div class="seg" id="bedPrep" role="group" aria-label="注水前整粉"><button data-v="wdt" aria-pressed="false">佈粉針</button><button data-v="dig" aria-pressed="false">中心挖洞</button></div></div>
     <div class="param"><span class="label">攪拌</span><div class="seg" id="bedStir" role="group" aria-label="攪拌"><button data-v="none" aria-pressed="true">不攪拌</button><button data-v="bloom" aria-pressed="false">只在悶蒸攪</button><button data-v="multi" aria-pressed="false">多次攪拌</button></div></div>
     <div class="transport">
       <button class="play" id="bedPlay">播放</button>
@@ -3137,7 +3157,12 @@ $('bedPlay').onclick=()=>playing?stop():play();
 $('bedTime').oninput=e=>{stop();si=+e.target.value;render();};
 $('bedStir').querySelectorAll('button').forEach(b=>b.onclick=()=>{stop();stir=b.dataset.v;$('bedStir').querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',x===b));build();si=runs.A.snaps.length-1;render();});
 $('bedPour').querySelectorAll('button').forEach(b=>b.onclick=()=>{stop();pour=b.dataset.v;$('bedPour').querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',x===b));build();si=runs.A.snaps.length-1;render();});
-$('bedCmp').querySelectorAll('button').forEach(b=>b.onclick=()=>{stop();cmp=b.dataset.v;$('bedCmp').querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',x===b));$('bedPDripP').hidden=cmp!=='prep';$('bedPrepLab').textContent=cmp==='prep'?'右邊用的整粉方式':'注水前整粉';build();si=runs.A.snaps.length-1;render();});
+$('bedCmp').querySelectorAll('button').forEach(b=>b.onclick=()=>{stop();cmp=b.dataset.v;$('bedCmp').querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',x===b));
+  const pr=cmp==='prep';$('bedCmpExtra').hidden=!pr;
+  // 整粉對照時，「整粉方式」是比較的一部分（只套用在右邊），移到上方的比較區塊
+  if(pr)$('bedCmpExtra').appendChild($('bedPrepP'));else $('bedPour').closest('.param').after($('bedPrepP'));
+  $('bedPrepLab').textContent=pr?'右邊用的整粉方式（左邊不整粉；都不選＝兩種都用）':'注水前整粉';
+  build();si=runs.A.snaps.length-1;render();});
 $('bedPDrip').querySelectorAll('button').forEach(b=>b.onclick=()=>{stop();pdrip=b.dataset.v;$('bedPDrip').querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',x===b));build();si=runs.A.snaps.length-1;render();});
 $('bedPrep').querySelectorAll('button').forEach(b=>b.onclick=()=>{stop();if(b.dataset.v==='wdt')wdt=!wdt;else dig=!dig;b.setAttribute('aria-pressed',b.dataset.v==='wdt'?wdt:dig);build();si=runs.A.snaps.length-1;render();});
 window.bedRender=()=>{if(!inited){inited=true;build();si=runs.A.snaps.length-1;}render();};
