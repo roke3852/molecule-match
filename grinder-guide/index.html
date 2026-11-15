@@ -86,6 +86,18 @@ header p{margin:0;color:var(--muted);font-size:13px}
 @keyframes tick{to{transform:rotate(120deg)}}
 #spinBtn.ccw.tick .ic{animation-name:tickr}
 @keyframes tickr{to{transform:rotate(-120deg)}}
+#swipeHint{position:absolute;left:50%;top:30%;transform:translateX(-50%);background:rgba(43,33,27,.86);color:#fff;border-radius:16px;padding:10px 16px 9px;text-align:center;pointer-events:none;z-index:3;box-shadow:0 4px 14px rgba(0,0,0,.2);white-space:nowrap}
+#swipeHint[hidden]{display:none}
+#swipeHint .track{position:relative;width:150px;height:34px;margin:0 auto;border-bottom:2px dashed rgba(255,255,255,.45)}
+#swipeHint .fing{position:absolute;left:50%;top:0;font-size:26px;margin-left:-13px}
+#swipeHint.both .fing{animation:swBoth 1.8s ease-in-out infinite}
+#swipeHint.cw .fing{animation:swR 1s ease-in infinite}
+#swipeHint.ccw .fing{animation:swL 1s ease-in infinite}
+@keyframes swBoth{0%,100%{transform:translateX(0)}25%{transform:translateX(55px)}75%{transform:translateX(-55px)}}
+@keyframes swR{0%{transform:translateX(-50px);opacity:0}20%{opacity:1}80%{opacity:1}100%{transform:translateX(55px);opacity:0}}
+@keyframes swL{0%{transform:translateX(50px);opacity:0}20%{opacity:1}80%{opacity:1}100%{transform:translateX(-55px);opacity:0}}
+#swipeHint .htxt{font-size:14px;font-weight:700;margin-top:6px}
+#swipeHint .htxt small{display:block;font-size:11px;font-weight:500;opacity:.8}
 .rule{font-size:12px;color:var(--muted);margin-top:12px;line-height:1.6}
 .toast{position:absolute;left:50%;top:10px;transform:translateX(-50%);background:var(--ink);color:#fff;font-size:13px;padding:5px 12px;border-radius:20px;opacity:0;transition:opacity .25s;pointer-events:none;white-space:nowrap}
 .toast.show{opacity:.92}
@@ -157,6 +169,7 @@ header p{margin:0;color:var(--muted);font-size:13px}
     <div class="stage" id="stage">
       <svg id="svg" viewBox="0 0 400 600" aria-label="磨豆機剖面示意圖"></svg>
       <div class="toast" id="toast"></div>
+      <div id="swipeHint" hidden><div class="track"><span class="fing">👆</span></div><div class="htxt"></div></div>
     </div>
     </div>
     <div class="card">
@@ -452,8 +465,11 @@ function qhud(){if(mode!=='game'||!GS)return;const t=GS.running?(performance.now
   $('qno').textContent=`${G[g].name}・${gk==='dis'?'拆解':'組裝'}挑戰`;
   $('qtitle').textContent=`⏱ ${t.toFixed(1)}/${GS.limit}　❌ ${GS.errors}　✔ ${GS.acts}/${GS.total}`;
   $('gProg').textContent=`${GS.acts}/${GS.total}`;$('gErr').textContent=GS.errors;}
+function hint(k,n){const h=$('swipeHint');if(!k||mode!=='game'){h.hidden=true;return;}
+  h.className=k;h.querySelector('.htxt').innerHTML=k==='both'?'← 逆時針　｜　順時針 →<small>可以直接在圖上左右滑動選方向</small>':
+    `${k==='cw'?'往右滑 →　順時針':'← 往左滑　逆時針'}<small>再滑 ${3-(n||0)} 下，或點零件旁的紅色旋轉鈕</small>`;h.hidden=false;}
 function setMsg(h){$('gMsg').innerHTML=h}
-function gameStop(){clearInterval(gTimer);gTimer=null;if(GS)GS.running=false;$('gAct').hidden=true;}
+function gameStop(){if($('swipeHint'))hint(null);clearInterval(gTimer);gTimer=null;if(GS)GS.running=false;$('gAct').hidden=true;}
 function gameReset(){gameStop();
   GS={running:false,done:new Set(),taken:new Set(),si:0,held:null,rot:null,sel:null,acts:0,errors:0,t0:0,tEnd:0,limit:gameLimit(),total:totalActs()};
   svg.querySelectorAll('.part').forEach(el=>el.style.transition='none');placeAll();hideArrow();svg.getBoundingClientRect();
@@ -470,8 +486,8 @@ function gameStart(){gameReset();GS.running=true;GS.t0=performance.now();$('gSta
     qhud();if(t>=GS.limit)gameEnd(false);},100);qhud();}
 function flashBad(id){const el=$('p-'+id);if(el)el.classList.add('bad');const pl=document.querySelector(`#pills .pill[data-id="${id}"]`);if(pl)pl.classList.add('bad');
   setTimeout(()=>{if(el)el.classList.remove('bad');if(pl)pl.classList.remove('bad')},450);}
-function wrong(msg){GS.errors++;flashBad(GS.sel);setMsg('❌ '+msg);$('gAct').hidden=true;qhud();}
-function good(msg){GS.acts++;setMsg('✅ '+msg);$('gAct').hidden=true;placeAll();renderPills();qhud();}
+function wrong(msg){hint(null);GS.errors++;flashBad(GS.sel);setMsg('❌ '+msg);$('gAct').hidden=true;qhud();}
+function good(msg){hint(null);GS.acts++;setMsg('✅ '+msg);$('gAct').hidden=true;placeAll();renderPills();qhud();}
 function gameTap(id){if(!GS||!GS.running)return;
   if(GS.rot){setMsg(`先把「${L(GS.rot.id)}」轉完！`);return;}
   const S0=seq()[GS.si];const inHR=S0&&S0.type==='holdrot'&&S0.opts.some(o=>o.hold===id||o.rot===id);
@@ -480,7 +496,7 @@ function gameTap(id){if(!GS||!GS.running)return;
   $('gAct').innerHTML=`<div class="ah">${L(id)}：要做什麼？</div><div class="ab">
     <button data-a="hold">✋ 固定</button><button data-a="cw">↻ 順時針</button><button data-a="ccw">↺ 逆時針</button><button data-a="take">${t}</button></div>
     <div class="an">方向以「面向這個零件」來看・也可以直接在圖上滑：→ 順時針、← 逆時針</div>`;
-  $('gAct').hidden=false;}
+  $('gAct').hidden=false;hint('both');}
 function act(a){const id=GS.sel,S=seq()[GS.si],isRot=a==='cw'||a==='ccw';
   if(S.type==='take'){
     if(S.ids.includes(id)&&!GS.taken.has(id)){ if(a!=='take')return wrong(`「${L(id)}」這一步不用固定也不用轉。`);
@@ -507,11 +523,12 @@ function startRot(id,dir,moving){GS.rot={id,dir,moving,n:0};
   if(gk==='asm'){GS.done.add(moving);placeAll();}
   showArrow(id,dir);setMsg(`方向正確！再轉 3 下把「${L(id)}」${gk==='dis'?'轉鬆':'鎖緊'}`);
   $('gAct').innerHTML=`<div class="ah">${L(id)}・${dir==='cw'?'↻ 順時針':'↺ 逆時針'}　<span id="spinCnt">0/3</span></div><div class="an" style="font-size:13px">點零件旁的紅色 ${dir==='cw'?'↻':'↺'} 按鈕，或在圖上${dir==='cw'?'往右 →':'往左 ←'}滑，共 3 下</div>`;
-  $('gAct').hidden=false;renderPills();}
+  $('gAct').hidden=false;renderPills();hint(dir,0);}
 function spin(){const r=GS.rot;if(!r||r.n>=3)return;r.n++;const el=$('p-'+r.id);el.classList.remove('wob');void el.getBBox();el.classList.add('wob');
   const sc=$('spinCnt');if(sc)sc.textContent=`${r.n}/3`;const sb=$('spinBtn');sb.querySelector('text').textContent=`${r.dir==='ccw'?'逆時針':'順時針'} ${r.n}/3`;
   sb.classList.remove('tick');void sb.getBBox();sb.classList.add('tick');
-  if(r.n<3)return;
+  if(r.n<3){hint(r.dir,r.n);return;}
+  hint(null);
   setTimeout(()=>{el.classList.remove('wob');if(gk==='dis')GS.done.add(r.moving);GS.held=null;GS.rot=null;hideArrow();
     good(gk==='dis'?`轉鬆了，「${L(r.moving)}」拿下來！`:`「${L(r.moving)}」鎖好了！`);next();},250);}
 function next(){GS.si++;GS.taken.clear();if(GS.si>=seq().length)gameEnd(true);}
