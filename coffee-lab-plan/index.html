@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>咖啡實驗室商業化路線圖</title>
-<meta name="app-version" content="1.2">
+<meta name="app-version" content="1.3">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;900&display=swap" rel="stylesheet">
@@ -117,6 +117,24 @@ h3{font-size:1.02rem;margin:18px 0 8px}
 .comm dd{margin:0}
 .comm .chk{grid-column:2;display:flex;align-items:center;gap:8px;font-size:.88rem;font-weight:700;margin-top:6px;cursor:pointer}
 .comm .chk input{width:18px;height:18px;accent-color:var(--done)}
+.ladder{display:flex;flex-direction:column;gap:10px}
+.model{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px;display:grid;grid-template-columns:2.2em 1fr;gap:4px 10px}
+.model.pick{border-color:var(--done);box-shadow:inset 4px 0 0 var(--done)}
+.model .ord{font-family:var(--display);font-weight:900;font-size:1.3rem;color:var(--accent);line-height:1.2}
+.model h4{margin:0;font-size:1.02rem;display:flex;flex-wrap:wrap;gap:4px 8px;align-items:center}
+.model p{margin:4px 0 0;font-size:.9rem}
+.diff{display:inline-flex;gap:3px;align-items:center;font-size:.75rem;color:var(--muted);font-weight:700}
+.diff i{width:8px;height:8px;border-radius:2px;background:var(--line)}
+.diff i.on{background:var(--accent)}
+.give{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.give div{background:var(--paper);border-radius:8px;padding:8px 10px;font-size:.85rem}
+.give b{display:block;font-size:.75rem;color:var(--muted)}
+.model .pro{color:var(--done)} .model .con{color:var(--accent)}
+.path{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap}
+.pstep{flex:1 1 150px;background:var(--paper);border-radius:8px;padding:10px;font-size:.88rem}
+.pstep b{display:block;color:var(--accent)}
+.parr{align-self:center;color:var(--muted);font-weight:700}
+@media (max-width:520px){.parr{display:none}.give{grid-template-columns:1fr}}
 .post{white-space:pre-wrap;background:var(--paper);border:1px dashed var(--line);border-radius:8px;padding:12px;font-size:.92rem;margin:8px 0}
 .btn{font:inherit;font-size:.88rem;font-weight:700;padding:7px 14px;border-radius:8px;border:1px solid var(--ink);background:var(--ink);color:var(--paper);cursor:pointer}
 /* revenue */
@@ -154,6 +172,7 @@ h3{font-size:1.02rem;margin:18px 0 8px}
     <a href="#roadmap" data-t="roadmap">路線圖</a>
     <a href="#issues" data-t="issues">待解問題清單</a>
     <a href="#launch" data-t="launch">推廣起步</a>
+    <a href="#sponsor" data-t="sponsor">贊助合作</a>
     <a href="#revenue" data-t="revenue">收入試算</a>
   </nav>
 
@@ -219,6 +238,27 @@ h3{font-size:1.02rem;margin:18px 0 8px}
 免費、手機就能玩，不用註冊。</div>
       <button class="btn" id="copyBtn" type="button">複製貼文</button> <span id="copyMsg" class="note"></span>
     </div>
+  </section>
+
+  <!-- 贊助 -->
+  <section id="s-sponsor">
+    <h2>贊助合作的五種模式</h2>
+    <p class="lead">從容易談到難談排列。第一家建議從 1、2 開始，累積數據後再談 3 的固定月費。</p>
+    <div class="ladder" id="ladder"></div>
+
+    <h3 class="mt">起步順序</h3>
+    <div class="card path">
+      <div class="pstep"><b>第 1 個月</b>找一家熟的店，談「以物易物＋專屬折扣碼」</div>
+      <div class="parr" aria-hidden="true">→</div>
+      <div class="pstep"><b>累積證據</b>「這關有 X 人玩、帶來 Y 筆訂單」</div>
+      <div class="parr" aria-hidden="true">→</div>
+      <div class="pstep"><b>第 2 個月起</b>拿數據去談「本月豆單」固定月費</div>
+    </div>
+
+    <h3 class="mt">一份合作要談清楚的事</h3>
+    <p class="lead">每談一家就照這張確認一次，打勾會跟著雲端同步。</p>
+    <ul class="tasks" id="dealList"></ul>
+    <p class="note">費用要訂多少，要看你累積到的流量；收入試算裡的贊助費只是示範假設。</p>
   </section>
 
   <!-- 收入 -->
@@ -295,6 +335,22 @@ const COMMS=[
  {id:"c6",n:"咖啡展、市集",tag:"rent",when:"有活動時",use:"現場試玩，轉換率最高",angle:"請熟識攤商放 QR code，或自己擺攤讓人現場挑戰",watch:"準備一張好看的成績卡讓人拍照分享"},
  {id:"c7",n:"自己的 IG 或 LINE 官方帳號",tag:"own",when:"第 4 週前開好",use:"所有借用管道帶來的人，最後都收進這裡",angle:"遊戲結算畫面放「追蹤拿每週挑戰關」",watch:"追蹤數就是之後談贊助的籌碼"}
 ];
+const MODELS=[
+ {n:"以物易物：豆子換曝光",d:1,pick:true,how:"烘豆商提供豆子（給你實際沖、拍影片，或當挑戰活動的獎品），你在遊戲裡做一個用他們豆子的關卡。",you:"豆子、案例、第一個合作夥伴",them:"免費曝光，雙方都不用出錢",pro:"最容易點頭；沒有流量數據時幾乎唯一談得成的方式",con:"沒有現金收入"},
+ {n:"導購分潤：成交才付錢",d:2,pick:true,how:"關卡裡放購買連結或專屬折扣碼，有人買才抽成。",you:"按成交抽成",them:"零風險，沒成交不用付",pro:"容易答應；專屬折扣碼是之後談月費的證據",con:"玩家少時收入很少"},
+ {n:"關卡贊助：固定月費",d:3,how:"「本月豆單」：烘豆商的豆子成為當月挑戰關，附品牌介紹和購買連結。",you:"每月固定收入",them:"整個月的主題曝光",pro:"收入穩定、可以多家輪替",con:"要拿得出數據：玩家數、該關遊玩數、折扣碼訂單數"},
+ {n:"聯名挑戰活動",d:3,how:"限時活動，例如「用某莊園藝伎沖出 90 分」，前幾名送豆子，參加者全都拿到折扣碼。",you:"一次性費用或分潤，加一波新玩家",them:"話題和名單",pro:"能帶來爆發性的新玩家",con:"活動設計和執行比較花時間"},
+ {n:"客製版授權",d:4,how:"幫烘豆商或咖啡館做一個只有自家豆子的版本，放在店裡或官網使用。",you:"一次性費用加維護費",them:"自己品牌的互動工具",pro:"單價最高",con:"比較接近接案，會吃掉時間"}
+];
+const DEAL=[["d1","期間","建議先試一個月"],["d2","露出內容","哪個關卡、品牌介紹、連結放在哪裡"],["d3","數據回報","每月給對方看哪些數字"],["d4","使用授權（書面）","豆子名稱、圖片、風味描述可以用在遊戲裡"],["d5","費用或分潤比例","以及怎麼結算、多久結一次"]];
+function renderSponsor(){
+  $("#ladder").innerHTML=MODELS.map((m,i)=>`<div class="model ${m.pick?"pick":""}"><span class="ord">${i+1}</span><div>
+   <h4>${m.n}<span class="diff" title="談成難度">難度 ${[1,2,3,4].map(k=>`<i class="${k<=m.d?"on":""}"></i>`).join("")}</span>${m.pick?'<span class="chip" style="margin:0;color:var(--done);border-color:var(--done)">先從這裡開始</span>':""}</h4>
+   <p>${m.how}</p>
+   <div class="give"><div><b>你得到</b>${m.you}</div><div><b>烘豆商得到</b>${m.them}</div></div>
+   <p><span class="pro">優點：</span>${m.pro}　<span class="con">缺點：</span>${m.con}</p></div></div>`).join("");
+  $("#dealList").innerHTML=DEAL.map(x=>`<li class="task ${done.has(x[0])?"done":""}"><label for="c-${x[0]}"><input type="checkbox" id="c-${x[0]}" data-id="${x[0]}" ${done.has(x[0])?"checked":""}><span><span class="t">${x[1]}</span><span class="d">${x[2]}</span></span></label></li>`).join("");
+}
 function renderComms(){
   $("#comms").innerHTML=COMMS.map((c,i)=>`<li class="comm ${done.has(c.id)?"done":""}"><span class="ord">${i+1}</span><div>
    <h4>${c.n}<span class="ch"><span class="tag ${c.tag}">${c.tag==="own"?"自有":"借用"}</span></span><span class="chip" style="margin:0">${c.when}</span></h4>
@@ -340,7 +396,7 @@ function renderOverall(){
   $("#allBar").style.width=(n/ALL.length*100)+"%";
   $("#allTxt").textContent=`${n} / ${ALL.length} 完成`;
 }
-function renderAll(){renderSteps();renderIssues();renderOverall();renderComms()}
+function renderAll(){renderSteps();renderIssues();renderOverall();renderComms();renderSponsor()}
 document.addEventListener("change",e=>{
   const id=e.target.dataset&&e.target.dataset.id; if(!id)return;
   e.target.checked?done.add(id):done.delete(id); save(); renderAll();
@@ -406,7 +462,7 @@ function applyRev(){
 calc();
 
 /* tabs */
-const TABS=["roadmap","issues","launch","revenue"];
+const TABS=["roadmap","issues","launch","sponsor","revenue"];
 function route(){
   const h=location.hash.slice(1); const t=TABS.includes(h)?h:"roadmap";
   TABS.forEach(x=>{$("#s-"+x).classList.toggle("on",x===t)});
