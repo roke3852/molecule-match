@@ -145,6 +145,9 @@ header p{margin:0;color:var(--muted);font-size:13px}
 #rot.ccw .spin{animation-direction:reverse}
 @keyframes spin{to{transform:rotate(360deg)}}
 .lbl{font-size:10px;fill:#7a6a5c}
+.tolab{display:inline-block;margin-top:10px;padding:8px 14px;border-radius:999px;background:#6b4428;color:#fff;font-weight:700;font-size:14px;text-decoration:none}
+#toLabWrap{text-align:center}
+header .labln{font-size:13px;color:var(--muted)}
 </style>
 </head>
 <body>
@@ -152,6 +155,7 @@ header p{margin:0;color:var(--muted);font-size:13px}
   <header>
     <h1>手搖磨豆機 拆解與組合教學</h1>
     <p>Comandante C40 ・ 1Zpresso ZP6 Special｜依官方說明整理，圖為剖面示意（非等比例）</p>
+    <p class="labln">裝好後可以到 <a href="../extraction-sim/">手沖咖啡實驗室</a> 試沖一杯</p>
   </header>
 
   <div class="bar">
@@ -198,6 +202,7 @@ header p{margin:0;color:var(--muted);font-size:13px}
         <button id="next" class="next">下一步 ›</button>
       </div>
       <div class="dots" id="dots"></div>
+      <div id="toLabWrap" hidden><a class="tolab" href="../extraction-sim/">☕ 裝好了，去沖一杯 →</a></div>
       </div>
       <div class="gamebox" id="game" hidden>
         <div class="seg" id="segK" style="display:inline-flex">
@@ -407,6 +412,7 @@ function render(){
   $('qtitle').textContent=st.t;
   $('qnext').textContent=step===S.length-1?'↻':'›';
   $('next').textContent=step===S.length-1?(mode==='dis'?'開始組合 ›':'重新開始 ↺'):'下一步 ›';
+  $('toLabWrap').hidden=!(mode==='asm'&&step===S.length-1);
   $('dots').innerHTML=S.map((_,i)=>`<b class="${i===step?'on':i<step?'done':''}" data-i="${i}">${i+1}</b>`).join('');
 }
 
@@ -565,7 +571,7 @@ function gameEnd(ok){const t=(performance.now()-GS.t0)/1000;GS.tEnd=t;gameStop()
   if(isNew)setBest(rec);
   setMsg(GS.errors?'完成！':'完成！順序、方向全對 👏');
   $('gResult').innerHTML=`<div class="result"><div class="rank">${rank}</div><div class="score">${score} 分${isNew?'　🏆 新紀錄':''}</div>
-    <p>用時 ${t.toFixed(1)} 秒（時限 ${GS.limit} 秒）・錯誤 ${GS.errors} 次</p><p>順序分 ${order}／60　時間分 ${time}／40</p></div>`;
+    <p>用時 ${t.toFixed(1)} 秒（時限 ${GS.limit} 秒）・錯誤 ${GS.errors} 次</p><p>順序分 ${order}／60　時間分 ${time}／40</p>${gk==='asm'?'<a class="tolab" href="../extraction-sim/">☕ 裝好了，去沖一杯 →</a>':''}</div>`;
   $('gStart').textContent='再玩一次';$('gStart').parentNode.hidden=false;}
 $('gStart').onclick=gameStart;
 $('qrestart').onclick=()=>{if(mode==='game')gameStart();};
@@ -585,7 +591,8 @@ svg.addEventListener('click',()=>{if(mode==='game')closePop()});
 $('gAct').onclick=e=>{const a=e.target.dataset&&e.target.dataset.a;if(!a||!GS||!GS.running)return;if(a==='spin')spin();else act(a);};
 document.querySelectorAll('#segK button').forEach(b=>b.onclick=()=>{gk=b.dataset.k;document.querySelectorAll('#segK button').forEach(x=>x.classList.toggle('on',x===b));gameReset();});
 
-setG('c40');
+setG(/^#zp6/i.test(location.hash)?'zp6':'c40');
+addEventListener('hashchange',()=>{const h=location.hash.toLowerCase();if(h==='#zp6'||h==='#c40')setG(h.slice(1));});
 </script>
 </body>
 </html>

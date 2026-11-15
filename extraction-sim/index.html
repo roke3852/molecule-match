@@ -184,6 +184,8 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
 .cloudbar{max-width:1040px;margin:-6px auto 12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .cloudbar button{padding:6px 12px;font-size:13px;font-weight:700;border-radius:999px;border:1px solid var(--line);background:var(--panel);color:var(--ink);cursor:pointer}
 .cloudbar #syncNote{font-size:12px;color:var(--muted)}
+.guideln{display:inline-block;margin-top:6px;font-size:12.5px;color:var(--accent);text-decoration:none;font-weight:700}
+.guideln:hover{text-decoration:underline}
 </style>
 <style>
 #gameView .wrap{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
@@ -510,7 +512,7 @@ button,input,select,label,.seg,.stepper,.card{touch-action:manipulation}
     <div class="param"><div class="row"><label for="dose" class="label">粉量</label><output id="doseOut" class="mono"></output></div><input id="dose" type="range" min="10" max="25" step="1" value="15"></div>
     <div class="param"><div class="row"><label for="ratio" class="label">粉水比</label><output id="ratioOut"></output></div><input id="ratio" type="range" min="12" max="20" step="0.5" value="16"></div>
     <div class="param"><div class="row"><label for="temp" class="label">水溫</label><output id="tempOut"></output></div><input id="temp" type="range" min="70" max="100" step="1" value="92"></div>
-    <div class="param wide" id="grinderParam"><div class="row"><label for="grinderSel" class="label">磨豆機</label><output id="grinderOut" class="label"></output></div><select id="grinderSel" class="beansel"></select><span class="label" id="clogOut"></span></div>
+    <div class="param wide" id="grinderParam"><div class="row"><label for="grinderSel" class="label">磨豆機</label><output id="grinderOut" class="label"></output></div><select id="grinderSel" class="beansel"></select><a class="guideln" id="glSim" hidden target="_self">🔧 這台怎麼拆洗？</a><span class="label" id="clogOut"></span></div>
     <div class="param"><div class="row"><label for="grind" class="label">研磨粒徑</label><output id="grindOut"></output></div><input id="grind" type="range" min="300" max="1200" step="50" value="650"></div>
     <div class="param wide"><span class="label">沖煮方式</span><div class="seg" role="group" aria-label="沖煮方式"><button id="pPulse" aria-pressed="true">分段注水</button><button id="pCont" aria-pressed="false">一刀流</button><button id="pSwitch" aria-pressed="false">Switch／GINA</button><button id="pImm" aria-pressed="false">浸泡</button></div></div>
     <div class="param wide" id="dripParam"><span class="label">濾杯</span><div class="seg wrapseg" role="group" aria-label="濾杯" id="segDrip"><button data-v="cone" aria-pressed="true">一般錐形</button><button data-v="v60" aria-pressed="false">V60</button><button data-v="orea" aria-pressed="false">OREA</button><button data-v="origami_c" aria-pressed="false">Origami 錐形紙</button><button data-v="origami_w" aria-pressed="false">Origami 波浪紙</button><button data-v="kalita" aria-pressed="false">Kalita Wave</button><button data-v="solo" aria-pressed="false">Solo</button></div><span class="label" id="dripDesc"></span></div>
@@ -875,7 +877,7 @@ button,input,select,label,.seg,.stepper,.card{touch-action:manipulation}
       <p class="label" id="gModeNote"></p>
       <div class="params">
         <div class="param pro gchamp" id="gchampP"><div class="row"><label for="gchamp" class="label">載入世界手沖冠軍配方</label><output id="gchampOut" class="label"></output></div><select id="gchamp" class="gsel"></select></div>
-        <div class="param pro gchamp" id="ggrinderP"><div class="row"><label for="ggrinder" class="label">磨豆機</label><output id="ggrinderOut" class="label"></output></div><select id="ggrinder" class="gsel"></select></div>
+        <div class="param pro gchamp" id="ggrinderP"><div class="row"><label for="ggrinder" class="label">磨豆機</label><output id="ggrinderOut" class="label"></output></div><select id="ggrinder" class="gsel"></select><a class="guideln" id="glGame" hidden target="_self">🔧 這台怎麼拆洗？</a></div>
         <div class="param pro" id="gdoseP"><div class="row"><label for="gdose" class="label">粉量</label><output id="gdoseOut"></output></div><input id="gdose" type="range" min="10" max="25" step="1" value="15"></div>
         <div class="param"><div class="row"><label for="gtemp" class="label">水溫</label><output id="gtempOut"></output></div><input id="gtemp" type="range" min="80" max="100" step="1" value="90"></div>
         <div class="param"><div class="row"><label for="ggrind" class="label">研磨粒徑</label><output id="ggrindOut"></output></div><input id="ggrind" type="range" min="300" max="1200" step="50" value="700"></div>
@@ -3250,6 +3252,16 @@ window.appBack=goBack;
     if(lock==='h'&&dx>90&&Math.abs(dy)<dx*.6&&Date.now()-st<900)goBack();},{passive:true});
   addEventListener('touchcancel',()=>{on=false;tip.style.opacity=0;},{passive:true});
 })();
+})();
+</script>
+<script>
+/* 選到有拆裝教學的磨豆機時，顯示連到「磨豆機拆裝教學」的小連結 */
+(function(){
+const GUIDE={c40:'c40',c40rc:'c40',zp6:'zp6'};
+function upd(){[['grinderSel','glSim'],['ggrinder','glGame']].forEach(([s,a])=>{const sel=document.getElementById(s),ln=document.getElementById(a);if(!sel||!ln)return;
+  const g=GUIDE[sel.value];ln.hidden=!g;if(g)ln.href='../grinder-guide/#'+g;});}
+document.addEventListener('change',upd,true);document.addEventListener('click',()=>setTimeout(upd,0),true);
+addEventListener('hashchange',()=>setTimeout(upd,0));upd();setTimeout(upd,300);
 })();
 </script>
 <script>
