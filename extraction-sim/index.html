@@ -457,6 +457,11 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
 .db-row.axis{min-height:16px}.db-row.axis .db-track{height:14px}
 .db-row.axis span[style]{position:absolute;transform:translateX(-50%);font-size:10.5px;color:var(--muted);font-family:var(--f-mono)}
 .modes .seg button{padding:7px 2px;white-space:nowrap}
+/* 手機：連點按鈕不要觸發「點兩下放大」（仍可雙指縮放）；輸入框至少 16px，避免 iOS 點進去自動放大 */
+html{touch-action:manipulation}
+button,input,select,label,.seg,.stepper,.card{touch-action:manipulation}
+.stepper button{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+@media (pointer:coarse){input[type=number],input[type=text],select{font-size:16px!important}}
 .modes .in{gap:8px}
 .mic-trade{margin-top:14px;border:1px solid var(--line);border-radius:10px;padding:10px 12px;display:flex;flex-direction:column;gap:5px}
 .mic-trade h3{margin:0;font-size:15px}
@@ -1301,7 +1306,14 @@ function stepify(inp,o){if(typeof document==='undefined'||!inp||inp.dataset.step
   const parse=o.parse||(s=>+s),fmt=o.fmt||(v=>String(v));
   const wrap=document.createElement('div');wrap.className='stepper';inp.parentNode.insertBefore(wrap,inp);
   const mk=(t,d,lab)=>{const b=document.createElement('button');b.type='button';b.textContent=t;b.setAttribute('aria-label',lab);
-    b.onclick=()=>{let v=parse(inp.value);if(v==null||isNaN(v))v=o.min;v=Math.max(o.min,Math.min(o.max,Math.round((v+d)/o.step)*o.step));inp.value=fmt(v);inp.dispatchEvent(new Event('change'));};return b;};
+    const bump=()=>{let v=parse(inp.value);if(v==null||isNaN(v))v=o.min;v=Math.max(o.min,Math.min(o.max,Math.round((v+d)/o.step)*o.step));inp.value=fmt(v);inp.dispatchEvent(new Event('change'));};
+    // 按一下調一格；按住不放會連續調整
+    let tmr=null,rep=null,held=false;const stop=()=>{clearTimeout(tmr);clearInterval(rep);tmr=rep=null;};
+    b.addEventListener('pointerdown',e=>{held=false;stop();tmr=setTimeout(()=>{held=true;bump();rep=setInterval(bump,120);},450);});
+    ['pointerup','pointerleave','pointercancel'].forEach(ev=>b.addEventListener(ev,stop));
+    b.addEventListener('click',e=>{if(held){held=false;return;}bump();});
+    b.addEventListener('dblclick',e=>e.preventDefault());
+    return b;};
   const lab=inp.getAttribute('aria-label')||'';
   wrap.appendChild(mk('−',-o.step,'減少'+lab));wrap.appendChild(inp);wrap.appendChild(mk('＋',o.step,'增加'+lab));}
 // 每張注水卡片：加上 −／＋，並在底部顯示累計水量與當下粉水比
