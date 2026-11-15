@@ -98,6 +98,14 @@ header p{margin:0;color:var(--muted);font-size:13px}
 @keyframes swL{0%{transform:translateX(50px);opacity:0}20%{opacity:1}80%{opacity:1}100%{transform:translateX(-55px);opacity:0}}
 #swipeHint .htxt{font-size:14px;font-weight:700;margin-top:6px}
 #swipeHint .htxt small{display:block;font-size:11px;font-weight:500;opacity:.8}
+#pop{position:absolute;z-index:4;background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:0 6px 18px rgba(0,0,0,.2);padding:8px;width:196px}
+#pop[hidden]{display:none}
+#pop .ph{font-size:14px;font-weight:800;margin:0 2px 6px;display:flex;justify-content:space-between;align-items:center}
+#pop .pg{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+#pop button{font-family:inherit;font-size:14px;font-weight:700;min-height:44px;border-radius:10px;border:1px solid var(--line);background:#faf6f0;color:var(--ink);cursor:pointer;padding:0 4px}
+#pop button.rel{grid-column:1/-1;background:#dbeafe;border-color:#93c5fd;color:#1d4ed8}
+#pop button.x{border:0;background:none;min-height:0;font-size:18px;color:var(--muted);padding:0 4px}
+#pop .pn{font-size:10.5px;color:var(--muted);margin-top:6px;text-align:center;line-height:1.4}
 .rule{font-size:12px;color:var(--muted);margin-top:12px;line-height:1.6}
 .toast{position:absolute;left:50%;top:10px;transform:translateX(-50%);background:var(--ink);color:#fff;font-size:13px;padding:5px 12px;border-radius:20px;opacity:0;transition:opacity .25s;pointer-events:none;white-space:nowrap}
 .toast.show{opacity:.92}
@@ -169,6 +177,7 @@ header p{margin:0;color:var(--muted);font-size:13px}
     <div class="stage" id="stage">
       <svg id="svg" viewBox="0 0 400 600" aria-label="磨豆機剖面示意圖"></svg>
       <div class="toast" id="toast"></div>
+      <div id="pop" hidden></div>
       <div id="swipeHint" hidden><div class="track"><span class="fing">👆</span></div><div class="htxt"></div></div>
     </div>
     </div>
@@ -201,7 +210,7 @@ header p{margin:0;color:var(--muted);font-size:13px}
         <div class="gchips" id="gChips"></div>
         <div class="nav"><button id="gStart" class="next">開始挑戰</button></div>
         <div id="gResult"></div>
-        <div class="rule">玩法：點圖左邊的零件名稱，上方會出現動作選單：✋ 固定、↻ 順時針、↺ 逆時針、取下／裝上。要轉的零件得先選對方向（按鈕或在圖上滑：→ 順時針、← 逆時針），再點零件旁的紅色旋轉鈕或繼續滑 3 下才會轉鬆（或鎖緊）；需要固定另一邊的（例如 C40 刻度盤），要先固定才能轉。旋轉方向一律以「面向正在轉的那個零件」來看。<br>評分（滿分 100）：順序分 60＋時間分 40。選錯零件、動作或方向，每次扣 10 分；在時限 40% 內完成拿滿時間分，之後越慢越少，超過時限就挑戰失敗。同一步一起拆裝的零件先後不拘。<br>S ≥ 90｜A ≥ 75｜B ≥ 60｜C 其他</div>
+        <div class="rule">玩法：點圖左邊的零件名稱，名稱旁邊會跳出動作選單：取下／裝上、✋ 固定、↺ 逆時針、↻ 順時針。固定中的零件再點一次可以「放開固定」（不扣分）。要轉的零件得先選對方向（按鈕或在圖上滑：→ 順時針、← 逆時針），再點零件旁的紅色旋轉鈕或繼續滑 3 下才會轉鬆（或鎖緊）；需要固定另一邊的（例如 C40 刻度盤），要先固定才能轉。旋轉方向一律以「面向正在轉的那個零件」來看。<br>評分（滿分 100）：順序分 60＋時間分 40。選錯零件、動作或方向，每次扣 10 分；在時限 40% 內完成拿滿時間分，之後越慢越少，超過時限就挑戰失敗。同一步一起拆裝的零件先後不拘。<br>S ≥ 90｜A ≥ 75｜B ≥ 60｜C 其他</div>
       </div>
     </div>
   </div>
@@ -469,14 +478,14 @@ function hint(k,n){const h=$('swipeHint');if(!k||mode!=='game'){h.hidden=true;re
   h.className=k;h.querySelector('.htxt').innerHTML=k==='both'?'← 逆時針　｜　順時針 →<small>可以直接在圖上左右滑動選方向</small>':
     `${k==='cw'?'往右滑 →　順時針':'← 往左滑　逆時針'}<small>再滑 ${3-(n||0)} 下，或點零件旁的紅色旋轉鈕</small>`;h.hidden=false;}
 function setMsg(h){$('gMsg').innerHTML=h}
-function gameStop(){if($('swipeHint'))hint(null);clearInterval(gTimer);gTimer=null;if(GS)GS.running=false;$('gAct').hidden=true;}
+function gameStop(){if($('swipeHint'))hint(null);if($('pop'))closePop();clearInterval(gTimer);gTimer=null;if(GS)GS.running=false;$('gAct').hidden=true;}
 function gameReset(){gameStop();
   GS={running:false,done:new Set(),taken:new Set(),si:0,held:null,rot:null,sel:null,acts:0,errors:0,t0:0,tEnd:0,limit:gameLimit(),total:totalActs()};
   svg.querySelectorAll('.part').forEach(el=>el.style.transition='none');placeAll();hideArrow();svg.getBoundingClientRect();
   svg.querySelectorAll('.part').forEach(el=>el.style.transition='');
   $('gTime').textContent='0.0';$('gLimit').textContent=` / ${GS.limit}`;$('gBar').style.width='100%';$('gBar').style.background='#16a34a';
   const b=getBest(),d=G[g];
-  setMsg(`<b>${d.name}・${gk==='dis'?'拆解':'組裝'}挑戰</b>（共 ${GS.total} 個動作）<br>點圖左邊的零件名稱，從上方選單選動作：固定、順時針、逆時針、${gk==='dis'?'取下':'裝上'}。要轉的零件選對方向後（也可以在圖上左右滑），再轉 3 下。${b?`<br>🏆 最佳紀錄：${b.rank} ${b.score} 分（${b.time} 秒、錯 ${b.errors} 次）`:''}`);
+  setMsg(`<b>${d.name}・${gk==='dis'?'拆解':'組裝'}挑戰</b>（共 ${GS.total} 個動作）<br>點圖左邊的零件名稱，旁邊會跳出動作選單：${gk==='dis'?'取下':'裝上'}、固定、逆時針、順時針。要轉的零件選對方向後（也可以在圖上左右滑），再轉 3 下。${b?`<br>🏆 最佳紀錄：${b.rank} ${b.score} 分（${b.time} 秒、錯 ${b.errors} 次）`:''}`);
   $('gResult').innerHTML='';$('gStart').textContent='開始挑戰';$('gStart').parentNode.hidden=false;
   renderPills();qhud();}
 function gameStart(){gameReset();GS.running=true;GS.t0=performance.now();$('gStart').parentNode.hidden=true;renderPills();
@@ -486,17 +495,28 @@ function gameStart(){gameReset();GS.running=true;GS.t0=performance.now();$('gSta
     qhud();if(t>=GS.limit)gameEnd(false);},100);qhud();}
 function flashBad(id){const el=$('p-'+id);if(el)el.classList.add('bad');const pl=document.querySelector(`#pills .pill[data-id="${id}"]`);if(pl)pl.classList.add('bad');
   setTimeout(()=>{if(el)el.classList.remove('bad');if(pl)pl.classList.remove('bad')},450);}
-function wrong(msg){hint(null);GS.errors++;flashBad(GS.sel);setMsg('❌ '+msg);$('gAct').hidden=true;qhud();}
-function good(msg){hint(null);GS.acts++;setMsg('✅ '+msg);$('gAct').hidden=true;placeAll();renderPills();qhud();}
+function wrong(msg){hint(null);closePop();GS.errors++;flashBad(GS.sel);setMsg('❌ '+msg);$('gAct').hidden=true;qhud();}
+function good(msg){hint(null);closePop();GS.acts++;setMsg('✅ '+msg);$('gAct').hidden=true;placeAll();renderPills();qhud();}
 function gameTap(id){if(!GS||!GS.running)return;
-  if(GS.rot){setMsg(`先把「${L(GS.rot.id)}」轉完！`);return;}
+  if(GS.rot){if(id===GS.held){GS.sel=id;openPop(id);return;}setMsg(`先把「${L(GS.rot.id)}」轉完！（或點「${L(GS.held||GS.rot.id)}」放開）`);return;}
   const S0=seq()[GS.si];const inHR=S0&&S0.type==='holdrot'&&S0.opts.some(o=>o.hold===id||o.rot===id);
+  if(GS.held===id){GS.sel=id;openPop(id);return;}
   if(GS.done.has(id)&&!inHR){setMsg(`「${L(id)}」已經${gk==='dis'?'拆下':'裝好'}了。`);return;}
-  GS.sel=id;const t=gk==='dis'?'⬆ 取下':'⬇ 裝上';
-  $('gAct').innerHTML=`<div class="ah">${L(id)}：要做什麼？</div><div class="ab">
-    <button data-a="hold">✋ 固定</button><button data-a="cw">↻ 順時針</button><button data-a="ccw">↺ 逆時針</button><button data-a="take">${t}</button></div>
-    <div class="an">方向以「面向這個零件」來看・也可以直接在圖上滑：→ 順時針、← 逆時針</div>`;
-  $('gAct').hidden=false;hint('both');}
+  GS.sel=id;openPop(id);}
+function openPop(id){const t=gk==='dis'?'⬆ 取下':'⬇ 裝上',held=GS.held===id,pop=$('pop');
+  pop.innerHTML=held?`<div class="ph">✋ ${L(id)}（固定中）<button class="x" data-a="close">✕</button></div><div class="pg"><button class="rel" data-a="release">放開固定</button></div><div class="pn">${GS.rot?'放開會中斷目前的旋轉':'放開不扣分'}</div>`
+   :`<div class="ph">${L(id)}<button class="x" data-a="close">✕</button></div><div class="pg">
+    <button data-a="take">${t}</button><button data-a="hold">✋ 固定</button>
+    <button data-a="ccw">↺ 逆時針</button><button data-a="cw">↻ 順時針</button></div>
+    <div class="pn">方向以「面向這個零件」來看</div>`;
+  pop.hidden=false;
+  const st=$('stage').getBoundingClientRect(),pl=document.querySelector(`#pills .pill[data-id="${id}"] rect`).getBoundingClientRect();
+  const h=pop.offsetHeight;let top=pl.top-st.top+pl.height/2-h/2;top=Math.max(6,Math.min(top,st.height-h-6));
+  pop.style.left=(pl.right-st.left+8)+'px';pop.style.top=top+'px';}
+function closePop(){$('pop').hidden=true}
+function release(){const id=GS.held;if(!id)return;
+  if(GS.rot){if(gk==='asm')GS.done.delete(GS.rot.moving);GS.rot=null;hideArrow();$('gAct').hidden=true;}
+  GS.held=null;GS.acts=Math.max(0,GS.acts-1);closePop();hint(null);placeAll();renderPills();qhud();setMsg(`放開了「${L(id)}」。`);}
 function act(a){const id=GS.sel,S=seq()[GS.si],isRot=a==='cw'||a==='ccw';
   if(S.type==='take'){
     if(S.ids.includes(id)&&!GS.taken.has(id)){ if(a!=='take')return wrong(`「${L(id)}」這一步不用固定也不用轉。`);
@@ -510,7 +530,7 @@ function act(a){const id=GS.sel,S=seq()[GS.si],isRot=a==='cw'||a==='ccw';
     return startRot(id,a,id);}
   // holdrot
   if(!GS.held){
-    if(a==='hold'&&S.opts.some(o=>o.hold===id)){GS.held=id;return good(`固定住「${L(id)}」，接著轉另一邊`);}
+    if(a==='hold'&&S.opts.some(o=>o.hold===id)){GS.held=id;return good(`✋ 固定住「${L(id)}」，接著轉另一邊（再點「${L(id)}」可以放開）`);}
     if(isRot&&S.opts.some(o=>o.rot===id))return wrong('要先固定住另一邊，不然會一起空轉！');
     return wrong(`現在還不能動「${L(id)}」，順序不對！`);}
   const o=S.opts.find(o=>o.hold===GS.held);
@@ -519,7 +539,7 @@ function act(a){const id=GS.sel,S=seq()[GS.si],isRot=a==='cw'||a==='ccw';
   if(!isRot)return wrong(`「${L(id)}」要用轉的。`);
   if(a!==o.dir)return wrong('方向反了！');
   startRot(id,a,S.part);}
-function startRot(id,dir,moving){GS.rot={id,dir,moving,n:0};
+function startRot(id,dir,moving){GS.rot={id,dir,moving,n:0};closePop();
   if(gk==='asm'){GS.done.add(moving);placeAll();}
   showArrow(id,dir);setMsg(`方向正確！再轉 3 下把「${L(id)}」${gk==='dis'?'轉鬆':'鎖緊'}`);
   $('gAct').innerHTML=`<div class="ah">${L(id)}・${dir==='cw'?'↻ 順時針':'↺ 逆時針'}　<span id="spinCnt">0/3</span></div><div class="an" style="font-size:13px">點零件旁的紅色 ${dir==='cw'?'↻':'↺'} 按鈕，或在圖上${dir==='cw'?'往右 →':'往左 ←'}滑，共 3 下</div>`;
@@ -551,8 +571,11 @@ $('stage').addEventListener('pointerup',e=>{if(mode!=='game'||!sw)return;const d
 $('stage').addEventListener('pointercancel',()=>{sw=null});
 function gameSwipe(dir){if(!GS||!GS.running)return;
   if(GS.rot){if(dir===GS.rot.dir)spin();else setMsg(`滑反了！要往${GS.rot.dir==='cw'?'右 →':'左 ←'}滑`);return;}
-  if(GS.sel&&!$('gAct').hidden){act(dir);return;}
+  if(GS.sel&&!$('pop').hidden&&GS.held!==GS.sel){act(dir);return;}
   setMsg('先點左邊的零件名稱，再滑動旋轉。');}
+$('pop').onclick=e=>{e.stopPropagation();const a=e.target.dataset&&e.target.dataset.a;if(!a||!GS||!GS.running)return;
+  if(a==='close')return closePop();if(a==='release')return release();act(a);};
+svg.addEventListener('click',()=>{if(mode==='game')closePop()});
 $('gAct').onclick=e=>{const a=e.target.dataset&&e.target.dataset.a;if(!a||!GS||!GS.running)return;if(a==='spin')spin();else act(a);};
 document.querySelectorAll('#segK button').forEach(b=>b.onclick=()=>{gk=b.dataset.k;document.querySelectorAll('#segK button').forEach(x=>x.classList.toggle('on',x===b));gameReset();});
 
