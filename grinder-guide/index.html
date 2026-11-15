@@ -24,7 +24,8 @@ header p{margin:0;color:var(--muted);font-size:13px}
 @media (max-width:760px){.main{grid-template-columns:1fr}}
 .stage{background:var(--card);border:1px solid var(--line);border-radius:16px;position:relative;overflow:hidden;touch-action:pan-y}
 .stage svg{display:block;width:100%;height:auto}
-.qnav{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:8px;background:rgba(245,239,230,.94);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);padding:6px 0 8px}
+#stick{position:sticky;top:0;z-index:5;background:rgba(245,239,230,.96);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.qnav{display:flex;align-items:center;gap:8px;background:rgba(245,239,230,.94);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);padding:6px 0 8px}
 .qnav button{width:52px;height:46px;flex:none;border-radius:12px;font-size:26px;font-weight:700;border:1px solid var(--line);background:#fff;color:var(--ink);cursor:pointer;line-height:1}
 .qnav button.next{background:var(--accent);color:#fff;border-color:var(--accent)}
 .qnav button:disabled{opacity:.35;cursor:default}
@@ -67,6 +68,17 @@ header p{margin:0;color:var(--muted);font-size:13px}
 #gslot .gchips{margin-top:8px}
 #gslot .nav{margin-top:10px}
 #gslot .result{margin-top:10px}
+#gAct[hidden],.nav[hidden]{display:none}
+#gAct{padding:2px 0 10px}
+#gAct .ah{font-size:15px;font-weight:700;margin-bottom:6px;text-align:center}
+#gAct .ab{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+#gAct button{font-family:inherit;font-size:14px;font-weight:700;padding:11px 2px;border-radius:12px;border:1px solid var(--line);background:#fff;cursor:pointer;color:var(--ink)}
+#gAct button.big{grid-column:1/-1;background:var(--accent);color:#fff;border-color:var(--accent);font-size:19px;padding:15px}
+#gAct .an{font-size:11px;color:var(--muted);text-align:center;margin-top:5px}
+.part.held{filter:drop-shadow(0 0 5px rgba(37,99,235,.95))}
+.part.wob>g{animation:wob .3s}
+@keyframes wob{30%{transform:rotate(-5deg)}70%{transform:rotate(5deg)}}
+.pill.held rect{fill:#dbeafe;stroke:#3b82f6}.pill.held text{fill:#1d4ed8}
 .rule{font-size:12px;color:var(--muted);margin-top:12px;line-height:1.6}
 .toast{position:absolute;left:50%;top:10px;transform:translateX(-50%);background:var(--ink);color:#fff;font-size:13px;padding:5px 12px;border-radius:20px;opacity:0;transition:opacity .25s;pointer-events:none;white-space:nowrap}
 .toast.show{opacity:.92}
@@ -126,10 +138,13 @@ header p{margin:0;color:var(--muted);font-size:13px}
 
   <div class="main">
     <div>
+    <div id="stick">
     <div class="qnav">
       <button id="qprev" aria-label="上一步">‹</button>
       <div class="qmid"><span id="qno"></span><b id="qtitle"></b></div>
       <button id="qnext" class="next" aria-label="下一步">›</button>
+    </div>
+    <div id="gAct" hidden></div>
     </div>
     <div id="gslot" hidden></div>
     <div class="stage" id="stage">
@@ -166,7 +181,7 @@ header p{margin:0;color:var(--muted);font-size:13px}
         <div class="gchips" id="gChips"></div>
         <div class="nav"><button id="gStart" class="next">開始挑戰</button></div>
         <div id="gResult"></div>
-        <div class="rule">評分（滿分 100）：順序分 60＋時間分 40。每點錯一次順序扣 10 分；在時限 40% 內完成拿滿時間分，之後越慢越少，超過時限就挑戰失敗。同一步一起拆裝的零件（例如錐刀和彈簧）先後不拘。<br>S ≥ 90｜A ≥ 75｜B ≥ 60｜C 其他</div>
+        <div class="rule">玩法：點圖左邊的零件名稱，上方會出現動作選單：✋ 固定、↻ 順時針、↺ 逆時針、取下／裝上。要轉的零件得先選對方向，再按「轉！」3 下才會轉鬆（或鎖緊）；需要固定另一邊的（例如 C40 刻度盤），要先固定才能轉。旋轉方向一律以「面向正在轉的那個零件」來看。<br>評分（滿分 100）：順序分 60＋時間分 40。選錯零件、動作或方向，每次扣 10 分；在時限 40% 內完成拿滿時間分，之後越慢越少，超過時限就挑戰失敗。同一步一起拆裝的零件先後不拘。<br>S ≥ 90｜A ≥ 75｜B ≥ 60｜C 其他</div>
       </div>
     </div>
   </div>
@@ -231,8 +246,9 @@ c40:{
   },
   dis:[
     {t:'準備工作', d:'在桌面上鋪一塊布，準備毛刷與吹球。先記下目前格數：一手握住搖柄固定軸心，另一手把刻度盤往鎖緊方向轉到底，數著格數就知道原本在幾格，組回時才能還原。', tip:'全程在桌面上方操作，零件掉了才不會滾走。', rm:[]},
-    {t:'旋下粉杯', d:'握住機身，把下方的粉杯（玻璃罐）旋開取下，就會看到底部的三爪刻度盤。', rm:['jar'], rot:{at:[205,420],dir:'ccw',lbl:'旋開'}},
-    {t:'轉下刻度盤', d:'搖柄先不要拔！一手握住搖柄把軸心固定住，另一手把三爪刻度盤往放鬆方向一直轉，直到完全脫離軸心。', warn:'沒固定搖柄的話，軸心會跟著刻度盤一起空轉，轉不下來。刻度盤一離開，錐刀和彈簧就會掉下來，記得在桌面上方操作。', rm:['dial'], rot:{at:[205,346],dir:'ccw',lbl:'旋鬆'}},
+    {t:'旋下粉杯', d:'握住機身，從底部看把粉杯（玻璃罐）逆時針旋開取下，就會看到底部的三爪刻度盤。', tip:'一般正牙螺紋：面向零件看，逆時針是鬆、順時針是緊。', rm:['jar'], rot:{at:[205,420],dir:'ccw',lbl:'逆時針'}},
+    {t:'固定搖柄', d:'搖柄先不要拔！一手握住搖柄，把軸心固定住。', tip:'也可以反過來：捏住三爪刻度盤固定，改轉搖柄。兩種都行，重點是一邊固定、一邊轉。', warn:'沒固定的話，軸心會跟著刻度盤一起空轉，轉不下來。', rm:[], focus:['crank']},
+    {t:'轉下三爪刻度盤', d:'另一手從底部看，把三爪刻度盤逆時針轉，轉幾圈鬆開後就會脫離軸心。若是固定刻度盤、改轉搖柄，搖柄要從頂部看逆時針轉。', warn:'刻度盤一離開，錐刀和彈簧就會掉下來，記得在桌面上方操作。', rm:['dial'], rot:{at:[205,346],dir:'ccw',lbl:'逆時針'}},
     {t:'取下錐刀與彈簧', d:'錐刀（內刀）往下取出，裡面藏著一根彈簧，一起拿出來。', tip:'C40 的錐刀是「浮動式」設計，在軸上有點鬆是正常的，研磨時會自動跟著軸心置中。', rm:['cone','spring']},
     {t:'取下下墊片', d:'取下軸心上的下墊片。舊款機器這裡可能會有一個紅色 O 型環（夾在墊片與彈簧之間，用來固定墊片），新款已經取消，沒有也正常。', rm:['washerB']},
     {t:'拔下搖柄', d:'刻度盤和錐刀都拆下後，才把搖柄拔掉。搖柄是靠一顆小磁鐵吸在軸心頂端，手握在靠近機身頂部的位置，直接往上拔起就好，不需要轉。', tip:'搖柄在軸上有一點點晃動是正常設計，不影響研磨。', rm:['crank']},
@@ -245,9 +261,10 @@ c40:{
     {t:'先裝搖柄固定', d:'把搖柄吸回軸心頂端。後面鎖刻度盤時要握住搖柄固定軸心，所以搖柄一定要先裝。', add:['crank']},
     {t:'套上下墊片', d:'從下方把下墊片套上軸心，凸起的邊緣同樣朝向軸承（朝上）。', tip:'若你的機器有紅色 O 型環，它放在下墊片與彈簧之間。', add:['washerB']},
     {t:'彈簧放進錐刀', d:'先把彈簧放進錐刀內，再把錐刀連同彈簧套回軸心。', add:['spring','cone']},
-    {t:'鎖回刻度盤', d:'把錐刀往機身內推住，同時握住搖柄固定軸心，再把刻度盤鎖回軸心（可以用握搖柄的手順便頂住機身）。', warn:'軸心沒固定的話會跟著刻度盤空轉，鎖不上。', add:['dial'], rot:{at:[205,346],dir:'cw',lbl:'鎖緊'}},
+    {t:'固定搖柄', d:'一手握住搖柄把軸心固定住，同時把錐刀往機身內推住。', tip:'也可以反過來：捏住刻度盤固定，改轉搖柄（從頂部看順時針）。', warn:'軸心沒固定的話會跟著刻度盤空轉，鎖不上。', add:[], focus:['crank']},
+    {t:'鎖回三爪刻度盤', d:'從底部看，把三爪刻度盤順時針鎖回軸心。', add:['dial'], rot:{at:[205,346],dir:'cw',lbl:'順時針'}},
     {t:'歸零並還原格數', d:'握住搖柄固定軸心，把刻度盤往鎖緊方向轉到底，刀盤輕觸、轉不動的位置就是 0 格。再往回數到你原本使用的格數。', tip:'轉到「輕觸」就停，不要硬鎖，避免刀盤互磨。', add:[]},
-    {t:'鎖回粉杯', d:'把粉杯旋回機身底部，完成！', add:['jar'], rot:{at:[205,420],dir:'cw',lbl:'鎖上'}}
+    {t:'鎖回粉杯', d:'從底部看，把粉杯順時針旋回機身，完成！', add:['jar'], rot:{at:[205,420],dir:'cw',lbl:'順時針'}}
   ]
 },
 zp6:{
@@ -276,7 +293,7 @@ zp6:{
   },
   dis:[
     {t:'準備工作', d:'先記下目前刻度，再把刻度環順時針轉到較粗的刻度，讓刀盤分開。準備毛刷和吹球，在桌面上操作。官方建議每月拆洗一次，全程不需要工具。', rm:[], rot:{at:[200,80],dir:'cw',lbl:'轉粗'}},
-    {t:'取下搖柄與粉杯', d:'把搖柄從頂端拔起，再把底部的粉杯旋開取下（ZP6 的粉杯是螺紋鎖上的，不是磁吸）。', rm:['handle','cup'], rot:{at:[205,420],dir:'ccw',lbl:'旋開'}},
+    {t:'取下搖柄與粉杯', d:'把搖柄從頂端拔起，再從底部看把粉杯逆時針旋開取下（ZP6 的粉杯是螺紋鎖上的，不是磁吸）。', rm:['handle','cup'], rot:{at:[205,420],dir:'ccw',lbl:'逆時針'}},
     {t:'轉下頂部滾花螺帽', d:'滾花螺帽在機身頂端、中軸最上面。一手從底部往上頂住內刀，另一手把螺帽逆時針轉下。', tip:'內刀上方有彈簧，頂住內刀才好轉，零件也不會掉。', rm:['nut'], rot:{at:[200,58],dir:'ccw',lbl:'逆時針'}},
     {t:'取出上軸承蓋與上軸承', d:'從頂部取出上軸承蓋，再取出上軸承。', tip:'注意上軸承蓋有圓點的那面朝上，組回時要照原方向。', rm:['ucap','ubear']},
     {t:'抽出中軸＋內刀組', d:'把中軸連同內刀從底部抽出，套在中軸上的下軸承蓋與錐形彈簧也一起取下。', rm:['burrset','bcap','spring']},
@@ -292,7 +309,7 @@ zp6:{
     {t:'插回中軸＋內刀組', d:'把套好彈簧與軸承蓋的中軸，從底部插回機身。', add:['burrset']},
     {t:'裝回上軸承（最難）', d:'從底部頂住內刀，先從頂部放入上軸承，再放上軸承蓋：有圓點的那面朝上，扁平面對準中軸的扁平面。', tip:'官方也說這步最需要耐心：上軸承蓋一定要卡到正確位置，慢慢轉動找角度，對上就會落下去。', add:['ubear','ucap']},
     {t:'鎖回滾花螺帽', d:'繼續頂住內刀，把頂部的滾花螺帽順時針鎖到感覺有阻力就停。', warn:'不要過度鎖緊，可能損傷刀盤組。', add:['nut'], rot:{at:[200,58],dir:'cw',lbl:'順時針'}},
-    {t:'裝回搖柄與粉杯', d:'搖柄插回頂端，粉杯對準螺紋旋回底部。', tip:'螺紋先對正再轉，避免鎖歪咬牙。', add:['handle','cup'], rot:{at:[205,420],dir:'cw',lbl:'鎖上'}},
+    {t:'裝回搖柄與粉杯', d:'搖柄插回頂端，粉杯對準螺紋，從底部看順時針旋回。', tip:'螺紋先對正再轉，避免鎖歪咬牙。', add:['handle','cup'], rot:{at:[205,420],dir:'cw',lbl:'順時針'}},
     {t:'校正零點', d:'把刻度環逆時針（往細）慢慢轉，轉到搖柄開始有阻力就是零點（不是鎖到最緊），這時指針應對準 0。若指針在 0 的右邊：先轉粗，頂住內刀把滾花螺帽逆時針鬆一點，再轉回零點檢查；在左邊就把螺帽順時針鎖緊一點。重複到對準為止，再轉回你常用的刻度。', tip:'逆時針是轉細、順時針是轉粗，數字越大越粗。鎖螺帽的力道會讓零點差到 2 格以上，所以要反覆確認。', add:[]}
   ]
 }};
@@ -332,7 +349,7 @@ function removedSet(){
 function render(){
   if(mode==='game'){gameReset();return;}
   const d=G[g], S=steps(), st=S[step], rem=removedSet();
-  const focus=new Set(mode==='dis'?st.rm:st.add);
+  const focus=new Set(st.focus||(mode==='dis'?st.rm:st.add));
   Object.entries(d.parts).forEach(([id,p])=>{
     const el=$('p-'+id); const pos=rem.has(id)?p.away:p.home;
     el.style.transform=`translate(${pos[0]}px,${pos[1]}px)`;
@@ -364,7 +381,7 @@ function go(i){const n=steps().length;
   step=Math.max(0,Math.min(n-1,i));render();}
 function setMode(m){gameStop();mode=m;step=0;
   const slot=$('gslot'), box=$('game');
-  if(m==='game'){['segK','gMsg','gChips','gStart','gResult'].forEach(id=>{const el=$(id);slot.appendChild(id==='gStart'?el.parentNode:el)});}
+  if(m==='game'){['segK','gMsg','gStart','gResult'].forEach(id=>{const el=$(id);slot.appendChild(id==='gStart'?el.parentNode:el)});}
   slot.hidden=m!=='game';document.body.classList.toggle('gaming',m==='game');
   $('tut').hidden=m==='game';$('game').hidden=m!=='game';$('qprev').hidden=$('qnext').hidden=m==='game';document.querySelectorAll('#segM button').forEach(b=>b.classList.toggle('on',b.dataset.m===m));
   // 切換時先把零件瞬間放到起始狀態
@@ -387,62 +404,121 @@ stg.addEventListener('touchstart',e=>{sx=e.touches[0].clientX},{passive:true});
 stg.addEventListener('touchend',e=>{if(sx===null)return;const dx=e.changedTouches[0].clientX-sx;if(Math.abs(dx)>45&&mode!=='game')go(step+(dx<0?1:-1));sx=null;});
 
 /* ---------- 挑戰遊戲 ---------- */
+G.c40.game={
+  dis:[{type:'rot',id:'jar',dir:'ccw'},
+       {type:'holdrot',part:'dial',opts:[{hold:'crank',rot:'dial',dir:'ccw'},{hold:'dial',rot:'crank',dir:'ccw'}]},
+       {type:'take',ids:['cone','spring']},{type:'take',ids:['washerB']},{type:'take',ids:['crank']},{type:'take',ids:['axle','washerT']}],
+  asm:[{type:'take',ids:['axle','washerT']},{type:'take',ids:['crank']},{type:'take',ids:['washerB']},{type:'take',ids:['spring','cone']},
+       {type:'holdrot',part:'dial',opts:[{hold:'crank',rot:'dial',dir:'cw'},{hold:'dial',rot:'crank',dir:'cw'}]},
+       {type:'rot',id:'jar',dir:'cw'}]};
+G.zp6.game={
+  dis:[{type:'take',ids:['handle']},{type:'rot',id:'cup',dir:'ccw'},
+       {type:'holdrot',part:'nut',opts:[{hold:'burrset',rot:'nut',dir:'ccw'}]},
+       {type:'take',ids:['ucap','ubear']},{type:'take',ids:['burrset','bcap','spring']},
+       {type:'rot',id:'oring',dir:'cw'},{type:'rot',id:'dring',dir:'cw'}],
+  asm:[{type:'rot',id:'dring',dir:'ccw'},{type:'rot',id:'oring',dir:'ccw'},{type:'take',ids:['spring','bcap']},{type:'take',ids:['burrset']},
+       {type:'take',ids:['ubear','ucap']},{type:'holdrot',part:'nut',opts:[{hold:'burrset',rot:'nut',dir:'cw'}]},
+       {type:'take',ids:['handle']},{type:'rot',id:'cup',dir:'cw'}]};
+const ROTAT={crank:[255,78]};
 let gk='dis', GS=null, gTimer=null;
-function gameGroups(){const d=G[g];return gk==='dis'?d.dis.filter(x=>x.rm.length).map(x=>x.rm):d.asm.filter(x=>x.add.length).map(x=>x.add);}
-function gameLimit(){return Object.keys(G[g].parts).length*(gk==='asm'?6:5);}
-function bestKey(){return `grinder-best-${g}-${gk}`}
+const WT={take:4,hold:4,rot:8};
+function seq(){return G[g].game[gk]}
+function gameLimit(){return seq().reduce((t,x)=>t+(x.type==='take'?WT.take*x.ids.length:x.type==='rot'?WT.rot:WT.hold+WT.rot),0)}
+function totalActs(){return seq().reduce((t,x)=>t+(x.type==='take'?x.ids.length:x.type==='rot'?1:2),0)}
+function L(id){return short(G[g].parts[id].label)}
+function bestKey(){return `grinder-best2-${g}-${gk}`}
 function getBest(){try{return JSON.parse(localStorage.getItem(bestKey()))}catch(e){return null}}
 function setBest(v){try{localStorage.setItem(bestKey(),JSON.stringify(v))}catch(e){}}
-function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
-function placeAll(doneSet){const d=G[g];Object.entries(d.parts).forEach(([id,p])=>{const el=$('p-'+id);
-  const out=gk==='dis'?doneSet.has(id):!doneSet.has(id);const pos=out?p.away:p.home;
-  el.style.transform=`translate(${pos[0]}px,${pos[1]}px)`;el.classList.remove('active','bad');});
-  $('rot').style.opacity=0;}
-function qhud(){if(mode!=='game'||!GS)return;const t=GS.running?(performance.now()-GS.t0)/1000:+$('gTime').textContent;
+function placeAll(){const d=G[g];Object.entries(d.parts).forEach(([id,p])=>{const el=$('p-'+id);
+  const out=gk==='dis'?GS.done.has(id):!GS.done.has(id);const pos=out?p.away:p.home;
+  el.style.transform=`translate(${pos[0]}px,${pos[1]}px)`;el.classList.remove('active','bad');el.classList.toggle('held',GS.held===id);});}
+function showArrow(id,dir){const p=G[g].parts[id];const at=ROTAT[id]&&g==='c40'?ROTAT[id]:[p.home[0]+72,p.home[1]];const rot=$('rot');
+  rot.setAttribute('transform',`translate(${at[0]},${at[1]})`);rot.classList.toggle('ccw',dir==='ccw');
+  rot.querySelector('.spin').setAttribute('transform',dir==='ccw'?'scale(-1,1)':'');rot.querySelector('text').textContent=dir==='ccw'?'逆時針':'順時針';rot.style.opacity=1;}
+function hideArrow(){$('rot').style.opacity=0}
+function renderPills(){if(!GS)return;document.querySelectorAll('#pills .pill').forEach(el=>{const id=el.dataset.id;
+  el.classList.toggle('done',GS.done.has(id));el.classList.toggle('held',GS.held===id);el.classList.toggle('idle',!GS.running&&!GS.done.has(id));
+  el.querySelector('text').textContent=(GS.held===id?'✋':GS.done.has(id)?'✓':'')+L(id);});}
+function renderGChips(){renderPills()}
+function qhud(){if(mode!=='game'||!GS)return;const t=GS.running?(performance.now()-GS.t0)/1000:(GS.tEnd||0);
   $('qno').textContent=`${G[g].name}・${gk==='dis'?'拆解':'組裝'}挑戰`;
-  $('qtitle').textContent=`⏱ ${t.toFixed(1)}/${GS.limit}　❌ ${GS.errors}　✔ ${GS.done.size}/${Object.keys(G[g].parts).length}`;}
-function gameStop(){clearInterval(gTimer);gTimer=null;if(GS)GS.running=false;}
-function gameReset(){gameStop();const d=G[g];const ids=Object.keys(d.parts);
-  GS={running:false,done:new Set(),gi:0,errors:0,t0:0,limit:gameLimit(),groups:gameGroups(),order:shuffle(ids)};
-  svg.querySelectorAll('.part').forEach(el=>el.style.transition='none');placeAll(GS.done);svg.getBoundingClientRect();
+  $('qtitle').textContent=`⏱ ${t.toFixed(1)}/${GS.limit}　❌ ${GS.errors}　✔ ${GS.acts}/${GS.total}`;
+  $('gProg').textContent=`${GS.acts}/${GS.total}`;$('gErr').textContent=GS.errors;}
+function setMsg(h){$('gMsg').innerHTML=h}
+function gameStop(){clearInterval(gTimer);gTimer=null;if(GS)GS.running=false;$('gAct').hidden=true;}
+function gameReset(){gameStop();
+  GS={running:false,done:new Set(),taken:new Set(),si:0,held:null,rot:null,sel:null,acts:0,errors:0,t0:0,tEnd:0,limit:gameLimit(),total:totalActs()};
+  svg.querySelectorAll('.part').forEach(el=>el.style.transition='none');placeAll();hideArrow();svg.getBoundingClientRect();
   svg.querySelectorAll('.part').forEach(el=>el.style.transition='');
-  $('gTime').textContent='0.0';$('gLimit').textContent=` / ${GS.limit}`;$('gErr').textContent='0';
-  $('gProg').textContent=`0/${ids.length}`;$('gBar').style.width='100%';$('gBar').style.background='#16a34a';
-  const b=getBest();
-  $('gMsg').innerHTML=`<b>${d.name}・${gk==='dis'?'拆解':'組裝'}挑戰</b><br>${gk==='dis'?'按下開始後，照正確的拆解順序，點圖左邊的零件名稱把它拆下來。':'零件都已經拆在右邊。按下開始後，照正確的組裝順序，點圖左邊的零件名稱把它裝回去。'}${b?`<br>🏆 最佳紀錄：${b.rank} ${b.score} 分（${b.time} 秒、錯 ${b.errors} 次）`:''}`;
-  $('gResult').innerHTML='';$('gStart').textContent='開始挑戰';$('gStart').hidden=false;
-  renderGChips();qhud();}
-function renderGChips(){const d=G[g];
-  document.querySelectorAll('#pills .pill').forEach(el=>{const id=el.dataset.id;el.classList.toggle('done',GS.done.has(id));el.classList.toggle('idle',!GS.running&&!GS.done.has(id));
-    el.querySelector('text').textContent=(GS.done.has(id)?'✓':'')+short(d.parts[id].label);});
-  $('gChips').innerHTML=GS.order.map(id=>`<button data-id="${id}" class="${GS.done.has(id)?'done':''}" ${!GS.running||GS.done.has(id)?'disabled':''}>${d.parts[id].label}</button>`).join('');}
-function gameStart(){gameReset();GS.running=true;GS.t0=performance.now();$('gStart').hidden=true;renderGChips();
-  $('gMsg').innerHTML=gk==='dis'?'點圖左邊的零件名稱：先拆哪個？':'點圖左邊的零件名稱：先裝哪個？';
+  $('gTime').textContent='0.0';$('gLimit').textContent=` / ${GS.limit}`;$('gBar').style.width='100%';$('gBar').style.background='#16a34a';
+  const b=getBest(),d=G[g];
+  setMsg(`<b>${d.name}・${gk==='dis'?'拆解':'組裝'}挑戰</b>（共 ${GS.total} 個動作）<br>點圖左邊的零件名稱，從上方選單選動作：固定、順時針、逆時針、${gk==='dis'?'取下':'裝上'}。要轉的零件選對方向後，按「轉！」3 下。${b?`<br>🏆 最佳紀錄：${b.rank} ${b.score} 分（${b.time} 秒、錯 ${b.errors} 次）`:''}`);
+  $('gResult').innerHTML='';$('gStart').textContent='開始挑戰';$('gStart').parentNode.hidden=false;
+  renderPills();qhud();}
+function gameStart(){gameReset();GS.running=true;GS.t0=performance.now();$('gStart').parentNode.hidden=true;renderPills();
+  setMsg(gk==='dis'?'第一個動作是什麼？點左邊的零件名稱。':'先裝哪個？點左邊的零件名稱。');
   gTimer=setInterval(()=>{const t=(performance.now()-GS.t0)/1000;$('gTime').textContent=t.toFixed(1);
     const r=Math.max(0,1-t/GS.limit);$('gBar').style.width=(r*100)+'%';$('gBar').style.background=r>.5?'#16a34a':r>.2?'#f59e0b':'#dc2626';
     qhud();if(t>=GS.limit)gameEnd(false);},100);qhud();}
-function flashBad(id){const el=$('p-'+id);el.classList.add('bad');const c=document.querySelector(`#gChips button[data-id="${id}"]`);if(c)c.classList.add('bad');const pl=document.querySelector(`#pills .pill[data-id="${id}"]`);if(pl)pl.classList.add('bad');
-  setTimeout(()=>{el.classList.remove('bad');if(c)c.classList.remove('bad');if(pl)pl.classList.remove('bad')},450);}
-function gameTap(id){if(!GS||!GS.running||GS.done.has(id))return;const grp=GS.groups[GS.gi];
-  if(grp.includes(id)){GS.done.add(id);placeAll(GS.done);$('p-'+id).classList.add('active');setTimeout(()=>{const x=$('p-'+id);if(x)x.classList.remove('active')},600);
-    if(grp.every(x=>GS.done.has(x)))GS.gi++;
-    $('gProg').textContent=`${GS.done.size}/${Object.keys(G[g].parts).length}`;renderGChips();
-    $('gMsg').textContent=`✅ ${G[g].parts[id].label}`;
-    qhud();if(GS.gi>=GS.groups.length)gameEnd(true);}
-  else{GS.errors++;$('gErr').textContent=GS.errors;flashBad(id);qhud();$('gMsg').textContent=`❌ 還不能${gk==='dis'?'拆':'裝'}「${G[g].parts[id].label}」，順序不對！`;}}
-function gameEnd(ok){const t=(performance.now()-GS.t0)/1000;gameStop();renderGChips();
-  if(!ok){$('gResult').innerHTML=`<div class="result"><div class="rank">⏰</div><div class="score">時間到！</div><p>完成 ${GS.done.size}/${Object.keys(G[g].parts).length} 個零件，錯誤 ${GS.errors} 次</p><p>先到「${gk==='dis'?'拆解':'組合'}」教學複習一下順序吧</p></div>`;
-    $('gStart').textContent='再挑戰一次';$('gStart').hidden=false;return;}
+function flashBad(id){const el=$('p-'+id);if(el)el.classList.add('bad');const pl=document.querySelector(`#pills .pill[data-id="${id}"]`);if(pl)pl.classList.add('bad');
+  setTimeout(()=>{if(el)el.classList.remove('bad');if(pl)pl.classList.remove('bad')},450);}
+function wrong(msg){GS.errors++;flashBad(GS.sel);setMsg('❌ '+msg);$('gAct').hidden=true;qhud();}
+function good(msg){GS.acts++;setMsg('✅ '+msg);$('gAct').hidden=true;placeAll();renderPills();qhud();}
+function gameTap(id){if(!GS||!GS.running)return;
+  if(GS.rot){setMsg(`先把「${L(GS.rot.id)}」轉完！`);return;}
+  const S0=seq()[GS.si];const inHR=S0&&S0.type==='holdrot'&&S0.opts.some(o=>o.hold===id||o.rot===id);
+  if(GS.done.has(id)&&!inHR){setMsg(`「${L(id)}」已經${gk==='dis'?'拆下':'裝好'}了。`);return;}
+  GS.sel=id;const t=gk==='dis'?'⬆ 取下':'⬇ 裝上';
+  $('gAct').innerHTML=`<div class="ah">${L(id)}：要做什麼？</div><div class="ab">
+    <button data-a="hold">✋ 固定</button><button data-a="cw">↻ 順時針</button><button data-a="ccw">↺ 逆時針</button><button data-a="take">${t}</button></div>
+    <div class="an">方向以「面向這個零件」來看</div>`;
+  $('gAct').hidden=false;}
+function act(a){const id=GS.sel,S=seq()[GS.si],isRot=a==='cw'||a==='ccw';
+  if(S.type==='take'){
+    if(S.ids.includes(id)&&!GS.taken.has(id)){ if(a!=='take')return wrong(`「${L(id)}」這一步不用固定也不用轉。`);
+      GS.taken.add(id);GS.done.add(id);good(`${gk==='dis'?'取下':'裝上'}「${L(id)}」`);
+      if(S.ids.every(x=>GS.taken.has(x)))next();return;}
+    return wrong(`現在還不能動「${L(id)}」，順序不對！`);}
+  if(S.type==='rot'){
+    if(id!==S.id)return wrong(`現在還不能動「${L(id)}」，順序不對！`);
+    if(!isRot)return wrong(`「${L(id)}」要用轉的。`);
+    if(a!==S.dir)return wrong('方向反了！');
+    return startRot(id,a,id);}
+  // holdrot
+  if(!GS.held){
+    if(a==='hold'&&S.opts.some(o=>o.hold===id)){GS.held=id;return good(`固定住「${L(id)}」，接著轉另一邊`);}
+    if(isRot&&S.opts.some(o=>o.rot===id))return wrong('要先固定住另一邊，不然會一起空轉！');
+    return wrong(`現在還不能動「${L(id)}」，順序不對！`);}
+  const o=S.opts.find(o=>o.hold===GS.held);
+  if(a==='hold')return wrong(`已經固定「${L(GS.held)}」了，現在要轉另一邊。`);
+  if(id!==o.rot)return wrong(`固定「${L(GS.held)}」之後，要轉的不是「${L(id)}」。`);
+  if(!isRot)return wrong(`「${L(id)}」要用轉的。`);
+  if(a!==o.dir)return wrong('方向反了！');
+  startRot(id,a,S.part);}
+function startRot(id,dir,moving){GS.rot={id,dir,moving,n:0};
+  if(gk==='asm'){GS.done.add(moving);placeAll();}
+  showArrow(id,dir);setMsg(`方向正確！按「轉！」3 下把「${L(id)}」${gk==='dis'?'轉鬆':'鎖緊'}`);
+  $('gAct').innerHTML=`<div class="ah">${L(id)}・${dir==='cw'?'↻ 順時針':'↺ 逆時針'}</div><div class="ab"><button class="big" data-a="spin">${dir==='cw'?'↻':'↺'} 轉！ 0/3</button></div>`;
+  $('gAct').hidden=false;renderPills();}
+function spin(){const r=GS.rot;if(!r)return;r.n++;const el=$('p-'+r.id);el.classList.remove('wob');void el.getBBox();el.classList.add('wob');
+  const btn=$('gAct').querySelector('.big');if(btn)btn.textContent=`${r.dir==='cw'?'↻':'↺'} 轉！ ${r.n}/3`;
+  if(r.n<3)return;
+  setTimeout(()=>{el.classList.remove('wob');if(gk==='dis')GS.done.add(r.moving);GS.held=null;GS.rot=null;hideArrow();
+    good(gk==='dis'?`轉鬆了，「${L(r.moving)}」拿下來！`:`「${L(r.moving)}」鎖好了！`);next();},250);}
+function next(){GS.si++;GS.taken.clear();if(GS.si>=seq().length)gameEnd(true);}
+function gameEnd(ok){const t=(performance.now()-GS.t0)/1000;GS.tEnd=t;gameStop();renderPills();qhud();hideArrow();
+  if(!ok){$('gResult').innerHTML=`<div class="result"><div class="rank">⏰</div><div class="score">時間到！</div><p>完成 ${GS.acts}/${GS.total} 個動作，錯誤 ${GS.errors} 次</p><p>先到「${gk==='dis'?'拆解':'組合'}」教學複習一下順序和方向吧</p></div>`;
+    $('gStart').textContent='再挑戰一次';$('gStart').parentNode.hidden=false;return;}
   const order=Math.max(0,60-10*GS.errors), r=t/GS.limit, time=Math.round(r<=.4?40:40*(1-r)/(.6));
   const score=order+time, rank=score>=90?'S':score>=75?'A':score>=60?'B':'C';
   const b=getBest(), rec={score,rank,time:t.toFixed(1),errors:GS.errors}, isNew=!b||score>b.score||(score===b.score&&t<+b.time);
   if(isNew)setBest(rec);
-  $('gMsg').textContent=GS.errors?'完成！':'完成！順序全對 👏';
+  setMsg(GS.errors?'完成！':'完成！順序、方向全對 👏');
   $('gResult').innerHTML=`<div class="result"><div class="rank">${rank}</div><div class="score">${score} 分${isNew?'　🏆 新紀錄':''}</div>
-    <p>用時 ${t.toFixed(1)} 秒（時限 ${GS.limit} 秒）・順序錯誤 ${GS.errors} 次</p><p>順序分 ${order}／60　時間分 ${time}／40</p></div>`;
-  $('gStart').textContent='再玩一次';$('gStart').hidden=false;}
+    <p>用時 ${t.toFixed(1)} 秒（時限 ${GS.limit} 秒）・錯誤 ${GS.errors} 次</p><p>順序分 ${order}／60　時間分 ${time}／40</p></div>`;
+  $('gStart').textContent='再玩一次';$('gStart').parentNode.hidden=false;}
 $('gStart').onclick=gameStart;
-$('gChips').onclick=e=>{const id=e.target.dataset&&e.target.dataset.id;if(id)gameTap(id)};
+$('gAct').onclick=e=>{const a=e.target.dataset&&e.target.dataset.a;if(!a||!GS||!GS.running)return;if(a==='spin')spin();else act(a);};
 document.querySelectorAll('#segK button').forEach(b=>b.onclick=()=>{gk=b.dataset.k;document.querySelectorAll('#segK button').forEach(x=>x.classList.toggle('on',x===b));gameReset();});
 
 setG('c40');
