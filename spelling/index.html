@@ -363,6 +363,7 @@ select{flex:1;min-width:0;border-radius:12px;border:2px solid var(--sky-deep);pa
     <button class="big pink" id="toBook" type="button">🎀 我的貼紙簿<span class="sub" id="bookSub"></span><span class="gmeter sm" id="homeGift"></span></button>
     <button class="big stats" id="toStats" type="button">📊 單字統計<span class="sub">學了幾個字、每個字練了幾次</span></button>
     <button class="big alt" id="toFree" type="button">自由練習與設定<span class="sub">自己選主題、自訂單字、選聲音</span></button>
+    <button class="big alt" id="gBtn" type="button"><span id="gBtnT">☁️ 用 Google 帳號同步進度</span><span class="sub" id="syncNote">紀錄存到雲端，換手機也能接著玩</span></button>
     <span class="small" id="noVoice" hidden>這個瀏覽器不支援語音，字母仍會一個一個亮起來。建議用 Safari 或 Chrome。</span>
   </div>
 </div>
@@ -1969,6 +1970,107 @@ $("changeBtn").onclick=()=>{mode==="level"?openMap():openFree()};
 renderSettings();
 build(levelOpts(0));   // a board ready behind the home screen
 openHome();
+
+/* ---------- Google Drive sync: the game record is kept as a hidden app file in the player's own Google Drive ---------- */
+(function(){
+const GCLIENT='267421312122-l2ggo7t35tqpf8ej5osqttt08ke30lr1.apps.googleusercontent.com';
+const GFILE='spelling.json',GAPI='https://www.googleapis.com',SYNC_KEYS=['sp-profiles','sp-current','sp-cfg','sp-custom-rows'];
+let gTok=null,gTokExp=0,gFileId=null,gClient=null,gOn=false,pushT=null;
+const ls={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
+const note=t=>{const el=$('syncNote');if(el)el.textContent=t};
+const btn=t=>{const el=$('gBtnT');if(el)el.textContent=t};
+try{const t=JSON.parse(sessionStorage.getItem('sp-gtok')||'null');if(t&&t.exp>Date.now()){gTok=t.tok;gTokExp=t.exp}}catch(e){}
+/* every real change to the record stamps a time, so the newer copy can be told apart */
+const _set=store.set;
+store.set=function(k,v){
+  if(SYNC_KEYS.includes(k)){const nv=JSON.stringify(v);if(ls.get(k)!==nv){_set.call(store,k,v);ls.set('sp-savedAt',String(Date.now()));schedule();return}}
+  _set.call(store,k,v);
+};
+function snapshot(){const o={savedAt:+ls.get('sp-savedAt')||0};SYNC_KEYS.forEach(k=>{const v=ls.get(k);if(v!=null)try{o[k]=JSON.parse(v)}catch(e){}});return o}
+function schedule(){if(!gOn)return;clearTimeout(pushT);pushT=setTimeout(push,1500)}
+function libLoad(){return new Promise((ok,no)=>{if(window.google&&google.accounts&&google.accounts.oauth2)return ok();const sc=document.createElement('script');sc.src='https://accounts.google.com/gsi/client';sc.onload=()=>ok();sc.onerror=()=>no(new Error('lib'));document.head.appendChild(sc)})}
+async function gf(url,opt={}){
+  if(!gTok||Date.now()>gTokExp)throw new Error('auth');
+  const r=await fetch(url,Object.assign({},opt,{headers:Object.assign({Authorization:'Bearer '+gTok},opt.headers||{})}));
+  if(r.status===401){gTok=null;throw new Error('auth')}
+  if(!r.ok)throw new Error('http '+r.status);
+  return r;
+}
+function expired(){btn('☁️ 點這裡連回 Google');note('Google 連線已過期，點一下就會繼續同步（紀錄先存在這台）')}
+async function push(){
+  if(!gOn)return;
+  if(!gTok||Date.now()>gTokExp){expired();return}
+  const body=JSON.stringify(snapshot()),keep=body.length<60000;
+  try{
+    if(gFileId)await gf(GAPI+'/upload/drive/v3/files/'+gFileId+'?uploadType=media',{method:'PATCH',keepalive:keep,headers:{'Content-Type':'application/json'},body});
+    else{
+      const b='sp'+Date.now(),meta=JSON.stringify({name:GFILE,parents:['appDataFolder']});
+      const mp='--'+b+'\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n'+meta+'\r\n--'+b+'\r\nContent-Type: application/json\r\n\r\n'+body+'\r\n--'+b+'--';
+      const r=await gf(GAPI+'/upload/drive/v3/files?uploadType=multipart&fields=id',{method:'POST',headers:{'Content-Type':'multipart/related; boundary='+b},body:mp});
+      gFileId=(await r.json()).id;
+    }
+    btn('☁️ 已連上 Google 同步');note('已同步到 Google 雲端硬碟 '+new Date().toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'}));
+  }catch(e){if(e.message==='auth')expired();else note('⚠️ 雲端同步失敗，紀錄先存在這台')}
+}
+document.addEventListener('visibilitychange',()=>{if(document.hidden&&pushT){clearTimeout(pushT);pushT=null;push()}});
+/* same player on both sides → keep the best stars, every sticker, and the newer of everything else */
+function mm(o,n,isMax){const r=Object.assign({},o,n);if(isMax)for(const k in o)if(k in n)r[k]=Math.max(+o[k]||0,+n[k]||0);return r}
+function merge(loc,rem,fresh){
+  const remNewer=(+rem.savedAt||0)>(+loc.savedAt||0),out={};
+  SYNC_KEYS.forEach(k=>{const v=remNewer?(k in rem?rem[k]:loc[k]):(k in loc?loc[k]:rem[k]);if(v!==undefined)out[k]=JSON.parse(JSON.stringify(v))});
+  const empty=p=>(!p.stars||!Object.keys(p.stars).length)&&(!p.stickers||!p.stickers.length);
+  let lp=Array.isArray(loc['sp-profiles'])?loc['sp-profiles']:[];if(fresh)lp=lp.filter(p=>!empty(p));
+  const rp=Array.isArray(rem['sp-profiles'])?rem['sp-profiles']:[];
+  const byId=new Map();rp.forEach(p=>byId.set(p.id,{r:p}));lp.forEach(p=>{const e=byId.get(p.id)||{};e.l=p;byId.set(p.id,e)});
+  const ps=[];
+  byId.forEach(({l,r})=>{
+    if(!l||!r){ps.push(JSON.parse(JSON.stringify(l||r)));return}
+    const n=remNewer?r:l,o=remNewer?l:r,m=JSON.parse(JSON.stringify(Object.assign({},o,n)));
+    m.stars=mm(o.stars||{},n.stars||{},true);m.practice=mm(o.practice||{},n.practice||{},false);m.certs=mm(o.certs||{},n.certs||{},false);
+    m.stickers=[...new Set([...(o.stickers||[]),...(n.stickers||[])])];
+    ps.push(m);
+  });
+  if(ps.length)out['sp-profiles']=ps;
+  const ids=(out['sp-profiles']||[]).map(p=>p.id);
+  out['sp-current']=ids.includes(loc['sp-current'])?loc['sp-current']:(ids.includes(rem['sp-current'])?rem['sp-current']:ids[0]);
+  out.savedAt=Math.max(+loc.savedAt||0,+rem.savedAt||0);
+  return out;
+}
+async function afterLogin(){
+  note('正在讀取 Google 雲端的紀錄…');
+  try{
+    const q=encodeURIComponent("name='"+GFILE+"'");
+    const j=await (await gf(GAPI+'/drive/v3/files?spaces=appDataFolder&fields=files(id)&q='+q)).json();
+    gFileId=j.files&&j.files[0]?j.files[0].id:null;
+    let rem=null;if(gFileId)rem=await (await gf(GAPI+'/drive/v3/files/'+gFileId+'?alt=media')).json().catch(()=>null);
+    gOn=true;ls.set('sp-g','1');
+    const fresh=ls.get('sp-gsync')!=='1';ls.set('sp-gsync','1');
+    if(rem&&Array.isArray(rem['sp-profiles'])&&rem['sp-profiles'].length){
+      const loc=snapshot(),m=merge(loc,rem,fresh);
+      let changed=false;
+      SYNC_KEYS.forEach(k=>{if(k in m){const v=JSON.stringify(m[k]);if(ls.get(k)!==v){ls.set(k,v);changed=true}}});
+      ls.set('sp-savedAt',String(m.savedAt));
+      if(changed){
+        await push();
+        try{sessionStorage.setItem('sp-gtok',JSON.stringify({tok:gTok,exp:gTokExp}))}catch(e){}
+        location.reload();return;
+      }
+    }
+    await push();
+  }catch(e){note(e.message==='auth'?'Google 連線已過期，再點一次':'⚠️ 讀取 Google 雲端失敗')}
+}
+function login(){
+  libLoad().then(()=>{
+    if(!gClient)gClient=google.accounts.oauth2.initTokenClient({client_id:GCLIENT,scope:'https://www.googleapis.com/auth/drive.appdata',
+      callback:t=>{if(t&&t.access_token){gTok=t.access_token;gTokExp=Date.now()+((+t.expires_in||3600)-120)*1000;try{sessionStorage.setItem('sp-gtok',JSON.stringify({tok:gTok,exp:gTokExp}))}catch(e){}afterLogin()}else note('⚠️ Google 登入沒有完成')},
+      error_callback:()=>note('⚠️ Google 登入被取消或被擋（請允許彈出視窗）')});
+    gClient.requestAccessToken({prompt:ls.get('sp-g')==='1'?'':'consent'});
+  },()=>note('⚠️ 無法載入 Google 登入，請確認網路'));
+}
+$('gBtn').onclick=()=>{if(gOn&&gTok&&Date.now()<gTokExp){push();return}login()};
+if(gTok&&ls.get('sp-g')==='1'){afterLogin()}
+else if(ls.get('sp-g')==='1')btn('☁️ 點這裡連回 Google 同步');
+})();
 })();
 </script>
 

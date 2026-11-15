@@ -1,6 +1,6 @@
 <!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
 <title>分子消消樂</title>
-<meta name="app-version" content="2026-11-15c">
+<meta name="app-version" content="2026-11-15d">
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1429,17 +1429,52 @@ pushCloud=function(){
     .catch(e=>{if(e.message==='auth'){gBtnText('☁️ 點這裡連回 Google（進度先存在這台）');syncNote('Google 連線已過期，點上面的按鈕重新連線就會同步')}else syncNote('⚠️ 雲端同步失敗，進度先存在這台裝置')});
 };
 function gBtnText(t){const b=$('gBtn');if(b)b.textContent=t}
+/* combine this device's save with the cloud save: same player → keep the best stars and the newer of everything else;
+   players found on only one side are kept (except the empty starter player of a device that has never synced) */
+function mergeMaps(o,n,isMax){const r=Object.assign({},o,n);if(isMax)for(const k in o)if(k in n)r[k]=Math.max(+o[k]||0,+n[k]||0);return r}
+function mergeSaves(loc,rem,localFresh){
+  const remNewer=(+rem.savedAt||0)>(+loc.savedAt||0);
+  const base=JSON.parse(JSON.stringify(remNewer?rem:loc));
+  const empty=p=>!p.stars||!Object.keys(p.stars).length;
+  let lp=loc.players||[];if(localFresh)lp=lp.filter(p=>!empty(p));
+  const byId=new Map();
+  (rem.players||[]).forEach(p=>byId.set(p.id,{r:p}));
+  lp.forEach(p=>{const e=byId.get(p.id)||{};e.l=p;byId.set(p.id,e)});
+  const out=[];
+  byId.forEach(({l,r})=>{
+    if(!l||!r){out.push(JSON.parse(JSON.stringify(l||r)));return}
+    const n=remNewer?r:l,o=remNewer?l:r,m=JSON.parse(JSON.stringify(Object.assign({},o,n)));
+    m.stars=mergeMaps(o.stars||{},n.stars||{},true);
+    ['practice','reviews','misses'].forEach(k=>m[k]=mergeMaps(o[k]||{},n[k]||{},false));
+    m.lastSeen=mergeMaps(o.lastSeen||{},n.lastSeen||{},true);
+    m.cur=Math.max(+l.cur||0,+r.cur||0);
+    out.push(m);
+  });
+  base.players=out.length?out:JSON.parse(JSON.stringify(loc.players||[]));
+  base.pid=base.players.some(p=>p.id===loc.pid)?loc.pid:(base.players.some(p=>p.id===rem.pid)?rem.pid:base.players[0].id);
+  base.savedAt=Math.max(+loc.savedAt||0,+rem.savedAt||0);
+  return base;
+}
 async function gAfterLogin(){
   syncNote('☁️ 正在讀取 Google 雲端的進度…');
   try{
     gFileId=await gFindFile();
     let d=null;
     if(gFileId){const r=await gFetch(GAPI+'/drive/v3/files/'+gFileId+'?alt=media');d=await r.json().catch(()=>null)}
+    let fresh=true;try{fresh=localStorage.getItem('molpairs.gsync')!=='1'}catch(e){}
+    let rem=null;try{rem=d&&typeof d.json==='string'?JSON.parse(d.json):null}catch(e){}
+    if(rem&&Array.isArray(rem.players)&&rem.players.length){
+      const m=mergeSaves(store,rem,fresh);
+      if(JSON.stringify(m)!==JSON.stringify(store)){
+        Object.keys(store).forEach(k=>delete store[k]);Object.assign(store,m);
+        try{localStorage.setItem(KEY,JSON.stringify(store))}catch(e){}
+        if(!timer){['winOv','loseOv','pickOv','editOv','whoOv','achOv','revOv'].forEach(o=>{const el=$(o);if(el)el.hidden=true});boot()}
+        else renderWhoBtns();
+      }
+    }
     cloud=gDrive;
-    try{localStorage.setItem('molpairs.g','1')}catch(e){}
-    const before=store.savedAt;
-    mergeRemote(d);
-    if(store.savedAt!==before||(d&&(+d.savedAt||0)>=(before||0)))syncNote('☁️ 已從 Google 讀取進度');
+    try{localStorage.setItem('molpairs.g','1');localStorage.setItem('molpairs.gsync','1')}catch(e){}
+    pushCloud();
     gBtnText('☁️ 已連上 Google 同步');
   }catch(e){syncNote('⚠️ 讀取 Google 雲端失敗：'+e.message)}
 }
