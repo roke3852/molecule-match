@@ -414,6 +414,23 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
 .bl-row b{font-family:var(--f-mono);font-weight:500;text-align:right}
 .bl-zone{display:flex;gap:16px;font-size:13px;margin-top:6px;color:var(--muted)}
 .bl-zone b{font-family:var(--f-mono);color:var(--ink);font-weight:500}
+.bed-db{display:flex;flex-direction:column;gap:2px}
+.db-key{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:13px;margin-bottom:6px;align-items:center}
+.db-key span{display:flex;align-items:center;gap:6px}.db-key .lab{color:var(--muted);font-size:12px}
+.db-key i{position:static!important;transform:none!important}
+.db-row{display:grid;grid-template-columns:7.4em 1fr 3.8em;gap:8px;align-items:center;font-size:12.5px;min-height:24px}
+.db-row.avg{font-weight:700}
+.db-row .dv{font-family:var(--f-mono);text-align:right;font-size:12.5px}
+.db-track{position:relative;height:22px}
+.db-track .tk{position:absolute;top:0;bottom:0;width:1px;background:var(--line)}
+.db-track .ln{position:absolute;top:10px;height:3px;background:var(--muted);opacity:.55;border-radius:2px}
+.pa,.pb{display:block;width:12px;height:12px;border-radius:50%;box-sizing:border-box}
+.db-track .pa,.db-track .pb{position:absolute;top:5px;transform:translateX(-50%)}
+.pa{border:2px solid var(--muted);background:var(--panel)}
+.pb{background:var(--accent);border:2px solid var(--accent)}
+.db-sep{height:1px;background:var(--line);margin:6px 0}
+.db-row.axis{min-height:16px}.db-row.axis .db-track{height:14px}
+.db-row.axis span[style]{position:absolute;transform:translateX(-50%);font-size:10.5px;color:var(--muted);font-family:var(--f-mono)}
 .modes .seg button{padding:7px 2px}
 .mic-trade{margin-top:14px;border:1px solid var(--line);border-radius:10px;padding:10px 12px;display:flex;flex-direction:column;gap:5px}
 .mic-trade h3{margin:0;font-size:15px}
@@ -666,8 +683,8 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
 
   <section class="panel">
     <h2>每一層的萃取率</h2>
-    <p class="label" style="margin:4px 0 10px">由上而下；長條越長萃得越多</p>
-    <div class="bed-layers"><div id="bedLayCone"></div><div id="bedLayFlat"></div></div>
+    <p class="label" style="margin:4px 0 10px">由上而下；點越靠右萃得越多，兩點之間的線越長差得越多</p>
+    <div class="bed-db" id="bedLay"></div>
   </section>
 
   <section class="panel">
@@ -2881,6 +2898,24 @@ function draw(key){
 function layers(key){const R=runs[key],st=bedStats(R,si);
   return '<h3>'+META[key].t+'</h3>'+st.rows.map((x,i)=>'<div class="bl-row"><span>'+(i===0?'第 1 層（最上）':i===st.rows.length-1?'第 '+(i+1)+' 層（最下）':'第 '+(i+1)+' 層')+'</span><div><i style="width:'+Math.max(2,(x.ey-8)/(HI-8)*100)+'%;background:'+col(x.ey)+'"></i></div><b>'+x.ey.toFixed(1)+'</b></div>').join('')+
     '<div class="bl-zone"><span>中心 <b>'+st.center.toFixed(1)+'%</b></span><span>邊緣 <b>'+st.edge.toFixed(1)+'%</b></span>'+(st.wall!=null?'<span>杯壁高處 <b>'+st.wall.toFixed(1)+'%</b></span>':'')+'</div>';}
+// 合併比較圖：每一層一列，空心點＝左邊、實心點＝右邊，連線長度就是差距
+function dumbbell(){const a=bedStats(runs.A,si),b=bedStats(runs.B,si),n=Math.max(a.rows.length,b.rows.length);
+  const rows=[];for(let i=0;i<n;i++)rows.push({n:i===0?'第 1 層（最上）':i===n-1?'第 '+n+' 層（最下）':'第 '+(i+1)+' 層',a:a.rows[i]?a.rows[i].ey:null,b:b.rows[i]?b.rows[i].ey:null});
+  const zones=[{n:'中心',a:a.center,b:b.center},{n:'邊緣',a:a.edge,b:b.edge}];
+  if(a.wall!=null||b.wall!=null)zones.push({n:'杯壁高處',a:a.wall,b:b.wall});
+  zones.push({n:'整杯平均',a:a.mean,b:b.mean,avg:1});
+  const vals=rows.concat(zones).flatMap(r=>[r.a,r.b]).filter(v=>v!=null);
+  let lo=Math.floor(Math.min(...vals)-.5),hi=Math.ceil(Math.max(...vals)+.5);if(hi-lo<4){const m=(hi+lo)/2;lo=Math.floor(m-2);hi=Math.ceil(m+2);}
+  const X=v=>((v-lo)/(hi-lo)*100).toFixed(2)+'%';
+  const ticks=[];for(let v=lo;v<=hi;v+=Math.max(1,Math.round((hi-lo)/4)))ticks.push(v);
+  const row=r=>{const both=r.a!=null&&r.b!=null,d=both?r.b-r.a:null,l=both?Math.min(r.a,r.b):0,h=both?Math.max(r.a,r.b):0;
+    return '<div class="db-row'+(r.avg?' avg':'')+'"><span class="nm">'+r.n+'</span><div class="db-track">'+ticks.map(v=>'<i class="tk" style="left:'+X(v)+'"></i>').join('')+
+      (both?'<i class="ln" style="left:'+X(l)+';width:calc('+X(h)+' - '+X(l)+')"></i>':'')+
+      (r.a!=null?'<i class="pa" style="left:'+X(r.a)+'" title="'+r.a.toFixed(1)+'"></i>':'')+(r.b!=null?'<i class="pb" style="left:'+X(r.b)+'" title="'+r.b.toFixed(1)+'"></i>':'')+
+      '</div><span class="dv">'+(both?(Math.abs(d)<.05?'0.0':(d>0?'+':'−')+Math.abs(d).toFixed(1)):'僅'+(r.a!=null?META.A.h:META.B.h))+'</span></div>';};
+  return '<div class="db-key"><span><i class="pa"></i>'+META.A.h+'</span><span><i class="pb"></i>'+META.B.h+'</span><span class="lab">右欄＝右邊減左邊（萃取率 %）</span></div>'+
+    rows.map(row).join('')+'<div class="db-sep"></div>'+zones.map(row).join('')+
+    '<div class="db-row axis"><span class="nm"></span><div class="db-track">'+ticks.map(v=>'<span style="left:'+X(v)+'">'+v+'%</span>').join('')+'</div><span class="dv"></span></div>';}
 function dryAt(R,t){const s=R.snaps[Math.min(t,R.snaps.length-1)];let d=0,n=0;s.cols.forEach(c=>c.cells.forEach(e=>{n++;if(e.dry)d++;}));return Math.round(d/n*100)+'%';}
 function flowSkew(R){const s=R.snaps[Math.min(70,R.snaps.length-1)];const q=s.cols.map(c=>c.q).filter(v=>v>0);return (Math.max(...q)/Math.min(...q)).toFixed(1)+' 倍';}
 function table(){const a=bedStats(runs.A,si),b=bedStats(runs.B,si),f=v=>v.toFixed(1)+'%';
@@ -2902,7 +2937,7 @@ function capDrip(t,E){const st=bedStirs(stir),k10=pour==='k10';
   if(t<E.pourEnd)return k10?'粕谷 10 段：每 15 秒小注 30 g，水柱細、擾動小，粉層幾乎維持原本的樣子，上下分層一直存在：上層碰到新鮮的水萃得多，下層碰到變濃的水萃得少。':'注水中：水柱把中心的粉往外推，中心慢慢凹下去，粉被推到杯壁上（藍框的格子）。原本的上下層被打亂；中心變薄、阻力小，水大多從凹洞往下流（藍色箭頭越明顯，流過的水越多）。';
   if(t<runs.A.ends.end)return (k10?'水快滴完：流速越來越慢，萃取也跟著放慢。':'水位下降：杯壁高處的粉最先露出水面，之後幾乎不再萃取；剩下的水集中從中心凹洞流走。')+(stir==='multi'?'多次攪拌讓細粉沉到底部，堵住濾紙，滴得比較慢。':'');
   return k10?'滴完了。低擾動讓分層保留下來：錐形上下、中心邊緣的深淺差得多；平底只有上下層有些差別。':'滴完了。中心形成凹洞，杯壁上那圈粉（藍框）萃得最少，凹洞底部附近的粉萃得多；原本的分層已經被打亂。';}
-function render(){if(!runs)build();draw('A');draw('B');$('bedLayCone').innerHTML=layers('A');$('bedLayFlat').innerHTML=layers('B');table();
+function render(){if(!runs)build();draw('A');draw('B');$('bedLay').innerHTML=dumbbell();table();
   $('bedTime').value=si;$('bedClock').textContent=fmt(runs.A.snaps[si].t);$('bedCap').textContent=caption();}
 function frame(now){if(!playing)return;const dt=Math.min(.1,(now-last)/1000);last=now;acc+=dt*10;while(acc>=1){acc-=1;si++;}
   const n=runs.A.snaps.length-1;if(si>=n){si=n;stop();}render();if(playing)raf=requestAnimationFrame(frame);}
