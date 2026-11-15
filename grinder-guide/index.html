@@ -132,7 +132,7 @@ const DEFS = `
 const TRAY = `<line x1="236" y1="28" x2="236" y2="590" stroke="#d9c9b4" stroke-dasharray="5 5"/>
 <text x="318" y="20" text-anchor="middle" class="lbl" style="font-size:11px">已拆下的零件</text>`;
 
-function zig(w,h,n,cone){let p=[];for(let i=0;i<=n;i++){const y=-h/2+h*i/n;const ww=cone? (w*0.45+w*0.55*i/n):w;p.push(((i%2?1:-1)*ww/2).toFixed(1)+','+y.toFixed(1));}return `<polyline points="${p.join(' ')}" fill="none" stroke="#3f3f3f" stroke-width="1.7" stroke-linejoin="round"/>`}
+function zig(w,h,n,cone){let p=[];for(let i=0;i<=n;i++){const y=-h/2+h*i/n;const f=cone==='up'?(1-i/n):i/n;const ww=cone?(w*0.45+w*0.55*f):w;p.push(((i%2?1:-1)*ww/2).toFixed(1)+','+y.toFixed(1));}return `<polyline points="${p.join(' ')}" fill="none" stroke="#3f3f3f" stroke-width="1.7" stroke-linejoin="round"/>`}
 function threads(y1,y2,w){let s='';for(let y=y1;y<=y2;y+=4)s+=`<line x1="${-w}" y1="${y}" x2="${w}" y2="${y+2}" stroke="#555" stroke-width=".8"/>`;return s}
 const crank = knob => `<rect x="-10" y="-9" width="20" height="16" rx="3" fill="url(#steel)" stroke="#444"/>
   <rect x="0" y="-5" width="98" height="9" rx="4.5" fill="url(#steel)" stroke="#444"/>
@@ -196,43 +196,46 @@ zp6:{
   name:'1Zpresso ZP6 Special',
   statics:`
     <rect x="88" y="95" width="84" height="258" rx="4" fill="url(#alu)" opacity=".3" stroke="#4b5057"/>
-    ${[100,112,124,136,148,160].map(x=>`<line x1="${x}" y1="200" x2="${x}" y2="250" stroke="#4b5057" opacity=".25"/>`).join('')}
+    ${[100,112,124,136,148,160].map(x=>`<line x1="${x}" y1="190" x2="${x}" y2="240" stroke="#4b5057" opacity=".25"/>`).join('')}
     <text x="20" y="180" class="lbl">機身</text><line x1="44" y1="177" x2="88" y2="177" stroke="#c9b79f"/>
     <path d="M126 96 L134 96 L130 103 Z" fill="#c2410c"/>
-    <text x="20" y="108" class="lbl">刻度指針</text><line x1="64" y1="105" x2="125" y2="100" stroke="#c9b79f"/>`,
-  order:['cup','dring','oring','burrset','spring','bcap','nut','ubear','ucap','handle'],
+    <text x="20" y="112" class="lbl">刻度指針</text><line x1="64" y1="109" x2="125" y2="100" stroke="#c9b79f"/>
+    <rect x="92" y="258" width="76" height="4" fill="url(#steel)" stroke="#666" stroke-width=".6"/>
+    <rect x="121" y="254" width="18" height="10" rx="2" fill="#3a3a3a"/>
+    <text x="20" y="252" class="lbl">下軸承</text><line x1="54" y1="249" x2="119" y2="257" stroke="#c9b79f"/>`,
+  order:['cup','dring','oring','burrset','spring','bcap','ubear','ucap','nut','handle'],
   parts:{
-    handle:{label:'搖柄（木球）', home:[130,46], away:[266,52], svg:crank('ball')},
-    ucap:{label:'上軸承蓋', home:[130,63], away:[274,172], svg:`<rect x="-15" y="-3" width="30" height="6" rx="2" fill="#2f3337" stroke="#111"/><rect x="-4" y="-3" width="8" height="2.2" fill="#9aa0a6"/>`},
-    ubear:{label:'上軸承', home:[130,73], away:[330,172], svg:`<rect x="-11" y="-5" width="22" height="10" rx="2" fill="#555" stroke="#222"/><circle cx="-6" r="2" fill="#ccc"/><circle cx="0" r="2" fill="#ccc"/><circle cx="6" r="2" fill="#ccc"/>`},
-    dring:{label:'外部刻度環', home:[130,79], away:[298,115], svg:`<rect x="-48" y="-17" width="96" height="34" rx="4" fill="url(#alu)" stroke="#333" fill-opacity=".85"/>${Array.from({length:15},(_,i)=>`<line x1="${-42+i*6}" y1="7" x2="${-42+i*6}" y2="${i%5?11:14}" stroke="#fff" stroke-width=".8"/>`).join('')}<text x="-42" y="2" font-size="7" fill="#fff">0</text><text x="-12" y="2" font-size="7" fill="#fff">1</text><text x="18" y="2" font-size="7" fill="#fff">2</text>`},
-    burrset:{label:'中軸＋內刀組', home:[130,220], away:[374,262], svg:`<rect x="-3.5" y="-165" width="7" height="330" fill="url(#steel)" stroke="#555" stroke-width=".8"/><rect x="-3.5" y="-165" width="3.5" height="20" fill="#b9bfc4"/><path d="M-8 65 L8 65 L26 125 L-26 125 Z" fill="url(#steel)" stroke="#444" fill-opacity=".92"/><path d="M-5 67 L-21 124 M1 66 L-7 125 M6 68 L10 125" stroke="#777" stroke-width=".9"/>${threads(147,163,4)}`},
-    oring:{label:'外刀環', home:[130,318], away:[290,330], svg:`<path d="M-44 -34 L-9 -34 L-27 30 L-44 30 Z" fill="url(#steel)" stroke="#555"/><path d="M44 -34 L9 -34 L27 30 L44 30 Z" fill="url(#steel)" stroke="#555"/><rect x="-44" y="29" width="88" height="5" fill="#8e959c" stroke="#555"/>`},
-    spring:{label:'錐形彈簧', home:[130,355], away:[286,278], svg:zig(16,12,6,true)},
-    bcap:{label:'軸承蓋', home:[130,365], away:[286,246], svg:`<rect x="-13" y="-3" width="26" height="6" rx="2" fill="#d7dbde" stroke="#444"/><rect x="-6" y="3" width="12" height="3" fill="#d7dbde" stroke="#444"/>`},
-    nut:{label:'滾花螺帽', home:[130,378], away:[286,214], svg:`<rect x="-11" y="-6" width="22" height="12" rx="2" fill="url(#steel)" stroke="#333"/>${[-7,-4,-1,2,5,8].map(x=>`<line x1="${x}" y1="-5" x2="${x}" y2="5" stroke="#555" stroke-width=".7"/>`).join('')}`},
+    handle:{label:'搖柄（木球）', home:[130,42], away:[266,52], svg:crank('ball')},
+    nut:{label:'滾花螺帽（頂部）', home:[130,58], away:[286,214], svg:`<rect x="-11" y="-6" width="22" height="12" rx="2" fill="url(#steel)" stroke="#333"/>${[-7,-4,-1,2,5,8].map(x=>`<line x1="${x}" y1="-5" x2="${x}" y2="5" stroke="#555" stroke-width=".7"/>`).join('')}`},
+    ucap:{label:'上軸承蓋', home:[130,67], away:[274,172], svg:`<rect x="-15" y="-3" width="30" height="6" rx="2" fill="#2f3337" stroke="#111"/><circle cx="-8" cy="-1" r="1.1" fill="#fff"/><circle cx="8" cy="-1" r="1.1" fill="#fff"/><rect x="-4" y="1" width="8" height="2" fill="#9aa0a6"/>`},
+    ubear:{label:'上軸承', home:[130,76], away:[330,172], svg:`<rect x="-11" y="-5" width="22" height="10" rx="2" fill="#555" stroke="#222"/><circle cx="-6" r="2" fill="#ccc"/><circle cx="0" r="2" fill="#ccc"/><circle cx="6" r="2" fill="#ccc"/>`},
+    dring:{label:'外部刻度環', home:[130,80], away:[298,115], svg:`<rect x="-48" y="-17" width="96" height="34" rx="4" fill="url(#alu)" stroke="#333" fill-opacity=".8"/>${Array.from({length:15},(_,i)=>`<line x1="${-42+i*6}" y1="7" x2="${-42+i*6}" y2="${i%5?11:14}" stroke="#fff" stroke-width=".8"/>`).join('')}<text x="-42" y="2" font-size="7" fill="#fff">0</text><text x="-12" y="2" font-size="7" fill="#fff">1</text><text x="18" y="2" font-size="7" fill="#fff">2</text>`},
+    burrset:{label:'中軸＋內刀組', home:[130,215], away:[374,262], svg:`<rect x="-3.5" y="-165" width="7" height="330" fill="url(#steel)" stroke="#555" stroke-width=".8"/><rect x="-3.5" y="-165" width="3.5" height="12" fill="#b9bfc4"/>${threads(-152,-140,4)}<path d="M-8 72 L8 72 L26 130 L-26 130 Z" fill="url(#steel)" stroke="#444" fill-opacity=".92"/><path d="M-5 74 L-21 129 M1 73 L-7 130 M6 75 L10 130" stroke="#777" stroke-width=".9"/>`},
+    oring:{label:'外刀環組', home:[130,318], away:[290,330], svg:`<path d="M-44 -34 L-9 -34 L-27 30 L-44 30 Z" fill="url(#steel)" stroke="#555"/><path d="M44 -34 L9 -34 L27 30 L44 30 Z" fill="url(#steel)" stroke="#555"/><rect x="-44" y="29" width="88" height="5" fill="#8e959c" stroke="#555"/>`},
+    spring:{label:'錐形彈簧', home:[130,280], away:[286,278], svg:zig(16,12,6,'up')},
+    bcap:{label:'下軸承蓋', home:[130,269], away:[286,246], svg:`<rect x="-13" y="-3" width="26" height="6" rx="2" fill="#d7dbde" stroke="#444"/><rect x="-6" y="-6" width="12" height="3" fill="#d7dbde" stroke="#444"/>`},
     cup:{label:'粉杯（螺紋）', home:[130,410], away:[296,512], svg:`<path d="M-54 -55 L54 -55 L54 60 Q54 68 46 68 L-46 68 Q-54 68 -54 60 Z" fill="url(#alu)" fill-opacity=".28" stroke="#4b5057" stroke-width="1.4"/>${threads(-54,-46,53)}`}
   },
   dis:[
-    {t:'準備工作', d:'先看一眼外部刻度環，記下目前刻度。準備毛刷和吹球，在桌面上操作。官方建議每月拆洗一次，全程不需要工具。', rm:[]},
+    {t:'準備工作', d:'先記下目前刻度，再把刻度環順時針轉到較粗的刻度，讓刀盤分開。準備毛刷和吹球，在桌面上操作。官方建議每月拆洗一次，全程不需要工具。', rm:[], rot:{at:[200,80],dir:'cw',lbl:'轉粗'}},
     {t:'取下搖柄與粉杯', d:'把搖柄從頂端拔起，再把底部的粉杯旋開取下（ZP6 的粉杯是螺紋鎖上的，不是磁吸）。', rm:['handle','cup'], rot:{at:[205,420],dir:'ccw',lbl:'旋開'}},
-    {t:'轉下滾花螺帽', d:'一手按住底部的內刀，另一手把最底下的滾花螺帽逆時針轉下來。', tip:'內刀底下有彈簧頂著，按住才不會彈開。', rm:['nut'], rot:{at:[200,378],dir:'ccw',lbl:'逆時針'}},
-    {t:'取出刀盤組', d:'從頂部往下按壓中軸，中軸＋內刀組就會從底部退出。錐形彈簧和軸承蓋也一起取下。', tip:'記住彈簧與軸承蓋的方向，組回時會用到（官方圖示有標示）。', rm:['bcap','spring','burrset']},
-    {t:'取出上軸承', d:'中軸拿掉後，從頂部刻度環內側取出上軸承蓋與上軸承。', rm:['ucap','ubear']},
-    {t:'拆外刀環（選做）', d:'深度清潔才需要。先把粉杯接回機身當握把，順時針轉動粉杯，就能把外刀環轉下來。', warn:'一定要先取出刀盤組，才能拆外刀環。', rm:['oring'], rot:{at:[200,318],dir:'cw',lbl:'順時針'}},
-    {t:'拆刻度環（選做）', d:'把頂部的外部刻度環順時針轉下。到這裡就全部拆完了。', rm:['dring'], rot:{at:[200,79],dir:'cw',lbl:'順時針'}},
-    {t:'清潔重點', d:'用毛刷清掉刀盤、外刀環與中軸上的咖啡粉，吹球吹淨刻度環與軸承附近的粉。', warn:'1Zpresso 官方：不可水洗、不可浸泡，保持乾燥。', rm:[]}
+    {t:'轉下頂部滾花螺帽', d:'滾花螺帽在機身頂端、中軸最上面。一手從底部往上頂住內刀，另一手把螺帽逆時針轉下。', tip:'內刀上方有彈簧，頂住內刀才好轉，零件也不會掉。', rm:['nut'], rot:{at:[200,58],dir:'ccw',lbl:'逆時針'}},
+    {t:'取出上軸承蓋與上軸承', d:'從頂部取出上軸承蓋，再取出上軸承。', tip:'注意上軸承蓋有圓點的那面朝上，組回時要照原方向。', rm:['ucap','ubear']},
+    {t:'抽出中軸＋內刀組', d:'把中軸連同內刀從底部抽出，套在中軸上的下軸承蓋與錐形彈簧也一起取下。', rm:['burrset','bcap','spring']},
+    {t:'拆外刀環組（選做）', d:'深度清潔才需要。先把粉杯接回機身當握把，順時針轉粉杯，把外刀環組整個轉下來。', warn:'一定要先取出刀盤組，才能拆外刀環；外刀和它的環座不要再分開。', rm:['oring'], rot:{at:[200,318],dir:'cw',lbl:'順時針'}},
+    {t:'拆刻度環（選做）', d:'把頂部的外部刻度環整組順時針轉下。到這裡就全部拆完了。', rm:['dring'], rot:{at:[200,80],dir:'cw',lbl:'順時針'}},
+    {t:'清潔重點', d:'用毛刷清掉刀盤、外刀環與中軸上的咖啡粉，吹球吹淨刻度環與軸承附近的粉。', warn:'1Zpresso 官方：不可水洗、不可浸泡。中軸與內刀、外刀環組、刻度環本體、機身上的軸承都不要再往下拆。', rm:[]}
   ],
   asm:[
-    {t:'確認零件', d:'可拆零件共 10 個：搖柄、粉杯、刻度環、外刀環、中軸＋內刀組、錐形彈簧、軸承蓋、滾花螺帽、上軸承、上軸承蓋。', add:[]},
-    {t:'裝回刻度環', d:'若有拆下，把外部刻度環逆時針鎖回機身頂部。', add:['dring'], rot:{at:[200,79],dir:'ccw',lbl:'逆時針'}},
-    {t:'裝回外刀環', d:'把外刀環逆時針鎖回機身底部，一樣可以接上粉杯當握把來轉。', add:['oring'], rot:{at:[200,318],dir:'ccw',lbl:'逆時針'}},
-    {t:'插回中軸＋內刀組', d:'把中軸與內刀組從底部插回機身。', tip:'把機身倒過來（底部朝上）操作比較順手，下一步也在倒置狀態進行。', add:['burrset']},
-    {t:'放彈簧與軸承蓋', d:'機身倒置下：先放錐形彈簧，大頭朝上；再把軸承蓋放到刀盤組上，凸起面朝上。', tip:'左邊示意圖是正立方向，所以看起來上下相反是正常的。', add:['spring','bcap']},
-    {t:'裝回上軸承（最難）', d:'把上軸承放進刻度環，再把上軸承蓋的「扁平面」對準中軸頂端的「扁平面」套進去。', tip:'官方也說這步最考驗耐心：慢慢轉動軸承蓋找角度，對上了就會滑進去。', add:['ubear','ucap']},
-    {t:'鎖回滾花螺帽', d:'按住刀盤組，把滾花螺帽順時針鎖到感覺有阻力就停。', warn:'不要過度鎖緊，可能損傷刀盤組。', add:['nut'], rot:{at:[200,378],dir:'cw',lbl:'順時針'}},
+    {t:'確認零件', d:'可拆零件共 10 個：搖柄、粉杯、刻度環、外刀環組、中軸＋內刀組、錐形彈簧、下軸承蓋、上軸承、上軸承蓋、滾花螺帽。', add:[]},
+    {t:'裝回刻度環', d:'若有拆下，把刻度環整組逆時針鎖到最緊，再順時針轉到比較粗的刻度。', add:['dring'], rot:{at:[200,80],dir:'ccw',lbl:'逆時針'}},
+    {t:'裝回外刀環組', d:'把外刀環組逆時針鎖到最緊（可以接上粉杯當握把來轉）。', add:['oring'], rot:{at:[200,318],dir:'ccw',lbl:'逆時針'}},
+    {t:'彈簧與下軸承蓋套上中軸', d:'先把錐形彈簧套上中軸（在內刀上方），大頭朝上；再套上下軸承蓋，凸緣朝上。', add:['spring','bcap']},
+    {t:'插回中軸＋內刀組', d:'把套好彈簧與軸承蓋的中軸，從底部插回機身。', add:['burrset']},
+    {t:'裝回上軸承（最難）', d:'從底部頂住內刀，先從頂部放入上軸承，再放上軸承蓋：有圓點的那面朝上，扁平面對準中軸的扁平面。', tip:'官方也說這步最需要耐心：上軸承蓋一定要卡到正確位置，慢慢轉動找角度，對上就會落下去。', add:['ubear','ucap']},
+    {t:'鎖回滾花螺帽', d:'繼續頂住內刀，把頂部的滾花螺帽順時針鎖到感覺有阻力就停。', warn:'不要過度鎖緊，可能損傷刀盤組。', add:['nut'], rot:{at:[200,58],dir:'cw',lbl:'順時針'}},
     {t:'裝回搖柄與粉杯', d:'搖柄插回頂端，粉杯對準螺紋旋回底部。', tip:'螺紋先對正再轉，避免鎖歪咬牙。', add:['handle','cup'], rot:{at:[205,420],dir:'cw',lbl:'鎖上'}},
-    {t:'校正確認', d:'把刻度往細的方向轉到底（刀盤咬合、搖柄轉不動），這時刻度指針應該對準 0。沒對準的話，照官方「How to Calibrate 1Zpresso Grinders」校正教學調整，再轉回你原本的刻度。', add:[]}
+    {t:'校正零點', d:'把刻度環逆時針（往細）慢慢轉，轉到搖柄開始有阻力就是零點（不是鎖到最緊），這時指針應對準 0。若指針在 0 的右邊：先轉粗，頂住內刀把滾花螺帽逆時針鬆一點，再轉回零點檢查；在左邊就把螺帽順時針鎖緊一點。重複到對準為止，再轉回你常用的刻度。', tip:'逆時針是轉細、順時針是轉粗，數字越大越粗。鎖螺帽的力道會讓零點差到 2 格以上，所以要反覆確認。', add:[]}
   ]
 }};
 
