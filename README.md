@@ -12,6 +12,7 @@
 | `spelling/` | 拼字消消樂 |
 | `molecule-reactions/` | 分子反應圖鑑 |
 | `extraction-sim/` | 手沖咖啡實驗室（萃取模擬器＋闖關遊戲） |
+| `coffee-lab-plan/` | 咖啡實驗室商業化路線圖 |
 | `cupping/` | 杯測教室 |
 | `smell-training/` | 嗅覺練習日誌 |
 | `yoshi-combos/` | 耀西連招手冊 |

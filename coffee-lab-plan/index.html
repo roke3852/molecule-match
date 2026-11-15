@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>咖啡實驗室商業化路線圖</title>
+<meta name="app-version" content="1.1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  /* 實驗筆記本：冷灰紙、墨色、咖啡櫻桃紅為重點、青綠代表完成 */
+  --paper:#F2F3F0; --card:#FFFFFF; --ink:#1E2A2F; --muted:#5E6B70; --line:#D6DAD5;
+  --accent:#A8323E; --accent-soft:#F4E3E4; --done:#2F6F68; --done-soft:#DDEDEA; --warn:#B7791F;
+  --display:"Noto Serif TC","Songti TC",serif; --body:"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --paper:#141A1C; --card:#1C2427; --ink:#E5EAE7; --muted:#9BA7AA; --line:#2F3A3D;
+    --accent:#E2707A; --accent-soft:#3A2427; --done:#62B6AA; --done-soft:#1F3532; --warn:#E0A84A;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#141A1C; --card:#1C2427; --ink:#E5EAE7; --muted:#9BA7AA; --line:#2F3A3D;
+  --accent:#E2707A; --accent-soft:#3A2427; --done:#62B6AA; --done-soft:#1F3532; --warn:#E0A84A;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--paper);color:var(--ink);font-family:var(--body);line-height:1.65;font-size:16px}
+.wrap{max-width:860px;margin:0 auto;padding:20px 16px 64px}
+header h1{font-family:var(--display);font-weight:900;font-size:1.7rem;line-height:1.25;margin:4px 0 6px;text-wrap:balance}
+header p{margin:0;color:var(--muted);font-size:.95rem}
+.overall{display:flex;align-items:center;gap:12px;margin:14px 0 4px}
+.bar{flex:1;height:8px;background:var(--line);border-radius:99px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--done);width:0;transition:width .3s}
+.overall b{font-variant-numeric:tabular-nums;font-size:.9rem;min-width:7.5em;text-align:right}
+nav{display:flex;gap:6px;overflow-x:auto;margin:18px -16px 18px;padding:0 16px;position:sticky;top:0;background:var(--paper);z-index:5;border-bottom:1px solid var(--line)}
+nav a{flex:none;padding:10px 12px;color:var(--muted);text-decoration:none;font-weight:500;border-bottom:3px solid transparent;white-space:nowrap}
+nav a.on{color:var(--ink);border-color:var(--accent)}
+nav a:focus-visible,button:focus-visible,input:focus-visible,label:focus-within{outline:2px solid var(--accent);outline-offset:2px}
+section{display:none}
+section.on{display:block}
+h2{font-family:var(--display);font-weight:600;font-size:1.3rem;margin:4px 0 8px;text-wrap:balance}
+h3{font-size:1.02rem;margin:18px 0 8px}
+.lead{color:var(--muted);margin:0 0 16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px}
+/* stepper */
+.steps{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;margin-bottom:14px}
+.step{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 8px;text-align:left;cursor:pointer;font:inherit;color:inherit;display:flex;flex-direction:column;gap:2px;position:relative;overflow:hidden}
+.step .n{font-family:var(--display);font-weight:900;font-size:1.2rem;color:var(--muted)}
+.step .nm{font-size:.82rem;font-weight:700;line-height:1.3}
+.step .ct{font-size:.75rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.step .fill{position:absolute;left:0;bottom:0;height:4px;background:var(--done);width:0}
+.step.on{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.step.on .n{color:var(--accent)}
+.step.complete .n{color:var(--done)}
+@media (max-width:520px){.steps{grid-template-columns:repeat(5,minmax(58px,1fr))}.step .nm{font-size:.72rem}}
+.stage-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:8px 12px}
+.when{font-size:.8rem;background:var(--accent-soft);color:var(--accent);padding:2px 8px;border-radius:99px;font-weight:700}
+.goal{margin:8px 0 0}
+.tasks{list-style:none;margin:10px 0 0;padding:0;display:flex;flex-direction:column;gap:8px}
+.task{border:1px solid var(--line);border-radius:8px;background:var(--paper)}
+.task label{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;cursor:pointer}
+.task input{margin-top:5px;width:18px;height:18px;accent-color:var(--done);flex:none}
+.task .t{font-weight:500}
+.task .d{display:block;font-size:.88rem;color:var(--muted);margin-top:2px}
+.task.done{background:var(--done-soft);border-color:transparent}
+.task.done .t{text-decoration:line-through;text-decoration-color:var(--done)}
+.chip{display:inline-block;font-size:.7rem;font-weight:700;padding:1px 7px;border-radius:99px;border:1px solid var(--line);color:var(--muted);margin-left:6px;vertical-align:2px;white-space:nowrap}
+.duo{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+@media (max-width:560px){.duo{grid-template-columns:1fr}}
+.box{border-radius:8px;padding:10px 12px;font-size:.9rem}
+.box b{display:block;font-size:.78rem;letter-spacing:.04em;margin-bottom:2px}
+.box.ok{background:var(--done-soft)} .box.ok b{color:var(--done)}
+.box.trap{background:var(--accent-soft)} .box.trap b{color:var(--accent)}
+/* value flow */
+.flow{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:center;margin-top:10px}
+.node{border:1px solid var(--line);background:var(--paper);border-radius:10px;padding:10px;font-size:.85rem}
+.node b{display:block;font-size:.95rem}
+.hub{grid-column:2;grid-row:1 / span 3;border:2px solid var(--accent);border-radius:12px;padding:14px 10px;text-align:center;font-family:var(--display);font-weight:900;writing-mode:vertical-rl;letter-spacing:.2em;background:var(--card)}
+.flow .l{grid-column:1}.flow .r{grid-column:3}
+.arrow{font-size:.78rem;color:var(--muted);margin-top:4px}
+.arrow em{font-style:normal;color:var(--accent);font-weight:700}
+/* issues */
+.filters{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.filters button{font:inherit;font-size:.85rem;padding:5px 12px;border-radius:99px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+.filters button.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.cat-group{margin-bottom:18px}
+.cat-group h3{display:flex;justify-content:space-between;gap:8px;border-bottom:1px solid var(--line);padding-bottom:4px}
+.cat-group h3 span{font-weight:400;color:var(--muted);font-size:.85rem;font-variant-numeric:tabular-nums}
+/* launch */
+.weeks{display:flex;flex-direction:column;gap:10px}
+.week{display:grid;grid-template-columns:72px 1fr;gap:12px;align-items:start}
+.week .wk{font-family:var(--display);font-weight:900;color:var(--accent);font-size:1rem;padding-top:12px}
+.week ul{margin:6px 0 0;padding-left:1.2em;font-size:.92rem}
+.channels{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px}
+.ch .tag{font-size:.72rem;font-weight:700;padding:1px 8px;border-radius:99px;margin-left:6px}
+.tag.own{background:var(--done-soft);color:var(--done)}
+.tag.rent{background:var(--accent-soft);color:var(--accent)}
+.ch p{margin:6px 0 0;font-size:.9rem;color:var(--muted)}
+.funnel{display:flex;flex-direction:column;gap:6px;margin-top:8px}
+.fun{display:grid;grid-template-columns:minmax(0,1fr);gap:2px}
+.fun .bar2{height:30px;border-radius:6px;background:var(--accent);color:#fff;display:flex;align-items:center;padding:0 10px;font-size:.85rem;font-weight:700;min-width:fit-content;white-space:nowrap}
+.fun small{color:var(--muted);font-size:.83rem}
+.post{white-space:pre-wrap;background:var(--paper);border:1px dashed var(--line);border-radius:8px;padding:12px;font-size:.92rem;margin:8px 0}
+.btn{font:inherit;font-size:.88rem;font-weight:700;padding:7px 14px;border-radius:8px;border:1px solid var(--ink);background:var(--ink);color:var(--paper);cursor:pointer}
+/* revenue */
+.sliders{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px 18px}
+.sl label{display:flex;justify-content:space-between;gap:8px;font-size:.88rem}
+.sl label output{font-weight:700;font-variant-numeric:tabular-nums}
+.sl input{width:100%;accent-color:var(--accent)}
+.sl .g{font-size:.75rem;color:var(--muted);font-weight:700;letter-spacing:.04em;grid-column:1/-1;margin-top:6px;border-top:1px solid var(--line);padding-top:8px}
+.total{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin:6px 0 12px}
+.total .big{font-family:var(--display);font-weight:900;font-size:2rem;font-variant-numeric:tabular-nums}
+.rev-row{display:grid;grid-template-columns:7.5em 1fr 6em;gap:8px;align-items:center;font-size:.88rem;margin:6px 0}
+.rev-row .track{height:14px;background:var(--line);border-radius:4px;overflow:hidden}
+.rev-row .track i{display:block;height:100%;background:var(--done);transition:width .25s}
+.rev-row .v{text-align:right;font-variant-numeric:tabular-nums;font-weight:700}
+.note{font-size:.85rem;color:var(--muted);margin-top:10px}
+.mt{margin-top:16px}
+.sync{display:none;align-items:center;gap:10px;flex-wrap:wrap;margin-top:10px}
+.sync.show{display:flex}
+.gbtn{font:inherit;font-size:.88rem;font-weight:700;padding:7px 14px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+.sync .note{margin:0}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <p>給自己看的作戰地圖</p>
+    <h1>咖啡實驗室商業化路線圖</h1>
+    <p>從「好玩的模擬器」到「有收入的產品」：五個階段、每一關要解決的問題，以及第一個月怎麼推廣。</p>
+    <div class="overall"><div class="bar"><i id="allBar"></i></div><b id="allTxt">0 / 0 完成</b></div>
+    <div class="sync" id="syncRow"><button class="gbtn" id="gBtn" type="button"><span id="gBtnT">☁️ 用 Google 帳號同步進度</span></button><span class="note" id="syncNote">勾選和試算存到你的 Google 雲端硬碟，換手機也看得到</span></div>
+  </header>
+
+  <nav id="tabs">
+    <a href="#roadmap" data-t="roadmap">路線圖</a>
+    <a href="#issues" data-t="issues">待解問題清單</a>
+    <a href="#launch" data-t="launch">推廣起步</a>
+    <a href="#revenue" data-t="revenue">收入試算</a>
+  </nav>
+
+  <!-- 路線圖 -->
+  <section id="s-roadmap">
+    <h2>五個階段</h2>
+    <p class="lead">點選階段看細節，完成的項目打勾，進度會記在這台裝置上。</p>
+    <div class="steps" id="steps"></div>
+    <div class="card" id="stageCard"></div>
+
+    <h3 class="mt">錢從哪裡來：價值交換</h3>
+    <div class="card">
+      <div class="flow">
+        <div class="node l"><b>玩家</b>手沖愛好者、新手<div class="arrow">給你：<em>流量、數據</em><br>得到：好玩、學會沖煮</div></div>
+        <div class="hub">咖啡實驗室</div>
+        <div class="node r"><b>烘豆商</b>自家烘焙、小品牌<div class="arrow">給你：<em>贊助費、分潤</em><br>得到：豆子曝光、導購</div></div>
+        <div class="node l"><b>付費玩家</b>想挑戰進階<div class="arrow">給你：<em>關卡包費用</em><br>得到：進階關卡</div></div>
+        <div class="node r"><b>咖啡教室</b>手沖課、講師<div class="arrow">給你：<em>授權費</em><br>得到：上課教具</div></div>
+        <div class="node l" style="grid-column:1/2"><b>關鍵順序</b>先有玩家，烘豆商和教室才會買單。</div>
+        <div class="node r"><b>先做哪個</b>烘豆商贊助：一家點頭就能驗證。</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 問題清單 -->
+  <section id="s-issues">
+    <h2>待解問題清單</h2>
+    <p class="lead">同一份清單，依類型重新分組。和路線圖的勾選是同步的。</p>
+    <div class="filters" id="filters"></div>
+    <div id="issueList"></div>
+  </section>
+
+  <!-- 推廣 -->
+  <section id="s-launch">
+    <h2>推廣起步：第一個月</h2>
+    <p class="lead">目標不是爆紅，是找到第一批「會主動玩第二次」的人。</p>
+    <div class="weeks">
+      <div class="week"><div class="wk">第 1 週</div><div class="card"><b>朋友圈試玩</b><ul><li>找 5～10 位會手沖的朋友，看他們玩，不要解釋</li><li>記下卡住的地方，當週修掉</li><li>請一位咖啡師挑模擬邏輯的錯</li></ul></div></div>
+      <div class="week"><div class="wk">第 2 週</div><div class="card"><b>做素材</b><ul><li>錄 3 支 15～30 秒的手機操作影片（選豆 → 沖煮 → 客人評分）</li><li>做「成績卡」截圖，讓玩家想分享</li><li>寫好第一篇貼文（下面有草稿）</li></ul></div></div>
+      <div class="week"><div class="wk">第 3 週</div><div class="card"><b>第一次公開</b><ul><li>先在 1～2 個手沖社團發文，先看版規是否允許分享自製工具</li><li>每則留言都親自回，把建議記下來</li><li>同步發 Threads / IG 短影片</li></ul></div></div>
+      <div class="week"><div class="wk">第 4 週</div><div class="card"><b>留住人、看數據</b><ul><li>推出「本週挑戰關」，給大家回來的理由</li><li>開 IG 或 LINE 官方帳號，把玩家收進自己的名單</li><li>看數據：多少人過第一關？多少人回訪？</li></ul></div></div>
+    </div>
+
+    <h3 class="mt">推廣管道</h3>
+    <div class="channels">
+      <div class="card ch"><b>手沖咖啡 FB 社團</b><span class="tag rent">借用</span><p>最快接觸到目標玩家。用「自己做的小工具」故事切入，不要像廣告。</p></div>
+      <div class="card ch"><b>Threads／IG 短影片</b><span class="tag rent">借用</span><p>遊戲畫面很適合短影片：「這杯客人只給 62 分，因為⋯」。</p></div>
+      <div class="card ch"><b>PTT、Dcard 咖啡相關看板</b><span class="tag rent">借用</span><p>討論深、玩家硬核，適合收集模擬邏輯的建議。注意自我宣傳的版規。</p></div>
+      <div class="card ch"><b>烘豆商、咖啡館 QR 桌卡</b><span class="tag rent">借用</span><p>從常去的店開始，「等咖啡時玩一關」。順便鋪路談贊助。</p></div>
+      <div class="card ch"><b>咖啡展、市集</b><span class="tag rent">借用</span><p>現場試玩的轉換率最高，有機會擺攤或請攤商放 QR code。</p></div>
+      <div class="card ch"><b>IG 帳號／LINE 官方帳號</b><span class="tag own">自有</span><p>借用管道帶來的人，最後都要收進這裡。之後談贊助時，追蹤數就是籌碼。</p></div>
+    </div>
+
+    <h3 class="mt">玩家漏斗：每一層掉人時該修什麼</h3>
+    <div class="card"><div class="funnel" id="funnel"></div></div>
+
+    <h3 class="mt">第一篇貼文草稿</h3>
+    <div class="card">
+      <div class="post" id="postText">最近沖咖啡時一直在想：研磨、水溫、注水速度到底怎麼影響風味？
+
+所以我做了一個小遊戲「咖啡實驗室」🧪
+客人會點單：「我想要酸一點、乾淨一點的」
+你要選豆子、濾杯、手法，沖出讓他滿意的那杯。
+
+還在測試階段，想請大家幫忙玩玩看、挑毛病，
+特別是模擬結果跟你實際沖的經驗不一樣的地方，很想聽！
+
+👉（連結）
+免費、手機就能玩，不用註冊。</div>
+      <button class="btn" id="copyBtn" type="button">複製貼文</button> <span id="copyMsg" class="note"></span>
+    </div>
+  </section>
+
+  <!-- 收入 -->
+  <section id="s-revenue">
+    <h2>收入試算</h2>
+    <p class="lead">拉動假設看每月收入怎麼組成。預設值是示範用的假設，不是市場數據。</p>
+    <div class="card">
+      <div class="total"><span class="big" id="tot">NT$0</span><span class="note" style="margin:0">／月（估算）</span></div>
+      <div id="revBars"></div>
+    </div>
+    <div class="card mt">
+      <div class="sliders" id="sliders"></div>
+    </div>
+    <p class="note">觀察重點：初期玩家少時，導購分潤幾乎可以忽略，收入主要靠「贊助」和「授權」這種按月固定收費的 B2B 收入。所以推廣階段的目標是累積可以拿去談贊助的數字，而不是直接向玩家收錢。</p>
+  </section>
+</div>
+
+<script>
+const STAGES=[
+ {n:0,name:"打磨產品",when:"第 1–2 週",goal:"陌生人打開後 30 秒內就知道怎麼玩，而且玩完想分享。",
+  ok:"5 位朋友不靠你解釋，都能自己過第一關。",trap:"一直加功能、遲遲不給別人玩。",
+  tasks:[
+   ["p1","手機版操作順暢","大部分人會在手機上第一次打開，按鈕、拖曳、文字大小都要在手機上測過。","產品"],
+   ["p2","第一關就是新手教學","不靠說明頁，用第一位客人一步步帶玩家完成一杯。","產品"],
+   ["p3","成績卡可截圖分享","結算畫面設計成好看的卡片：客人評語＋分數＋你的配方。","產品"],
+   ["p4","請咖啡師挑模擬邏輯的錯","模擬結果跟實際經驗差太多，懂咖啡的人會直接離開。這是信任的基礎。","內容"],
+   ["p5","決定正式名稱，查商標和網域","「咖啡實驗室」很常見，先查有沒有人註冊，必要時換個好記的名字。","法務"],
+   ["p6","加上流量統計","裝 GoatCounter 或 Cloudflare Web Analytics 這類輕量統計，之後談贊助需要數字。","技術"]
+  ]},
+ {n:1,name:"小規模驗證",when:"第 3–4 週",goal:"確認真的有人想玩，並找出最吸引人的那個點。",
+  ok:"至少一半的試玩者主動玩第二次，或主動分享給別人。",trap:"只問「好不好玩」，大家都會說好玩。看行為，不看客套話。",
+  tasks:[
+   ["v1","找 10–20 位手沖玩家試玩","可以從朋友、常去的咖啡館開始，盡量找不認識你的人。","推廣"],
+   ["v2","問三個固定問題","會再玩嗎？會推薦給誰？哪一關最有感？答案寫下來比較。","產品"],
+   ["v3","看數據：過關率和回訪率","多少人過第一關？隔幾天還有多少人回來？","技術"],
+   ["v4","收集玩家截圖和留言","經過同意後，這些會是之後推廣最有說服力的素材。","推廣"],
+   ["v5","決定主打一個特色","例如「客人點單」或「風味分子圖」，對外只講一件事。","產品"]
+  ]},
+ {n:2,name:"公開推廣",when:"第 2 個月",goal:"把試玩者變成追蹤者，累積可以拿去談贊助的數字。",
+  ok:"累積 500 位試玩、100 位追蹤（IG 或 LINE）。",trap:"只在別人的平台發文，沒把人收進自己的名單。",
+  tasks:[
+   ["g1","在手沖社團發第一篇故事型貼文","用「我自己做的」的角度，請大家幫忙挑錯。","推廣"],
+   ["g2","每週 1–2 支短影片","15–30 秒，從「客人只給 62 分，為什麼？」這種懸念開頭。","推廣"],
+   ["g3","推出「本週挑戰關」","固定節奏給玩家回來的理由，也是之後放贊助豆的位置。","產品"],
+   ["g4","開 IG 或 LINE 官方帳號","所有管道帶來的人，最後都導到這裡。","推廣"],
+   ["g5","咖啡展、市集擺 QR code","現場試玩轉換最高。可以請熟識的攤商幫忙放。","推廣"]
+  ]},
+ {n:3,name:"第一筆收入",when:"第 3 個月",goal:"拿到第一筆錢，證明有人願意為它付費。",
+  ok:"第一家付費贊助，或第一筆關卡包收入。",trap:"為了收錢先做複雜的會員和金流系統。",
+  tasks:[
+   ["m1","做一頁贊助提案","放流量數據、玩家輪廓、贊助關卡示意圖和報價。","商業"],
+   ["m2","找 1 家熟識烘豆商試做贊助關卡","第一家可以先免費或低價，換取案例和導購數據。","商業"],
+   ["m3","取得豆子名稱和圖片的使用同意","放真實品牌的豆子進遊戲前，先拿到書面同意。","法務"],
+   ["m4","每家烘豆商一組專屬折扣碼","這樣才算得出你帶來多少訂單，續約時有依據。","技術"],
+   ["m5","決定收款方式","先用 Portaly 或匯款收；收入穩定後問會計師是否需要辦營業登記。","法務"],
+   ["m6","畫出免費版和付費關卡包的界線","免費版要夠好玩，付費的是進階挑戰，不要把核心體驗鎖起來。","產品"]
+  ]},
+ {n:4,name:"擴大",when:"第 4–6 個月",goal:"建立第二個收入來源，讓收入穩定。",
+  ok:"每月有固定收入，而且有兩種以上的收入來源。",trap:"同時開太多方向，每一個都做一半。",
+  tasks:[
+   ["x1","咖啡教室教具授權方案","講師可以指定關卡給學員，看到學員進度。先找一間教室共同設計。","商業"],
+   ["x2","每月豆單關卡輪替","多家烘豆商輪流贊助，形成固定節目。","商業"],
+   ["x3","評估帳號系統和後端","現在用 Google Drive 存進度；教室授權可能需要真正的帳號和權限。","技術"],
+   ["x4","英文版、海外手沖社群","手沖是國際興趣，介面英文化後市場會大很多。","產品"],
+   ["x5","每月檢視一次數據","過關率、回訪率、導購轉換、各收入來源佔比。","商業"]
+  ]}
+];
+const CATS=["產品","內容","技術","推廣","商業","法務"];
+const ALL=STAGES.flatMap(s=>s.tasks.map(t=>({id:t[0],t:t[1],d:t[2],cat:t[3],stage:s})));
+let done=new Set(), cur=0, catF="全部";
+function loadState(){try{done=new Set(JSON.parse(localStorage.getItem("cl-done")||"[]"));cur=+(localStorage.getItem("cl-stage")||0)||0}catch(e){}}
+loadState();
+let onSaved=null;
+function save(){try{localStorage.setItem("cl-done",JSON.stringify([...done]));localStorage.setItem("cl-stage",cur);localStorage.setItem("cl-savedAt",String(Date.now()))}catch(e){}onSaved&&onSaved()}
+const $=s=>document.querySelector(s);
+
+function taskHTML(t,showStage){
+  return `<li class="task ${done.has(t.id)?"done":""}"><label for="c-${t.id}${showStage?"-i":""}">
+  <input type="checkbox" id="c-${t.id}${showStage?"-i":""}" data-id="${t.id}" ${done.has(t.id)?"checked":""}>
+  <span><span class="t">${t.t}</span><span class="chip">${showStage?("階段 "+t.stage.n):t.cat}</span><span class="d">${t.d}</span></span></label></li>`;
+}
+function renderSteps(){
+  $("#steps").innerHTML=STAGES.map(s=>{
+    const c=s.tasks.filter(t=>done.has(t[0])).length, tot=s.tasks.length;
+    return `<button type="button" class="step ${s.n===cur?"on":""} ${c===tot?"complete":""}" data-s="${s.n}" aria-pressed="${s.n===cur}">
+      <span class="n">${s.n}</span><span class="nm">${s.name}</span><span class="ct">${c}/${tot}</span><span class="fill" style="width:${c/tot*100}%"></span></button>`;
+  }).join("");
+  const s=STAGES[cur];
+  const ts=ALL.filter(t=>t.stage===s);
+  $("#stageCard").innerHTML=`<div class="stage-head"><h2 style="margin:0">階段 ${s.n}：${s.name}</h2><span class="when">${s.when}</span></div>
+   <p class="goal"><b>目標：</b>${s.goal}</p>
+   <ul class="tasks">${ts.map(t=>taskHTML(t,false)).join("")}</ul>
+   <div class="duo"><div class="box ok"><b>過關標準</b>${s.ok}</div><div class="box trap"><b>常見陷阱</b>${s.trap}</div></div>`;
+}
+function renderIssues(){
+  $("#filters").innerHTML=["全部",...CATS].map(c=>`<button type="button" class="${c===catF?"on":""}" data-c="${c}">${c}</button>`).join("");
+  $("#issueList").innerHTML=CATS.filter(c=>catF==="全部"||c===catF).map(c=>{
+    const ts=ALL.filter(t=>t.cat===c), n=ts.filter(t=>done.has(t.id)).length;
+    return `<div class="cat-group"><h3>${c}<span>${n} / ${ts.length}</span></h3><ul class="tasks">${ts.map(t=>taskHTML(t,true)).join("")}</ul></div>`;
+  }).join("");
+}
+function renderOverall(){
+  const n=ALL.filter(t=>done.has(t.id)).length;
+  $("#allBar").style.width=(n/ALL.length*100)+"%";
+  $("#allTxt").textContent=`${n} / ${ALL.length} 完成`;
+}
+function renderAll(){renderSteps();renderIssues();renderOverall()}
+document.addEventListener("change",e=>{
+  const id=e.target.dataset&&e.target.dataset.id; if(!id)return;
+  e.target.checked?done.add(id):done.delete(id); save(); renderAll();
+});
+$("#steps").addEventListener("click",e=>{const b=e.target.closest(".step");if(!b)return;cur=+b.dataset.s;save();renderSteps()});
+$("#filters").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;catF=b.dataset.c;renderIssues()});
+
+/* funnel */
+const FUN=[["看到貼文或影片",100,"沒人點：開頭三秒不夠吸引人，換標題或影片開場"],["打開遊戲",40,"打開就走：載入太慢或第一眼看不懂"],["過第一關",25,"卡在第一關：新手引導不夠清楚"],["隔幾天回來玩",10,"沒回來：缺少回來的理由（每週挑戰關）"],["分享或點豆子連結",4,"不分享：成績卡不夠好看，或豆子跟關卡沒連結"]];
+$("#funnel").innerHTML=FUN.map(f=>`<div class="fun"><div class="bar2" style="width:${Math.max(f[1],22)}%">${f[0]}・${f[1]}</div><small>${f[2]}</small></div>`).join("")+`<p class="note">數字是「每 100 位看到的人」的示範比例，用來對照自己的數據。</p>`;
+
+/* copy */
+$("#copyBtn").addEventListener("click",async()=>{
+  try{await navigator.clipboard.writeText($("#postText").textContent);$("#copyMsg").textContent="已複製"}
+  catch(e){$("#copyMsg").textContent="無法自動複製，請長按文字選取"}
+});
+
+/* revenue */
+const SL=[
+ {g:"導購分潤"},
+ {k:"mau",l:"每月活躍玩家",min:100,max:20000,step:100,v:1000,f:v=>v.toLocaleString()+" 人"},
+ {k:"ctr",l:"點豆子連結比例",min:0,max:30,step:1,v:8,f:v=>v+"%"},
+ {k:"cvr",l:"點了之後購買比例",min:0,max:40,step:1,v:15,f:v=>v+"%"},
+ {k:"aov",l:"平均訂單金額",min:200,max:1500,step:50,v:450,f:v=>"NT$"+v},
+ {k:"com",l:"分潤比例",min:0,max:30,step:1,v:10,f:v=>v+"%"},
+ {g:"烘豆商贊助"},
+ {k:"sp",l:"贊助烘豆商數",min:0,max:12,step:1,v:2,f:v=>v+" 家"},
+ {k:"spf",l:"每家每月贊助費",min:0,max:10000,step:500,v:1500,f:v=>"NT$"+v.toLocaleString()},
+ {g:"咖啡教室授權"},
+ {k:"cl",l:"授權教室數",min:0,max:20,step:1,v:1,f:v=>v+" 間"},
+ {k:"clf",l:"每間每月授權費",min:0,max:8000,step:500,v:2000,f:v=>"NT$"+v.toLocaleString()},
+ {g:"付費關卡包"},
+ {k:"pay",l:"活躍玩家購買比例",min:0,max:10,step:.5,v:2,f:v=>v+"%"},
+ {k:"price",l:"關卡包價格（攤到每月）",min:0,max:300,step:10,v:99,f:v=>"NT$"+v}
+];
+const V={};let savedRev={};try{savedRev=JSON.parse(localStorage.getItem("cl-rev")||"{}")||{}}catch(e){}
+$("#sliders").innerHTML=SL.map(s=>{
+  if(s.g)return `<div class="sl"><div class="g">${s.g}</div></div>`;
+  const v=(s.k in savedRev&&isFinite(savedRev[s.k]))?+savedRev[s.k]:s.v; V[s.k]=v;
+  return `<div class="sl"><label for="r-${s.k}">${s.l}<output id="o-${s.k}">${s.f(v)}</output></label><input type="range" id="r-${s.k}" data-k="${s.k}" min="${s.min}" max="${s.max}" step="${s.step}" value="${v}"></div>`;
+}).join("");
+document.querySelectorAll(".sl .g").forEach(g=>g.parentElement.style.gridColumn="1/-1");
+function calc(){
+  const r=[
+    ["導購分潤",V.mau*V.ctr/100*V.cvr/100*V.aov*V.com/100],
+    ["烘豆商贊助",V.sp*V.spf],
+    ["教室授權",V.cl*V.clf],
+    ["付費關卡包",V.mau*V.pay/100*V.price]
+  ];
+  const tot=r.reduce((a,b)=>a+b[1],0), mx=Math.max(...r.map(x=>x[1]),1);
+  $("#tot").textContent="NT$"+Math.round(tot).toLocaleString();
+  $("#revBars").innerHTML=r.map(x=>`<div class="rev-row"><span>${x[0]}</span><div class="track"><i style="width:${x[1]/mx*100}%"></i></div><span class="v">${Math.round(x[1]).toLocaleString()}</span></div>`).join("");
+}
+$("#sliders").addEventListener("input",e=>{
+  const k=e.target.dataset.k; if(!k)return; V[k]=+e.target.value;
+  const s=SL.find(x=>x.k===k); $("#o-"+k).textContent=s.f(V[k]); calc();
+  try{localStorage.setItem("cl-rev",JSON.stringify(V))}catch(e){} save();
+});
+function applyRev(){
+  let r={};try{r=JSON.parse(localStorage.getItem("cl-rev")||"{}")||{}}catch(e){}
+  SL.forEach(s=>{if(s.k&&s.k in r&&isFinite(r[s.k])){V[s.k]=+r[s.k];$("#r-"+s.k).value=V[s.k];$("#o-"+s.k).textContent=s.f(V[s.k])}});calc();
+}
+calc();
+
+/* tabs */
+const TABS=["roadmap","issues","launch","revenue"];
+function route(){
+  const h=location.hash.slice(1); const t=TABS.includes(h)?h:"roadmap";
+  TABS.forEach(x=>{$("#s-"+x).classList.toggle("on",x===t)});
+  document.querySelectorAll("#tabs a").forEach(a=>a.classList.toggle("on",a.dataset.t===t));
+}
+window.addEventListener("hashchange",route);
+renderAll(); route();
+
+/* ---------- Google 雲端同步：進度存成你自己 Google 雲端硬碟裡的隱藏 App 檔案（只在 GitHub 網址上啟用） ---------- */
+(function(){
+if(!/github\.io$/.test(location.hostname))return;
+$("#syncRow").classList.add("show");
+const GCLIENT='267421312122-l2ggo7t35tqpf8ej5osqttt08ke30lr1.apps.googleusercontent.com';
+const GFILE='coffee-lab-plan.json',GAPI='https://www.googleapis.com',KEYS=['cl-done','cl-stage','cl-rev'];
+let gTok=null,gTokExp=0,gFileId=null,gClient=null,gOn=false,pushT=null;
+const ls={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
+const note=t=>{$("#syncNote").textContent=t},btn=t=>{$("#gBtnT").textContent=t};
+try{const t=JSON.parse(sessionStorage.getItem('cl-gtok')||'null');if(t&&t.exp>Date.now()){gTok=t.tok;gTokExp=t.exp}}catch(e){}
+onSaved=()=>{if(!gOn)return;clearTimeout(pushT);pushT=setTimeout(push,1500)};
+function snapshot(){const o={savedAt:+ls.get('cl-savedAt')||0};KEYS.forEach(k=>{const v=ls.get(k);if(v!=null)try{o[k]=JSON.parse(v)}catch(e){}});return o}
+function libLoad(){return new Promise((ok,no)=>{if(window.google&&google.accounts&&google.accounts.oauth2)return ok();const sc=document.createElement('script');sc.src='https://accounts.google.com/gsi/client';sc.onload=()=>ok();sc.onerror=()=>no(new Error('lib'));document.head.appendChild(sc)})}
+async function gf(url,opt={}){
+  if(!gTok||Date.now()>gTokExp)throw new Error('auth');
+  const r=await fetch(url,Object.assign({},opt,{headers:Object.assign({Authorization:'Bearer '+gTok},opt.headers||{})}));
+  if(r.status===401){gTok=null;throw new Error('auth')}
+  if(!r.ok)throw new Error('http '+r.status);
+  return r;
+}
+function expired(){btn('☁️ 點這裡連回 Google');note('Google 連線已過期，點一下就會繼續同步（進度先存在這台）')}
+async function push(){
+  if(!gOn)return;
+  if(!gTok||Date.now()>gTokExp){expired();return}
+  const body=JSON.stringify(snapshot());
+  try{
+    if(gFileId)await gf(GAPI+'/upload/drive/v3/files/'+gFileId+'?uploadType=media',{method:'PATCH',keepalive:true,headers:{'Content-Type':'application/json'},body});
+    else{
+      const b='cl'+Date.now(),meta=JSON.stringify({name:GFILE,parents:['appDataFolder']});
+      const mp='--'+b+'\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n'+meta+'\r\n--'+b+'\r\nContent-Type: application/json\r\n\r\n'+body+'\r\n--'+b+'--';
+      const r=await gf(GAPI+'/upload/drive/v3/files?uploadType=multipart&fields=id',{method:'POST',headers:{'Content-Type':'multipart/related; boundary='+b},body:mp});
+      gFileId=(await r.json()).id;
+    }
+    btn('☁️ 已連上 Google 同步');note('已同步到 Google 雲端硬碟 '+new Date().toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'}));
+  }catch(e){if(e.message==='auth')expired();else note('⚠️ 雲端同步失敗，進度先存在這台')}
+}
+document.addEventListener('visibilitychange',()=>{if(document.hidden&&pushT){clearTimeout(pushT);pushT=null;push()}});
+async function afterLogin(){
+  note('正在讀取 Google 雲端的進度…');
+  try{
+    const q=encodeURIComponent("name='"+GFILE+"'");
+    const j=await (await gf(GAPI+'/drive/v3/files?spaces=appDataFolder&fields=files(id)&q='+q)).json();
+    gFileId=j.files&&j.files[0]?j.files[0].id:null;
+    let rem=null;if(gFileId)rem=await (await gf(GAPI+'/drive/v3/files/'+gFileId+'?alt=media')).json().catch(()=>null);
+    gOn=true;ls.set('cl-g','1');
+    const loc=snapshot();
+    /* 第一次在這台連線：勾選取聯集，避免任何一邊的進度不見；之後以較新的那份為準 */
+    const first=ls.get('cl-gsync')!=='1';ls.set('cl-gsync','1');
+    if(rem){
+      const remNewer=(+rem.savedAt||0)>(+loc.savedAt||0);
+      const pick=k=>remNewer?(k in rem?rem[k]:loc[k]):(k in loc?loc[k]:rem[k]);
+      let d=pick('cl-done')||[];
+      if(first)d=[...new Set([...(loc['cl-done']||[]),...(rem['cl-done']||[])])];
+      ls.set('cl-done',JSON.stringify(d));
+      const st=pick('cl-stage');if(st!=null)ls.set('cl-stage',JSON.stringify(st));
+      const rv=pick('cl-rev');if(rv)ls.set('cl-rev',JSON.stringify(rv));
+      ls.set('cl-savedAt',String(Math.max(+loc.savedAt||0,+rem.savedAt||0)));
+      loadState();renderAll();applyRev();
+    }
+    await push();
+  }catch(e){note(e.message==='auth'?'Google 連線已過期，再點一次':'⚠️ 讀取 Google 雲端失敗')}
+}
+function login(){
+  libLoad().then(()=>{
+    if(!gClient)gClient=google.accounts.oauth2.initTokenClient({client_id:GCLIENT,scope:'https://www.googleapis.com/auth/drive.appdata',
+      callback:t=>{if(t&&t.access_token){gTok=t.access_token;gTokExp=Date.now()+((+t.expires_in||3600)-120)*1000;try{sessionStorage.setItem('cl-gtok',JSON.stringify({tok:gTok,exp:gTokExp}))}catch(e){}afterLogin()}else note('⚠️ Google 登入沒有完成')},
+      error_callback:()=>note('⚠️ Google 登入被取消或被擋（請允許彈出視窗）')});
+    gClient.requestAccessToken({prompt:ls.get('cl-g')==='1'?'':'consent'});
+  },()=>note('⚠️ 無法載入 Google 登入，請確認網路'));
+}
+$("#gBtn").onclick=()=>{if(gOn&&gTok&&Date.now()<gTokExp){push();return}login()};
+if(gTok&&ls.get('cl-g')==='1')afterLogin();
+else if(ls.get('cl-g')==='1')btn('☁️ 點這裡連回 Google 同步');
+})();
+</script>
+</body>
+</html>
