@@ -242,6 +242,9 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
 #gameView .seg button{flex:1;background:transparent;border:0;font-size:14px;padding:7px 6px;cursor:pointer;white-space:nowrap}
 #gameView .seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
 #gameView .gchamp{grid-column:1 / -1}
+#playView.glock #gMode{display:none}
+#playView.glock .param input:disabled,#playView.glock .seg button:disabled{opacity:.45}
+#playView.glock #ggrinder:disabled{opacity:1}
 #gameView .gsel{width:100%;font:inherit;font-size:15px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:7px 10px}
 #gameView .costline{margin:0;font-size:14px;text-align:center}
 #gameView .costline b{font-family:var(--f-mono);font-weight:500}
@@ -841,7 +844,7 @@ button,input,select,label,.seg,.stepper,.card{touch-action:manipulation}
   <!-- level map -->
   <section id="mapView" class="wrap" style="gap:12px">
     <p class="lede">每位客人都有自己喜歡的風味和預算。聽懂他的描述，在預算內挑豆子、選器具、決定水溫、研磨和注水手法，沖出一杯讓他滿意的咖啡。分數達到他的期待就過關，解鎖下一位客人。</p>
-    <div class="seg stagetabs" id="stageTabs" role="group" aria-label="關卡類型"><button data-v="cust">客人關卡</button><button data-v="comp">咖啡比賽</button></div>
+    <div class="seg stagetabs" id="stageTabs" role="group" aria-label="關卡類型"><button data-v="cust">客人關卡</button><button data-v="comp">咖啡比賽</button><button data-v="grind">磨豆機挑戰</button></div>
     <div class="levels" id="levels"></div>
   </section>
 
@@ -1435,6 +1438,7 @@ const gSnap=(G,g)=>gSize(G,gClick(G,g));
 const gDial=(G,g)=>{const c=gClick(G,g);if(G.dial!=='num')return '第 '+c+' 格';const r=G.rot&&c>=G.rot?Math.floor(c/G.rot):0,k=c-r*(G.rot||0);return (r?'轉 '+r+' 圈後 ':'刻度 ')+Math.floor(k/10)+'.'+(k%10);};
 const gStepTxt=G=>{const u=+G.um.toFixed(1);return G.move?'每格約 '+u+' μm 粒徑（刀盤位移 '+G.move+' μm）':'每格約 '+u+' μm';};
 function gRange(el,G){const z=G.z||0;el.step=Number.isInteger(G.um)?G.um:1;el.min=gSize(G,Math.ceil((300-z)/G.um));el.max=gSize(G,Math.floor((1200-z)/G.um));}
+window.GRH={gClick,gSize,gSnap,gDial,gStepTxt,gRange}; // 闖關遊戲也用同一套刻度換算
 const pFor=kind=>kind==='im'?Object.assign({},simP(),{filter:'metal',cutoff:0,wdt:false,dig:false}):simP();
 function simP(){const b=curBean(),gr=curGrinder();return Object.assign({},P,b?{roast:b.roast,bean:b.f,clarAdj:b.clar||0}:{bean:null,clarAdj:0},{fines:gr?gr.fines:null});}
 function syncGrindSlider(){const gr=curGrinder(),el=$('grind');
@@ -1833,6 +1837,7 @@ t=Math.min(75,tMax); $('scrub').value=t; draw();
 </script>
 <script>
 (function(){
+const {gClick,gSize,gSnap,gDial,gStepTxt,gRange}=window.GRH;
 const $=id=>document.getElementById(id);
 // order: acid caf sugar cga bitter fruity roasty
 const BREWERS=[
@@ -1973,8 +1978,27 @@ const COMPS=[
  {name:'冠軍挑戰賽',role:'大魔王',color:'#b08a2e',bean:'geisha',need:1,after:4,rivals:['champ:wbrc2016','champ:wbrc2017','champ:wbrc2018','champ:wbrc2019','champ:wbrc2021','champ:wbrc2022','champ:wbrc2023','champ:wbrc2024','champ:wbrc2025'],
   quote:'九位世界冠軍的手法同場較量，指定豆是巴拿馬藝伎。要贏過全部的人才算過關。',hint:'把所有工具都用上：濾杯、分段水溫、整粉、斷水補水。先看評分表上冠軍們最弱的一項，從那裡下手。'},
 ];
+// ---- 磨豆機挑戰：豆子、器具、水溫、粉水比都固定，只能調研磨。每台磨豆機用同一套模型（每格粒徑、細粉比例），沒有特別優待哪一台 ----
+const GCH=[
+ {name:'阿哲',role:'露營咖啡・C40',color:'#4a6b3a',grinder:'c40',ref:790,fix:{bean:'ethn',brewer:'v60',temp:93,ratio:15,pour:'three',stir:'bloom'},w:{sweet:2,fruity:2,astr:1,tds:1,balance:1},
+  quote:'露營只帶了 C40，一格大約 27 μm。古吉日曬我想喝到甜、果香飽滿，不要澀。',hint:'C40 每格約 27 μm，換一格味道就差不少。先兩三格兩三格跳，找到方向再一格一格調。想要更細的刻度，可以加裝 Red Clix（每格減半）。',ok:'就是這個甜感，山上喝更好喝！'},
+ {name:'小芸',role:'宿舍咖啡・Encore',color:'#8a5a9e',grinder:'encore',ref:820,fix:{bean:'bra',brewer:'cone',temp:90,ratio:16,pour:'three',stir:'none'},w:{bitter:2,astr:2,sweet:1,body:1,tds:1},
+  quote:'宿舍只有入門的 Encore，細粉比較多。巴西喜拉朵我想要順口、不苦不澀。',hint:'入門錐刀細粉多，細粉萃取快、容易帶出苦和澀，也比較會塞水。通常要比你以為的再粗一點。',ok:'好順！原來我的磨豆機也可以沖出這樣。'},
+ {name:'Ken',role:'手沖玩家・ZP6',color:'#2f6f8f',grinder:'zp6',ref:708,fix:{bean:'ken',brewer:'kalita',temp:92,ratio:16,pour:'multi',stir:'none'},w:{balance:2,sweet:2,acid:1,tds:1,astr:1},
+  quote:'ZP6 的刻度是 5.2、5.3 這樣讀的。肯亞 AA 我要酸質明亮，但要有甜感撐住。',hint:'ZP6 每格約 9 μm（刻度 0.1），刻度 x.y 就是第 xy 格。七角刀細粉少，適合淺焙手沖，酸質會很乾淨。',ok:'酸甜平衡得剛好，這就是肯亞！'},
+ {name:'Mia',role:'咖啡師・K-Ultra',color:'#b0642e',grinder:'kultra',ref:669,fix:{bean:'tarrazu',brewer:'orea',temp:92,ratio:16,pour:'three',stir:'bloom'},w:{sweet:2,body:2,tds:1,bitter:1,balance:1},
+  quote:'K-Ultra 一圈 100 格，每格不到 8 μm。塔拉珠蜜處理，我要甜感和醇厚度都到位。',hint:'每格只有約 7.6 μm，要調很多格才有明顯差異，可以 5 格、10 格一跳。轉超過一圈，要記得現在是第幾圈。',ok:'甜、厚、圓潤，蜜處理就該是這樣。'},
+ {name:'小林',role:'咖啡館店長・P80',color:'#3a5f8a',grinder:'p80',ref:640,fix:{bean:'ethw',brewer:'v60',temp:93,ratio:16,pour:'three',stir:'bloom'},w:{sweet:2,balance:2,tds:1,astr:1,bitter:1},
+  quote:'店裡用 P80，每格 10 μm。耶加雪菲要乾淨、甜、酸質明亮，幫我找到最對的那一格。',hint:'P80 是 80mm 平刀，細粉少、杯子乾淨。每格 10 μm，可以很細地微調：先大步找方向，再一格一格逼近。',ok:'就是這一格，明天開店就用它。'},
+ {name:'Lin',role:'杯測師・EK43',color:'#5e4a3a',grinder:'ek43',ref:760,fix:{bean:'alishan',brewer:'v60',temp:94,ratio:16,pour:'multi',stir:'none'},w:{sweet:2,clarity:2,astr:1,bitter:1,tds:1},
+  quote:'EK43 是無段式，沒有刻度，全靠你自己找。阿里山要像烏龍茶一樣清爽、甜、乾淨。',hint:'無段磨豆機可以停在任何粒徑，自由但也容易迷路：記住每一次的設定，往好的方向收斂。98mm 平刀細粉很少，適合追求清晰度。',ok:'清爽又有茶感，這杯可以給杯測台。'},
+ {name:'阿伯',role:'家裡第一台・砍豆機',color:'#7a6a4a',grinder:'blade',ref:1000,fix:{bean:'man',brewer:'press',temp:90,ratio:15,steep:240,stir:'bloom'},w:{bitter:2,astr:1,body:1,tds:1},
+  quote:'家裡只有砍豆機，粉粗細差很多。曼特寧沖給我喝，不要太苦就好。',hint:'刀片打碎的粉粗細不一、細粉超多。用法式濾壓（不會塞水）、磨粗一點，苦味就收得住。真的喜歡手沖，下一台換有刀盤的磨豆機。',ok:'嗯，不苦，好喝！原來砍豆機也可以。'}
+];
+GCH.forEach(L=>{L.budget=9999;L.target=80;L.best=99;L.tol=.8;L.rule={grinder:L.grinder,fix:L.fix,beans:[L.fix.bean],brewers:[L.fix.brewer]};});
 const isComp=()=>stageMode==='comp';
-const curL=()=>isComp()?COMPS[cur]:LEVELS[cur];
+const isGrind=()=>stageMode==='grind';
+const curL=()=>isComp()?COMPS[cur]:isGrind()?GCH[cur]:LEVELS[cur];
 function rivalList(C){return C.rivals.map(id=>id.startsWith('champ:')?champRival(id.slice(6)):RIV[id]);}
 function rivalRecipe(R,bean){const o=Object.assign({mode:'pro',bean,steep:240,swMode:'closeFirst',swClose:30,swOpen:120,stirI:'none',planT:null,planD:null,planTemp:null,valveWins:null},clone(R.o));
   if(!o.plan||o.n){const n=o.n||3;o.plan=evenPlan(o.dose,o.ratio,n);}
@@ -1999,7 +2023,7 @@ function rivalScores(i){if(rivalCache[i])return rivalCache[i];const C=COMPS[i];
   return rivalCache[i]=rivalList(C).map(R=>{const o=rivalRecipe(R,C.bean);if(C.rule&&C.rule.brewers&&!C.rule.brewers.includes(o.brewer)){o.brewer=C.rule.brewers[0];o.swMode='closeFirst';o.swOpen=Math.min(150,o.swOpen||120);}
     const E=evalCup(C,o);return {name:R.name,desc:R.desc,s:E.sc,ey:E.r.ey,tds:E.r.tds};});}
 function rankOf(i,s){return 1+rivalScores(i).filter(x=>x.s>s+1e-9).length;}
-function scoreOf(L,r,pf){return L.budget!=null&&L.want?score(pf,L.want):judge(r,L).total;}
+function scoreOf(L,r,pf){return L.budget!=null&&L.want?score(pf,L.want,L.tol):judge(r,L).total;}
 // ---- 關卡規則：限制條件、時間、冷熱雙杯、一人三杯 ----
 const doseOf=o=>o.mode==='pro'?o.dose:(o.sdose||15);
 function ruleText(L){const R=L.rule||{},t=[];
@@ -2007,6 +2031,8 @@ function ruleText(L){const R=L.rule||{},t=[];
   if(R.brewers)t.push('只能用'+R.brewers.map(id=>(BREWERS.find(b=>b.id===id)||{}).name||id).join('、'));
   if(R.dose)t.push('粉量固定 '+R.dose+' g');if(R.maxTemp)t.push('水溫最高 '+R.maxTemp+'°C');if(R.minGrind)t.push('研磨至少 '+R.minGrind+' μm');
   if(R.fines)t.push('磨豆機故障：細粉特別多');if(R.maxTime)t.push((L.need?'超過 '+fmtT(R.maxTime)+' 每 5 秒扣 2 分':'必須在 '+fmtT(R.maxTime)+' 前滴完'));
+  if(R.grinder){const G=GRINDERS.find(g=>g.id===R.grinder);t.push('指定磨豆機：'+G.name+'（'+(G.um?gStepTxt(G):'無段，直接設定粒徑')+'）');}
+  if(R.fix){const F=R.fix,B=BEANS.find(b=>b.id===F.bean),W=BREWERS.find(b=>b.id===F.brewer);t.push('只能調研磨，其他固定：'+B.name+'・'+W.name+'・'+F.temp+'°C・1:'+F.ratio);}
   if(R.cool)t.push('熱喝、放涼各評一次，取平均');if(R.triple)t.push('連沖三杯，看平均與穩定度');
   return t;}
 function applyRule(L,o0){const o=clone(o0),R=L.rule||{};
@@ -2014,10 +2040,12 @@ function applyRule(L,o0){const o=clone(o0),R=L.rule||{};
   if(R.maxTemp){o.temp=Math.min(o.temp,R.maxTemp);if(o.planTemp)o.planTemp=o.planTemp.map(v=>Math.min(v,R.maxTemp));}
   if(R.minGrind)o.grind=Math.max(o.grind,R.minGrind);
   if(R.fines)o.forceFines=R.fines;
+  if(R.fix){Object.assign(o,R.fix);o.mode='simple';}
+  if(R.grinder){const G=GRINDERS.find(g=>g.id===R.grinder);o.grinder=R.grinder;if(G){if(G.um)o.grind=gSnap(G,o.grind);o.forceFines=G.fines;}}
   if(R.beans&&!R.beans.includes(o.bean))o.bean=R.beans[0];
   if(R.brewers&&!R.brewers.includes(o.brewer))o.brewer=R.brewers[0];
   return o;}
-const scoreFor=(L,r,pf,pfo)=>L.need?judge(r,L,pfo).total:score(pfo||pf,L.want);
+const scoreFor=(L,r,pf,pfo)=>L.need?judge(r,L,pfo).total:score(pfo||pf,L.want,L.tol);
 function coolPf(pf){return Object.assign({},pf,{acid:Math.min(10,pf.acid+.9),sweet:Math.min(10,pf.sweet+.5),bitter:Math.max(0,pf.bitter-.6),astr:Math.min(10,pf.astr+.3),fruity:Math.max(0,pf.fruity-.8),balance:Math.min(10,pf.balance+.6)});}
 function evalCup(L,o0){const R=L.rule||{},o=applyRule(L,o0),notes=[];let fail=false;
   const r=brew(o),pf=profile(r);let sc=scoreFor(L,r,pf);
@@ -2037,8 +2065,8 @@ const expectFor=B=>Math.round(55+30*(1-Math.exp(-(B-60)/180)));
 LEVELS.forEach(L=>{L.target=expectFor(L.budget);});
 const beanCost=o=>Math.round(BEANS.find(b=>b.id===o.bean).price*doseOf(applyRule(curL(),o))/100);
 const cupCost=o=>beanCost(o)+FIXED_COST;
-const part=(v,t)=>Math.exp(-(((v-t)/2.6)**2));
-function score(pf,want){let s=0,w=0;for(const k in want){const [t,wt]=want[k];s+=wt*part(pf[k],t);w+=wt;}return 100*s/w;}
+const part=(v,t,tol)=>Math.exp(-(((v-t)/(tol||2.6))**2));
+function score(pf,want,tol){let s=0,w=0;for(const k in want){const [t,wt]=want[k];s+=wt*part(pf[k],t,tol);w+=wt;}return 100*s/w;}
 
 function evenPlan(dose,ratio,n){const W=Math.round(dose*ratio),b=Math.min(3*dose,W),r=W-b,each=Math.floor(r/n/5)*5;const a=[b];for(let i=0;i<n;i++)a.push(i===n-1?r-each*(n-1):each);return a;}
 const STIRP={none:'不攪拌',bloom:'悶蒸時攪',swirl:'每注後旋轉'}, STIRI={none:'不攪拌',once:'開頭一次',min:'每分鐘'};
@@ -2074,6 +2102,8 @@ function brew(o){
 }
 
 // 盲測關：客人的目標就是這杯「隱藏配方」沖出來的口感
+GCH.forEach(L=>{const G=GRINDERS.find(g=>g.id===L.grinder);if(G&&G.um)L.ref=gSnap(G,L.ref);
+  const pf=profile(brew(applyRule(L,Object.assign({mode:'simple',grind:L.ref},L.fix))));L.want={};for(const k in L.w)L.want[k]=[Math.round(pf[k]*10)/10,L.w[k]];});
 LEVELS.forEach(L=>{if(!L.blind)return;const pf=profile(brew(Object.assign({mode:'simple'},L.blind)));
   L.want={};['tds','balance','sweet','bitter','astr','body','fruity','roasty'].forEach(k=>{L.want[k]=[Math.round(pf[k]*10)/10,1];});});
 // ---- state ----
@@ -2087,19 +2117,22 @@ if(save.mode==='pro')O.mode='pro';
 let cur=0, openRec=null, stageMode='cust';
 if(!save.hist)save.hist={};
 if(!save.comp)save.comp={};
-const histKey=()=>isComp()?'c'+cur:cur;
+if(!save.grind)save.grind={};
+const histKey=()=>isComp()?'c'+cur:isGrind()?'g'+cur:cur;
+const bestStore=()=>isGrind()?save.grind:save.best;
 const compPass=i=>save.comp[i]!=null&&save.comp[i].rank<=COMPS[i].need;
 const placeName=r=>r===1?'冠軍':r===2?'亞軍':r===3?'季軍':'第 '+r+' 名';
 
-function starsFor(i,s){const L=LEVELS[i];if(s==null||s<L.target)return 0;const span=L.best-L.target;
+function starsFor(i,s){const L=(isGrind()?GCH:LEVELS)[i];if(s==null||s<L.target)return 0;const span=L.best-L.target;
   return s>=L.target+span*.8?3:s>=L.target+span*.45?2:1;}
 const starHTML=n=>'<span>'+'★'.repeat(n)+'</span><span class="off">'+'★'.repeat(3-n)+'</span>';
 const unlockedCust=i=>i===0||(save.best[i-1]!=null&&save.best[i-1]>=LEVELS[i-1].target);
-const unlocked=i=>isComp()?compUnlocked(i):unlockedCust(i);
+const unlocked=i=>isComp()?compUnlocked(i):isGrind()?true:unlockedCust(i);
 
 function renderMap(){
   $('stageTabs').querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===stageMode));
   if(isComp())return renderCompMap();
+  if(isGrind())return renderGrindMap();
   const box=$('levels');box.innerHTML='';let tot=0;
   LEVELS.forEach((L,i)=>{const b=save.best[i],st=starsFor(i,b);tot+=st;
     const el=document.createElement('button');el.className='lv';el.disabled=!unlockedCust(i);
@@ -2110,6 +2143,16 @@ function renderMap(){
   $('totalStars').textContent=tot;$('maxStars').textContent=LEVELS.length*3;
 }
 const compUnlocked=i=>i===0||compPass(COMPS[i].after!=null?COMPS[i].after:i-1);
+function renderGrindMap(){
+  const box=$('levels');box.innerHTML='<p class="label" style="grid-column:1/-1;margin:0 0 4px">豆子、器具、水溫、粉水比都固定，只能調研磨。學會讀每一台磨豆機的刻度，找到客人要的那一格。</p>';let tot=0;
+  GCH.forEach((L,i)=>{const b=save.grind[i],st=starsFor(i,b),G=GRINDERS.find(g=>g.id===L.grinder);tot+=st;
+    const el=document.createElement('button');el.className='lv';
+    el.innerHTML='<div class="av" style="background:'+L.color+'">'+L.name[0]+'</div>'+
+      '<div class="nm">'+G.name+' <span class="label">'+L.name+'・'+L.role.split('・')[0]+'</span></div>'+
+      '<div class="meta"><span>'+(G.um?gStepTxt(G):'無段')+'・期待 '+L.target+' 分'+(b!=null?'・最佳 '+Math.round(b):'')+'</span><span class="stars">'+starHTML(st)+'</span></div>';
+    el.onclick=()=>openLevel(i);box.appendChild(el);});
+  $('totalStars').textContent=tot;$('maxStars').textContent=GCH.length*3;
+}
 function renderCompMap(){
   const box=$('levels');box.innerHTML='';
   COMPS.forEach((C,i)=>{const b=save.comp[i],B=BEANS.find(x=>x.id===C.bean);
@@ -2124,12 +2167,17 @@ function showMap(){$('playView').hidden=true;$('mapView').hidden=false;renderMap
 function openLevel(i){
   if(!unlocked(i))return;cur=i;const L=curL(),comp=isComp();
   if(comp){O.bean=L.bean;}
-  document.querySelectorAll('.budgetnote').forEach(e=>e.hidden=comp);$('cBudget').parentElement.hidden=comp;$('costLine').hidden=comp;
+  const gr=isGrind();
+  document.querySelectorAll('.budgetnote').forEach(e=>e.hidden=comp||gr);$('cBudget').parentElement.hidden=comp||gr;$('costLine').hidden=comp||gr;
+  $('playView').classList.toggle('glock',gr);
+  if(gr){O.__gl=true;Object.assign(O,L.fix);O.mode='simple';O.grinder=L.grinder;const G=GRINDERS.find(g=>g.id===L.grinder);if(G&&G.um)O.grind=gSnap(G,O.grind);$('gratio').value=O.ratio;}
+  else if(O.__gl){O.__gl=false;O.mode=save.mode==='pro'?'pro':'simple';O.grinder=null;}
+  ['gtemp','gratio','gsteep'].forEach(id=>$(id).disabled=gr);document.querySelectorAll('#pour button,#stir button').forEach(b=>b.disabled=gr);
   $('cRivals').hidden=!comp;
   if(comp){const B=BEANS.find(x=>x.id===L.bean);$('cRivals').innerHTML='<b>指定豆：'+B.name+'（'+B.sub+'・'+ROASTN(B.roast)+'）</b><span>評分標準：'+STYLES[styleByRoast(B.roast)].name+'・'+(L.need===1?'需要拿到冠軍':'前 '+L.need+' 名晉級')+'</span><b>同場對手</b>'+rivalList(L).map(R=>'<span>'+R.name+'・'+R.desc+'</span>').join('');}
   $('mapView').hidden=true;$('playView').hidden=false;
   $('cAv').textContent=L.name[0];$('cAv').style.background=L.color;
-  $('cName').textContent=L.name;$('cLevel').textContent=comp?'第 '+(i+1)+' 站 · '+L.role:'第 '+(i+1)+' 位 · '+L.role;
+  $('cName').textContent=L.name;$('cLevel').textContent=comp?'第 '+(i+1)+' 站 · '+L.role:gr?'磨豆機挑戰 '+(i+1)+' · '+L.role:'第 '+(i+1)+' 位 · '+L.role;
   $('cQuote').textContent=comp?L.quote:'「'+L.quote+'」';
   $('cTarget').parentElement.hidden=comp;
   if(!comp){$('cTarget').textContent=L.target+' 分';$('cBudget').textContent='NT$'+L.budget+'／杯';}syncCost();
@@ -2142,11 +2190,11 @@ function openLevel(i){
   if(L.blind){$('cQuote').textContent='「這杯是我沖的，你喝喝看，然後沖一杯一模一樣的給我。」';$('cQuote').insertAdjacentHTML('beforeend','<span class="blindTgt">'+Object.entries(L.want).map(([k,[t]])=>DIMS[k]+' '+T5(t)).join('・')+'</span>');}
   syncParams();
   updBest();openRec=null;renderChoices();renderHist();$('resultBox').hidden=true;$('brewingBox').hidden=true;$('brewBtn').hidden=false;
-  try{history.replaceState(null,'',comp?'#game':'#level-'+(i+1));}catch(e){}
+  try{history.replaceState(null,'',comp||gr?'#game':'#level-'+(i+1));}catch(e){}
   scrollTo(0,0);
 }
 function updBest(){if(isComp()){const b=save.comp[cur];$('cBest').textContent=b?placeName(b.rank)+'（'+Math.round(b.s)+' 分）':'—';$('cStars').innerHTML='';return;}
-  const b=save.best[cur];$('cBest').textContent=b!=null?Math.round(b)+' 分':'—';$('cStars').innerHTML=starHTML(starsFor(cur,b));}
+  const b=bestStore()[cur];$('cBest').textContent=b!=null?Math.round(b)+' 分':'—';$('cStars').innerHTML=starHTML(starsFor(cur,b));}
 $('hintBtn').onclick=()=>{$('cHint').hidden=false;$('hintBtn').hidden=true;};
 $('backBtn').onclick=showMap;
 
@@ -2190,13 +2238,14 @@ function renderGPlan(){
   $('gplanMinus').disabled=O.plan.length<=2;$('gplanPlus').disabled=O.plan.length>=7;
   {const W=O.plan.reduce((a,b)=>a+b,0);$('gplanOut').innerHTML='合計 <b>'+W+' ml</b>・粉 '+O.dose+' g → <b class="ratioLive">1:'+(W/O.dose).toFixed(1)+'</b> · 最後一注 '+fmtT(seg[seg.length-1].e)+' 結束';}
 }
-function syncCost(){if(isComp()){$('costLine').hidden=true;return;}$('costLine').hidden=false;const L=LEVELS[cur],c=cupCost(O),bc=beanCost(O),over=c>L.budget;
+function syncCost(){if(isComp()||isGrind()){$('costLine').hidden=true;return;}$('costLine').hidden=false;const L=LEVELS[cur],c=cupCost(O),bc=beanCost(O),over=c>L.budget;
   $('costLine').innerHTML='這杯成本 <b>NT$'+c+'</b>（豆子 '+bc+' ＋ 其他 '+FIXED_COST+'）・預算 <b>NT$'+L.budget+'</b>・'+(over?'<span class="over">超出 NT$'+(c-L.budget)+'，客人付不起</span>':'利潤 <b>NT$'+(L.budget-c)+'</b>');}
 function syncParams(){
   const drip=!!DRIPPER[O.brewer], pro=O.mode==='pro', sw=O.brewer==='switch', press=O.brewer==='press';
   if(!O.plan)gEven(3);
   document.querySelectorAll('#gameView .param.pro').forEach(e=>e.hidden=!pro);
   document.querySelectorAll('#gameView .param.simple').forEach(e=>e.hidden=pro);
+  const glk=isGrind()&&!$('playView').hidden;$('ggrinderP').hidden=!(pro||glk);$('ggrinder').disabled=glk;if(glk)$('gchampP').hidden=true;
   $('gMode').querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===O.mode));
   $('gModeNote').textContent=pro?'和練習模擬器一樣的完整設定：粉量、每一注的水量、時間與水溫、聰明杯閥門、攪拌時機。':'只調最關鍵的幾項，其餘用常見做法自動安排。';
   $('gDoseNote').textContent=pro?'粉量在步驟 3 調整':'粉量固定 15 g';
@@ -2222,11 +2271,11 @@ function syncParams(){
   }
   const perPour=pro&&O.planTemp&&!$('gplanP').hidden;
   $('gtempOut').innerHTML=perPour?O.planTemp.join('/')+' <span class="label">各注</span>':O.temp+' °C';
-  const GR=pro&&O.grinder?GRINDERS.find(g=>g.id===O.grinder):null;
+  const GR=(pro||glk)&&O.grinder?GRINDERS.find(g=>g.id===O.grinder):null;
   $('ggrindOut').innerHTML=(GR&&GR.um?gDial(GR,O.grind)+' <span class="label">≈ '+O.grind+' μm・'+grindName(O.grind)+'</span>':O.grind+' μm <span class="label">'+grindName(O.grind)+'</span>');
   $('ggrinder').value=O.grinder||'';
   $('ggrinderOut').textContent=GR?(GR.um?gStepTxt(GR):'以 μm 設定')+'・細粉'+(GR.fines<.1?'少':GR.fines<.16?'中等':GR.fines<.25?'偏多':'很多'):'不指定時不計細粉與塞水';
-  {const el=$('ggrind');if(GR&&GR.um){gRange(el,GR);}else{el.step=pro&&GR?10:50;el.min=300;el.max=1200;}el.value=O.grind;}
+  {const el=$('ggrind');if(GR&&GR.um){gRange(el,GR);}else{el.step=(pro||glk)&&GR?10:50;el.min=300;el.max=1200;}el.value=O.grind;}
   $('gratioOut').innerHTML='1:'+O.ratio+' <span class="label">'+Math.round(doseOf(applyRule(curL(),O))*O.ratio)+' ml</span>';
   $('gsteepOut').textContent=fmtT(O.steep);
   syncCost();
@@ -2245,6 +2294,7 @@ $('gplanPlus').onclick=()=>{if(O.plan.length<7){gEven(O.plan.length);syncParams(
 $('gplanEven').onclick=()=>{gEven(O.plan.length-1);syncParams();};
 [['pour','pour'],['stir','stir']].forEach(([id,k])=>$(id).querySelectorAll('button').forEach(b=>b.onclick=()=>{O[k]=b.dataset.v;syncParams();}));
 
+function grindTxt(o){const G=o.grinder&&GRINDERS.find(g=>g.id===o.grinder);return G&&G.um?gDial(G,o.grind)+'（≈'+o.grind+' μm）':o.grind+' μm';}
 function recipeText(o){const B=BEANS.find(b=>b.id===o.bean),R=BREWERS.find(b=>b.id===o.brewer);
   const drip=!!DRIPPER[o.brewer];
   if(o.mode==='pro'){const sw=o.brewer==='switch',press=o.brewer==='press';
@@ -2276,8 +2326,8 @@ $('brewBtn').onclick=()=>{
 
 function showResult(o,r,pf,sc,E){
   $('rBoard').hidden=true;$('rDkey').hidden=false;
-  const L=LEVELS[cur],cost=cupCost(o),over=cost>L.budget,late=!!(E&&E.fail),pass=!over&&!late&&sc>=L.target;
-  const prev=save.best[cur];if(!over&&!late&&(prev==null||sc>prev)){save.best[cur]=sc;persist();}
+  const L=curL(),gr=isGrind(),cost=cupCost(o),over=!gr&&cost>L.budget,late=!!(E&&E.fail),pass=!over&&!late&&sc>=L.target;
+  const BS=bestStore(),prev=BS[cur];if(!over&&!late&&(prev==null||sc>prev)){BS[cur]=sc;persist();}
   updBest();
   $('brewingBox').hidden=true;$('brewBtn').hidden=false;$('resultBox').hidden=false;
   const st=(over||(E&&E.fail))?0:starsFor(cur,sc);
@@ -2285,24 +2335,26 @@ function showResult(o,r,pf,sc,E){
   $('rV').textContent=over?'超出預算，客人付不起':late?'太慢了，客人沒等到':pass?'客人滿意，過關！':'還不是他要的味道';
   $('rRule').hidden=!(E&&E.notes.length);$('rRule').textContent=E&&E.notes.length?E.notes.join('；'):'';
   $('rStars').innerHTML=starHTML(st);
-  $('rNeed').textContent=(over?'這杯成本 NT$'+cost+'，超出預算 NT$'+(cost-L.budget)+'；分數只供參考，不算過關':pass?(st<3?'再高一點可以拿更多星':'三星滿分'):'他期待 '+L.target+' 分，還差 '+Math.ceil(L.target-sc)+' 分')+'・成本 NT$'+cost+'・'+(over?'虧損 NT$'+(cost-L.budget):'利潤 NT$'+(L.budget-cost));
+  $('rNeed').textContent=(over?'這杯成本 NT$'+cost+'，超出預算 NT$'+(cost-L.budget)+'；分數只供參考，不算過關':pass?(st<3?'再高一點可以拿更多星':'三星滿分'):'他期待 '+L.target+' 分，還差 '+Math.ceil(L.target-sc)+' 分')+(gr?'・研磨 '+grindTxt(o):'・成本 NT$'+cost+'・'+(over?'虧損 NT$'+(cost-L.budget):'利潤 NT$'+(L.budget-cost)));
   // count up
   const t0=performance.now();(function c(now){const u=Math.min(1,(now-t0)/600);$('rScore').textContent=Math.round(sc*u);if(u<1)requestAnimationFrame(c);})(t0);
   // comments: two worst weighted gaps
-  const issues=Object.entries(L.want).map(([k,[t,w]])=>({k,d:pf[k]-t,loss:w*(1-part(pf[k],t))})).filter(x=>Math.abs(x.d)>1.5).sort((a,b)=>b.loss-a.loss).slice(0,2);
+  const issues=Object.entries(L.want).map(([k,[t,w]])=>({k,d:pf[k]-t,loss:w*(1-part(pf[k],t,L.tol))})).filter(x=>Math.abs(x.d)>(L.tol?.25:1.5)).sort((a,b)=>b.loss-a.loss).slice(0,2);
   if(over){$('rSay').textContent=L.name+'：「這杯要 NT$'+cost+'？我的預算只有 NT$'+L.budget+'，換個便宜一點的豆子吧。」';}
   else $('rSay').textContent=L.name+'：「'+(issues.length?issues.map(x=>SAY[x.k][x.d>0?1:0]).join(''):'')+(pass?(issues.length?'不過整體我喜歡。':L.ok):(issues.length?'':'好像差了一點什麼，說不上來。'))+'」';
-  $('rDims').innerHTML=Object.entries(L.want).sort((a,b)=>b[1][1]-a[1][1]).map(([k,[t]])=>dimRow(k,pf[k],t,part(pf[k],t))).join('');
+  $('rDims').innerHTML=Object.entries(L.want).sort((a,b)=>b[1][1]-a[1][1]).map(([k,[t]])=>dimRow(k,pf[k],t,part(pf[k],t,L.tol))).join('');
   $('rOther').innerHTML=Object.keys(DIMS).filter(k=>!(k in L.want)).map(k=>dimRow(k,pf[k],null,null)).join('');
   $('rTDS').textContent=r.tds.toFixed(2)+'%';$('rEY').textContent=r.ey.toFixed(1)+'%';$('rVol').textContent=Math.round(r.vol)+' ml';
   $('rRecipe').textContent='這杯：'+recipeText(o);
-  lastShare={comp:false,idx:cur,who:L.name,role:L.role,color:L.color,sc,pass,stars:st,verdict:$('rV').textContent,say:$('rSay').textContent,recipe:recipeText(o),tds:r.tds,ey:r.ey,vol:r.vol};
+  lastShare={comp:false,kind:gr?'grind':'cust',idx:cur,who:L.name,role:L.role,color:L.color,sc,pass,stars:st,target:L.target,verdict:$('rV').textContent,say:$('rSay').textContent,recipe:(gr?'研磨 '+grindTxt(o)+'・':'')+recipeText(o),tds:r.tds,ey:r.ey,vol:r.vol,
+    dims:Object.entries(L.want).sort((a,b)=>b[1][1]-a[1][1]).map(([k,[t]])=>({n:DIMS[k],v:pf[k],t}))};
   const H=(save.hist[histKey()]=save.hist[histKey()]||[]);
   H.push({n:(H.length?H[H.length-1].n:0)+1,at:Date.now(),o,s:sc,pf,tds:r.tds,ey:r.ey,vol:r.vol,cost,over,late:!!(E&&E.fail)});
   if(H.length>30)H.splice(0,H.length-30);
+  if(lastShare)lastShare.steps=stepsOf(H);
   persist();openRec=null;renderHist();
-  const nx=cur+1<LEVELS.length&&unlocked(cur+1);
-  $('nextBtn').hidden=!nx;$('nextBtn').textContent='下一位客人';
+  const nx=cur+1<(gr?GCH:LEVELS).length&&unlocked(cur+1);
+  $('nextBtn').hidden=!nx;$('nextBtn').textContent=gr?'下一台磨豆機':'下一位客人';
   renderMap();
   $('resultBox').scrollIntoView({behavior:'smooth',block:'start'});
 }
@@ -2325,10 +2377,12 @@ function showCompResult(o,r,pf,sc,E){
   $('rOther').innerHTML=Object.keys(DIMS).map(k=>dimRow(k,pf[k],null,null)).join('');
   $('rTDS').textContent=r.tds.toFixed(2)+'%';$('rEY').textContent=r.ey.toFixed(1)+'%';$('rVol').textContent=Math.round(r.vol)+' ml';
   $('rRecipe').textContent='這杯：'+recipeText(o);
-  lastShare={comp:true,idx:cur,who:C.name,role:C.role,color:C.color,sc,pass,rank:$('rStars').textContent,verdict:$('rV').textContent,say:$('rSay').textContent,recipe:recipeText(o),tds:r.tds,ey:r.ey,vol:r.vol};
+  lastShare={comp:true,kind:'comp',idx:cur,who:C.name,role:C.role,color:C.color,sc,pass,rank:$('rStars').textContent,verdict:$('rV').textContent,say:$('rSay').textContent,recipe:recipeText(o),tds:r.tds,ey:r.ey,vol:r.vol,
+    dims:J.parts.map(q=>({n:q.k,v:q.s*10,t:null}))};
   const H=(save.hist[histKey()]=save.hist[histKey()]||[]);
   H.push({n:(H.length?H[H.length-1].n:0)+1,at:Date.now(),o,s:sc,pf,tds:r.tds,ey:r.ey,vol:r.vol,aroma:r.aroma,c:r.c,share:r.share,rank,pass});
   if(H.length>30)H.splice(0,H.length-30);
+  if(lastShare)lastShare.steps=stepsOf(H);
   persist();openRec=null;renderHist();
   const nx=cur+1<COMPS.length&&compUnlocked(cur+1);
   $('nextBtn').hidden=!nx;$('nextBtn').textContent='下一站比賽';
@@ -2341,9 +2395,27 @@ $('nextBtn').onclick=()=>openLevel(cur+1);
 // ---- 分享成績：畫一張成績卡，手機用系統分享，其他情況顯示圖片讓玩家長按儲存 ----
 let lastShare=null;
 const SHARE_URL='https://roke3852.github.io/molecule-match/extraction-sim/';
+const SH_POUR={three:'三段式',cont:'一刀流',multi:'少量多次'},SH_STIR={none:'不攪拌',bloom:'悶蒸時攪'};
+function paramChanges(a,b){
+  if(!a)return '第一杯';
+  const t=[],nm=(L,id)=>(L.find(x=>x.id===id)||{}).name||id;
+  if(a.bean!==b.bean)t.push('豆子 '+nm(BEANS,a.bean)+'→'+nm(BEANS,b.bean));
+  if(a.brewer!==b.brewer)t.push('器具 '+nm(BREWERS,a.brewer)+'→'+nm(BREWERS,b.brewer));
+  if(a.grind!==b.grind){const G=b.grinder&&GRINDERS.find(g=>g.id===b.grinder);t.push('研磨 '+(G&&G.um?gDial(G,a.grind)+'→'+gDial(G,b.grind):a.grind+'→'+b.grind+' μm'));}
+  if(a.temp!==b.temp)t.push('水溫 '+a.temp+'→'+b.temp+'°C');
+  if(a.ratio!==b.ratio)t.push('粉水比 1:'+a.ratio+'→1:'+b.ratio);
+  if(b.mode==='pro'&&a.dose!==b.dose)t.push('粉量 '+a.dose+'→'+b.dose+' g');
+  if(b.mode!=='pro'&&a.pour!==b.pour&&DRIPPER[b.brewer])t.push('注水 '+SH_POUR[a.pour]+'→'+SH_POUR[b.pour]);
+  if(b.mode!=='pro'&&a.stir!==b.stir)t.push(SH_STIR[b.stir]||'攪拌');
+  if(a.steep!==b.steep&&(b.brewer==='press'||b.brewer==='switch'))t.push('浸泡 '+fmtT(a.steep)+'→'+fmtT(b.steep));
+  if(a.mode!==b.mode)t.push(b.mode==='pro'?'改用精細設定':'改用簡單設定');
+  return t.length?t.slice(0,2).join('、')+(t.length>2?' 等':''):'同樣參數再沖一次';
+}
+function stepsOf(H){return H.map((h,i)=>({n:h.n,s:h.s,chg:paramChanges(i?H[i-1].o:null,h.o)}));}
 function shareText(d){
-  return d.comp?('我在「手沖咖啡實驗室」參加'+d.who+'，拿到 '+Math.round(d.sc)+' 分，'+d.rank+'！☕\n'+d.recipe+'\n你也來挑戰：'+SHARE_URL)
-    :('我在「手沖咖啡實驗室」幫'+d.who+'沖了一杯，拿到 '+Math.round(d.sc)+' 分'+(d.pass?'，'+'★'.repeat(d.stars)+' 過關！':'，還差一點…')+' ☕\n'+d.recipe+'\n你能沖得比我好嗎？'+SHARE_URL);
+  const st=d.steps||[],tries=st.length>1?'試了 '+st.length+' 杯，從 '+Math.round(st[0].s)+' 分調到 '+Math.round(d.sc)+' 分。':'';
+  if(d.comp)return '我在「手沖咖啡實驗室」參加'+d.who+'，拿到 '+Math.round(d.sc)+' 分，'+d.rank+'！☕\n'+tries+(tries?'\n':'')+d.recipe+'\n你也來挑戰：'+SHARE_URL;
+  return '我在「手沖咖啡實驗室」'+(d.kind==='grind'?'挑戰'+d.role.split('・').pop()+'，':'幫'+d.who+'沖了一杯，')+'拿到 '+Math.round(d.sc)+' 分'+(d.pass?'，'+'★'.repeat(d.stars)+' 過關！':'，還差一點…')+' ☕\n'+tries+(tries?'\n':'')+d.recipe+'\n你能沖得比我好嗎？'+SHARE_URL;
 }
 function wrapLines(x,t,maxW,maxLines){
   const out=[];let line='';
@@ -2354,39 +2426,74 @@ function wrapLines(x,t,maxW,maxLines){
   return out;
 }
 function drawShareCard(d){
-  const W=1080,H=1350,c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d');
+  const W=1080,M=new OffscreenCanvasLike();
   const cs=getComputedStyle(document.documentElement),v=k=>cs.getPropertyValue(k).trim();
-  const bg=v('--bg')||'#141715',panel=v('--panel')||'#1c201e',ink=v('--ink')||'#e4e8e3',muted=v('--muted')||'#98a29a',acc=v('--accent')||'#6fbfa6',gold=v('--gold')||'#f0c23a',fail=v('--fail')||'#e47a68',line=v('--line')||'#2f3632';
+  const bg=v('--bg')||'#141715',panel=v('--panel')||'#1c201e',ink=v('--ink')||'#e4e8e3',muted=v('--muted')||'#98a29a',acc=v('--accent')||'#6fbfa6',gold=v('--gold')||'#f0c23a',fail=v('--fail')||'#e47a68',line=v('--line')||'#2f3632',you=v('--you')||'#ec8a5c',want=v('--want')||acc;
   const FD=v('--f-display')||'serif',FB=v('--f-body')||'sans-serif';
+  const dims=(d.dims||[]).slice(0,7),steps=d.steps||[],showSteps=steps.length>1,list=steps.slice(-4);
+  // measure text blocks first so the card is as tall as its content
+  M.x.font='400 38px '+FB;const sayL=wrapLines(M.x,d.say,W-240,4);
+  M.x.font='400 30px '+FB;const recL=wrapLines(M.x,d.recipe,W-220,3);
+  M.x.font='400 30px '+FB;const listL=list.map(s=>wrapLines(M.x,s.chg,W-220-250,2));
+  const chartH=dims.length?90+dims.length*62:0, stepH=showSteps?100+170+listL.reduce((a,l)=>a+Math.max(1,l.length)*42+14,0):0;
+  const H=780+sayL.length*56+30+chartH+stepH+170+recL.length*44+200;
+  const c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d');
   x.fillStyle=bg;x.fillRect(0,0,W,H);
-  // card
   const rr=(X,Y,w,h,r)=>{x.beginPath();x.moveTo(X+r,Y);x.arcTo(X+w,Y,X+w,Y+h,r);x.arcTo(X+w,Y+h,X,Y+h,r);x.arcTo(X,Y+h,X,Y,r);x.arcTo(X,Y,X+w,Y,r);x.closePath()};
-  rr(60,60,W-120,H-120,40);x.fillStyle=panel;x.fill();x.strokeStyle=line;x.lineWidth=3;x.stroke();
-  x.fillStyle=d.color||acc;x.fillRect(60,120,12,110);
-  x.textBaseline='alphabetic';
-  x.fillStyle=muted;x.font='600 36px '+FB;x.fillText('☕ 手沖咖啡實驗室',110,150);
+  rr(50,50,W-100,H-100,40);x.fillStyle=panel;x.fill();x.strokeStyle=line;x.lineWidth=3;x.stroke();
+  x.fillStyle=d.color||acc;x.fillRect(50,120,12,110);x.textBaseline='alphabetic';
+  x.fillStyle=muted;x.font='600 36px '+FB;x.fillText('☕ 手沖咖啡實驗室'+(d.kind==='grind'?'・磨豆機挑戰':d.kind==='comp'?'・咖啡比賽':''),110,150);
   x.fillStyle=ink;x.font='700 64px '+FD;x.fillText(d.comp?d.who:('客人：'+d.who),110,225);
-  x.fillStyle=muted;x.font='400 34px '+FB;x.fillText(d.comp?(d.role||'咖啡比賽'):('第 '+(d.idx+1)+' 位客人・'+(d.role||'')),110,275);
-  // score
+  x.fillStyle=muted;x.font='400 34px '+FB;x.fillText(d.comp?(d.role||''):d.kind==='grind'?d.role:('第 '+(d.idx+1)+' 位客人・'+(d.role||'')),110,275);
   x.fillStyle=d.pass?acc:fail;x.font='700 260px '+FD;const sc=String(Math.round(d.sc));x.fillText(sc,110,560);
   const sw=x.measureText(sc).width;x.fillStyle=muted;x.font='500 50px '+FB;x.fillText('分',120+sw,560);
   x.fillStyle=ink;x.font='700 54px '+FB;x.fillText(d.verdict,110,650);
   if(d.comp){x.fillStyle=gold;x.font='700 46px '+FB;x.fillText(d.rank,110,720)}
-  else{x.font='700 64px '+FB;for(let i=0;i<3;i++){x.fillStyle=i<d.stars?gold:line;x.fillText('★',110+i*74,725)}}
-  // quote
-  x.fillStyle=ink;x.font='400 38px '+FB;let y=810;
-  wrapLines(x,d.say,W-240,4).forEach(l=>{x.fillText(l,110,y);y+=56});
-  // facts
-  y=Math.max(y+20,1000);const fw=(W-220-40)/3;
+  else{x.font='700 64px '+FB;for(let i=0;i<3;i++){x.fillStyle=i<d.stars?gold:line;x.fillText('★',110+i*74,725)}
+    if(d.target){x.fillStyle=muted;x.font='400 32px '+FB;x.fillText('客人期待 '+d.target+' 分',360,715);}}
+  let y=810;x.fillStyle=ink;x.font='400 38px '+FB;sayL.forEach(l=>{x.fillText(l,110,y);y+=56});y+=30;
+  const sect=(t,legend)=>{x.fillStyle=ink;x.font='700 38px '+FB;x.fillText(t,110,y);
+    if(legend){x.font='400 26px '+FB;let lx=W-110;legend.slice().reverse().forEach(([txt,col,dot])=>{const w=x.measureText(txt).width;lx-=w;x.fillStyle=muted;x.fillText(txt,lx,y);lx-=34;x.fillStyle=col;if(dot){x.beginPath();x.arc(lx+12,y-9,10,0,7);x.fill()}else x.fillRect(lx+10,y-26,5,30);lx-=22;});}
+    y+=50;};
+  // ---- 風味對照 ----
+  if(dims.length){
+    sect(d.comp?'評審評分（0–10）':'客人期待 vs 你這杯',d.comp?null:[['客人想要',want,false],['你這杯',you,true]]);
+    const x0=270,x1=W-290,sx=val=>x0+(x1-x0)*Math.max(0,Math.min(10,val))/10;
+    dims.forEach(m=>{const cy=y+18;
+      x.fillStyle=muted;x.font='500 30px '+FB;x.fillText(m.n,110,cy+10);
+      rr(x0,cy-7,x1-x0,14,7);x.fillStyle=line;x.fill();
+      if(m.t!=null){const a=sx(Math.min(m.v,m.t)),b=sx(Math.max(m.v,m.t));if(b-a>2){x.fillStyle=you;x.globalAlpha=.3;x.fillRect(a,cy-7,b-a,14);x.globalAlpha=1;}
+        x.fillStyle=want;x.fillRect(sx(m.t)-3,cy-22,6,44);}
+      else{rr(x0,cy-7,Math.max(14,sx(m.v)-x0),14,7);x.fillStyle=acc;x.fill();}
+      if(m.t!=null){x.fillStyle=you;x.beginPath();x.arc(sx(m.v),cy,13,0,7);x.fill();}
+      x.fillStyle=ink;x.font='700 28px '+FB;const tv=m.t!=null?m.v.toFixed(1)+' / '+m.t.toFixed(1):m.v.toFixed(1);x.fillText(tv,x1+28,cy+10);
+      y+=62;});
+    y+=50;}
+  // ---- 調整過程 ----
+  if(showSteps){
+    sect('調整過程：試了 '+steps.length+' 杯');
+    const px0=130,px1=W-130,top=y+10,bot=y+140,all=steps.slice(-30),n=all.length;
+    const X=i=>n>1?px0+(px1-px0)*i/(n-1):(px0+px1)/2,Y=s=>bot-(bot-top)*Math.max(0,Math.min(100,s))/100;
+    x.strokeStyle=line;x.lineWidth=2;x.beginPath();x.moveTo(px0,bot);x.lineTo(px1,bot);x.stroke();
+    if(d.target){x.setLineDash([10,8]);x.strokeStyle=muted;x.beginPath();x.moveTo(px0,Y(d.target));x.lineTo(px1,Y(d.target));x.stroke();x.setLineDash([]);
+      x.fillStyle=muted;x.font='400 24px '+FB;x.fillText('期待 '+d.target,px0,Y(d.target)-10);}
+    x.strokeStyle=acc;x.lineWidth=5;x.beginPath();all.forEach((s,i)=>{const px=X(i),py=Y(s.s);i?x.lineTo(px,py):x.moveTo(px,py)});x.stroke();
+    all.forEach((s,i)=>{x.fillStyle=i===n-1?you:acc;x.beginPath();x.arc(X(i),Y(s.s),i===n-1?11:6,0,7);x.fill();});
+    x.fillStyle=muted;x.font='400 24px '+FB;x.fillText('第 '+all[0].n+' 杯',px0-20,bot+32);const lt='第 '+all[n-1].n+' 杯';x.fillText(lt,px1-x.measureText(lt).width+20,bot+32);
+    y=bot+80;
+    list.forEach((s,i)=>{x.fillStyle=ink;x.font='700 30px '+FB;x.fillText('第 '+s.n+' 杯 '+Math.round(s.s)+' 分',110,y);
+      x.fillStyle=muted;x.font='400 30px '+FB;const ls=listL[i].length?listL[i]:[''];ls.forEach((l,k)=>{x.fillText(l,360,y+k*42)});y+=Math.max(1,ls.length)*42+14;});
+    y+=10;}
+  // ---- 數據 ----
+  const fw=(W-220-40)/3;
   [['濃度 TDS',d.tds.toFixed(2)+'%'],['萃取率 EY',d.ey.toFixed(1)+'%'],['杯量',Math.round(d.vol)+' ml']].forEach((f,i)=>{
-    const X=110+i*(fw+20);rr(X,y,fw,130,20);x.fillStyle=bg;x.fill();
-    x.fillStyle=ink;x.font='700 46px '+FB;x.fillText(f[1],X+24,y+62);x.fillStyle=muted;x.font='400 28px '+FB;x.fillText(f[0],X+24,y+106)});
-  y+=195;
-  x.fillStyle=muted;x.font='400 30px '+FB;
-  wrapLines(x,d.recipe,W-220,2).forEach(l=>{x.fillText(l,110,y);y+=44});
-  x.fillStyle=acc;x.font='700 32px '+FB;x.fillText('你能沖得比我好嗎？ roke3852.github.io/molecule-match',110,H-110);
+    const X0=110+i*(fw+20);rr(X0,y,fw,130,20);x.fillStyle=bg;x.fill();
+    x.fillStyle=ink;x.font='700 46px '+FB;x.fillText(f[1],X0+24,y+62);x.fillStyle=muted;x.font='400 28px '+FB;x.fillText(f[0],X0+24,y+106)});
+  y+=180;x.fillStyle=muted;x.font='400 30px '+FB;recL.forEach(l=>{x.fillText(l,110,y);y+=44});
+  x.fillStyle=acc;x.font='700 32px '+FB;x.fillText('你能沖得比我好嗎？ roke3852.github.io/molecule-match',110,H-100);
   return c;
 }
+function OffscreenCanvasLike(){const c=document.createElement('canvas');this.x=c.getContext('2d');}
 function openShareOv(url,text){
   $('shareImg').src=url;$('shareDl').href=url;$('shareOv').hidden=false;$('shareHint').textContent='長按圖片可以儲存或分享；也可以複製文字貼到社群。';
   $('shareCopy').onclick=async()=>{try{await navigator.clipboard.writeText(text);$('shareHint').textContent='已複製分享文字'}catch(e){$('shareHint').textContent='無法自動複製，請改用下載圖片'}};
