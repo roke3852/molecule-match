@@ -84,6 +84,19 @@ main{padding:0 0 calc(80px + env(safe-area-inset-bottom))}
 .edrow button{flex:1;padding:6px 0;border-radius:9px;border:1.5px solid var(--line);background:#fff;font-size:12.5px}
 .edrow button:disabled{opacity:.35}
 .edrow button.arm{background:#c8442b;border-color:#c8442b;color:#fff;font-weight:700}
+.cafe{padding:12px 0;border-bottom:1px dashed var(--line)}
+.cafe:last-child{border-bottom:0}
+.cafe-h{display:flex;align-items:center;gap:10px;cursor:pointer;font-size:15.5px}
+.cafe-h .box{flex:0 0 auto;width:22px;height:22px;border-radius:7px;border:2px solid var(--line);background:#fff;display:grid;place-items:center}
+.cafe.on .cafe-h .box{background:var(--green);border-color:var(--green)}
+.cafe.on .cafe-h .box::after{content:"✓";color:#fff;font-size:14px;font-weight:700}
+.cafe.on .cafe-h b{color:var(--sub)}
+.cafe-m{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:6px 0 4px 32px}
+.cafe-m .tag{font-size:11.5px;padding:2px 8px;border-radius:999px;background:var(--maple-soft);color:var(--maple);font-weight:700}
+.cafe-t{font-size:12px;color:var(--sub)}
+.cafe-d{margin-left:32px;font-size:13.5px;color:var(--ink)}
+.cafe-b{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 0 32px}
+.cafe-b .btn{font-size:12.5px;padding:7px 12px;text-decoration:none}
 .empty{margin:10px 0 20px 58px;color:var(--sub);font-size:13px}
 .banner{margin:10px 14px 0;padding:12px 14px;border-radius:14px;background:#fff3c4;font-size:13.5px}
 .pub{margin:14px;padding:14px;border-radius:16px;background:var(--day-soft);font-size:13px}
@@ -294,6 +307,23 @@ nav a.on{color:var(--maple);font-weight:700;background:var(--maple-soft)}
     </div>
   </section>
 
+  <!-- 咖啡 -->
+  <section class="view" id="v-coffee">
+    <div class="sec">
+      <h3>☕ 福岡咖啡名店</h3>
+      <div class="hint">來自「咖啡人物誌」的福岡名單。藥院在地鐵七隈線上（從天神南站往藥院方向）；平尾的兩間離車站稍遠（NO COFFEE 靠藥院大通站、FILTER SUPPLY 靠西鐵平尾站），帶長輩小孩建議搭計程車；春吉在天神南側。喝過點一下打勾。營業時間可能異動，出發前請點「地圖」確認。</div>
+      <div id="cafes"></div>
+    </div>
+    <div class="sec">
+      <h3>🗓️ 怎麼排進行程</h3>
+      <div class="hint" style="margin-bottom:0">
+        <b>11/22（日）</b>市區日最適合：早上睡到自然醒那段，可以先去藥院喝一杯再回天神（當天六間都有營業）。<br>
+        <b>11/28（六）</b>最後巡禮：回台前到 REC COFFEE 或 COFFEE COUNTY 買豆子當伴手禮。<br>
+        <b>避開公休</b>：NO COFFEE 週一休、REC 博多烘焙所週二休、COFFEE COUNTY 週三休、FILTER SUPPLY 週三四休。
+      </div>
+    </div>
+  </section>
+
   <!-- 工具 -->
   <section class="view" id="v-tools">
     <div class="sec">
@@ -349,6 +379,7 @@ nav a.on{color:var(--maple);font-weight:700;background:var(--maple-soft)}
   <a href="#trip" data-v="trip"><i>🗓️</i>行程</a>
   <a href="#map" data-v="map"><i>🗺️</i>地圖</a>
   <a href="#list" data-v="list"><i>✅</i>清單</a>
+  <a href="#coffee" data-v="coffee"><i>☕</i>咖啡</a>
   <a href="#tools" data-v="tools"><i>🧰</i>工具</a>
 </nav>
 
@@ -848,8 +879,32 @@ rate.oninput=()=>{S.set('rate',+rate.value||0);jpy.oninput()};
 $('#phrases').innerHTML=PHR.map((p,i)=>`<div class="ph"><div class="z"><b class="jp">${esc(p.jp)}</b><span>${esc(p.zh)}</span></div><button data-i="${i}">放大</button></div>`).join('');
 $('#phrases').onclick=e=>{const b=e.target.closest('button');if(!b)return;const p=PHR[+b.dataset.i];big(p.jp,p.zh);$('#ovJp').style.whiteSpace='normal'};
 
+/* ---------- coffee ---------- */
+const CAFES=[
+ {id:'rec',n:'REC COFFEE 藥院站前店',jp:'REC COFFEE 薬院駅前店',a:'藥院',h:'',tag:'🏆 冠軍店',d:'日本冠軍二連霸、2016 世界第二的岩瀬由和創立，從咖啡餐車起家，福岡最有名的咖啡店之一。',u:'https://rec-coffee.com'},
+ {id:'recr',n:'REC COFFEE 博多烘焙所',jp:'REC COFFEE 博多ロースタリー',a:'博多',h:'10:00–18:00・週二休',tag:'買豆',d:'REC 的烘焙所，配方豆和單品超過十種，有停車場。',u:'https://rec-coffee.com'},
+ {id:'county',n:'COFFEE COUNTY Fukuoka',jp:'COFFEE COUNTY Fukuoka',a:'藥院',h:'11:00–19:30・週三休',tag:'單品',d:'久留米起家的烘豆商，老闆親自到中美洲、衣索比亞挑豆。全部是單品，淺到中焙，風味鮮明。',u:'https://coffeecounty.cc'},
+ {id:'manu',n:'manu coffee 春吉店',jp:'manu coffee 春吉店',a:'春吉',h:'',tag:'福岡先驅',d:'2003 年開業的一號店，把精品咖啡在福岡變成文化的先驅。柳橋市場裡還有一間可以看那珂川的分店。',u:'https://www.manucoffee.com'},
+ {id:'nocoffee',n:'NO COFFEE',jp:'NO COFFEE',a:'平尾',h:'10:00–18:00・週一休',tag:'潮流',d:'福岡的潮流咖啡品牌，周邊商品很有人氣。店很小（約 8 席），帶小孩建議外帶。',u:''},
+ {id:'filter',n:'FILTER SUPPLY',jp:'FILTER SUPPLY',a:'平尾',h:'平日 12:00–20:00、假日 12:00–18:00・週三四休',tag:'單品多',d:'淺焙到深焙都有，超過十種單品可選。',u:''}
+];
+function drawCafes(){
+ const done=S.get('cafes',{});
+ $('#cafes').innerHTML=CAFES.map(c=>`<div class="cafe${done[c.id]?' on':''}" data-id="${c.id}">
+  <div class="cafe-h"><span class="box"></span><b>${esc(c.n)}</b></div>
+  <div class="cafe-m"><span class="tag">${esc(c.a)}</span><span class="tag">${esc(c.tag)}</span>${c.h?`<span class="cafe-t">🕒 ${esc(c.h)}</span>`:''}</div>
+  <div class="cafe-d">${esc(c.d)}</div>
+  <div class="cafe-b"><a class="btn" href="${mapUrl(c.jp+' 福岡')}" target="_blank" rel="noopener">🗺️ 地圖</a>${c.u?`<a class="btn ghost" href="${c.u}" target="_blank" rel="noopener">🔗 官網</a>`:''}<button class="btn ghost" data-taxi="${esc(c.jp)}">🚕 給司機看</button></div>
+ </div>`).join('');
+}
+$('#cafes').addEventListener('click',e=>{
+ const tx=e.target.closest('[data-taxi]');if(tx){const c=CAFES.find(x=>x.jp===tx.dataset.taxi);big(c.jp+'までお願いします。','請載我們到：'+c.n);$('#ovJp').style.whiteSpace='normal';return}
+ if(e.target.closest('a'))return;
+ const r=e.target.closest('.cafe-h');if(!r)return;const id=r.parentNode.dataset.id,done=S.get('cafes',{});done[id]=!done[id];S.set('cafes',done);drawCafes()});
+drawCafes();
+
 /* ---------- routing ---------- */
-const VIEWS=['trip','map','list','tools'];
+const VIEWS=['trip','map','list','coffee','tools'];
 function currentView(){const h=location.hash.slice(1);return VIEWS.includes(h)?h:'trip'}
 function route(){const v=currentView();VIEWS.forEach(x=>$('#v-'+x).classList.toggle('on',x===v));
  document.querySelectorAll('nav a').forEach(a=>a.classList.toggle('on',a.dataset.v===v));
