@@ -340,6 +340,8 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
 .modes .app{font-family:var(--f-display);font-weight:700;font-size:16px;margin-right:auto;white-space:nowrap}
 .modes .mgrp{display:flex;flex-direction:column;gap:3px;min-width:0}
 .modes .mgrp.mg-play{flex:2 1 0;max-width:220px}.modes .mgrp.mg-learn{flex:3 1 0;max-width:330px}
+.swipeBack{position:fixed;left:0;top:50%;width:40px;height:40px;border-radius:50%;background:var(--panel);border:1px solid var(--line);color:var(--muted);display:flex;align-items:center;justify-content:center;font-size:24px;line-height:1;opacity:0;transform:translate(-40px,-50%);transition:opacity .1s;pointer-events:none;z-index:50;box-shadow:0 2px 8px rgba(0,0,0,.25)}
+.swipeBack.ready{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
 .modes .mlab{font-size:10.5px;color:var(--muted);letter-spacing:.08em;padding-left:2px}
 .modes .seg{width:100%}
 .modes .mgrp.mg-learn .seg button[aria-pressed="true"]{background:var(--gold);border-color:var(--gold);color:#1d1606}
@@ -3185,9 +3187,13 @@ addEventListener('resize',()=>{if($('bedView')&&!$('bedView').hidden&&runs)rende
 <script>
 (function(){
 const $=id=>document.getElementById(id);
-function show(mode,push){
+// 返回用的瀏覽紀錄（只在 app 內，切換分頁時記下上一頁和捲動位置）
+const NAV=[];let curMode=null;
+function show(mode,push,noRec){
+  if(push&&!noRec&&curMode&&curMode!==mode){NAV.push({mode:curMode,y:scrollY});if(NAV.length>30)NAV.shift();}
   const ids={sim:'simView',game:'gameView',learn:'learnView',micro:'microView',bed:'bedView'},btn={sim:'mSim',game:'mGame',learn:'mLearn',micro:'mMicro',bed:'mBed'};
   if(!ids[mode])mode='sim';
+  curMode=mode;
   Object.keys(ids).forEach(k=>{$(ids[k]).hidden=k!==mode;$(btn[k]).setAttribute('aria-pressed',k===mode);});
   if(push){try{history.replaceState(null,'','#'+mode);}catch(e){}}
   try{localStorage.setItem('brewLab.mode',mode);}catch(e){}
@@ -3211,6 +3217,32 @@ function route(){const h=location.hash||'';
   show(['game','learn','micro','bed'].includes(m)?m:'sim');
 }
 addEventListener('hashchange',route);route();
+// 上一頁：闖關中先回到客人列表；其他情況回到上一個分頁
+function goBack(){
+  const pv=$('playView');
+  if(curMode==='game'&&pv&&!pv.hidden){$('backBtn').click();return true;}
+  const prev=NAV.pop();if(!prev)return false;
+  show(prev.mode,true,true);requestAnimationFrame(()=>scrollTo(0,prev.y||0));return true;
+}
+window.appBack=goBack;
+// 由左往右滑＝上一頁。避開滑桿、輸入框、畫布和可以左右捲動的區塊
+(function(){
+  const tip=document.createElement('div');tip.className='swipeBack';tip.innerHTML='‹';document.body.appendChild(tip);
+  let sx=0,sy=0,st=0,on=false,lock=null;
+  const blocked=el=>{for(let e=el;e&&e!==document.body;e=e.parentElement){
+    if(e.matches&&e.matches('input,select,textarea,canvas,[data-noswipe]'))return true;
+    const cs=getComputedStyle(e);if((cs.overflowX==='auto'||cs.overflowX==='scroll')&&e.scrollWidth>e.clientWidth+2)return true;}return false;};
+  addEventListener('touchstart',e=>{if(e.touches.length!==1){on=false;return;}const t=e.touches[0];
+    on=!blocked(e.target);sx=t.clientX;sy=t.clientY;st=Date.now();lock=null;},{passive:true});
+  addEventListener('touchmove',e=>{if(!on)return;const t=e.touches[0],dx=t.clientX-sx,dy=t.clientY-sy;
+    if(lock==null&&(Math.abs(dx)>10||Math.abs(dy)>10))lock=Math.abs(dx)>Math.abs(dy)*1.5&&dx>0?'h':'v';
+    if(lock!=='h'){tip.style.opacity=0;return;}
+    const f=Math.min(1,dx/90);tip.style.opacity=f;tip.style.transform='translate('+(-40+56*f)+'px,-50%)';tip.classList.toggle('ready',f>=1);},{passive:true});
+  addEventListener('touchend',e=>{if(!on)return;on=false;const t=e.changedTouches[0],dx=t.clientX-sx,dy=t.clientY-sy;
+    tip.style.opacity=0;tip.style.transform='translate(-40px,-50%)';tip.classList.remove('ready');
+    if(lock==='h'&&dx>90&&Math.abs(dy)<dx*.6&&Date.now()-st<900)goBack();},{passive:true});
+  addEventListener('touchcancel',()=>{on=false;tip.style.opacity=0;},{passive:true});
+})();
 })();
 </script>
 </body>
