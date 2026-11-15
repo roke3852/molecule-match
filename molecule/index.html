@@ -1,6 +1,6 @@
 <!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
 <title>分子消消樂</title>
-<meta name="app-version" content="2026-11-14d">
+<meta name="app-version" content="2026-11-15a">
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -260,6 +260,7 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--sel);outline-of
     <div class="lvls" id="lvls"></div>
     <button class="big alt" id="themeBtn">自由練習</button>
     <button class="big alt" id="mapClose">回到目前這關</button>
+    <button class="big alt" id="gBtn">☁️ 用 Google 帳號同步進度</button>
     <small class="note" id="syncNote" style="text-align:center">進度會自動儲存</small>
   </div>
 </div>
@@ -732,7 +733,11 @@ async function initCloud(){
     const ref=db.doc('data/users/'+id+'/save');
     const snap=await Promise.race([ref.get(),new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout')),10000))]);
     cloud=ref;
-    const d=snap.exists?snap.data():null;
+    mergeRemote(snap.exists?snap.data():null);
+  }catch(e){cloud=cloud||null}
+}
+/* take the remote save if it is newer than this device's; otherwise upload this device's */
+function mergeRemote(d){
     if(d&&typeof d.json==='string'&&(+d.savedAt||0)>(store.savedAt||0)){
       const remote=JSON.parse(d.json);
       if(remote&&Array.isArray(remote.players)&&remote.players.length){
@@ -745,7 +750,6 @@ async function initCloud(){
     }else{
       pushCloud();
     }
-  }catch(e){cloud=cloud||null}
 }
 function customTheme(){
   const c=store.custom||EX_CUSTOM;
@@ -1387,6 +1391,70 @@ function boot(){
 }
 boot();
 initCloud();
+try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch(e){}
+
+/* ---------- Google Drive sync: progress saved as a hidden app file in the player's own Google Drive ---------- */
+const GCLIENT='';   /* ← 貼上 Google Cloud 的 OAuth 用戶端 ID（xxxx.apps.googleusercontent.com） */
+const GFILE='molpairs.json',GAPI='https://www.googleapis.com';
+let gTok=null,gTokExp=0,gFileId=null,gClient=null,gPending=null;
+function gLoadLib(){return new Promise((ok,no)=>{if(window.google&&google.accounts&&google.accounts.oauth2)return ok();const sc=document.createElement('script');sc.src='https://accounts.google.com/gsi/client';sc.onload=()=>ok();sc.onerror=()=>no(new Error('lib'));document.head.appendChild(sc)})}
+async function gFetch(url,opt={}){
+  if(!gTok||Date.now()>gTokExp)throw new Error('auth');
+  const r=await fetch(url,Object.assign({},opt,{headers:Object.assign({Authorization:'Bearer '+gTok},opt.headers||{})}));
+  if(r.status===401){gTok=null;throw new Error('auth')}
+  if(!r.ok)throw new Error('http '+r.status);
+  return r;
+}
+async function gFindFile(){
+  const q=encodeURIComponent("name='"+GFILE+"'");
+  const r=await gFetch(GAPI+'/drive/v3/files?spaces=appDataFolder&fields=files(id)&q='+q);
+  const j=await r.json();return j.files&&j.files[0]?j.files[0].id:null;
+}
+const gDrive={
+  set(d){
+    const body=JSON.stringify(d),keep=body.length<60000;
+    if(gFileId)return gFetch(GAPI+'/upload/drive/v3/files/'+gFileId+'?uploadType=media',{method:'PATCH',keepalive:keep,headers:{'Content-Type':'application/json'},body});
+    const b='molpairs'+Date.now(),meta=JSON.stringify({name:GFILE,parents:['appDataFolder']});
+    const mp='--'+b+'\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n'+meta+'\r\n--'+b+'\r\nContent-Type: application/json\r\n\r\n'+body+'\r\n--'+b+'--';
+    return gFetch(GAPI+'/upload/drive/v3/files?uploadType=multipart&fields=id',{method:'POST',headers:{'Content-Type':'multipart/related; boundary='+b},body:mp}).then(r=>r.json()).then(j=>{gFileId=j.id});
+  }
+};
+/* when Google needs a fresh sign-in, pushCloud would fail – remember that and ask for a tap */
+const _push=pushCloud;
+pushCloud=function(){
+  if(cloud!==gDrive)return _push();
+  if(!gTok||Date.now()>gTokExp){gBtnText('☁️ 點這裡連回 Google（進度先存在這台）');syncNote('Google 連線已過期，點上面的按鈕重新連線就會同步');return}
+  gDrive.set({json:JSON.stringify(store),savedAt:store.savedAt||Date.now()})
+    .then(()=>{syncNote('☁️ 已同步到 Google 雲端硬碟 '+new Date().toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'}));gBtnText('☁️ 已連上 Google 同步')})
+    .catch(e=>{if(e.message==='auth'){gBtnText('☁️ 點這裡連回 Google（進度先存在這台）');syncNote('Google 連線已過期，點上面的按鈕重新連線就會同步')}else syncNote('⚠️ 雲端同步失敗，進度先存在這台裝置')});
+};
+function gBtnText(t){const b=$('gBtn');if(b)b.textContent=t}
+async function gAfterLogin(){
+  syncNote('☁️ 正在讀取 Google 雲端的進度…');
+  try{
+    gFileId=await gFindFile();
+    let d=null;
+    if(gFileId){const r=await gFetch(GAPI+'/drive/v3/files/'+gFileId+'?alt=media');d=await r.json().catch(()=>null)}
+    cloud=gDrive;
+    try{localStorage.setItem('molpairs.g','1')}catch(e){}
+    const before=store.savedAt;
+    mergeRemote(d);
+    if(store.savedAt!==before||(d&&(+d.savedAt||0)>=(before||0)))syncNote('☁️ 已從 Google 讀取進度');
+    gBtnText('☁️ 已連上 Google 同步');
+  }catch(e){syncNote('⚠️ 讀取 Google 雲端失敗：'+e.message)}
+}
+async function gLogin(){
+  if(!GCLIENT){syncNote('尚未設定 Google 用戶端 ID（GCLIENT），請先完成 Google Cloud 設定');return}
+  try{await gLoadLib()}catch(e){syncNote('⚠️ 無法載入 Google 登入，請確認網路');return}
+  if(!gClient)gClient=google.accounts.oauth2.initTokenClient({client_id:GCLIENT,scope:'https://www.googleapis.com/auth/drive.appdata',
+    callback:t=>{if(t&&t.access_token){gTok=t.access_token;gTokExp=Date.now()+((+t.expires_in||3600)-120)*1000;gAfterLogin()}else syncNote('⚠️ Google 登入沒有完成')},
+    error_callback:()=>syncNote('⚠️ Google 登入被取消或被擋（請允許彈出視窗）')});
+  let linked=false;try{linked=localStorage.getItem('molpairs.g')==='1'}catch(e){}
+  gClient.requestAccessToken({prompt:linked?'':'consent'});
+}
+$('gBtn').onclick=gLogin;
+try{if(localStorage.getItem('molpairs.g')==='1')gBtnText('☁️ 點這裡連回 Google 同步')}catch(e){}
+if(!GCLIENT)$('gBtn').hidden=true;
 addEventListener('pagehide',()=>{if(cloud&&cloudTimer){clearTimeout(cloudTimer);pushCloud()}});
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&cloud&&cloudTimer){clearTimeout(cloudTimer);pushCloud()}});
 
