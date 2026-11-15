@@ -646,7 +646,9 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
 
   <section class="panel bed-ctl">
     <div class="param"><span class="label">注水方式</span><div class="seg" id="bedPour" role="group" aria-label="注水方式"><button data-v="normal" aria-pressed="true">一般注水</button><button data-v="k10" aria-pressed="false">粕谷 10 段（低擾動）</button></div></div>
-    <div class="param"><span class="label">注水前整粉</span><div class="seg" id="bedPrep" role="group" aria-label="注水前整粉"><button data-v="wdt" aria-pressed="false">佈粉針</button><button data-v="dig" aria-pressed="false">中心挖洞</button></div></div>
+    <div class="param"><span class="label">比較</span><div class="seg" id="bedCmp" role="group" aria-label="比較"><button data-v="drip" aria-pressed="true">錐形 vs 平底</button><button data-v="prep" aria-pressed="false">沒整粉 vs 有整粉</button></div></div>
+    <div class="param" id="bedPDripP" hidden><span class="label">濾杯</span><div class="seg" id="bedPDrip" role="group" aria-label="濾杯"><button data-v="cone" aria-pressed="true">錐形</button><button data-v="flat" aria-pressed="false">平底</button></div></div>
+    <div class="param"><span class="label" id="bedPrepLab">注水前整粉</span><div class="seg" id="bedPrep" role="group" aria-label="注水前整粉"><button data-v="wdt" aria-pressed="false">佈粉針</button><button data-v="dig" aria-pressed="false">中心挖洞</button></div></div>
     <div class="param"><span class="label">攪拌</span><div class="seg" id="bedStir" role="group" aria-label="攪拌"><button data-v="none" aria-pressed="true">不攪拌</button><button data-v="bloom" aria-pressed="false">只在悶蒸攪</button><button data-v="multi" aria-pressed="false">多次攪拌</button></div></div>
     <div class="transport">
       <button class="play" id="bedPlay">播放</button>
@@ -2817,87 +2819,104 @@ if(typeof module!=='undefined')module.exports={bedRun,bedStats,BED_DRIP};
 
 (function(){
 const $=id=>document.getElementById(id);
-let stir='none',pour='normal',wdt=false,dig=false,runs=null,si=0,playing=false,raf=0,last=0,acc=0,inited=false;
+let stir='none',pour='normal',wdt=false,dig=false,cmp='drip',pdrip='cone',runs=null,META={},si=0,playing=false,raf=0,last=0,acc=0,inited=false;
 const fmt=t=>Math.floor(t/60)+':'+String(Math.round(t%60)).padStart(2,'0');
 const LO=12,HI=22,STOPS=[[246,235,208],[214,160,98],[150,82,38],[70,32,12]];
 function col(ey){let f=Math.max(0,Math.min(1,(ey-LO)/(HI-LO)))*(STOPS.length-1),i=Math.min(STOPS.length-2,Math.floor(f)),u=f-i;
   const c=STOPS[i].map((v,k)=>Math.round(v+(STOPS[i+1][k]-v)*u));return 'rgb('+c.join(',')+')';}
 const cssv=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
-function build(){runs={cone:bedRun({drip:'cone',stir,pour,wdt,dig,temp:93}),flat:bedRun({drip:'flat',stir,pour,wdt,dig,temp:93})};
-  const n=runs.cone.snaps.length-1;$('bedTime').max=n;if(si>n)si=n;}
-function card(key){const D=BED_DRIP[key];return '<header><b>'+D.name+'</b><small>'+D.sub+'</small></header><canvas></canvas><div class="bed-st"></div>';}
+function build(){
+  if(cmp==='drip'){runs={A:bedRun({drip:'cone',stir,pour,wdt,dig,temp:93}),B:bedRun({drip:'flat',stir,pour,wdt,dig,temp:93})};
+    META={A:{t:BED_DRIP.cone.name,s:BED_DRIP.cone.sub,h:'錐形'},B:{t:BED_DRIP.flat.name,s:BED_DRIP.flat.sub,h:'平底'}};}
+  else{const w2=wdt||!dig,d2=dig||!wdt,nm=[w2?'佈粉針':'',d2?'挖洞':''].filter(Boolean).join('＋');
+    runs={A:bedRun({drip:pdrip,stir,pour,wdt:false,dig:false,temp:93}),B:bedRun({drip:pdrip,stir,pour,wdt:w2,dig:d2,temp:93})};
+    META={A:{t:'沒整粉',s:BED_DRIP[pdrip].name+'・直接注水',h:'沒整粉'},B:{t:'有整粉',s:BED_DRIP[pdrip].name+'・'+nm,h:nm}};}
+  ['A','B'].forEach(k=>{$(k==='A'?'bedCone':'bedFlat').innerHTML=card(k);});
+  const n=runs.A.snaps.length-1;$('bedTime').max=n;if(si>n)si=n;}
+function card(key){const D=META[key];return '<header><b>'+D.t+'</b><small>'+D.s+'</small></header><canvas></canvas><div class="bed-st"></div>';}
 function draw(key){
-  const R=runs[key],el=$(key==='cone'?'bedCone':'bedFlat'),cv=el.querySelector('canvas'),w=cv.parentElement.clientWidth-2;if(w<=0)return;
+  const R=runs[key],cone=R.cfg.drip==='cone',el=$(key==='A'?'bedCone':'bedFlat'),cv=el.querySelector('canvas'),w=cv.parentElement.clientWidth-2;if(w<=0)return;
   const dpr=Math.min(2,devicePixelRatio||1),h=Math.round(w*1.08);cv.style.height=h+'px';cv.width=Math.round(w*dpr);cv.height=Math.round(h*dpr);
   const g=cv.getContext('2d');g.setTransform(dpr,0,0,dpr,0,0);g.clearRect(0,0,w,h);
   const s=R.snaps[Math.min(si,R.snaps.length-1)],t=s.t,E=R.ends;
-  const x0=key==='cone'?w*.19:w*.08,cw=(w-2*x0)/BED_NX,y0=h*.36,rh=(h*.5)/10;
+  const x0=cone?w*.19:w*.08,cw=(w-2*x0)/BED_NX,y0=h*.36,rh=(h*.5)/10;
   const ink=cssv('--ink'),line=cssv('--muted');
   // cone: the bed sits inside a V; clip everything to it
   const vY=x=>{const u=Math.min(1,Math.abs((x-w/2)/(w/2-x0)));return y0+rh*(10*(1-u)+1.4*u)+rh*.3;};
   const ax=w/2,ay=vY(w/2),rimY=h*.08,ext=(ay-rimY)/(ay-vY(x0))*(w/2-x0);
-  if(key==='cone'){g.save();g.beginPath();g.moveTo(w/2-ext,rimY);g.lineTo(ax,ay);g.lineTo(w/2+ext,rimY);g.closePath();g.clip();}
+  if(cone){g.save();g.beginPath();g.moveTo(w/2-ext,rimY);g.lineTo(ax,ay);g.lineTo(w/2+ext,rimY);g.closePath();g.clip();}
   if(t<E.end){const sMin=Math.min(...s.cols.map(c=>c.s));let ly=t<E.bloom?y0+(sMin-.8)*rh:y0+s.L*rh;ly=Math.max(h*.1,ly);
-    g.fillStyle='rgba(110,170,195,.28)';g.fillRect(key==='cone'?0:x0,ly,key==='cone'?w:w-2*x0,(key==='cone'?h:y0+6*rh)-ly);}
-  if(key!=='cone')g.save(),g.beginPath(),g.rect(x0,0,w-2*x0,h),g.clip();
-  s.cols.forEach((c,i)=>c.cells.forEach((e,r)=>{const x=x0+i*cw,y=y0+(c.s+r)*rh,hh=(key==='cone'&&r===c.cells.length-1)?rh*2.5:rh+.5;
+    g.fillStyle='rgba(110,170,195,.28)';g.fillRect(cone?0:x0,ly,cone?w:w-2*x0,(cone?h:y0+6*rh)-ly);}
+  if(!cone)g.save(),g.beginPath(),g.rect(x0,0,w-2*x0,h),g.clip();
+  s.cols.forEach((c,i)=>c.cells.forEach((e,r)=>{const x=x0+i*cw,y=y0+(c.s+r)*rh,hh=(cone&&r===c.cells.length-1)?rh*2.5:rh+.5;
     if(e.dry){g.fillStyle='#d9d4c8';g.fillRect(x,y,cw+.5,hh);g.strokeStyle='rgba(120,110,95,.6)';g.lineWidth=1;g.beginPath();g.moveTo(x,y+rh);g.lineTo(x+cw,y);g.stroke();}
     else{g.fillStyle=col(e.E*BED_EYMAX);g.fillRect(x,y,cw+.5,hh);}
     }));
   // 被推到杯壁上的粉：貼著濾紙往上堆（藍框）
   const slope=(w/2-x0)/(ay-vY(x0));
   [['L',-1],['R',1]].forEach(([sd,dir])=>(s.wall?s.wall[sd]:[]).forEach(e=>{const yc=y0+e.y*rh,y=yc-rh*.45;
-    let x;if(key==='cone'){const xl=dir<0?ax-(ay-yc)*slope:ax+(ay-yc)*slope;x=dir<0?xl+1+(e.k%2)*cw*.95:xl-1-cw*(1+(e.k%2)*.95);}
+    let x;if(cone){const xl=dir<0?ax-(ay-yc)*slope:ax+(ay-yc)*slope;x=dir<0?xl+1+(e.k%2)*cw*.95:xl-1-cw*(1+(e.k%2)*.95);}
     else x=dir<0?x0+(e.k%2)*cw:w-x0-cw*(1+(e.k%2));
     g.fillStyle=e.dry?'#d9d4c8':col(e.E*BED_EYMAX);g.fillRect(x,y,cw,rh*.9);g.strokeStyle='rgba(30,70,110,.95)';g.lineWidth=1.3;g.strokeRect(x+.7,y+.7,cw-1.4,rh*.9-1.4);}));
-  if(key!=='cone')g.restore();
-  if(key==='cone')g.restore();
+  if(!cone)g.restore();
+  if(cone)g.restore();
   // flow ticks
   if(s.Q>0){g.strokeStyle='rgba(60,130,165,.85)';g.lineWidth=1.2;
     s.cols.forEach((c,i)=>{const a=Math.min(1,c.q*s.Q*1.4);if(a<.15)return;const x=x0+(i+.5)*cw;for(let r=1;r<c.cells.length;r+=3){const y=y0+(c.s+r)*rh+((t*3)%3)/3*rh;g.globalAlpha=a;g.beginPath();g.moveTo(x-2.5,y-2);g.lineTo(x,y+1);g.lineTo(x+2.5,y-2);g.stroke();}});g.globalAlpha=1;}
   // fines at bottom
-  if(R.fines&&t>60){g.fillStyle=key==='cone'?'#3a2416':'#3a2416';R.cols.forEach((c,i)=>{const yb=y0+c.b*rh;for(let k=0;k<4;k++){g.beginPath();g.arc(x0+i*cw+(k+.5)*cw/4,yb-2,1.2,0,6.3);g.fill();}});}
+  if(R.fines&&t>60){g.fillStyle=cone?'#3a2416':'#3a2416';R.cols.forEach((c,i)=>{const yb=y0+c.b*rh;for(let k=0;k<4;k++){g.beginPath();g.arc(x0+i*cw+(k+.5)*cw/4,yb-2,1.2,0,6.3);g.fill();}});}
   // dripper outline
   g.strokeStyle=line;g.lineWidth=2;g.beginPath();
-  if(key==='cone'){g.moveTo(w/2-ext,rimY);g.lineTo(ax,ay);g.lineTo(w/2+ext,rimY);g.stroke();
+  if(cone){g.moveTo(w/2-ext,rimY);g.lineTo(ax,ay);g.lineTo(w/2+ext,rimY);g.stroke();
     g.beginPath();g.moveTo(ax,ay);g.lineTo(ax,ay+8);g.stroke();
     if(s.Q>0){g.fillStyle='rgba(120,70,30,.8)';for(let k=0;k<3;k++){const yy=ay+10+((t*4+k*7)%20);g.beginPath();g.arc(ax,yy,1.6,0,6.3);g.fill();}}}
   else{const yb=y0+6*rh+4;g.moveTo(x0-w*.04,h*.08);g.lineTo(x0-2,yb);g.lineTo(w-x0+2,yb);g.lineTo(w-x0+w*.04,h*.08);g.stroke();
     if(s.Q>0){g.fillStyle='rgba(120,70,30,.8)';[.35,.5,.65].forEach(f=>{for(let k=0;k<2;k++){const yy=yb+5+((t*4+k*9)%16);g.beginPath();g.arc(w*f,yy,1.5,0,6.3);g.fill();}});}}
   // labels
   g.fillStyle=cssv('--muted');g.font='11px '+cssv('--f-body');
-  g.fillText(key==='cone'?'下層（錐尖）':'下層',2,y0+(key==='cone'?10:6)*rh+(key==='cone'?20:14));
+  g.fillText(cone?'下層（錐尖）':'下層',2,y0+(cone?10:6)*rh+(cone?20:14));
   const st=bedStats(R,si);
   el.querySelector('.bed-st').innerHTML='<span><em>平均</em><b>'+st.mean.toFixed(1)+'%</b></span><span><em>最高格</em><b>'+st.hi.toFixed(1)+'%</b></span><span><em>最低格</em><b>'+st.lo.toFixed(1)+'%</b></span>';
 }
 function layers(key){const R=runs[key],st=bedStats(R,si);
-  return '<h3>'+BED_DRIP[key].name+'</h3>'+st.rows.map((x,i)=>'<div class="bl-row"><span>'+(i===0?'第 1 層（最上）':i===st.rows.length-1?'第 '+(i+1)+' 層（最下）':'第 '+(i+1)+' 層')+'</span><div><i style="width:'+Math.max(2,(x.ey-8)/(HI-8)*100)+'%;background:'+col(x.ey)+'"></i></div><b>'+x.ey.toFixed(1)+'</b></div>').join('')+
+  return '<h3>'+META[key].t+'</h3>'+st.rows.map((x,i)=>'<div class="bl-row"><span>'+(i===0?'第 1 層（最上）':i===st.rows.length-1?'第 '+(i+1)+' 層（最下）':'第 '+(i+1)+' 層')+'</span><div><i style="width:'+Math.max(2,(x.ey-8)/(HI-8)*100)+'%;background:'+col(x.ey)+'"></i></div><b>'+x.ey.toFixed(1)+'</b></div>').join('')+
     '<div class="bl-zone"><span>中心 <b>'+st.center.toFixed(1)+'%</b></span><span>邊緣 <b>'+st.edge.toFixed(1)+'%</b></span>'+(st.wall!=null?'<span>杯壁高處 <b>'+st.wall.toFixed(1)+'%</b></span>':'')+'</div>';}
-function table(){const a=bedStats(runs.cone,si),b=bedStats(runs.flat,si),f=v=>v.toFixed(1)+'%';
+function dryAt(R,t){const s=R.snaps[Math.min(t,R.snaps.length-1)];let d=0,n=0;s.cols.forEach(c=>c.cells.forEach(e=>{n++;if(e.dry)d++;}));return Math.round(d/n*100)+'%';}
+function flowSkew(R){const s=R.snaps[Math.min(70,R.snaps.length-1)];const q=s.cols.map(c=>c.q).filter(v=>v>0);return (Math.max(...q)/Math.min(...q)).toFixed(1)+' 倍';}
+function table(){const a=bedStats(runs.A,si),b=bedStats(runs.B,si),f=v=>v.toFixed(1)+'%';
   const top=s=>s.rows[0].ey,bot=s=>s.rows[s.rows.length-1].ey;
-  const rows=[['平均萃取率',f(a.mean),f(b.mean)],['最高格－最低格',f(a.hi-a.lo),f(b.hi-b.lo)],['最上層－最下層',f(top(a)-bot(a)),f(top(b)-bot(b))],['邊緣－中心',f(a.edge-a.center),f(b.edge-b.center)],['均勻度（越高越均勻）',(a.uni*100).toFixed(0),(b.uni*100).toFixed(0)],['中心凹陷',a.crater?'約 '+a.crater+' 層':'沒有',b.crater?'約 '+b.crater+' 層':'沒有'],['被推到杯壁上的粉',a.wall!=null?f(a.wall):'—',b.wall!=null?f(b.wall):'—'],['滴完時間',fmt(runs.cone.ends.end),fmt(runs.flat.ends.end)]];
-  $('bedTbl').innerHTML='<thead><tr><th>'+fmt(runs.cone.snaps[si].t)+'</th><th>錐形</th><th>平底</th></tr></thead><tbody>'+rows.map(r=>'<tr><td>'+r[0]+'</td><td>'+r[1]+'</td><td>'+r[2]+'</td></tr>').join('')+'</tbody>';}
-function caption(){const t=runs.cone.snaps[si].t,E=runs.cone.ends,st=bedStirs(stir),k10=pour==='k10';
+  const rows=[['平均萃取率',f(a.mean),f(b.mean)],['最高格－最低格',f(a.hi-a.lo),f(b.hi-b.lo)],['最上層－最下層',f(top(a)-bot(a)),f(top(b)-bot(b))],['邊緣－中心',f(a.edge-a.center),f(b.edge-b.center)],['均勻度（越高越均勻）',(a.uni*100).toFixed(0),(b.uni*100).toFixed(0)],['悶蒸結束時還沒濕的粉',dryAt(runs.A,runs.A.ends.bloom),dryAt(runs.B,runs.B.ends.bloom)],['水流最多÷最少的位置',flowSkew(runs.A),flowSkew(runs.B)],['中心凹陷',a.crater?'約 '+a.crater+' 層':'沒有',b.crater?'約 '+b.crater+' 層':'沒有'],['被推到杯壁上的粉',a.wall!=null?f(a.wall):'—',b.wall!=null?f(b.wall):'—'],['滴完時間',fmt(runs.A.ends.end),fmt(runs.B.ends.end)]];
+  $('bedTbl').innerHTML='<thead><tr><th>'+fmt(runs.A.snaps[si].t)+'</th><th>'+META.A.h+'</th><th>'+META.B.h+'</th></tr></thead><tbody>'+rows.map(r=>'<tr><td>'+r[0]+'</td><td>'+r[1]+'</td><td>'+r[2]+'</td></tr>').join('')+'</tbody>';}
+function caption(){const t=runs.A.snaps[si].t,E=runs.A.ends;if(cmp==='prep')return capPrep(t,E);return capDrip(t,E);}
+function capPrep(t,E){const st=bedStirs(stir);
+  if(t===0)return '左邊直接注水，右邊先整過粉。按「播放」比較悶蒸時哪邊的粉吸不到水（灰色斜線），以及注水時水往哪裡走。';
+  if(st.some(x=>t>=x&&t<x+4))return '攪拌：兩邊的粉都被翻動，原本吸不到水的粉團也被打散，差距縮小。攪拌本身就有一部分整粉的效果。';
+  if(t<E.bloom)return '悶蒸：左邊沒整粉，結塊和被 CO₂ 包住的粉吸不到水（灰色斜線），錐形的錐尖最多；右邊'+(META.B.h.includes('佈粉針')?'結塊被佈粉針打散，':'')+(META.B.h.includes('挖洞')?'中心的洞讓水直接到達深處，':'')+'吸不到水的粉少很多。';
+  if(t<E.pourEnd)return '注水中：沒整粉時粉床鬆緊不一，水偏走鬆的地方（藍色箭頭特別密的欄），緊的地方流過的水少、萃得少；整過粉的粉床密度一致，水比較平均。晚濕的粉也比較晚開始萃取，到最後還是比較淺。';
+  if(t<E.end)return '水快滴完：比較兩邊的顏色深淺，左邊淺色的格子（晚濕、水流少的地方）比較多。';
+  return '滴完了。整粉的好處是萃取比較平均、平均萃取率略高；代價只是多花一點準備時間。看下方比較表的「還沒濕的粉」和「水流最多÷最少」。';}
+function capDrip(t,E){const st=bedStirs(stir),k10=pour==='k10';
   if(st.some(x=>t>=x&&t<x+4))return '攪拌：粉被翻起來再落下，上層和下層、中心和邊緣的粉交換位置，萃取率的差距一下子拉近。';
   if(t===0)return '按「播放」看水怎麼從上往下流，以及每一格粉萃取的過程。灰色斜線是還沒吸到水的粉。';
   if(t<E.bloom)return '悶蒸：少量的水由上往下滲，水不流動。'+(dig?'中心先挖了洞，水直接到達深處，錐尖附近的粉比較早濕透。':'')+(wdt?'用佈粉針整過粉，結塊被打散，幾乎沒有吸不到水的粉團。':'')+(stir==='none'&&!wdt?'沒攪拌時有些粉被 CO₂ 包住，晚一點才濕（灰色），錐形底部的錐尖最容易發生。':'');
   if(t<E.pourEnd)return k10?'粕谷 10 段：每 15 秒小注 30 g，水柱細、擾動小，粉層幾乎維持原本的樣子，上下分層一直存在：上層碰到新鮮的水萃得多，下層碰到變濃的水萃得少。':'注水中：水柱把中心的粉往外推，中心慢慢凹下去，粉被推到杯壁上（藍框的格子）。原本的上下層被打亂；中心變薄、阻力小，水大多從凹洞往下流（藍色箭頭越明顯，流過的水越多）。';
-  if(t<runs.cone.ends.end)return (k10?'水快滴完：流速越來越慢，萃取也跟著放慢。':'水位下降：杯壁高處的粉最先露出水面，之後幾乎不再萃取；剩下的水集中從中心凹洞流走。')+(stir==='multi'?'多次攪拌讓細粉沉到底部，堵住濾紙，滴得比較慢。':'');
+  if(t<runs.A.ends.end)return (k10?'水快滴完：流速越來越慢，萃取也跟著放慢。':'水位下降：杯壁高處的粉最先露出水面，之後幾乎不再萃取；剩下的水集中從中心凹洞流走。')+(stir==='multi'?'多次攪拌讓細粉沉到底部，堵住濾紙，滴得比較慢。':'');
   return k10?'滴完了。低擾動讓分層保留下來：錐形上下、中心邊緣的深淺差得多；平底只有上下層有些差別。':'滴完了。中心形成凹洞，杯壁上那圈粉（藍框）萃得最少，凹洞底部附近的粉萃得多；原本的分層已經被打亂。';}
-function render(){if(!runs)build();draw('cone');draw('flat');$('bedLayCone').innerHTML=layers('cone');$('bedLayFlat').innerHTML=layers('flat');table();
-  $('bedTime').value=si;$('bedClock').textContent=fmt(runs.cone.snaps[si].t);$('bedCap').textContent=caption();}
+function render(){if(!runs)build();draw('A');draw('B');$('bedLayCone').innerHTML=layers('A');$('bedLayFlat').innerHTML=layers('B');table();
+  $('bedTime').value=si;$('bedClock').textContent=fmt(runs.A.snaps[si].t);$('bedCap').textContent=caption();}
 function frame(now){if(!playing)return;const dt=Math.min(.1,(now-last)/1000);last=now;acc+=dt*10;while(acc>=1){acc-=1;si++;}
-  const n=runs.cone.snaps.length-1;if(si>=n){si=n;stop();}render();if(playing)raf=requestAnimationFrame(frame);}
-function play(){if(si>=runs.cone.snaps.length-1)si=0;playing=true;acc=0;$('bedPlay').textContent='暫停';last=performance.now();raf=requestAnimationFrame(frame);}
+  const n=runs.A.snaps.length-1;if(si>=n){si=n;stop();}render();if(playing)raf=requestAnimationFrame(frame);}
+function play(){if(si>=runs.A.snaps.length-1)si=0;playing=true;acc=0;$('bedPlay').textContent='暫停';last=performance.now();raf=requestAnimationFrame(frame);}
 function stop(){playing=false;cancelAnimationFrame(raf);$('bedPlay').textContent='播放';}
-$('bedCone').innerHTML=card('cone');$('bedFlat').innerHTML=card('flat');
 $('bedGrad').style.background='linear-gradient(90deg,'+[0,1/3,2/3,1].map(f=>col(LO+(HI-LO)*f)).join(',')+')';$('bedGradLab').textContent=LO+'% → '+HI+'%';
 $('bedPlay').onclick=()=>playing?stop():play();
 $('bedTime').oninput=e=>{stop();si=+e.target.value;render();};
-$('bedStir').querySelectorAll('button').forEach(b=>b.onclick=()=>{stop();stir=b.dataset.v;$('bedStir').querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',x===b));build();si=runs.cone.snaps.length-1;render();});
-$('bedPour').querySelectorAll('button').forEach(b=>b.onclick=()=>{stop();pour=b.dataset.v;$('bedPour').querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',x===b));build();si=runs.cone.snaps.length-1;render();});
-$('bedPrep').querySelectorAll('button').forEach(b=>b.onclick=()=>{stop();if(b.dataset.v==='wdt')wdt=!wdt;else dig=!dig;b.setAttribute('aria-pressed',b.dataset.v==='wdt'?wdt:dig);build();si=runs.cone.snaps.length-1;render();});
-window.bedRender=()=>{if(!inited){inited=true;build();si=runs.cone.snaps.length-1;}render();};
+$('bedStir').querySelectorAll('button').forEach(b=>b.onclick=()=>{stop();stir=b.dataset.v;$('bedStir').querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',x===b));build();si=runs.A.snaps.length-1;render();});
+$('bedPour').querySelectorAll('button').forEach(b=>b.onclick=()=>{stop();pour=b.dataset.v;$('bedPour').querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',x===b));build();si=runs.A.snaps.length-1;render();});
+$('bedCmp').querySelectorAll('button').forEach(b=>b.onclick=()=>{stop();cmp=b.dataset.v;$('bedCmp').querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',x===b));$('bedPDripP').hidden=cmp!=='prep';$('bedPrepLab').textContent=cmp==='prep'?'右邊用的整粉方式':'注水前整粉';build();si=runs.A.snaps.length-1;render();});
+$('bedPDrip').querySelectorAll('button').forEach(b=>b.onclick=()=>{stop();pdrip=b.dataset.v;$('bedPDrip').querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',x===b));build();si=runs.A.snaps.length-1;render();});
+$('bedPrep').querySelectorAll('button').forEach(b=>b.onclick=()=>{stop();if(b.dataset.v==='wdt')wdt=!wdt;else dig=!dig;b.setAttribute('aria-pressed',b.dataset.v==='wdt'?wdt:dig);build();si=runs.A.snaps.length-1;render();});
+window.bedRender=()=>{if(!inited){inited=true;build();si=runs.A.snaps.length-1;}render();};
 addEventListener('resize',()=>{if($('bedView')&&!$('bedView').hidden&&runs)render();});
 })();
 
