@@ -420,7 +420,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
 .tr-key{display:flex;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--muted)}
 .tr-key span{display:flex;align-items:center;gap:5px}.tr-key i{display:block;width:12px;height:8px;border-radius:2px}
 .tr-key .good i,.tr-row.good .tr-bar i{background:#2e8b57}.tr-key .bad i,.tr-row.bad .tr-bar i{background:#c0503a}.tr-key .flav i,.tr-row.flav .tr-bar i{background:#8a8f99}
-.tr-row{display:grid;grid-template-columns:7.2em 1fr 3.6em;gap:8px;align-items:center;font-size:13px}
+.tr-row{display:grid;grid-template-columns:8.6em 1fr 3.6em;gap:8px;align-items:center;font-size:13px}
 .tr-row .nm{color:var(--ink)}
 .tr-row.flat .nm,.tr-row.flat .v{color:var(--muted)}
 .tr-bar{position:relative;height:12px;background:linear-gradient(var(--line),var(--line)) center/1px 100% no-repeat}
@@ -2441,16 +2441,20 @@ function load(c,keepGhost){
 // 好處／代價：把「目前選的做法」和對照組在各面向的差異畫成左右對稱長條
 const TRADE=[
   ['萃取量','all',1,15,'pt'],['甜（糖）','sugar',1,15,'pt'],['香氣（花果香）','fruity',1,15,'pt'],['口感（油脂）','oil',1,10,'pt'],
-  ['酸','acid',0,15,'pt'],['苦','bitter',-1,10,'pt'],['萃取均勻度','uni',1,15,'pt'],['細粉（塞水風險）','frag',-1,6,'x'],['滴完時間','time',-1,30,'s']];
+  ['酸','acid',0,15,'pt'],['苦','bitter',-1,10,'pt'],['苦味占比','bshare',-1,10,'pt'],['萃取均勻度','uni',1,15,'pt'],['細粉（塞水）','frag',-1,6,'x'],['滴完時間','time',-1,30,'s']];
 function tradeVals(R,end){const x=R.curve.find(p=>p.t>=end)||R.curve[R.curve.length-1],ix=id=>MIC_T.findIndex(t=>t.id===id);
-  return {all:x.all*100,sugar:x.e[ix('sugar')]*100,fruity:x.e[ix('fruity')]*100,oil:x.e[ix('oil')]*100,acid:x.e[ix('acid')]*100,bitter:x.e[ix('bitter')]*100,
+  return {all:x.all*100,sugar:x.e[ix('sugar')]*100,fruity:x.e[ix('fruity')]*100,oil:x.e[ix('oil')]*100,acid:x.e[ix('acid')]*100,bitter:x.e[ix('bitter')]*100,bshare:x.e[ix('bitter')]/Math.max(.01,x.all)*100,
     uni:micUniform(R)*100,frag:R.fragTot||0,time:micEnds(R.cfg)[1]};}
 function tradeHTML(an,bn,RA,RB,end){
   const A=tradeVals(RA,end),B=tradeVals(RB,end);const good=[],bad=[],flav=[];
   const rows=TRADE.map(([n,k,sgn,sc,u])=>{const d=A[k]-B[k],thr=u==='s'?1:u==='x'?.6:1.5;
     const txt=u==='s'?(d>0?'+':'')+Math.round(d)+' 秒':u==='x'?(Math.abs(d)<.6?'差不多':d>0?'較多':'較少'):(d>0?'+':'')+d.toFixed(0);
     const cls=Math.abs(d)<thr?'flat':sgn===0?'flav':(d*sgn>0?'good':'bad');
-    if(cls==='good')good.push(n);else if(cls==='bad')bad.push(n);else if(cls==='flav')flav.push(n+(d>0?'較明顯':'較收斂'));
+    const base={萃取量:'萃取量','甜（糖）':'甜感','香氣（花果香）':'香氣','口感（油脂）':'油脂（口感）',酸:'酸',苦:'苦味',苦味占比:'苦味占比（苦÷整體）',萃取均勻度:'萃取均勻度','細粉（塞水）':'細粉（塞水風險）',滴完時間:'滴完時間'}[n]||n;
+    const amt=u==='x'?'':'（'+(d>0?'+':'−')+(u==='s'?Math.abs(Math.round(d))+' 秒':Math.abs(d).toFixed(0)+' 點')+'）';
+    const word=u==='s'?(d>0?'較長':'較短'):(k==='uni'||k==='bshare')?(d>0?'較高':'較低'):(d>0?'較多':'較少');
+    const phr=base+word+amt;
+    if(cls==='good')good.push(phr);else if(cls==='bad')bad.push(phr);else if(cls==='flav')flav.push(base+(d>0?'較明顯':'較收斂'));
     const w=Math.min(50,Math.abs(d)/sc*50);
     return '<div class="tr-row '+cls+'"><span class="nm">'+n+'</span><div class="tr-bar"><i style="'+(d>=0?'left:50%':'left:'+(50-w)+'%')+';width:'+w+'%"></i></div><span class="v">'+txt+'</span></div>';}).join('');
   return '<div class="mic-trade"><h3>「'+an+'」相對於「'+bn+'」</h3><div class="tr-key"><span class="good"><i></i>好處</span><span class="bad"><i></i>代價</span><span class="flav"><i></i>風味走向（不分好壞）</span></div>'+rows+
