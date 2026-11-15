@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="毛毛飲食">
+<meta name="theme-color" content="#5b4636">
+<title>毛毛的飲食過敏紀錄</title>
+<style>
+:root{--bg:#f7f2ec;--card:#fff;--ink:#2d241d;--mute:#8b7c6f;--line:#e7ddd1;--accent:#5b4636;--soft:#f1e8dd;
+--ok:#2f8f5b;--okbg:#e3f4ea;--warn:#b7791f;--warnbg:#fdf1dc;--bad:#c2410c;--badbg:#fde7dc;--sev:#b91c1c;--sevbg:#fde2e2;--unk:#64748b;--unkbg:#eef1f5;--line2:#3b82c4}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;font-size:15px;padding-bottom:calc(76px + env(safe-area-inset-bottom))}
+header{position:sticky;top:0;z-index:5;background:var(--accent);color:#fff;padding:calc(10px + env(safe-area-inset-top)) 16px 10px;display:flex;align-items:center;gap:10px}
+header a{color:#fff;text-decoration:none;font-size:20px;opacity:.85}
+header h1{font-size:18px;margin:0;flex:1}
+header .sub{font-size:12px;opacity:.8}
+main{max-width:680px;margin:0 auto;padding:12px 14px}
+nav{position:fixed;bottom:0;left:0;right:0;z-index:6;background:#fff;border-top:1px solid var(--line);display:flex;padding-bottom:env(safe-area-inset-bottom)}
+nav button{flex:1;border:0;background:none;font:inherit;font-size:11px;color:var(--mute);padding:7px 0 6px;display:flex;flex-direction:column;align-items:center;gap:1px;cursor:pointer}
+nav button .i{font-size:21px}
+nav button.on{color:var(--accent);font-weight:700}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-bottom:10px}
+h2{font-size:15px;margin:16px 2px 8px;color:var(--mute);font-weight:600;display:flex;align-items:center;gap:8px}
+h2 .r{margin-left:auto}
+.btn{font:inherit;font-size:14px;border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:10px;padding:8px 12px;cursor:pointer}
+.btn.pri{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
+.btn.big{width:100%;padding:12px;font-size:16px}
+.btn.del{color:var(--sev);border-color:#f3c9c9}
+.btn.sm{padding:5px 9px;font-size:13px}
+.row{display:flex;gap:8px;align-items:center}
+.muted{color:var(--mute);font-size:13px}
+.pill{display:inline-flex;align-items:center;gap:3px;font-size:12px;padding:2px 8px;border-radius:10px;white-space:nowrap}
+.st-none{background:var(--okbg);color:var(--ok)}.st-unk{background:var(--unkbg);color:var(--unk)}.st-watch{background:var(--warnbg);color:var(--warn)}
+.st-mild{background:var(--warnbg);color:var(--warn)}.st-clear{background:var(--badbg);color:var(--bad)}.st-severe{background:var(--sevbg);color:var(--sev)}
+.tagp{background:var(--soft);color:#6b5646}
+/* 日期列 */
+.datebar{display:flex;align-items:center;gap:6px;margin-bottom:10px}
+.datebar .d{flex:1;text-align:center;font-weight:700;font-size:16px}
+.datebar input{font:inherit;border:1px solid var(--line);border-radius:10px;padding:6px;background:#fff}
+/* 熱量條 */
+.kcal{display:flex;align-items:baseline;gap:6px}
+.kcal .n{font-size:34px;font-weight:800;font-variant-numeric:tabular-nums}
+.bar{height:12px;background:var(--soft);border-radius:6px;overflow:hidden;margin:8px 0 4px;position:relative}
+.bar i{display:block;height:100%;border-radius:6px;background:var(--ok);transition:width .3s}
+.bar i.over{background:var(--bad)}
+/* 紀錄 */
+.log{display:flex;gap:10px;align-items:center;padding:10px 0;border-top:1px solid var(--line);cursor:pointer}
+.log:first-child{border-top:0}
+.log .t{font-size:12px;color:var(--mute);width:40px;flex:none;font-variant-numeric:tabular-nums}
+.log .b{flex:1;min-width:0}
+.log .nm{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.log .k{font-weight:700;font-variant-numeric:tabular-nums;text-align:right;flex:none}
+.empty{color:var(--mute);text-align:center;padding:22px 10px;font-size:14px;line-height:1.6}
+/* 食物卡 */
+.chips{display:flex;gap:6px;overflow-x:auto;margin:0 -14px 10px;padding:0 14px 2px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chips button{flex:none;font:inherit;font-size:13px;border:1px solid var(--line);background:#fff;border-radius:16px;padding:5px 11px;cursor:pointer;white-space:nowrap}
+.chips button.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.food{display:flex;gap:10px;cursor:pointer;align-items:flex-start}
+.food .ic{width:44px;height:44px;border-radius:12px;background:var(--soft);display:flex;align-items:center;justify-content:center;font-size:24px;flex:none}
+.food .b{flex:1;min-width:0}
+.food .nm{font-weight:700}
+.food .br{font-size:12px;color:var(--mute)}
+.food .meta{display:flex;flex-wrap:wrap;gap:4px;margin-top:5px}
+.food .kc{text-align:right;flex:none;font-size:12px;color:var(--mute)}
+.food .kc b{display:block;font-size:17px;color:var(--ink);font-variant-numeric:tabular-nums}
+.search{width:100%;font:inherit;border:1px solid var(--line);border-radius:12px;padding:9px 12px;margin-bottom:8px;background:#fff}
+.sortrow{display:flex;gap:8px;align-items:center;margin-bottom:8px}
+.sortrow select{font:inherit;font-size:13px;border:1px solid var(--line);border-radius:10px;padding:5px 8px;background:#fff}
+/* 表單 */
+.sheet{position:fixed;inset:0;z-index:20;background:rgba(30,20,12,.45);display:none;align-items:flex-end;justify-content:center}
+.sheet.show{display:flex}
+.sheet .in{background:var(--bg);width:100%;max-width:680px;max-height:92vh;overflow:auto;border-radius:18px 18px 0 0;padding:14px 16px calc(18px + env(safe-area-inset-bottom))}
+.sheet h3{margin:0 0 10px;font-size:18px;display:flex;align-items:center}
+.sheet h3 button{margin-left:auto;border:0;background:none;font-size:22px;color:var(--mute);cursor:pointer}
+label.f{display:block;font-size:13px;color:var(--mute);margin:12px 0 5px;font-weight:600}
+input.f,select.f,textarea.f{width:100%;font:inherit;font-size:16px;border:1px solid var(--line);border-radius:10px;padding:9px 10px;background:#fff;color:var(--ink)}
+textarea.f{min-height:64px;resize:vertical}
+.two{display:flex;gap:10px}.two>div{flex:1;min-width:0}
+.opt{display:flex;flex-wrap:wrap;gap:6px}
+.opt button{font:inherit;font-size:14px;border:1px solid var(--line);background:#fff;border-radius:18px;padding:6px 11px;cursor:pointer;color:var(--ink)}
+.opt button.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.opt.sym button.on{background:var(--bad);border-color:var(--bad)}
+.hint{font-size:12px;color:var(--mute);margin-top:4px;line-height:1.5}
+.warnbox{background:var(--sevbg);color:var(--sev);border-radius:10px;padding:8px 10px;font-size:13px;margin-top:8px;line-height:1.5}
+.infobox{background:var(--warnbg);color:#7a4b12;border-radius:10px;padding:8px 10px;font-size:13px;margin-top:8px;line-height:1.5}
+.pick{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px;max-height:240px;overflow:auto}
+.pick button{font:inherit;text-align:left;border:1px solid var(--line);background:#fff;border-radius:10px;padding:7px 9px;cursor:pointer;font-size:13px;line-height:1.35}
+.pick button.on{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent)}
+.pick button .s{font-size:11px;color:var(--mute)}
+.pick button.al{background:#fff6f4}
+.actions{display:flex;gap:8px;margin-top:16px}
+.actions .btn{flex:1;padding:11px}
+/* 分析 */
+table.t{width:100%;border-collapse:collapse;font-size:14px}
+table.t th{font-size:12px;color:var(--mute);font-weight:600;text-align:left;padding:4px 4px 6px;border-bottom:1px solid var(--line)}
+table.t td{padding:8px 4px;border-bottom:1px solid var(--line);vertical-align:middle}
+table.t td.n{text-align:center;font-variant-numeric:tabular-nums}
+.stat{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.stat>div{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px;text-align:center}
+.stat b{display:block;font-size:22px;font-variant-numeric:tabular-nums}
+.stat span{font-size:12px;color:var(--mute)}
+.chart{position:relative}
+.chart svg{width:100%;height:auto;display:block}
+.tip{position:absolute;pointer-events:none;background:var(--ink);color:#fff;font-size:12px;padding:5px 8px;border-radius:8px;white-space:nowrap;transform:translate(-50%,-110%);display:none}
+.sync{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.toast{position:fixed;left:50%;bottom:calc(86px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--ink);color:#fff;font-size:14px;padding:9px 16px;border-radius:20px;z-index:30;max-width:90vw;text-align:center;display:none}
+.rank{display:flex;gap:8px;align-items:center;padding:7px 0;border-top:1px solid var(--line);cursor:pointer}
+.rank:first-child{border-top:0}
+.rank .no{width:22px;height:22px;border-radius:11px;background:var(--soft);font-size:12px;display:flex;align-items:center;justify-content:center;flex:none;font-weight:700}
+</style>
+</head>
+<body>
+<header>
+  <a href="../" aria-label="回 App 目錄">‹</a>
+  <div style="flex:1"><h1 id="hTitle">🐱 毛毛的飲食紀錄</h1><div class="sub">罐頭過敏・喜好・熱量・減重</div></div>
+</header>
+<main id="view"></main>
+<nav id="nav">
+  <button data-v="today"><span class="i">🍽️</span>今天</button>
+  <button data-v="foods"><span class="i">🥫</span>食物庫</button>
+  <button data-v="history"><span class="i">📅</span>紀錄</button>
+  <button data-v="analysis"><span class="i">🔍</span>過敏分析</button>
+  <button data-v="cat"><span class="i">🐱</span>毛毛</button>
+</nav>
+<div class="sheet" id="sheet"><div class="in" id="sheetIn"></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ===================== 資料 ===================== */
+const KEY="catfood-v1";
+const PROT=["雞","火雞","鴨","鵝","牛","羊","豬","兔","鹿","袋鼠","鮪魚","鰹魚","鮭魚","白身魚","鯖魚","沙丁魚","蝦蟹貝","雞蛋","乳製品","穀物/麩質","豆類","其他"];
+const TYPES={can:{n:"罐頭/主食罐",i:"🥫"},pouch:{n:"餐包",i:"🍱"},dry:{n:"乾飼料",i:"🥣"},raw:{n:"生食/凍乾",i:"🥩"},treat:{n:"零食/肉泥",i:"🍬"},other:{n:"其他",i:"🍽️"}};
+const AL={unk:{n:"還沒確定",c:"st-unk",o:0},none:{n:"沒有過敏",c:"st-none",o:1},watch:{n:"觀察中",c:"st-watch",o:2},mild:{n:"輕微過敏",c:"st-mild",o:3},clear:{n:"明顯過敏",c:"st-clear",o:4},severe:{n:"嚴重過敏",c:"st-severe",o:5}};
+const ALLERGIC=s=>s==="mild"||s==="clear"||s==="severe";
+const SYM=["嘔吐","腹瀉","軟便","便秘","搔癢","抓臉/耳朵","舔毛過度","掉毛/禿","皮膚紅疹","黑下巴","耳朵髒","打噴嚏","眼睛分泌物","食慾變差","精神差"];
+const LIKE={0:{n:"還不知道",e:"❔"},1:{n:"不吃",e:"😾"},2:{n:"普通",e:"😐"},3:{n:"愛吃",e:"😺"},4:{n:"超愛",e:"😻"}};
+const ATE={all:{n:"吃光",f:1},most:{n:"吃大部分",f:.75},half:{n:"吃一半",f:.5},little:{n:"吃一點",f:.25},none:{n:"沒吃",f:0}};
+const RE={none:{n:"沒反應",c:"st-none"},watch:{n:"再觀察",c:"st-watch"},yes:{n:"有反應",c:"st-clear"}};
+
+const $=s=>document.querySelector(s);
+const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+const pad=n=>String(n).padStart(2,"0");
+const ymd=d=>d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
+const today=()=>ymd(new Date());
+const nowHM=()=>{const d=new Date();return pad(d.getHours())+":"+pad(d.getMinutes())};
+const r1=n=>Math.round(n*10)/10;
+const fmtD=s=>{const d=new Date(s+"T00:00");return (d.getMonth()+1)+"/"+d.getDate()+" 週"+"日一二三四五六"[d.getDay()]};
+
+let S;
+function blank(){return{cat:{name:"毛毛",target:null,goal:null,factor:0.8,updatedAt:0},foods:{},logs:{},weights:{},savedAt:0}}
+function load(){try{S=JSON.parse(localStorage.getItem(KEY))}catch(e){}if(!S||!S.foods)S=blank();["foods","logs","weights"].forEach(k=>S[k]=S[k]||{})}
+let onSaved=()=>{};
+function save(){S.savedAt=Date.now();try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){toast("⚠️ 存檔失敗")}onSaved()}
+const live=o=>Object.values(o).filter(x=>!x.del);
+const foods=()=>live(S.foods);
+const logs=()=>live(S.logs);
+const weights=()=>live(S.weights).sort((a,b)=>a.date<b.date?-1:a.date>b.date?1:0);
+function put(coll,obj){obj.updatedAt=Date.now();S[coll][obj.id]=obj;save()}
+function remove(coll,id){const o=S[coll][id];if(!o)return;S[coll][id]={id,del:1,updatedAt:Date.now()};save()}
+load();
+
+/* 熱量計算 */
+const kcalOf=(food,g)=>food&&food.kcal100?g*food.kcal100/100:0;
+const logKcal=l=>{const f=S.foods[l.foodId];return kcalOf(f,+l.grams||0)*(ATE[l.ate]||ATE.all).f};
+const curWeight=()=>{const w=weights();return w.length?w[w.length-1].kg:null};
+function rer(kg){return kg?70*Math.pow(kg,0.75):null}
+function autoGoal(){const t=S.cat.target||curWeight();return t?Math.round(rer(t)*(S.cat.factor||0.8)):null}
+const goal=()=>S.cat.goal||autoGoal();
+
+/* 依紀錄統計每款食物 */
+function foodStats(id){
+  const L=logs().filter(l=>l.foodId===id);
+  const yes=L.filter(l=>l.react==="yes").length;
+  const eaten=L.filter(l=>l.ate);
+  const rate=eaten.length?eaten.reduce((s,l)=>s+(ATE[l.ate]||ATE.all).f,0)/eaten.length:null;
+  const last=L.map(l=>l.date).sort().pop();
+  return{n:L.length,yes,rate,last};
+}
+
+/* ===================== 介面 ===================== */
+let V=location.hash.slice(1)||"today",day=today(),fFilter="all",fSort="status",fQ="";
+function toast(t){const e=$("#toast");e.textContent=t;e.style.display="block";clearTimeout(toast.t);toast.t=setTimeout(()=>e.style.display="none",2200)}
+function go(v){V=v;location.hash=v;render();scrollTo(0,0)}
+$("#nav").onclick=e=>{const b=e.target.closest("button");if(b)go(b.dataset.v)};
+window.addEventListener("hashchange",()=>{const v=location.hash.slice(1);if(v&&v!==V){V=v;render()}});
+function render(){
+  document.querySelectorAll("#nav button").forEach(b=>b.classList.toggle("on",b.dataset.v===V));
+  $("#hTitle").textContent="🐱 "+(S.cat.name||"毛毛")+"的飲食紀錄";
+  ({today:vToday,foods:vFoods,history:vHistory,analysis:vAnalysis,cat:vCat}[V]||vToday)();
+}
+const alPill=s=>`<span class="pill ${AL[s||"unk"].c}">${AL[s||"unk"].n}</span>`;
+const likeTxt=v=>LIKE[v||0].e+" "+LIKE[v||0].n;
+
+/* ---------- 今天 ---------- */
+function vToday(){
+  const L=logs().filter(l=>l.date===day).sort((a,b)=>(a.time||"")<(b.time||"")?-1:1);
+  const k=Math.round(L.reduce((s,l)=>s+logKcal(l),0)),G=goal();
+  const pct=G?Math.min(100,k/G*100):0,over=G&&k>G;
+  const noKcal=L.some(l=>{const f=S.foods[l.foodId];return !f||!f.kcal100});
+  $("#view").innerHTML=`
+  <div class="datebar"><button class="btn sm" data-d="-1">‹</button><div class="d">${day===today()?"今天 ":""}${fmtD(day)}</div><button class="btn sm" data-d="1">›</button><label class="btn sm" style="position:relative;overflow:hidden">📅<input type="date" id="dpick" value="${day}" style="position:absolute;inset:0;opacity:0;width:100%;height:100%"></label></div>
+  <div class="card">
+    <div class="muted">實際吃進去的熱量（依吃多少折算）</div>
+    <div class="kcal"><span class="n">${k}</span><span class="muted">/ ${G?G+" kcal":"還沒設定目標"}</span></div>
+    ${G?`<div class="bar"><i class="${over?"over":""}" style="width:${pct}%"></i></div>
+    <div class="muted">${over?`⚠️ 超過目標 ${k-G} kcal`:`還可以吃 ${G-k} kcal`}</div>`:`<div class="hint">到「🐱 毛毛」頁填體重和目標體重，就會自動算每日熱量目標。</div>`}
+    ${noKcal?`<div class="infobox">有食物還沒填熱量，那幾筆不會算進去。點紀錄裡的食物就能補。</div>`:""}
+  </div>
+  <button class="btn pri big" id="addLog">＋ 記一餐</button>
+  <h2>這天吃了什麼</h2>
+  <div class="card">${L.length?L.map(logRow).join(""):`<div class="empty">還沒有紀錄<br>每餐記一下，之後才找得出是哪個成分讓${esc(S.cat.name)}過敏</div>`}</div>
+  ${pendingWatch()}`;
+  $("#view").querySelectorAll("[data-d]").forEach(b=>b.onclick=()=>{const d=new Date(day+"T00:00");d.setDate(d.getDate()+ +b.dataset.d);day=ymd(d);render()});
+  $("#dpick").onchange=e=>{if(e.target.value){day=e.target.value;render()}};
+  $("#addLog").onclick=()=>logSheet();
+  bindLogs();
+}
+function logRow(l){
+  const f=S.foods[l.foodId]||{name:"（已刪除的食物）"};
+  return `<div class="log" data-log="${l.id}"><div class="t">${esc(l.time||"")}</div><div class="b">
+   <div class="nm">${f.allergy&&ALLERGIC(f.allergy)?"⚠️ ":""}${esc(f.name)}</div>
+   <div class="muted">${l.grams?r1(+l.grams)+" g・":""}${(ATE[l.ate]||ATE.all).n}${l.react&&l.react!=="none"?` <span class="pill ${RE[l.react].c}">${RE[l.react].n}${l.sym&&l.sym.length?"："+esc(l.sym.join("、")):""}</span>`:""}</div></div>
+   <div class="k">${Math.round(logKcal(l))}<div class="muted" style="font-weight:400">kcal</div></div></div>`;
+}
+function bindLogs(){$("#view").querySelectorAll("[data-log]").forEach(e=>e.onclick=()=>logSheet(S.logs[e.dataset.log]))}
+function pendingWatch(){
+  const P=logs().filter(l=>l.react==="watch").sort((a,b)=>a.date<b.date?1:-1).slice(0,5);
+  if(!P.length)return"";
+  return `<h2>⏳ 還在觀察反應的餐</h2><div class="card"><div class="hint" style="margin:0 0 4px">食物過敏常在吃完幾小時到兩三天後才出現，記得回來更新。</div>${P.map(l=>`<div class="log" data-log="${l.id}"><div class="t">${fmtD(l.date).split(" ")[0]}</div><div class="b"><div class="nm">${esc((S.foods[l.foodId]||{}).name||"")}</div></div><span class="btn sm">更新</span></div>`).join("")}</div>`;
+}
+
+/* ---------- 記一餐 ---------- */
+function logSheet(l,draft){
+  const isNew=!l||!!draft;
+  l=draft||(l?JSON.parse(JSON.stringify(l)):{id:uid(),date:day,time:nowHM(),foodId:null,grams:"",ate:"all",react:"watch",sym:[],note:""});
+  l.sym=l.sym||[];
+  const F=foods().sort((a,b)=>{const sa=ALLERGIC(a.allergy)?1:0,sb=ALLERGIC(b.allergy)?1:0;if(sa!==sb)return sa-sb;return (foodStats(b.id).last||"").localeCompare(foodStats(a.id).last||"")});
+  open(`<h3>${isNew?"記一餐":"編輯這餐"}<button data-x>×</button></h3>
+  <div class="two"><div><label class="f">日期</label><input class="f" type="date" id="lDate" value="${l.date}"></div><div><label class="f">時間</label><input class="f" type="time" id="lTime" value="${l.time||""}"></div></div>
+  <label class="f">吃了哪一款</label>
+  ${F.length?`<input class="search" id="lQ" placeholder="搜尋名稱或品牌" style="margin-bottom:6px"><div class="pick" id="lPick"></div>`:`<div class="hint">食物庫還是空的，先新增一款。</div>`}
+  <button class="btn sm" id="lNewFood" style="margin-top:6px">＋ 新增一款食物</button>
+  <div id="lWarn"></div>
+  <label class="f">份量（公克）</label>
+  <input class="f" type="number" inputmode="decimal" id="lG" value="${l.grams}" placeholder="例如 40">
+  <div class="opt" id="lPortion" style="margin-top:6px"></div>
+  <label class="f">吃了多少</label>
+  <div class="opt" id="lAte">${Object.entries(ATE).map(([k,v])=>`<button data-v="${k}" class="${l.ate===k?"on":""}">${v.n}</button>`).join("")}</div>
+  <div class="hint" id="lK"></div>
+  <label class="f">有沒有過敏反應</label>
+  <div class="opt" id="lRe">${Object.entries(RE).map(([k,v])=>`<button data-v="${k}" class="${l.react===k?"on":""}">${v.n}</button>`).join("")}</div>
+  <div id="lSymBox" style="${l.react==="yes"?"":"display:none"}"><label class="f">症狀（可複選）</label><div class="opt sym" id="lSym">${SYM.map(s=>`<button data-v="${s}" class="${l.sym.includes(s)?"on":""}">${s}</button>`).join("")}</div></div>
+  <label class="f">備註</label><textarea class="f" id="lNote" placeholder="例如：吃完一小時吐、混了一點乾乾">${esc(l.note)}</textarea>
+  <div class="actions">${isNew?"":`<button class="btn del" id="lDel">刪除</button>`}<button class="btn pri" id="lSave">儲存</button></div>`);
+  const drawPick=()=>{
+    const q=($("#lQ")?$("#lQ").value:"").trim().toLowerCase();
+    const P=$("#lPick");if(!P)return;
+    P.innerHTML=F.filter(f=>!q||(f.name+" "+(f.brand||"")).toLowerCase().includes(q)).map(f=>`<button data-f="${f.id}" class="${f.id===l.foodId?"on":""} ${ALLERGIC(f.allergy)?"al":""}">${ALLERGIC(f.allergy)?"⚠️ ":""}${TYPES[f.type||"can"].i} ${esc(f.name)}<div class="s">${esc(f.brand||"")}${f.kcal100?" ・"+f.kcal100+" kcal/100g":""} ${LIKE[f.like||0].e}</div></button>`).join("")||`<div class="muted">找不到</div>`;
+    P.querySelectorAll("[data-f]").forEach(b=>b.onclick=()=>{l.foodId=b.dataset.f;const f=S.foods[l.foodId];if(!$("#lG").value&&f.serving)$("#lG").value=f.serving;drawPick();sync()});
+  };
+  const sync=()=>{
+    const f=S.foods[l.foodId];
+    $("#lWarn").innerHTML=f&&ALLERGIC(f.allergy)?`<div class="warnbox">⚠️ 這款已標記「${AL[f.allergy].n}」${f.symptoms&&f.symptoms.length?"（"+esc(f.symptoms.join("、"))+"）":""}，確定要記嗎？</div>`:"";
+    $("#lPortion").innerHTML=f&&f.serving?[[.25,"¼"],[.5,"½"],[1,"1"],[1.5,"1½"]].map(([m,t])=>`<button data-g="${r1(f.serving*m)}">${t} ${f.type==="dry"?"份":"罐"}（${r1(f.serving*m)}g）</button>`).join(""):"";
+    $("#lPortion").querySelectorAll("[data-g]").forEach(b=>b.onclick=()=>{$("#lG").value=b.dataset.g;sync()});
+    const g=+$("#lG").value||0,kc=kcalOf(f,g);
+    $("#lK").textContent=f?(f.kcal100?`這份 ${Math.round(kc)} kcal，實際吃進 ${Math.round(kc*ATE[l.ate].f)} kcal`:"這款還沒填熱量"):"";
+  };
+  if($("#lQ"))$("#lQ").oninput=drawPick;
+  drawPick();sync();
+  $("#lG").oninput=sync;
+  opt("#lAte",v=>{l.ate=v;sync()});
+  opt("#lRe",v=>{l.react=v;$("#lSymBox").style.display=v==="yes"?"":"none"});
+  multi("#lSym",l.sym);
+  $("#lNewFood").onclick=()=>{const keep=Object.assign({},l,{date:$("#lDate").value,time:$("#lTime").value,grams:$("#lG").value,note:$("#lNote").value});
+    foodSheet(null,id=>{keep.foodId=id;const f=S.foods[id];if(!keep.grams&&f.serving)keep.grams=f.serving;if(isNew)logSheet(null,keep);else logSheet(keep)})};
+  $("#lSave").onclick=()=>{
+    if(!l.foodId)return toast("請選一款食物");
+    l.date=$("#lDate").value||day;l.time=$("#lTime").value;l.grams=+$("#lG").value||0;l.note=$("#lNote").value.trim();
+    if(l.react!=="yes")l.sym=[];
+    put("logs",l);close();day=l.date;
+    const f=S.foods[l.foodId];
+    if(l.react==="yes"&&f&&!ALLERGIC(f.allergy)){setTimeout(()=>{if(confirm(`這餐有反應。要把「${f.name}」標成「觀察中」嗎？\n（確定是過敏的話，可以到食物庫改成輕微／明顯過敏）`)){f.allergy="watch";f.symptoms=[...new Set([...(f.symptoms||[]),...l.sym])];put("foods",f);render()}},50)}
+    if(V!=="today"&&V!=="history")V="today";render();toast("已記錄");
+  };
+  if(!isNew)$("#lDel").onclick=()=>{if(confirm("刪除這筆紀錄？")){remove("logs",l.id);close();render()}};
+}
+
+/* ---------- 食物庫 ---------- */
+function vFoods(){
+  const F=foods();
+  const cnt={all:F.length,safe:F.filter(f=>f.allergy==="none").length,al:F.filter(f=>ALLERGIC(f.allergy)).length,watch:F.filter(f=>f.allergy==="watch"||!f.allergy||f.allergy==="unk").length};
+  let L=F.filter(f=>fFilter==="all"||(fFilter==="safe"&&f.allergy==="none")||(fFilter==="al"&&ALLERGIC(f.allergy))||(fFilter==="watch"&&(f.allergy==="watch"||!f.allergy||f.allergy==="unk"))||(fFilter==="love"&&(f.like||0)>=3));
+  if(fQ){const q=fQ.toLowerCase();L=L.filter(f=>(f.name+" "+(f.brand||"")+" "+(f.prot||[]).join(" ")).toLowerCase().includes(q))}
+  const sorters={status:(a,b)=>AL[a.allergy||"unk"].o-AL[b.allergy||"unk"].o||(b.like||0)-(a.like||0),
+    kcal:(a,b)=>(a.kcal100||1e9)-(b.kcal100||1e9),like:(a,b)=>(b.like||0)-(a.like||0),
+    recent:(a,b)=>(foodStats(b.id).last||"").localeCompare(foodStats(a.id).last||""),name:(a,b)=>a.name.localeCompare(b.name,"zh-Hant")};
+  L.sort(sorters[fSort]);
+  $("#view").innerHTML=`
+  <div class="chips" id="fChips">${[["all","全部"],["safe","✅ 安全"],["al","⚠️ 過敏"],["watch","❔ 待確認"],["love","😻 愛吃"]].map(([k,n])=>`<button data-f="${k}" class="${fFilter===k?"on":""}">${n} ${k==="love"?"":cnt[k]}</button>`).join("")}</div>
+  <input class="search" id="fQ" placeholder="搜尋名稱、品牌、成分（例如：鮭魚）" value="${esc(fQ)}">
+  <div class="sortrow"><span class="muted">排序</span><select id="fSort">
+   <option value="status">安全優先</option><option value="kcal">熱量低→高</option><option value="like">最愛吃</option><option value="recent">最近吃過</option><option value="name">名稱</option></select>
+   <button class="btn pri sm" id="fAdd" style="margin-left:auto">＋ 新增食物</button></div>
+  ${L.length?L.map(foodCard).join(""):`<div class="card empty">${F.length?"沒有符合的食物":"把毛毛吃過的罐頭、飼料一款款加進來<br>標記有沒有過敏、愛不愛吃、熱量多少"}</div>`}`;
+  $("#fSort").value=fSort;
+  $("#fSort").onchange=e=>{fSort=e.target.value;vFoods()};
+  $("#fChips").onclick=e=>{const b=e.target.closest("button");if(b){fFilter=b.dataset.f;vFoods()}};
+  $("#fQ").oninput=e=>{fQ=e.target.value;const p=e.target.selectionStart;vFoods();const i=$("#fQ");i.focus();i.setSelectionRange(p,p)};
+  $("#fAdd").onclick=()=>foodSheet();
+  $("#view").querySelectorAll("[data-food]").forEach(e=>e.onclick=()=>foodSheet(S.foods[e.dataset.food]));
+}
+function foodCard(f){
+  const st=foodStats(f.id),per=f.kcal100&&f.serving?Math.round(f.kcal100*f.serving/100):null;
+  return `<div class="card food" data-food="${f.id}"><div class="ic">${TYPES[f.type||"can"].i}</div><div class="b">
+   <div class="nm">${esc(f.name)}</div><div class="br">${esc(f.brand||"")}${f.brand?"・":""}${TYPES[f.type||"can"].n}</div>
+   <div class="meta">${alPill(f.allergy)}<span class="pill tagp">${likeTxt(f.like)}</span>${(f.prot||[]).map(p=>`<span class="pill tagp">${esc(p)}</span>`).join("")}</div>
+   ${f.symptoms&&f.symptoms.length&&ALLERGIC(f.allergy)?`<div class="muted" style="margin-top:4px">症狀：${esc(f.symptoms.join("、"))}</div>`:""}
+   ${st.n?`<div class="muted" style="margin-top:4px">吃過 ${st.n} 次${st.yes?`・<b style="color:var(--bad)">${st.yes} 次有反應</b>`:""}${st.rate!=null?`・平均吃掉 ${Math.round(st.rate*100)}%`:""}</div>`:""}
+  </div><div class="kc">${f.kcal100?`<b>${f.kcal100}</b>kcal/100g`:"未填熱量"}${per?`<div>一${f.type==="dry"?"份":"罐"} ${per} kcal</div>`:""}</div></div>`;
+}
+function foodSheet(f,after){
+  const isNew=!f;
+  f=f?JSON.parse(JSON.stringify(f)):{id:uid(),name:"",brand:"",type:"can",prot:[],kcal100:"",serving:"",allergy:"unk",symptoms:[],like:0,note:""};
+  f.prot=f.prot||[];f.symptoms=f.symptoms||[];
+  open(`<h3>${isNew?"新增食物":"編輯食物"}<button data-x>×</button></h3>
+  <label class="f">名稱</label><input class="f" id="fN" value="${esc(f.name)}" placeholder="例如：雞肉鮭魚主食罐">
+  <div class="two"><div><label class="f">品牌</label><input class="f" id="fB" value="${esc(f.brand||"")}" placeholder="例如：汪喵星球"></div>
+  <div><label class="f">種類</label><select class="f" id="fT">${Object.entries(TYPES).map(([k,v])=>`<option value="${k}" ${f.type===k?"selected":""}>${v.i} ${v.n}</option>`).join("")}</select></div></div>
+  <label class="f">主要肉類／成分（可複選，用來找過敏原）</label>
+  <div class="opt" id="fP">${PROT.map(p=>`<button data-v="${p}" class="${f.prot.includes(p)?"on":""}">${p}</button>`).join("")}</div>
+  <div class="hint">照包裝成分表勾，連少量的也勾（例如雞肉罐裡加了魚油、雞蛋），分析才準。</div>
+  <div class="two"><div><label class="f">熱量 kcal / 100g</label><input class="f" type="number" inputmode="decimal" id="fK" value="${f.kcal100}" placeholder="例如 95"></div>
+  <div><label class="f">一罐／一份 幾公克</label><input class="f" type="number" inputmode="decimal" id="fS" value="${f.serving}" placeholder="例如 80"></div></div>
+  <div class="hint" id="fKH">包裝寫 kcal/kg 的話除以 10；只寫「一罐 xx kcal」的話，用 xx ÷ 罐重 × 100。</div>
+  <label class="f">過敏狀況</label>
+  <div class="opt" id="fA">${Object.entries(AL).map(([k,v])=>`<button data-v="${k}" class="${f.allergy===k?"on":""}">${v.n}</button>`).join("")}</div>
+  <div id="fSymBox"><label class="f">出現過的症狀</label><div class="opt sym" id="fSym">${SYM.map(s=>`<button data-v="${s}" class="${f.symptoms.includes(s)?"on":""}">${s}</button>`).join("")}</div></div>
+  <label class="f">喜不喜歡吃</label>
+  <div class="opt" id="fL">${[4,3,2,1,0].map(k=>`<button data-v="${k}" class="${+f.like===k?"on":""}">${LIKE[k].e} ${LIKE[k].n}</button>`).join("")}</div>
+  <label class="f">備註（購買地點、價格、口感…）</label><textarea class="f" id="fNote">${esc(f.note||"")}</textarea>
+  ${!isNew?foodHistory(f.id):""}
+  <div class="actions">${isNew?"":`<button class="btn del" id="fDel">刪除</button>`}<button class="btn pri" id="fSave">儲存</button></div>`);
+  multi("#fP",f.prot);multi("#fSym",f.symptoms);
+  const symVis=()=>$("#fSymBox").style.display=f.allergy==="unk"||f.allergy==="none"?"none":"";symVis();
+  opt("#fA",v=>{f.allergy=v;symVis()});opt("#fL",v=>f.like=+v);
+  const kh=()=>{const k=+$("#fK").value,s=+$("#fS").value;$("#fKH").textContent=k&&s?`一罐／一份約 ${Math.round(k*s/100)} kcal`:"包裝寫 kcal/kg 的話除以 10；只寫「一罐 xx kcal」的話，用 xx ÷ 罐重 × 100。"};
+  $("#fK").oninput=kh;$("#fS").oninput=kh;kh();
+  $("#fSave").onclick=()=>{
+    f.name=$("#fN").value.trim();if(!f.name)return toast("請填名稱");
+    f.brand=$("#fB").value.trim();f.type=$("#fT").value;f.kcal100=+$("#fK").value||"";f.serving=+$("#fS").value||"";f.note=$("#fNote").value.trim();
+    if(f.allergy==="unk"||f.allergy==="none")f.symptoms=[];
+    put("foods",f);close();toast(isNew?"已新增":"已儲存");
+    if(after)after(f.id);else render();
+  };
+  if(!isNew)$("#fDel").onclick=()=>{if(confirm(`刪除「${f.name}」？吃過它的紀錄會保留但不再算熱量。`)){remove("foods",f.id);close();render()}};
+}
+function foodHistory(id){
+  const L=logs().filter(l=>l.foodId===id).sort((a,b)=>a.date<b.date?1:-1).slice(0,8);
+  if(!L.length)return"";
+  return `<label class="f">最近吃的紀錄</label><div class="card" style="margin:0">${L.map(l=>`<div class="row" style="padding:5px 0;font-size:13px"><span style="width:80px">${fmtD(l.date)}</span><span style="flex:1">${(ATE[l.ate]||ATE.all).n}</span><span class="pill ${RE[l.react||"none"].c}">${RE[l.react||"none"].n}</span></div>`).join("")}</div>`;
+}
+
+/* ---------- 紀錄（歷史） ---------- */
+let hDays=14;
+function vHistory(){
+  const L=logs(),G=goal();
+  const by={};L.forEach(l=>(by[l.date]=by[l.date]||[]).push(l));
+  const ds=Object.keys(by).sort().reverse();
+  const shown=ds.slice(0,hDays);
+  $("#view").innerHTML=`<h2>每日紀錄<span class="r muted">${ds.length} 天</span></h2>
+  ${shown.length?shown.map(d=>{const a=by[d].sort((x,y)=>(x.time||"")<(y.time||"")?-1:1),k=Math.round(a.reduce((s,l)=>s+logKcal(l),0)),re=a.some(l=>l.react==="yes");
+    return `<div class="card"><div class="row" style="margin-bottom:2px"><b style="cursor:pointer" data-day="${d}">${fmtD(d)}</b>${re?`<span class="pill st-clear">有反應</span>`:""}<span style="margin-left:auto;font-weight:700;${G&&k>G?"color:var(--bad)":""}">${k} kcal</span>${G?`<span class="muted">/ ${G}</span>`:""}</div>${a.map(logRow).join("")}</div>`}).join(""):`<div class="card empty">還沒有任何紀錄</div>`}
+  ${ds.length>hDays?`<button class="btn big" id="more">再看更早的</button>`:""}`;
+  bindLogs();
+  $("#view").querySelectorAll("[data-day]").forEach(e=>e.onclick=()=>{day=e.dataset.day;go("today")});
+  if($("#more"))$("#more").onclick=()=>{hDays+=14;vHistory()};
+}
+
+/* ---------- 過敏分析 ---------- */
+function vAnalysis(){
+  const F=foods();
+  const rows=PROT.map(p=>{const fs=F.filter(f=>(f.prot||[]).includes(p));
+    const al=fs.filter(f=>ALLERGIC(f.allergy)),ok=fs.filter(f=>f.allergy==="none"),w=fs.filter(f=>f.allergy==="watch");
+    const reLogs=logs().filter(l=>l.react==="yes"&&S.foods[l.foodId]&&(S.foods[l.foodId].prot||[]).includes(p)).length;
+    let lv,c,o;
+    if(!al.length&&!w.length&&ok.length){lv="大概安全";c="st-none";o=1}
+    else if(al.length&&!ok.length){lv="高度可疑";c="st-severe";o=5}
+    else if(al.length&&ok.length){lv=al.length>ok.length?"可疑":"有點可疑";c=al.length>ok.length?"st-clear":"st-mild";o=al.length>ok.length?4:3}
+    else if(w.length){lv="觀察中";c="st-watch";o=2}else{lv="";o=0}
+    return{p,n:fs.length,al:al.length,ok:ok.length,w:w.length,reLogs,lv,c,o}}).filter(r=>r.n);
+  rows.sort((a,b)=>b.o-a.o||b.al-a.al);
+  const safeLove=F.filter(f=>f.allergy==="none"&&(f.like||0)>=3).sort((a,b)=>(a.kcal100||1e9)-(b.kcal100||1e9));
+  const sus=rows.filter(r=>r.o>=4).map(r=>r.p);
+  $("#view").innerHTML=`
+  <div class="stat"><div><b>${F.length}</b><span>吃過的款數</span></div><div><b style="color:var(--bad)">${F.filter(f=>ALLERGIC(f.allergy)).length}</b><span>會過敏</span></div><div><b style="color:var(--ok)">${F.filter(f=>f.allergy==="none").length}</b><span>確定安全</span></div></div>
+  ${sus.length?`<div class="card" style="margin-top:10px;background:var(--sevbg);border-color:#f3c9c9"><b style="color:var(--sev)">最可疑的過敏原：${sus.map(esc).join("、")}</b><div class="hint" style="color:#7f1d1d">選新罐頭時先避開含這些成分的（包含少量添加）。</div></div>`:""}
+  <h2>成分 × 過敏對照</h2>
+  <div class="card">${rows.length?`<table class="t"><tr><th>成分</th><th style="text-align:center">過敏款</th><th style="text-align:center">安全款</th><th style="text-align:center">觀察中</th><th>判斷</th></tr>
+   ${rows.map(r=>`<tr data-p="${esc(r.p)}" style="cursor:pointer"><td><b>${esc(r.p)}</b></td><td class="n" style="${r.al?"color:var(--bad);font-weight:700":""}">${r.al}</td><td class="n" style="${r.ok?"color:var(--ok);font-weight:700":""}">${r.ok}</td><td class="n">${r.w}</td><td>${r.lv?`<span class="pill ${r.c}">${r.lv}</span>`:`<span class="muted">資料不足</span>`}</td></tr>`).join("")}</table>
+   <div class="hint" style="margin-top:8px">原理：同一個成分出現在多款「會過敏」的食物、卻沒出現在「安全」的食物裡，就越可疑。點一列看含這個成分的食物。成分要在食物裡勾好才會算進來。</div>`:`<div class="empty">在食物庫把每款食物的成分勾起來、標好過敏狀況，這裡就會整理出可疑的過敏原。</div>`}</div>
+  <h2>✅ 安全又愛吃（熱量低的排前面）</h2>
+  <div class="card">${safeLove.length?safeLove.map((f,i)=>`<div class="rank" data-food="${f.id}"><span class="no">${i+1}</span><span style="flex:1"><b>${esc(f.name)}</b> <span class="muted">${esc(f.brand||"")}</span></span><span>${LIKE[f.like].e}</span><span class="muted" style="width:86px;text-align:right">${f.kcal100?f.kcal100+" kcal/100g":"未填熱量"}</span></div>`).join(""):`<div class="empty">標成「沒有過敏」又「愛吃／超愛」的食物會出現在這裡，減重時優先選熱量低的。</div>`}</div>
+  <h2>反應最多的食物</h2>
+  <div class="card">${(()=>{const R=F.map(f=>({f,s:foodStats(f.id)})).filter(x=>x.s.yes).sort((a,b)=>b.s.yes-a.s.yes).slice(0,8);
+    return R.length?R.map(x=>`<div class="rank" data-food="${x.f.id}"><span style="flex:1"><b>${esc(x.f.name)}</b> <span class="muted">${esc((x.f.prot||[]).join("、"))}</span></span><span class="pill st-clear">${x.s.yes} / ${x.s.n} 次</span></div>`).join(""):`<div class="empty">記一餐時選「有反應」，就會統計在這裡。</div>`})()}</div>
+  <div class="infobox">📌 這裡是幫你整理線索，不是診斷。要確認食物過敏，獸醫通常會建議用單一新蛋白或水解蛋白做 8 週左右的排除飲食，再一次加回一種成分觀察。</div>`;
+  $("#view").querySelectorAll("[data-food]").forEach(e=>e.onclick=()=>foodSheet(S.foods[e.dataset.food]));
+  $("#view").querySelectorAll("[data-p]").forEach(e=>e.onclick=()=>{fQ=e.dataset.p;fFilter="all";go("foods")});
+}
+
+/* ---------- 毛毛（體重、目標、備份） ---------- */
+function vCat(){
+  const W=weights(),cw=curWeight(),t=S.cat.target,ag=autoGoal();
+  let trend="";
+  if(W.length>=2){const a=W[W.length-1],b=W.find(w=>(new Date(a.date)-new Date(w.date))/864e5<=35)||W[0];
+    const days=(new Date(a.date)-new Date(b.date))/864e5;
+    if(days>=6){const wk=(a.kg-b.kg)/b.kg*100/(days/7);
+      trend=`<div class="hint" style="margin-top:6px">最近每週 ${wk<=0?"減少":"增加"} <b>${Math.abs(r1(wk))}%</b> 體重${wk<0&&wk>=-2?"（✅ 在建議的每週 0.5–2% 之內）":wk<-2?"（⚠️ 減太快了，貓咪減太快可能傷肝，請問獸醫）":wk>0?"（還在增加，可以再減一點熱量或確認零食）":""}</div>`}}
+  $("#view").innerHTML=`
+  <div class="card"><div class="row"><span style="font-size:40px">🐱</span><div style="flex:1"><label class="f" style="margin-top:0">貓咪名字</label><input class="f" id="cName" value="${esc(S.cat.name||"")}"></div></div></div>
+  <div class="stat"><div><b>${cw!=null?cw:"–"}</b><span>目前 kg</span></div><div><b>${t||"–"}</b><span>目標 kg</span></div><div><b>${cw&&t?r1(cw-t):"–"}</b><span>還差 kg</span></div></div>
+  <h2>體重紀錄<span class="r"><button class="btn pri sm" id="wAdd">＋ 記體重</button></span></h2>
+  <div class="card">${W.length?weightChart(W,t):`<div class="empty">定期量一次體重（例如每週同一天、吃飯前），就能看減重進度。</div>`}${trend}
+   ${W.length?`<div style="margin-top:8px">${W.slice().reverse().slice(0,6).map(w=>`<div class="rank" data-w="${w.id}"><span style="flex:1">${fmtD(w.date)}</span><b>${w.kg} kg</b></div>`).join("")}</div>`:""}</div>
+  <h2>每日熱量目標</h2>
+  <div class="card">
+   <div class="two"><div><label class="f" style="margin-top:0">目標體重 kg</label><input class="f" type="number" inputmode="decimal" id="cT" value="${t||""}" placeholder="問獸醫的理想體重"></div>
+   <div><label class="f" style="margin-top:0">減重係數</label><select class="f" id="cF">${[[1,"1.0（維持）"],[.9,"0.9"],[.8,"0.8（常用減重）"],[.7,"0.7"]].map(([v,n])=>`<option value="${v}" ${+S.cat.factor===v?"selected":""}>${n}</option>`).join("")}</select></div></div>
+   <div class="hint">自動計算：70 × 目標體重<sup>0.75</sup> × 減重係數 ＝ <b>${ag?ag+" kcal/天":"先填體重"}</b></div>
+   <label class="f">自己指定每日熱量（獸醫有給數字就填這裡，留空用自動）</label>
+   <input class="f" type="number" inputmode="numeric" id="cG" value="${S.cat.goal||""}" placeholder="${ag||""}">
+   <div class="hint">現在使用：<b>${goal()?goal()+" kcal/天":"未設定"}</b>。計算只是起點，實際份量請和獸醫確認，並依體重變化調整。</div>
+  </div>
+  <h2>資料備份與同步</h2>
+  <div class="card">
+   <div class="sync" id="syncRow" style="display:none;margin-bottom:10px"><button class="btn pri" id="gBtn"><span id="gBtnT">☁️ 用 Google 帳號同步</span></button><span class="muted" id="syncNote">存到你自己的 Google 雲端硬碟，換手機也看得到</span></div>
+   <div class="row"><button class="btn" id="exp">⬇️ 匯出備份</button><button class="btn" id="imp">⬆️ 匯入備份</button><input type="file" id="impF" accept=".json,application/json" style="display:none"></div>
+   <div class="hint">資料平常存在這支手機的瀏覽器裡。食物 ${foods().length} 款・餐點紀錄 ${logs().length} 筆・體重 ${W.length} 筆</div>
+  </div>`;
+  $("#cName").onchange=e=>{S.cat.name=e.target.value.trim()||"毛毛";S.cat.updatedAt=Date.now();save();render()};
+  $("#cT").onchange=e=>{S.cat.target=+e.target.value||null;S.cat.updatedAt=Date.now();save();vCat()};
+  $("#cF").onchange=e=>{S.cat.factor=+e.target.value;S.cat.updatedAt=Date.now();save();vCat()};
+  $("#cG").onchange=e=>{S.cat.goal=+e.target.value||null;S.cat.updatedAt=Date.now();save();vCat()};
+  $("#wAdd").onclick=()=>weightSheet();
+  $("#view").querySelectorAll("[data-w]").forEach(e=>e.onclick=()=>weightSheet(S.weights[e.dataset.w]));
+  bindChart();
+  $("#exp").onclick=()=>{const b=new Blob([JSON.stringify(S,null,1)],{type:"application/json"});const a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=`${S.cat.name||"cat"}-飲食紀錄-${today()}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),2000)};
+  $("#imp").onclick=()=>$("#impF").click();
+  $("#impF").onchange=e=>{const file=e.target.files[0];if(!file)return;file.text().then(t=>{const d=JSON.parse(t);if(!d.foods)throw 0;merge(d);save();render();toast("已合併匯入的資料")}).catch(()=>toast("⚠️ 檔案格式不對"))};
+  syncUI&&syncUI();
+}
+function weightSheet(w){
+  const isNew=!w;w=w?Object.assign({},w):{id:uid(),date:today(),kg:""};
+  open(`<h3>${isNew?"記體重":"編輯體重"}<button data-x>×</button></h3>
+  <div class="two"><div><label class="f">日期</label><input class="f" type="date" id="wD" value="${w.date}"></div><div><label class="f">體重 kg</label><input class="f" type="number" step="0.01" inputmode="decimal" id="wK" value="${w.kg}" placeholder="例如 6.2"></div></div>
+  <div class="hint">抱著貓量總重再扣掉自己的體重也可以。盡量固定在同一時段（例如早餐前）量。</div>
+  <div class="actions">${isNew?"":`<button class="btn del" id="wDel">刪除</button>`}<button class="btn pri" id="wSave">儲存</button></div>`);
+  $("#wSave").onclick=()=>{const k=+$("#wK").value;if(!k)return toast("請填體重");w.kg=r1(k*10)/10;w.date=$("#wD").value||today();put("weights",w);close();render()};
+  if(!isNew)$("#wDel").onclick=()=>{remove("weights",w.id);close();render()};
+}
+function weightChart(W,t){
+  const w=340,h=170,pl=34,pr=10,pt=12,pb=24;
+  const ks=W.map(x=>x.kg).concat(t?[t]:[]);let lo=Math.min(...ks),hi=Math.max(...ks);const pd=Math.max(.2,(hi-lo)*.15);lo-=pd;hi+=pd;
+  const t0=new Date(W[0].date).getTime(),t1=new Date(W[W.length-1].date).getTime(),span=Math.max(1,t1-t0);
+  const X=d=>W.length===1?(pl+w-pr)/2:pl+(new Date(d).getTime()-t0)/span*(w-pl-pr),Y=k=>pt+(hi-k)/(hi-lo)*(h-pt-pb);
+  const ticks=[0,1,2,3].map(i=>lo+(hi-lo)*i/3);
+  const pts=W.map(x=>[X(x.date),Y(x.kg)]);
+  chartPts=W.map((x,i)=>({x:pts[i][0],y:pts[i][1],t:`${fmtD(x.date)}　${x.kg} kg`}));
+  return `<div class="chart" id="wc"><svg viewBox="0 0 ${w} ${h}" role="img" aria-label="體重變化圖">
+   ${ticks.map(v=>`<line x1="${pl}" x2="${w-pr}" y1="${Y(v)}" y2="${Y(v)}" stroke="#eee6dc"/><text x="${pl-5}" y="${Y(v)+4}" font-size="10" fill="#8b7c6f" text-anchor="end">${r1(v)}</text>`).join("")}
+   ${t?`<line x1="${pl}" x2="${w-pr}" y1="${Y(t)}" y2="${Y(t)}" stroke="#2f8f5b" stroke-width="1.5" stroke-dasharray="5 4"/><text x="${w-pr}" y="${Y(t)-4}" font-size="10" fill="#2f8f5b" text-anchor="end">目標 ${t}</text>`:""}
+   <polyline points="${pts.map(p=>p.join(",")).join(" ")}" fill="none" stroke="var(--line2)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+   ${pts.map(p=>`<circle cx="${p[0]}" cy="${p[1]}" r="4" fill="var(--line2)" stroke="#fff" stroke-width="2"/>`).join("")}
+   <text x="${pl}" y="${h-6}" font-size="10" fill="#8b7c6f">${fmtD(W[0].date).split(" ")[0]}</text>
+   <text x="${w-pr}" y="${h-6}" font-size="10" fill="#8b7c6f" text-anchor="end">${fmtD(W[W.length-1].date).split(" ")[0]}</text>
+   <line id="wcx" y1="${pt}" y2="${h-pb}" stroke="#bbb" stroke-width="1" style="display:none"/>
+   <rect x="0" y="0" width="${w}" height="${h}" fill="transparent" id="wcHit"/>
+  </svg><div class="tip" id="wcTip"></div></div>`;
+}
+let chartPts=[];
+function bindChart(){
+  const hit=$("#wcHit");if(!hit)return;const svg=hit.ownerSVGElement,tip=$("#wcTip"),cx=$("#wcx");
+  const mv=e=>{const r=svg.getBoundingClientRect(),p=e.touches?e.touches[0]:e,x=(p.clientX-r.left)/r.width*340;
+    let b=chartPts[0];chartPts.forEach(q=>{if(Math.abs(q.x-x)<Math.abs(b.x-x))b=q});
+    cx.setAttribute("x1",b.x);cx.setAttribute("x2",b.x);cx.style.display="";
+    tip.style.display="block";tip.style.left=b.x/340*r.width+"px";tip.style.top=b.y/170*r.height+"px";tip.textContent=b.t};
+  const out=()=>{tip.style.display="none";cx.style.display="none"};
+  hit.addEventListener("mousemove",mv);hit.addEventListener("touchstart",mv,{passive:true});hit.addEventListener("touchmove",mv,{passive:true});
+  hit.addEventListener("mouseleave",out);hit.addEventListener("touchend",()=>setTimeout(out,1500));
+}
+
+/* ---------- 共用：表單 ---------- */
+function open(html){$("#sheetIn").innerHTML=html;$("#sheet").classList.add("show");document.body.style.overflow="hidden";
+  $("#sheetIn").querySelectorAll("[data-x]").forEach(b=>b.onclick=close);$("#sheetIn").scrollTop=0}
+function close(){$("#sheet").classList.remove("show");document.body.style.overflow=""}
+$("#sheet").onclick=e=>{if(e.target.id==="sheet")close()};
+function opt(sel,cb){const el=$(sel);el.onclick=e=>{const b=e.target.closest("button");if(!b)return;el.querySelectorAll("button").forEach(x=>x.classList.toggle("on",x===b));cb(b.dataset.v)}}
+function multi(sel,arr){const el=$(sel);el.onclick=e=>{const b=e.target.closest("button");if(!b)return;const v=b.dataset.v,i=arr.indexOf(v);if(i<0)arr.push(v);else arr.splice(i,1);b.classList.toggle("on",i<0)}}
+
+/* ---------- 合併（匯入、雲端同步共用）：每筆取較新的 ---------- */
+function merge(d){
+  ["foods","logs","weights"].forEach(k=>{Object.values(d[k]||{}).forEach(o=>{const m=S[k][o.id];if(!m||(o.updatedAt||0)>(m.updatedAt||0))S[k][o.id]=o})});
+  if(d.cat&&(d.cat.updatedAt||0)>(S.cat.updatedAt||0))S.cat=d.cat;
+}
+
+/* ---------- Google 雲端同步：存成你自己 Google 雲端硬碟裡的隱藏 App 檔案（只在 GitHub 網址上啟用） ---------- */
+let syncUI=null;
+(function(){
+if(!/github\.io$/.test(location.hostname))return;
+const GCLIENT='267421312122-l2ggo7t35tqpf8ej5osqttt08ke30lr1.apps.googleusercontent.com';
+const GFILE='cat-food-log.json',GAPI='https://www.googleapis.com';
+let gTok=null,gTokExp=0,gFileId=null,gClient=null,gOn=false,pushT=null,noteT='存到你自己的 Google 雲端硬碟，換手機也看得到',btnT='☁️ 用 Google 帳號同步';
+const ls={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
+const note=t=>{noteT=t;const e=$("#syncNote");if(e)e.textContent=t},btn=t=>{btnT=t;const e=$("#gBtnT");if(e)e.textContent=t};
+syncUI=()=>{const r=$("#syncRow");if(!r)return;r.style.display="flex";note(noteT);btn(btnT);$("#gBtn").onclick=()=>{if(gOn&&gTok&&Date.now()<gTokExp){push();return}login()}};
+try{const t=JSON.parse(sessionStorage.getItem('cf-gtok')||'null');if(t&&t.exp>Date.now()){gTok=t.tok;gTokExp=t.exp}}catch(e){}
+onSaved=()=>{if(!gOn)return;clearTimeout(pushT);pushT=setTimeout(push,1500)};
+function libLoad(){return new Promise((ok,no)=>{if(window.google&&google.accounts&&google.accounts.oauth2)return ok();const sc=document.createElement('script');sc.src='https://accounts.google.com/gsi/client';sc.onload=()=>ok();sc.onerror=()=>no(new Error('lib'));document.head.appendChild(sc)})}
+async function gf(url,opt={}){
+  if(!gTok||Date.now()>gTokExp)throw new Error('auth');
+  const r=await fetch(url,Object.assign({},opt,{headers:Object.assign({Authorization:'Bearer '+gTok},opt.headers||{})}));
+  if(r.status===401){gTok=null;throw new Error('auth')}
+  if(!r.ok)throw new Error('http '+r.status);
+  return r;
+}
+function expired(){btn('☁️ 點這裡連回 Google');note('Google 連線已過期，點一下就會繼續同步（資料先存在這台）')}
+async function push(){
+  if(!gOn)return;
+  if(!gTok||Date.now()>gTokExp){expired();return}
+  const body=JSON.stringify(S);
+  try{
+    if(gFileId)await gf(GAPI+'/upload/drive/v3/files/'+gFileId+'?uploadType=media',{method:'PATCH',keepalive:body.length<60000,headers:{'Content-Type':'application/json'},body});
+    else{
+      const b='cf'+Date.now(),meta=JSON.stringify({name:GFILE,parents:['appDataFolder']});
+      const mp='--'+b+'\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n'+meta+'\r\n--'+b+'\r\nContent-Type: application/json\r\n\r\n'+body+'\r\n--'+b+'--';
+      const r=await gf(GAPI+'/upload/drive/v3/files?uploadType=multipart&fields=id',{method:'POST',headers:{'Content-Type':'multipart/related; boundary='+b},body:mp});
+      gFileId=(await r.json()).id;
+    }
+    btn('☁️ 已連上 Google 同步');note('已同步到 Google 雲端硬碟 '+new Date().toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'}));
+  }catch(e){if(e.message==='auth')expired();else note('⚠️ 雲端同步失敗，資料先存在這台')}
+}
+document.addEventListener('visibilitychange',()=>{if(document.hidden&&pushT){clearTimeout(pushT);pushT=null;push()}});
+async function afterLogin(){
+  note('正在讀取 Google 雲端的資料…');
+  try{
+    const q=encodeURIComponent("name='"+GFILE+"'");
+    const j=await (await gf(GAPI+'/drive/v3/files?spaces=appDataFolder&fields=files(id)&q='+q)).json();
+    gFileId=j.files&&j.files[0]?j.files[0].id:null;
+    let rem=null;if(gFileId)rem=await (await gf(GAPI+'/drive/v3/files/'+gFileId+'?alt=media')).json().catch(()=>null);
+    gOn=true;ls.set('cf-g','1');
+    if(rem&&rem.foods){merge(rem);try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}render()}
+    await push();
+  }catch(e){note(e.message==='auth'?'Google 連線已過期，再點一次':'⚠️ 讀取 Google 雲端失敗')}
+}
+function login(){
+  libLoad().then(()=>{
+    if(!gClient)gClient=google.accounts.oauth2.initTokenClient({client_id:GCLIENT,scope:'https://www.googleapis.com/auth/drive.appdata',
+      callback:t=>{if(t&&t.access_token){gTok=t.access_token;gTokExp=Date.now()+((+t.expires_in||3600)-120)*1000;try{sessionStorage.setItem('cf-gtok',JSON.stringify({tok:gTok,exp:gTokExp}))}catch(e){}afterLogin()}else note('⚠️ Google 登入沒有完成')},
+      error_callback:()=>note('⚠️ Google 登入被取消或被擋（請允許彈出視窗）')});
+    gClient.requestAccessToken({prompt:ls.get('cf-g')==='1'?'':'consent'});
+  },()=>note('⚠️ 無法載入 Google 登入，請確認網路'));
+}
+if(gTok&&ls.get('cf-g')==='1')afterLogin();
+else if(ls.get('cf-g')==='1')btn('☁️ 點這裡連回 Google 同步');
+})();
+
+render();
+</script>
+</body>
+</html>
