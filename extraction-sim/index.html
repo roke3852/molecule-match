@@ -1,7 +1,9 @@
 <!DOCTYPE html>
-<html lang="zh-Hant">
+<html lang="zh-Hant" data-theme="dark">
 <head>
 <meta charset="utf-8">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#141715">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>手沖咖啡實驗室</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -179,6 +181,9 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
 .fine{font-size:12px;color:var(--muted);max-width:80ch}
 @media (max-width:720px){.charts{grid-template-columns:1fr}.stage{gap:10px}.stat b{font-size:15px}.panel{padding:12px}}
 @media (max-width:420px){.stats{grid-template-columns:1fr 1fr}.stats .stat:last-child{grid-column:span 2}}
+.cloudbar{max-width:1040px;margin:-6px auto 12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.cloudbar button{padding:6px 12px;font-size:13px;font-weight:700;border-radius:999px;border:1px solid var(--line);background:var(--panel);color:var(--ink);cursor:pointer}
+.cloudbar #syncNote{font-size:12px;color:var(--muted)}
 </style>
 <style>
 #gameView .wrap{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
@@ -479,6 +484,7 @@ button,input,select,label,.seg,.stepper,.card{touch-action:manipulation}
 .tr-row.good .v{color:#2e8b57}.tr-row.bad .v{color:#c0503a}
 .tr-sum{margin:6px 0 0;font-size:13px;line-height:1.7}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .tr-key .good i,:root:not([data-theme="light"]) .tr-row.good .tr-bar i{background:#5cc28a}:root:not([data-theme="light"]) .tr-key .bad i,:root:not([data-theme="light"]) .tr-row.bad .tr-bar i{background:#e47a68}:root:not([data-theme="light"]) .tr-row.good .v{color:#5cc28a}:root:not([data-theme="light"]) .tr-row.bad .v{color:#e47a68}}
+:root[data-theme="dark"] .tr-key .good i,:root[data-theme="dark"] .tr-row.good .tr-bar i{background:#5cc28a}:root[data-theme="dark"] .tr-key .bad i,:root[data-theme="dark"] .tr-row.bad .tr-bar i{background:#e47a68}:root[data-theme="dark"] .tr-row.good .v{color:#5cc28a}:root[data-theme="dark"] .tr-row.bad .v{color:#e47a68}
 
 </style>
 </head>
@@ -488,6 +494,7 @@ button,input,select,label,.seg,.stepper,.card{touch-action:manipulation}
   <div class="mgrp mg-play"><span class="mlab">練習・遊戲</span><div class="seg" role="group" aria-label="練習與遊戲"><button id="mSim" aria-pressed="true">模擬器</button><button id="mGame" aria-pressed="false">闖關遊戲</button></div></div>
   <div class="mgrp mg-learn"><span class="mlab">教學</span><div class="seg" role="group" aria-label="教學"><button id="mLearn" aria-pressed="false">4:6 沖法</button><button id="mMicro" aria-pressed="false">顯微鏡</button><button id="mBed" aria-pressed="false">粉層</button></div></div>
 </div></nav>
+<div class="cloudbar"><button id="gBtn" type="button"><span id="gBtnT">☁️ 用 Google 帳號同步紀錄</span></button><span id="syncNote">沖煮紀錄和闖關進度存到你的 Google 雲端，換手機也接得上</span></div>
 <section id="simView">
 <div class="wrap">
   <div>
@@ -2804,7 +2811,7 @@ function rgba(hex,a){if(!hex)return 'rgba(0,0,0,'+a+')';if(hex.startsWith('rgb')
 function draw(){
   if(!S)return;if(!ctx||!W){if(!size())return;}
   const P=micPhase(cfg,S.t),cx=W/2,cy=H/2,X=x=>cx+x*cs,Y=y=>cy+y*cs;
-  const dark=matchMedia('(prefers-color-scheme: dark)').matches;
+  const dark=document.documentElement.dataset.theme==='dark'||(document.documentElement.dataset.theme!=='light'&&matchMedia('(prefers-color-scheme: dark)').matches);
   ctx.clearRect(0,0,W,H);
   const all=micAll(S);
   // liquid
@@ -3243,6 +3250,102 @@ window.appBack=goBack;
     if(lock==='h'&&dx>90&&Math.abs(dy)<dx*.6&&Date.now()-st<900)goBack();},{passive:true});
   addEventListener('touchcancel',()=>{on=false;tip.style.opacity=0;},{passive:true});
 })();
+})();
+</script>
+<script>
+/* ☁️ Google 雲端同步：紀錄存到自己 Google 雲端硬碟的 App 專用資料夾（別人看不到），換手機也能接著用 */
+(function(){
+const $=id=>document.getElementById(id);
+const GCLIENT='267421312122-l2ggo7t35tqpf8ej5osqttt08ke30lr1.apps.googleusercontent.com';
+const GFILE='brewlab.json',GAPI='https://www.googleapis.com';
+const SYNC_KEYS=['brewsim-runs-v1','brewQuest.v1','brewsim-params-v1','brewLab.scoreStyle'];
+const STAMP='brewLab.savedAt',GFLAG='brewLab.g',TOKK='brewLab.gtok';
+let gTok=null,gTokExp=0,gFileId=null,gClient=null,gOn=false,pushT=null;
+const raw=Storage.prototype.setItem;
+const ls={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{raw.call(localStorage,k,v)}catch(e){}}};
+const note=t=>{const el=$('syncNote');if(el)el.textContent=t};
+const btn=t=>{const el=$('gBtnT');if(el)el.textContent=t};
+try{const t=JSON.parse(sessionStorage.getItem(TOKK)||'null');if(t&&t.exp>Date.now()){gTok=t.tok;gTokExp=t.exp}}catch(e){}
+/* 每次紀錄真的有變動就蓋時間戳，之後才分得出哪一份比較新 */
+Storage.prototype.setItem=function(k,v){
+  if(this===localStorage&&SYNC_KEYS.includes(k)&&ls.get(k)!==String(v)){raw.call(this,k,v);raw.call(this,STAMP,String(Date.now()));schedule();return}
+  return raw.call(this,k,v);
+};
+function parse(v){if(v==null)return undefined;try{return JSON.parse(v)}catch(e){return v}}
+function snapshot(){const o={savedAt:+ls.get(STAMP)||0};SYNC_KEYS.forEach(k=>{const v=parse(ls.get(k));if(v!==undefined)o[k]=v});return o}
+function schedule(){if(!gOn)return;clearTimeout(pushT);pushT=setTimeout(push,1500)}
+function libLoad(){return new Promise((ok,no)=>{if(window.google&&google.accounts&&google.accounts.oauth2)return ok();const sc=document.createElement('script');sc.src='https://accounts.google.com/gsi/client';sc.onload=()=>ok();sc.onerror=()=>no(new Error('lib'));document.head.appendChild(sc)})}
+async function gf(url,opt={}){
+  if(!gTok||Date.now()>gTokExp)throw new Error('auth');
+  const r=await fetch(url,Object.assign({},opt,{headers:Object.assign({Authorization:'Bearer '+gTok},opt.headers||{})}));
+  if(r.status===401){gTok=null;throw new Error('auth')}
+  if(!r.ok)throw new Error('http '+r.status);
+  return r;
+}
+function expired(){btn('☁️ 點這裡連回 Google');note('Google 連線已過期，點一下就會繼續同步（紀錄先存在這台）')}
+async function push(){
+  if(!gOn)return;
+  if(!gTok||Date.now()>gTokExp){expired();return}
+  const body=JSON.stringify(snapshot()),keep=body.length<60000;
+  try{
+    if(gFileId)await gf(GAPI+'/upload/drive/v3/files/'+gFileId+'?uploadType=media',{method:'PATCH',keepalive:keep,headers:{'Content-Type':'application/json'},body});
+    else{
+      const b='bl'+Date.now(),meta=JSON.stringify({name:GFILE,parents:['appDataFolder']});
+      const mp='--'+b+'\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n'+meta+'\r\n--'+b+'\r\nContent-Type: application/json\r\n\r\n'+body+'\r\n--'+b+'--';
+      const r=await gf(GAPI+'/upload/drive/v3/files?uploadType=multipart&fields=id',{method:'POST',headers:{'Content-Type':'multipart/related; boundary='+b},body:mp});
+      gFileId=(await r.json()).id;
+    }
+    btn('☁️ 已連上 Google 同步');note('已同步到 Google 雲端硬碟 '+new Date().toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'}));
+  }catch(e){if(e.message==='auth')expired();else note('⚠️ 雲端同步失敗，紀錄先存在這台')}
+}
+document.addEventListener('visibilitychange',()=>{if(document.hidden&&pushT){clearTimeout(pushT);pushT=null;push()}});
+/* 合併：沖煮紀錄兩邊都留、闖關取最高分、比賽取最好名次，其他設定用較新的那份 */
+function merge(loc,rem){
+  const remNewer=(+rem.savedAt||0)>(+loc.savedAt||0),N=remNewer?rem:loc,O=remNewer?loc:rem,out={};
+  SYNC_KEYS.forEach(k=>{const v=k in N?N[k]:O[k];if(v!==undefined)out[k]=JSON.parse(JSON.stringify(v))});
+  const R='brewsim-runs-v1',ra=Array.isArray(loc[R])?loc[R]:[],rb=Array.isArray(rem[R])?rem[R]:[];
+  if(ra.length||rb.length){const seen=new Set(),all=[];
+    [...rb,...ra].forEach(r=>{const id=(r.at||0)+'|'+(r.p&&r.p.pattern||'')+'|'+JSON.stringify(r.res||'').length;if(!seen.has(id)){seen.add(id);all.push(r)}});
+    all.sort((a,b)=>(a.at||0)-(b.at||0));out[R]=all.slice(-200);}
+  const Q='brewQuest.v1',qn=N[Q],qo=O[Q];
+  if(qn&&qo&&typeof qn==='object'&&typeof qo==='object'){
+    const q=JSON.parse(JSON.stringify(Object.assign({},qo,qn)));
+    q.best=Object.assign({},qo.best||{},qn.best||{});for(const k in qo.best||{})if(qn.best&&k in qn.best)q.best[k]=Math.max(+qo.best[k]||0,+qn.best[k]||0);
+    q.comp=Object.assign({},qo.comp||{},qn.comp||{});for(const k in qo.comp||{}){const a=qo.comp[k],b=(qn.comp||{})[k];if(a&&b)q.comp[k]=(a.rank<b.rank||(a.rank===b.rank&&a.s>b.s))?a:b}
+    q.hist=Object.assign({},qo.hist||{},qn.hist||{});
+    out[Q]=q;
+  }
+  out.savedAt=Math.max(+loc.savedAt||0,+rem.savedAt||0);
+  return out;
+}
+async function afterLogin(){
+  note('正在讀取 Google 雲端的紀錄…');
+  try{
+    const q=encodeURIComponent("name='"+GFILE+"'");
+    const j=await (await gf(GAPI+'/drive/v3/files?spaces=appDataFolder&fields=files(id)&q='+q)).json();
+    gFileId=j.files&&j.files[0]?j.files[0].id:null;
+    let rem=null;if(gFileId)rem=await (await gf(GAPI+'/drive/v3/files/'+gFileId+'?alt=media')).json().catch(()=>null);
+    gOn=true;ls.set(GFLAG,'1');
+    if(rem&&typeof rem==='object'){
+      const m=merge(snapshot(),rem);let changed=false;
+      SYNC_KEYS.forEach(k=>{if(k in m){const v=typeof m[k]==='string'?m[k]:JSON.stringify(m[k]);if(ls.get(k)!==v){ls.set(k,v);changed=true}}});
+      ls.set(STAMP,String(m.savedAt));
+      if(changed){await push();try{sessionStorage.setItem(TOKK,JSON.stringify({tok:gTok,exp:gTokExp}))}catch(e){}location.reload();return}
+    }
+    await push();
+  }catch(e){note(e.message==='auth'?'Google 連線已過期，再點一次':'⚠️ 讀取 Google 雲端失敗')}
+}
+function login(){
+  libLoad().then(()=>{
+    if(!gClient)gClient=google.accounts.oauth2.initTokenClient({client_id:GCLIENT,scope:'https://www.googleapis.com/auth/drive.appdata',
+      callback:t=>{if(t&&t.access_token){gTok=t.access_token;gTokExp=Date.now()+((+t.expires_in||3600)-120)*1000;try{sessionStorage.setItem(TOKK,JSON.stringify({tok:gTok,exp:gTokExp}))}catch(e){}afterLogin()}else note('⚠️ Google 登入沒有完成')},
+      error_callback:()=>note('⚠️ Google 登入被取消或被擋（請允許彈出視窗）')});
+    gClient.requestAccessToken({prompt:ls.get(GFLAG)==='1'?'':'consent'});
+  },()=>note('⚠️ 無法載入 Google 登入，請確認網路'));
+}
+$('gBtn').onclick=()=>{if(gOn&&gTok&&Date.now()<gTokExp){push();return}login()};
+if(gTok&&ls.get(GFLAG)==='1')afterLogin();
+else if(ls.get(GFLAG)==='1')btn('☁️ 點這裡連回 Google 同步');
 })();
 </script>
 </body>
