@@ -51,7 +51,18 @@ header p{margin:0;color:var(--muted);font-size:13px}
 .result .rank{font-size:54px;font-weight:800;color:var(--accent);line-height:1}
 .result .score{font-size:20px;font-weight:700;margin:4px 0}
 .result p{margin:4px 0;font-size:14px;color:var(--muted)}
-.gaming .stage svg{max-height:48vh;width:auto;max-width:100%;margin:0 auto}
+.pills{display:none}
+.gaming .pills{display:inline}
+.gaming .lbl:not(.tray),.gaming [stroke="#c9b79f"],.gaming [stroke="#e8a3a3"]{display:none}
+.gaming #gChips{display:none}
+.pill{cursor:pointer}
+.pill rect{fill:#fff;stroke:#c9b79f;stroke-width:1.2}
+.pill text{font-size:11.5px;font-weight:700;fill:#2b211b;pointer-events:none}
+.pill line{stroke:#c9b79f;stroke-width:1;stroke-dasharray:3 2}
+.pill.idle{opacity:.55}
+.pill.done rect{fill:#e6f4ea;stroke:#9fd3ad}.pill.done text{fill:#166534}
+.pill.bad rect{fill:#fdecec;stroke:#dc2626}.pill.bad text{fill:#b91c1c}
+.pill.bad{animation:shake .4s}
 #gslot{margin-bottom:10px}
 #gslot .gchips{margin-top:8px}
 #gslot .nav{margin-top:10px}
@@ -177,7 +188,7 @@ const DEFS = `
 </defs>`;
 
 const TRAY = `<line x1="236" y1="28" x2="236" y2="590" stroke="#d9c9b4" stroke-dasharray="5 5"/>
-<text x="318" y="20" text-anchor="middle" class="lbl" style="font-size:11px">已拆下的零件</text>`;
+<text x="318" y="20" text-anchor="middle" class="lbl tray" style="font-size:11px">已拆下的零件</text>`;
 
 function zig(w,h,n,cone){let p=[];for(let i=0;i<=n;i++){const y=-h/2+h*i/n;const f=cone==='up'?(1-i/n):i/n;const ww=cone?(w*0.45+w*0.55*f):w;p.push(((i%2?1:-1)*ww/2).toFixed(1)+','+y.toFixed(1));}return `<polyline points="${p.join(' ')}" fill="none" stroke="#3f3f3f" stroke-width="1.7" stroke-linejoin="round"/>`}
 function threads(y1,y2,w){let s='';for(let y=y1;y<=y2;y+=4)s+=`<line x1="${-w}" y1="${y}" x2="${w}" y2="${y+2}" stroke="#555" stroke-width=".8"/>`;return s}
@@ -297,10 +308,19 @@ function build(){
   d.order.forEach(id=>{const p=d.parts[id];
     html+=`<g class="part" id="p-${id}" data-id="${id}" style="transform:translate(${p.home[0]}px,${p.home[1]}px)"><g>${p.svg}</g></g>`;});
   html+=`<g id="rot" style="opacity:0"><g class="spin"><path d="M13 0 A13 13 0 1 1 0 -13" fill="none" stroke="#c2410c" stroke-width="3" stroke-linecap="round"/><path d="M-5 -18 L3 -13 L-5 -8 Z" fill="#c2410c"/></g><text y="28" text-anchor="middle" font-size="11" font-weight="700" fill="#c2410c"></text></g>`;
+  html+=`<g class="pills" id="pills"></g>`;
   svg.innerHTML=html;
+  buildPills();
   svg.querySelectorAll('.part').forEach(el=>el.addEventListener('click',e=>{e.stopPropagation();if(mode==='game')gameTap(el.dataset.id);else toast(G[g].parts[el.dataset.id].label)}));
 }
 
+function short(l){return l.replace(/（.*?）/g,'')}
+function buildPills(){const d=G[g];
+  const arr=Object.entries(d.parts).map(([id,p])=>{const bb=$('p-'+id).firstElementChild.getBBox();return {id,p,ty:p.home[1],tx:p.home[0]+bb.x}}).sort((a,b)=>a.ty-b.ty);
+  let y=-1e9;arr.forEach(a=>{a.y=Math.max(a.ty,y+32);y=a.y});
+  const over=arr.length?arr[arr.length-1].y-575:0;if(over>0){arr.forEach(a=>a.y-=over);for(let i=arr.length-2;i>=0;i--)arr[i].y=Math.min(arr[i].y,arr[i+1].y-32);}
+  $('pills').innerHTML=arr.map(a=>`<g class="pill idle" data-id="${a.id}"><line x1="72" y1="${a.y}" x2="${a.tx}" y2="${a.ty}"/><rect x="2" y="${a.y-13}" width="70" height="26" rx="13"/><text x="37" y="${a.y+4}" text-anchor="middle">${short(d.parts[a.id].label)}</text></g>`).join('');
+  $('pills').querySelectorAll('.pill').forEach(el=>el.addEventListener('click',e=>{e.stopPropagation();if(mode==='game')gameTap(el.dataset.id)}));}
 function steps(){return G[g][mode]}
 function removedSet(){
   const d=G[g], s=new Set();
@@ -389,20 +409,22 @@ function gameReset(){gameStop();const d=G[g];const ids=Object.keys(d.parts);
   $('gTime').textContent='0.0';$('gLimit').textContent=` / ${GS.limit}`;$('gErr').textContent='0';
   $('gProg').textContent=`0/${ids.length}`;$('gBar').style.width='100%';$('gBar').style.background='#16a34a';
   const b=getBest();
-  $('gMsg').innerHTML=`<b>${d.name}・${gk==='dis'?'拆解':'組裝'}挑戰</b><br>${gk==='dis'?'按下開始後，照正確的拆解順序，點圖上的零件或下面的按鈕把它拆下來。':'零件都已經拆在右邊。按下開始後，照正確的組裝順序點零件把它裝回去。'}${b?`<br>🏆 最佳紀錄：${b.rank} ${b.score} 分（${b.time} 秒、錯 ${b.errors} 次）`:''}`;
+  $('gMsg').innerHTML=`<b>${d.name}・${gk==='dis'?'拆解':'組裝'}挑戰</b><br>${gk==='dis'?'按下開始後，照正確的拆解順序，點圖左邊的零件名稱把它拆下來。':'零件都已經拆在右邊。按下開始後，照正確的組裝順序，點圖左邊的零件名稱把它裝回去。'}${b?`<br>🏆 最佳紀錄：${b.rank} ${b.score} 分（${b.time} 秒、錯 ${b.errors} 次）`:''}`;
   $('gResult').innerHTML='';$('gStart').textContent='開始挑戰';$('gStart').hidden=false;
   renderGChips();qhud();}
 function renderGChips(){const d=G[g];
+  document.querySelectorAll('#pills .pill').forEach(el=>{const id=el.dataset.id;el.classList.toggle('done',GS.done.has(id));el.classList.toggle('idle',!GS.running&&!GS.done.has(id));
+    el.querySelector('text').textContent=(GS.done.has(id)?'✓':'')+short(d.parts[id].label);});
   $('gChips').innerHTML=GS.order.map(id=>`<button data-id="${id}" class="${GS.done.has(id)?'done':''}" ${!GS.running||GS.done.has(id)?'disabled':''}>${d.parts[id].label}</button>`).join('');}
 function gameStart(){gameReset();GS.running=true;GS.t0=performance.now();$('gStart').hidden=true;renderGChips();
-  $('gMsg').innerHTML=gk==='dis'?'先拆哪個？點吧！':'先裝哪個？點吧！';
+  $('gMsg').innerHTML=gk==='dis'?'點圖左邊的零件名稱：先拆哪個？':'點圖左邊的零件名稱：先裝哪個？';
   gTimer=setInterval(()=>{const t=(performance.now()-GS.t0)/1000;$('gTime').textContent=t.toFixed(1);
     const r=Math.max(0,1-t/GS.limit);$('gBar').style.width=(r*100)+'%';$('gBar').style.background=r>.5?'#16a34a':r>.2?'#f59e0b':'#dc2626';
     qhud();if(t>=GS.limit)gameEnd(false);},100);qhud();}
-function flashBad(id){const el=$('p-'+id);el.classList.add('bad');const c=document.querySelector(`#gChips button[data-id="${id}"]`);if(c)c.classList.add('bad');
-  setTimeout(()=>{el.classList.remove('bad');if(c)c.classList.remove('bad')},450);}
+function flashBad(id){const el=$('p-'+id);el.classList.add('bad');const c=document.querySelector(`#gChips button[data-id="${id}"]`);if(c)c.classList.add('bad');const pl=document.querySelector(`#pills .pill[data-id="${id}"]`);if(pl)pl.classList.add('bad');
+  setTimeout(()=>{el.classList.remove('bad');if(c)c.classList.remove('bad');if(pl)pl.classList.remove('bad')},450);}
 function gameTap(id){if(!GS||!GS.running||GS.done.has(id))return;const grp=GS.groups[GS.gi];
-  if(grp.includes(id)){GS.done.add(id);placeAll(GS.done);$('p-'+id).classList.add('active');setTimeout(()=>$('p-'+id).classList.remove('active'),600);
+  if(grp.includes(id)){GS.done.add(id);placeAll(GS.done);$('p-'+id).classList.add('active');setTimeout(()=>{const x=$('p-'+id);if(x)x.classList.remove('active')},600);
     if(grp.every(x=>GS.done.has(x)))GS.gi++;
     $('gProg').textContent=`${GS.done.size}/${Object.keys(G[g].parts).length}`;renderGChips();
     $('gMsg').textContent=`✅ ${G[g].parts[id].label}`;
