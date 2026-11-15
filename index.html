@@ -30,6 +30,7 @@ h2{font-size:15px;color:var(--mute);margin:18px 2px 8px;font-weight:600}
 .app a.cover{position:absolute;inset:0;border-radius:16px;z-index:1}
 .ic{width:56px;height:56px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:30px;flex:none;position:relative}
 .dot{position:absolute;top:-4px;right:-4px;background:var(--new);color:#fff;font-size:10px;font-weight:700;border-radius:8px;padding:1px 5px;border:2px solid var(--card)}
+.bd{flex:1;min-width:0}
 .nm{font-size:17px;font-weight:700}
 .ds{font-size:13px;color:var(--mute);margin-top:3px;line-height:1.4}
 .meta{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;align-items:center}
@@ -39,13 +40,28 @@ h2{font-size:15px;color:var(--mute);margin:18px 2px 8px;font-weight:600}
 .note{font-size:12px;color:#7a4b12;background:#fff4e5;border-radius:8px;padding:4px 8px;margin-top:6px;line-height:1.4}
 .star{position:absolute;top:8px;right:8px;z-index:2;width:34px;height:34px;border:0;background:none;font-size:22px;line-height:1;cursor:pointer;color:#cbbfb2;border-radius:10px}
 .star.on{color:var(--star)}
-.mv{position:absolute;right:8px;bottom:8px;z-index:2;display:none;flex-direction:column;gap:4px}
+.mv{display:none;width:100%;gap:6px}
 .editing .mv{display:flex}
 .editing .star{display:none}
 .editing a.cover{display:none}
-.mv button{width:32px;height:28px;border:1px solid var(--line);background:#faf6f0;border-radius:8px;font-size:13px;cursor:pointer}
+.editing .app{flex-wrap:wrap;padding-right:14px}
+.mv button{flex:1;height:38px;border:1px solid var(--line);background:#faf6f0;color:var(--ink);border-radius:10px;font:inherit;font-size:13px;cursor:pointer}
+.mv button:active{background:#efe6da}
 .mv button:disabled{opacity:.3}
-.editing .app{padding-right:52px}
+.head{display:flex;align-items:flex-start;gap:10px}
+.head>div{flex:1;min-width:0}
+.refresh{flex:none;margin-top:6px;font:inherit;font-size:14px;font-weight:600;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:20px;padding:7px 13px;cursor:pointer;display:flex;align-items:center;gap:5px}
+.refresh .r{display:inline-block}
+.refresh.busy .r{animation:spin .8s linear infinite}
+.refresh:disabled{opacity:.7}
+@keyframes spin{to{transform:rotate(360deg)}}
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--accent);color:#fff;font-size:14px;padding:9px 16px;border-radius:20px;box-shadow:0 4px 14px rgba(0,0,0,.2);z-index:9;max-width:90vw;text-align:center}
+.cats{display:flex;gap:6px;overflow-x:auto;margin:0 -16px 12px;padding:0 16px 2px;scrollbar-width:none}
+.cats::-webkit-scrollbar{display:none}
+.cats button{flex:none;font:inherit;font-size:14px;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:18px;padding:6px 12px;cursor:pointer;white-space:nowrap}
+.cats button.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+.cats .cnt{font-size:12px;opacity:.65;margin-left:3px}
+#list h2:first-child{margin-top:4px}
 .empty{color:var(--mute);font-size:14px;padding:28px 12px;text-align:center;background:var(--card);border:1px dashed var(--line);border-radius:16px;line-height:1.6}
 .tabs{display:flex;gap:4px;background:#ebe2d6;padding:4px;border-radius:12px;margin-bottom:12px}
 .tabs button{flex:1;font:inherit;font-size:15px;font-weight:600;border:0;background:none;color:var(--mute);padding:9px 6px;border-radius:9px;cursor:pointer}
@@ -56,13 +72,20 @@ footer{margin-top:28px;font-size:12px;color:var(--mute);text-align:center;line-h
 </head>
 <body>
 <main>
-  <h1>Roke 的 App</h1>
-  <div class="sub">點一下就能打開・點 ☆ 加入我的最愛分頁</div>
+  <div class="head">
+    <div>
+      <h1>Roke 的 App</h1>
+      <div class="sub">點一下就能打開・點 ☆ 加入我的最愛分頁</div>
+    </div>
+    <button class="refresh" id="refreshBtn" aria-label="重新整理"><span class="r">↻</span>更新</button>
+  </div>
 
   <div class="tabs" id="tabs">
     <button data-tab="all">全部 App<span class="cnt" id="cntAll"></span></button>
     <button data-tab="fav">⭐ 我的最愛<span class="cnt" id="cntFav"></span></button>
   </div>
+
+  <div class="cats" id="cats"></div>
 
   <div class="bar">
     <label for="sort">排序</label>
@@ -74,33 +97,42 @@ footer{margin-top:28px;font-size:12px;color:var(--mute);text-align:center;line-h
       <option value="name">名稱</option>
       <option value="custom">自訂順序</option>
     </select>
-    <button class="btn" id="editBtn" hidden>調整順序</button>
+    <button class="btn" id="editBtn">調整順序</button>
   </div>
 
   <div id="notice"></div>
   <div id="list"></div>
 
-  <footer>新增或更新 App：在這頁的 APPS 清單加一行或改 ver / updated（日期＋時間）/ note。<br>版本號一變，首頁就會在那個 App 上顯示「新版」。</footer>
+  <footer>按右上角「↻ 更新」會重新抓這頁和所有 App 的最新版。<br>新增或更新 App：在這頁的 APPS 清單加一行或改 ver / updated（日期＋時間）/ note。<br>版本號一變，首頁就會在那個 App 上顯示「新版」。<br><span id="hubVer"></span></footer>
 </main>
 <script>
-/* 新增 App：加一行 { path, name, desc, icon, color, tag, ver, updated, note }
+const HUB_VER = "2.0";
+/* 分類：App 的 cat 填這裡的 id；順序就是分類標籤與分組的順序 */
+const CATS = [
+  { id:"coffee", name:"咖啡", icon:"☕" },
+  { id:"learn",  name:"學習", icon:"🧪" },
+  { id:"invest", name:"投資", icon:"📈" },
+  { id:"travel", name:"旅行", icon:"✈️" },
+  { id:"game",   name:"遊戲", icon:"🎮" }
+];
+/* 新增 App：加一行 { path, name, desc, icon, color, cat, tag, ver, updated, note }
    更新 App：把 ver 往上加、updated 改成更新的日期時間（"YYYY-MM-DD HH:MM"，台灣時間）、note 寫這次改了什麼 */
 const APPS = [
-  { path:"molecule/",    name:"分子消消樂",          desc:"分子模型配對遊戲，認識官能基與分子結構", icon:"🧪", color:"#dbeafe", tag:"遊戲",
+  { path:"molecule/",    name:"分子消消樂",          desc:"分子模型配對遊戲，認識官能基與分子結構", icon:"🧪", color:"#dbeafe", cat:"learn", tag:"遊戲",
     ver:"1.1", updated:"2026-11-14 10:47", note:"卡片改用示性式，看得出官能基；配對成功另顯示分子式" },
-  { path:"coffee-expo/", name:"2026 台灣咖啡展 逛展地圖", desc:"南港1館 4F 互動平面圖、名店標示、已逛紀錄與筆記", icon:"☕", color:"#efe0c8", tag:"11/13–11/16",
+  { path:"coffee-expo/", name:"2026 台灣咖啡展 逛展地圖", desc:"南港1館 4F 互動平面圖、名店標示、已逛紀錄與筆記", icon:"☕", color:"#efe0c8", cat:"coffee", tag:"11/13–11/16",
     ver:"1.6", updated:"2026-11-14 10:57", note:"新增器材／義式烘豆／生豆產區／水與吧台 4 個主題篩選，補 30 多家廠商介紹與 6 個新攤位" },
-  { path:"fukuoka-trip/", name:"福岡 5大2小 8天7夜", desc:"每日行程時間軸、地圖導航、待辦打包清單、計程車與買票日文卡", icon:"🍁", color:"#fbe0d6", tag:"11/21–11/28",
+  { path:"fukuoka-trip/", name:"福岡 5大2小 8天7夜", desc:"每日行程時間軸、地圖導航、待辦打包清單、計程車與買票日文卡", icon:"🍁", color:"#fbe0d6", cat:"travel", tag:"11/21–11/28",
     ver:"1.6", updated:"2026-11-14 10:38", note:"地圖加入大區塊，點一下放大分解成小區塊再看景點" },
-  { path:"spelling/",           name:"拼字消消樂",     desc:"英文拼字配對遊戲，點單字聽發音與字母", icon:"🔤", color:"#fef3c7", tag:"遊戲", ver:"1.0", updated:"2026-11-14 10:17" },
-  { path:"molecule-reactions/", name:"分子反應圖鑑",   desc:"用分子模型看懂光合作用、水果香氣、咖啡風味等化學反應", icon:"⚗️", color:"#dcfce7", tag:"學習", ver:"1.0", updated:"2026-11-14 10:17" },
-  { path:"extraction-sim/",     name:"手沖咖啡實驗室", desc:"萃取模擬器＋客人闖關＋咖啡比賽＋4:6 教學", icon:"🫖", color:"#ede0d4", tag:"咖啡", ver:"4.1", updated:"2026-11-15 11:40" },
-  { path:"brew-log/",           name:"沖煮紀錄 × 風味地圖", desc:"手沖紀錄：控制圖、注水曲線、高溫/中常溫風味雷達、參數對風味", icon:"📊", color:"#d6ece6", tag:"咖啡", ver:"1.4", updated:"2026-11-14 23:15", note:"新增「實驗」分頁：每杯自動比出改了什麼參數、結果變了什麼，預期 vs 結果判定，標記有干擾的杯" },
-  { path:"cupping/",            name:"杯測教室",       desc:"咖啡杯測流程與風味評分練習", icon:"☕", color:"#f5e6d3", tag:"咖啡", ver:"1.0", updated:"2026-11-14 10:17" },
-  { path:"smell-training/",     name:"嗅覺練習日誌",   desc:"香氣材料嗅覺練習與紀錄", icon:"👃", color:"#fce7f3", tag:"練習", ver:"1.0", updated:"2026-11-14 10:17" },
-  { path:"yoshi-combos/",       name:"耀西連招手冊",   desc:"任天堂明星大亂鬥 耀西連招整理", icon:"🦖", color:"#d9f99d", tag:"遊戲", ver:"1.0", updated:"2026-11-14 10:17" },
-  { path:"mtx-sim/",            name:"小台指期模擬器", desc:"模擬下單、保證金、風險指標，可手動控制指數", icon:"📈", color:"#e0e7ff", tag:"投資", ver:"1.0", updated:"2026-11-14 10:17" },
-  { path:"eink-notes/",         name:"元太法說會筆記", desc:"元太 分季法說筆記、指引回測、股價與產線時程", icon:"📝", color:"#f1f5f9", tag:"投資", ver:"2.0", updated:"2026-11-14 16:10" }
+  { path:"spelling/",           name:"拼字消消樂",     desc:"英文拼字配對遊戲，點單字聽發音與字母", icon:"🔤", color:"#fef3c7", cat:"learn", tag:"遊戲", ver:"1.0", updated:"2026-11-14 10:17" },
+  { path:"molecule-reactions/", name:"分子反應圖鑑",   desc:"用分子模型看懂光合作用、水果香氣、咖啡風味等化學反應", icon:"⚗️", color:"#dcfce7", cat:"learn", tag:"學習", ver:"1.0", updated:"2026-11-14 10:17" },
+  { path:"extraction-sim/",     name:"手沖咖啡實驗室", desc:"萃取模擬器＋客人闖關＋咖啡比賽＋4:6 教學", icon:"🫖", color:"#ede0d4", cat:"coffee", tag:"咖啡", ver:"4.1", updated:"2026-11-15 11:40" },
+  { path:"brew-log/",           name:"沖煮紀錄 × 風味地圖", desc:"手沖紀錄：控制圖、注水曲線、高溫/中常溫風味雷達、參數對風味", icon:"📊", color:"#d6ece6", cat:"coffee", tag:"咖啡", ver:"1.4", updated:"2026-11-14 23:15", note:"新增「實驗」分頁：每杯自動比出改了什麼參數、結果變了什麼，預期 vs 結果判定，標記有干擾的杯" },
+  { path:"cupping/",            name:"杯測教室",       desc:"咖啡杯測流程與風味評分練習", icon:"☕", color:"#f5e6d3", cat:"coffee", tag:"咖啡", ver:"1.0", updated:"2026-11-14 10:17" },
+  { path:"smell-training/",     name:"嗅覺練習日誌",   desc:"香氣材料嗅覺練習與紀錄", icon:"👃", color:"#fce7f3", cat:"coffee", tag:"練習", ver:"1.0", updated:"2026-11-14 10:17" },
+  { path:"yoshi-combos/",       name:"耀西連招手冊",   desc:"任天堂明星大亂鬥 耀西連招整理", icon:"🦖", color:"#d9f99d", cat:"game", tag:"遊戲", ver:"1.0", updated:"2026-11-14 10:17" },
+  { path:"mtx-sim/",            name:"小台指期模擬器", desc:"模擬下單、保證金、風險指標，可手動控制指數", icon:"📈", color:"#e0e7ff", cat:"invest", tag:"投資", ver:"1.0", updated:"2026-11-14 10:17" },
+  { path:"eink-notes/",         name:"元太法說會筆記", desc:"元太 分季法說筆記、指引回測、股價與產線時程", icon:"📝", color:"#f1f5f9", cat:"invest", tag:"投資", ver:"2.0", updated:"2026-11-14 16:10" }
 ];
 
 /* ---------- 本機儲存（每支手機/瀏覽器各自記錄） ---------- */
@@ -109,11 +141,12 @@ function load(){ try{ return JSON.parse(localStorage.getItem(KEY)) || null }catc
 function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)) }catch(e){} }
 let S = load();
 if(!S){ /* 第一次打開：把目前版本都當成看過，不要整頁都是「新版」 */
-  S = { fav:[], tab:"all", sort:"default", order:[], seen:{}, opens:{}, last:{}, hideNotice:"" };
+  S = { fav:[], tab:"all", cat:"all", sort:"default", order:[], seen:{}, opens:{}, last:{}, hideNotice:"" };
   APPS.forEach(a => S.seen[a.path] = a.ver);
   save();
 }
 ["fav","order"].forEach(k => S[k] = S[k] || []);
+S.cat = S.cat || "all";
 ["seen","opens","last"].forEach(k => S[k] = S[k] || {});
 /* 新加入目錄的 App 也直接視為已看過 */
 APPS.forEach(a => { if(!(a.path in S.seen)) S.seen[a.path] = a.ver; });
@@ -150,9 +183,9 @@ function sorted(list){
 function card(a, i, n){
   const nw = isNew(a);
   return `<div class="app" data-p="${a.path}">
-    <a class="cover" href="${a.path}" aria-label="${a.name}"></a>
+    <a class="cover" href="${a.path}?v=${encodeURIComponent(a.ver||"")}" aria-label="${a.name}"></a>
     <div class="ic" style="background:${a.color}">${a.icon}${nw?`<span class="dot">新</span>`:""}</div>
-    <div>
+    <div class="bd">
       <div class="nm">${a.name}</div>
       <div class="ds">${a.desc}</div>
       <div class="meta">
@@ -163,18 +196,30 @@ function card(a, i, n){
     </div>
     <button class="star${isFav(a)?" on":""}" data-fav="${a.path}" aria-label="我的最愛">${isFav(a)?"★":"☆"}</button>
     <div class="mv">
-      <button data-up="${a.path}" ${i===0?"disabled":""} aria-label="上移">▲</button>
-      <button data-down="${a.path}" ${i===n-1?"disabled":""} aria-label="下移">▼</button>
+      <button data-mv="top" data-p="${a.path}" ${i===0?"disabled":""}>⤒ 置頂</button>
+      <button data-mv="up" data-p="${a.path}" ${i===0?"disabled":""}>▲ 上移</button>
+      <button data-mv="down" data-p="${a.path}" ${i===n-1?"disabled":""}>▼ 下移</button>
+      <button data-mv="bottom" data-p="${a.path}" ${i===n-1?"disabled":""}>⤓ 置底</button>
     </div>
   </div>`;
 }
 
-const visible = () => sorted(APPS).filter(a => S.tab !== "fav" || isFav(a));
+const catOf = a => CATS.some(c=>c.id===a.cat) ? a.cat : "other";
+const catName = id => { const c = CATS.find(c=>c.id===id); return c ? `${c.icon} ${c.name}` : "其他"; };
+const inTab = a => S.tab !== "fav" || isFav(a);
+const visible = () => sorted(APPS).filter(a => inTab(a) && (S.cat === "all" || catOf(a) === S.cat));
+/* 依分類分組（看「全部分類」且排序為預設／自訂／名稱時）；其他情況一整串 */
+function blocks(){
+  const list = visible();
+  const group = S.cat === "all" && ["default","custom","name"].includes(S.sort);
+  if(!group) return [{ title:"", items:list }];
+  const ids = [...CATS.map(c=>c.id), "other"];
+  return ids.map(id => ({ title:catName(id), items:list.filter(a=>catOf(a)===id) })).filter(b=>b.items.length);
+}
 
 function render(){
   document.getElementById("sort").value = S.sort;
   const eb = document.getElementById("editBtn");
-  eb.hidden = S.sort !== "custom";
   eb.textContent = editing ? "完成" : "調整順序";
   eb.classList.toggle("on", editing);
 
@@ -191,25 +236,81 @@ function render(){
   document.getElementById("cntAll").textContent = APPS.length;
   document.getElementById("cntFav").textContent = APPS.filter(isFav).length;
 
-  const list = visible();
+  /* 分類標籤 */
+  const pool = APPS.filter(inTab);
+  const used = [...CATS.map(c=>c.id), "other"].filter(id => APPS.some(a=>catOf(a)===id));
+  if(S.cat !== "all" && !used.includes(S.cat)) S.cat = "all";
+  document.getElementById("cats").innerHTML =
+    `<button data-cat="all" class="${S.cat==="all"?"on":""}">全部分類<span class="cnt">${pool.length}</span></button>` +
+    used.map(id => `<button data-cat="${id}" class="${S.cat===id?"on":""}">${catName(id)}<span class="cnt">${pool.filter(a=>catOf(a)===id).length}</span></button>`).join("");
+
+  const bs = blocks();
   const el = document.getElementById("list");
   el.className = editing ? "editing" : "";
-  el.innerHTML = list.length
-    ? `<div class="grid">${list.map((a,i)=>card(a,i,list.length)).join("")}</div>`
-    : `<div class="empty">還沒有最愛的 App<br>到「全部 App」點卡片右上角的 ☆ 就會加進來</div>`;
+  el.innerHTML = bs.some(b=>b.items.length)
+    ? bs.map(b => `${b.title?`<h2>${b.title}</h2>`:""}<div class="grid">${b.items.map((a,i)=>card(a,i,b.items.length)).join("")}</div>`).join("")
+    : S.tab === "fav"
+      ? `<div class="empty">${S.cat==="all"?"還沒有最愛的 App":"這個分類還沒有最愛的 App"}<br>到「全部 App」點卡片右上角的 ☆ 就會加進來</div>`
+      : `<div class="empty">這個分類目前沒有 App</div>`;
 }
 
-/* 在自訂順序中移動（跟目前分頁裡的上下一個交換） */
-function move(path, dir){
-  const all = sorted(APPS);
-  const group = visible();
-  const i = group.findIndex(a=>a.path===path), j = i + dir;
-  if(j<0 || j>=group.length) return;
-  const order = all.map(a=>a.path);
-  const pi = order.indexOf(path), pj = order.indexOf(group[j].path);
-  [order[pi], order[pj]] = [order[pj], order[pi]];
+/* 在自訂順序中移動：只在同一組（畫面上同一區塊）裡移動 */
+function move(path, how){
+  const order = sorted(APPS).map(a=>a.path);
+  const group = (blocks().find(b=>b.items.some(a=>a.path===path)) || {items:[]}).items.map(a=>a.path);
+  const i = group.indexOf(path); if(i<0) return;
+  let target;
+  if(how==="up") target = group[i-1];
+  else if(how==="down") target = group[i+1];
+  else if(how==="top") target = group[0];
+  else target = group[group.length-1];
+  if(!target || target===path) return;
+  if(how==="up" || how==="down"){
+    const pi = order.indexOf(path), pj = order.indexOf(target);
+    [order[pi], order[pj]] = [order[pj], order[pi]];
+  } else {
+    order.splice(order.indexOf(path),1);
+    const t = order.indexOf(target);
+    order.splice(how==="top" ? t : t+1, 0, path);
+  }
   S.order = order; save(); render();
+  const c = document.querySelector(`.app[data-p="${CSS.escape(path)}"]`);
+  if(c) c.scrollIntoView({block:"nearest", behavior:"smooth"});
 }
+
+/* 重新整理：繞過快取重抓目錄頁與每個 App，再重新載入 */
+function toast(msg){
+  const t = document.createElement("div"); t.className = "toast"; t.textContent = msg;
+  document.body.appendChild(t); setTimeout(()=>t.remove(), 2600);
+}
+async function refreshAll(){
+  const b = document.getElementById("refreshBtn");
+  b.disabled = true; b.classList.add("busy"); b.lastChild.textContent = "更新中…";
+  const before = Object.fromEntries(APPS.map(a=>[a.path,a.ver]));
+  try{ sessionStorage.setItem("roke-hub-before", JSON.stringify(before)); }catch(e){}
+  const opt = { cache:"reload" };
+  await Promise.allSettled([
+    fetch("./", opt), fetch("index.html", opt),
+    ...APPS.map(a => fetch(a.path, opt))
+  ]);
+  location.replace(location.pathname + "?r=" + Date.now());
+}
+(function afterRefresh(){
+  const q = new URLSearchParams(location.search);
+  if(!q.has("r")) return;
+  history.replaceState(null, "", location.pathname);
+  let before = null;
+  try{ before = JSON.parse(sessionStorage.getItem("roke-hub-before")); sessionStorage.removeItem("roke-hub-before"); }catch(e){}
+  if(!before) return;
+  const changed = APPS.filter(a => before[a.path] !== a.ver);
+  setTimeout(()=>toast(changed.length ? `已更新：${changed.map(a=>`${a.name} v${a.ver}`).join("、")}` : "已是最新版"), 150);
+})();
+document.getElementById("refreshBtn").addEventListener("click", refreshAll);
+document.getElementById("hubVer").textContent = `目錄頁 v${HUB_VER}`;
+document.getElementById("cats").addEventListener("click", e=>{
+  const b = e.target.closest("[data-cat]"); if(!b) return;
+  S.cat = b.dataset.cat; save(); render();
+});
 
 document.getElementById("sort").addEventListener("change", e=>{
   S.sort = e.target.value;
@@ -221,7 +322,14 @@ document.getElementById("tabs").addEventListener("click", e=>{
   const b = e.target.closest("[data-tab]"); if(!b) return;
   S.tab = b.dataset.tab; save(); render(); window.scrollTo(0,0);
 });
-document.getElementById("editBtn").addEventListener("click", ()=>{ editing = !editing; render(); });
+/* 按「調整順序」會自動切到自訂順序，從目前看到的順序開始調 */
+document.getElementById("editBtn").addEventListener("click", ()=>{
+  if(!editing && S.sort !== "custom"){
+    S.order = sorted(APPS).map(a=>a.path);
+    S.sort = "custom"; save();
+  }
+  editing = !editing; render();
+});
 
 document.getElementById("list").addEventListener("click", e=>{
   const f = e.target.closest("[data-fav]");
@@ -229,8 +337,7 @@ document.getElementById("list").addEventListener("click", e=>{
     const p = f.dataset.fav;
     S.fav = S.fav.includes(p) ? S.fav.filter(x=>x!==p) : [...S.fav, p];
     save(); render(); return; }
-  const up = e.target.closest("[data-up]");   if(up){ move(up.dataset.up,-1); return; }
-  const dn = e.target.closest("[data-down]"); if(dn){ move(dn.dataset.down,1); return; }
+  const m = e.target.closest("[data-mv]"); if(m){ if(!m.disabled) move(m.dataset.p, m.dataset.mv); return; }
   const a = e.target.closest("a.cover");
   if(a){ /* 記錄使用次數、最後使用時間，並把這版標成已看過 */
     const p = a.closest(".app").dataset.p, app = APPS.find(x=>x.path===p);
