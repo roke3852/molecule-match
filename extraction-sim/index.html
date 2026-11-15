@@ -300,6 +300,14 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
 #gameView .acts button{flex:1;min-width:130px;border-radius:10px;padding:10px;cursor:pointer;font-weight:700}
 #gameView .acts .pri{background:var(--accent);color:var(--accent-ink);border:0}
 #gameView .acts .sec{background:transparent;border:1px solid var(--accent);color:var(--accent)}
+.share-ov{position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;padding:16px}
+.share-ov[hidden]{display:none}
+.share-dlg{background:var(--panel);color:var(--ink);border-radius:14px;padding:14px;max-width:420px;width:100%;max-height:92vh;overflow:auto;display:flex;flex-direction:column;gap:10px}
+.share-dlg img{width:100%;border-radius:10px;display:block;border:1px solid var(--line)}
+.share-dlg p{margin:0;font-size:13px;color:var(--muted)}
+.share-dlg .row{display:flex;gap:8px;flex-wrap:wrap}
+.share-dlg button,.share-dlg a{flex:1 1 auto;text-align:center;font:inherit;font-size:14px;font-weight:700;padding:9px 12px;border-radius:9px;border:1px solid var(--accent);background:transparent;color:var(--accent);cursor:pointer;text-decoration:none}
+.share-dlg .pri{background:var(--accent);color:var(--accent-ink);border:0}
 #gameView details summary{cursor:pointer;font-size:13px;color:var(--muted)}
 #gameView details .dims{margin-top:10px}
 #gameView .panel{min-width:0}
@@ -937,10 +945,23 @@ button,input,select,label,.seg,.stepper,.card{touch-action:manipulation}
       </div>
       <p class="recipe" id="rRecipe"></p>
       <div class="acts">
+        <button class="sec" id="shareBtn" type="button">📤 分享成績</button>
         <button class="sec" id="againBtn">調整再沖一次</button>
         <button class="pri" id="nextBtn">下一位客人</button>
       </div>
     </section>
+
+    <div class="share-ov" id="shareOv" hidden role="dialog" aria-modal="true" aria-label="分享成績">
+      <div class="share-dlg">
+        <img id="shareImg" alt="成績卡">
+        <p id="shareHint">長按圖片可以儲存或分享；也可以複製文字貼到社群。</p>
+        <div class="row">
+          <button class="pri" id="shareCopy" type="button">複製分享文字</button>
+          <a id="shareDl" download="咖啡實驗室成績.png">下載圖片</a>
+        </div>
+        <div class="row"><button id="shareClose" type="button">關閉</button></div>
+      </div>
+    </div>
 
     <section class="panel hist" id="histBox" hidden aria-label="沖煮紀錄">
       <div class="hist-h"><h3>沖煮紀錄</h3><span class="label" id="histCount"></span><button class="ghost" id="histClear">清除紀錄</button></div>
@@ -2275,6 +2296,7 @@ function showResult(o,r,pf,sc,E){
   $('rOther').innerHTML=Object.keys(DIMS).filter(k=>!(k in L.want)).map(k=>dimRow(k,pf[k],null,null)).join('');
   $('rTDS').textContent=r.tds.toFixed(2)+'%';$('rEY').textContent=r.ey.toFixed(1)+'%';$('rVol').textContent=Math.round(r.vol)+' ml';
   $('rRecipe').textContent='這杯：'+recipeText(o);
+  lastShare={comp:false,idx:cur,who:L.name,role:L.role,color:L.color,sc,pass,stars:st,verdict:$('rV').textContent,say:$('rSay').textContent,recipe:recipeText(o),tds:r.tds,ey:r.ey,vol:r.vol};
   const H=(save.hist[histKey()]=save.hist[histKey()]||[]);
   H.push({n:(H.length?H[H.length-1].n:0)+1,at:Date.now(),o,s:sc,pf,tds:r.tds,ey:r.ey,vol:r.vol,cost,over,late:!!(E&&E.fail)});
   if(H.length>30)H.splice(0,H.length-30);
@@ -2303,6 +2325,7 @@ function showCompResult(o,r,pf,sc,E){
   $('rOther').innerHTML=Object.keys(DIMS).map(k=>dimRow(k,pf[k],null,null)).join('');
   $('rTDS').textContent=r.tds.toFixed(2)+'%';$('rEY').textContent=r.ey.toFixed(1)+'%';$('rVol').textContent=Math.round(r.vol)+' ml';
   $('rRecipe').textContent='這杯：'+recipeText(o);
+  lastShare={comp:true,idx:cur,who:C.name,role:C.role,color:C.color,sc,pass,rank:$('rStars').textContent,verdict:$('rV').textContent,say:$('rSay').textContent,recipe:recipeText(o),tds:r.tds,ey:r.ey,vol:r.vol};
   const H=(save.hist[histKey()]=save.hist[histKey()]||[]);
   H.push({n:(H.length?H[H.length-1].n:0)+1,at:Date.now(),o,s:sc,pf,tds:r.tds,ey:r.ey,vol:r.vol,aroma:r.aroma,c:r.c,share:r.share,rank,pass});
   if(H.length>30)H.splice(0,H.length-30);
@@ -2314,6 +2337,73 @@ function showCompResult(o,r,pf,sc,E){
 }
 $('againBtn').onclick=()=>{$('resultBox').hidden=true;document.querySelector('#beans').closest('.panel').scrollIntoView({behavior:'smooth',block:'start'});};
 $('nextBtn').onclick=()=>openLevel(cur+1);
+
+// ---- 分享成績：畫一張成績卡，手機用系統分享，其他情況顯示圖片讓玩家長按儲存 ----
+let lastShare=null;
+const SHARE_URL='https://roke3852.github.io/molecule-match/extraction-sim/';
+function shareText(d){
+  return d.comp?('我在「手沖咖啡實驗室」參加'+d.who+'，拿到 '+Math.round(d.sc)+' 分，'+d.rank+'！☕\n'+d.recipe+'\n你也來挑戰：'+SHARE_URL)
+    :('我在「手沖咖啡實驗室」幫'+d.who+'沖了一杯，拿到 '+Math.round(d.sc)+' 分'+(d.pass?'，'+'★'.repeat(d.stars)+' 過關！':'，還差一點…')+' ☕\n'+d.recipe+'\n你能沖得比我好嗎？'+SHARE_URL);
+}
+function wrapLines(x,t,maxW,maxLines){
+  const out=[];let line='';
+  for(const ch of t){if(ch==='\n'){out.push(line);line='';continue}
+    if(x.measureText(line+ch).width>maxW&&line){out.push(line);line=ch}else line+=ch}
+  if(line)out.push(line);
+  if(out.length>maxLines){out.length=maxLines;out[maxLines-1]=out[maxLines-1].replace(/.{1}$/,'…')}
+  return out;
+}
+function drawShareCard(d){
+  const W=1080,H=1350,c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d');
+  const cs=getComputedStyle(document.documentElement),v=k=>cs.getPropertyValue(k).trim();
+  const bg=v('--bg')||'#141715',panel=v('--panel')||'#1c201e',ink=v('--ink')||'#e4e8e3',muted=v('--muted')||'#98a29a',acc=v('--accent')||'#6fbfa6',gold=v('--gold')||'#f0c23a',fail=v('--fail')||'#e47a68',line=v('--line')||'#2f3632';
+  const FD=v('--f-display')||'serif',FB=v('--f-body')||'sans-serif';
+  x.fillStyle=bg;x.fillRect(0,0,W,H);
+  // card
+  const rr=(X,Y,w,h,r)=>{x.beginPath();x.moveTo(X+r,Y);x.arcTo(X+w,Y,X+w,Y+h,r);x.arcTo(X+w,Y+h,X,Y+h,r);x.arcTo(X,Y+h,X,Y,r);x.arcTo(X,Y,X+w,Y,r);x.closePath()};
+  rr(60,60,W-120,H-120,40);x.fillStyle=panel;x.fill();x.strokeStyle=line;x.lineWidth=3;x.stroke();
+  x.fillStyle=d.color||acc;x.fillRect(60,120,12,110);
+  x.textBaseline='alphabetic';
+  x.fillStyle=muted;x.font='600 36px '+FB;x.fillText('☕ 手沖咖啡實驗室',110,150);
+  x.fillStyle=ink;x.font='700 64px '+FD;x.fillText(d.comp?d.who:('客人：'+d.who),110,225);
+  x.fillStyle=muted;x.font='400 34px '+FB;x.fillText(d.comp?(d.role||'咖啡比賽'):('第 '+(d.idx+1)+' 位客人・'+(d.role||'')),110,275);
+  // score
+  x.fillStyle=d.pass?acc:fail;x.font='700 260px '+FD;const sc=String(Math.round(d.sc));x.fillText(sc,110,560);
+  const sw=x.measureText(sc).width;x.fillStyle=muted;x.font='500 50px '+FB;x.fillText('分',120+sw,560);
+  x.fillStyle=ink;x.font='700 54px '+FB;x.fillText(d.verdict,110,650);
+  if(d.comp){x.fillStyle=gold;x.font='700 46px '+FB;x.fillText(d.rank,110,720)}
+  else{x.font='700 64px '+FB;for(let i=0;i<3;i++){x.fillStyle=i<d.stars?gold:line;x.fillText('★',110+i*74,725)}}
+  // quote
+  x.fillStyle=ink;x.font='400 38px '+FB;let y=810;
+  wrapLines(x,d.say,W-240,4).forEach(l=>{x.fillText(l,110,y);y+=56});
+  // facts
+  y=Math.max(y+20,1000);const fw=(W-220-40)/3;
+  [['濃度 TDS',d.tds.toFixed(2)+'%'],['萃取率 EY',d.ey.toFixed(1)+'%'],['杯量',Math.round(d.vol)+' ml']].forEach((f,i)=>{
+    const X=110+i*(fw+20);rr(X,y,fw,130,20);x.fillStyle=bg;x.fill();
+    x.fillStyle=ink;x.font='700 46px '+FB;x.fillText(f[1],X+24,y+62);x.fillStyle=muted;x.font='400 28px '+FB;x.fillText(f[0],X+24,y+106)});
+  y+=195;
+  x.fillStyle=muted;x.font='400 30px '+FB;
+  wrapLines(x,d.recipe,W-220,2).forEach(l=>{x.fillText(l,110,y);y+=44});
+  x.fillStyle=acc;x.font='700 32px '+FB;x.fillText('你能沖得比我好嗎？ roke3852.github.io/molecule-match',110,H-110);
+  return c;
+}
+function openShareOv(url,text){
+  $('shareImg').src=url;$('shareDl').href=url;$('shareOv').hidden=false;$('shareHint').textContent='長按圖片可以儲存或分享；也可以複製文字貼到社群。';
+  $('shareCopy').onclick=async()=>{try{await navigator.clipboard.writeText(text);$('shareHint').textContent='已複製分享文字'}catch(e){$('shareHint').textContent='無法自動複製，請改用下載圖片'}};
+}
+$('shareClose').onclick=()=>{$('shareOv').hidden=true};
+$('shareOv').addEventListener('click',e=>{if(e.target===$('shareOv'))$('shareOv').hidden=true});
+$('shareBtn').onclick=async()=>{
+  const d=lastShare;if(!d)return;
+  const text=shareText(d),cv=drawShareCard(d),url=cv.toDataURL('image/png');
+  try{
+    const blob=await new Promise(ok=>cv.toBlob(ok,'image/png'));
+    const file=blob&&new File([blob],'咖啡實驗室成績.png',{type:'image/png'});
+    if(file&&navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],text,title:'手沖咖啡實驗室'});return}
+  }catch(e){if(e&&e.name==='AbortError')return}
+  openShareOv(url,text);
+};
+
 
 // ---- grinder select ----
 $('ggrinder').innerHTML='<option value="">不指定</option>'+GRINDERS.map(g=>'<option value="'+g.id+'">'+g.name+'｜'+g.type+'</option>').join('');
