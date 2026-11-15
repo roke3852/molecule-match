@@ -1220,16 +1220,16 @@ function cupProfile(r){const Lg=Math.log,cl=v=>Math.max(0,Math.min(10,v));
   return {tds:tdsS,acid,acidRaw,sweet,balance,bitter:B,astr:cl(dim('cga')),body,
     fruity:cl(dim('fruity')),roasty:cl(dim('roasty')),caf:cl(r.c[1]*10),oil:r.oil??null};}
 
-// Grinders: um = microns per click (null = stepless / not published, set in μm); fines = share of fine particles at ~650 μm (estimated from burr type)
+// Grinders: um = 每格粒徑變化 μm（依 Honest Coffee Guide 實測刻度表：C40 0–1090 μm/40 格、K-Ultra 0–760 μm/100 格、K6 約 8.5 μm/格、Encore 250–1200 μm/40 格；P80 用官方 10 μm/格）；z = 零點粒徑；move = 官方標示的刀盤位移（不是粒徑）；null = 無段，直接以 μm 設定; fines = share of fine particles at ~650 μm (estimated from burr type)
 const GRINDERS=[
- {id:'c40',name:'Comandante C40 MK4',type:'手搖・39mm 錐刀',um:30,fines:.14},
- {id:'c40rc',name:'Comandante C40＋Red Clix',type:'手搖・39mm 錐刀，細刻度軸',um:15,fines:.14},
- {id:'kultra',name:'1Zpresso K-Ultra',type:'手搖・48mm 錐刀',um:20,fines:.12},
- {id:'zp6',name:'1Zpresso ZP6 Special',type:'手搖・48mm 七角刀，手沖取向',um:9,z:240,move:22,dial:'num',fines:.09},
- {id:'k6',name:'Kingrinder K6',type:'手搖・48mm 錐刀',um:16,fines:.15},
+ {id:'c40',name:'Comandante C40 MK4',type:'手搖・39mm 錐刀',um:27.25,fines:.14},
+ {id:'c40rc',name:'Comandante C40＋Red Clix',type:'手搖・39mm 錐刀，細刻度軸',um:13.625,fines:.14},
+ {id:'kultra',name:'1Zpresso K-Ultra',type:'手搖・48mm 錐刀',um:7.6,move:20,dial:'num',rot:100,fines:.12},
+ {id:'zp6',name:'1Zpresso ZP6 Special',type:'手搖・48mm 七角刀，手沖取向',um:9,z:240,move:22,dial:'num',rot:90,fines:.09},
+ {id:'k6',name:'Kingrinder K6',type:'手搖・48mm 錐刀',um:8.5,move:16,fines:.15},
  {id:'p80',name:'Option-O Lagom P80',type:'電動・80mm 平刀',um:10,fines:.08},
  {id:'ek43',name:'Mahlkönig EK43',type:'電動・98mm 平刀，無段',um:null,fines:.07},
- {id:'encore',name:'Baratza Encore',type:'電動・40mm 錐刀，入門款',um:null,fines:.22},
+ {id:'encore',name:'Baratza Encore',type:'電動・40mm 錐刀，入門款',um:23.75,z:250,fines:.22},
  {id:'blade',name:'砍豆機（刀片式）',type:'電動・刀片打碎',um:null,fines:.35},
 ];
 
@@ -1411,9 +1411,9 @@ const curGrinder=()=>GRINDERS.find(g=>g.id===P.grinder)||null;
 const gClick=(G,g)=>Math.max(0,Math.round((g-(G.z||0))/G.um));
 const gSize=(G,c)=>Math.round((G.z||0)+c*G.um);
 const gSnap=(G,g)=>gSize(G,gClick(G,g));
-const gDial=(G,g)=>{const c=gClick(G,g);return G.dial==='num'?'刻度 '+Math.floor(c/10)+'.'+(c%10):'第 '+c+' 格';};
-const gStepTxt=G=>G.move?'每格約 '+G.um+' μm 粒徑（刀盤位移 '+G.move+' μm）':'每格 '+G.um+' μm';
-function gRange(el,G){const z=G.z||0;el.step=G.um;el.min=gSize(G,Math.ceil((300-z)/G.um));el.max=gSize(G,Math.floor((1200-z)/G.um));}
+const gDial=(G,g)=>{const c=gClick(G,g);if(G.dial!=='num')return '第 '+c+' 格';const r=G.rot&&c>=G.rot?Math.floor(c/G.rot):0,k=c-r*(G.rot||0);return (r?'轉 '+r+' 圈後 ':'刻度 ')+Math.floor(k/10)+'.'+(k%10);};
+const gStepTxt=G=>{const u=+G.um.toFixed(1);return G.move?'每格約 '+u+' μm 粒徑（刀盤位移 '+G.move+' μm）':'每格約 '+u+' μm';};
+function gRange(el,G){const z=G.z||0;el.step=Number.isInteger(G.um)?G.um:1;el.min=gSize(G,Math.ceil((300-z)/G.um));el.max=gSize(G,Math.floor((1200-z)/G.um));}
 const pFor=kind=>kind==='im'?Object.assign({},simP(),{filter:'metal',cutoff:0,wdt:false,dig:false}):simP();
 function simP(){const b=curBean(),gr=curGrinder();return Object.assign({},P,b?{roast:b.roast,bean:b.f,clarAdj:b.clar||0}:{bean:null,clarAdj:0},{fines:gr?gr.fines:null});}
 function syncGrindSlider(){const gr=curGrinder(),el=$('grind');
@@ -2731,7 +2731,7 @@ const TOPICS=[
  {id:'oil',name:'油脂與香氣',A:{temp:96,pour:'strong'},B:{temp:88,pour:'gentle'},an:'96°C・強力沖刷',bn:'88°C・輕柔注水',
   text:'<p>咖啡裡的物質分兩類。酸、糖、咖啡因、綠原酸這些<b>水溶性</b>物質會溶進水，再一格一格擴散出來。<b>油脂</b>不溶於水，以小油滴的形式存在細胞裡（畫面中金色的圓點）。</p><p>油要出來，得先被熱水加熱、變得比較會流動，再被水流和翻攪從粉粒表面剪下來，變成很小的油滴懸浮在咖啡裡（乳化）。所以溫度越高、注水越猛，帶出的油越多。內部完整細胞裡的油幾乎出不來，大部分的油最後都留在咖啡渣裡。</p><p>香氣分子不全是「不溶於水」。很多烘焙香（吡嗪、呋喃類）本身就溶得進水，跟水溶性物質一起擴散出來。另一部分比較親油的香氣（例如一些酯類）偏好待在油滴裡，要等油被帶出來，或很慢地從油轉進水裡（畫面中有金色外圈的香氣小點）。溫度高、水流強，這部分出得比較多。</p><p>油進到杯子裡會讓口感更滑、更厚，也會留住親油的香氣。不過手沖的濾紙會擋下大部分的油，紙濾咖啡口感比較乾淨；法壓壺、金屬濾網的咖啡油感就明顯得多。</p>'},
  {id:'k10',name:'粕谷 10 段',A:{grind:1250,temp:96,bloom:30,pour:'pulse10'},B:{grind:650,temp:93,bloom:40,pour:'normal'},an:'粕谷 10 段',bn:'一般配方',
-  text:'<p>2026 年粕谷哲在世界手沖冠軍十週年推出的新沖法（也叫 Multi-Pour）：20 g 粉、300 g 水（1:15）、95–96°C、<b>超粗研磨</b>（C40 約 40–45 格，約 1200–1350 μm），V60 或 V60 NEO。先注 30 g 悶蒸 30 秒，之後每 15 秒注 30 g，共 10 注，約 3:00–3:30 滴完。</p><p><b>為什麼磨這麼粗：</b>粗粉的細粉少、不容易塞，可以放心用高溫、拉長時間。對照顯微鏡看：粗粉的中心離表面很遠，藏在裡面又大又慢的苦味大分子大多出不來；先出來的是外圈破裂細胞裡的酸、糖和香氣。所以整體萃得比較少，但苦味相對更少。</p><p><b>為什麼用 96°C：</b>粗粉萃得慢，用高溫讓分子動得快，也讓表面的油比較好帶出，補回一些口感。</p><p><b>為什麼分 10 注：</b>每 15 秒一小注，粉層一直泡在剛換上的新鮮水裡，濃度差保持大；每注都是一次輕輕的翻動，但水位低、不會猛烈沖刷。整個過程維持 3 分多鐘穩定接觸，讓粗粉有時間慢慢萃。</p><p>粕谷哲的說法是：精品咖啡的好味道是「加法」，短時間、乾淨的沖法雖然避開缺點，也把很多好的味道留在粉裡。網路上的評價不一：有人喝到很甜、很厚的口感，也有人和一般兩段沖法並排比較，覺得 10 段的酸比較搶、甜感和厚度反而少。這個模型能確定的是苦味大分子占比明顯較低；整體萃得比較少，所以甜和厚度不見得更多，酸和甜的比例則會隨粉粒而變。實際喝起來跟豆子很有關係。</p><p>圖上可以看到 10 次注水的節奏：每注一次，水流和邊界層短暫變強，之後慢慢緩下來。</p>'},
+  text:'<p>2026 年粕谷哲在世界手沖冠軍十週年推出的新沖法（也叫 Multi-Pour）：20 g 粉、300 g 水（1:15）、95–96°C、<b>超粗研磨</b>（C40 約 40–45 格，約 1100–1250 μm），V60 或 V60 NEO。先注 30 g 悶蒸 30 秒，之後每 15 秒注 30 g，共 10 注，約 3:00–3:30 滴完。</p><p><b>為什麼磨這麼粗：</b>粗粉的細粉少、不容易塞，可以放心用高溫、拉長時間。對照顯微鏡看：粗粉的中心離表面很遠，藏在裡面又大又慢的苦味大分子大多出不來；先出來的是外圈破裂細胞裡的酸、糖和香氣。所以整體萃得比較少，但苦味相對更少。</p><p><b>為什麼用 96°C：</b>粗粉萃得慢，用高溫讓分子動得快，也讓表面的油比較好帶出，補回一些口感。</p><p><b>為什麼分 10 注：</b>每 15 秒一小注，粉層一直泡在剛換上的新鮮水裡，濃度差保持大；每注都是一次輕輕的翻動，但水位低、不會猛烈沖刷。整個過程維持 3 分多鐘穩定接觸，讓粗粉有時間慢慢萃。</p><p>粕谷哲的說法是：精品咖啡的好味道是「加法」，短時間、乾淨的沖法雖然避開缺點，也把很多好的味道留在粉裡。網路上的評價不一：有人喝到很甜、很厚的口感，也有人和一般兩段沖法並排比較，覺得 10 段的酸比較搶、甜感和厚度反而少。這個模型能確定的是苦味大分子占比明顯較低；整體萃得比較少，所以甜和厚度不見得更多，酸和甜的比例則會隨粉粒而變。實際喝起來跟豆子很有關係。</p><p>圖上可以看到 10 次注水的節奏：每注一次，水流和邊界層短暫變強，之後慢慢緩下來。</p>'},
  {id:'stir',name:'攪拌',A:{stir:'multi'},B:{stir:'none'},C:{stir:'bloom'},an:'多次攪拌',bn:'不攪拌',cn:'只在悶蒸攪',
   text:'<p>攪拌（用攪拌棒、湯匙，或旋轉濾杯）時，畫面會出現旋渦。它做了三件事：</p><p><b>打散乾粉團</b>：悶蒸時有些粉被 CO₂ 包住、黏成一團，水進不去（顏色較淺的那塊）。攪一下把粉團打散，每顆粉都吸到水，CO₂ 也排得比較快。</p><p><b>把粉粒旁的濃水換掉</b>：粉粒周圍那層水會越來越濃，物質出來的速度就變慢。攪拌把這層濃水攪開、換上較淡的水，萃取變快。浸泡時差最多，因為水本來不流動，不攪的話這層濃水會一直貼著粉粒。</p><p><b>代價</b>：攪拌也會把外圈破裂細胞的碎片打下來變成細粉。手沖時細粉往下沉、堵住濾紙，滴得變慢，接觸時間拉長，苦味大分子跟著變多；粉層被攪混，層次也會變少（清晰度下降）。這就是為什麼很多配方只在悶蒸時攪一下，確保粉都濕透，之後就不再攪。</p>'},
  {id:'imstage',name:'浸泡時機',A:{hyb:'bloomIm',bloom:45},B:{hyb:'endIm',bloom:30},C:{},an:'悶蒸時浸泡',bn:'最後一段浸泡',cn:'全程滴濾',
