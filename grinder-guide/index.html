@@ -29,6 +29,8 @@ header p{margin:0;color:var(--muted);font-size:13px}
 .qnav button{width:52px;height:46px;flex:none;border-radius:12px;font-size:26px;font-weight:700;border:1px solid var(--line);background:#fff;color:var(--ink);cursor:pointer;line-height:1}
 .qnav button.next{background:var(--accent);color:#fff;border-color:var(--accent)}
 .qnav button:disabled{opacity:.35;cursor:default}
+.qnav button.restart{width:auto;font-size:15px;padding:0 12px;background:#fff;color:var(--accent);border-color:#f3b98f}
+.qnav button[hidden]{display:none}
 .qmid{flex:1;min-width:0;text-align:center;line-height:1.25}
 .qmid span{display:block;font-size:11px;color:var(--accent);font-weight:700}
 .qmid b{display:block;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -170,6 +172,7 @@ header p{margin:0;color:var(--muted);font-size:13px}
       <button id="qprev" aria-label="上一步">‹</button>
       <div class="qmid"><span id="qno"></span><b id="qtitle"></b></div>
       <button id="qnext" class="next" aria-label="下一步">›</button>
+      <button id="qrestart" class="restart" hidden>↺ 重新開始</button>
     </div>
     <div id="gAct" hidden></div>
     </div>
@@ -413,7 +416,7 @@ function setMode(m){gameStop();mode=m;step=0;
   const slot=$('gslot'), box=$('game');
   if(m==='game'){['segK','gMsg','gStart','gResult'].forEach(id=>{const el=$(id);slot.appendChild(id==='gStart'?el.parentNode:el)});}
   slot.hidden=m!=='game';document.body.classList.toggle('gaming',m==='game');
-  $('tut').hidden=m==='game';$('game').hidden=m!=='game';$('qprev').hidden=$('qnext').hidden=m==='game';document.querySelectorAll('#segM button').forEach(b=>b.classList.toggle('on',b.dataset.m===m));
+  $('tut').hidden=m==='game';$('game').hidden=m!=='game';$('qprev').hidden=$('qnext').hidden=m==='game';$('qrestart').hidden=m!=='game';document.querySelectorAll('#segM button').forEach(b=>b.classList.toggle('on',b.dataset.m===m));
   // 切換時先把零件瞬間放到起始狀態
   svg.querySelectorAll('.part').forEach(el=>el.style.transition='none');render();svg.getBoundingClientRect();
   svg.querySelectorAll('.part').forEach(el=>el.style.transition='');}
@@ -564,6 +567,7 @@ function gameEnd(ok){const t=(performance.now()-GS.t0)/1000;GS.tEnd=t;gameStop()
     <p>用時 ${t.toFixed(1)} 秒（時限 ${GS.limit} 秒）・錯誤 ${GS.errors} 次</p><p>順序分 ${order}／60　時間分 ${time}／40</p></div>`;
   $('gStart').textContent='再玩一次';$('gStart').parentNode.hidden=false;}
 $('gStart').onclick=gameStart;
+$('qrestart').onclick=()=>{if(mode==='game')gameStart();};
 let sw=null;
 $('stage').addEventListener('pointerdown',e=>{if(mode==='game')sw={x:e.clientX,y:e.clientY}});
 $('stage').addEventListener('pointerup',e=>{if(mode!=='game'||!sw)return;const dx=e.clientX-sw.x,dy=e.clientY-sw.y;sw=null;
