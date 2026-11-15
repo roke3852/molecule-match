@@ -1225,7 +1225,7 @@ const GRINDERS=[
  {id:'c40',name:'Comandante C40 MK4',type:'手搖・39mm 錐刀',um:30,fines:.14},
  {id:'c40rc',name:'Comandante C40＋Red Clix',type:'手搖・39mm 錐刀，細刻度軸',um:15,fines:.14},
  {id:'kultra',name:'1Zpresso K-Ultra',type:'手搖・48mm 錐刀',um:20,fines:.12},
- {id:'zp6',name:'1Zpresso ZP6 Special',type:'手搖・48mm 七角刀，手沖取向',um:22,fines:.09},
+ {id:'zp6',name:'1Zpresso ZP6 Special',type:'手搖・48mm 七角刀，手沖取向',um:9,z:240,move:22,dial:'num',fines:.09},
  {id:'k6',name:'Kingrinder K6',type:'手搖・48mm 錐刀',um:16,fines:.15},
  {id:'p80',name:'Option-O Lagom P80',type:'電動・80mm 平刀',um:10,fines:.08},
  {id:'ek43',name:'Mahlkönig EK43',type:'電動・98mm 平刀，無段',um:null,fines:.07},
@@ -1358,9 +1358,9 @@ function labels(){
   $('ratioOut').innerHTML='<span class="mono">1:'+(+P.ratio.toFixed(1))+'</span> <span class="label">('+Math.round(P.dose*P.ratio)+' ml)</span>';
   $('tempOut').innerHTML=(P.planTemp&&(P.pattern==='pulse'||P.pattern==='switch'))?'<span class="mono">'+P.planTemp.join('/')+'</span> <span class="label">各注</span>':'<span class="mono">'+P.temp+' °C</span>';
   const g=P.grind, d=g<450?'細':g<750?'中細':g<950?'中粗':'粗', gr=curGrinder();
-  $('grindOut').innerHTML=(gr&&gr.um?'<span class="mono">第 '+Math.round(g/gr.um)+' 格</span> <span class="label">≈ '+g+' μm・'+d+'</span>':'<span class="mono">'+g+' μm</span> <span class="label">'+d+'</span>');
+  $('grindOut').innerHTML=(gr&&gr.um?'<span class="mono">'+gDial(gr,g)+'</span> <span class="label">≈ '+g+' μm・'+d+'</span>':'<span class="mono">'+g+' μm</span> <span class="label">'+d+'</span>');
   $('grinderSel').value=P.grinder||'';
-  $('grinderOut').textContent=gr?(gr.um?'每格 '+gr.um+' μm':'無段／刻度未公開，以 μm 設定')+'・細粉 '+(gr.fines<.1?'少':gr.fines<.16?'中等':gr.fines<.25?'偏多':'很多'):'';
+  $('grinderOut').textContent=gr?(gr.um?gStepTxt(gr):'無段／刻度未公開，以 μm 設定')+'・細粉 '+(gr.fines<.1?'少':gr.fines<.16?'中等':gr.fines<.25?'偏多':'很多'):'';
   $('roastOut').innerHTML='<span class="label">'+['極淺焙','淺焙','中焙','中深焙','深焙'][P.roast-1]+'</span>';
   if(typeof champSnap!=='undefined'&&champSnap)$('champState').textContent=champKey()===champSnap?'冠軍原始參數':'已從冠軍參數調整過';
   {const b=curBean();$('roastParam').hidden=!!b;$('beanSel').value=P.beanId||'';
@@ -1407,10 +1407,17 @@ function presetTimes(){
 const curBean=()=>BEANS.find(b=>b.id===P.beanId)||null;
 const effRoast=()=>{const b=curBean();return b?b.roast:P.roast;};
 const curGrinder=()=>GRINDERS.find(g=>g.id===P.grinder)||null;
+// 刻度 ↔ 粒徑：粒徑 = 零點粒徑 z + 格數 × 每格粒徑 um（ZP6 依 Honest Coffee Guide 實測圖：0.0≈240 μm、9.0≈1050 μm，每格約 9 μm；官方 22 μm 是刀盤位移，不是粒徑）
+const gClick=(G,g)=>Math.max(0,Math.round((g-(G.z||0))/G.um));
+const gSize=(G,c)=>Math.round((G.z||0)+c*G.um);
+const gSnap=(G,g)=>gSize(G,gClick(G,g));
+const gDial=(G,g)=>{const c=gClick(G,g);return G.dial==='num'?'刻度 '+Math.floor(c/10)+'.'+(c%10):'第 '+c+' 格';};
+const gStepTxt=G=>G.move?'每格約 '+G.um+' μm 粒徑（刀盤位移 '+G.move+' μm）':'每格 '+G.um+' μm';
+function gRange(el,G){const z=G.z||0;el.step=G.um;el.min=gSize(G,Math.ceil((300-z)/G.um));el.max=gSize(G,Math.floor((1200-z)/G.um));}
 const pFor=kind=>kind==='im'?Object.assign({},simP(),{filter:'metal',cutoff:0,wdt:false,dig:false}):simP();
 function simP(){const b=curBean(),gr=curGrinder();return Object.assign({},P,b?{roast:b.roast,bean:b.f,clarAdj:b.clar||0}:{bean:null,clarAdj:0},{fines:gr?gr.fines:null});}
 function syncGrindSlider(){const gr=curGrinder(),el=$('grind');
-  if(gr&&gr.um){const um=gr.um;el.step=um;el.min=um*Math.ceil(300/um);el.max=um*Math.floor(1200/um);P.grind=Math.max(+el.min,Math.min(+el.max,Math.round(P.grind/um)*um));}
+  if(gr&&gr.um){gRange(el,gr);P.grind=Math.max(+el.min,Math.min(+el.max,gSnap(gr,P.grind)));}
   else{el.step=gr?10:50;el.min=300;el.max=1200;}
   el.value=P.grind;}
 (function(){const sel=$('grinderSel');
@@ -1487,7 +1494,7 @@ function run(){
   draw();
 }
 [['dose',1],['ratio',1],['temp',1],['grind',1],['steep',1],['roast',1],['swOpen',1],['swClose',1]].forEach(([id])=>{
-  $(id).addEventListener('input',e=>{P[id]=+e.target.value;if(id==='temp')P.planTemp=null;if(id==='swOpen'||id==='swClose')P.valveWins=null;if(id==='ratio'||id==='dose')P.plan=evenPlan(P.plan.length-1);run();});
+  $(id).addEventListener('input',e=>{P[id]=+e.target.value;if(id==='grind'){const G=curGrinder();if(G&&G.um)P.grind=gSnap(G,P.grind);}if(id==='temp')P.planTemp=null;if(id==='swOpen'||id==='swClose')P.valveWins=null;if(id==='ratio'||id==='dose')P.plan=evenPlan(P.plan.length-1);run();});
 });
 const PAT={pulse:'pPulse',cont:'pCont',switch:'pSwitch',immersion:'pImm'};
 const isIM=()=>P.pattern==='immersion';
@@ -2195,10 +2202,10 @@ function syncParams(){
   const perPour=pro&&O.planTemp&&!$('gplanP').hidden;
   $('gtempOut').innerHTML=perPour?O.planTemp.join('/')+' <span class="label">各注</span>':O.temp+' °C';
   const GR=pro&&O.grinder?GRINDERS.find(g=>g.id===O.grinder):null;
-  $('ggrindOut').innerHTML=(GR&&GR.um?'第 '+Math.round(O.grind/GR.um)+' 格 <span class="label">≈ '+O.grind+' μm・'+grindName(O.grind)+'</span>':O.grind+' μm <span class="label">'+grindName(O.grind)+'</span>');
+  $('ggrindOut').innerHTML=(GR&&GR.um?gDial(GR,O.grind)+' <span class="label">≈ '+O.grind+' μm・'+grindName(O.grind)+'</span>':O.grind+' μm <span class="label">'+grindName(O.grind)+'</span>');
   $('ggrinder').value=O.grinder||'';
-  $('ggrinderOut').textContent=GR?(GR.um?'每格 '+GR.um+' μm':'以 μm 設定')+'・細粉'+(GR.fines<.1?'少':GR.fines<.16?'中等':GR.fines<.25?'偏多':'很多'):'不指定時不計細粉與塞水';
-  {const el=$('ggrind');if(GR&&GR.um){el.step=GR.um;el.min=GR.um*Math.ceil(300/GR.um);el.max=GR.um*Math.floor(1200/GR.um);}else{el.step=pro&&GR?10:50;el.min=300;el.max=1200;}el.value=O.grind;}
+  $('ggrinderOut').textContent=GR?(GR.um?gStepTxt(GR):'以 μm 設定')+'・細粉'+(GR.fines<.1?'少':GR.fines<.16?'中等':GR.fines<.25?'偏多':'很多'):'不指定時不計細粉與塞水';
+  {const el=$('ggrind');if(GR&&GR.um){gRange(el,GR);}else{el.step=pro&&GR?10:50;el.min=300;el.max=1200;}el.value=O.grind;}
   $('gratioOut').innerHTML='1:'+O.ratio+' <span class="label">'+Math.round(doseOf(applyRule(curL(),O))*O.ratio)+' ml</span>';
   $('gsteepOut').textContent=fmtT(O.steep);
   syncCost();
@@ -2207,7 +2214,7 @@ function syncParams(){
 $('gfilter').querySelectorAll('button').forEach(b=>b.onclick=()=>{O.filter=b.dataset.v;syncParams();});
 $('gprep').querySelectorAll('button').forEach(b=>b.onclick=()=>{O[b.dataset.v]=!O[b.dataset.v];syncParams();});
 ['cutoff','bypassMl'].forEach(id=>$('g'+id).addEventListener('input',e=>{O[id]=+e.target.value;syncParams();}));
-['temp','grind','ratio','steep','dose','swClose','swOpen'].forEach(id=>$('g'+id).addEventListener('input',e=>{O[id]=+e.target.value;if(id==='temp')O.planTemp=null;if(id==='swOpen'||id==='swClose')O.valveWins=null;
+['temp','grind','ratio','steep','dose','swClose','swOpen'].forEach(id=>$('g'+id).addEventListener('input',e=>{O[id]=+e.target.value;if(id==='grind'&&O.grinder){const G=GRINDERS.find(x=>x.id===O.grinder);if(G&&G.um)O.grind=gSnap(G,O.grind);}if(id==='temp')O.planTemp=null;if(id==='swOpen'||id==='swClose')O.valveWins=null;
   if(id==='ratio'||id==='dose')gEven(O.plan.length-1);if(id==='dose')renderChoices();syncParams();}));
 [['gdpat','dpat'],['gswMode','swMode'],['gMode','mode']].forEach(([id,k])=>$(id).querySelectorAll('button').forEach(b=>b.onclick=()=>{O[k]=b.dataset.v;if(k==='swMode')O.valveWins=null;
   if(k==='mode'){save.mode=O.mode;persist();if(O.mode==='simple'&&O.ratio%0.5){O.ratio=Math.round(O.ratio*2)/2;}$('gratio').value=O.ratio;}
@@ -2224,7 +2231,7 @@ function recipeText(o){const B=BEANS.find(b=>b.id===o.bean),R=BREWERS.find(b=>b.
     const how=press?'浸泡 '+fmtT(o.steep):sw?(o.valveWins?'冠軍分段開關閥':o.swMode==='openFirst'?'先開後關 '+fmtT(o.swClose)+'–'+fmtT(o.swOpen):'先關後開 開閥 '+fmtT(o.swOpen))+'・'+o.plan.join('/')+'ml':
       o.dpat==='cont'?'一刀流':(o.plan.length-1)+' 段 '+o.plan.join('/')+'ml';
     const G=o.grinder?GRINDERS.find(g=>g.id===o.grinder):null;
-    return '精細・'+B.name+'・'+R.name+(G?'・'+G.name.replace(/^(Comandante|1Zpresso|Option-O Lagom|Mahlkönig|Kingrinder|Baratza) /,'')+(G.um?' '+Math.round(o.grind/G.um)+'格':''):'')+'・'+o.dose+'g・'+(tl?'':o.temp+'°C・')+o.grind+'μm・1:'+o.ratio+'・'+how+tl+'・'+(press?STIRI[o.stirI]:STIRP[o.stirP]);}
+    return '精細・'+B.name+'・'+R.name+(G?'・'+G.name.replace(/^(Comandante|1Zpresso|Option-O Lagom|Mahlkönig|Kingrinder|Baratza) /,'')+(G.um?' '+gDial(G,o.grind).replace(/^第 (\d+) 格$/,'$1格'):''):'')+'・'+o.dose+'g・'+(tl?'':o.temp+'°C・')+o.grind+'μm・1:'+o.ratio+'・'+how+tl+'・'+(press?STIRI[o.stirI]:STIRP[o.stirP]);}
   return B.name+'・'+R.name+'・'+o.temp+'°C・'+o.grind+'μm・1:'+o.ratio+'・'+(drip?{three:'三段式',cont:'一刀流',multi:'少量多次'}[o.pour]:(o.brewer==='switch'?'開閥 ':'浸泡 ')+fmtT(o.steep))+(o.stir==='none'?'・不攪拌':'・攪拌');}
 
 function dimRow(k,v,t,pts){
@@ -2310,7 +2317,7 @@ $('nextBtn').onclick=()=>openLevel(cur+1);
 
 // ---- grinder select ----
 $('ggrinder').innerHTML='<option value="">不指定</option>'+GRINDERS.map(g=>'<option value="'+g.id+'">'+g.name+'｜'+g.type+'</option>').join('');
-$('ggrinder').addEventListener('change',e=>{O.grinder=e.target.value||null;const g=GRINDERS.find(x=>x.id===O.grinder);if(g&&g.um)O.grind=Math.round(O.grind/g.um)*g.um;syncParams();});
+$('ggrinder').addEventListener('change',e=>{O.grinder=e.target.value||null;const g=GRINDERS.find(x=>x.id===O.grinder);if(g&&g.um)O.grind=gSnap(g,O.grind);syncParams();});
 
 // ---- champion recipes in detailed mode ----
 $('gchamp').innerHTML='<option value="">選一位冠軍，自動填入他的參數</option>'+ALL_RECIPES.map(c=>'<option value="'+c.id+'">'+c.year+'｜'+c.name+'（'+c.country+'）'+(c.id.startsWith('wbrc')?'':'｜'+c.method)+'</option>').join('');
@@ -2328,7 +2335,7 @@ const POURN={three:'三段式',cont:'一刀流',multi:'少量多次'}, DPATN={pu
 function params(o){
   const B=BEANS.find(b=>b.id===o.bean),R=BREWERS.find(b=>b.id===o.brewer),pro=o.mode==='pro',sw=o.brewer==='switch',press=o.brewer==='press',drip=isDrip(o);
   const P=(isComp()?[]:[{k:'成本',t:'NT$'+cupCost(o),n:cupCost(o),u:' 元'}]).concat([{k:'設定',t:pro?'精細':'簡單'},{k:'豆子',t:B.name+'（'+B.sub.split('・')[0]+'）'},{k:'器具',t:R.name}]);
-  if(pro&&o.grinder){const G=GRINDERS.find(g=>g.id===o.grinder);if(G)P.push({k:'磨豆機',t:G.name+(G.um?'（第 '+Math.round(o.grind/G.um)+' 格）':'')});}
+  if(pro&&o.grinder){const G=GRINDERS.find(g=>g.id===o.grinder);if(G)P.push({k:'磨豆機',t:G.name+(G.um?'（'+gDial(G,o.grind)+'）':'')});}
   if(pro)P.push({k:'粉量',t:o.dose+' g',n:o.dose,u:' g'});
   const usesPlan=pro&&!press&&(sw||o.dpat==='pulse');
   if(usesPlan&&o.planTemp)P.push({k:'水溫',t:'各注 '+o.planTemp.join('/')+' °C'});else P.push({k:'水溫',t:o.temp+' °C',n:o.temp,u:' °C'});
