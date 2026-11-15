@@ -100,12 +100,18 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
 .stepper button{background:transparent;border:0;color:var(--ink);font:inherit;font-size:17px;width:34px;height:34px;cursor:pointer}
 .stepper button:disabled{opacity:.3;cursor:default}
 .stepper span{min-width:4.2em;text-align:center;font-size:13px}
-.pours{display:flex;flex-wrap:wrap;gap:8px}
-.pour{display:grid;grid-template-columns:auto 72px;gap:4px 6px;align-items:center;border:1px solid var(--line);border-radius:8px;padding:8px 10px}
+.pours{display:grid;grid-template-columns:repeat(auto-fill,minmax(128px,1fr));gap:8px}
+.pour{display:grid;grid-template-columns:1fr;gap:4px 6px;align-items:center;border:1px solid var(--line);border-radius:8px;padding:8px 10px}
 .pour .ptitle{grid-column:1 / -1;font-size:12px;font-weight:700}
 .pour small{grid-column:1 / -1}
-.pour label{font-size:11px;color:var(--muted)}
-.pour input{width:72px;font-family:var(--f-mono);font-size:14px;padding:5px 6px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink)}
+.pour label{font-size:11px;color:var(--muted);margin-top:2px}
+.stepper{display:flex;align-items:stretch;min-width:0}
+.stepper button{flex:0 0 30px;height:32px;border:1px solid var(--line);background:var(--panel);color:var(--ink);font-size:16px;line-height:1;padding:0;cursor:pointer}
+.stepper button:first-child{border-radius:6px 0 0 6px;border-right:0}.stepper button:last-child{border-radius:0 6px 6px 0;border-left:0}
+.stepper button:active{background:var(--accent);color:var(--accent-ink)}
+.stepper input{border-radius:0!important;text-align:center;min-width:0;flex:1}
+.ratioLive{color:var(--accent)}
+.pour input{width:100%;box-sizing:border-box;font-family:var(--f-mono);font-size:14px;padding:5px 6px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink)}
 .pour small{font-size:10px;color:var(--muted);font-family:var(--f-mono)}
 .savebtn{background:transparent;border:1px solid var(--accent);color:var(--accent);border-radius:8px;font:inherit;font-weight:700;padding:7px 14px;cursor:pointer}
 .saved{display:flex;flex-direction:column;gap:12px}
@@ -1248,6 +1254,22 @@ function oilOf(method,p,s){const tr=filterOf(method,p)==='metal'?.6:.08,rf=.7+.1
 // 口感顯示用：內部 0–10，畫面顯示滿分 5
 const T5=v=>(v/2).toFixed(1);
 
+// 分段注水卡片的 −／＋ 按鈕：不用每次手動輸入數字
+// opts: step, min, max, parse(str)->number, fmt(number)->str
+function stepify(inp,o){if(typeof document==='undefined'||!inp||inp.dataset.stepped)return;inp.dataset.stepped=1;
+  const parse=o.parse||(s=>+s),fmt=o.fmt||(v=>String(v));
+  const wrap=document.createElement('div');wrap.className='stepper';inp.parentNode.insertBefore(wrap,inp);
+  const mk=(t,d,lab)=>{const b=document.createElement('button');b.type='button';b.textContent=t;b.setAttribute('aria-label',lab);
+    b.onclick=()=>{let v=parse(inp.value);if(v==null||isNaN(v))v=o.min;v=Math.max(o.min,Math.min(o.max,Math.round((v+d)/o.step)*o.step));inp.value=fmt(v);inp.dispatchEvent(new Event('change'));};return b;};
+  const lab=inp.getAttribute('aria-label')||'';
+  wrap.appendChild(mk('−',-o.step,'減少'+lab));wrap.appendChild(inp);wrap.appendChild(mk('＋',o.step,'增加'+lab));}
+// 每張注水卡片：加上 −／＋，並在底部顯示累計水量與當下粉水比
+function enhancePours(box,plan,dose,fmtT,parseT){
+  let cum=0;box.querySelectorAll('.pour').forEach((d,i)=>{const ins=d.querySelectorAll('input');
+    stepify(ins[0],{step:5,min:0,max:400});stepify(ins[1],{step:5,min:0,max:600,parse:parseT,fmt:fmtT});
+    stepify(ins[2],{step:1,min:1,max:120});stepify(ins[3],{step:1,min:70,max:100});
+    cum+=plan[i];const sm=d.querySelector('small');if(sm)sm.innerHTML=sm.innerHTML+'<br>累計 '+cum+' ml・1:'+(cum/dose).toFixed(1);});}
+
 </script>
 <script>
 (function(){
@@ -1293,9 +1315,9 @@ function renderPlan(){
   P.plan.forEach((ml,i)=>{const d=document.createElement('div');d.className='pour';const id='pour'+i;
     const fixT=()=>{if(!P.planT)P.planT=seg.map(g=>Math.round(g.s));if(!P.planD)P.planD=seg.map(g=>Math.round(g.e-g.s));};
     d.innerHTML='<div class="ptitle">'+(i?'第 '+i+' 注':'悶蒸')+'</div>'+
-      '<label for="'+id+'">ml</label><input id="'+id+'" type="number" inputmode="numeric" min="0" max="400" step="5" value="'+ml+'">'+
+      '<label for="'+id+'">ml</label><input id="'+id+'" type="number" inputmode="numeric" min="0" max="400" step="5" value="'+ml+'" aria-label="'+(i?'第 '+i+' 注':'悶蒸')+'水量">'+
       '<label for="'+id+'t">開始</label><input id="'+id+'t" type="text" inputmode="numeric" value="'+fmtT(seg[i].s)+'" aria-label="'+(i?'第 '+i+' 注':'悶蒸')+'開始時間">'+
-      '<label for="'+id+'d">秒數</label><input id="'+id+'d" type="number" inputmode="numeric" min="1" max="120" step="1" value="'+Math.round(seg[i].e-seg[i].s)+'">'+'<label for="'+id+'c">水溫</label><input id="'+id+'c" type="number" inputmode="numeric" min="70" max="100" step="1" value="'+(P.planTemp?P.planTemp[i]:P.temp)+'" aria-label="'+(i?'第 '+i+' 注':'悶蒸')+'水溫 °C">'+
+      '<label for="'+id+'d">秒數</label><input id="'+id+'d" type="number" inputmode="numeric" min="1" max="120" step="1" value="'+Math.round(seg[i].e-seg[i].s)+'" aria-label="'+(i?'第 '+i+' 注':'悶蒸')+'秒數">'+'<label for="'+id+'c">水溫</label><input id="'+id+'c" type="number" inputmode="numeric" min="70" max="100" step="1" value="'+(P.planTemp?P.planTemp[i]:P.temp)+'" aria-label="'+(i?'第 '+i+' 注':'悶蒸')+'水溫 °C">'+
       '<small>'+(ml/Math.max(1,seg[i].e-seg[i].s)).toFixed(1)+' ml/s</small>';
     const [iml,it,idur,itc]=d.querySelectorAll('input');itc.addEventListener('change',e=>{const v=Math.max(70,Math.min(100,Math.round(+e.target.value||P.temp)));if(!P.planTemp)P.planTemp=P.plan.map(()=>P.temp);P.planTemp[i]=v;if(P.planTemp.every(x=>x===P.temp))P.planTemp=null;run();});
     iml.addEventListener('change',e=>{let v=Math.max(0,Math.min(400,Math.round(+e.target.value||0)));
@@ -1304,10 +1326,11 @@ function renderPlan(){
       fixT();P.planT[i]=v;run();});
     idur.addEventListener('change',e=>{const v=Math.max(1,Math.min(120,Math.round(+e.target.value||1)));fixT();P.planD[i]=v;run();});
     box.appendChild(d);});
+  enhancePours(box,P.plan,P.dose,fmtT,parseT);
   $('planN').textContent=(P.plan.length-1)+' 注';
   $('planMinus').disabled=P.plan.length<=2; $('planPlus').disabled=P.plan.length>=7;
   const W=P.plan.reduce((a,b)=>a+b,0);
-  $('planOut').textContent='合計 '+W+' ml · 最後一注 '+fmtT(seg[seg.length-1].e)+' 結束';
+  $('planOut').innerHTML='合計 <b>'+W+' ml</b>・粉 '+P.dose+' g → <b class="ratioLive">1:'+(W/P.dose).toFixed(1)+'</b> · 最後一注 '+fmtT(seg[seg.length-1].e)+' 結束';
 }
 function syncRatio(){const W=P.plan.reduce((a,b)=>a+b,0);P.ratio=Math.max(1,W)/P.dose;$('ratio').value=P.ratio;}
 function presetTimes(){
@@ -1959,9 +1982,9 @@ function renderGPlan(){
   const fixT=()=>{if(!O.planT)O.planT=seg.map(g=>Math.round(g.s));if(!O.planD)O.planD=seg.map(g=>Math.round(g.e-g.s));};
   O.plan.forEach((ml,i)=>{const d=document.createElement('div');d.className='pour';const id='gpour'+i,nm=i?'第 '+i+' 注':'悶蒸';
     d.innerHTML='<div class="ptitle">'+nm+'</div>'+
-      '<label for="'+id+'">ml</label><input id="'+id+'" type="number" inputmode="numeric" min="0" max="400" step="5" value="'+ml+'">'+
+      '<label for="'+id+'">ml</label><input id="'+id+'" type="number" inputmode="numeric" min="0" max="400" step="5" value="'+ml+'" aria-label="'+nm+'水量">'+
       '<label for="'+id+'t">開始</label><input id="'+id+'t" type="text" inputmode="numeric" value="'+fmtT(seg[i].s)+'" aria-label="'+nm+'開始時間">'+
-      '<label for="'+id+'d">秒數</label><input id="'+id+'d" type="number" inputmode="numeric" min="1" max="120" step="1" value="'+Math.round(seg[i].e-seg[i].s)+'">'+
+      '<label for="'+id+'d">秒數</label><input id="'+id+'d" type="number" inputmode="numeric" min="1" max="120" step="1" value="'+Math.round(seg[i].e-seg[i].s)+'" aria-label="'+nm+'秒數">'+
       '<label for="'+id+'c">水溫</label><input id="'+id+'c" type="number" inputmode="numeric" min="70" max="100" step="1" value="'+(O.planTemp?O.planTemp[i]:O.temp)+'" aria-label="'+nm+'水溫 °C">'+
       '<small>'+(ml/Math.max(1,seg[i].e-seg[i].s)).toFixed(1)+' ml/s</small>';
     const [iml,it,idur,itc]=d.querySelectorAll('input');
@@ -1972,9 +1995,10 @@ function renderGPlan(){
     it.addEventListener('change',e=>{const v=parseT(e.target.value);if(v==null){e.target.value=fmtT(seg[i].s);return;}fixT();O.planT[i]=v;syncParams();});
     idur.addEventListener('change',e=>{fixT();O.planD[i]=Math.max(1,Math.min(120,Math.round(+e.target.value||1)));syncParams();});
     box.appendChild(d);});
+  enhancePours(box,O.plan,O.dose,fmtT,parseT);
   $('gplanN').textContent=(O.plan.length-1)+' 注';
   $('gplanMinus').disabled=O.plan.length<=2;$('gplanPlus').disabled=O.plan.length>=7;
-  $('gplanOut').textContent='合計 '+O.plan.reduce((a,b)=>a+b,0)+' ml · 最後一注 '+fmtT(seg[seg.length-1].e)+' 結束';
+  {const W=O.plan.reduce((a,b)=>a+b,0);$('gplanOut').innerHTML='合計 <b>'+W+' ml</b>・粉 '+O.dose+' g → <b class="ratioLive">1:'+(W/O.dose).toFixed(1)+'</b> · 最後一注 '+fmtT(seg[seg.length-1].e)+' 結束';}
 }
 function syncCost(){if(isComp()){$('costLine').hidden=true;return;}$('costLine').hidden=false;const L=LEVELS[cur],c=cupCost(O),bc=beanCost(O),over=c>L.budget;
   $('costLine').innerHTML='這杯成本 <b>NT$'+c+'</b>（豆子 '+bc+' ＋ 其他 '+FIXED_COST+'）・預算 <b>NT$'+L.budget+'</b>・'+(over?'<span class="over">超出 NT$'+(c-L.budget)+'，客人付不起</span>':'利潤 <b>NT$'+(L.budget-c)+'</b>');}
