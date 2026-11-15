@@ -105,6 +105,25 @@ table.t td.n{text-align:center;font-variant-numeric:tabular-nums}
 .chart{position:relative}
 .chart svg{width:100%;height:auto;display:block}
 .tip{position:absolute;pointer-events:none;background:var(--ink);color:#fff;font-size:12px;padding:5px 8px;border-radius:8px;white-space:nowrap;transform:translate(-50%,-110%);display:none}
+.avatar{width:84px;height:84px;border-radius:50%;flex:none;position:relative;cursor:pointer;background:var(--soft);display:flex;align-items:center;justify-content:center;font-size:44px;overflow:visible;border:0;padding:0}
+.avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%;display:block}
+.avatar .cam{position:absolute;right:-2px;bottom:-2px;width:28px;height:28px;border-radius:50%;background:var(--accent);color:#fff;font-size:14px;display:flex;align-items:center;justify-content:center;border:2px solid #fff}
+.cloud{flex:none;border:1px solid rgba(255,255,255,.35);background:rgba(255,255,255,.12);color:#fff;font:inherit;font-size:13px;border-radius:18px;padding:6px 10px;display:flex;align-items:center;gap:5px;cursor:pointer;white-space:nowrap}
+.cloud .dt{width:8px;height:8px;border-radius:50%;background:#bdb3a9}
+.cloud.on .dt{background:#4ade80}.cloud.err .dt{background:#fbbf24}.cloud.busy .dt{background:#60a5fa;animation:bl 1s infinite}
+@keyframes bl{50%{opacity:.3}}
+.hav{width:36px;height:36px;border-radius:50%;object-fit:cover;border:2px solid rgba(255,255,255,.7);flex:none}
+.scan{background:#fff;border:1px dashed #cdbba7;border-radius:12px;padding:10px;margin-bottom:4px}
+.scan .row{flex-wrap:wrap}
+.thumbs{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+.thumbs div{position:relative}
+.thumbs img{width:64px;height:64px;object-fit:cover;border-radius:10px;display:block;border:1px solid var(--line)}
+.thumbs button{position:absolute;top:-6px;right:-6px;width:22px;height:22px;border-radius:50%;border:0;background:var(--ink);color:#fff;font-size:12px;cursor:pointer}
+.ocrst{font-size:13px;margin-top:8px;line-height:1.5}
+.ocrok{background:var(--okbg);color:#1f6b43;border-radius:10px;padding:8px 10px;margin-top:8px;font-size:13px;line-height:1.5}
+.lines{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px;max-height:150px;overflow:auto}
+.lines button{font:inherit;font-size:12px;border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:4px 7px;cursor:pointer;text-align:left;max-width:100%}
+.food .ic img{width:44px;height:44px;border-radius:12px;object-fit:cover}
 .sync{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .toast{position:fixed;left:50%;bottom:calc(86px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--ink);color:#fff;font-size:14px;padding:9px 16px;border-radius:20px;z-index:30;max-width:90vw;text-align:center;display:none}
 .rank{display:flex;gap:8px;align-items:center;padding:7px 0;border-top:1px solid var(--line);cursor:pointer}
@@ -115,7 +134,9 @@ table.t td.n{text-align:center;font-variant-numeric:tabular-nums}
 <body>
 <header>
   <a href="../" aria-label="回 App 目錄">‹</a>
+  <span id="hAv"></span>
   <div style="flex:1"><h1 id="hTitle">🐱 毛毛的飲食紀錄</h1><div class="sub">罐頭過敏・喜好・熱量・減重</div></div>
+  <button class="cloud" id="hCloud" aria-label="雲端存檔"><span class="dt"></span><span id="hCloudT">☁️ 雲端存檔</span></button>
 </header>
 <main id="view"></main>
 <nav id="nav">
@@ -189,7 +210,8 @@ $("#nav").onclick=e=>{const b=e.target.closest("button");if(b)go(b.dataset.v)};
 window.addEventListener("hashchange",()=>{const v=location.hash.slice(1);if(v&&v!==V){V=v;render()}});
 function render(){
   document.querySelectorAll("#nav button").forEach(b=>b.classList.toggle("on",b.dataset.v===V));
-  $("#hTitle").textContent="🐱 "+(S.cat.name||"毛毛")+"的飲食紀錄";
+  $("#hTitle").textContent=(S.cat.photo?"":"🐱 ")+(S.cat.name||"毛毛")+"的飲食紀錄";
+  $("#hAv").innerHTML=S.cat.photo?`<img class="hav" src="${S.cat.photo}" alt="">`:"";
   ({today:vToday,foods:vFoods,history:vHistory,analysis:vAnalysis,cat:vCat}[V]||vToday)();
 }
 const alPill=s=>`<span class="pill ${AL[s||"unk"].c}">${AL[s||"unk"].n}</span>`;
@@ -316,7 +338,7 @@ function vFoods(){
 }
 function foodCard(f){
   const st=foodStats(f.id),per=f.kcal100&&f.serving?Math.round(f.kcal100*f.serving/100):null;
-  return `<div class="card food" data-food="${f.id}"><div class="ic">${TYPES[f.type||"can"].i}</div><div class="b">
+  return `<div class="card food" data-food="${f.id}"><div class="ic">${f.photo?`<img src="${f.photo}" alt="">`:TYPES[f.type||"can"].i}</div><div class="b">
    <div class="nm">${esc(f.name)}</div><div class="br">${esc(f.brand||"")}${f.brand?"・":""}${TYPES[f.type||"can"].n}</div>
    <div class="meta">${alPill(f.allergy)}<span class="pill tagp">${likeTxt(f.like)}</span>${(f.prot||[]).map(p=>`<span class="pill tagp">${esc(p)}</span>`).join("")}</div>
    ${f.symptoms&&f.symptoms.length&&ALLERGIC(f.allergy)?`<div class="muted" style="margin-top:4px">症狀：${esc(f.symptoms.join("、"))}</div>`:""}
@@ -328,6 +350,10 @@ function foodSheet(f,after){
   f=f?JSON.parse(JSON.stringify(f)):{id:uid(),name:"",brand:"",type:"can",prot:[],kcal100:"",serving:"",allergy:"unk",symptoms:[],like:0,note:""};
   f.prot=f.prot||[];f.symptoms=f.symptoms||[];
   open(`<h3>${isNew?"新增食物":"編輯食物"}<button data-x>×</button></h3>
+  <div class="scan"><div class="row"><button class="btn pri" id="fCam" type="button">📷 拍罐頭自動填</button><button class="btn" id="fAlb" type="button">🖼️ 從相簿選</button></div>
+   <input type="file" id="fCamF" accept="image/*" capture="environment" style="display:none"><input type="file" id="fAlbF" accept="image/*" multiple style="display:none">
+   <div class="hint">拍正面拿名稱；拍背面的成分和營養標示拿熱量、淨重、肉類。可以拍好幾張，結果會累加。字要拍清楚、拍正。</div>
+   <div class="thumbs" id="fThumbs"></div><div id="fOcr"></div></div>
   <label class="f">名稱</label><input class="f" id="fN" value="${esc(f.name)}" placeholder="例如：雞肉鮭魚主食罐">
   <div class="two"><div><label class="f">品牌</label><input class="f" id="fB" value="${esc(f.brand||"")}" placeholder="例如：汪喵星球"></div>
   <div><label class="f">種類</label><select class="f" id="fT">${Object.entries(TYPES).map(([k,v])=>`<option value="${k}" ${f.type===k?"selected":""}>${v.i} ${v.n}</option>`).join("")}</select></div></div>
@@ -346,6 +372,7 @@ function foodSheet(f,after){
   ${!isNew?foodHistory(f.id):""}
   <div class="actions">${isNew?"":`<button class="btn del" id="fDel">刪除</button>`}<button class="btn pri" id="fSave">儲存</button></div>`);
   multi("#fP",f.prot);multi("#fSym",f.symptoms);
+  scanSetup(f);
   const symVis=()=>$("#fSymBox").style.display=f.allergy==="unk"||f.allergy==="none"?"none":"";symVis();
   opt("#fA",v=>{f.allergy=v;symVis()});opt("#fL",v=>f.like=+v);
   const kh=()=>{const k=+$("#fK").value,s=+$("#fS").value;$("#fKH").textContent=k&&s?`一罐／一份約 ${Math.round(k*s/100)} kcal`:"包裝寫 kcal/kg 的話除以 10；只寫「一罐 xx kcal」的話，用 xx ÷ 罐重 × 100。"};
@@ -422,7 +449,15 @@ function vCat(){
     if(days>=6){const wk=(a.kg-b.kg)/b.kg*100/(days/7);
       trend=`<div class="hint" style="margin-top:6px">最近每週 ${wk<=0?"減少":"增加"} <b>${Math.abs(r1(wk))}%</b> 體重${wk<0&&wk>=-2?"（✅ 在建議的每週 0.5–2% 之內）":wk<-2?"（⚠️ 減太快了，貓咪減太快可能傷肝，請問獸醫）":wk>0?"（還在增加，可以再減一點熱量或確認零食）":""}</div>`}}
   $("#view").innerHTML=`
-  <div class="card"><div class="row"><span style="font-size:40px">🐱</span><div style="flex:1"><label class="f" style="margin-top:0">貓咪名字</label><input class="f" id="cName" value="${esc(S.cat.name||"")}"></div></div></div>
+  <div class="card"><div class="row" style="gap:14px"><button class="avatar" id="cAv" aria-label="上傳照片">${S.cat.photo?`<img src="${S.cat.photo}" alt="">`:"🐱"}<span class="cam">📷</span></button><input type="file" id="cAvF" accept="image/*" style="display:none">
+   <div style="flex:1;min-width:0"><label class="f" style="margin-top:0">貓咪名字</label><input class="f" id="cName" value="${esc(S.cat.name||"")}">
+   <div class="hint">點頭像換照片${S.cat.photo?`・<a href="#" id="cAvDel" style="color:var(--mute)">移除照片</a>`:""}</div></div></div></div>
+<h2>☁️ 雲端存檔與備份</h2>
+  <div class="card">
+   <div class="sync" id="syncRow" style="margin-bottom:10px"><button class="btn pri" id="gBtn"><span id="gBtnT">☁️ 用 Google 帳號同步</span></button><span class="muted" id="syncNote">存到你自己的 Google 雲端硬碟，換手機也看得到</span></div>
+   <div class="row"><button class="btn" id="exp">⬇️ 匯出備份</button><button class="btn" id="imp">⬆️ 匯入備份</button><input type="file" id="impF" accept=".json,application/json" style="display:none"></div>
+   <div class="hint">連上 Google 後，每次修改都會自動存到你自己的 Google 雲端硬碟（隱藏的 App 資料夾，別人看不到）；換手機登入同一個帳號會自動合併回來。沒連的話資料只存在這支手機的瀏覽器裡，記得定期匯出備份。<br>食物 ${foods().length} 款・餐點紀錄 ${logs().length} 筆・體重 ${W.length} 筆</div>
+  </div>
   <div class="stat"><div><b>${cw!=null?cw:"–"}</b><span>目前 kg</span></div><div><b>${t||"–"}</b><span>目標 kg</span></div><div><b>${cw&&t?r1(cw-t):"–"}</b><span>還差 kg</span></div></div>
   <h2>體重紀錄<span class="r"><button class="btn pri sm" id="wAdd">＋ 記體重</button></span></h2>
   <div class="card">${W.length?weightChart(W,t):`<div class="empty">定期量一次體重（例如每週同一天、吃飯前），就能看減重進度。</div>`}${trend}
@@ -436,12 +471,10 @@ function vCat(){
    <input class="f" type="number" inputmode="numeric" id="cG" value="${S.cat.goal||""}" placeholder="${ag||""}">
    <div class="hint">現在使用：<b>${goal()?goal()+" kcal/天":"未設定"}</b>。計算只是起點，實際份量請和獸醫確認，並依體重變化調整。</div>
   </div>
-  <h2>資料備份與同步</h2>
-  <div class="card">
-   <div class="sync" id="syncRow" style="display:none;margin-bottom:10px"><button class="btn pri" id="gBtn"><span id="gBtnT">☁️ 用 Google 帳號同步</span></button><span class="muted" id="syncNote">存到你自己的 Google 雲端硬碟，換手機也看得到</span></div>
-   <div class="row"><button class="btn" id="exp">⬇️ 匯出備份</button><button class="btn" id="imp">⬆️ 匯入備份</button><input type="file" id="impF" accept=".json,application/json" style="display:none"></div>
-   <div class="hint">資料平常存在這支手機的瀏覽器裡。食物 ${foods().length} 款・餐點紀錄 ${logs().length} 筆・體重 ${W.length} 筆</div>
-  </div>`;
+`;
+  $("#cAv").onclick=()=>$("#cAvF").click();
+  $("#cAvF").onchange=e=>{const f=e.target.files[0];if(!f)return;photoFrom(f).then(u=>{S.cat.photo=u;S.cat.updatedAt=Date.now();save();render();toast("照片已更新")}).catch(()=>toast("⚠️ 這張照片讀不出來，換一張試試"))};
+  if($("#cAvDel"))$("#cAvDel").onclick=e=>{e.preventDefault();if(confirm("移除照片？")){S.cat.photo=null;S.cat.updatedAt=Date.now();save();render()}};
   $("#cName").onchange=e=>{S.cat.name=e.target.value.trim()||"毛毛";S.cat.updatedAt=Date.now();save();render()};
   $("#cT").onchange=e=>{S.cat.target=+e.target.value||null;S.cat.updatedAt=Date.now();save();vCat()};
   $("#cF").onchange=e=>{S.cat.factor=+e.target.value;S.cat.updatedAt=Date.now();save();vCat()};
@@ -494,6 +527,84 @@ function bindChart(){
   hit.addEventListener("mouseleave",out);hit.addEventListener("touchend",()=>setTimeout(out,1500));
 }
 
+/* 照片：裁成正方形、縮到 320px 存成 JPEG（約 20–40KB，可一起同步） */
+function photoFrom(file){return new Promise((ok,no)=>{const u=URL.createObjectURL(file),im=new Image();
+  im.onload=()=>{const n=Math.min(im.naturalWidth,im.naturalHeight),z=320,c=document.createElement("canvas");c.width=c.height=z;
+    c.getContext("2d").drawImage(im,(im.naturalWidth-n)/2,(im.naturalHeight-n)/2,n,n,0,0,z,z);URL.revokeObjectURL(u);ok(c.toDataURL("image/jpeg",.82))};
+  im.onerror=()=>{URL.revokeObjectURL(u);no()};im.src=u})}
+
+/* ---------- 拍照辨識罐頭（Tesseract.js，在手機上辨識，不上傳照片） ---------- */
+const PSYN={"雞":/雞肉|雞胸|雞腿|雞肝|雞心|雞胗|雞骨|雞油|雞湯|雞粉|雞皮|鶏|チキン|\bchicken\b/i,"火雞":/火雞|\bturkey\b|ターキー/i,"鴨":/鴨|\bduck\b|ダック/i,"鵝":/鵝|\bgoose\b/i,
+ "牛":/牛肉|牛肝|牛心|牛肚|牛腱|牛筋|\bbeef\b|ビーフ/i,"羊":/羊肉|羔羊|羊肝|羊心|\blamb\b|\bmutton\b|ラム/i,"豬":/豬|\bpork\b|ポーク/i,"兔":/兔|\brabbit\b/i,"鹿":/鹿|\bvenison\b|\bdeer\b/i,"袋鼠":/袋鼠|\bkangaroo\b/i,
+ "鮪魚":/鮪|金槍魚|\btuna\b|まぐろ|マグロ/i,"鰹魚":/鰹|柴魚|\bbonito\b|かつお|カツオ|skipjack/i,"鮭魚":/鮭|三文魚|\bsalmon\b|サーモン/i,"白身魚":/白身魚|白肉魚|鱈|鯛|鱸|\bwhitefish\b|\bcod\b|\bpollock\b|\bhoki\b/i,
+ "鯖魚":/鯖|\bmackerel\b|サバ/i,"沙丁魚":/沙丁|\bsardines?\b|いわし|イワシ/i,"蝦蟹貝":/蝦|蟹|干貝|淡菜|蛤|貽貝|\bshrimp\b|\bprawns?\b|\bcrab\b|\bmussels?\b|\bclams?\b|ホタテ/i,
+ "雞蛋":/雞蛋|蛋黃|全蛋|蛋粉|\beggs?\b|卵/i,"乳製品":/牛奶|羊奶|奶粉|起司|乳酪|優格|乳清|\bmilk\b|\bcheese\b|\bwhey\b|\byogh?urt\b/i,
+ "穀物/麩質":/小麥|麩質|玉米|糙米|白米|米粉|燕麥|大麥|麥|\bwheat\b|\bcorn\b|\brice\b|\bgluten\b|\boats?\b|\bbarley\b/i,"豆類":/豌豆|大豆|黃豆|扁豆|鷹嘴豆|豆粉|\bpeas?\b|\bsoy|\blentils?\b|\bchickpeas?\b/i};
+function parseLabel(raw){
+  let t=raw.replace(/[０-９]/g,c=>String.fromCharCode(c.charCodeAt(0)-65248)).replace(/[／]/g,"/").replace(/[：]/g,":").replace(/[，]/g,",").replace(/[．。]/g,".");
+  let z=t.replace(/\s+/g,"").toLowerCase().replace(/大卡|千卡|仟卡/g,"kcal").replace(/公克|克(?!力)/g,"g").replace(/公斤/g,"kg").replace(/(\d),(\d{3})/g,"$1$2");
+  const num=x=>parseFloat(x),out={};let m;
+  /* 淨重 */
+  if(m=z.match(/(?:淨重|淨含量|內容量|内容量|容量|重量|netwt\.?|netweight|net)[:]?(\d+(?:\.\d+)?)(kg|g)/))out.serving=num(m[1])*(m[2]==="kg"?1000:1);
+  else{const all=[...z.matchAll(/(\d+(?:\.\d+)?)g(?!\/)/g)].map(x=>num(x[1])).filter(v=>v>=30&&v<=1000&&v!==100);if(all.length)out.serving=all[0]}
+  /* 熱量 */
+  if(m=z.match(/(\d+(?:\.\d+)?)kcal\/100g/))out.kcal100=num(m[1]);
+  else if(m=z.match(/100g[^\d]{0,14}?(\d+(?:\.\d+)?)kcal/))out.kcal100=num(m[1]);
+  else if(m=z.match(/(\d+(?:\.\d+)?)kcal\/kg/))out.kcal100=num(m[1])/10;
+  else if(((m=z.match(/(\d+(?:\.\d+)?)kcal\/(?:罐|包|份|can|pouch|tin)/))||(m=z.match(/每(?:罐|包|份)[^\d]{0,8}(\d+(?:\.\d+)?)kcal/)))&&out.serving)out.kcal100=num(m[1])/out.serving*100;
+  else if(m=z.match(/(?:熱量|代謝能|me|energy|エネルギー|能量)[^\d]{0,10}(\d+(?:\.\d+)?)kcal/)){const v=num(m[1]);out.kcal100=v>=1000?v/10:v}
+  if(out.kcal100){out.kcal100=Math.round(out.kcal100*10)/10;if(out.kcal100<30||out.kcal100>650)delete out.kcal100}
+  /* 成分：先拿掉容易誤判的詞 */
+  const c=t.replace(/牛磺酸|蛋白質|粗蛋白|蛋白|乳化|乳酸|雞蛋/g,m=>m==="雞蛋"?"＃蛋＃":"").replace(/火雞/g,"＃火＃");
+  out.prot=Object.keys(PSYN).filter(p=>{if(p==="雞蛋")return /＃蛋＃/.test(c)||PSYN[p].test(c.replace(/＃蛋＃/g,""));if(p==="火雞")return /＃火＃/.test(c)||/\bturkey\b|ターキー/i.test(c);return PSYN[p].test(c)});
+  out.lines=t.split(/\n+/).map(x=>x.replace(/\s{2,}/g," ").trim()).filter(x=>x.replace(/[^\p{L}\p{N}]/gu,"").length>=2).slice(0,40);
+  return out;
+}
+let ocrWorker=null;
+function ocrLoad(){return new Promise((ok,no)=>{if(window.Tesseract)return ok();const sc=document.createElement("script");sc.src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js";sc.onload=ok;sc.onerror=()=>no(new Error("lib"));document.head.appendChild(sc)})}
+async function ocrRun(img,onp){
+  await ocrLoad();
+  if(!ocrWorker)ocrWorker=await Tesseract.createWorker(["chi_tra","eng"],1,{logger:m=>{if(m.status&&onp)onp(m)}});
+  const{data}=await ocrWorker.recognize(img);return data.text||"";
+}
+function imgCanvas(file,max,gray){return new Promise((ok,no)=>{const u=URL.createObjectURL(file),im=new Image();
+  im.onload=()=>{const k=Math.min(1,max/Math.max(im.naturalWidth,im.naturalHeight)),c=document.createElement("canvas");c.width=Math.round(im.naturalWidth*k);c.height=Math.round(im.naturalHeight*k);
+    const x=c.getContext("2d");if(gray)x.filter="grayscale(1) contrast(1.35)";x.drawImage(im,0,0,c.width,c.height);URL.revokeObjectURL(u);ok(c)};
+  im.onerror=()=>{URL.revokeObjectURL(u);no()};im.src=u})}
+function scanSetup(f){
+  let target="name",found={prot:[],lines:[]};
+  const thumbs=()=>{$("#fThumbs").innerHTML=f.photo?`<div><img src="${f.photo}" alt=""><button type="button" id="fPhDel">✕</button></div>`:"";
+    if($("#fPhDel"))$("#fPhDel").onclick=()=>{f.photo=null;thumbs()}};thumbs();
+  const show=()=>{const d=[];if(found.kcal100)d.push(`熱量 <b>${found.kcal100} kcal/100g</b>`);if(found.serving)d.push(`淨重 <b>${found.serving} g</b>`);if(found.prot.length)d.push(`成分 <b>${found.prot.join("、")}</b>`);
+    $("#fOcr").innerHTML=(d.length?`<div class="ocrok">✅ 已自動填入：${d.join("・")}<br><span style="opacity:.8">請對照包裝確認，辨識可能有錯</span></div>`:`<div class="ocrst muted">沒有抓到熱量或成分，可以再拍營養標示那一面，或手動填。</div>`)+
+     (found.lines.length?`<div class="ocrst"><span class="muted">點一行文字填到</span> <span class="opt" id="fTgt" style="display:inline-flex"><button type="button" data-v="name" class="${target==="name"?"on":""}" style="padding:3px 9px;font-size:12px">名稱</button><button type="button" data-v="brand" class="${target==="brand"?"on":""}" style="padding:3px 9px;font-size:12px">品牌</button><button type="button" data-v="note" class="${target==="note"?"on":""}" style="padding:3px 9px;font-size:12px">備註</button></span></div>
+     <div class="lines">${found.lines.map((l,i)=>`<button type="button" data-l="${i}">${esc(l)}</button>`).join("")}</div>`:"");
+    if($("#fTgt"))opt("#fTgt",v=>target=v);
+    $("#fOcr").querySelectorAll("[data-l]").forEach(b=>b.onclick=()=>{const l=found.lines[+b.dataset.l];
+      if(target==="note"){const n=$("#fNote");n.value=(n.value?n.value+"\n":"")+l}else $(target==="name"?"#fN":"#fB").value=l;toast("已填入"+({name:"名稱",brand:"品牌",note:"備註"})[target])})};
+  const apply=r=>{
+    if(r.kcal100&&!$("#fK").value){$("#fK").value=r.kcal100}
+    if(r.serving&&!$("#fS").value){$("#fS").value=r.serving}
+    $("#fK").oninput();
+    r.prot.forEach(p=>{if(!f.prot.includes(p)){f.prot.push(p);const b=document.querySelector(`#fP [data-v="${p}"]`);if(b)b.classList.add("on")}});
+    found.kcal100=found.kcal100||r.kcal100;found.serving=found.serving||r.serving;found.prot=[...new Set([...found.prot,...r.prot])];found.lines=[...found.lines,...r.lines.filter(l=>!found.lines.includes(l))];
+    if(!$("#fN").value&&r.lines.length){const cand=r.lines.find(l=>/罐|主食|餐包|肉泥|飼料|乾糧|凍乾|pat[eé]|can|food/i.test(l));if(cand)$("#fN").value=cand}
+  };
+  const handle=async files=>{
+    for(const file of files){
+      if(!f.photo)try{f.photo=await photoFrom(file);thumbs()}catch(e){}
+      $("#fOcr").innerHTML=`<div class="ocrst">🔍 辨識中…<span id="fPr"></span><br><span class="muted">第一次用要下載中文辨識資料（約 10MB），請稍等</span></div>`;
+      try{const cv=await imgCanvas(file,1800,true);
+        const text=await ocrRun(cv,m=>{const e=$("#fPr");if(e)e.textContent=({"loading tesseract core":" 載入辨識程式","loading language traineddata":" 下載中文資料","initializing api":" 準備中","recognizing text":" 讀字中"}[m.status]||"")+(m.progress?" "+Math.round(m.progress*100)+"%":"")});
+        apply(parseLabel(text));
+      }catch(e){$("#fOcr").innerHTML=`<div class="warnbox">⚠️ 辨識失敗${e&&e.message==="lib"?"（載入不了辨識程式，請確認網路）":""}，照片已存，可以手動填。</div>`;return}
+    }
+    show();
+  };
+  $("#fCam").onclick=()=>$("#fCamF").click();$("#fAlb").onclick=()=>$("#fAlbF").click();
+  $("#fCamF").onchange=e=>{handle([...e.target.files]);e.target.value=""};$("#fAlbF").onchange=e=>{handle([...e.target.files]);e.target.value=""};
+}
+
 /* ---------- 共用：表單 ---------- */
 function open(html){$("#sheetIn").innerHTML=html;$("#sheet").classList.add("show");document.body.style.overflow="hidden";
   $("#sheetIn").querySelectorAll("[data-x]").forEach(b=>b.onclick=close);$("#sheetIn").scrollTop=0}
@@ -510,14 +621,17 @@ function merge(d){
 
 /* ---------- Google 雲端同步：存成你自己 Google 雲端硬碟裡的隱藏 App 檔案（只在 GitHub 網址上啟用） ---------- */
 let syncUI=null;
+function cloudState(st,t){$("#hCloud").className="cloud "+(st||"");$("#hCloudT").textContent=t}
+$("#hCloud").onclick=()=>{if(window.cloudClick)cloudClick();else{go("cat");toast("雲端存檔要用 roke3852.github.io 的網址打開才能用")}};
 (function(){
-if(!/github\.io$/.test(location.hostname))return;
+if(!/github\.io$/.test(location.hostname)){syncUI=()=>{$("#gBtn").onclick=()=>toast("雲端存檔要用 roke3852.github.io 的網址打開才能用")};return}
 const GCLIENT='267421312122-l2ggo7t35tqpf8ej5osqttt08ke30lr1.apps.googleusercontent.com';
 const GFILE='cat-food-log.json',GAPI='https://www.googleapis.com';
 let gTok=null,gTokExp=0,gFileId=null,gClient=null,gOn=false,pushT=null,noteT='存到你自己的 Google 雲端硬碟，換手機也看得到',btnT='☁️ 用 Google 帳號同步';
 const ls={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
 const note=t=>{noteT=t;const e=$("#syncNote");if(e)e.textContent=t},btn=t=>{btnT=t;const e=$("#gBtnT");if(e)e.textContent=t};
-syncUI=()=>{const r=$("#syncRow");if(!r)return;r.style.display="flex";note(noteT);btn(btnT);$("#gBtn").onclick=()=>{if(gOn&&gTok&&Date.now()<gTokExp){push();return}login()}};
+window.cloudClick=()=>{if(gOn&&gTok&&Date.now()<gTokExp){push(true);return}login()};
+syncUI=()=>{const r=$("#syncRow");if(!r)return;note(noteT);btn(btnT);$("#gBtn").onclick=cloudClick};
 try{const t=JSON.parse(sessionStorage.getItem('cf-gtok')||'null');if(t&&t.exp>Date.now()){gTok=t.tok;gTokExp=t.exp}}catch(e){}
 onSaved=()=>{if(!gOn)return;clearTimeout(pushT);pushT=setTimeout(push,1500)};
 function libLoad(){return new Promise((ok,no)=>{if(window.google&&google.accounts&&google.accounts.oauth2)return ok();const sc=document.createElement('script');sc.src='https://accounts.google.com/gsi/client';sc.onload=()=>ok();sc.onerror=()=>no(new Error('lib'));document.head.appendChild(sc)})}
@@ -528,11 +642,12 @@ async function gf(url,opt={}){
   if(!r.ok)throw new Error('http '+r.status);
   return r;
 }
-function expired(){btn('☁️ 點這裡連回 Google');note('Google 連線已過期，點一下就會繼續同步（資料先存在這台）')}
-async function push(){
+function expired(){btn('☁️ 點這裡連回 Google');note('Google 連線已過期，點一下就會繼續同步（資料先存在這台）');cloudState('err','☁️ 點我連回')}
+async function push(manual){
   if(!gOn)return;
   if(!gTok||Date.now()>gTokExp){expired();return}
   const body=JSON.stringify(S);
+  cloudState('busy','☁️ 存檔中');
   try{
     if(gFileId)await gf(GAPI+'/upload/drive/v3/files/'+gFileId+'?uploadType=media',{method:'PATCH',keepalive:body.length<60000,headers:{'Content-Type':'application/json'},body});
     else{
@@ -541,12 +656,13 @@ async function push(){
       const r=await gf(GAPI+'/upload/drive/v3/files?uploadType=multipart&fields=id',{method:'POST',headers:{'Content-Type':'multipart/related; boundary='+b},body:mp});
       gFileId=(await r.json()).id;
     }
-    btn('☁️ 已連上 Google 同步');note('已同步到 Google 雲端硬碟 '+new Date().toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'}));
-  }catch(e){if(e.message==='auth')expired();else note('⚠️ 雲端同步失敗，資料先存在這台')}
+    const hm=new Date().toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit',hour12:false});
+    btn('☁️ 已連上，點一下立即存檔');note('已存到 Google 雲端硬碟 '+hm);cloudState('on','☁️ 已存 '+hm);if(manual)toast('已存到雲端 '+hm);
+  }catch(e){if(e.message==='auth')expired();else{note('⚠️ 雲端存檔失敗，資料先存在這台');cloudState('err','☁️ 存檔失敗')}}
 }
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&pushT){clearTimeout(pushT);pushT=null;push()}});
 async function afterLogin(){
-  note('正在讀取 Google 雲端的資料…');
+  note('正在讀取 Google 雲端的資料…');cloudState('busy','☁️ 讀取中');
   try{
     const q=encodeURIComponent("name='"+GFILE+"'");
     const j=await (await gf(GAPI+'/drive/v3/files?spaces=appDataFolder&fields=files(id)&q='+q)).json();
@@ -555,7 +671,7 @@ async function afterLogin(){
     gOn=true;ls.set('cf-g','1');
     if(rem&&rem.foods){merge(rem);try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}render()}
     await push();
-  }catch(e){note(e.message==='auth'?'Google 連線已過期，再點一次':'⚠️ 讀取 Google 雲端失敗')}
+  }catch(e){if(e.message==='auth')expired();else{note('⚠️ 讀取 Google 雲端失敗');cloudState('err','☁️ 讀取失敗')}}
 }
 function login(){
   libLoad().then(()=>{
@@ -566,7 +682,7 @@ function login(){
   },()=>note('⚠️ 無法載入 Google 登入，請確認網路'));
 }
 if(gTok&&ls.get('cf-g')==='1')afterLogin();
-else if(ls.get('cf-g')==='1')btn('☁️ 點這裡連回 Google 同步');
+else if(ls.get('cf-g')==='1'){btn('☁️ 點這裡連回 Google 同步');cloudState('err','☁️ 點我連回')}
 })();
 
 render();
