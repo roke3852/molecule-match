@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>C40・ZP6 拆解與組合教學</title>
+<style>
+:root{
+  --bg:#f5efe6; --card:#fffaf3; --ink:#2b211b; --muted:#7a6a5c; --line:#e3d6c5;
+  --accent:#c2410c; --accent-soft:#fde7d9; --ok:#166534; --ok-soft:#e6f4ea; --warn:#b91c1c; --warn-soft:#fdecec;
+  color-scheme: light;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;-webkit-tap-highlight-color:transparent}
+.wrap{max-width:980px;margin:0 auto;padding:14px 14px 40px}
+header h1{font-size:20px;margin:4px 0 2px;letter-spacing:.5px}
+header p{margin:0;color:var(--muted);font-size:13px}
+.bar{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0 10px}
+.seg{display:flex;background:#eadfce;border-radius:12px;padding:3px}
+.seg button{border:0;background:transparent;padding:8px 14px;border-radius:9px;font-size:15px;color:var(--muted);font-weight:600;cursor:pointer;font-family:inherit}
+.seg button.on{background:var(--card);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.seg button small{display:block;font-size:10px;font-weight:500;color:var(--muted)}
+.main{display:grid;grid-template-columns:1.05fr 1fr;gap:14px;align-items:start}
+@media (max-width:760px){.main{grid-template-columns:1fr}}
+.stage{background:var(--card);border:1px solid var(--line);border-radius:16px;position:relative;overflow:hidden;touch-action:pan-y}
+.stage svg{display:block;width:100%;height:auto}
+.qnav{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:8px;background:rgba(245,239,230,.94);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);padding:6px 0 8px}
+.qnav button{width:52px;height:46px;flex:none;border-radius:12px;font-size:26px;font-weight:700;border:1px solid var(--line);background:#fff;color:var(--ink);cursor:pointer;line-height:1}
+.qnav button.next{background:var(--accent);color:#fff;border-color:var(--accent)}
+.qnav button:disabled{opacity:.35;cursor:default}
+.qmid{flex:1;min-width:0;text-align:center;line-height:1.25}
+.qmid span{display:block;font-size:11px;color:var(--accent);font-weight:700}
+.qmid b{display:block;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.toast{position:absolute;left:50%;top:10px;transform:translateX(-50%);background:var(--ink);color:#fff;font-size:13px;padding:5px 12px;border-radius:20px;opacity:0;transition:opacity .25s;pointer-events:none;white-space:nowrap}
+.toast.show{opacity:.92}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px}
+.prog{height:5px;background:#eee3d4;border-radius:5px;overflow:hidden;margin-bottom:12px}
+.prog i{display:block;height:100%;background:var(--accent);width:0;transition:width .4s}
+.stepno{font-size:12px;color:var(--accent);font-weight:700;letter-spacing:1px}
+.card h2{font-size:21px;margin:4px 0 8px}
+.card .txt{font-size:16px;line-height:1.7}
+.note{margin-top:10px;padding:9px 12px;border-radius:10px;font-size:14px;line-height:1.6}
+.note.tip{background:var(--ok-soft);color:var(--ok)}
+.note.warn{background:var(--warn-soft);color:var(--warn)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.chip{font-size:12px;padding:4px 9px;border-radius:20px;background:#efe5d7;color:var(--muted);border:1px solid transparent}
+.chip.on{background:var(--accent-soft);color:var(--accent);border-color:#f3b98f;font-weight:700}
+.chip.gone{opacity:.45;text-decoration:line-through}
+.nav{display:flex;gap:10px;margin-top:16px}
+.nav button{flex:1;padding:13px;border-radius:12px;font-size:16px;font-weight:700;border:1px solid var(--line);background:#fff;color:var(--ink);cursor:pointer;font-family:inherit}
+.nav button.next{background:var(--accent);color:#fff;border-color:var(--accent)}
+.nav button:disabled{opacity:.35;cursor:default}
+.dots{display:flex;gap:6px;justify-content:center;margin-top:12px;flex-wrap:wrap}
+.dots b{width:26px;height:26px;border-radius:50%;background:#efe5d7;color:var(--muted);font-size:12px;display:grid;place-items:center;cursor:pointer;font-weight:600}
+.dots b.on{background:var(--accent);color:#fff}
+.dots b.done{background:#f6cfb4;color:#8a3a12}
+.foot{margin-top:18px;font-size:12px;color:var(--muted);line-height:1.7}
+.foot a{color:var(--accent)}
+/* svg */
+.part{transition:transform .8s cubic-bezier(.6,.05,.3,1),opacity .5s;cursor:pointer}
+.part.active>g{animation:pulse 1.4s ease-in-out infinite}
+.part.active{filter:drop-shadow(0 0 4px rgba(194,65,12,.9))}
+@keyframes pulse{50%{opacity:.6}}
+#rot{transition:opacity .3s}
+#rot .spin{animation:spin 1.6s linear infinite;transform-box:fill-box;transform-origin:center}
+#rot.ccw .spin{animation-direction:reverse}
+@keyframes spin{to{transform:rotate(360deg)}}
+.lbl{font-size:10px;fill:#7a6a5c}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>手搖磨豆機 拆解與組合教學</h1>
+    <p>Comandante C40 ・ 1Zpresso ZP6 Special｜依官方說明整理，圖為剖面示意（非等比例）</p>
+  </header>
+
+  <div class="bar">
+    <div class="seg" id="segG">
+      <button data-g="c40" class="on">C40<small>Comandante</small></button>
+      <button data-g="zp6">ZP6 Special<small>1Zpresso</small></button>
+    </div>
+    <div class="seg" id="segM">
+      <button data-m="dis" class="on">🔧 拆解</button>
+      <button data-m="asm">🧩 組合</button>
+    </div>
+  </div>
+
+  <div class="main">
+    <div>
+    <div class="qnav">
+      <button id="qprev" aria-label="上一步">‹</button>
+      <div class="qmid"><span id="qno"></span><b id="qtitle"></b></div>
+      <button id="qnext" class="next" aria-label="下一步">›</button>
+    </div>
+    <div class="stage" id="stage">
+      <svg id="svg" viewBox="0 0 400 600" aria-label="磨豆機剖面示意圖"></svg>
+      <div class="toast" id="toast"></div>
+    </div>
+    </div>
+    <div class="card">
+      <div class="prog"><i id="prog"></i></div>
+      <div class="stepno" id="stepno"></div>
+      <h2 id="title"></h2>
+      <div class="txt" id="txt"></div>
+      <div id="notes"></div>
+      <div class="chips" id="chips"></div>
+      <div class="nav">
+        <button id="prev">‹ 上一步</button>
+        <button id="next" class="next">下一步 ›</button>
+      </div>
+      <div class="dots" id="dots"></div>
+    </div>
+  </div>
+
+  <div class="foot">
+    小提示：點圖上的零件可看名稱；手機上可左右滑動切換步驟，鍵盤可用 ← →。<br>
+    資料來源：<a href="https://comandantegrinder.com/pages/faq">Comandante 官方 FAQ（拆解與組裝）</a>、
+    <a href="https://1zpresso.coffee/clean-tutorial-for-external-adjustment/">1Zpresso 外調式磨豆機清潔教學</a>、
+    <a href="https://1zpresso.coffee/manual-k-en/">1Zpresso K 系列／ZP6 Special 使用手冊</a>
+  </div>
+</div>
+
+<script>
+const DEFS = `
+<defs>
+  <linearGradient id="steel" x1="0" x2="1"><stop offset="0" stop-color="#8e959c"/><stop offset=".45" stop-color="#eef0f2"/><stop offset="1" stop-color="#959ca3"/></linearGradient>
+  <linearGradient id="wood" x1="0" x2="1"><stop offset="0" stop-color="#6e4424"/><stop offset=".5" stop-color="#b58050"/><stop offset="1" stop-color="#6e4424"/></linearGradient>
+  <linearGradient id="alu" x1="0" x2="1"><stop offset="0" stop-color="#4c5157"/><stop offset=".5" stop-color="#9aa0a6"/><stop offset="1" stop-color="#4c5157"/></linearGradient>
+</defs>`;
+
+const TRAY = `<line x1="236" y1="28" x2="236" y2="590" stroke="#d9c9b4" stroke-dasharray="5 5"/>
+<text x="318" y="20" text-anchor="middle" class="lbl" style="font-size:11px">已拆下的零件</text>`;
+
+function zig(w,h,n,cone){let p=[];for(let i=0;i<=n;i++){const y=-h/2+h*i/n;const ww=cone? (w*0.45+w*0.55*i/n):w;p.push(((i%2?1:-1)*ww/2).toFixed(1)+','+y.toFixed(1));}return `<polyline points="${p.join(' ')}" fill="none" stroke="#3f3f3f" stroke-width="1.7" stroke-linejoin="round"/>`}
+function threads(y1,y2,w){let s='';for(let y=y1;y<=y2;y+=4)s+=`<line x1="${-w}" y1="${y}" x2="${w}" y2="${y+2}" stroke="#555" stroke-width=".8"/>`;return s}
+const crank = knob => `<rect x="-10" y="-9" width="20" height="16" rx="3" fill="url(#steel)" stroke="#444"/>
+  <rect x="0" y="-5" width="98" height="9" rx="4.5" fill="url(#steel)" stroke="#444"/>
+  ${knob==='ball'?`<rect x="97" y="-12" width="6" height="8" fill="#555"/><circle cx="100" cy="-24" r="13" fill="url(#wood)" stroke="#5a3a1c"/>`
+  :`<ellipse cx="100" cy="-21" rx="11" ry="17" fill="url(#wood)" stroke="#5a3a1c"/>`}`;
+const washer = `<rect x="-14" y="-2.5" width="28" height="5" rx="1" fill="#d7dbde" stroke="#555"/>
+  <rect x="-14" y="-6" width="4" height="3.5" fill="#d7dbde" stroke="#555"/><rect x="10" y="-6" width="4" height="3.5" fill="#d7dbde" stroke="#555"/>`;
+
+/* ---------- 資料 ---------- */
+const G = {
+c40:{
+  name:'Comandante C40',
+  statics:`
+    <rect x="85" y="70" width="90" height="260" rx="5" fill="url(#wood)" opacity=".28" stroke="#7a4e2a"/>
+    <text x="20" y="160" class="lbl">機身</text><line x1="44" y1="157" x2="85" y2="157" stroke="#c9b79f"/>
+    <rect x="80" y="62" width="100" height="12" rx="3" fill="url(#steel)" stroke="#555"/>
+    <rect x="120" y="65" width="20" height="10" rx="2" fill="#3a3a3a"/>
+    <text x="20" y="70" class="lbl">上軸承</text><line x1="54" y1="67" x2="118" y2="70" stroke="#c9b79f"/>
+    <rect x="88" y="243" width="84" height="5" fill="url(#steel)" stroke="#666" stroke-width=".6"/>
+    <rect x="121" y="239" width="18" height="12" rx="2" fill="#3a3a3a"/>
+    <text x="20" y="240" class="lbl">下軸承</text><line x1="54" y1="237" x2="119" y2="244" stroke="#c9b79f"/>
+    <path d="M90 256 L121 256 L104 328 L90 328 Z" fill="url(#steel)" stroke="#555"/>
+    <path d="M170 256 L139 256 L156 328 L170 328 Z" fill="url(#steel)" stroke="#555"/>
+    <text x="20" y="300" class="lbl">外刀環</text><line x1="54" y1="297" x2="92" y2="297" stroke="#c9b79f"/>
+    <rect x="86" y="327" width="88" height="8" fill="url(#steel)" stroke="#555"/>
+    <circle cx="100" cy="331" r="2.4" fill="#b91c1c"/><circle cx="130" cy="331" r="2.4" fill="#b91c1c"/><circle cx="160" cy="331" r="2.4" fill="#b91c1c"/>
+    <text x="8" y="352" class="lbl" style="fill:#b91c1c">校正螺絲×3 勿拆</text><line x1="60" y1="345" x2="98" y2="333" stroke="#e8a3a3"/>`,
+  order:['jar','axle','washerT','washerB','cone','spring','dial','crank'],
+  parts:{
+    crank:{label:'搖柄', home:[130,38], away:[268,48], svg:crank('oval')},
+    jar:{label:'粉杯（玻璃罐）', home:[130,410], away:[300,500], svg:`<path d="M-50 -78 L50 -78 L50 -66 L56 -60 L56 66 Q56 72 50 72 L-50 72 Q-56 72 -56 66 L-56 -60 L-50 -66 Z" fill="rgba(170,205,230,.35)" stroke="#6b8aa3" stroke-width="1.5"/>${threads(-77,-69,49).replace(/#555/g,'#7d9bb3')}`},
+    dial:{label:'三爪刻度盤', home:[130,346], away:[298,122], svg:`<rect x="-36" y="-5" width="72" height="10" rx="5" fill="url(#steel)" stroke="#444"/><circle r="8" fill="#a3a9af" stroke="#444"/><circle cx="-28" r="2" fill="#666"/><circle cx="28" r="2" fill="#666"/>`},
+    cone:{label:'錐刀（內刀）', home:[130,292], away:[284,200], svg:`<path d="M-8 -30 L8 -30 L25 30 L-25 30 Z" fill="url(#steel)" stroke="#444" fill-opacity=".92"/><path d="M-5 -28 L-20 28 M1 -29 L-7 29 M6 -27 L9 29 M-2 -10 L16 22" stroke="#777" stroke-width=".9"/>`},
+    spring:{label:'彈簧', home:[130,285], away:[340,200], svg:zig(13,28,8)},
+    washerB:{label:'下墊片', home:[130,259], away:[284,258], svg:washer},
+    washerT:{label:'上墊片', home:[130,82], away:[284,290], svg:washer},
+    axle:{label:'軸心', home:[130,190], away:[376,262], svg:`<rect x="-3.5" y="-157" width="7" height="320" fill="url(#steel)" stroke="#555" stroke-width=".8"/><rect x="-6" y="-157" width="12" height="12" fill="#6b7178"/>${threads(138,160,4)}`}
+  },
+  dis:[
+    {t:'準備工作', d:'在桌面上鋪一塊布，準備毛刷與吹球。先記下目前格數：把刻度盤往鎖緊方向轉到底（搖柄轉不動），數著格數就知道原本在幾格，組回時才能還原。', tip:'全程在桌面上方操作，零件掉了才不會滾走。', rm:[]},
+    {t:'旋下粉杯', d:'握住機身，把下方的粉杯（玻璃罐）旋開取下，就會看到底部的三爪刻度盤。', rm:['jar'], rot:{at:[205,420],dir:'ccw',lbl:'旋開'}},
+    {t:'拔下搖柄', d:'搖柄是靠一顆小磁鐵吸在軸心頂端。手握在靠近機身頂部的位置，把搖柄直接往上拔起就好，不需要轉。', tip:'搖柄在軸上有一點點晃動是正常設計，不影響研磨。', rm:['crank']},
+    {t:'轉下刻度盤', d:'一手托住錐刀，另一手把三爪刻度盤往放鬆方向一直轉，直到完全脫離軸心。', warn:'刻度盤一離開，錐刀和彈簧就會掉下來，記得用手托著。', rm:['dial'], rot:{at:[205,346],dir:'ccw',lbl:'旋鬆'}},
+    {t:'取下錐刀與彈簧', d:'錐刀（內刀）往下取出，裡面藏著一根彈簧，一起拿出來。', tip:'C40 的錐刀是「浮動式」設計，在軸上有點鬆是正常的，研磨時會自動跟著軸心置中。', rm:['cone','spring']},
+    {t:'取下下墊片', d:'取下軸心上的下墊片。舊款機器這裡可能會有一個紅色 O 型環（夾在墊片與彈簧之間，用來固定墊片），新款已經取消，沒有也正常。', rm:['washerB']},
+    {t:'抽出軸心', d:'把軸心從機身抽出來，上墊片會跟著一起出來。到這裡就拆完了。', tip:'如果軸承卡在軸心的六角部位，邊小幅轉動邊慢慢拉，不要硬扯。', rm:['axle','washerT']},
+    {t:'清潔重點', d:'用毛刷刷掉錐刀、外刀環和軸心上的咖啡粉，再用吹球吹乾淨死角。', warn:'外刀環周圍 3 顆螺絲是出廠校正好的，千萬不要轉開（會損壞機器、失去保固）。不可浸泡、不可放洗碗機；有沖水的話所有零件要完全乾燥。Ironheart 版碳鋼刀盤不可碰水。', rm:[]}
+  ],
+  asm:[
+    {t:'確認零件', d:'可拆零件共 8 個：搖柄、粉杯、刻度盤、錐刀、彈簧、下墊片、上墊片、軸心。組裝大致是拆解的反向，最容易出錯的是兩片墊片的方向。', add:[]},
+    {t:'上墊片＋軸心', d:'先把上墊片套上軸心，凸起的邊緣朝向軸承（朝上），再把軸心插回機身。', warn:'墊片方向裝反會影響軸心穩定，凸緣一定要朝軸承。', add:['axle','washerT']},
+    {t:'先裝搖柄固定', d:'把搖柄吸回軸心頂端，先幫忙把軸心固定住，後面幾步比較好裝。', add:['crank']},
+    {t:'套上下墊片', d:'從下方把下墊片套上軸心，凸起的邊緣同樣朝向軸承（朝上）。', tip:'若你的機器有紅色 O 型環，它放在下墊片與彈簧之間。', add:['washerB']},
+    {t:'彈簧放進錐刀', d:'先把彈簧放進錐刀內，再把錐刀連同彈簧套回軸心。', add:['spring','cone']},
+    {t:'鎖回刻度盤', d:'一手把錐刀往機身內推住，另一手把刻度盤鎖回軸心。', add:['dial'], rot:{at:[205,346],dir:'cw',lbl:'鎖緊'}},
+    {t:'歸零並還原格數', d:'把刻度盤往鎖緊方向轉到底，搖柄轉不動的位置就是 0 格。再往回數到你原本使用的格數。', tip:'轉到「輕觸」就停，不要硬鎖，避免刀盤互磨。', add:[]},
+    {t:'鎖回粉杯', d:'把粉杯旋回機身底部，完成！', add:['jar'], rot:{at:[205,420],dir:'cw',lbl:'鎖上'}}
+  ]
+},
+zp6:{
+  name:'1Zpresso ZP6 Special',
+  statics:`
+    <rect x="88" y="95" width="84" height="258" rx="4" fill="url(#alu)" opacity=".3" stroke="#4b5057"/>
+    ${[100,112,124,136,148,160].map(x=>`<line x1="${x}" y1="200" x2="${x}" y2="250" stroke="#4b5057" opacity=".25"/>`).join('')}
+    <text x="20" y="180" class="lbl">機身</text><line x1="44" y1="177" x2="88" y2="177" stroke="#c9b79f"/>
+    <path d="M126 96 L134 96 L130 103 Z" fill="#c2410c"/>
+    <text x="20" y="108" class="lbl">刻度指針</text><line x1="64" y1="105" x2="125" y2="100" stroke="#c9b79f"/>`,
+  order:['cup','dring','oring','burrset','spring','bcap','nut','ubear','ucap','handle'],
+  parts:{
+    handle:{label:'搖柄（木球）', home:[130,46], away:[266,52], svg:crank('ball')},
+    ucap:{label:'上軸承蓋', home:[130,63], away:[274,172], svg:`<rect x="-15" y="-3" width="30" height="6" rx="2" fill="#2f3337" stroke="#111"/><rect x="-4" y="-3" width="8" height="2.2" fill="#9aa0a6"/>`},
+    ubear:{label:'上軸承', home:[130,73], away:[330,172], svg:`<rect x="-11" y="-5" width="22" height="10" rx="2" fill="#555" stroke="#222"/><circle cx="-6" r="2" fill="#ccc"/><circle cx="0" r="2" fill="#ccc"/><circle cx="6" r="2" fill="#ccc"/>`},
+    dring:{label:'外部刻度環', home:[130,79], away:[298,115], svg:`<rect x="-48" y="-17" width="96" height="34" rx="4" fill="url(#alu)" stroke="#333" fill-opacity=".85"/>${Array.from({length:15},(_,i)=>`<line x1="${-42+i*6}" y1="7" x2="${-42+i*6}" y2="${i%5?11:14}" stroke="#fff" stroke-width=".8"/>`).join('')}<text x="-42" y="2" font-size="7" fill="#fff">0</text><text x="-12" y="2" font-size="7" fill="#fff">1</text><text x="18" y="2" font-size="7" fill="#fff">2</text>`},
+    burrset:{label:'中軸＋內刀組', home:[130,220], away:[374,262], svg:`<rect x="-3.5" y="-165" width="7" height="330" fill="url(#steel)" stroke="#555" stroke-width=".8"/><rect x="-3.5" y="-165" width="3.5" height="20" fill="#b9bfc4"/><path d="M-8 65 L8 65 L26 125 L-26 125 Z" fill="url(#steel)" stroke="#444" fill-opacity=".92"/><path d="M-5 67 L-21 124 M1 66 L-7 125 M6 68 L10 125" stroke="#777" stroke-width=".9"/>${threads(147,163,4)}`},
+    oring:{label:'外刀環', home:[130,318], away:[290,330], svg:`<path d="M-44 -34 L-9 -34 L-27 30 L-44 30 Z" fill="url(#steel)" stroke="#555"/><path d="M44 -34 L9 -34 L27 30 L44 30 Z" fill="url(#steel)" stroke="#555"/><rect x="-44" y="29" width="88" height="5" fill="#8e959c" stroke="#555"/>`},
+    spring:{label:'錐形彈簧', home:[130,355], away:[286,278], svg:zig(16,12,6,true)},
+    bcap:{label:'軸承蓋', home:[130,365], away:[286,246], svg:`<rect x="-13" y="-3" width="26" height="6" rx="2" fill="#d7dbde" stroke="#444"/><rect x="-6" y="3" width="12" height="3" fill="#d7dbde" stroke="#444"/>`},
+    nut:{label:'滾花螺帽', home:[130,378], away:[286,214], svg:`<rect x="-11" y="-6" width="22" height="12" rx="2" fill="url(#steel)" stroke="#333"/>${[-7,-4,-1,2,5,8].map(x=>`<line x1="${x}" y1="-5" x2="${x}" y2="5" stroke="#555" stroke-width=".7"/>`).join('')}`},
+    cup:{label:'粉杯（磁吸）', home:[130,410], away:[296,512], svg:`<path d="M-54 -55 L54 -55 L54 60 Q54 68 46 68 L-46 68 Q-54 68 -54 60 Z" fill="url(#alu)" fill-opacity=".28" stroke="#4b5057" stroke-width="1.4"/><rect x="-54" y="-55" width="108" height="6" fill="#333" opacity=".45"/>`}
+  },
+  dis:[
+    {t:'準備工作', d:'先看一眼外部刻度環，記下目前刻度。準備毛刷和吹球，在桌面上操作。官方建議每月拆洗一次，全程不需要工具。', rm:[]},
+    {t:'取下搖柄與粉杯', d:'把搖柄從頂端拔起；粉杯是磁吸式，往下拉開即可。', rm:['handle','cup']},
+    {t:'轉下滾花螺帽', d:'一手按住底部的內刀，另一手把最底下的滾花螺帽逆時針轉下來。', tip:'內刀底下有彈簧頂著，按住才不會彈開。', rm:['nut'], rot:{at:[200,378],dir:'ccw',lbl:'逆時針'}},
+    {t:'取出刀盤組', d:'從頂部往下按壓中軸，中軸＋內刀組就會從底部退出。錐形彈簧和軸承蓋也一起取下。', tip:'記住彈簧與軸承蓋的方向，組回時會用到（官方圖示有標示）。', rm:['bcap','spring','burrset']},
+    {t:'取出上軸承', d:'中軸拿掉後，從頂部刻度環內側取出上軸承蓋與上軸承。', rm:['ucap','ubear']},
+    {t:'拆外刀環（選做）', d:'深度清潔才需要。先把粉杯接回機身當握把，順時針轉動粉杯，就能把外刀環轉下來。', warn:'一定要先取出刀盤組，才能拆外刀環。', rm:['oring'], rot:{at:[200,318],dir:'cw',lbl:'順時針'}},
+    {t:'拆刻度環（選做）', d:'把頂部的外部刻度環順時針轉下。到這裡就全部拆完了。', rm:['dring'], rot:{at:[200,79],dir:'cw',lbl:'順時針'}},
+    {t:'清潔重點', d:'用毛刷清掉刀盤、外刀環與中軸上的咖啡粉，吹球吹淨刻度環與軸承附近的粉。', warn:'1Zpresso 官方：不可水洗、不可浸泡，保持乾燥。', rm:[]}
+  ],
+  asm:[
+    {t:'確認零件', d:'可拆零件共 10 個：搖柄、粉杯、刻度環、外刀環、中軸＋內刀組、錐形彈簧、軸承蓋、滾花螺帽、上軸承、上軸承蓋。', add:[]},
+    {t:'裝回刻度環', d:'若有拆下，把外部刻度環逆時針鎖回機身頂部。', add:['dring'], rot:{at:[200,79],dir:'ccw',lbl:'逆時針'}},
+    {t:'裝回外刀環', d:'把外刀環逆時針鎖回機身底部，一樣可以接上粉杯當握把來轉。', add:['oring'], rot:{at:[200,318],dir:'ccw',lbl:'逆時針'}},
+    {t:'插回中軸＋內刀組', d:'把中軸與內刀組從底部插回機身。', tip:'把機身倒過來（底部朝上）操作比較順手，下一步也在倒置狀態進行。', add:['burrset']},
+    {t:'放彈簧與軸承蓋', d:'機身倒置下：先放錐形彈簧，大頭朝上；再把軸承蓋放到刀盤組上，凸起面朝上。', tip:'左邊示意圖是正立方向，所以看起來上下相反是正常的。', add:['spring','bcap']},
+    {t:'裝回上軸承（最難）', d:'把上軸承放進刻度環，再把上軸承蓋的「扁平面」對準中軸頂端的「扁平面」套進去。', tip:'官方也說這步最考驗耐心：慢慢轉動軸承蓋找角度，對上了就會滑進去。', add:['ubear','ucap']},
+    {t:'鎖回滾花螺帽', d:'按住刀盤組，把滾花螺帽順時針鎖到感覺有阻力就停。', warn:'不要過度鎖緊，可能損傷刀盤組。', add:['nut'], rot:{at:[200,378],dir:'cw',lbl:'順時針'}},
+    {t:'裝回搖柄與粉杯', d:'搖柄插回頂端，粉杯吸回底部。', add:['handle','cup']},
+    {t:'校正確認', d:'把刻度往細的方向轉到底（刀盤咬合、搖柄轉不動），這時刻度指針應該對準 0。沒對準的話，照官方「How to Calibrate 1Zpresso Grinders」校正教學調整，再轉回你原本的刻度。', add:[]}
+  ]
+}};
+
+/* ---------- 狀態 ---------- */
+let g='c40', mode='dis', step=0;
+const $=id=>document.getElementById(id);
+const svg=$('svg');
+
+function build(){
+  const d=G[g];
+  let html=DEFS+TRAY+`<g>${d.statics}</g>`;
+  d.order.forEach(id=>{const p=d.parts[id];
+    html+=`<g class="part" id="p-${id}" data-id="${id}" style="transform:translate(${p.home[0]}px,${p.home[1]}px)"><g>${p.svg}</g></g>`;});
+  html+=`<g id="rot" style="opacity:0"><g class="spin"><path d="M13 0 A13 13 0 1 1 0 -13" fill="none" stroke="#c2410c" stroke-width="3" stroke-linecap="round"/><path d="M-5 -18 L3 -13 L-5 -8 Z" fill="#c2410c"/></g><text y="28" text-anchor="middle" font-size="11" font-weight="700" fill="#c2410c"></text></g>`;
+  svg.innerHTML=html;
+  svg.querySelectorAll('.part').forEach(el=>el.addEventListener('click',e=>{e.stopPropagation();toast(G[g].parts[el.dataset.id].label)}));
+}
+
+function steps(){return G[g][mode]}
+function removedSet(){
+  const d=G[g], s=new Set();
+  if(mode==='dis'){d.dis.slice(0,step+1).forEach(x=>x.rm.forEach(id=>s.add(id)));}
+  else{Object.keys(d.parts).forEach(id=>s.add(id));d.asm.slice(0,step+1).forEach(x=>x.add.forEach(id=>s.delete(id)));}
+  return s;
+}
+
+function render(){
+  const d=G[g], S=steps(), st=S[step], rem=removedSet();
+  const focus=new Set(mode==='dis'?st.rm:st.add);
+  Object.entries(d.parts).forEach(([id,p])=>{
+    const el=$('p-'+id); const pos=rem.has(id)?p.away:p.home;
+    el.style.transform=`translate(${pos[0]}px,${pos[1]}px)`;
+    el.classList.toggle('active',focus.has(id));
+  });
+  const rot=$('rot');
+  if(st.rot){rot.setAttribute('transform',`translate(${st.rot.at[0]},${st.rot.at[1]})`);rot.classList.toggle('ccw',st.rot.dir==='ccw');
+    rot.querySelector('.spin').setAttribute('transform',st.rot.dir==='ccw'?'scale(-1,1)':'');
+    rot.querySelector('text').textContent=st.rot.lbl;rot.style.opacity=1;}
+  else rot.style.opacity=0;
+
+  $('stepno').textContent=`${d.name}・${mode==='dis'?'拆解':'組合'}　第 ${step+1} / ${S.length} 步`;
+  $('title').textContent=st.t;
+  $('txt').textContent=st.d;
+  $('notes').innerHTML=(st.tip?`<div class="note tip">💡 ${st.tip}</div>`:'')+(st.warn?`<div class="note warn">⚠️ ${st.warn}</div>`:'');
+  $('chips').innerHTML=d.order.slice().reverse().map(id=>`<span class="chip ${focus.has(id)?'on':''} ${rem.has(id)&&!focus.has(id)?'gone':''}">${d.parts[id].label}</span>`).join('');
+  $('prog').style.width=((step+1)/S.length*100)+'%';
+  $('prev').disabled=step===0;
+  $('qprev').disabled=step===0;
+  $('qno').textContent=`${mode==='dis'?'拆解':'組合'} ${step+1} / ${S.length}`;
+  $('qtitle').textContent=st.t;
+  $('qnext').textContent=step===S.length-1?'↻':'›';
+  $('next').textContent=step===S.length-1?(mode==='dis'?'開始組合 ›':'重新開始 ↺'):'下一步 ›';
+  $('dots').innerHTML=S.map((_,i)=>`<b class="${i===step?'on':i<step?'done':''}" data-i="${i}">${i+1}</b>`).join('');
+}
+
+function go(i){const n=steps().length;
+  if(i>=n){ if(mode==='dis'){setMode('asm');return;} else {step=0;render();return;} }
+  step=Math.max(0,Math.min(n-1,i));render();}
+function setMode(m){mode=m;step=0;document.querySelectorAll('#segM button').forEach(b=>b.classList.toggle('on',b.dataset.m===m));
+  // 切換時先把零件瞬間放到起始狀態
+  svg.querySelectorAll('.part').forEach(el=>el.style.transition='none');render();svg.getBoundingClientRect();
+  svg.querySelectorAll('.part').forEach(el=>el.style.transition='');}
+function setG(x){g=x;document.querySelectorAll('#segG button').forEach(b=>b.classList.toggle('on',b.dataset.g===x));build();setMode(mode);}
+
+let tt;function toast(s){const t=$('toast');t.textContent=s;t.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('show'),1400);}
+
+$('prev').onclick=()=>go(step-1);
+$('next').onclick=()=>go(step+1);
+$('qprev').onclick=()=>go(step-1);
+$('qnext').onclick=()=>go(step+1);
+$('dots').onclick=e=>{if(e.target.dataset.i)go(+e.target.dataset.i)};
+document.querySelectorAll('#segG button').forEach(b=>b.onclick=()=>setG(b.dataset.g));
+document.querySelectorAll('#segM button').forEach(b=>b.onclick=()=>setMode(b.dataset.m));
+document.addEventListener('keydown',e=>{if(e.key==='ArrowRight')go(step+1);if(e.key==='ArrowLeft')go(step-1);});
+let sx=null;const stg=$('stage');
+stg.addEventListener('touchstart',e=>{sx=e.touches[0].clientX},{passive:true});
+stg.addEventListener('touchend',e=>{if(sx===null)return;const dx=e.changedTouches[0].clientX-sx;if(Math.abs(dx)>45)go(step+(dx<0?1:-1));sx=null;});
+
+setG('c40');
+</script>
+</body>
+</html>
