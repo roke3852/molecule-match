@@ -79,6 +79,13 @@ header p{margin:0;color:var(--muted);font-size:13px}
 .part.wob>g{animation:wob .3s}
 @keyframes wob{30%{transform:rotate(-5deg)}70%{transform:rotate(5deg)}}
 .pill.held rect{fill:#dbeafe;stroke:#3b82f6}.pill.held text{fill:#1d4ed8}
+#spinBtn{cursor:pointer}
+#spinBtn .halo{animation:halo 1s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
+@keyframes halo{50%{transform:scale(1.25);opacity:.05}}
+#spinBtn.tick .ic{animation:tick .3s;transform-box:fill-box;transform-origin:center}
+@keyframes tick{to{transform:rotate(120deg)}}
+#spinBtn.ccw.tick .ic{animation-name:tickr}
+@keyframes tickr{to{transform:rotate(-120deg)}}
 .rule{font-size:12px;color:var(--muted);margin-top:12px;line-height:1.6}
 .toast{position:absolute;left:50%;top:10px;transform:translateX(-50%);background:var(--ink);color:#fff;font-size:13px;padding:5px 12px;border-radius:20px;opacity:0;transition:opacity .25s;pointer-events:none;white-space:nowrap}
 .toast.show{opacity:.92}
@@ -181,7 +188,7 @@ header p{margin:0;color:var(--muted);font-size:13px}
         <div class="gchips" id="gChips"></div>
         <div class="nav"><button id="gStart" class="next">開始挑戰</button></div>
         <div id="gResult"></div>
-        <div class="rule">玩法：點圖左邊的零件名稱，上方會出現動作選單：✋ 固定、↻ 順時針、↺ 逆時針、取下／裝上。要轉的零件得先選對方向，再按「轉！」3 下才會轉鬆（或鎖緊）；需要固定另一邊的（例如 C40 刻度盤），要先固定才能轉。旋轉方向一律以「面向正在轉的那個零件」來看。<br>評分（滿分 100）：順序分 60＋時間分 40。選錯零件、動作或方向，每次扣 10 分；在時限 40% 內完成拿滿時間分，之後越慢越少，超過時限就挑戰失敗。同一步一起拆裝的零件先後不拘。<br>S ≥ 90｜A ≥ 75｜B ≥ 60｜C 其他</div>
+        <div class="rule">玩法：點圖左邊的零件名稱，上方會出現動作選單：✋ 固定、↻ 順時針、↺ 逆時針、取下／裝上。要轉的零件得先選對方向（按鈕或在圖上滑：→ 順時針、← 逆時針），再點零件旁的紅色旋轉鈕或繼續滑 3 下才會轉鬆（或鎖緊）；需要固定另一邊的（例如 C40 刻度盤），要先固定才能轉。旋轉方向一律以「面向正在轉的那個零件」來看。<br>評分（滿分 100）：順序分 60＋時間分 40。選錯零件、動作或方向，每次扣 10 分；在時限 40% 內完成拿滿時間分，之後越慢越少，超過時限就挑戰失敗。同一步一起拆裝的零件先後不拘。<br>S ≥ 90｜A ≥ 75｜B ≥ 60｜C 其他</div>
       </div>
     </div>
   </div>
@@ -325,9 +332,10 @@ function build(){
   d.order.forEach(id=>{const p=d.parts[id];
     html+=`<g class="part" id="p-${id}" data-id="${id}" style="transform:translate(${p.home[0]}px,${p.home[1]}px)"><g>${p.svg}</g></g>`;});
   html+=`<g id="rot" style="opacity:0"><g class="spin"><path d="M13 0 A13 13 0 1 1 0 -13" fill="none" stroke="#c2410c" stroke-width="3" stroke-linecap="round"/><path d="M-5 -18 L3 -13 L-5 -8 Z" fill="#c2410c"/></g><text y="28" text-anchor="middle" font-size="11" font-weight="700" fill="#c2410c"></text></g>`;
-  html+=`<g class="pills" id="pills"></g>`;
+  html+=`<g class="pills" id="pills"></g><g id="spinBtn" style="display:none"><circle class="halo" r="30" fill="#c2410c" opacity=".18"/><circle r="22" fill="#c2410c"/><g class="ic"><path d="M9 0 A9 9 0 1 1 0 -9" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"/><path d="M-4 -13 L3 -9 L-4 -5 Z" fill="#fff"/></g><text y="44" text-anchor="middle" font-size="12" font-weight="800" fill="#c2410c"></text></g>`;
   svg.innerHTML=html;
   buildPills();
+  $('spinBtn').addEventListener('click',e=>{e.stopPropagation();if(mode==='game'&&GS&&GS.rot)spin();});
   svg.querySelectorAll('.part').forEach(el=>el.addEventListener('click',e=>{e.stopPropagation();if(mode==='game')gameTap(el.dataset.id);else toast(G[g].parts[el.dataset.id].label)}));
 }
 
@@ -432,10 +440,10 @@ function setBest(v){try{localStorage.setItem(bestKey(),JSON.stringify(v))}catch(
 function placeAll(){const d=G[g];Object.entries(d.parts).forEach(([id,p])=>{const el=$('p-'+id);
   const out=gk==='dis'?GS.done.has(id):!GS.done.has(id);const pos=out?p.away:p.home;
   el.style.transform=`translate(${pos[0]}px,${pos[1]}px)`;el.classList.remove('active','bad');el.classList.toggle('held',GS.held===id);});}
-function showArrow(id,dir){const p=G[g].parts[id];const at=ROTAT[id]&&g==='c40'?ROTAT[id]:[p.home[0]+72,p.home[1]];const rot=$('rot');
-  rot.setAttribute('transform',`translate(${at[0]},${at[1]})`);rot.classList.toggle('ccw',dir==='ccw');
-  rot.querySelector('.spin').setAttribute('transform',dir==='ccw'?'scale(-1,1)':'');rot.querySelector('text').textContent=dir==='ccw'?'逆時針':'順時針';rot.style.opacity=1;}
-function hideArrow(){$('rot').style.opacity=0}
+function showArrow(id,dir){const p=G[g].parts[id];const at=ROTAT[id]&&g==='c40'?ROTAT[id]:[p.home[0]+78,p.home[1]];const b=$('spinBtn');
+  b.setAttribute('transform',`translate(${at[0]},${at[1]})`);b.classList.toggle('ccw',dir==='ccw');
+  b.querySelector('.ic').setAttribute('transform',dir==='ccw'?'scale(-1,1)':'');b.querySelector('text').textContent=`${dir==='ccw'?'逆時針':'順時針'} 0/3`;b.style.display='';}
+function hideArrow(){$('rot').style.opacity=0;const b=$('spinBtn');if(b)b.style.display='none';}
 function renderPills(){if(!GS)return;document.querySelectorAll('#pills .pill').forEach(el=>{const id=el.dataset.id;
   el.classList.toggle('done',GS.done.has(id));el.classList.toggle('held',GS.held===id);el.classList.toggle('idle',!GS.running&&!GS.done.has(id));
   el.querySelector('text').textContent=(GS.held===id?'✋':GS.done.has(id)?'✓':'')+L(id);});}
@@ -452,7 +460,7 @@ function gameReset(){gameStop();
   svg.querySelectorAll('.part').forEach(el=>el.style.transition='');
   $('gTime').textContent='0.0';$('gLimit').textContent=` / ${GS.limit}`;$('gBar').style.width='100%';$('gBar').style.background='#16a34a';
   const b=getBest(),d=G[g];
-  setMsg(`<b>${d.name}・${gk==='dis'?'拆解':'組裝'}挑戰</b>（共 ${GS.total} 個動作）<br>點圖左邊的零件名稱，從上方選單選動作：固定、順時針、逆時針、${gk==='dis'?'取下':'裝上'}。要轉的零件選對方向後，按「轉！」3 下。${b?`<br>🏆 最佳紀錄：${b.rank} ${b.score} 分（${b.time} 秒、錯 ${b.errors} 次）`:''}`);
+  setMsg(`<b>${d.name}・${gk==='dis'?'拆解':'組裝'}挑戰</b>（共 ${GS.total} 個動作）<br>點圖左邊的零件名稱，從上方選單選動作：固定、順時針、逆時針、${gk==='dis'?'取下':'裝上'}。要轉的零件選對方向後（也可以在圖上左右滑），再轉 3 下。${b?`<br>🏆 最佳紀錄：${b.rank} ${b.score} 分（${b.time} 秒、錯 ${b.errors} 次）`:''}`);
   $('gResult').innerHTML='';$('gStart').textContent='開始挑戰';$('gStart').parentNode.hidden=false;
   renderPills();qhud();}
 function gameStart(){gameReset();GS.running=true;GS.t0=performance.now();$('gStart').parentNode.hidden=true;renderPills();
@@ -471,7 +479,7 @@ function gameTap(id){if(!GS||!GS.running)return;
   GS.sel=id;const t=gk==='dis'?'⬆ 取下':'⬇ 裝上';
   $('gAct').innerHTML=`<div class="ah">${L(id)}：要做什麼？</div><div class="ab">
     <button data-a="hold">✋ 固定</button><button data-a="cw">↻ 順時針</button><button data-a="ccw">↺ 逆時針</button><button data-a="take">${t}</button></div>
-    <div class="an">方向以「面向這個零件」來看</div>`;
+    <div class="an">方向以「面向這個零件」來看・也可以直接在圖上滑：→ 順時針、← 逆時針</div>`;
   $('gAct').hidden=false;}
 function act(a){const id=GS.sel,S=seq()[GS.si],isRot=a==='cw'||a==='ccw';
   if(S.type==='take'){
@@ -497,11 +505,12 @@ function act(a){const id=GS.sel,S=seq()[GS.si],isRot=a==='cw'||a==='ccw';
   startRot(id,a,S.part);}
 function startRot(id,dir,moving){GS.rot={id,dir,moving,n:0};
   if(gk==='asm'){GS.done.add(moving);placeAll();}
-  showArrow(id,dir);setMsg(`方向正確！按「轉！」3 下把「${L(id)}」${gk==='dis'?'轉鬆':'鎖緊'}`);
-  $('gAct').innerHTML=`<div class="ah">${L(id)}・${dir==='cw'?'↻ 順時針':'↺ 逆時針'}</div><div class="ab"><button class="big" data-a="spin">${dir==='cw'?'↻':'↺'} 轉！ 0/3</button></div>`;
+  showArrow(id,dir);setMsg(`方向正確！再轉 3 下把「${L(id)}」${gk==='dis'?'轉鬆':'鎖緊'}`);
+  $('gAct').innerHTML=`<div class="ah">${L(id)}・${dir==='cw'?'↻ 順時針':'↺ 逆時針'}　<span id="spinCnt">0/3</span></div><div class="an" style="font-size:13px">點零件旁的紅色 ${dir==='cw'?'↻':'↺'} 按鈕，或在圖上${dir==='cw'?'往右 →':'往左 ←'}滑，共 3 下</div>`;
   $('gAct').hidden=false;renderPills();}
-function spin(){const r=GS.rot;if(!r)return;r.n++;const el=$('p-'+r.id);el.classList.remove('wob');void el.getBBox();el.classList.add('wob');
-  const btn=$('gAct').querySelector('.big');if(btn)btn.textContent=`${r.dir==='cw'?'↻':'↺'} 轉！ ${r.n}/3`;
+function spin(){const r=GS.rot;if(!r||r.n>=3)return;r.n++;const el=$('p-'+r.id);el.classList.remove('wob');void el.getBBox();el.classList.add('wob');
+  const sc=$('spinCnt');if(sc)sc.textContent=`${r.n}/3`;const sb=$('spinBtn');sb.querySelector('text').textContent=`${r.dir==='ccw'?'逆時針':'順時針'} ${r.n}/3`;
+  sb.classList.remove('tick');void sb.getBBox();sb.classList.add('tick');
   if(r.n<3)return;
   setTimeout(()=>{el.classList.remove('wob');if(gk==='dis')GS.done.add(r.moving);GS.held=null;GS.rot=null;hideArrow();
     good(gk==='dis'?`轉鬆了，「${L(r.moving)}」拿下來！`:`「${L(r.moving)}」鎖好了！`);next();},250);}
@@ -518,6 +527,15 @@ function gameEnd(ok){const t=(performance.now()-GS.t0)/1000;GS.tEnd=t;gameStop()
     <p>用時 ${t.toFixed(1)} 秒（時限 ${GS.limit} 秒）・錯誤 ${GS.errors} 次</p><p>順序分 ${order}／60　時間分 ${time}／40</p></div>`;
   $('gStart').textContent='再玩一次';$('gStart').parentNode.hidden=false;}
 $('gStart').onclick=gameStart;
+let sw=null;
+$('stage').addEventListener('pointerdown',e=>{if(mode==='game')sw={x:e.clientX,y:e.clientY}});
+$('stage').addEventListener('pointerup',e=>{if(mode!=='game'||!sw)return;const dx=e.clientX-sw.x,dy=e.clientY-sw.y;sw=null;
+  if(Math.abs(dx)<30||Math.abs(dx)<Math.abs(dy))return;gameSwipe(dx>0?'cw':'ccw');});
+$('stage').addEventListener('pointercancel',()=>{sw=null});
+function gameSwipe(dir){if(!GS||!GS.running)return;
+  if(GS.rot){if(dir===GS.rot.dir)spin();else setMsg(`滑反了！要往${GS.rot.dir==='cw'?'右 →':'左 ←'}滑`);return;}
+  if(GS.sel&&!$('gAct').hidden){act(dir);return;}
+  setMsg('先點左邊的零件名稱，再滑動旋轉。');}
 $('gAct').onclick=e=>{const a=e.target.dataset&&e.target.dataset.a;if(!a||!GS||!GS.running)return;if(a==='spin')spin();else act(a);};
 document.querySelectorAll('#segK button').forEach(b=>b.onclick=()=>{gk=b.dataset.k;document.querySelectorAll('#segK button').forEach(x=>x.classList.toggle('on',x===b));gameReset();});
 
