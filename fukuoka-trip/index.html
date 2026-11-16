@@ -1049,7 +1049,7 @@ const FS=(function(){
   return a.sort((x,y)=>(y.id===dev)-(x.id===dev)||y.t-x.t)}
  function drawMem(){const el=$('#famMem');if(!el)return;const a=members();
   el.innerHTML=`<div class="hint" style="margin:12px 0 4px">已加入的手機（${a.length}）：</div>`+(a.length?a.map(m=>`<div class="fam-m${Date.now()-m.t<360000?' live':''}"><i></i><b>${esc(m.n||'還沒填暱稱的手機')}${m.id===dev?'（你）':''}</b><span>${ago(m.t)}</span></div>`).join(''):'<div class="hint" style="margin:0">讀取中…</div>');
-  const ask=$('#famAsk');if(ask)ask.classList.toggle('on',!!code&&!myName&&!raw.get('famSkip'))}
+  }
  function setName(v){v=(v||'').trim().slice(0,12);if(!v){toast('請先填暱稱');return}myName=v;raw.set('famName',v);beat(true);draw();drawMem();toast('👋 '+v+'，家人看得到你加入了')}
  let lastRead=+raw.get('famRead')||0,chatN=-1;
  function chats(){const E={};for(const p in R)if(p.startsWith('chat/'))E[p]=R[p];for(const p in Q)if(p.startsWith('chat/')){if(Q[p]===null)delete E[p];else E[p]=Q[p]}
@@ -1078,7 +1078,6 @@ const FS=(function(){
   chatN=a.length;
  }
  function send(){const el=$('#chatIn'),t=el.value.trim();if(!t||!code)return;
-  if(!myName){toast('先填個暱稱，家人才知道是誰');const k=$('#famAsk');raw.del('famSkip');k.classList.add('on');$('#famAskIn').focus();return}
   const now=Date.now(),id=now.toString(36)+Math.random().toString(36).slice(2,6);
   Q['chat/'+id]=JSON.stringify({n:myName,d:dev,t:now,m:t.slice(0,500)});saveQ();el.value='';drawChat('mine');clearTimeout(flushT);flush()}
  function setState(st){state=st;draw()}
@@ -1136,7 +1135,7 @@ const FS=(function(){
   box.innerHTML=`<div class="fam-st ${T[0]}"><i></i>${T[1]}</div>
    <div class="hint" style="margin:0 0 4px">邀請連結（傳到家人群組，打開就會加入）：</div><div class="fam-code">${esc(link())}</div>
    <div class="acts"><button class="btn pri" id="famShare">📤 傳給家人</button><button class="btn" id="famCopy">複製連結</button><button class="btn ghost" id="famStop">停止共用</button></div>
-   <div class="addrow"><input id="famName" maxlength="12" placeholder="你的暱稱（例如：爸爸）" value="${esc(myName)}"><button id="famNameOk">${myName?'改暱稱':'儲存'}</button></div>
+   <div class="addrow"><input id="famName" maxlength="12" placeholder="暱稱（可不填，例如：爸爸）" value="${esc(myName)}"><button id="famNameOk">${myName?'改暱稱':'儲存'}</button></div>
    <div id="famMem"></div>
    <div class="hint" style="margin:10px 0 0">知道這個連結的人都能看和改，請只傳給家人。同一天的行程若兩人同時修改，以後存的為準。</div>`;
   drawMem();

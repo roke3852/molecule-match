@@ -799,7 +799,7 @@ const FS=(function(){
  function members(){const E={};for(const p in R)if(p.startsWith('members/'))E[p]=R[p];for(const p in Q)if(p.startsWith('members/'))E[p]=Q[p];
   const a=[];for(const p in E){try{const m=JSON.parse(E[p]);if(m&&m.t)a.push({id:p.slice(8),n:String(m.n||''),t:+m.t})}catch(e){}}
   return a.sort((x,y)=>(y.id===dev)-(x.id===dev)||y.t-x.t)}
- function drawMem(){const ask=$("#famAsk");if(ask)ask.classList.toggle('on',!!code&&!myName&&!ls.get('cf-famSkip'));
+ function drawMem(){
   const el=$("#famMem");if(!el)return;const a=members();
   el.innerHTML=`<div class="hint" style="margin-top:12px">已加入的手機（${a.length}）：</div>`+(a.length?a.map(m=>`<div class="fam-m${Date.now()-m.t<360000?' live':''}"><i></i><b>${esc(m.n||'還沒填暱稱的手機')}${m.id===dev?'（你）':''}</b><span>${ago(m.t)}</span></div>`).join(''):'<div class="hint">讀取中…</div>')}
  function setName(v){v=(v||'').trim().slice(0,12);if(!v){toast('請先填暱稱');return}myName=v;ls.set('cf-famName',v);beat(true);if(document.activeElement)document.activeElement.blur();draw();toast('👋 '+v+'，家人看得到你加入了')}
@@ -819,7 +819,7 @@ const FS=(function(){
   box.innerHTML=`<div class="fam-st ${T[0]}"><i></i>${T[1]}</div>
    <div class="hint">邀請連結（傳到家人群組，打開就會加入）：</div><div class="fam-code">${esc(link())}</div>
    <div class="row"><button class="btn pri" id="famShare">📤 傳給家人</button><button class="btn" id="famCopy">複製連結</button><button class="btn" id="famStop">停止共用</button></div>
-   <div class="row" style="margin-top:10px"><input class="f" id="famName" maxlength="12" placeholder="你的暱稱（例如：爸爸）" value="${esc(myName)}" style="flex:1;margin:0"><button class="btn" id="famNameOk">${myName?'改暱稱':'儲存'}</button></div>
+   <div class="row" style="margin-top:10px"><input class="f" id="famName" maxlength="12" placeholder="暱稱（可不填，例如：爸爸）" value="${esc(myName)}" style="flex:1;margin:0"><button class="btn" id="famNameOk">${myName?'改暱稱':'儲存'}</button></div>
    <div id="famMem"></div>
    <div class="hint" style="margin-top:10px">知道這個連結的人都能看和改，請只傳給家人。同一筆紀錄若兩人同時修改，以後存的為準。</div>`;
   drawMem();
