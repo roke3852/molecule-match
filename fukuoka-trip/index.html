@@ -280,6 +280,7 @@ nav a{position:relative}
 .xempty{font-size:13px;color:var(--sub);padding:6px 0}
 .fd-area{margin:16px 0 4px;padding:10px 12px;border-radius:12px;background:#f8f3ec}.fd-area:first-child{margin-top:4px}
 .fd-area b{font-size:15.5px;display:block}.fd-area .when{font-size:12.5px;color:#2f6b4a;margin-top:3px;line-height:1.6}.fd-area .when a{color:#2f6b4a;font-weight:700}.fd-area .when.no{color:var(--sub)}
+.fd-p{margin:6px 0 0 32px;font-size:13px;display:flex;flex-wrap:wrap;gap:2px 8px;align-items:baseline}.fd-p b{color:var(--ink)}.fd-p span{color:var(--sub);font-size:12px}.fd-p em{font-style:normal;color:var(--sub);font-size:12px;flex-basis:100%}
 .fd-f{display:flex;gap:8px;align-items:flex-start}.fd-f>span{flex:0 0 auto;font-size:12px;font-weight:900;color:var(--sub);padding-top:7px;width:28px}.fd-f .seg{flex:1;margin-bottom:8px}
 .seg button.zero{opacity:.4}
 .fd-sw{display:flex;align-items:center;gap:8px;font-size:13.5px;font-weight:700;margin:2px 0 12px 36px;cursor:pointer}
@@ -456,9 +457,10 @@ nav a.on{color:var(--maple);font-weight:700;background:var(--maple-soft)}
   <section class="view" id="v-food">
     <div class="sec">
       <h3>🍜 依地點找美食</h3>
-      <div class="hint">依行程會經過的地方分區，每區上面標出你們哪天會在那裡。想吃的點一下打勾、可以加照片（開著家人共用時全家看得到）；點推薦餐點會放大日文給店員看。營業時間和公休日可能變動，出發前用「地圖」再確認。</div>
+      <div class="hint">依行程會經過的地方分區，每區上面標出你們哪天會在那裡。想吃的點一下打勾、可以加照片（開著家人共用時全家看得到）；點推薦餐點會放大日文給店員看。營業時間和公休日可能變動，出發前用「地圖」再確認。人均是大概值（台幣用「工具」頁的匯率換算）。</div>
       <div class="fd-f"><span>地區</span><div class="seg" id="foodSeg"></div></div>
       <div class="fd-f"><span>種類</span><div class="seg" id="foodType"></div></div>
+      <div class="fd-f"><span>人均</span><div class="seg" id="foodPrice"></div></div>
       <label class="fd-sw"><input type="checkbox" id="foodWant"><i></i>只看已勾選的</label>
       <div id="foods"></div>
     </div>
@@ -1316,70 +1318,76 @@ const FAREAS=[
  {k:'kokura',n:'小倉',kw:['小倉城']}
 ];
 const FOODS=[
- {id:'ikkousha',m:[{n:'泡系豚骨拉麵',jp:'泡系とんこつラーメン'},{n:'溏心蛋',jp:'味玉'},{n:'煎餃',jp:'餃子'}],a:'hakata',n:'博多一幸舍',jp:'博多一幸舎 総本店',t:'拉麵',d:'湯頭表面有一層細泡的濃郁豚骨拉麵，博多站步行可到，晚上也開。',tip:'豚骨味較濃，怕腥的人先點小碗或加大蒜。'},
- {id:'menkaido',m:[{n:'各家招牌豚骨拉麵',jp:'おすすめのとんこつラーメン'},{n:'加麵',jp:'替え玉'}],a:'hakata',n:'博多拉麵街道',jp:'博多めん街道',t:'拉麵',d:'博多站內一整層都是拉麵店，各家口味一次比較，不用出車站。',tip:'就在車站裡，適合抵達當晚或玩累的晚上。',kid:1},
- {id:'maedaya',m:[{n:'牛腸鍋（味噌）',jp:'もつ鍋 みそ味'},{n:'牛腸鍋（醬油）',jp:'もつ鍋 しょうゆ味'},{n:'收尾：強棒麵',jp:'〆のちゃんぽん麺'},{n:'芝麻鯖魚',jp:'ごまさば'},{n:'自家製明太子',jp:'自家製明太子'}],a:'hakata',n:'博多牛腸鍋 前田屋 博多店',jp:'博多もつ鍋 前田屋 博多店',t:'牛腸鍋',d:'只用國產和牛小腸，臭味少，不太敢吃內臟的人也能接受。博多店每天中午就開。',tip:'很難排，建議先預約；有兒童友善座位。',kid:1},
- {id:'rakutenchi',m:[{n:'元祖牛腸鍋（韭菜山）',jp:'元祖もつ鍋'},{n:'收尾：強棒麵',jp:'〆のちゃんぽん麺'},{n:'醋拌牛腸',jp:'酢もつ'}],a:'hakata',n:'元祖牛腸鍋 樂天地 博多站前店',jp:'元祖もつ鍋楽天地 博多駅前店',t:'牛腸鍋',d:'老字號連鎖，韭菜堆成小山的招牌牛腸鍋，價格親民，分店多比較好訂。',tip:''},
- {id:'ichiran',m:[{n:'天然豚骨拉麵',jp:'天然とんこつラーメン'},{n:'加麵',jp:'替え玉'},{n:'半熟鹽味蛋',jp:'半熟塩ゆでたまご'}],a:'tenjin',n:'一蘭 本社總本店',jp:'一蘭 本社総本店',t:'拉麵',d:'一蘭的總店，24 小時營業，可以填單自選湯頭濃度、辣度、麵的硬度。',tip:'一人一格的座位，小孩坐要大人陪；人多時排隊快。',kid:1},
- {id:'mentaiju',m:[{n:'明太重',jp:'めんたい重'},{n:'明太子沾麵',jp:'めんたい煮込みつけ麺'}],a:'tenjin',n:'元祖博多明太重',jp:'元祖博多めんたい重',t:'明太子',d:'整條明太子鋪在白飯上、淋特製昆布醬的「明太重」，福岡代表名物。在中洲那珂川旁。',tip:'早上 7 點就開，開店時段最好排。'},
- {id:'hyoutan',m:[{n:'午餐握壽司套餐',jp:'ランチ握り'},{n:'活烏賊（季節）',jp:'活いか'},{n:'鮪魚大腹',jp:'大トロ'}],a:'tenjin',n:'葫蘆壽司',jp:'ひょうたん寿司',t:'海鮮',d:'天神的人氣壽司店，魚料新鮮、價格實在，午餐套餐最划算。',tip:'常常要排隊，可以先去登記再逛天神。'},
- {id:'hirao',m:[{n:'天婦羅定食',jp:'天ぷら定食'},{n:'醃烏賊（免費）',jp:'いかの塩辛'},{n:'炸蝦',jp:'えび天'}],a:'tenjin',n:'天婦羅 平尾 大名店',jp:'天ぷら ひらお 大名店',t:'定食',d:'炸好一樣送一樣的現炸天婦羅定食，桌上的醃烏賊鹽辛和漬物免費吃到飽，便宜又快。',tip:'小孩可以點炸蝦和雞肉，接受度高。',kid:1},
- {id:'shinshin',m:[{n:'博多拉麵',jp:'博多らーめん'},{n:'炒飯',jp:'炒飯'},{n:'一口煎餃',jp:'一口餃子'}],a:'tenjin',n:'Shin-Shin 天神本店',jp:'ShinShin 天神本店',t:'拉麵',d:'極細麵＋清爽一點的豚骨湯，比一蘭、一幸舍好入口，福岡人也常吃。',tip:''},
- {id:'yatai',m:[{n:'屋台拉麵',jp:'屋台ラーメン'},{n:'關東煮',jp:'おでん'},{n:'一口煎餃',jp:'一口餃子'},{n:'烤雞串',jp:'焼き鳥'}],a:'tenjin',n:'中洲屋台',jp:'中洲屋台',t:'小吃',d:'那珂川旁的路邊攤，拉麵、關東煮、烤串、煎餃都有，是福岡夜晚的代表風景（D3 晚上已排）。',tip:'多數只收現金、座位少，一攤坐不下就分兩攤；小孩建議點拉麵和煎餃。',kid:1},
- {id:'zenzai',m:[{n:'善哉（紅豆湯）',jp:'ぜんざい'}],a:'kawabata',n:'川端善哉廣場',jp:'川端ぜんざい広場',t:'甜點',d:'川端商店街裡的紅豆湯老店，熱呼呼的善哉配鹹昆布，逛完櫛田神社剛好休息。',tip:'通常只有週五到週日和假日營業，11/28（六）可以去，出發前再確認。',kid:1},
- {id:'kasanoya',m:[{n:'梅枝餅',jp:'梅ヶ枝餅'},{n:'梅枝餅＋抹茶套餐',jp:'梅ヶ枝餅と抹茶のセット'}],a:'dazaifu',n:'笠之家 梅枝餅',jp:'かさの家',t:'甜點',d:'參道上的老店，現烤梅枝餅外皮微脆、紅豆餡熱燙，店內有茶屋可以坐著吃。',tip:'一個約 150 日圓，人人都買一個邊走邊吃。',kid:1},
- {id:'sbdaz',m:[{n:'季節限定星冰樂',jp:'季節限定フラペチーノ'}],a:'dazaifu',n:'星巴克 太宰府天滿宮表參道店',jp:'スターバックス 太宰府天満宮表参道店',t:'咖啡',d:'隈研吾設計、用木條交錯搭出的店面，本身就是景點，順便讓小孩上廁所休息。',tip:'拍照的人多，想坐要碰運氣。',kid:1},
- {id:'yufumabushi',m:[{n:'豐後牛三吃',jp:'豊後牛まぶし',p:'¥3,200'},{n:'鰻魚三吃',jp:'鰻まぶし'},{n:'地雞三吃',jp:'地鶏まぶし'}],a:'yufuin',n:'由布釜飯 心（由布まぶし）',jp:'由布まぶし 心',t:'定食',d:'由布院名物「三吃」飯，有豐後牛、鰻魚、地雞三種，先直接吃、再加佐料、最後加高湯做茶泡飯。',tip:'有駅前店和金鱗湖本店；本店週二休，11/25（三）有開。熱門名店，建議早點去或預約。',kid:1},
- {id:'korokke',m:[{n:'金賞可樂餅',jp:'金賞コロッケ'},{n:'豐後牛肉可樂餅',jp:'豊後牛肉コロッケ'}],a:'yufuin',n:'湯布院 金賞可樂餅',jp:'湯布院 金賞コロッケ',t:'小吃',d:'湯之坪街道上的現炸可樂餅，得過可樂餅大賽金賞，是邊走邊吃的首選。',tip:'',kid:1},
- {id:'milch',m:[{n:'溫熱半熟起司蛋糕',jp:'ケーゼクーヘン'},{n:'布丁',jp:'プリン'}],a:'yufuin',n:'由布院 Milch 起司蛋糕',jp:'由布院ミルヒ',t:'甜點',d:'溫熱的半熟起司蛋糕「Käsekuchen」，用由布院牛奶做的，一顆一顆小小的很好分。',tip:'',kid:1},
- {id:'karato',m:[{n:'握壽司（自己挑）',jp:'にぎり寿司'},{n:'海鮮丼',jp:'海鮮丼'},{n:'炸河豚',jp:'ふく唐揚げ'},{n:'河豚味噌湯',jp:'ふく汁'}],a:'moji',n:'唐戶市場 活力馬關街',jp:'唐戸市場 活きいき馬関街',t:'海鮮',d:'一樓幾十家魚店擺出握壽司、海鮮丼、炸河豚、河豚味噌湯，自己夾、自己挑，坐在海邊吃。',tip:'只在週五到週日和假日舉行，你們 11/27 剛好是週五 ✓。中午前去選擇最多，賣完就收。',kid:1},
- {id:'bearfruits',m:[{n:'超級燒咖哩',jp:'スーパー焼きカレー',p:'¥1,210'},{n:'鐵板拿坡里麵',jp:'鉄板ナポリタン',p:'¥1,210'},{n:'蛋包飯',jp:'オムライス'}],a:'moji',n:'BEAR FRUITS 燒咖哩',jp:'BEAR FRUITS 門司港本店',t:'燒咖哩',d:'門司港名物「燒咖哩」的人氣店，起司底下藏著半熟蛋。門司港車站一出來就到。',tip:'不能預約，假日中午可能排 30–45 分鐘；有不辣的兒童選項可問。',kid:1},
- {id:'curryhonpo',m:[{n:'燒咖哩（牛）',jp:'焼きカレー ビーフ'},{n:'海鮮燒咖哩',jp:'シーフード焼きカレー'}],a:'moji',n:'伽哩本舖 門司港 Retro 店',jp:'伽哩本舗 門司港レトロ店',t:'燒咖哩',d:'用 320 度特製烤箱烤的燒咖哩，口味有牛、豬、雞、海鮮可選。',tip:'BEAR FRUITS 排太久可以來這裡。'},
- {id:'mooon',m:[{n:'烤香蕉聖代',jp:'焼きバナナパルフェ',p:'¥880'},{n:'水果奶昔',jp:'フルーツシェイク'}],a:'moji',n:'Mooon de Retro 香蕉聖代',jp:'Fruit factory Mooon de Retro',t:'甜點',d:'舊門司稅關一樓的水果甜點店，門司港限定的「烤香蕉聖代」。',tip:'',kid:1},
- {id:'sukesan',m:[{n:'牛肉烏龍麵',jp:'肉うどん'},{n:'牛蒡天烏龍麵',jp:'ごぼう天うどん'},{n:'萩餅',jp:'ぼた餅'}],a:'kokura',n:'資さん烏龍麵',jp:'資さんうどん',t:'烏龍麵',d:'北九州人從小吃到大的烏龍麵連鎖，招牌是牛肉烏龍麵和萩餅（おはぎ），營業到很晚。',tip:'小倉站附近有分店，從小倉城回程前可以吃一碗。',kid:1},
- {id:'fullfull',m:[{n:'明太法國麵包',jp:'明太フランス'},{n:'明太子可頌',jp:'明太クロワッサン'}],a:'hakata',n:'The Full Full（明太子法國麵包）',jp:'THE FULL FULL 博多',t:'麵包',d:'福岡人氣麵包店，招牌「明太法國」是法國麵包夾滿明太子奶油，烤得酥脆，鹹香很下飯也很適合當伴手禮。',tip:'剛出爐時最好吃，熱門時段可能要排隊。',kid:1,u:1},
- {id:'sashisu',m:[{n:'握壽司拼盤',jp:'おまかせ握り'},{n:'鮭魚卵小丼',jp:'いくら小丼'},{n:'鮪魚手捲',jp:'まぐろ手巻き'}],a:'hakata',n:'壽司酒場 SASHISU KITTE 博多店',jp:'すし酒場 さしす KITTE博多店',t:'海鮮',d:'博多站旁 KITTE 博多裡的壽司居酒屋，一貫一貫點、價格親民，氣氛輕鬆，晚餐小酌或帶小孩都可以。',tip:'晚餐尖峰常客滿，建議先訂位或早點去。',kid:1,u:1},
- {id:'daco',m:[{n:'生甜甜圈',jp:'生ドーナツ'},{n:'八女抹茶奶油甜甜圈',jp:'プレミアム抹茶クリーム'},{n:'咖啡甜甜圈',jp:'コーヒードーナツ'}],a:'hakata',n:'dacō 博多站前（甜甜圈・麵包）',jp:'dacō 博多駅前',t:'甜點',d:'福岡人氣麵包店 AMAM DACOTAN 的姊妹店，2026/7 在博多站前西日本城市大樓 1 樓開幕，旁邊同時開了生甜甜圈專賣店「I’m donut ?」。',tip:'I’m donut ? 博多站前店只能外帶、用售票機點；人氣店常排隊，早點去。',kid:1,v:1,u:1},
- {id:'daitoen',m:[{n:'厚切牛舌',jp:'上タン塩'},{n:'上等牛五花',jp:'上カルビ'},{n:'冷麵',jp:'冷麺'}],a:'hakata',n:'燒肉 大東園 本店',jp:'焼肉 大東園 本店',t:'燒肉',d:'福岡老字號燒肉店，傳承幾十年的醬汁和厚切牛舌是招牌，適合想吃經典燒肉的晚餐。',tip:'',kid:1,u:1},
- {id:'nikuichi',m:[{n:'黑毛和牛拼盤',jp:'黒毛和牛盛り合わせ'},{n:'牛舌',jp:'タン塩'},{n:'和牛壽司',jp:'肉寿司'}],a:'hakata',n:'肉屋肉一 博多店',jp:'肉屋肉一 博多店',t:'燒肉',d:'以黑毛和牛為主的燒肉店，肉品店直營所以價格實在。你們 D2 11/22 晚餐已經排了這家。',tip:'晚餐一定要先訂位。',kid:1,u:1},
- {id:'yamasho',m:[{n:'上等牛五花',jp:'上カルビ'},{n:'和牛握壽司',jp:'肉寿司'},{n:'土鍋白飯',jp:'銀シャリ'},{n:'和牛明太重（午餐）',jp:'和牛明太重'}],a:'hakata',n:'肉の山翔（A5 和牛燒肉）',jp:'肉の山翔',t:'燒肉',d:'A5 黑毛和牛燒肉，五花、赤身有 1,000 日圓以下的價位，肉都是手切，土鍋炊白飯和肉壽司是招牌，午餐有和牛明太重。',tip:'博多站南有店，天神國體道路旁也有一家；晚上建議訂位。',kid:1,v:1,u:1},
- {id:'yasohachi',m:[{n:'和牛拼盤',jp:'和牛盛り合わせ'},{n:'牛舌',jp:'タン塩'},{n:'石鍋拌飯',jp:'石焼ビビンバ'}],a:'hakata',n:'博多燒肉 八十八 筑紫口本店',jp:'博多 焼肉 八十八 筑紫口本店',t:'燒肉',d:'博多站筑紫口出來就到的燒肉店，離車站近，玩完回來不用再走遠。',tip:'',kid:1,u:1},
- {id:'jiichiro',m:[{n:'治一郎布丁',jp:'治一郎のプリン'},{n:'年輪蛋糕',jp:'治一郎のバウムクーヘン'}],a:'tenjin',n:'治一郎 大丸福岡天神店（布丁）',jp:'治一郎 大丸福岡天神店',t:'甜點',d:'以濕潤年輪蛋糕出名的店，布丁也很受歡迎，口感綿密、焦糖微苦，在大丸地下食品街。',tip:'布丁要冷藏，買了當天吃。',kid:1,u:1},
- {id:'nunu',m:[{n:'努努雞',jp:'努努鶏'},{n:'骨付努努雞',jp:'骨付き努努鶏'}],a:'tenjin',n:'努努雞（冷吃炸雞）',jp:'努努鶏',t:'小吃',d:'天神大名一帶的名物，炸雞冷了才吃，甜辣醬汁滲進去，像下酒菜也像零嘴，可以外帶邊走邊吃。',tip:'',kid:1,u:1},
- {id:'taihou',m:[{n:'昔拉麵',jp:'昔ラーメン'},{n:'加麵',jp:'替え玉'},{n:'煎餃',jp:'餃子'}],a:'tenjin',n:'大砲拉麵 天神今泉店',jp:'大砲ラーメン 天神今泉店',t:'拉麵',d:'久留米起家的老牌豚骨拉麵，招牌「昔拉麵」湯頭濃郁、表面有一層香脆的豬背油。',tip:'',kid:1,u:1},
- {id:'kanetora',m:[{n:'濃厚沾麵',jp:'濃厚つけ麺'},{n:'加高湯',jp:'スープ割り'}],a:'tenjin',n:'麵屋兼虎（天神本店／福岡PARCO店）',jp:'麺屋兼虎 天神本店',t:'沾麵',d:'濃厚魚介豚骨沾麵，麵很粗很有嚼勁。天神本店和福岡PARCO店都在天神，PARCO店逛街時順路。',tip:'沾麵吃完可以請店員加高湯（スープ割り）喝湯。',kid:1,u:1},
- {id:'gennai',m:[{n:'鰻魚飯（並・半條）',jp:'うな重（並）',p:'¥2,480'},{n:'鰻魚飯（上・3/4 條）',jp:'うな重（上）',p:'¥3,280'},{n:'整條鰻魚飯',jp:'一本うな重',p:'¥3,980'}],a:'tenjin',n:'鰻魚 三代目 源內',jp:'うなぎ 三代目源内',t:'鰻魚',d:'2025 年在天神開的國產鰻魚專賣店，關東風先蒸後烤，外皮酥香、肉很軟，在 Mina 天神附近。',tip:'午餐 10:30–15:00、晚餐 17:00–21:00，可以預約。',kid:1,v:1,u:1},
- {id:'yumeippo',m:[{n:'拉麵（普通）',jp:'ラーメン 並',p:'¥1,100'},{n:'加蒜加油',jp:'ニンニクアブラ'}],a:'tenjin',n:'夢之一步 天神店（二郎系拉麵）',jp:'夢の一歩 天神店',t:'拉麵',d:'二郎系拉麵：份量超大、豆芽菜堆成山、蒜和豬背油可以自己加，適合食量大的人挑戰。',tip:'營業時間很短、會變動（查到的資料是晚上 19:00–21:00、週一休），去之前一定要再確認。份量很大，小孩不建議。',v:1,u:1},
+ {id:'ikkousha',pr:[1000,1500],m:[{n:'泡系豚骨拉麵',jp:'泡系とんこつラーメン'},{n:'溏心蛋',jp:'味玉'},{n:'煎餃',jp:'餃子'}],a:'hakata',n:'博多一幸舍',jp:'博多一幸舎 総本店',t:'拉麵',d:'湯頭表面有一層細泡的濃郁豚骨拉麵，博多站步行可到，晚上也開。',tip:'豚骨味較濃，怕腥的人先點小碗或加大蒜。'},
+ {id:'menkaido',pr:[1000,1500],m:[{n:'各家招牌豚骨拉麵',jp:'おすすめのとんこつラーメン'},{n:'加麵',jp:'替え玉'}],a:'hakata',n:'博多拉麵街道',jp:'博多めん街道',t:'拉麵',d:'博多站內一整層都是拉麵店，各家口味一次比較，不用出車站。',tip:'就在車站裡，適合抵達當晚或玩累的晚上。',kid:1},
+ {id:'maedaya',pr:[1500,5000],pn:'午餐約 ¥1,500–3,000，晚餐約 ¥4,000–5,000',m:[{n:'牛腸鍋（味噌）',jp:'もつ鍋 みそ味'},{n:'牛腸鍋（醬油）',jp:'もつ鍋 しょうゆ味'},{n:'收尾：強棒麵',jp:'〆のちゃんぽん麺'},{n:'芝麻鯖魚',jp:'ごまさば'},{n:'自家製明太子',jp:'自家製明太子'}],a:'hakata',n:'博多牛腸鍋 前田屋 博多店',jp:'博多もつ鍋 前田屋 博多店',t:'牛腸鍋',d:'只用國產和牛小腸，臭味少，不太敢吃內臟的人也能接受。博多店每天中午就開。',tip:'很難排，建議先預約；有兒童友善座位。',kid:1},
+ {id:'rakutenchi',pr:[3000,4000],m:[{n:'元祖牛腸鍋（韭菜山）',jp:'元祖もつ鍋'},{n:'收尾：強棒麵',jp:'〆のちゃんぽん麺'},{n:'醋拌牛腸',jp:'酢もつ'}],a:'hakata',n:'元祖牛腸鍋 樂天地 博多站前店',jp:'元祖もつ鍋楽天地 博多駅前店',t:'牛腸鍋',d:'老字號連鎖，韭菜堆成小山的招牌牛腸鍋，價格親民，分店多比較好訂。',tip:''},
+ {id:'ichiran',pr:[1200,1800],m:[{n:'天然豚骨拉麵',jp:'天然とんこつラーメン'},{n:'加麵',jp:'替え玉'},{n:'半熟鹽味蛋',jp:'半熟塩ゆでたまご'}],a:'tenjin',n:'一蘭 本社總本店',jp:'一蘭 本社総本店',t:'拉麵',d:'一蘭的總店，24 小時營業，可以填單自選湯頭濃度、辣度、麵的硬度。',tip:'一人一格的座位，小孩坐要大人陪；人多時排隊快。',kid:1},
+ {id:'mentaiju',pr:[2000,3000],m:[{n:'明太重',jp:'めんたい重'},{n:'明太子沾麵',jp:'めんたい煮込みつけ麺'}],a:'tenjin',n:'元祖博多明太重',jp:'元祖博多めんたい重',t:'明太子',d:'整條明太子鋪在白飯上、淋特製昆布醬的「明太重」，福岡代表名物。在中洲那珂川旁。',tip:'早上 7 點就開，開店時段最好排。'},
+ {id:'hyoutan',pr:[1500,5000],pn:'午餐套餐約 ¥1,500–2,500，晚餐約 ¥3,000–5,000',m:[{n:'午餐握壽司套餐',jp:'ランチ握り'},{n:'活烏賊（季節）',jp:'活いか'},{n:'鮪魚大腹',jp:'大トロ'}],a:'tenjin',n:'葫蘆壽司',jp:'ひょうたん寿司',t:'海鮮',d:'天神的人氣壽司店，魚料新鮮、價格實在，午餐套餐最划算。',tip:'常常要排隊，可以先去登記再逛天神。'},
+ {id:'hirao',pr:[1000,1500],m:[{n:'天婦羅定食',jp:'天ぷら定食'},{n:'醃烏賊（免費）',jp:'いかの塩辛'},{n:'炸蝦',jp:'えび天'}],a:'tenjin',n:'天婦羅 平尾 大名店',jp:'天ぷら ひらお 大名店',t:'定食',d:'炸好一樣送一樣的現炸天婦羅定食，桌上的醃烏賊鹽辛和漬物免費吃到飽，便宜又快。',tip:'小孩可以點炸蝦和雞肉，接受度高。',kid:1},
+ {id:'shinshin',pr:[900,1300],m:[{n:'博多拉麵',jp:'博多らーめん'},{n:'炒飯',jp:'炒飯'},{n:'一口煎餃',jp:'一口餃子'}],a:'tenjin',n:'Shin-Shin 天神本店',jp:'ShinShin 天神本店',t:'拉麵',d:'極細麵＋清爽一點的豚骨湯，比一蘭、一幸舍好入口，福岡人也常吃。',tip:''},
+ {id:'yatai',pr:[1500,3000],pn:'多攤吃的話再往上加',m:[{n:'屋台拉麵',jp:'屋台ラーメン'},{n:'關東煮',jp:'おでん'},{n:'一口煎餃',jp:'一口餃子'},{n:'烤雞串',jp:'焼き鳥'}],a:'tenjin',n:'中洲屋台',jp:'中洲屋台',t:'小吃',d:'那珂川旁的路邊攤，拉麵、關東煮、烤串、煎餃都有，是福岡夜晚的代表風景（D3 晚上已排）。',tip:'多數只收現金、座位少，一攤坐不下就分兩攤；小孩建議點拉麵和煎餃。',kid:1},
+ {id:'zenzai',pr:[500,800],m:[{n:'善哉（紅豆湯）',jp:'ぜんざい'}],a:'kawabata',n:'川端善哉廣場',jp:'川端ぜんざい広場',t:'甜點',d:'川端商店街裡的紅豆湯老店，熱呼呼的善哉配鹹昆布，逛完櫛田神社剛好休息。',tip:'通常只有週五到週日和假日營業，11/28（六）可以去，出發前再確認。',kid:1},
+ {id:'kasanoya',pr:[150,600],m:[{n:'梅枝餅',jp:'梅ヶ枝餅'},{n:'梅枝餅＋抹茶套餐',jp:'梅ヶ枝餅と抹茶のセット'}],a:'dazaifu',n:'笠之家 梅枝餅',jp:'かさの家',t:'甜點',d:'參道上的老店，現烤梅枝餅外皮微脆、紅豆餡熱燙，店內有茶屋可以坐著吃。',tip:'一個約 150 日圓，人人都買一個邊走邊吃。',kid:1},
+ {id:'sbdaz',pr:[600,900],m:[{n:'季節限定星冰樂',jp:'季節限定フラペチーノ'}],a:'dazaifu',n:'星巴克 太宰府天滿宮表參道店',jp:'スターバックス 太宰府天満宮表参道店',t:'咖啡',d:'隈研吾設計、用木條交錯搭出的店面，本身就是景點，順便讓小孩上廁所休息。',tip:'拍照的人多，想坐要碰運氣。',kid:1},
+ {id:'yufumabushi',pr:[2500,3500],m:[{n:'豐後牛三吃',jp:'豊後牛まぶし',p:'¥3,200'},{n:'鰻魚三吃',jp:'鰻まぶし'},{n:'地雞三吃',jp:'地鶏まぶし'}],a:'yufuin',n:'由布釜飯 心（由布まぶし）',jp:'由布まぶし 心',t:'定食',d:'由布院名物「三吃」飯，有豐後牛、鰻魚、地雞三種，先直接吃、再加佐料、最後加高湯做茶泡飯。',tip:'有駅前店和金鱗湖本店；本店週二休，11/25（三）有開。熱門名店，建議早點去或預約。',kid:1},
+ {id:'korokke',pr:[200,400],m:[{n:'金賞可樂餅',jp:'金賞コロッケ'},{n:'豐後牛肉可樂餅',jp:'豊後牛肉コロッケ'}],a:'yufuin',n:'湯布院 金賞可樂餅',jp:'湯布院 金賞コロッケ',t:'小吃',d:'湯之坪街道上的現炸可樂餅，得過可樂餅大賽金賞，是邊走邊吃的首選。',tip:'',kid:1},
+ {id:'milch',pr:[300,800],m:[{n:'溫熱半熟起司蛋糕',jp:'ケーゼクーヘン'},{n:'布丁',jp:'プリン'}],a:'yufuin',n:'由布院 Milch 起司蛋糕',jp:'由布院ミルヒ',t:'甜點',d:'溫熱的半熟起司蛋糕「Käsekuchen」，用由布院牛奶做的，一顆一顆小小的很好分。',tip:'',kid:1},
+ {id:'karato',pr:[1500,3000],pn:'自己挑，吃多少算多少',m:[{n:'握壽司（自己挑）',jp:'にぎり寿司'},{n:'海鮮丼',jp:'海鮮丼'},{n:'炸河豚',jp:'ふく唐揚げ'},{n:'河豚味噌湯',jp:'ふく汁'}],a:'moji',n:'唐戶市場 活力馬關街',jp:'唐戸市場 活きいき馬関街',t:'海鮮',d:'一樓幾十家魚店擺出握壽司、海鮮丼、炸河豚、河豚味噌湯，自己夾、自己挑，坐在海邊吃。',tip:'只在週五到週日和假日舉行，你們 11/27 剛好是週五 ✓。中午前去選擇最多，賣完就收。',kid:1},
+ {id:'bearfruits',pr:[1200,2000],m:[{n:'超級燒咖哩',jp:'スーパー焼きカレー',p:'¥1,210'},{n:'鐵板拿坡里麵',jp:'鉄板ナポリタン',p:'¥1,210'},{n:'蛋包飯',jp:'オムライス'}],a:'moji',n:'BEAR FRUITS 燒咖哩',jp:'BEAR FRUITS 門司港本店',t:'燒咖哩',d:'門司港名物「燒咖哩」的人氣店，起司底下藏著半熟蛋。門司港車站一出來就到。',tip:'不能預約，假日中午可能排 30–45 分鐘；有不辣的兒童選項可問。',kid:1},
+ {id:'curryhonpo',pr:[1200,1800],m:[{n:'燒咖哩（牛）',jp:'焼きカレー ビーフ'},{n:'海鮮燒咖哩',jp:'シーフード焼きカレー'}],a:'moji',n:'伽哩本舖 門司港 Retro 店',jp:'伽哩本舗 門司港レトロ店',t:'燒咖哩',d:'用 320 度特製烤箱烤的燒咖哩，口味有牛、豬、雞、海鮮可選。',tip:'BEAR FRUITS 排太久可以來這裡。'},
+ {id:'mooon',pr:[600,1200],m:[{n:'烤香蕉聖代',jp:'焼きバナナパルフェ',p:'¥880'},{n:'水果奶昔',jp:'フルーツシェイク'}],a:'moji',n:'Mooon de Retro 香蕉聖代',jp:'Fruit factory Mooon de Retro',t:'甜點',d:'舊門司稅關一樓的水果甜點店，門司港限定的「烤香蕉聖代」。',tip:'',kid:1},
+ {id:'sukesan',pr:[600,1000],m:[{n:'牛肉烏龍麵',jp:'肉うどん'},{n:'牛蒡天烏龍麵',jp:'ごぼう天うどん'},{n:'萩餅',jp:'ぼた餅'}],a:'kokura',n:'資さん烏龍麵',jp:'資さんうどん',t:'烏龍麵',d:'北九州人從小吃到大的烏龍麵連鎖，招牌是牛肉烏龍麵和萩餅（おはぎ），營業到很晚。',tip:'小倉站附近有分店，從小倉城回程前可以吃一碗。',kid:1},
+ {id:'fullfull',pr:[300,600],m:[{n:'明太法國麵包',jp:'明太フランス'},{n:'明太子可頌',jp:'明太クロワッサン'}],a:'hakata',n:'The Full Full（明太子法國麵包）',jp:'THE FULL FULL 博多',t:'麵包',d:'福岡人氣麵包店，招牌「明太法國」是法國麵包夾滿明太子奶油，烤得酥脆，鹹香很下飯也很適合當伴手禮。',tip:'剛出爐時最好吃，熱門時段可能要排隊。',kid:1,u:1},
+ {id:'sashisu',pr:[3000,5000],m:[{n:'握壽司拼盤',jp:'おまかせ握り'},{n:'鮭魚卵小丼',jp:'いくら小丼'},{n:'鮪魚手捲',jp:'まぐろ手巻き'}],a:'hakata',n:'壽司酒場 SASHISU KITTE 博多店',jp:'すし酒場 さしす KITTE博多店',t:'海鮮',d:'博多站旁 KITTE 博多裡的壽司居酒屋，一貫一貫點、價格親民，氣氛輕鬆，晚餐小酌或帶小孩都可以。',tip:'晚餐尖峰常客滿，建議先訂位或早點去。',kid:1,u:1},
+ {id:'daco',pr:[400,1000],m:[{n:'生甜甜圈',jp:'生ドーナツ'},{n:'八女抹茶奶油甜甜圈',jp:'プレミアム抹茶クリーム'},{n:'咖啡甜甜圈',jp:'コーヒードーナツ'}],a:'hakata',n:'dacō 博多站前（甜甜圈・麵包）',jp:'dacō 博多駅前',t:'甜點',d:'福岡人氣麵包店 AMAM DACOTAN 的姊妹店，2026/7 在博多站前西日本城市大樓 1 樓開幕，旁邊同時開了生甜甜圈專賣店「I’m donut ?」。',tip:'I’m donut ? 博多站前店只能外帶、用售票機點；人氣店常排隊，早點去。',kid:1,v:1,u:1},
+ {id:'daitoen',pr:[5000,8000],m:[{n:'厚切牛舌',jp:'上タン塩'},{n:'上等牛五花',jp:'上カルビ'},{n:'冷麵',jp:'冷麺'}],a:'hakata',n:'燒肉 大東園 本店',jp:'焼肉 大東園 本店',t:'燒肉',d:'福岡老字號燒肉店，傳承幾十年的醬汁和厚切牛舌是招牌，適合想吃經典燒肉的晚餐。',tip:'',kid:1,u:1},
+ {id:'nikuichi',pr:[5000,8000],m:[{n:'黑毛和牛拼盤',jp:'黒毛和牛盛り合わせ'},{n:'牛舌',jp:'タン塩'},{n:'和牛壽司',jp:'肉寿司'}],a:'hakata',n:'肉屋肉一 博多店',jp:'肉屋肉一 博多店',t:'燒肉',d:'以黑毛和牛為主的燒肉店，肉品店直營所以價格實在。你們 D2 11/22 晚餐已經排了這家。',tip:'晚餐一定要先訂位。',kid:1,u:1},
+ {id:'yamasho',pr:[1500,6000],pn:'午餐約 ¥1,500–2,700，晚餐約 ¥4,000–6,000',m:[{n:'上等牛五花',jp:'上カルビ'},{n:'和牛握壽司',jp:'肉寿司'},{n:'土鍋白飯',jp:'銀シャリ'},{n:'和牛明太重（午餐）',jp:'和牛明太重'}],a:'hakata',n:'肉の山翔（A5 和牛燒肉）',jp:'肉の山翔',t:'燒肉',d:'A5 黑毛和牛燒肉，五花、赤身有 1,000 日圓以下的價位，肉都是手切，土鍋炊白飯和肉壽司是招牌，午餐有和牛明太重。',tip:'博多站南有店，天神國體道路旁也有一家；晚上建議訂位。',kid:1,v:1,u:1},
+ {id:'yasohachi',pr:[4000,6000],m:[{n:'和牛拼盤',jp:'和牛盛り合わせ'},{n:'牛舌',jp:'タン塩'},{n:'石鍋拌飯',jp:'石焼ビビンバ'}],a:'hakata',n:'博多燒肉 八十八 筑紫口本店',jp:'博多 焼肉 八十八 筑紫口本店',t:'燒肉',d:'博多站筑紫口出來就到的燒肉店，離車站近，玩完回來不用再走遠。',tip:'',kid:1,u:1},
+ {id:'jiichiro',pr:[400,800],m:[{n:'治一郎布丁',jp:'治一郎のプリン'},{n:'年輪蛋糕',jp:'治一郎のバウムクーヘン'}],a:'tenjin',n:'治一郎 大丸福岡天神店（布丁）',jp:'治一郎 大丸福岡天神店',t:'甜點',d:'以濕潤年輪蛋糕出名的店，布丁也很受歡迎，口感綿密、焦糖微苦，在大丸地下食品街。',tip:'布丁要冷藏，買了當天吃。',kid:1,u:1},
+ {id:'nunu',pr:[600,1200],m:[{n:'努努雞',jp:'努努鶏'},{n:'骨付努努雞',jp:'骨付き努努鶏'}],a:'tenjin',n:'努努雞（冷吃炸雞）',jp:'努努鶏',t:'小吃',d:'天神大名一帶的名物，炸雞冷了才吃，甜辣醬汁滲進去，像下酒菜也像零嘴，可以外帶邊走邊吃。',tip:'',kid:1,u:1},
+ {id:'taihou',pr:[800,1200],m:[{n:'昔拉麵',jp:'昔ラーメン'},{n:'加麵',jp:'替え玉'},{n:'煎餃',jp:'餃子'}],a:'tenjin',n:'大砲拉麵 天神今泉店',jp:'大砲ラーメン 天神今泉店',t:'拉麵',d:'久留米起家的老牌豚骨拉麵，招牌「昔拉麵」湯頭濃郁、表面有一層香脆的豬背油。',tip:'',kid:1,u:1},
+ {id:'kanetora',pr:[1100,1600],m:[{n:'濃厚沾麵',jp:'濃厚つけ麺'},{n:'加高湯',jp:'スープ割り'}],a:'tenjin',n:'麵屋兼虎（天神本店／福岡PARCO店）',jp:'麺屋兼虎 天神本店',t:'沾麵',d:'濃厚魚介豚骨沾麵，麵很粗很有嚼勁。天神本店和福岡PARCO店都在天神，PARCO店逛街時順路。',tip:'沾麵吃完可以請店員加高湯（スープ割り）喝湯。',kid:1,u:1},
+ {id:'gennai',pr:[2500,4000],m:[{n:'鰻魚飯（並・半條）',jp:'うな重（並）',p:'¥2,480'},{n:'鰻魚飯（上・3/4 條）',jp:'うな重（上）',p:'¥3,280'},{n:'整條鰻魚飯',jp:'一本うな重',p:'¥3,980'}],a:'tenjin',n:'鰻魚 三代目 源內',jp:'うなぎ 三代目源内',t:'鰻魚',d:'2025 年在天神開的國產鰻魚專賣店，關東風先蒸後烤，外皮酥香、肉很軟，在 Mina 天神附近。',tip:'午餐 10:30–15:00、晚餐 17:00–21:00，可以預約。',kid:1,v:1,u:1},
+ {id:'yumeippo',pr:[1100,1400],m:[{n:'拉麵（普通）',jp:'ラーメン 並',p:'¥1,100'},{n:'加蒜加油',jp:'ニンニクアブラ'}],a:'tenjin',n:'夢之一步 天神店（二郎系拉麵）',jp:'夢の一歩 天神店',t:'拉麵',d:'二郎系拉麵：份量超大、豆芽菜堆成山、蒜和豬背油可以自己加，適合食量大的人挑戰。',tip:'營業時間很短、會變動（查到的資料是晚上 19:00–21:00、週一休），去之前一定要再確認。份量很大，小孩不建議。',v:1,u:1},
  {id:'wakaba',a:'tenjin',n:'WAKABA 豬排',jp:'とんかつ わかば',t:'豬排',d:'你清單上的豬排店。',tip:'我沒查到這家店的資料，請用地圖確認店名、地址和營業時間。',u:1},
  {id:'mina',a:'tenjin',n:'Mina 天神 5 樓',jp:'ミーナ天神',t:'商場',d:'天神站前的大型商場，Mina 和天神地下街相連，下雨天也好逛。',tip:'你寫的 5 樓我查不到是哪一家店，請告訴我店名，我再補上介紹和推薦餐點。',kid:1,u:1},
- {id:'fukuyadaz',m:[{n:'辛子明太子',jp:'味の明太子'},{n:'明太子軟管',jp:'tubu tube'}],a:'dazaifu',n:'味之明太子 福屋 太宰府店',jp:'味の明太子 ふくや 太宰府店',t:'明太子',d:'明太子的創始店 ふくや 在參道上的分店，可以試吃、買明太子，有時也有現做的明太子點心。',tip:'明太子要冷藏，太宰府那天不用急著買，最後一天再買比較安全。',kid:1,u:1},
- {id:'fukutarodaz',m:[{n:'明太子仙貝',jp:'めんべい'},{n:'明太子仙貝（美乃滋）',jp:'めんべい マヨネーズ'}],a:'dazaifu',n:'福太郎 太宰府店（明太子仙貝）',jp:'福太郎 太宰府店',t:'小吃',d:'めんべい（明太子仙貝）的店，參道店常有現烤或限定口味可以試吃。',tip:'',kid:1,u:1},
+ {id:'fukuyadaz',pr:[1000,3000],pn:'以買明太子為主',m:[{n:'辛子明太子',jp:'味の明太子'},{n:'明太子軟管',jp:'tubu tube'}],a:'dazaifu',n:'味之明太子 福屋 太宰府店',jp:'味の明太子 ふくや 太宰府店',t:'明太子',d:'明太子的創始店 ふくや 在參道上的分店，可以試吃、買明太子，有時也有現做的明太子點心。',tip:'明太子要冷藏，太宰府那天不用急著買，最後一天再買比較安全。',kid:1,u:1},
+ {id:'fukutarodaz',pr:[500,1500],pn:'以買仙貝為主',m:[{n:'明太子仙貝',jp:'めんべい'},{n:'明太子仙貝（美乃滋）',jp:'めんべい マヨネーズ'}],a:'dazaifu',n:'福太郎 太宰府店（明太子仙貝）',jp:'福太郎 太宰府店',t:'小吃',d:'めんべい（明太子仙貝）的店，參道店常有現烤或限定口味可以試吃。',tip:'',kid:1,u:1},
  {id:'kaigen',a:'dazaifu',n:'拉麵 魁源 太宰府店',jp:'ラーメン 魁源 太宰府店',t:'拉麵',d:'你清單上的太宰府拉麵店。',tip:'我沒查到這家店的資料，請用地圖確認店名和營業時間。附近查得到的拉麵店有暖暮（太宰府站前）和一蘭太宰府參道店。',u:1},
- {id:'danbo',m:[{n:'暖暮拉麵',jp:'ラーメン'},{n:'加麵',jp:'替え玉'},{n:'一口煎餃',jp:'一口餃子'}],a:'dazaifu',n:'暖暮 太宰府站前店',jp:'暖暮 太宰府駅前店',t:'拉麵',d:'福岡的人氣豚骨拉麵連鎖，湯頭濃郁、細麵，就在太宰府車站旁，下山後或回程前都方便。',tip:'10:30–20:00，年中無休。',kid:1,v:1,u:1},
- {id:'kotorii',m:[{n:'抹茶套餐',jp:'抹茶セット'},{n:'和風甜點',jp:'和スイーツ'}],a:'dazaifu',n:'小鳥居茶房',jp:'小鳥居茶房',t:'咖啡',d:'太宰府小巷裡的和風茶房，安靜好坐，逛完參道人潮後休息喝茶吃甜點。',tip:'',kid:1,u:1},
- {id:'tenzan',m:[{n:'草莓最中',jp:'いちご最中'},{n:'草莓大福',jp:'いちご大福'}],a:'dazaifu',n:'天山 本店（草莓最中・大福）',jp:'天山 本店',t:'甜點',d:'太宰府的和菓子店，把整顆草莓包進最中或大福，紅豆的甜和草莓的酸很搭，是參道上的人氣點心。',tip:'',kid:1,u:1}
+ {id:'danbo',pr:[900,1300],m:[{n:'暖暮拉麵',jp:'ラーメン'},{n:'加麵',jp:'替え玉'},{n:'一口煎餃',jp:'一口餃子'}],a:'dazaifu',n:'暖暮 太宰府站前店',jp:'暖暮 太宰府駅前店',t:'拉麵',d:'福岡的人氣豚骨拉麵連鎖，湯頭濃郁、細麵，就在太宰府車站旁，下山後或回程前都方便。',tip:'10:30–20:00，年中無休。',kid:1,v:1,u:1},
+ {id:'kotorii',pr:[800,1500],m:[{n:'抹茶套餐',jp:'抹茶セット'},{n:'和風甜點',jp:'和スイーツ'}],a:'dazaifu',n:'小鳥居茶房',jp:'小鳥居茶房',t:'咖啡',d:'太宰府小巷裡的和風茶房，安靜好坐，逛完參道人潮後休息喝茶吃甜點。',tip:'',kid:1,u:1},
+ {id:'tenzan',pr:[300,800],m:[{n:'草莓最中',jp:'いちご最中'},{n:'草莓大福',jp:'いちご大福'}],a:'dazaifu',n:'天山 本店（草莓最中・大福）',jp:'天山 本店',t:'甜點',d:'太宰府的和菓子店，把整顆草莓包進最中或大福，紅豆的甜和草莓的酸很搭，是參道上的人氣點心。',tip:'',kid:1,u:1}
 ];
-let fArea='all',fType='all',fWant=false;
+let fArea='all',fType='all',fWant=false,fPrice='all';
 const FTYPES=[['noodle','🍜 拉麵・麵',['拉麵','沾麵','烏龍麵']],['meat','🥩 燒肉・肉',['燒肉','牛腸鍋','豬排']],['sea','🐟 海鮮・壽司',['海鮮','鰻魚','明太子']],['meal','🍛 定食・咖哩',['定食','燒咖哩']],['sweet','🍰 甜點・麵包',['甜點','麵包']],['snack','🍡 小吃・咖啡',['小吃','咖啡','商場']]];
+const fRate=()=>+S.get('rate',0.21)||0.21;
+const FPR=[['all','全部'],['p1','¥1,500 以下'],['p2','¥1,500–3,000'],['p3','¥3,000 以上']];
+const fPriceOf=f=>!f.pr?'':f.pr[1]<=1500?'p1':f.pr[0]>=3000?'p3':(f.pr[0]+f.pr[1])/2<=3000?'p2':'p3';
 const fTypeOf=f=>(FTYPES.find(t=>t[2].includes(f.t))||FTYPES[5])[0];
 function areaHits(a){const out=[];DAYS.forEach((_,i)=>{const ms=D(i).stops.filter(s=>a.kw.some(k=>stopText(s).includes(k)));if(ms.length)out.push({i,s:ms.find(s=>MEALRX.test(s.n))||ms[0]})});return out}
 function drawFoods(){
  const want=S.get('foods',{}),ph=S.get('gphoto',{});
- const okA=f=>fArea==='all'||f.a===fArea,okT=f=>fType==='all'||fTypeOf(f)===fType,okW=f=>!fWant||want[f.id];
- const cA=k=>FOODS.filter(f=>(k==='all'||f.a===k)&&okT(f)&&okW(f)).length,cT=k=>FOODS.filter(f=>okA(f)&&(k==='all'||fTypeOf(f)===k)&&okW(f)).length;
+ const okP=f=>fPrice==='all'||fPriceOf(f)===fPrice,okA0=f=>fArea==='all'||f.a===fArea,okA=f=>okA0(f)&&okP(f),okT=f=>fType==='all'||fTypeOf(f)===fType,okW=f=>!fWant||want[f.id];
+ const cP=k=>FOODS.filter(f=>okA0(f)&&okT(f)&&okW(f)&&(k==='all'||fPriceOf(f)===k)).length;
+ const cA=k=>FOODS.filter(f=>(k==='all'||f.a===k)&&okP(f)&&okT(f)&&okW(f)).length,cT=k=>FOODS.filter(f=>okA(f)&&(k==='all'||fTypeOf(f)===k)&&okW(f)).length;
  $('#foodSeg').innerHTML=[['all','全部']].concat(FAREAS.map(a=>[a.k,a.n])).map(x=>{const n=cA(x[0]);return `<button class="${x[0]===fArea?'on':''}${n?'':' zero'}" data-a="${x[0]}">${x[1]} ${n}</button>`}).join('');
  $('#foodType').innerHTML=[['all','全部']].concat(FTYPES.map(t=>[t[0],t[1]])).map(x=>{const n=cT(x[0]);return `<button class="${x[0]===fType?'on':''}${n?'':' zero'}" data-t="${x[0]}">${x[1]} ${n}</button>`}).join('');
+ $('#foodPrice').innerHTML=FPR.map(x=>{const n=cP(x[0]);return `<button class="${x[0]===fPrice?'on':''}${n?'':' zero'}" data-p="${x[0]}">${x[1]} ${n}</button>`}).join('');
  $('#foodWant').checked=fWant;$('#foodWant').parentNode.lastChild.textContent='只看已勾選的（'+FOODS.filter(f=>want[f.id]).length+'）';
  let h='';
  FAREAS.forEach(a=>{
   if(fArea!=='all'&&fArea!==a.k)return;
-  const L=FOODS.filter(f=>f.a===a.k&&okT(f)&&okW(f));if(!L.length)return;
+  const L=FOODS.filter(f=>f.a===a.k&&okP(f)&&okT(f)&&okW(f));if(!L.length)return;
   const hits=areaHits(a);
   h+=`<div class="fd-area"><b>📍 ${a.n}</b>${hits.length?`<div class="when">你們會來：${hits.map(x=>`<a href="#trip" data-go="${x.i}" data-id="${esc(x.s.id)}">${dayLbl(x.i)}・${esc(trunc(x.s.n,10))}</a>`).join('、')}</div>`:'<div class="when no">目前行程沒有排到這裡</div>'}</div>`;
   h+=L.map(f=>`<div class="cafe${want[f.id]?' on':''}" data-id="${f.id}">
    <div class="cafe-h"><span class="box"></span><b>${esc(f.n)}</b></div>
    <div class="fd-tags"><span>${esc(f.t)}</span>${f.kid?'<span class="kid">👶 小孩友善</span>':''}${f.u?'<span class="mine">⭐ 你的清單</span>':''}${f.u&&!f.v?'<span class="nv">資料待確認</span>':''}</div>
    <div class="cafe-d">${esc(f.d)}</div>
+   <div class="fd-p">💴 人均 ${f.pr?`<b>約 ¥${f.pr[0].toLocaleString()}–${f.pr[1].toLocaleString()}</b><span>≈ NT$${Math.round(f.pr[0]*fRate()).toLocaleString()}–${Math.round(f.pr[1]*fRate()).toLocaleString()}</span>${f.pn?`<em>${esc(f.pn)}</em>`:''}`:'<span>還不知道，查到再補</span>'}</div>
    ${f.m?`<div class="fd-m"><span>🍽️ 推薦：</span>${f.m.map((d,j)=>`<button data-fdish="${f.id}:${j}">${esc(d.n)}${d.p?`<i>${d.p}</i>`:''}</button>`).join('')}</div>`:''}
    ${f.tip?`<div class="gift-k">💡 ${esc(f.tip)}</div>`:''}
    ${ph['f_'+f.id]?(ph['f_'+f.id].u?`<img class="gimg" src="${ph['f_'+f.id].u}" alt="" data-zoom="f_${f.id}">`:`<div class="gimg wait">照片下載中…</div>`):''}
@@ -1390,15 +1398,16 @@ function drawFoods(){
 }
 $('#foodSeg').onclick=e=>{const b=e.target.closest('button');if(!b)return;fArea=b.dataset.a;drawFoods()};
 $('#foodType').onclick=e=>{const b=e.target.closest('button');if(!b)return;fType=b.dataset.t;drawFoods()};
+$('#foodPrice').onclick=e=>{const b=e.target.closest('button');if(!b)return;fPrice=b.dataset.p;drawFoods()};
 $('#foodWant').onchange=e=>{fWant=e.target.checked;drawFoods()};
-$('#foods').addEventListener('click',e=>{if(e.target.id==='fdReset'){fArea='all';fType='all';fWant=false;drawFoods()}});
+$('#foods').addEventListener('click',e=>{if(e.target.id==='fdReset'){fArea='all';fType='all';fWant=false;fPrice='all';drawFoods()}});
 $('#foods').addEventListener('click',e=>{
  const dd=e.target.closest('[data-fdish]');if(dd){const [id,j]=dd.dataset.fdish.split(':'),f=FOODS.find(x=>x.id===id),d=f.m[+j];big(d.jp+'をください','請給我「'+d.n+'」');$('#ovJp').style.whiteSpace='normal';return}
  const pb=e.target.closest('[data-photo]');if(pb){gPhotoFor=pb.dataset.photo;$('#gFile').click();return}
  const zm=e.target.closest('[data-zoom]');if(zm){const id=zm.dataset.zoom,f=FOODS.find(x=>'f_'+x.id===id);$('#imgovI').src=zm.src;$('#imgovT').textContent=f?f.n:'';$('#imgovD').dataset.id=id;$('#imgovD').textContent='移除這張照片';delete $('#imgovD').dataset.arm;$('#imgov').classList.add('on');return}
  const sh=e.target.closest('[data-fshow]');if(sh){const f=FOODS.find(x=>x.id===sh.dataset.fshow);big(f.jp+'に行きたいです','我想去「'+f.n+'」');$('#ovJp').style.whiteSpace='normal';return}
  const r=e.target.closest('.cafe-h');if(!r)return;const id=r.parentNode.dataset.id,w=S.get('foods',{});w[id]=!w[id];if(!w[id])delete w[id];S.set('foods',w);drawFoods()});
-document.addEventListener('click',e=>{const a=e.target.closest('[data-farea]');if(!a)return;fArea=a.dataset.farea;fType='all';fWant=false});
+document.addEventListener('click',e=>{const a=e.target.closest('[data-farea]');if(!a)return;fArea=a.dataset.farea;fType='all';fWant=false;fPrice='all'});
 reloaders.push(()=>{if(currentView()==='food')drawFoods()});
 const MEALRX=/午餐|晚餐|美食|屋台|海鮮|散策|街道|商店街|參道|小倉城/;
 function stopFoods(day){const m={};FAREAS.forEach(a=>{const s=D(day).stops.find(s=>MEALRX.test(s.n)&&a.kw.some(k=>stopText(s).includes(k)));if(s&&!m[s.id])m[s.id]=a});return m}
