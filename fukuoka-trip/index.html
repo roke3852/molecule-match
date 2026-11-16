@@ -281,6 +281,9 @@ nav a{position:relative}
 .subnav.on{display:flex}
 .subnav a{flex:1;max-width:180px;text-align:center;text-decoration:none;padding:8px 10px;border-radius:12px;border:1.5px solid var(--line);background:#fff;color:var(--sub);font-size:13.5px;font-weight:700}
 .subnav a.on{background:var(--ink);border-color:var(--ink);color:#fff}
+.tr.gf{background:#fff3c4;color:#8a6200;margin-left:6px}
+.giftbox{display:block;margin-top:8px;background:#fff8e1;border:1px solid #f1dfa8;border-radius:10px;padding:8px 10px;text-decoration:none;color:#5b4d43;font-size:12.5px;line-height:1.6}
+.giftbox b{display:block;color:#7a5a00;font-size:13px}.giftbox em{display:block;font-style:normal;font-weight:700;color:var(--maple);margin-top:2px}
 .lk{margin:6px 0 0 32px;font-size:12.5px;border-radius:8px;padding:5px 8px;line-height:1.6}
 .lk.ok{background:#e9f4ec;color:#2f6b4a}.lk.ok a{color:#2f6b4a;font-weight:700}
 .lk.no{background:#f3ece4;color:#5b4d43}.lk.no .btn{display:block;margin-top:5px;font-size:12.5px;padding:6px 10px;width:100%;text-align:left}
@@ -718,6 +721,7 @@ function renderDay(keep){
  if(editing){h+=`<div class="edtools"><button class="btn" data-act="add">＋ 新增一站</button><button class="btn" data-act="sort">⏱ 依時間排序</button>${dayChanged(curDay)?'<button class="btn" data-act="reset">↩ 還原這天</button>':''}</div>`}
  else h+=wxHtml(curDay);
  h+='<div class="tl">';
+ const SG=editing?{}:stopGifts(curDay),gw=S.get('gifts',{});
  d.stops.forEach((s,i)=>{const isD=!!done[s.id],[ic,cls]=trIcon(s.tr);const tt=s.t.replace('-','<br>–<br>');
   if(editing){
    h+=`<div class="stop ed" data-id="${s.id}" data-i="${i}"><span class="dot"></span><div class="tm">${tt}</div>
@@ -728,8 +732,9 @@ function renderDay(keep){
    <button class="dot" data-act="done" aria-label="完成"></button>
    <div class="tm">${tt}</div>
    <div class="sc"><div class="sc-h" data-act="toggle"><div class="main"><div class="t">${esc(s.t)}${i===nowI?'<span class="now-tag">現在</span>':''}</div><h3>${esc(s.n)}</h3>
-   <span class="tr ${cls}">${ic} ${esc(s.tr)}</span></div><span class="chev">⌄</span></div>
-   <div class="more">${esc(s.d)}${s.tip?`<div class="tip">💡 ${esc(s.tip)}</div>`:''}
+   <span class="tr ${cls}">${ic} ${esc(s.tr)}</span>${SG[s.id]?`<span class="tr gf">🎁 伴手禮 ${SG[s.id].length} 款</span>`:''}</div><span class="chev">⌄</span></div>
+   <div class="more">${esc(s.d)}${s.tip?`<div class="tip">💡 ${esc(s.tip)}</div>`:''}${SG[s.id]?(()=>{const gs=SG[s.id].slice().sort((a,b)=>(gw[b.id]?1:0)-(gw[a.id]?1:0)),nw=gs.filter(g=>gw[g.id]).length;
+    return `<a class="giftbox" href="#gift" data-gf="${gs.map(g=>g.id).join(',')}" data-gl="${esc(s.n)}"><b>🎁 這一站買得到 ${gs.length} 款伴手禮${nw?`（其中 ${nw} 款在想買清單）`:''}</b><span>${gs.slice(0,8).map(g=>(gw[g.id]?'✓ ':'')+esc(gShort(g))).join('、')}${gs.length>8?'…':''}</span><em>看介紹 ›</em></a>`})():''}
    <div class="acts"><a class="btn" href="${mapUrl(s.q||s.n)}" target="_blank" rel="noopener">📍 地圖導航</a>
    ${s.jr?'<a class="btn" href="#tools" data-act="jr">🎫 買票小抄</a>':''}
    <button class="btn pri" data-act="done">${isD?'↺ 取消完成':'✓ 完成'}</button></div></div></div></div>`});
@@ -1119,11 +1124,16 @@ const GAT={suzukake:['hakata','tenjin'],jagariko:['super','hakata','airport'],ra
 function stopText(s){return s.n+' '+(s.q||'')+' '+(s.d||'')}
 function findStops(kws,min){const out=[];DAYS.forEach((_,i)=>{if(i<(min||0))return;const ms=D(i).stops.filter(s=>{const t=stopText(s);return kws.some(k=>t.includes(k))});if(ms.length)out.push({i,s:ms.find(s=>/伴手禮|買|補貨|マイング|購物|逛|參道|参道|街道|散策/.test(stopText(s)))||ms[ms.length-1]})});return out.reverse()}
 function dayLbl(i){return 'D'+(i+1)+' '+DAYS[i].date}
-function linkHtml(hits,label){return `<div class="lk ok">📍 ${label}：${hits.slice(0,2).map(h=>`<a href="#trip" data-go="${h.i}" data-id="${esc(h.s.id)}">${dayLbl(h.i)}・${esc(trunc(h.s.n,12))}</a>`).join('、')}</div>`}
+function linkHtml(hits,label){return `<div class="lk ok">📍 ${label}：${hits.slice(0,3).map(h=>`<a href="#trip" data-go="${h.i}" data-id="${esc(h.s.id)}">${dayLbl(h.i)}・${esc(trunc(h.s.n,12))}</a>`).join('、')}</div>`}
 function sugHtml(kind,id,day,name){return `<div class="lk no">💡 目前行程還沒排到買得到的地點。<button class="btn" data-sug="${kind}:${id}">＋ 加進 ${dayLbl(day)}：${esc(name)}</button></div>`}
-function giftLink(g){const at=GAT[g.id]||['hakata','airport','tenjin'];let hits=[];
- at.forEach(k=>{findStops(SPOTS[k].kw,SPOTS[k].min).forEach(h=>{if(!hits.some(x=>x.i===h.i))hits.push(h)})});hits.sort((a,b)=>b.i-a.i);
- if(hits.length)return linkHtml(hits,'行程中買得到');const sp=SPOTS[at[0]];return sugHtml('g',g.id,sp.day,sp.sug.n)}
+function giftHits(g){const at=GAT[g.id]||['hakata','airport','tenjin'];let hits=[];
+ at.forEach(k=>{findStops(SPOTS[k].kw,SPOTS[k].min).forEach(h=>{if(!hits.some(x=>x.s.id===h.s.id))hits.push(h)})});return hits.sort((a,b)=>b.i-a.i).slice(0,3)}
+function giftLink(g){const hits=giftHits(g);
+ if(hits.length)return linkHtml(hits,'行程中買得到');const sp=SPOTS[(GAT[g.id]||['hakata'])[0]];return sugHtml('g',g.id,sp.day,sp.sug.n)}
+function stopGifts(day){const m={};GIFTS.forEach(g=>giftHits(g).forEach(h=>{if(h.i===day)(m[h.s.id]=m[h.s.id]||[]).push(g)}));return m}
+const gShort=g=>g.n.replace(/（.*?）/g,'');
+let gOnly=null;
+document.addEventListener('click',e=>{const a=e.target.closest('[data-gf]');if(!a)return;gOnly={ids:a.dataset.gf.split(','),label:a.dataset.gl};gCat='';if(currentView()==='gift')drawGifts()});
 function cafeLink(c){const hits=findStops([c.jp,c.n]);if(hits.length)return linkHtml(hits,'已排進行程');
  return `<div class="lk no">💡 還沒排進行程。<button class="btn" data-sug="c:${c.id}">＋ 加進 ${dayLbl(1)}：${esc(c.n)}</button></div>`}
 function addSug(key){const [kind,id]=key.split(':');let day,st;
@@ -1162,8 +1172,8 @@ let gCat='全部';
 function drawGifts(){
  const want=S.get('gifts',{});
  $('#giftSeg').innerHTML=GCATS.map(c=>`<button class="${c===gCat?'on':''}" data-c="${c}">${c}${c==='想買的'?'（'+GIFTS.filter(g=>want[g.id]).length+'）':''}</button>`).join('');
- const L=GIFTS.filter(g=>gCat==='全部'||(gCat==='想買的'?want[g.id]:g.c===gCat));
- $('#gifts').innerHTML=L.length?L.map(g=>`<div class="cafe${want[g.id]?' on':''}" data-id="${g.id}">
+ const L=GIFTS.filter(g=>gOnly?gOnly.ids.includes(g.id):gCat==='全部'||(gCat==='想買的'?want[g.id]:g.c===gCat));
+ $('#gifts').innerHTML=(gOnly?`<div class="lk ok" style="margin:0 0 4px">📍 「${esc(gOnly.label)}」這一站買得到的 ${L.length} 款。按上面的分類可以看全部。</div>`:'')+(L.length?L.map(g=>`<div class="cafe${want[g.id]?' on':''}" data-id="${g.id}">
   <div class="cafe-h"><span class="box"></span><b>${esc(g.n)}</b></div>
   <div class="cafe-m"><span class="tag">${esc(g.c)}</span><span class="cafe-t">${esc(g.mk)}</span></div>
   <div class="cafe-d">${esc(g.d)}</div>
@@ -1171,9 +1181,9 @@ function drawGifts(){
   ${giftLink(g)}
   ${g.w?`<div class="gift-w">⚠️ ${esc(g.w)}</div>`:''}
   <div class="cafe-b"><button class="btn ghost" data-show="${g.id}">🔍 給店員看</button></div>
- </div>`).join(''):'<div class="xempty">還沒有勾選想買的東西。</div>';
+ </div>`).join(''):'<div class="xempty">還沒有勾選想買的東西。</div>');
 }
-$('#giftSeg').onclick=e=>{const b=e.target.closest('button');if(!b)return;gCat=b.dataset.c;drawGifts()};
+$('#giftSeg').onclick=e=>{const b=e.target.closest('button');if(!b)return;gOnly=null;gCat=b.dataset.c;drawGifts()};
 $('#gifts').addEventListener('click',e=>{
  const sh=e.target.closest('[data-show]');if(sh){const g=GIFTS.find(x=>x.id===sh.dataset.show);big(g.jp+'はありますか？','請問有賣「'+g.n+'」嗎？');$('#ovJp').style.whiteSpace='normal';return}
  const r=e.target.closest('.cafe-h');if(!r)return;const id=r.parentNode.dataset.id,want=S.get('gifts',{});want[id]=!want[id];if(!want[id])delete want[id];S.set('gifts',want);drawGifts()});
@@ -1190,7 +1200,7 @@ function route(){const v=currentView();VIEWS.forEach(x=>$('#v-'+x).classList.tog
  document.querySelectorAll('nav a').forEach(a=>{a.classList.toggle('on',a.dataset.g===g);if(a.dataset.g===g&&g==='buy')a.setAttribute('href','#'+v)});
  const sn=$('#subnav');sn.classList.toggle('on',sub.length>1);sn.innerHTML=sub.length>1?sub.map(x=>`<a href="#${x[0]}" class="${x[0]===v?'on':''}">${x[1]}</a>`).join(''):'';
  $('#todayBtn').classList.toggle('on',v==='trip'&&ti>=0&&ti<8&&curDay!==ti);window.scrollTo(0,0);
- if(v==='map')drawMap();if(v==='gift')drawGifts();if(v==='coffee')drawCafes();if(v==='chat'&&window.FS)FS.chatOpen()}
+ if(v==='map')drawMap();if(v==='trip'&&!editing)renderDay(true);if(v==='gift')drawGifts();if(v==='coffee')drawCafes();if(v==='chat'&&window.FS)FS.chatOpen()}
 window.addEventListener('hashchange',route);
 
 /* ---------- family sync (Firebase Realtime Database, REST + 串流) ---------- */
