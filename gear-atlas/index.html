@@ -94,6 +94,13 @@ section + section{margin-top:28px}
 .btn[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
 .btn.fav[aria-pressed="true"]{background:var(--brass);border-color:var(--brass);color:var(--bg)}
 .btn.solid{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:700}
+a.btn{text-decoration:none;color:inherit;display:inline-block}
+.photos{display:flex;gap:6px;overflow-x:auto;margin:8px 0 0}
+.photos button{flex:0 0 auto;padding:0;border:1px solid var(--line);border-radius:3px;overflow:hidden;background:none}
+.photos img{display:block;width:88px;height:88px;object-fit:cover}
+.viewer{position:fixed;inset:0;z-index:12;background:var(--bg);overflow:auto;padding:16px 0 40px}
+.viewer img{display:block;max-width:100%;max-height:70vh;margin:0 auto;border:1px solid var(--line);border-radius:4px}
+.toast{position:fixed;left:16px;right:16px;bottom:76px;z-index:14;background:var(--ink);color:var(--bg);padding:10px 14px;border-radius:4px;font-size:14px;text-align:center}
 .detail{margin-top:10px;border-top:1px dashed var(--line);padding-top:8px}
 dl.spec{margin:0 0 8px;display:grid;grid-template-columns:5.2em 1fr;gap:2px 10px;font-size:13.5px}
 dl.spec dt{font-family:var(--f-mono);color:var(--muted);font-size:12.5px;padding-top:1px}
@@ -141,6 +148,9 @@ footer{color:var(--muted);font-size:12.5px;margin-top:30px;border-top:1px solid 
 <main><div class="wrap" id="app"></div></main>
 <div id="cmpbar"></div>
 <div id="sheet"></div>
+<div id="viewer"></div>
+<div id="toast"></div>
+<input id="file" type="file" accept="image/*" multiple hidden>
 
 <script>
 /* ---------- 資料 ---------- */
@@ -269,6 +279,29 @@ const S={cat:"grinders",sub:"all",q:"",favOnly:false,open:{},prin:{},cmp:[],favs
 const $=s=>document.querySelector(s);
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 
+/* ---------- 照片（存在這台裝置的瀏覽器） ---------- */
+const PH={};let phDB=null,phTarget=null;
+function phOpen(){return new Promise(res=>{try{const r=indexedDB.open("gear-atlas-photos",1);
+  r.onupgradeneeded=()=>r.result.createObjectStore("p");
+  r.onsuccess=()=>{phDB=r.result;const c=phDB.transaction("p").objectStore("p").openCursor();
+    c.onsuccess=()=>{const cur=c.result;if(cur){PH[cur.key]=cur.value;cur.continue()}else res()};c.onerror=()=>res()};
+  r.onerror=()=>res()}catch(e){res()}})}
+function phSave(id){try{const st=phDB.transaction("p","readwrite").objectStore("p");(PH[id]&&PH[id].length)?st.put(PH[id],id):st.delete(id);return true}catch(e){return false}}
+function shrink(file){return new Promise((res,rej)=>{const u=URL.createObjectURL(file),im=new Image();
+  im.onload=()=>{const k=Math.min(1,1100/Math.max(im.width,im.height)),c=document.createElement("canvas");
+    c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);c.getContext("2d").drawImage(im,0,0,c.width,c.height);
+    URL.revokeObjectURL(u);res(c.toDataURL("image/jpeg",.82))};
+  im.onerror=()=>{URL.revokeObjectURL(u);rej()};im.src=u})}
+let toastT;function toast(m){$("#toast").innerHTML=`<div class="toast" role="status">${m}</div>`;clearTimeout(toastT);toastT=setTimeout(()=>$("#toast").innerHTML="",3500)}
+function renderViewer(){
+  const v=S.view,ph=v&&PH[v.id];
+  if(!v||!ph||!ph[v.i]){S.view=null;$("#viewer").innerHTML="";return}
+  const it=ALL.find(x=>x.id===v.id);
+  $("#viewer").innerHTML=`<div class="viewer" role="dialog" aria-label="照片"><div class="wrap"><div class="sheet-head"><h2>${esc(it.n)}</h2><button class="btn solid" data-act="viewclose">關閉</button></div>
+   <img src="${ph[v.i]}" alt="${esc(it.n)} 照片"><p class="count" style="text-align:center;margin-top:8px">第 ${v.i+1} 張／共 ${ph.length} 張</p>
+   <div class="acts" style="justify-content:center">${ph.length>1?`<button class="btn" data-act="viewstep" data-v="-1">上一張</button><button class="btn" data-act="viewstep" data-v="1">下一張</button>`:""}<button class="btn" data-act="photodel">刪除這張</button></div></div></div>`;
+}
+
 /* ---------- 原理圖 ---------- */
 const L='stroke="var(--bp-line)" fill="none" stroke-width="1.5"';
 const HOT='stroke="var(--bp-hot)" fill="none" stroke-width="1.5"';
@@ -311,17 +344,21 @@ function renderTabs(){
 }
 function card(it,showCat){
   const open=!!S.open[it.id],fav=S.favs.has(it.id),cmp=S.cmp.includes(it.id);
+  const ph=PH[it.id]||[];
   const subLabel=(it.cat.subs.find(s=>s[0]===it.s)||[])[1]||"";
   return `<article class="card${fav?" fav":""}">
     <div class="meta">${esc(it.b)}${showCat?"　／　"+it.cat.name:""}</div>
     <h3>${esc(it.n)}</h3>
     <div class="pills"><span class="pill">${subLabel}</span><span class="pill tier">${TIERS[it.t]}</span></div>
     <p>${esc(it.d)}</p>
+    ${ph.length?`<div class="photos">${ph.map((u,i)=>`<button data-act="view" data-v="${it.id}" data-i="${i}" aria-label="放大第 ${i+1} 張照片"><img src="${u}" alt="${esc(it.n)} 照片 ${i+1}"></button>`).join("")}</div>`:""}
     ${open?`<div class="detail"><dl class="spec">${it.sp.map(r=>`<dt>${esc(r[0])}</dt><dd>${esc(r[1])}</dd>`).join("")}</dl><h4>特色</h4><p>${esc(it.f)}</p><h4>適合</h4><p>${esc(it.w)}</p></div>`:""}
     <div class="acts">
       <button class="btn" data-act="open" data-v="${it.id}" aria-expanded="${open}">${open?"收合":"看規格"}</button>
       <button class="btn fav" data-act="fav" data-v="${it.id}" aria-pressed="${fav}">${fav?"★ 已收藏":"☆ 收藏"}</button>
       <button class="btn" data-act="cmp" data-v="${it.id}" aria-pressed="${cmp}">${cmp?"✓ 比較中":"＋ 比較"}</button>
+      <button class="btn" data-act="addphoto" data-v="${it.id}">＋ 加照片</button>
+      <a class="btn" href="https://www.google.com/search?tbm=isch&q=${encodeURIComponent(it.n+" 咖啡")}" target="_blank" rel="noopener">搜尋照片 ↗</a>
     </div></article>`;
 }
 function match(it,q){return (it.n+it.b+it.d+it.f+it.w+it.sp.flat().join("")+it.cat.name+TIERS[it.t]).toLowerCase().includes(q)}
@@ -338,7 +375,7 @@ function renderCat(){
     <div class="bp"><div class="bp-tabs">${c.principles.map((x,i)=>`<button class="bp-tab" data-act="prin" data-v="${i}" aria-pressed="${i===pi}">${x.label}</button>`).join("")}</div>
     <div class="bp-body"><div>${DIAG[p.k]()}</div><div><h3>${p.h}</h3><p>${p.p}</p><ul>${p.pts.map(r=>`<li><b>${r[0]}</b><span>${r[1]}</span></li>`).join("")}</ul><div class="cap">示意圖，僅說明結構與趨勢</div></div></div></div>
   </section>
-  <section><h2>代表器材</h2><p class="sec-note">點「看規格」展開細節，點「＋ 比較」最多選 3 項並排。</p>
+  <section><h2>代表器材</h2><p class="sec-note">點「看規格」展開細節，點「＋ 比較」最多選 3 項並排。每項器材都可以加上自己的照片。</p>
     <div class="filters"><button class="chip" data-act="sub" data-v="all" aria-pressed="${S.sub==="all"}">全部</button>${c.subs.map(s=>`<button class="chip" data-act="sub" data-v="${s[0]}" aria-pressed="${S.sub===s[0]}">${s[1]}</button>`).join("")}<button class="chip" data-act="favonly" aria-pressed="${S.favOnly}">★ 只看收藏</button></div>
     <p class="count">${items.length} 項</p>
     ${items.length?`<div class="list">${items.map(it=>card(it)).join("")}</div>`:`<p class="empty">${S.favOnly?"這個分類還沒有收藏。":"沒有符合的器材。"}</p>`}
@@ -374,6 +411,7 @@ function render(){
   renderTabs();
   $("#app").innerHTML=(S.cat==="quiz"&&!S.q.trim())?renderQuiz():renderCat();
   renderCmp();
+  renderViewer();
 }
 
 /* ---------- 事件 ---------- */
@@ -390,17 +428,31 @@ document.addEventListener("click",e=>{
   else if(a==="cmpclear"){S.cmp=[];S.sheet=false}
   else if(a==="sheet")S.sheet=true;
   else if(a==="sheetclose")S.sheet=false;
+  else if(a==="addphoto"){phTarget=v;$("#file").click();return}
+  else if(a==="view")S.view={id:v,i:+b.dataset.i};
+  else if(a==="viewclose")S.view=null;
+  else if(a==="viewstep"){const n=PH[S.view.id].length;S.view.i=(S.view.i+ +v+n)%n}
+  else if(a==="photodel"){const p=PH[S.view.id];p.splice(S.view.i,1);phSave(S.view.id);if(!p.length)S.view=null;else S.view.i=Math.min(S.view.i,p.length-1)}
   else if(a==="quiznew")newQuiz();
   else if(a==="ans"){const z=S.quiz;if(z.pick===null){z.pick=+v;if(z.pick===QUIZ[z.qs[z.i]].a)z.score++}}
   else if(a==="next"){const z=S.quiz;z.i++;z.pick=null;if(z.i>=z.qs.length){const best=store.get("gear-quiz-best",0);if(z.score>best)store.set("gear-quiz-best",z.score)}}
   render();
 });
 $("#q").addEventListener("input",e=>{S.q=e.target.value;renderTabs();$("#app").innerHTML=(S.cat==="quiz"&&!S.q.trim())?renderQuiz():renderCat()});
+$("#file").addEventListener("change",async e=>{
+  const files=[...e.target.files],id=phTarget;if(!id||!files.length)return;
+  let bad=0;PH[id]=PH[id]||[];
+  for(const f of files){try{PH[id].push(await shrink(f))}catch(_){bad++}}
+  const saved=phSave(id);e.target.value="";render();
+  if(bad)toast(`有 ${bad} 張照片讀不出來，請改用 JPG 或 PNG。`);
+  else if(!saved)toast("照片已加入，但這個瀏覽器無法儲存，關閉頁面後會消失。");
+});
 function fromHash(){const h=location.hash.slice(1);if(h==="quiz"||CATS.some(c=>c.id===h)){S.cat=h;S.sub="all"}}
 window.addEventListener("hashchange",()=>{fromHash();render()});
 function start(d){
   if(d&&d.cat){Object.assign(S,{cat:d.cat,sub:d.sub||"all",cmp:d.cmp||[],open:d.open||{},prin:d.prin||{},quiz:d.quiz||null})}
   fromHash();render();
+  phOpen().then(render);
 }
 window.claude?.hot?.snapshot?.(()=>({cat:S.cat,sub:S.sub,cmp:S.cmp,open:S.open,prin:S.prin,quiz:S.quiz}));
 window.claude?.hot?.ready?window.claude.hot.ready(start):start(window.claude?.hot?.data??{});
