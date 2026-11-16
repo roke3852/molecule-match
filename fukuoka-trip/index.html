@@ -281,6 +281,9 @@ nav a{position:relative}
 .subnav.on{display:flex}
 .subnav a{flex:1;max-width:180px;text-align:center;text-decoration:none;padding:8px 10px;border-radius:12px;border:1.5px solid var(--line);background:#fff;color:var(--sub);font-size:13.5px;font-weight:700}
 .subnav a.on{background:var(--ink);border-color:var(--ink);color:#fff}
+.lk{margin:6px 0 0 32px;font-size:12.5px;border-radius:8px;padding:5px 8px;line-height:1.6}
+.lk.ok{background:#e9f4ec;color:#2f6b4a}.lk.ok a{color:#2f6b4a;font-weight:700}
+.lk.no{background:#f3ece4;color:#5b4d43}.lk.no .btn{display:block;margin-top:5px;font-size:12.5px;padding:6px 10px;width:100%;text-align:left}
 .gift-k{margin-left:32px;font-size:12px;color:var(--sub);margin-top:4px}
 .gift-w{margin-left:32px;font-size:12.5px;color:#8a6200;background:#fff3c4;border-radius:8px;padding:4px 8px;margin-top:6px}
 .nbadge{display:none;position:absolute;top:0;left:50%;margin-left:6px;min-width:17px;height:17px;border-radius:9px;background:var(--maple);color:#fff;font-size:10.5px;font-weight:700;line-height:17px;padding:0 4px}
@@ -1089,6 +1092,7 @@ function drawCafes(){
   <div class="cafe-h"><span class="box"></span><b>${esc(c.n)}</b></div>
   <div class="cafe-m"><span class="tag">${esc(c.a)}</span><span class="tag">${esc(c.tag)}</span>${c.h?`<span class="cafe-t">🕒 ${esc(c.h)}</span>`:''}</div>
   <div class="cafe-d">${esc(c.d)}</div>
+  ${cafeLink(c)}
   <div class="cafe-b"><a class="btn" href="${mapUrl(c.jp+' 福岡')}" target="_blank" rel="noopener">🗺️ 地圖</a>${c.u?`<a class="btn ghost" href="${c.u}" target="_blank" rel="noopener">🔗 官網</a>`:''}<button class="btn ghost" data-taxi="${esc(c.jp)}">🚕 給司機看</button></div>
  </div>`).join('');
 }
@@ -1097,6 +1101,34 @@ $('#cafes').addEventListener('click',e=>{
  if(e.target.closest('a'))return;
  const r=e.target.closest('.cafe-h');if(!r)return;const id=r.parentNode.dataset.id,done=S.get('cafes',{});done[id]=!done[id];S.set('cafes',done);drawCafes()});
 drawCafes();
+
+/* ---------- 吃喝買 ↔ 行程 連結 ---------- */
+const SPOTS={
+ hakata:{n:'博多站',kw:['博多駅','博多站','博多車站','マイング','デイトス','AMU','博多阪急'],day:6,sug:{n:'博多站マイング買伴手禮',q:'博多駅 マイング',tr:'步行',d:'回飯店前在博多站內的伴手禮街「マイング」「博多デイトス」一次買齊，想買的清單見「吃喝買 → 伴手禮」。'}},
+ tenjin:{n:'天神百貨地下街',kw:['天神','岩田屋','大丸','三越'],day:7,sug:{n:'天神百貨地下街買伴手禮',q:'天神地下街',tr:'步行',d:'岩田屋、大丸、三越地下食品街補買伴手禮，離飯店近。'}},
+ airport:{n:'福岡機場',kw:['福岡空港','福岡機場','機場','空港'],min:6,day:7,sug:{n:'機場免稅店補買伴手禮',q:'福岡空港 国際線ターミナル',tr:'步行',d:'出境後到國際線免稅店補買通りもん、明太子、めんべい等，冷藏品在這裡買最方便。'}},
+ super:{n:'超市・藥妝店',kw:['ららぽーと','LaLaport','ドン・キホーテ','唐吉訶德','超市','スーパー'],day:5,sug:{n:'超市買零食泡麵',q:'ららぽーと福岡',tr:'步行',d:'LaLaport 裡的超市買九州限定零食、袋裝泡麵，價格比伴手禮店便宜。'}},
+ dazaifu:{n:'太宰府參道',kw:['太宰府'],day:2,sug:{n:'太宰府參道吃梅枝餅',q:'太宰府天満宮 参道',tr:'步行',d:'參道上很多家現烤梅枝餅，趁熱吃。'}},
+ yufuin:{n:'由布院',kw:['由布院','湯布院'],day:4,sug:{n:'由布院買 B-speak 蛋糕捲',q:'由布院駅',tr:'步行',d:'B-speak 的 P ロール常常上午就賣完，到由布院先去買。'}},
+ moji:{n:'門司港',kw:['門司港'],day:6,sug:{n:'門司港買香蕉點心',q:'門司港駅',tr:'步行',d:'門司港車站周邊和海峽廣場有各種香蕉點心。'}}
+};
+const GAT={suzukake:['hakata','tenjin'],jagariko:['super','hakata','airport'],ramen:['super','hakata','airport'],umegae:['dazaifu'],yufuin:['yufuin'],moji:['moji']};
+function stopText(s){return s.n+' '+(s.q||'')+' '+(s.d||'')}
+function findStops(kws,min){const out=[];DAYS.forEach((_,i)=>{if(i<(min||0))return;const ms=D(i).stops.filter(s=>{const t=stopText(s);return kws.some(k=>t.includes(k))});if(ms.length)out.push({i,s:ms.find(s=>/伴手禮|買|補貨|マイング|購物|逛|參道|参道|街道|散策/.test(stopText(s)))||ms[ms.length-1]})});return out.reverse()}
+function dayLbl(i){return 'D'+(i+1)+' '+DAYS[i].date}
+function linkHtml(hits,label){return `<div class="lk ok">📍 ${label}：${hits.slice(0,2).map(h=>`<a href="#trip" data-go="${h.i}" data-id="${esc(h.s.id)}">${dayLbl(h.i)}・${esc(trunc(h.s.n,12))}</a>`).join('、')}</div>`}
+function sugHtml(kind,id,day,name){return `<div class="lk no">💡 目前行程還沒排到買得到的地點。<button class="btn" data-sug="${kind}:${id}">＋ 加進 ${dayLbl(day)}：${esc(name)}</button></div>`}
+function giftLink(g){const at=GAT[g.id]||['hakata','airport','tenjin'];let hits=[];
+ at.forEach(k=>{findStops(SPOTS[k].kw,SPOTS[k].min).forEach(h=>{if(!hits.some(x=>x.i===h.i))hits.push(h)})});hits.sort((a,b)=>b.i-a.i);
+ if(hits.length)return linkHtml(hits,'行程中買得到');const sp=SPOTS[at[0]];return sugHtml('g',g.id,sp.day,sp.sug.n)}
+function cafeLink(c){const hits=findStops([c.jp,c.n]);if(hits.length)return linkHtml(hits,'已排進行程');
+ return `<div class="lk no">💡 還沒排進行程。<button class="btn" data-sug="c:${c.id}">＋ 加進 ${dayLbl(1)}：${esc(c.n)}</button></div>`}
+function addSug(key){const [kind,id]=key.split(':');let day,st;
+ if(kind==='g'){const g=GIFTS.find(x=>x.id===id),sp=SPOTS[(GAT[id]||['hakata'])[0]];day=sp.day;st=Object.assign({t:'未定'},sp.sug)}
+ else{const c=CAFES.find(x=>x.id===id);day=1;st={t:'未定',n:c.n+' 喝咖啡',q:c.jp,tr:'計程車／地鐵',d:c.d+(c.h?'（營業：'+c.h+'）':'')}}
+ const days=ensureEd().days;days[day].stops.push(clean(Object.assign({id:'x'+Date.now()},st)));saveEd();renderChips();renderDay(true);drawGifts();drawCafes();
+ toast('已加到 '+dayLbl(day)+' 最後一站，時間可到行程頁按「編輯」調整')}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-sug]');if(b){e.stopPropagation();addSug(b.dataset.sug)}});
 
 /* ---------- 伴手禮 ---------- */
 const GCATS=['全部','想買的','甜點','明太子・鹹食','調味・茶','拉麵','景點限定'];
@@ -1133,6 +1165,7 @@ function drawGifts(){
   <div class="cafe-m"><span class="tag">${esc(g.c)}</span><span class="cafe-t">${esc(g.mk)}</span></div>
   <div class="cafe-d">${esc(g.d)}</div>
   <div class="gift-k">🕒 ${esc(g.k)}</div>
+  ${giftLink(g)}
   ${g.w?`<div class="gift-w">⚠️ ${esc(g.w)}</div>`:''}
   <div class="cafe-b"><button class="btn ghost" data-show="${g.id}">🔍 給店員看</button></div>
  </div>`).join(''):'<div class="xempty">還沒有勾選想買的東西。</div>';
@@ -1141,7 +1174,7 @@ $('#giftSeg').onclick=e=>{const b=e.target.closest('button');if(!b)return;gCat=b
 $('#gifts').addEventListener('click',e=>{
  const sh=e.target.closest('[data-show]');if(sh){const g=GIFTS.find(x=>x.id===sh.dataset.show);big(g.jp+'はありますか？','請問有賣「'+g.n+'」嗎？');$('#ovJp').style.whiteSpace='normal';return}
  const r=e.target.closest('.cafe-h');if(!r)return;const id=r.parentNode.dataset.id,want=S.get('gifts',{});want[id]=!want[id];if(!want[id])delete want[id];S.set('gifts',want);drawGifts()});
-reloaders.push(drawGifts);
+reloaders.push(drawGifts);reloaders.push(drawCafes);
 drawGifts();
 
 /* ---------- routing ---------- */
@@ -1154,7 +1187,7 @@ function route(){const v=currentView();VIEWS.forEach(x=>$('#v-'+x).classList.tog
  document.querySelectorAll('nav a').forEach(a=>{a.classList.toggle('on',a.dataset.g===g);if(a.dataset.g===g&&g==='buy')a.setAttribute('href','#'+v)});
  const sn=$('#subnav');sn.classList.toggle('on',sub.length>1);sn.innerHTML=sub.length>1?sub.map(x=>`<a href="#${x[0]}" class="${x[0]===v?'on':''}">${x[1]}</a>`).join(''):'';
  $('#todayBtn').classList.toggle('on',v==='trip'&&ti>=0&&ti<8&&curDay!==ti);window.scrollTo(0,0);
- if(v==='map')drawMap();if(v==='chat'&&window.FS)FS.chatOpen()}
+ if(v==='map')drawMap();if(v==='gift')drawGifts();if(v==='coffee')drawCafes();if(v==='chat'&&window.FS)FS.chatOpen()}
 window.addEventListener('hashchange',route);
 
 /* ---------- family sync (Firebase Realtime Database, REST + 串流) ---------- */
