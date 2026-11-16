@@ -146,6 +146,10 @@ main{padding:0 0 calc(80px + env(safe-area-inset-bottom))}
 .stop.open .chev{transform:rotate(180deg)}
 .more{display:none;margin-top:9px;padding-top:9px;border-top:1px dashed var(--line);font-size:13.5px;color:#4a3f38}
 .stop.open .more{display:block}
+.sph{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.sph img{width:76px;height:76px;object-fit:cover;border-radius:10px;border:1px solid var(--line);cursor:pointer}
+.sph .ld{width:76px;height:76px;border-radius:10px;background:#eee;color:#999;font-size:11px;display:flex;align-items:center;justify-content:center}
+.sph .add{height:76px;min-width:76px;padding:0 10px;border-radius:10px;border:1.5px dashed var(--line);background:#fff;font-size:12.5px;font-weight:700;color:var(--sub)}
 .tip{margin-top:8px;background:#fff8e1;border-radius:10px;padding:7px 10px;font-size:12.5px;color:#7a5a00}
 .acts{display:flex;gap:8px;margin-top:10px}
 .btn{flex:1;display:inline-flex;justify-content:center;align-items:center;gap:6px;padding:8px 10px;border-radius:11px;font-size:13px;font-weight:700;text-decoration:none;border:1.5px solid var(--line);background:#fff}
@@ -856,6 +860,10 @@ function nowStopIndex(day){
  if(idx>=0){const last=st[idx];const e=toMin(last.t.split('-')[1]||'');if(idx===st.length-1&&e&&m>e+60)idx=-1}
  return idx;
 }
+const SPMAX=8;
+function stopPhotoKeys(id){const g=S.get('gphoto',{}),pre='s_'+id+'_';return Object.keys(g).filter(k=>k.startsWith(pre)&&g[k]&&g[k].h).sort((a,b)=>+a.slice(pre.length)-+b.slice(pre.length))}
+function photoBox(id){const g=S.get('gphoto',{}),pre='s_'+id+'_',ks=stopPhotoKeys(id),mx=ks.reduce((m,k)=>Math.max(m,+k.slice(pre.length)||0),-1);
+ return `<div class="sph">${ks.map(k=>g[k].u?`<img src="${g[k].u}" data-szoom="${k}" alt="照片">`:`<span class="ld">載入中…</span>`).join('')}${ks.length<SPMAX?`<button class="add" data-sphoto="${pre}${mx+1}">📷 ${ks.length?'再加一張':'加照片'}</button>`:''}</div>`}
 function renderDay(keep){
  const opened=keep?[...document.querySelectorAll('.stop.open')].map(x=>x.dataset.id):[];
  const d=D(curDay);document.documentElement.style.setProperty('--day',d.c);document.documentElement.style.setProperty('--day-soft',soft(d.c));
@@ -883,10 +891,11 @@ function renderDay(keep){
    <button class="dot" data-act="done" aria-label="完成"></button>
    <div class="tm">${tt}</div>
    <div class="sc"><div class="sc-h" data-act="toggle"><div class="main"><div class="t">${esc(s.t)}${i===nowI?'<span class="now-tag">現在</span>':''}</div><h3>${esc(s.n)}</h3>
-   <span class="tr ${cls}">${ic} ${esc(s.tr)}</span>${SF[s.id]?`<span class="tr fd">🍜 美食 ${FOODS.filter(f=>f.a===SF[s.id].k).length} 間</span>`:''}${SG[s.id]?`<span class="tr gf">🎁 伴手禮 ${SG[s.id].length} 款</span>`:''}</div><span class="chev">⌄</span></div>
+   <span class="tr ${cls}">${ic} ${esc(s.tr)}</span>${stopPhotoKeys(s.id).length?`<span class="tr">📷 ${stopPhotoKeys(s.id).length}</span>`:''}${SF[s.id]?`<span class="tr fd">🍜 美食 ${FOODS.filter(f=>f.a===SF[s.id].k).length} 間</span>`:''}${SG[s.id]?`<span class="tr gf">🎁 伴手禮 ${SG[s.id].length} 款</span>`:''}</div><span class="chev">⌄</span></div>
    <div class="more">${esc(s.d)}${s.tip?`<div class="tip">💡 ${esc(s.tip)}</div>`:''}${SF[s.id]?(()=>{const a=SF[s.id],fs=FOODS.filter(f=>f.a===a.k).sort((x,y)=>(fw[y.id]?1:0)-(fw[x.id]?1:0)),nw=fs.filter(f=>fw[f.id]).length;
     return `<a class="foodbox" href="#food" data-farea="${a.k}"><b>🍜 ${a.n}附近好吃的 ${fs.length} 間${nw?`（${nw} 間在想吃清單）`:''}</b><span>${fs.map(f=>(fw[f.id]?'✓ ':'')+esc(f.n.replace(/（.*?）/g,''))).join('、')}</span><em>看推薦 ›</em></a>`})():''}${SG[s.id]?(()=>{const gs=SG[s.id].slice().sort((a,b)=>(gw[b.id]?1:0)-(gw[a.id]?1:0)),nw=gs.filter(g=>gw[g.id]).length;
     return (curDay>=6&&/機場|空港/.test(stopText(s))?`<a class="giftbox" href="#tax" style="background:#e9f4ec;border-color:#c5dccb"><b style="color:#2f6b4a">🧾 有買免稅品？託運行李「之前」要先辦免稅手續</b><span>新制要在機場掃護照做海關確認才會退稅，順序錯了就退不回來。</span><em>看退稅教學 ›</em></a>`:'')+`<a class="giftbox" href="#gift" data-gf=""${gs.map(g=>g.id).join(',')}" data-gl="${esc(s.n)}"><b>🎁 這一站買得到 ${gs.length} 款伴手禮${nw?`（其中 ${nw} 款在想買清單）`:''}</b><span>${gs.slice(0,8).map(g=>(gw[g.id]?'✓ ':'')+esc(gShort(g))).join('、')}${gs.length>8?'…':''}</span><em>看介紹 ›</em></a>`})():''}
+   ${photoBox(s.id)}
    <div class="acts"><a class="btn" href="${mapUrl(s.q||s.n)}" target="_blank" rel="noopener">📍 地圖導航</a>
    ${s.jr?'<a class="btn" href="#tools" data-act="jr">🎫 買票小抄</a>':''}
    <button class="btn pri" data-act="done">${isD?'↺ 取消完成':'✓ 完成'}</button></div></div></div></div>`});
@@ -904,6 +913,9 @@ function renderDay(keep){
 const sortStops=a=>a.map((s,i)=>[s,i]).sort((x,y)=>((toMin(x[0].t)??9999)-(toMin(y[0].t)??9999))||x[1]-y[1]).map(x=>x[0]);
 $('#chips').addEventListener('click',e=>{const c=e.target.closest('.chip');if(!c)return;curDay=+c.dataset.i;delArm=null;S.set('day',curDay);renderChips();renderDay();window.scrollTo({top:$('header').offsetHeight,behavior:'smooth'})});
 $('#dayview').addEventListener('click',e=>{
+ const pb=e.target.closest('[data-sphoto]');if(pb){gPhotoFor=pb.dataset.sphoto;$('#gFile').click();return}
+ const im=e.target.closest('[data-szoom]');if(im){const st=im.closest('.stop'),h3=st&&st.querySelector('h3');$('#imgovI').src=im.src;$('#imgovT').textContent=h3?h3.textContent:'';$('#imgovD').dataset.id=im.dataset.szoom;$('#imgovD').textContent='移除這張照片';delete $('#imgovD').dataset.arm;$('#imgov').classList.add('on');return}
+
  if(e.target.closest('#wxR')){loadWx(true);return}
  const a=e.target.closest('[data-act]');if(!a)return;const st=a.closest('.stop');const act=a.dataset.act;
  if(act==='toggle'){st.classList.toggle('open');return}
@@ -1323,12 +1335,12 @@ const GIFTS=[
 let gCat='全部',gPhotoFor=null;
 function phash(str){let a=0xdeadbeef^str.length,b=0x41c6ce57^str.length;for(let i=0;i<str.length;i++){const c=str.charCodeAt(i);a=Math.imul(a^c,2654435761);b=Math.imul(b^c,1597334677)}
  a=Math.imul(a^(a>>>16),2246822507)^Math.imul(b^(b>>>13),3266489909);b=Math.imul(b^(b>>>16),2246822507)^Math.imul(a^(a>>>13),3266489909);return 'p'+(4294967296*(2097151&b)+(a>>>0)).toString(36)+str.length.toString(36)}
-function photoFrom(file){return new Promise((ok,no)=>{const u=URL.createObjectURL(file),im=new Image();
- im.onload=()=>{const m=Math.max(im.naturalWidth,im.naturalHeight),k=Math.min(1,480/m),c=document.createElement('canvas');c.width=Math.round(im.naturalWidth*k);c.height=Math.round(im.naturalHeight*k);
-  c.getContext('2d').drawImage(im,0,0,c.width,c.height);URL.revokeObjectURL(u);ok(c.toDataURL('image/jpeg',.8))};
+function photoFrom(file,max,q){max=max||480;q=q||.8;return new Promise((ok,no)=>{const u=URL.createObjectURL(file),im=new Image();
+ im.onload=()=>{const m=Math.max(im.naturalWidth,im.naturalHeight),k=Math.min(1,max/m),c=document.createElement('canvas');c.width=Math.round(im.naturalWidth*k);c.height=Math.round(im.naturalHeight*k);
+  c.getContext('2d').drawImage(im,0,0,c.width,c.height);URL.revokeObjectURL(u);ok(c.toDataURL('image/jpeg',q))};
  im.onerror=()=>{URL.revokeObjectURL(u);no()};im.src=u})}
 function setGiftPhoto(id,u){const g=S.get('gphoto',{});if(u)g[id]={h:phash(u),u};else delete g[id];S.set('gphoto',g);
- const chk=S.get('gphoto',{});if(u&&!(chk[id]&&chk[id].u)){toast('⚠️ 手機儲存空間不足，照片沒有存成功');return}drawGifts();if(typeof drawFoods==='function')drawFoods();toast(u?'📷 照片已加上':'照片已移除')}
+ const chk=S.get('gphoto',{});if(u&&!(chk[id]&&chk[id].u)){toast('⚠️ 手機儲存空間不足，照片沒有存成功');return}drawGifts();if(typeof drawFoods==='function')drawFoods();if(typeof renderDay==='function')renderDay(true);toast(u?'📷 照片已加上':'照片已移除')}
 function drawGifts(){
  const want=S.get('gifts',{}),ph=S.get('gphoto',{});
  $('#giftSeg').innerHTML=GCATS.map(c=>`<button class="${c===gCat?'on':''}" data-c="${c}">${c}${c==='想買的'?'（'+GIFTS.filter(g=>want[g.id]).length+'）':''}</button>`).join('');
@@ -1350,7 +1362,7 @@ $('#gifts').addEventListener('click',e=>{
  const zm=e.target.closest('[data-zoom]');if(zm){const id=zm.dataset.zoom,g=GIFTS.find(x=>x.id===id);$('#imgovI').src=zm.src;$('#imgovT').textContent=g.n;$('#imgovD').dataset.id=id;$('#imgovD').textContent='移除這張照片';delete $('#imgovD').dataset.arm;$('#imgov').classList.add('on');return}
  const sh=e.target.closest('[data-show]');if(sh){const g=GIFTS.find(x=>x.id===sh.dataset.show);big(g.jp+'はありますか？','請問有賣「'+g.n+'」嗎？');$('#ovJp').style.whiteSpace='normal';return}
  const r=e.target.closest('.cafe-h');if(!r)return;const id=r.parentNode.dataset.id,want=S.get('gifts',{});want[id]=!want[id];if(!want[id])delete want[id];S.set('gifts',want);drawGifts()});
-$('#gFile').onchange=e=>{const f=e.target.files[0],id=gPhotoFor;e.target.value='';if(!f||!id)return;photoFrom(f).then(u=>setGiftPhoto(id,u)).catch(()=>toast('⚠️ 這張照片讀不出來，換一張試試'))};
+$('#gFile').onchange=e=>{const f=e.target.files[0],id=gPhotoFor;e.target.value='';if(!f||!id)return;photoFrom(f,id.startsWith('s_')?720:480,id.startsWith('s_')?.75:.8).then(u=>setGiftPhoto(id,u)).catch(()=>toast('⚠️ 這張照片讀不出來，換一張試試'))};
 $('#imgov').addEventListener('click',e=>{if(e.target.id==='imgovD'){const b=e.target;if(b.dataset.arm){setGiftPhoto(b.dataset.id,null);$('#imgov').classList.remove('on')}else{b.dataset.arm=1;b.textContent='再按一次確定移除'}return}$('#imgov').classList.remove('on')});
 reloaders.push(drawGifts);reloaders.push(drawCafes);
 drawGifts();
@@ -1765,7 +1777,7 @@ const FS=(function(){
    else{miss=true;if(getBusy[x.h])continue;getBusy[x.h]=1;
     fetch(purl(x.h)).then(r=>r.ok?r.json():null).then(d=>{delete getBusy[x.h];if(typeof d!=='string'||d.slice(0,11)!=='data:image/')return;
      let cur=null;try{cur=JSON.parse(raw.get('gphoto'))}catch(e){}cur=cur||{};let ch=false;for(const i in cur)if(cur[i]&&cur[i].h===x.h&&!cur[i].u){cur[i].u=d;ch=true}
-     if(ch){upDone[x.h]=1;raw.set('gphoto',JSON.stringify(cur));drawGifts();drawFoods()}}).catch(()=>{delete getBusy[x.h]})}}
+     if(ch){upDone[x.h]=1;raw.set('gphoto',JSON.stringify(cur));drawGifts();drawFoods();if(typeof renderDay==='function'&&!editing)renderDay(true)}}).catch(()=>{delete getBusy[x.h]})}}
   clearTimeout(phT);if(miss)phT=setTimeout(photoSync,15000)}
  function setState(st){state=st;draw()}
  async function flush(){
