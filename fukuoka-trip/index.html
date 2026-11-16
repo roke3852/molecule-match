@@ -317,6 +317,10 @@ nav a{position:relative}
 .tx-q .opts button.ok{background:#3f7d5c;border-color:#3f7d5c;color:#fff}.tx-q .opts button.bad{background:var(--maple-soft);border-color:var(--maple)}
 .tx-row{display:flex;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line);font-size:14px}.tx-row b{flex:1}.tx-row span{color:var(--sub);font-size:12.5px}.tx-row .del{color:#b9a99b;font-size:16px;padding:2px 6px}
 .tx-sum{background:#e9f4ec;color:#2f6b4a;border-radius:12px;padding:10px 12px;margin:8px 0;font-size:14px;line-height:1.7}
+.chip .hol{font-size:10px;font-weight:900;color:#b3261e;background:#fde2e2;border-radius:999px;padding:0 5px;margin:2px auto 0;width:max-content}
+.chip.on .hol{background:rgba(255,255,255,.9)}
+.holb{display:inline-block;margin-left:6px;font-size:11.5px;font-weight:900;background:#fde2e2;color:#b3261e;border-radius:999px;padding:1px 8px;vertical-align:1px}
+.holnote{margin:10px 14px 0;background:#fde2e2;color:#7a1f18;border-radius:12px;padding:9px 12px;font-size:13px;line-height:1.7}
 .sim-days{display:flex;gap:6px;overflow-x:auto;padding:12px 14px 0;scrollbar-width:none}.sim-days::-webkit-scrollbar{display:none}
 .sim-days button{flex:0 0 auto;padding:6px 11px;border-radius:999px;border:1.5px solid var(--line);background:#fff;font-size:12.5px;font-weight:700;color:var(--sub)}
 .sim-days button.on{background:var(--c);border-color:var(--c);color:#fff}
@@ -837,9 +841,11 @@ const anyChanged=()=>!!ed&&DAYS.some((_,i)=>dayChanged(i));
 let editing=false,delArm=null;
 
 /* ---------- itinerary ---------- */
+const HOL={0:'週六',1:'週日',2:'勤勞感謝日'};
+const HOL_NOTE='11/21–11/23 是日本三連休（11/23 勤勞感謝日是國定假日），日本人也出遊，景點、餐廳、交通都會比平常擠：熱門餐廳先訂位、太宰府和屋台早點去、搭車避開尖峰。';
 function renderChips(){
  $('#chips').innerHTML=DAYS.map((d,i)=>`<button class="chip${i===curDay?' on':''}${i===ti?' today':''}" style="--c:${d.c}" data-i="${i}">
-  <div class="d">Day ${i+1}${dayChanged(i)?' ✏️':''}</div><div class="n">${d.date.split('/')[1]}</div><div class="w">${d.date.split('/')[0]}月・${d.wk}</div><div class="wxc">${(()=>{const w=dayWx(i);return w.live?wmo(w.c)[0]+' '+w.hi+'°':'🌡️ '+w.hi+'°'})()}</div></button>`).join('');
+  <div class="d">Day ${i+1}${dayChanged(i)?' ✏️':''}</div>${HOL[i]!==undefined?'<div class="hol">🎌 三連休</div>':''}<div class="n">${d.date.split('/')[1]}</div><div class="w">${d.date.split('/')[0]}月・${d.wk}</div><div class="wxc">${(()=>{const w=dayWx(i);return w.live?wmo(w.c)[0]+' '+w.hi+'°':'🌡️ '+w.hi+'°'})()}</div></button>`).join('');
  const on=$('#chips .chip.on');if(on)on.scrollIntoView({inline:'center',block:'nearest'});
 }
 function nowStopIndex(day){
@@ -855,11 +861,12 @@ function renderDay(keep){
  const n=d.stops.length,k=d.stops.filter(s=>done[s.id]).length;
  let h='';
  if(ed&&ed.v!==BASEV&&anyChanged())h+=`<div class="banner">📣 正式版行程已更新，但這台手機還有你自己的修改。<div class="acts"><button class="btn pri" data-act="useBase">改用正式版</button><button class="btn" data-act="keepMine">保留我的</button></div></div>`;
- h+=`<div class="hero${editing?' editing':''}"><div class="hero-band"><div class="lbl">Day ${curDay+1}・${d.date}（${d.wk}）${dayChanged(curDay)?`<span class="mod">${FS.on()?'已修改・全家同步':'已修改・只在這台手機'}</span>`:''}</div>
+ h+=`<div class="hero${editing?' editing':''}"><div class="hero-band"><div class="lbl">Day ${curDay+1}・${d.date}（${d.wk}）${dayChanged(curDay)?`<span class="mod">${FS.on()?'已修改・全家同步':'已修改・只在這台手機'}</span>`:''}${HOL[curDay]!==undefined?`<span class="holb">🎌 日本三連休 ${curDay+1}/3${curDay===2?'・勤勞感謝日':''}</span>`:''}</div>
  ${editing?`<input class="title-in" id="titleIn" value="${esc(d.title)}">`:`<h2>${esc(d.title)}</h2>`}</div>
  <div class="hero-meta"><span class="pill${d.payWarn?' warn':''}">💳 ${esc(d.pay)}</span>${d.payNote?`<span class="pill" style="background:#f3ece4;color:#5b4d43">${esc(d.payNote)}</span>`:''}
  ${editing?'':'<button class="editbtn mapbtn" data-act="map">🗺️ 地圖</button>'}<button class="editbtn" data-act="edit">${editing?'✓ 完成編輯':'✏️ 編輯'}</button>
  <div class="prog"><span>完成 ${k}/${n}</span><div class="bar"><i style="width:${n?k/n*100:0}%"></i></div></div></div></div>`;
+ if(!editing&&HOL[curDay]!==undefined)h+=`<div class="holnote">🎌 <b>日本三連休第 ${curDay+1} 天</b>：${HOL_NOTE.split('，').slice(1).join('，')}</div>`;
  if(editing){h+=`<div class="edtools"><button class="btn" data-act="add">＋ 新增一站</button><button class="btn" data-act="sort">⏱ 依時間排序</button>${dayChanged(curDay)?'<button class="btn" data-act="reset">↩ 還原這天</button>':''}</div>`}
  else h+=wxHtml(curDay);
  h+='<div class="tl">';
@@ -1503,7 +1510,7 @@ function simCardHtml(st){
   <p>交通時間加起來大約 <b>${Math.floor(mins/60)} 小時 ${mins%60} 分</b>。按「上一步」或上面的日期可以回去再看。</p></div>`}
  const d=D(st.di),c=d.c,dl=`<span class="d">D${st.di+1} ${d.date}（${d.wk}）</span>`;
  if(st.k==='day'){const ss=d.stops,mv=SIM.filter(x=>x.k==='move'&&x.di===st.di),mins=mv.reduce((a,x)=>a+(x.min||0),0),cnt=k=>ss.filter(s=>kindOf(s)===k).length;
-  return `<div class="sim-card" style="--c:${c}"><div class="top">${dl}<span class="sk">開始</span></div><h3>${esc(d.title)}</h3>
+  return `<div class="sim-card" style="--c:${c}"><div class="top">${dl}<span class="sk">開始</span>${HOL[st.di]!==undefined?`<span class="sk" style="background:#fde2e2;color:#b3261e">🎌 日本三連休 ${st.di+1}/3</span>`:''}</div><h3>${esc(d.title)}</h3>
   <div class="sim-sum"><div><b>${cnt('see')}</b>景點</div><div><b>${cnt('eat')}</b>吃</div><div><b>${cnt('buy')}</b>買</div><div><b>${mv.length}</b>段交通</div></div>
   <p>這天第一站是 <b>${esc(ss[0]?ss[0].t+' '+ss[0].n:'—')}</b>，交通合計約 <b>${mins>=60?Math.floor(mins/60)+' 小時 ':''}${mins%60} 分</b>。${d.pay?`<br>💳 ${esc(d.pay)}`:''}</p></div>`}
  if(st.k==='move'){const [ic]=trIcon(st.s.tr||''),fr=st.from?st.from.n:'飯店／出發地';
