@@ -210,7 +210,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
 .nz-row{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr) 3.6em;gap:8px;align-items:center;font-size:14px}
 .nz-row .nm{display:flex;flex-direction:column;min-width:0}
 .nz-row .nm em{font-style:normal;font-size:11px;font-weight:700}
-.nz-row .nm small{font-size:11.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nz-row .nm small{font-size:11.5px;color:var(--muted);line-height:1.4}
 .nz-row .bar{height:8px;background:var(--line);border-radius:4px;overflow:hidden}
 .nz-row .bar i{display:block;height:100%;border-radius:4px}
 .nz-row b{text-align:right;font-weight:500;font-variant-numeric:tabular-nums}
@@ -220,6 +220,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
 .nz-drip small{font-size:13px;color:var(--muted);line-height:1.5}
 .nz-key{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13px;margin:6px 0 8px}
 .nz-key span{display:flex;align-items:center;gap:6px}
+.nz-key small{flex-basis:100%;color:var(--muted);font-size:12px}
 .nz-key i{display:block;width:20px;height:3px;border-radius:2px}
 .nz-key i.dash{height:0;border-top:2px dashed}
 .nz-chart{width:100%;touch-action:pan-y}
@@ -863,8 +864,10 @@ button,input,select,label,.seg,.stepper,.card{touch-action:manipulation}
   </section>
 
   <section class="panel">
-    <h2>兩條線有沒有一起動？</h2>
-    <div class="nz-key"><span><i style="background:var(--fail)"></i>聞到的負面氣味占比</span><span><i class="dash" style="border-color:var(--fruity)"></i>香氣總強度（最高＝100）</span><span><i style="background:var(--cga)"></i>正在滴下的液體裡，苦＋澀的占比</span></div>
+    <h2>氣味感受怎麼變？苦澀有沒有一起動？</h2>
+    <p class="label" style="margin:4px 0 8px">氣味分三組：閾值低（≤ 1 μg/L）、少量就主導感受的<b style="color:var(--accent)">強正面</b>和<b style="color:var(--fail)">強負面</b>，以及閾值高或好壞看量、只當背景的<b style="color:var(--gold)">背景氣味</b>。</p>
+    <div class="nz-mode"><div class="seg" id="nzCMode" role="group" aria-label="圖表顯示"><button data-v="abs" aria-pressed="true">感受強度</button><button data-v="share" aria-pressed="false">占比</button></div></div>
+    <div class="nz-key" id="nzKey"></div>
     <div id="nzChart" class="nz-chart"></div>
   </section>
 
@@ -3606,10 +3609,14 @@ const PLANS={
   three:{name:'三段',dose:15,ratio:16,plan:[45,65,65,65],planT:[0,45,75,105]},
   k46:{name:'4:6 五段',dose:20,ratio:15,plan:[50,70,60,60,60],planT:[0,45,90,135,180]},
   one:{name:'一刀流',dose:15,ratio:16,plan:[45,195],planT:[0,40],planD:[null,60]}};
-const S={roast:3,plan:'three',grind:650,temp:93,defect:'',basis:'int',t:60};
+const S={roast:3,plan:'three',grind:650,temp:93,defect:'',basis:'int',cmode:'abs',t:60};
 let R=null,playing=false,last=0,acc=0;
 const fmt=t=>Math.floor(t/60)+':'+String(Math.floor(t%60)).padStart(2,'0');
 const CLS={pos:['正面','var(--accent)'],neu:['看量','var(--gold)'],neg:['負面','var(--fail)']};
+// 感受分組：閾值 ≤ 1 μg/L 的正面／負面分子量少就主導香氣；其他閾值高或好壞看量的當背景
+const GRP={sp:['強正面','var(--accent)'],bg:['背景','var(--gold)'],sn:['強負面','var(--fail)']};
+const grpOf=d=>d.thr<=1&&d.cls==='pos'?'sp':d.thr<=1&&d.cls==='neg'?'sn':'bg';
+const tagOf=d=>{const g=grpOf(d);return g==='bg'?['背景・'+CLS[d.cls][0],'var(--gold)']:GRP[g];};
 const TASTE=[{i:0,n:'有機酸',c:'var(--acid)'},{i:2,n:'糖與甜感',c:'var(--sugar)'},{i:1,n:'咖啡因',c:'var(--caf)'},{i:3,n:'綠原酸（澀）',c:'var(--cga)'},{i:4,n:'苦味大分子',c:'var(--bitter)'}];
 
 function run(){
@@ -3620,6 +3627,7 @@ function run(){
   R.out.forEach(o=>{const I=o.inten,tot=I.reduce((a,b)=>a+b,0);let pos=0,neg=0,neu=0;
     ODOR.forEach((d,i)=>{if(d.cls==='pos')pos+=I[i];else if(d.cls==='neg')neg+=I[i];else neu+=I[i];});
     o.tot=tot;o.pos=tot?pos/tot:0;o.neg=tot?neg/tot:0;o.neu=tot?neu/tot:0;peak=Math.max(peak,tot);
+    const G={sp:0,bg:0,sn:0};ODOR.forEach((d,i)=>G[grpOf(d)]+=I[i]);o.G=G;o.snr=(G.sp+G.sn)>0?G.sn/(G.sp+G.sn):0;
     const ts=o.dTaste.reduce((a,b)=>a+b,0);o.dsum=ts;o.ba=ts>1e-5?(o.dTaste[3]+o.dTaste[4])/ts:null;});
   R.peak=peak||1;
   // 每一步（STEP）
@@ -3645,12 +3653,12 @@ function render(){
   $('nzPhase').textContent=pourTxt+'　粉層溫度約 '+o.T.toFixed(1)+'°C';
   // 聞到的
   const vals=S.basis==='int'?o.inten:o.mass, tot=vals.reduce((a,b)=>a+b,0)||1;
-  let g={pos:0,neu:0,neg:0};ODOR.forEach((d,i)=>g[d.cls]+=vals[i]/tot);
-  $('nzStack').innerHTML=['pos','neu','neg'].map(k=>'<i style="width:'+(g[k]*100)+'%;background:'+CLS[k][1]+'" title="'+CLS[k][0]+'"></i>').join('')+
-    '<div class="nz-stk-lab"><span style="color:var(--accent)">正面 '+Math.round(g.pos*100)+'%</span><span style="color:var(--gold)">看量 '+Math.round(g.neu*100)+'%</span><span style="color:var(--fail)">負面 '+Math.round(g.neg*100)+'%</span></div>';
+  let g={sp:0,bg:0,sn:0};ODOR.forEach((d,i)=>g[grpOf(d)]+=vals[i]/tot);
+  $('nzStack').innerHTML=['sp','bg','sn'].map(k=>'<i style="width:'+(g[k]*100)+'%;background:'+GRP[k][1]+'" title="'+GRP[k][0]+'"></i>').join('')+
+    '<div class="nz-stk-lab">'+['sp','bg','sn'].map(k=>'<span style="color:'+GRP[k][1]+'">'+GRP[k][0]+' '+Math.round(g[k]*100)+'%</span>').join('')+'</div>';
   const rel=o.tot/R.peak;$('nzIntBar').style.width=Math.max(2,rel*100)+'%';$('nzInt').textContent=Math.round(rel*100);
   const rows=ODOR.map((d,i)=>({d,v:vals[i]/tot})).filter(x=>x.v>.004).sort((a,b)=>b.v-a.v).slice(0,9);
-  $('nzSmell').innerHTML=rows.map(x=>'<div class="nz-row"><span class="nm"><em style="color:'+CLS[x.d.cls][1]+'">'+CLS[x.d.cls][0]+'</em>'+x.d.n+'<small>'+x.d.note+'・MW '+x.d.mw.toFixed(1)+'</small></span><span class="bar"><i style="width:'+Math.min(100,x.v*100/ (rows[0].v||1))+'%;background:'+CLS[x.d.cls][1]+'"></i></span><b class="mono">'+(x.v*100).toFixed(x.v<.1?1:0)+'%</b></div>').join('')||'<p class="nz-cap">還沒有氣味出來。</p>';
+  $('nzSmell').innerHTML=rows.map(x=>'<div class="nz-row"><span class="nm"><em style="color:'+tagOf(x.d)[1]+'">'+tagOf(x.d)[0]+'</em>'+x.d.n+'<small>'+x.d.note+'・MW '+x.d.mw.toFixed(1)+'・閾值 '+(x.d.thr<.01?x.d.thr.toExponential(0):x.d.thr)+' μg/L</small></span><span class="bar"><i style="width:'+Math.min(100,x.v*100/ (rows[0].v||1))+'%;background:'+tagOf(x.d)[1]+'"></i></span><b class="mono">'+(x.v*100).toFixed(x.v<.1?1:0)+'%</b></div>').join('')||'<p class="nz-cap">還沒有氣味出來。</p>';
   $('nzSmellCap').textContent=S.basis==='int'?'占比＝每個分子的氣味活性值（液面濃度 ÷ 嗅覺閾值）取平方根後的比例，只列聞得到的前 9 名。':'占比＝這一秒從粉層揮發出去的重量比例。重量大的不一定聞得到，對照「以感受強度」看差多少。';
   // 流進杯裡的
   const ts=o.dsum;
@@ -3672,13 +3680,19 @@ let CW=640,CH=230,PADL=36,PADR=10,PADT=10,PADB=28;
 const X=t=>PADL+(t/R.endT)*(CW-PADL-PADR), Y=v=>PADT+(1-v)*(CH-PADT-PADB);
 function path(fn){let d='',on=false;R.out.forEach(o=>{const v=fn(o);if(v==null||isNaN(v)){on=false;return;}d+=(on?'L':'M')+X(o.t).toFixed(1)+','+Y(Math.max(0,Math.min(1,v))).toFixed(1);on=true;});return d;}
 function renderChart(){
+  $('nzKey').innerHTML=(S.cmode==='abs'?
+    '<span><i style="background:var(--accent)"></i>強正面的感受強度</span><span><i style="background:var(--fail)"></i>強負面的感受強度</span><span><i class="dash" style="border-color:var(--gold)"></i>背景氣味的感受強度</span><small>強度以整段最香的時刻（三組加總）＝100</small>':
+    '<span><i style="background:var(--accent)"></i>強正面占比</span><span><i style="background:var(--fail)"></i>強負面占比</span><span><i class="dash" style="border-color:var(--gold)"></i>背景氣味占比</span>')+
+    '<span><i style="background:var(--cga)"></i>正在滴下的液體裡，苦＋澀的占比</span>';
   CW=Math.max(320,Math.min(1000,$('nzChart').clientWidth||640));
   let s='<svg viewBox="0 0 '+CW+' '+CH+'" width="100%" role="img" aria-label="氣味與味道隨時間的變化">';
   R.segs.forEach(g=>{s+='<rect x="'+X(g.s)+'" y="'+PADT+'" width="'+Math.max(1,X(g.e)-X(g.s))+'" height="'+(CH-PADT-PADB)+'" fill="var(--accent-soft)"/>';});
   [0,.25,.5,.75,1].forEach(v=>{s+='<line x1="'+PADL+'" x2="'+(CW-PADR)+'" y1="'+Y(v)+'" y2="'+Y(v)+'" stroke="var(--line)"/><text x="'+(PADL-6)+'" y="'+(Y(v)+4)+'" text-anchor="end" font-size="11" fill="var(--muted)">'+v*100+'</text>';});
   for(let t=0;t<=R.endT;t+=30)s+='<text x="'+X(t)+'" y="'+(CH-8)+'" text-anchor="middle" font-size="11" fill="var(--muted)">'+fmt(t)+'</text>';
-  s+='<path d="'+path(o=>o.tot/R.peak)+'" fill="none" stroke="var(--fruity)" stroke-width="2" stroke-dasharray="5 4"/>';
-  s+='<path d="'+path(o=>o.neg)+'" fill="none" stroke="var(--fail)" stroke-width="2.5"/>';
+  const ab=S.cmode==='abs',gv=k=>o=>ab?o.G[k]/R.peak:(o.tot?o.G[k]/o.tot:null);
+  s+='<path d="'+path(gv('bg'))+'" fill="none" stroke="var(--gold)" stroke-width="2" stroke-dasharray="5 4"/>';
+  s+='<path d="'+path(gv('sp'))+'" fill="none" stroke="var(--accent)" stroke-width="2.5"/>';
+  s+='<path d="'+path(gv('sn'))+'" fill="none" stroke="var(--fail)" stroke-width="2.5"/>';
   s+='<path d="'+path(o=>o.ba)+'" fill="none" stroke="var(--cga)" stroke-width="2.5"/>';
   s+='<line id="nzCur" x1="0" x2="0" y1="'+PADT+'" y2="'+(CH-PADB)+'" stroke="var(--ink)" stroke-width="1.5"/>';
   s+='<rect id="nzHit" x="'+PADL+'" y="0" width="'+(CW-PADL-PADR)+'" height="'+CH+'" fill="transparent" style="cursor:pointer"/></svg>';
@@ -3712,21 +3726,25 @@ function renderVerdict(){
   const after=R.out.filter(o=>o.ba!=null&&o.t>R.segs[0].e+5);
   const firstDrip=after[0],lastDrip=after[after.length-1];
   const tail=R.out.slice(-Math.max(5,Math.round(R.out.length*.1)));
-  const negEarly=Math.max(...R.out.filter(o=>o.t<=R.segs[0].e+20).map(o=>o.neg)),negLate=tail.reduce((a,o)=>a+o.neg,0)/tail.length;
+  const sh=k=>o=>o.tot?o.G[k]/o.tot:0, avg=(arr,f)=>arr.reduce((a,o)=>a+f(o),0)/arr.length;
+  const early=R.out.filter(o=>o.t>=R.segs[0].e&&o.t<=R.segs[0].e+20);
+  const negEarly=Math.max(...R.out.filter(o=>o.t<=R.segs[0].e+20).map(sh('sn'))),negLate=avg(tail,sh('sn'));
+  const bgEarly=avg(early,sh('bg')),bgLate=avg(tail,sh('bg')),spEarly=avg(early,sh('sp')),spLate=avg(tail,sh('sp'));
   const intLate=tail.reduce((a,o)=>a+o.tot,0)/tail.length/R.peak;
-  const rNeg=corr(after.map(o=>o.neg),after.map(o=>o.ba)),rInt=corr(after.map(o=>o.tot),after.map(o=>o.ba));
+  const rNeg=corr(after.map(sh('sn')),after.map(o=>o.ba)),rBg=corr(after.map(sh('bg')),after.map(o=>o.ba)),rInt=corr(after.map(o=>o.tot),after.map(o=>o.ba));
   const pc=v=>Math.round(v*100)+'%',rr=v=>v==null?'—':v.toFixed(2);
   const strong=v=>v!=null&&Math.abs(v)>=.6, mid=v=>v!=null&&Math.abs(v)>=.3;
   const dNeg=negLate-negEarly;
   let li=[];
-  li.push('<li><b>負面氣味占比：</b>悶蒸時最高約 '+pc(negEarly)+'，到最後約 '+pc(negLate)+'，'+(Math.abs(dNeg)<.05?'幾乎沒變。':dNeg>0?'上升 '+pc(dNeg)+'。':'反而下降 '+pc(-dNeg)+'。')+'和滴下液體苦澀占比的相關係數 '+rr(rNeg)+'，'+(Math.abs(dNeg)<.05?'但負面占比本身只變動幾個百分點，鼻子分辨不出來，這個相關沒有實際意義。':rNeg!=null&&rNeg<=-.3?'方向相反：苦澀變多時，負面氣味的比例反而下降。':strong(rNeg)?'兩者同步上升。':mid(rNeg)?'有一點同步，但不可靠。':'幾乎沒有同步。')+'</li>');
+  li.push('<li><b>強負面占比：</b>悶蒸時最高約 '+pc(negEarly)+'，到最後約 '+pc(negLate)+'，'+(Math.abs(dNeg)<.05?'幾乎沒變。':dNeg>0?'上升 '+pc(dNeg)+'。':'反而下降 '+pc(-dNeg)+'。')+'和滴下液體苦澀占比的相關係數 '+rr(rNeg)+'，'+(Math.abs(dNeg)<.05?'但負面占比本身只變動幾個百分點，鼻子分辨不出來，這個相關沒有實際意義。':rNeg!=null&&rNeg<=-.3?'方向相反：苦澀變多時，負面氣味的比例反而下降。':strong(rNeg)?'兩者同步上升。':mid(rNeg)?'有一點同步，但不可靠。':'幾乎沒有同步。')+'</li>');
+  li.push('<li><b>背景氣味占比：</b>悶蒸後約 '+pc(bgEarly)+'，到最後約 '+pc(bgLate)+'；強正面從 '+pc(spEarly)+' 變成 '+pc(spLate)+'。'+(bgEarly-bgLate>.05?'焦糖、奶油、花香這類背景香氣比主調掉得快，聞起來會從「甜、豐富」變成「只剩烘烤主調、單調」。和苦澀占比的相關係數 '+rr(rBg)+'。':'背景和主調的比例變化不大。')+'</li>');
   li.push('<li><b>香氣總強度：</b>最後只剩最高時的 '+pc(intLate)+'。和苦澀占比的相關係數 '+rr(rInt)+'，'+(rInt!=null&&rInt<=-.6?'香氣越淡，滴下來的越苦澀，兩者明顯同步。':rInt!=null&&rInt<=-.3?'有一定的同步。':'同步不明顯。')+'</li>');
   if(firstDrip&&lastDrip)li.push('<li><b>滴下液體的苦＋澀占比：</b>從第一滴的 '+pc(firstDrip.ba)+' 上升到最後的 '+pc(lastDrip.ba)+'。這是溶得很慢的苦味大分子在後段比例變高。</li>');
   const defOn=S.defect&&ODOR.some((d,i)=>d.def===S.defect&&R.E0[i]>0);
   if(defOn)li.push('<li><b>缺陷豆的氣味：</b>從悶蒸就聞得到，整個過程都在。它代表豆子有問題，不是萃取進度，用它判斷斷水時機沒有意義。</li>');
   const negSig=rNeg!=null&&rNeg>=.6&&dNeg>.05, intSig=rInt!=null&&rInt<=-.3;
-  const concl=negSig?'在這組條件下，負面氣味變多確實跟苦澀出來同步，用它當斷水訊號說得通。':
-    intSig?'在這組條件下，「聞到負面氣味」不是可靠的訊號，負面氣味的比例幾乎沒有跟著苦澀變化。比較有道理的是「香氣變淡、變單調」：香氣強度下降和苦澀占比上升是同步的，因為兩者都代表好成分已經萃得差不多了。':
+  const concl=negSig&&defOn?'這組的負面氣味確實越來越明顯，也跟苦澀同步，但那是缺陷豆的霉味分子：它們親油、溶得慢，所以後段比例變高。它從悶蒸就聞得到，代表的是豆子有問題；把它當斷水訊號，只是剛好和萃取進度同方向。':negSig?'在這組條件下，負面氣味變多確實跟苦澀出來同步，用它當斷水訊號說得通。':
+    intSig?'在這組條件下，「聞到負面氣味」不是可靠的訊號：強負面的占比幾乎沒有跟著苦澀變化。真正在變的是「香氣變淡、變單調」：甜感、花香這些背景香氣先退場，只剩烘烤主調；這和苦澀占比上升是同步的，因為兩者都代表好成分已經萃得差不多了。':
     '在這組條件下，氣味和苦澀的同步都不明顯，靠聞的判斷斷水時機證據不足，看時間、流速和液面顏色會比較準。';
   $('nzVerdict').innerHTML='<p class="nz-concl">'+concl+'</p><ul>'+li.join('')+'</ul><p class="nz-cap">相關係數只算開始滴之後的時間，-1 到 1，越接近 ±1 越同步。換焙度、研磨、水溫或缺陷，結論可能會變。</p>';
 }
@@ -3742,6 +3760,7 @@ function renderFate(){
 // ---- 控制 ----
 function seg(id,key,cast){$(id).querySelectorAll('button').forEach(b=>b.onclick=()=>{$(id).querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',x===b));S[key]=cast?cast(b.dataset.v):b.dataset.v;key==='basis'?render():run();});}
 seg('nzRoast','roast',Number);seg('nzPlan','plan');seg('nzDef','defect');seg('nzBasis','basis');
+$('nzCMode').querySelectorAll('button').forEach(b=>b.onclick=()=>{$('nzCMode').querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',x===b));S.cmode=b.dataset.v;renderChart();render();});
 $('nzGrind').oninput=e=>{S.grind=+e.target.value;$('nzGrindV').textContent=S.grind+' μm';};$('nzGrind').onchange=run;
 $('nzTemp').oninput=e=>{S.temp=+e.target.value;$('nzTempV').textContent=S.temp+'°C';};$('nzTemp').onchange=run;
 $('nzTime').oninput=e=>setT(+e.target.value);
