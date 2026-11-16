@@ -271,6 +271,12 @@ textarea:focus,input:focus,select:focus{outline:none;border-color:var(--maple)}
 nav{position:fixed;left:0;right:0;bottom:0;background:rgba(255,253,249,.96);backdrop-filter:blur(8px);border-top:1px solid var(--line);display:flex;padding:6px 6px calc(6px + env(safe-area-inset-bottom));z-index:20}
 nav a{flex:1;text-align:center;text-decoration:none;color:var(--sub);font-size:11.5px;padding:4px 0;border-radius:12px}
 nav a{position:relative}
+.xtabs{display:flex;gap:6px;overflow-x:auto;padding:12px 14px 0;scrollbar-width:none}.xtabs::-webkit-scrollbar{display:none}
+.xtab{flex:0 0 auto;padding:7px 13px;border-radius:999px;border:1.5px solid var(--line);background:#fff;font-size:13.5px;font-weight:700;color:var(--sub);white-space:nowrap}
+.xtab.on{background:var(--maple);border-color:var(--maple);color:#fff}.xtab.add{border-style:dashed}
+.sec h3 .xh{margin-left:auto;display:flex;gap:2px}.sec h3 .xh button{font-size:14px;padding:2px 6px;opacity:.65}
+.xfoot{margin:14px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}.xfoot .hint{flex:1 1 100%;font-size:12px;color:var(--sub)}
+.xempty{font-size:13px;color:var(--sub);padding:6px 0}
 .nbadge{display:none;position:absolute;top:0;left:50%;margin-left:6px;min-width:17px;height:17px;border-radius:9px;background:var(--maple);color:#fff;font-size:10.5px;font-weight:700;line-height:17px;padding:0 4px}
 .nbadge.on{display:block}
 .chat-top{margin:10px 14px 0;font-size:12px;color:var(--sub)}
@@ -324,6 +330,9 @@ nav a.on{color:var(--maple);font-weight:700;background:var(--maple-soft)}
 
   <!-- 清單 -->
   <section class="view" id="v-list">
+    <div class="xtabs" id="xtabs"></div>
+    <div id="xform"></div>
+    <div id="xmain">
     <div class="sec">
       <h3>✅ 出發前待辦</h3>
       <div class="hint">從行程表整理出要先預約／確認的事，點一下打勾。</div>
@@ -335,6 +344,8 @@ nav a.on{color:var(--maple);font-weight:700;background:var(--maple-soft)}
       <div id="pack"></div>
       <div class="addrow"><input id="packIn" placeholder="新增要帶的東西…"><button id="packAdd">加入</button></div>
     </div>
+    </div>
+    <div id="xbody"></div>
   </section>
 
   <!-- 咖啡 -->
@@ -910,6 +921,57 @@ $('#packAdd').onclick=()=>{addPack($('#packIn').value);$('#packIn').value=''};
 $('#todoIn').onkeydown=e=>{if(e.key==='Enter')$('#todoAdd').click()};
 $('#packIn').onkeydown=e=>{if(e.key==='Enter')$('#packAdd').click()};
 
+/* ---------- 自訂清單與清單分頁 ---------- */
+let xtabs=S.get('xtabs',{}),xlists=S.get('xlists',{}),curTab='main',xf=null,xarm=null;
+const xid=()=>'x'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+const xsort=o=>Object.keys(o).sort((a,b)=>(o[a].o||0)-(o[b].o||0));
+const xsaveT=()=>S.set('xtabs',xtabs),xsaveL=()=>S.set('xlists',xlists);
+function drawX(){
+ if(curTab!=='main'&&!xtabs[curTab])curTab='main';
+ $('#xtabs').innerHTML=`<button class="xtab${curTab==='main'?' on':''}" data-xt="main">📋 行前清單</button>`+xsort(xtabs).map(id=>`<button class="xtab${curTab===id?' on':''}" data-xt="${id}">${xtabs[id].p?'🔒':'👨‍👩‍👧'} ${esc(xtabs[id].n)}</button>`).join('')+`<button class="xtab add" data-xa="newtab">＋ 新增分頁</button>`;
+ let f='';
+ if(xf&&xf.k==='newtab')f=`<div class="sec"><h3>新增清單分頁</h3><input id="xIn" maxlength="20" placeholder="分頁名稱，例如：我的清單"><div class="hint" style="margin:10px 0 8px">要給誰看？</div><div class="acts"><button class="btn pri" data-xa="mk" data-p="1">🔒 只有我</button><button class="btn" data-xa="mk" data-p="0">👨‍👩‍👧 全家共用</button><button class="btn ghost" data-xa="cancel">取消</button></div></div>`;
+ if(xf&&xf.k==='rent')f=`<div class="sec"><h3>修改分頁名稱</h3><div class="addrow" style="margin-top:0"><input id="xIn" maxlength="20" value="${esc(xtabs[curTab].n)}"><button data-xa="rentok">儲存</button></div><div class="acts" style="margin-top:8px"><button class="btn ghost" data-xa="cancel">取消</button></div></div>`;
+ $('#xform').innerHTML=f;
+ $('#xmain').style.display=curTab==='main'?'':'none';
+ const ids=xsort(xlists).filter(id=>xlists[id].tab===curTab);
+ let h=ids.map(id=>{const L=xlists[id];
+  if(xf&&xf.k==='renl'&&xf.id===id)return `<div class="sec"><h3>修改清單名稱</h3><div class="addrow" style="margin-top:0"><input id="xIn" maxlength="20" value="${esc(L.n)}"><button data-xa="renlok" data-id="${id}">儲存</button></div><div class="acts" style="margin-top:8px"><button class="btn ghost" data-xa="cancel">取消</button></div></div>`;
+  return `<div class="sec" data-xl="${id}"><h3>${esc(L.n)}<span class="xh"><button data-xa="renl" data-id="${id}" aria-label="改名">✏️</button><button data-xa="dell" data-id="${id}" aria-label="刪除清單">${xarm==='l'+id?'確定刪除？':'🗑️'}</button></span></h3>
+   ${(L.items||[]).length?L.items.map((x,i)=>`<div class="ck${x.on?' on':''}" data-xi="${i}"><span class="box"></span><span class="txt">${esc(x.t)}</span><button class="del" data-xd="${i}" aria-label="刪除">×</button></div>`).join(''):'<div class="xempty">還沒有項目</div>'}
+   <div class="addrow"><input data-xin="${id}" placeholder="新增項目…"><button data-xa="addi" data-id="${id}">加入</button></div></div>`}).join('');
+ h+=`<div class="sec"><h3>＋ 新增清單</h3><div class="hint">在「${curTab==='main'?'行前清單':esc(xtabs[curTab].n)}」這個分頁多加一張清單${curTab==='main'||!xtabs[curTab].p?'':'（只有你看得到）'}。</div><div class="addrow" style="margin-top:0"><input id="xNewL" maxlength="20" placeholder="清單名稱，例如：要買的伴手禮"><button data-xa="addl">新增</button></div></div>`;
+ if(curTab!=='main')h+=`<div class="xfoot"><div class="hint">${xtabs[curTab].p?'🔒 這個分頁只存在這台手機，家人看不到。':'👨‍👩‍👧 這個分頁全家共用（開啟「家人共用」後會同步）。'}</div><button class="btn" data-xa="rent">✏️ 改分頁名稱</button><button class="btn ghost" data-xa="delt">${xarm==='t'?'再按一次確定刪除':'🗑️ 刪除這個分頁'}</button></div>`;
+ $('#xbody').innerHTML=h;
+ const xi=$('#xIn');if(xi&&xf&&!xf.shown){xf.shown=1;xi.focus()}
+}
+$('#v-list').addEventListener('click',e=>{
+ const t=e.target.closest('[data-xt]');if(t){curTab=t.dataset.xt;xf=null;xarm=null;drawX();return}
+ const sec=e.target.closest('[data-xl]'),L=sec&&xlists[sec.dataset.xl];
+ const d=e.target.closest('[data-xd]');if(d&&L){L.items.splice(+d.dataset.xd,1);xsaveL();drawX();return}
+ const b=e.target.closest('[data-xa]');
+ if(!b){const r=e.target.closest('[data-xi]');if(r&&L){const it=L.items[+r.dataset.xi];it.on=!it.on;if(!it.on)delete it.on;xsaveL();drawX()}return}
+ const a=b.dataset.xa,id=b.dataset.id,val=()=>(($('#xIn')||{}).value||'').trim();
+ if(a==='newtab'){xf={k:'newtab'};xarm=null;drawX();return}
+ if(a==='cancel'){xf=null;drawX();return}
+ if(a==='mk'){const n=val();if(!n){toast('請先填分頁名稱');return}const tid=xid(),t={n,o:Date.now()};if(b.dataset.p==='1')t.p=1;xtabs[tid]=t;xsaveT();
+  const lid=xid(),l={n,tab:tid,items:[],o:Date.now()};if(t.p)l.p=1;xlists[lid]=l;xsaveL();curTab=tid;xf=null;drawX();toast(t.p?'🔒 已新增，只有你看得到':'👨‍👩‍👧 已新增，全家共用');return}
+ if(a==='rent'){xf={k:'rent'};drawX();return}
+ if(a==='rentok'){const n=val();if(!n)return;xtabs[curTab].n=n;xsaveT();xf=null;drawX();return}
+ if(a==='delt'){if(xarm!=='t'){xarm='t';drawX();return}for(const k in xlists)if(xlists[k].tab===curTab)delete xlists[k];delete xtabs[curTab];xsaveL();xsaveT();curTab='main';xarm=null;xf=null;drawX();toast('已刪除分頁');return}
+ if(a==='addl'){const n=$('#xNewL').value.trim();if(!n){toast('請先填清單名稱');return}const l={n,tab:curTab,items:[],o:Date.now()};if(curTab!=='main'&&xtabs[curTab].p)l.p=1;xlists[xid()]=l;xsaveL();drawX();return}
+ if(a==='renl'){xf={k:'renl',id};drawX();return}
+ if(a==='renlok'){const n=val();if(!n||!xlists[id])return;xlists[id].n=n;xsaveL();xf=null;drawX();return}
+ if(a==='dell'){if(xarm!=='l'+id){xarm='l'+id;drawX();return}delete xlists[id];xsaveL();xarm=null;drawX();return}
+ if(a==='addi'){const inp=document.querySelector(`[data-xin="${id}"]`),v=inp.value.trim();if(!v||!xlists[id])return;(xlists[id].items=xlists[id].items||[]).push({t:v.slice(0,80)});xsaveL();drawX();const n2=document.querySelector(`[data-xin="${id}"]`);if(n2)n2.focus();return}
+});
+$('#v-list').addEventListener('keydown',e=>{if(e.key!=='Enter'||e.isComposing)return;const el=e.target;
+ if(el.dataset&&el.dataset.xin){e.preventDefault();el.parentNode.querySelector('button').click()}
+ else if(el.id==='xNewL'){e.preventDefault();el.parentNode.querySelector('button').click()}
+ else if(el.id==='xIn'&&xf&&xf.k!=='newtab'){e.preventDefault();el.parentNode.querySelector('button').click()}});
+reloaders.push(()=>{xtabs=S.get('xtabs',{});xlists=S.get('xlists',{});drawX()});
+drawX();
+
 /* ---------- overlay ---------- */
 function big(jp,zh){$('#ovJp').textContent=jp;$('#ovZh').textContent=zh;$('#ov').classList.add('on')}
 $('#ovX').onclick=()=>$('#ov').classList.remove('on');
@@ -1001,7 +1063,7 @@ window.addEventListener('hashchange',route);
 /* ---------- family sync (Firebase Realtime Database, REST + 串流) ---------- */
 const FB_URL='https://molecule-match-default-rtdb.asia-southeast1.firebasedatabase.app';
 const FS=(function(){
- const KEYS=['done','cafes','memo','savedNotes','edits','todo','pack'];
+ const KEYS=['done','cafes','memo','savedNotes','edits','todo','pack','xtabs','xlists'];
  const raw={get(k){try{return localStorage.getItem('fuk26_'+k)}catch(e){return null}},set(k,v){try{localStorage.setItem('fuk26_'+k,v)}catch(e){}},del(k){try{localStorage.removeItem('fuk26_'+k)}catch(e){}}};
  const okCode=c=>/^[A-Za-z0-9_-]{8,40}$/.test(c||'');
  const enc=k=>encodeURIComponent(k).replace(/\./g,'%2E'),dec=k=>{try{return decodeURIComponent(k)}catch(e){return k}};
@@ -1014,6 +1076,8 @@ const FS=(function(){
   if(key==='done'||key==='cafes'){for(const k in v)if(v[k])o[key+'/'+enc(k)]=true}
   else if(key==='memo'){for(const k in v)if(v[k])o['memo/m'+k]=String(v[k])}
   else if(key==='savedNotes'){for(const k in v)if(v[k])o['notes/'+enc(k)]=String(v[k])}
+  else if(key==='xtabs'){for(const k in v)if(v[k]&&!v[k].p)o['xt/'+k]=JSON.stringify({n:v[k].n,o:v[k].o})}
+  else if(key==='xlists'){for(const k in v)if(v[k]&&!v[k].p)o['xl/'+k]=JSON.stringify({n:v[k].n,tab:v[k].tab,items:v[k].items||[],o:v[k].o})}
   else if(key==='edits'){o['edits/v']=v.v||1;(v.days||[]).forEach((d,i)=>{o['edits/d'+i]=JSON.stringify(d)})}
   else o[key]=JSON.stringify(v);
   return o}
@@ -1022,6 +1086,7 @@ const FS=(function(){
   if(key==='done'||key==='cafes'){const o={},x=sub(key+'/');for(const k in x)if(x[k])o[dec(k)]=true;return o}
   if(key==='memo'){const o={},x=sub('memo/m');for(const k in x)o[k]=String(x[k]);return o}
   if(key==='savedNotes'){const o={},x=sub('notes/');for(const k in x)o[dec(k)]=String(x[k]);return o}
+  if(key==='xtabs'||key==='xlists'){const o={},x=sub(key==='xtabs'?'xt/':'xl/');for(const k in x){try{const r=JSON.parse(x[k]);if(r&&typeof r.n==='string')o[k]=r}catch(e){}}return o}
   if(key==='edits'){const x=sub('edits/d');if(!Object.keys(x).length)return null;
    return{v:+E['edits/v']||BASEV,days:DAYS.map((_,i)=>{try{const d=JSON.parse(x[i]);if(d&&Array.isArray(d.stops))return d}catch(e){}return baseDay(i)})}}
   try{const a=JSON.parse(E[key]);return Array.isArray(a)?a:null}catch(e){return null}}
@@ -1037,7 +1102,7 @@ const FS=(function(){
   if(ns===sig){dirty=false;return}
   if(busy()&&!force){dirty=true;return}
   dirty=false;sig=ns;
-  KEYS.forEach(k=>{const v=fromLeaves(k,E);if(v==null)raw.del(k);else raw.set(k,JSON.stringify(v));cache[k]=leaves(k,v)});
+  KEYS.forEach(k=>{const v=fromLeaves(k,E);if(k==='xtabs'||k==='xlists'){let loc=null;try{loc=JSON.parse(raw.get(k))}catch(e){}for(const i in loc||{})if(loc[i]&&loc[i].p)v[i]=loc[i]}if(v==null)raw.del(k);else raw.set(k,JSON.stringify(v));cache[k]=leaves(k,v)});
   done=S.get('done',{});memos=S.get('memo',{});ed=S.get('edits',null);
   renderChips();renderDay(true);drawCafes();reloaders.forEach(f=>{try{f()}catch(e){}});
  }
