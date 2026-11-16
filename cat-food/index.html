@@ -124,6 +124,10 @@ table.t td.n{text-align:center;font-variant-numeric:tabular-nums}
 .lines{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px;max-height:150px;overflow:auto}
 .lines button{font:inherit;font-size:12px;border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:4px 7px;cursor:pointer;text-align:left;max-width:100%}
 .food .ic img{width:44px;height:44px;border-radius:12px;object-fit:cover}
+.fam-st{display:flex;align-items:center;gap:8px;font-weight:700;margin-bottom:10px}
+.fam-st i{flex:none;width:10px;height:10px;border-radius:50%;background:#bdb3a9}
+.fam-st.ok i{background:#3fae5a}.fam-st.busy i{background:#e0a100}.fam-st.err i{background:#d9534f}
+.fam-code{font-family:ui-monospace,Menlo,monospace;font-size:12px;word-break:break-all;background:var(--soft);border-radius:8px;padding:6px 8px;margin:4px 0 10px}
 .sync{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .toast{position:fixed;left:50%;bottom:calc(86px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--ink);color:#fff;font-size:14px;padding:9px 16px;border-radius:20px;z-index:30;max-width:90vw;text-align:center;display:none}
 .rank{display:flex;gap:8px;align-items:center;padding:7px 0;border-top:1px solid var(--line);cursor:pointer}
@@ -458,6 +462,8 @@ function vCat(){
   <div class="card"><div class="row" style="gap:14px"><button class="avatar" id="cAv" aria-label="上傳照片">${S.cat.photo?`<img src="${S.cat.photo}" alt="">`:"🐱"}<span class="cam">📷</span></button><input type="file" id="cAvF" accept="image/*" style="display:none">
    <div style="flex:1;min-width:0"><label class="f" style="margin-top:0">貓咪名字</label><input class="f" id="cName" value="${esc(S.cat.name||"")}">
    <div class="hint">點頭像換照片${S.cat.photo?`・<a href="#" id="cAvDel" style="color:var(--mute)">移除照片</a>`:""}</div></div></div></div>
+<h2>👨‍👩‍👧‍👦 家人共用</h2>
+  <div class="card" id="famBox"></div>
 <h2>☁️ 雲端存檔與備份</h2>
   <div class="card">
    <div class="sync" id="syncRow" style="margin-bottom:10px"><button class="btn pri" id="gBtn"><span id="gBtnT">☁️ 用 Google 帳號同步</span></button><span class="muted" id="syncNote">存到你自己的 Google 雲端硬碟，換手機也看得到</span></div>
@@ -699,6 +705,125 @@ function login(){
 if(gTok&&ls.get('cf-g')==='1')afterLogin();
 else if(ls.get('cf-g')==='1'){btn('☁️ 點這裡連回 Google 同步');cloudState('err','☁️ 點我連回')}
 })();
+
+/* ---------- 家人共用（Firebase Realtime Database，REST + 串流）：每筆紀錄取較新的，照片另外存 ---------- */
+const FS=(function(){
+ const FB_URL='https://molecule-match-default-rtdb.asia-southeast1.firebasedatabase.app',COLLS=['foods','logs','weights'];
+ const ls={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}},del(k){try{localStorage.removeItem(k)}catch(e){}}};
+ const okCode=c=>/^[A-Za-z0-9_-]{8,40}$/.test(c||'');
+ const enc=k=>encodeURIComponent(k).replace(/\./g,'%2E'),dec=k=>{try{return decodeURIComponent(k)}catch(e){return k}};
+ let code=null,R={},Q={},es=null,state='off',dirty=false,flushT=null,sending=false,hidAt=0,want={},upDone={},upBusy={},getBusy={},retryT=null;
+ try{const u=new URLSearchParams(location.search).get('fam');if(okCode(u))ls.set('cf-fam',u)}catch(e){}
+ code=ls.get('cf-fam');if(!okCode(code))code=null;
+ const canon=o=>o===null||typeof o!=='object'?JSON.stringify(o):Array.isArray(o)?'['+o.map(canon).join(',')+']':'{'+Object.keys(o).filter(k=>o[k]!==undefined).sort().map(k=>JSON.stringify(k)+':'+canon(o[k])).join(',')+'}';
+ const hmemo=new Map();
+ function hash(str){let h=hmemo.get(str);if(h)return h;let a=0xdeadbeef^str.length,b=0x41c6ce57^str.length;
+  for(let i=0;i<str.length;i++){const c=str.charCodeAt(i);a=Math.imul(a^c,2654435761);b=Math.imul(b^c,1597334677)}
+  a=Math.imul(a^(a>>>16),2246822507)^Math.imul(b^(b>>>13),3266489909);b=Math.imul(b^(b>>>16),2246822507)^Math.imul(a^(a>>>13),3266489909);
+  h='p'+(4294967296*(2097151&b)+(a>>>0)).toString(36)+str.length.toString(36);hmemo.set(str,h);return h}
+ function leaf(path,rec){const c=Object.assign({},rec);delete c.photo;delete c._p;
+  if(rec.photo)c._p=hash(rec.photo);else{const w=want[path];if(w&&w.u===(rec.updatedAt||0))c._p=w.h}
+  return canon(c)}
+ const recAt=path=>{if(path==='cat')return S.cat;const i=path.indexOf('/');return S[path.slice(0,i)][dec(path.slice(i+1))]};
+ function setRec(path,rec){if(path==='cat')S.cat=rec;else{const i=path.indexOf('/');S[path.slice(0,i)][dec(path.slice(i+1))]=rec}}
+ function locals(){const o={cat:S.cat};COLLS.forEach(k=>{for(const id in S[k])o[k+'/'+enc(id)]=S[k][id]});return o}
+ const photoByHash=h=>{const L=locals();for(const p in L)if(L[p]&&L[p].photo&&hash(L[p].photo)===h)return L[p].photo;return null};
+ const saveQ=()=>ls.set('cf-famQ',JSON.stringify(Q));
+ const persist=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
+ const busy=()=>$("#sheet").classList.contains("show")||/^(INPUT|TEXTAREA|SELECT)$/.test((document.activeElement||{}).tagName||'');
+ function paint(){if(busy()){dirty=true;return}dirty=false;render()}
+ const purl=h=>FB_URL+'/trips/'+code+'p/'+h+'.json';
+ function fetchPhoto(path,h){
+  if(getBusy[h])return;getBusy[h]=1;
+  fetch(purl(h)).then(r=>r.ok?r.json():null).then(d=>{delete getBusy[h];
+   if(typeof d!=='string'||d.slice(0,11)!=='data:image/'){clearTimeout(retryT);retryT=setTimeout(reconcile,20000);return}
+   let ch=false;const L=locals();for(const p in L){const w=want[p];if(w&&w.h===h&&L[p]&&!L[p].photo&&(L[p].updatedAt||0)===w.u){L[p].photo=d;delete want[p];ch=true}}
+   if(ch){upDone[h]=1;persist();paint()}
+  }).catch(()=>{delete getBusy[h];clearTimeout(retryT);retryT=setTimeout(reconcile,20000)})}
+ function upPhoto(photo){const h=hash(photo);if(upDone[h]||upBusy[h])return;upBusy[h]=1;
+  fetch(purl(h),{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(photo)}).then(r=>{delete upBusy[h];if(r.ok){upDone[h]=1;ls.set('cf-famP',JSON.stringify(Object.keys(upDone)))}}).catch(()=>{delete upBusy[h]})}
+ function reconcile(){
+  if(!code)return;let changed=false;
+  for(const path in R){let r;try{r=JSON.parse(R[path])}catch(e){continue}
+   if(!r||typeof r!=='object')continue;if(path!=='cat'&&(!/^(foods|logs|weights)\//.test(path)||!r.id))continue;
+   const m=recAt(path),ru=r.updatedAt||0,mu=m?(m.updatedAt||0):-1,h=r._p;delete r._p;
+   if(ru>mu){
+    if(h){const ph=(m&&m.photo&&hash(m.photo)===h)?m.photo:photoByHash(h);if(ph)r.photo=ph;else want[path]={h,u:ru}}else delete want[path];
+    setRec(path,r);changed=true}
+   else if(ru===mu&&h&&m&&!m.photo&&!want[path])want[path]={h,u:ru};
+   else if(ru<mu)delete want[path];
+  }
+  const L=locals();
+  for(const path in L){const rec=L[path];if(!rec)continue;
+   if(rec.photo)upPhoto(rec.photo);
+   const sx=leaf(path,rec);if(R[path]!==sx){if(Q[path]!==sx)Q[path]=sx}else if(path in Q)delete Q[path]}
+  for(const p in want)if(L[p]&&!L[p].photo)fetchPhoto(p,want[p].h);
+  saveQ();if(changed){persist();paint()}
+  clearTimeout(flushT);flushT=setTimeout(flush,changed?50:600);
+ }
+ async function flush(){
+  if(!code||sending||!Object.keys(Q).length)return;
+  sending=true;const sent=Object.assign({},Q);
+  try{const r=await fetch(FB_URL+'/trips/'+code+'.json',{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify(sent)});
+   if(!r.ok)throw new Error('http '+r.status);
+   for(const p in sent){R[p]=sent[p];if(Q[p]===sent[p])delete Q[p]}
+   saveQ();sending=false;if(es&&es.readyState===1&&state!=='ok')setState('ok');
+   if(Object.keys(Q).length)flush();
+  }catch(e){sending=false;clearTimeout(flushT);flushT=setTimeout(flush,6000);if(state==='ok')setState('wait')}
+ }
+ function flat(d,pre,out){if(d===null||d===undefined)return;if(typeof d==='object'){for(const k in d)flat(d[k],pre?pre+'/'+k:String(k),out)}else if(pre)out[pre]=d}
+ function put(path,data){for(const p in R)if(!path||p===path||p.startsWith(path+'/'))delete R[p];flat(data,path,R)}
+ function connect(){
+  if(es){es.close();es=null}
+  if(!code)return;setState('busy');
+  es=new EventSource(FB_URL+'/trips/'+code+'.json');
+  const h=kind=>e=>{let m;try{m=JSON.parse(e.data)}catch(x){return}if(!m)return;
+   const path=(m.path||'/').replace(/^\/+|\/+$/g,'');
+   if(kind==='put')put(path,m.data);else if(m.data&&typeof m.data==='object'){for(const k in m.data)put(path?path+'/'+k:k,m.data[k])}
+   if(state!=='ok')setState('ok');reconcile()};
+  es.addEventListener('put',h('put'));es.addEventListener('patch',h('patch'));
+  es.addEventListener('cancel',()=>{es.close();setState('err')});
+  es.onerror=()=>{if(!es)return;if(es.readyState===2){setState('err');setTimeout(()=>{if(code&&state==='err')connect()},15000)}else setState('wait')};
+ }
+ function setState(st){state=st;draw()}
+ function start(c){code=c;ls.set('cf-fam',c);Q={};saveQ();R={};want={};upDone={};ls.del('cf-famP');connect()}
+ function stop(){if(es){es.close();es=null}code=null;ls.del('cf-fam');ls.del('cf-famP');Q={};saveQ();R={};setState('off')}
+ const link=()=>location.origin+location.pathname+'?fam='+code;
+ function draw(){
+  if(code){const T={ok:['on','👨‍👩‍👧 共用中'],err:['err','👨‍👩‍👧 連不上'],wait:['err','👨‍👩‍👧 離線']}[state]||['busy','👨‍👩‍👧 連線中'];
+   $("#hCloud").className="cloud "+T[0];$("#hCloudT").textContent=T[1]}
+  const box=$("#famBox");if(!box)return;
+  if(!code){box.innerHTML=`<div class="fam-st"><i></i>目前沒有共用</div>
+   <div class="row"><button class="btn pri" id="famNew">建立家人共用</button></div>
+   <div class="hint" style="margin-top:10px">全家共用同一份毛毛的紀錄：食物庫、每餐紀錄、體重、照片，任何人改了其他人都會看到，不用登入帳號。<br>家人已經建立了？貼上邀請連結或共用碼：</div>
+   <div class="row" style="margin-top:8px"><input class="f" id="famIn" placeholder="邀請連結或共用碼" autocapitalize="off" autocorrect="off" style="flex:1;margin:0"><button class="btn" id="famJoin">加入</button></div>`;return}
+  const T={ok:['ok','已連線，全家同步中'],busy:['busy','連線中…'],wait:['busy','沒有網路，改動先存在這台，連上後自動補傳'],err:['err','連不上雲端，稍後會自動再試']}[state]||['busy','連線中…'];
+  box.innerHTML=`<div class="fam-st ${T[0]}"><i></i>${T[1]}</div>
+   <div class="hint">邀請連結（傳到家人群組，打開就會加入）：</div><div class="fam-code">${esc(link())}</div>
+   <div class="row"><button class="btn pri" id="famShare">📤 傳給家人</button><button class="btn" id="famCopy">複製連結</button><button class="btn" id="famStop">停止共用</button></div>
+   <div class="hint" style="margin-top:10px">知道這個連結的人都能看和改，請只傳給家人。同一筆紀錄若兩人同時修改，以後存的為準。</div>`;
+ }
+ document.addEventListener('click',async e=>{
+  const id=e.target.id;
+  if(id==='famNew'){const a=new Uint8Array(16);crypto.getRandomValues(a);const ab='abcdefghjkmnpqrstuvwxyz23456789';start([...a].map(x=>ab[x%ab.length]).join(''));toast('已建立，把邀請連結傳給家人');return}
+  if(id==='famJoin'){let v=$("#famIn").value.trim();const m=v.match(/[?&]fam=([A-Za-z0-9_-]+)/);if(m)v=m[1];if(!okCode(v)){toast('共用碼格式不對');return}start(v);return}
+  if(id==='famCopy'){try{await navigator.clipboard.writeText(link());toast('✅ 已複製邀請連結')}catch(x){toast('請長按上面的連結複製')}return}
+  if(id==='famShare'){if(navigator.share){try{await navigator.share({title:'毛毛的飲食紀錄',text:'毛毛的飲食紀錄（全家共用）',url:link()})}catch(x){}}else $("#famCopy").click();return}
+  if(id==='famStop'){if(e.target.dataset.arm){stop();toast('已停止共用，紀錄留在這台手機');render()}else{e.target.dataset.arm=1;e.target.textContent='再按一次確定'}return}
+ });
+ setInterval(()=>{if(dirty&&!busy()){dirty=false;render()}},1500);
+ window.addEventListener('online',()=>{if(code){connect();flush()}});
+ document.addEventListener('visibilitychange',()=>{if(document.hidden){hidAt=Date.now();return}
+  if(code&&(Date.now()-hidAt>20000||!es||es.readyState===2))connect();flush()});
+ try{Q=JSON.parse(ls.get('cf-famQ'))||{}}catch(e){Q={}}
+ try{(JSON.parse(ls.get('cf-famP'))||[]).forEach(h=>upDone[h]=1)}catch(e){}
+ return{on:()=>!!code,draw,local:reconcile,init(){draw();if(code)connect()}};
+})();
+{const _os=onSaved;onSaved=()=>{_os();FS.local()};
+ const _vc=vCat;vCat=function(){_vc();FS.draw()};
+ const _cs=cloudState;cloudState=function(st,t){if(!FS.on())_cs(st,t)};
+ const _hc=$("#hCloud").onclick;$("#hCloud").onclick=e=>{if(FS.on()){go("cat");return}_hc(e)}}
+FS.init();
 
 render();
 </script>
