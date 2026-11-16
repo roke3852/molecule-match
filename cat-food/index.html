@@ -127,6 +127,11 @@ table.t td.n{text-align:center;font-variant-numeric:tabular-nums}
 .fam-st{display:flex;align-items:center;gap:8px;font-weight:700;margin-bottom:10px}
 .fam-st i{flex:none;width:10px;height:10px;border-radius:50%;background:#bdb3a9}
 .fam-st.ok i{background:#3fae5a}.fam-st.busy i{background:#e0a100}.fam-st.err i{background:#d9534f}
+.fam-m{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--line)}
+.fam-m:last-child{border-bottom:0}.fam-m i{flex:none;width:8px;height:8px;border-radius:50%;background:#cfc4b8}.fam-m.live i{background:#3fae5a}
+.fam-m b{flex:1}.fam-m span{font-size:12px;color:var(--mute)}
+.fam-ask{display:none;position:fixed;left:12px;right:12px;bottom:calc(84px + env(safe-area-inset-bottom));z-index:25;background:#fff;border:1px solid var(--line);border-radius:16px;padding:12px 14px;box-shadow:0 8px 28px rgba(0,0,0,.18);max-width:560px;margin:0 auto}
+.fam-ask.on{display:block}.fam-ask .x{position:absolute;top:6px;right:8px;border:0;background:none;font-size:20px;color:var(--mute);padding:2px 8px}
 .fam-code{font-family:ui-monospace,Menlo,monospace;font-size:12px;word-break:break-all;background:var(--soft);border-radius:8px;padding:6px 8px;margin:4px 0 10px}
 .sync{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .toast{position:fixed;left:50%;bottom:calc(86px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--ink);color:#fff;font-size:14px;padding:9px 16px;border-radius:20px;z-index:30;max-width:90vw;text-align:center;display:none}
@@ -151,6 +156,7 @@ table.t td.n{text-align:center;font-variant-numeric:tabular-nums}
   <button data-v="cat"><span class="i">🐱</span>毛毛</button>
 </nav>
 <div class="sheet" id="sheet"><div class="in" id="sheetIn"></div></div>
+<div class="fam-ask" id="famAsk"><button class="x" id="famAskX" aria-label="略過">×</button><b>👋 你是哪一位？</b><div class="hint">填個暱稱，家人就知道你加入共用了。</div><div class="row" style="margin-top:8px"><input class="f" id="famAskIn" maxlength="12" placeholder="例如：媽媽" style="flex:1;margin:0"><button class="btn pri" id="famAskOk">確定</button></div></div>
 <div class="toast" id="toast"></div>
 
 <script>
@@ -713,6 +719,8 @@ const FS=(function(){
  const okCode=c=>/^[A-Za-z0-9_-]{8,40}$/.test(c||'');
  const enc=k=>encodeURIComponent(k).replace(/\./g,'%2E'),dec=k=>{try{return decodeURIComponent(k)}catch(e){return k}};
  let code=null,R={},Q={},es=null,state='off',dirty=false,flushT=null,sending=false,hidAt=0,want={},upDone={},upBusy={},getBusy={},retryT=null;
+ let dev=ls.get('cf-famDev');if(!/^[a-z0-9]{10}$/.test(dev||'')){dev=Array.from(crypto.getRandomValues(new Uint8Array(10)),x=>'abcdefghjkmnpqrstuvwxyz23456789'[x%31]).join('');ls.set('cf-famDev',dev)}
+ let myName=ls.get('cf-famName')||'',lastBeat=0;
  try{const u=new URLSearchParams(location.search).get('fam');if(okCode(u))ls.set('cf-fam',u)}catch(e){}
  code=ls.get('cf-fam');if(!okCode(code))code=null;
  const canon=o=>o===null||typeof o!=='object'?JSON.stringify(o):Array.isArray(o)?'['+o.map(canon).join(',')+']':'{'+Object.keys(o).filter(k=>o[k]!==undefined).sort().map(k=>JSON.stringify(k)+':'+canon(o[k])).join(',')+'}';
@@ -780,19 +788,29 @@ const FS=(function(){
   const h=kind=>e=>{let m;try{m=JSON.parse(e.data)}catch(x){return}if(!m)return;
    const path=(m.path||'/').replace(/^\/+|\/+$/g,'');
    if(kind==='put')put(path,m.data);else if(m.data&&typeof m.data==='object'){for(const k in m.data)put(path?path+'/'+k:k,m.data[k])}
-   if(state!=='ok')setState('ok');reconcile()};
+   const first=state!=='ok';if(first)setState('ok');reconcile();if(first||!path)beat(first);drawMem()};
   es.addEventListener('put',h('put'));es.addEventListener('patch',h('patch'));
   es.addEventListener('cancel',()=>{es.close();setState('err')});
   es.onerror=()=>{if(!es)return;if(es.readyState===2){setState('err');setTimeout(()=>{if(code&&state==='err')connect()},15000)}else setState('wait')};
  }
+ function beat(force){if(!code)return;if(!force&&Date.now()-lastBeat<240000)return;lastBeat=Date.now();
+  Q['members/'+dev]=JSON.stringify({n:myName,t:lastBeat});saveQ();clearTimeout(flushT);flushT=setTimeout(flush,300)}
+ const ago=t=>{const m=Math.round((Date.now()-t)/60000);if(m<6)return'上線中';if(m<60)return m+' 分鐘前';if(m<1440)return Math.round(m/60)+' 小時前';const d=new Date(t);return(d.getMonth()+1)+'/'+d.getDate()+' '+pad(d.getHours())+':'+pad(d.getMinutes())};
+ function members(){const E={};for(const p in R)if(p.startsWith('members/'))E[p]=R[p];for(const p in Q)if(p.startsWith('members/'))E[p]=Q[p];
+  const a=[];for(const p in E){try{const m=JSON.parse(E[p]);if(m&&m.t)a.push({id:p.slice(8),n:String(m.n||''),t:+m.t})}catch(e){}}
+  return a.sort((x,y)=>(y.id===dev)-(x.id===dev)||y.t-x.t)}
+ function drawMem(){const ask=$("#famAsk");if(ask)ask.classList.toggle('on',!!code&&!myName&&!ls.get('cf-famSkip'));
+  const el=$("#famMem");if(!el)return;const a=members();
+  el.innerHTML=`<div class="hint" style="margin-top:12px">已加入的手機（${a.length}）：</div>`+(a.length?a.map(m=>`<div class="fam-m${Date.now()-m.t<360000?' live':''}"><i></i><b>${esc(m.n||'還沒填暱稱的手機')}${m.id===dev?'（你）':''}</b><span>${ago(m.t)}</span></div>`).join(''):'<div class="hint">讀取中…</div>')}
+ function setName(v){v=(v||'').trim().slice(0,12);if(!v){toast('請先填暱稱');return}myName=v;ls.set('cf-famName',v);beat(true);if(document.activeElement)document.activeElement.blur();draw();toast('👋 '+v+'，家人看得到你加入了')}
  function setState(st){state=st;draw()}
  function start(c){code=c;ls.set('cf-fam',c);Q={};saveQ();R={};want={};upDone={};ls.del('cf-famP');connect()}
- function stop(){if(es){es.close();es=null}code=null;ls.del('cf-fam');ls.del('cf-famP');Q={};saveQ();R={};setState('off')}
+ function stop(){if(es){es.close();es=null}try{fetch(FB_URL+'/trips/'+code+'/members/'+dev+'.json',{method:'DELETE',keepalive:true})}catch(e){}code=null;ls.del('cf-fam');ls.del('cf-famP');Q={};saveQ();R={};setState('off')}
  const link=()=>location.origin+location.pathname+'?fam='+code;
  function draw(){
   if(code){const T={ok:['on','👨‍👩‍👧 共用中'],err:['err','👨‍👩‍👧 連不上'],wait:['err','👨‍👩‍👧 離線']}[state]||['busy','👨‍👩‍👧 連線中'];
    $("#hCloud").className="cloud "+T[0];$("#hCloudT").textContent=T[1]}
-  const box=$("#famBox");if(!box)return;
+  drawMem();const box=$("#famBox");if(!box)return;if(document.activeElement&&document.activeElement.id==='famName')return;
   if(!code){box.innerHTML=`<div class="fam-st"><i></i>目前沒有共用</div>
    <div class="row"><button class="btn pri" id="famNew">建立家人共用</button></div>
    <div class="hint" style="margin-top:10px">全家共用同一份毛毛的紀錄：食物庫、每餐紀錄、體重、照片，任何人改了其他人都會看到，不用登入帳號。<br>家人已經建立了？貼上邀請連結或共用碼：</div>
@@ -801,7 +819,10 @@ const FS=(function(){
   box.innerHTML=`<div class="fam-st ${T[0]}"><i></i>${T[1]}</div>
    <div class="hint">邀請連結（傳到家人群組，打開就會加入）：</div><div class="fam-code">${esc(link())}</div>
    <div class="row"><button class="btn pri" id="famShare">📤 傳給家人</button><button class="btn" id="famCopy">複製連結</button><button class="btn" id="famStop">停止共用</button></div>
+   <div class="row" style="margin-top:10px"><input class="f" id="famName" maxlength="12" placeholder="你的暱稱（例如：爸爸）" value="${esc(myName)}" style="flex:1;margin:0"><button class="btn" id="famNameOk">${myName?'改暱稱':'儲存'}</button></div>
+   <div id="famMem"></div>
    <div class="hint" style="margin-top:10px">知道這個連結的人都能看和改，請只傳給家人。同一筆紀錄若兩人同時修改，以後存的為準。</div>`;
+  drawMem();
  }
  document.addEventListener('click',async e=>{
   const id=e.target.id;
@@ -809,9 +830,13 @@ const FS=(function(){
   if(id==='famJoin'){let v=$("#famIn").value.trim();const m=v.match(/[?&]fam=([A-Za-z0-9_-]+)/);if(m)v=m[1];if(!okCode(v)){toast('共用碼格式不對');return}start(v);return}
   if(id==='famCopy'){try{await navigator.clipboard.writeText(link());toast('✅ 已複製邀請連結')}catch(x){toast('請長按上面的連結複製')}return}
   if(id==='famShare'){if(navigator.share){try{await navigator.share({title:'毛毛的飲食紀錄',text:'毛毛的飲食紀錄（全家共用）',url:link()})}catch(x){}}else $("#famCopy").click();return}
+  if(id==='famNameOk'){setName($("#famName").value);return}
+  if(id==='famAskOk'){setName($("#famAskIn").value);return}
+  if(id==='famAskX'){ls.set('cf-famSkip','1');drawMem();return}
   if(id==='famStop'){if(e.target.dataset.arm){stop();toast('已停止共用，紀錄留在這台手機');render()}else{e.target.dataset.arm=1;e.target.textContent='再按一次確定'}return}
  });
  setInterval(()=>{if(dirty&&!busy()){dirty=false;render()}},1500);
+ setInterval(()=>{if(code&&!document.hidden&&state==='ok'){beat(false);drawMem()}},60000);
  window.addEventListener('online',()=>{if(code){connect();flush()}});
  document.addEventListener('visibilitychange',()=>{if(document.hidden){hidAt=Date.now();return}
   if(code&&(Date.now()-hidAt>20000||!es||es.readyState===2))connect();flush()});
