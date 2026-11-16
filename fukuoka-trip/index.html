@@ -280,6 +280,12 @@ nav a{position:relative}
 .xempty{font-size:13px;color:var(--sub);padding:6px 0}
 .fd-area{margin:16px 0 4px;padding:10px 12px;border-radius:12px;background:#f8f3ec}.fd-area:first-child{margin-top:4px}
 .fd-area b{font-size:15.5px;display:block}.fd-area .when{font-size:12.5px;color:#2f6b4a;margin-top:3px;line-height:1.6}.fd-area .when a{color:#2f6b4a;font-weight:700}.fd-area .when.no{color:var(--sub)}
+.fd-f{display:flex;gap:8px;align-items:flex-start}.fd-f>span{flex:0 0 auto;font-size:12px;font-weight:900;color:var(--sub);padding-top:7px;width:28px}.fd-f .seg{flex:1;margin-bottom:8px}
+.seg button.zero{opacity:.4}
+.fd-sw{display:flex;align-items:center;gap:8px;font-size:13.5px;font-weight:700;margin:2px 0 12px 36px;cursor:pointer}
+.fd-sw input{display:none}.fd-sw i{position:relative;width:40px;height:24px;border-radius:12px;background:#d9cdbf;transition:.2s;flex:0 0 auto}
+.fd-sw i::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:.2s;box-shadow:0 1px 2px rgba(0,0,0,.2)}
+.fd-sw input:checked+i{background:var(--maple)}.fd-sw input:checked+i::after{left:19px}
 .fd-m{margin:6px 0 0 32px;display:flex;flex-wrap:wrap;gap:5px;align-items:center;font-size:12.5px}.fd-m span{color:var(--sub);font-weight:700}
 .fd-m button{font-size:12.5px;padding:3px 9px;border-radius:999px;border:1px solid #f3cfc5;background:#fdf0ea;color:#8a2f1d;font-weight:700}.fd-m button i{font-style:normal;font-weight:400;color:#a8998c;margin-left:4px}
 .fd-tags{margin-left:32px;display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}.fd-tags span{font-size:11.5px;padding:1px 8px;border-radius:999px;background:#f3ece4;color:#5b4d43}.fd-tags span.mine{background:#fff3c4;color:#8a6200}.fd-tags span.nv{background:#eee;color:#888}.fd-tags span.kid{background:#e9f4ec;color:#2f6b4a}
@@ -451,7 +457,9 @@ nav a.on{color:var(--maple);font-weight:700;background:var(--maple-soft)}
     <div class="sec">
       <h3>🍜 依地點找美食</h3>
       <div class="hint">依行程會經過的地方分區，每區上面標出你們哪天會在那裡。想吃的點一下打勾、可以加照片（開著家人共用時全家看得到）；點推薦餐點會放大日文給店員看。營業時間和公休日可能變動，出發前用「地圖」再確認。</div>
-      <div class="seg" id="foodSeg"></div>
+      <div class="fd-f"><span>地區</span><div class="seg" id="foodSeg"></div></div>
+      <div class="fd-f"><span>種類</span><div class="seg" id="foodType"></div></div>
+      <label class="fd-sw"><input type="checkbox" id="foodWant"><i></i>只看已勾選的</label>
       <div id="foods"></div>
     </div>
   </section>
@@ -1351,15 +1359,21 @@ const FOODS=[
  {id:'kotorii',m:[{n:'抹茶套餐',jp:'抹茶セット'},{n:'和風甜點',jp:'和スイーツ'}],a:'dazaifu',n:'小鳥居茶房',jp:'小鳥居茶房',t:'咖啡',d:'太宰府小巷裡的和風茶房，安靜好坐，逛完參道人潮後休息喝茶吃甜點。',tip:'',kid:1,u:1},
  {id:'tenzan',m:[{n:'草莓最中',jp:'いちご最中'},{n:'草莓大福',jp:'いちご大福'}],a:'dazaifu',n:'天山 本店（草莓最中・大福）',jp:'天山 本店',t:'甜點',d:'太宰府的和菓子店，把整顆草莓包進最中或大福，紅豆的甜和草莓的酸很搭，是參道上的人氣點心。',tip:'',kid:1,u:1}
 ];
-let fArea='all';
+let fArea='all',fType='all',fWant=false;
+const FTYPES=[['noodle','🍜 拉麵・麵',['拉麵','沾麵','烏龍麵']],['meat','🥩 燒肉・肉',['燒肉','牛腸鍋','豬排']],['sea','🐟 海鮮・壽司',['海鮮','鰻魚','明太子']],['meal','🍛 定食・咖哩',['定食','燒咖哩']],['sweet','🍰 甜點・麵包',['甜點','麵包']],['snack','🍡 小吃・咖啡',['小吃','咖啡','商場']]];
+const fTypeOf=f=>(FTYPES.find(t=>t[2].includes(f.t))||FTYPES[5])[0];
 function areaHits(a){const out=[];DAYS.forEach((_,i)=>{const ms=D(i).stops.filter(s=>a.kw.some(k=>stopText(s).includes(k)));if(ms.length)out.push({i,s:ms.find(s=>MEALRX.test(s.n))||ms[0]})});return out}
 function drawFoods(){
  const want=S.get('foods',{}),ph=S.get('gphoto',{});
- $('#foodSeg').innerHTML=[['all','全部'],['want','想吃的（'+FOODS.filter(f=>want[f.id]).length+'）']].concat(FAREAS.map(a=>[a.k,a.n])).map(x=>`<button class="${x[0]===fArea?'on':''}" data-a="${x[0]}">${x[1]}</button>`).join('');
+ const okA=f=>fArea==='all'||f.a===fArea,okT=f=>fType==='all'||fTypeOf(f)===fType,okW=f=>!fWant||want[f.id];
+ const cA=k=>FOODS.filter(f=>(k==='all'||f.a===k)&&okT(f)&&okW(f)).length,cT=k=>FOODS.filter(f=>okA(f)&&(k==='all'||fTypeOf(f)===k)&&okW(f)).length;
+ $('#foodSeg').innerHTML=[['all','全部']].concat(FAREAS.map(a=>[a.k,a.n])).map(x=>{const n=cA(x[0]);return `<button class="${x[0]===fArea?'on':''}${n?'':' zero'}" data-a="${x[0]}">${x[1]} ${n}</button>`}).join('');
+ $('#foodType').innerHTML=[['all','全部']].concat(FTYPES.map(t=>[t[0],t[1]])).map(x=>{const n=cT(x[0]);return `<button class="${x[0]===fType?'on':''}${n?'':' zero'}" data-t="${x[0]}">${x[1]} ${n}</button>`}).join('');
+ $('#foodWant').checked=fWant;$('#foodWant').parentNode.lastChild.textContent='只看已勾選的（'+FOODS.filter(f=>want[f.id]).length+'）';
  let h='';
  FAREAS.forEach(a=>{
-  if(fArea!=='all'&&fArea!=='want'&&fArea!==a.k)return;
-  const L=FOODS.filter(f=>f.a===a.k&&(fArea!=='want'||want[f.id]));if(!L.length)return;
+  if(fArea!=='all'&&fArea!==a.k)return;
+  const L=FOODS.filter(f=>f.a===a.k&&okT(f)&&okW(f));if(!L.length)return;
   const hits=areaHits(a);
   h+=`<div class="fd-area"><b>📍 ${a.n}</b>${hits.length?`<div class="when">你們會來：${hits.map(x=>`<a href="#trip" data-go="${x.i}" data-id="${esc(x.s.id)}">${dayLbl(x.i)}・${esc(trunc(x.s.n,10))}</a>`).join('、')}</div>`:'<div class="when no">目前行程沒有排到這裡</div>'}</div>`;
   h+=L.map(f=>`<div class="cafe${want[f.id]?' on':''}" data-id="${f.id}">
@@ -1372,16 +1386,19 @@ function drawFoods(){
    <div class="cafe-b"><a class="btn" href="${mapUrl(f.jp)}" target="_blank" rel="noopener">📍 地圖</a><button class="btn ghost" data-fshow="${f.id}">🔍 給店員看</button><button class="btn ghost" data-photo="f_${f.id}">📷 ${ph['f_'+f.id]?'換照片':'加照片'}</button></div>
   </div>`).join('');
  });
- $('#foods').innerHTML=h||'<div class="xempty">還沒有勾選想吃的店。</div>';
+ $('#foods').innerHTML=h||`<div class="xempty">${fWant?'這個條件下還沒有勾選的店。':'這個條件下沒有店。'}<br><button class="btn ghost" id="fdReset" style="margin-top:8px">清除篩選</button></div>`;
 }
 $('#foodSeg').onclick=e=>{const b=e.target.closest('button');if(!b)return;fArea=b.dataset.a;drawFoods()};
+$('#foodType').onclick=e=>{const b=e.target.closest('button');if(!b)return;fType=b.dataset.t;drawFoods()};
+$('#foodWant').onchange=e=>{fWant=e.target.checked;drawFoods()};
+$('#foods').addEventListener('click',e=>{if(e.target.id==='fdReset'){fArea='all';fType='all';fWant=false;drawFoods()}});
 $('#foods').addEventListener('click',e=>{
  const dd=e.target.closest('[data-fdish]');if(dd){const [id,j]=dd.dataset.fdish.split(':'),f=FOODS.find(x=>x.id===id),d=f.m[+j];big(d.jp+'をください','請給我「'+d.n+'」');$('#ovJp').style.whiteSpace='normal';return}
  const pb=e.target.closest('[data-photo]');if(pb){gPhotoFor=pb.dataset.photo;$('#gFile').click();return}
  const zm=e.target.closest('[data-zoom]');if(zm){const id=zm.dataset.zoom,f=FOODS.find(x=>'f_'+x.id===id);$('#imgovI').src=zm.src;$('#imgovT').textContent=f?f.n:'';$('#imgovD').dataset.id=id;$('#imgovD').textContent='移除這張照片';delete $('#imgovD').dataset.arm;$('#imgov').classList.add('on');return}
  const sh=e.target.closest('[data-fshow]');if(sh){const f=FOODS.find(x=>x.id===sh.dataset.fshow);big(f.jp+'に行きたいです','我想去「'+f.n+'」');$('#ovJp').style.whiteSpace='normal';return}
  const r=e.target.closest('.cafe-h');if(!r)return;const id=r.parentNode.dataset.id,w=S.get('foods',{});w[id]=!w[id];if(!w[id])delete w[id];S.set('foods',w);drawFoods()});
-document.addEventListener('click',e=>{const a=e.target.closest('[data-farea]');if(!a)return;fArea=a.dataset.farea});
+document.addEventListener('click',e=>{const a=e.target.closest('[data-farea]');if(!a)return;fArea=a.dataset.farea;fType='all';fWant=false});
 reloaders.push(()=>{if(currentView()==='food')drawFoods()});
 const MEALRX=/午餐|晚餐|美食|屋台|海鮮|散策|街道|商店街|參道|小倉城/;
 function stopFoods(day){const m={};FAREAS.forEach(a=>{const s=D(day).stops.find(s=>MEALRX.test(s.n)&&a.kw.some(k=>stopText(s).includes(k)));if(s&&!m[s.id])m[s.id]=a});return m}
