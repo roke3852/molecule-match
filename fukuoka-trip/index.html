@@ -38,7 +38,7 @@ header::after{content:"";position:absolute;right:-30px;top:-30px;width:170px;hei
 .fam-m{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--line);font-size:14px}
 .fam-m:last-child{border-bottom:0}.fam-m i{flex:0 0 auto;width:8px;height:8px;border-radius:50%;background:#cfc4b8}.fam-m.live i{background:#3fae5a}
 .fam-m b{flex:1;font-weight:700}.fam-m span{font-size:12px;color:var(--sub)}
-.fam-ask{display:none;position:fixed;left:12px;right:12px;bottom:calc(84px + env(safe-area-inset-bottom));z-index:40;background:#fff;border:1px solid var(--line);border-radius:16px;padding:12px 14px;box-shadow:0 8px 28px rgba(0,0,0,.18);max-width:576px;margin:0 auto}
+.fam-ask{display:none;position:fixed;left:12px;right:12px;bottom:calc(var(--navh,62px) + 70px);z-index:40;background:#fff;border:1px solid var(--line);border-radius:16px;padding:12px 14px;box-shadow:0 8px 28px rgba(0,0,0,.18);max-width:576px;margin:0 auto}
 .fam-ask.on{display:block}.fam-ask b{font-size:14.5px}.fam-ask .x{position:absolute;top:8px;right:10px;font-size:18px;color:#b9a99b;padding:2px 6px}
 .fam-code{font-family:ui-monospace,Menlo,monospace;font-size:12px;word-break:break-all;background:#f3ece4;border-radius:8px;padding:6px 8px;margin-bottom:10px}
 .hotel-line{margin-top:10px;font-size:12.5px;opacity:.95;position:relative;z-index:1}
@@ -270,6 +270,25 @@ textarea:focus,input:focus,select:focus{outline:none;border-color:var(--maple)}
 /* bottom nav */
 nav{position:fixed;left:0;right:0;bottom:0;background:rgba(255,253,249,.96);backdrop-filter:blur(8px);border-top:1px solid var(--line);display:flex;padding:6px 6px calc(6px + env(safe-area-inset-bottom));z-index:20}
 nav a{flex:1;text-align:center;text-decoration:none;color:var(--sub);font-size:11.5px;padding:4px 0;border-radius:12px}
+nav a{position:relative}
+.nbadge{display:none;position:absolute;top:0;left:50%;margin-left:6px;min-width:17px;height:17px;border-radius:9px;background:var(--maple);color:#fff;font-size:10.5px;font-weight:700;line-height:17px;padding:0 4px}
+.nbadge.on{display:block}
+.chat-top{margin:10px 14px 0;font-size:12px;color:var(--sub)}
+.chat-list{padding:8px 14px calc(70px + var(--navh,62px))}
+.chat-day{text-align:center;font-size:11.5px;color:var(--sub);margin:12px 0 6px}
+.msg{display:flex;flex-direction:column;align-items:flex-start;margin:6px 0}
+.msg.me{align-items:flex-end}
+.msg .who{font-size:11.5px;color:var(--sub);margin:0 6px 2px}
+.msg .bub{max-width:82%;background:var(--card);border:1px solid var(--line);border-radius:16px 16px 16px 4px;padding:8px 12px;font-size:15px;line-height:1.5;white-space:pre-wrap;word-break:break-word}
+.msg.me .bub{background:var(--maple-soft);border-color:#f3cfc5;border-radius:16px 16px 4px 16px}
+.msg .mtm{font-size:10.5px;color:#a8998c;margin:2px 6px 0}
+.msg .mtm button{font-size:10.5px;color:#a8998c;text-decoration:underline;margin-left:8px}
+.chat-empty{text-align:center;color:var(--sub);font-size:13.5px;padding:40px 20px;line-height:1.8}
+.chat-bar{position:fixed;left:0;right:0;bottom:var(--navh,62px);display:none;gap:8px;padding:8px 12px;background:rgba(255,253,249,.97);border-top:1px solid var(--line);z-index:19}
+#v-chat.on .chat-bar.on{display:flex}
+.chat-bar input{flex:1;font-size:16px}
+.chat-bar button{flex:0 0 auto;padding:0 16px;border-radius:11px;background:var(--maple);color:#fff;font-weight:700}
+@media(min-width:620px){.chat-list,.chat-top{max-width:600px;margin-left:auto;margin-right:auto}.chat-bar{padding-left:calc(50% - 288px);padding-right:calc(50% - 288px)}}
 nav a i{display:block;font-style:normal;font-size:21px;line-height:1.2}
 nav a.on{color:var(--maple);font-weight:700;background:var(--maple-soft)}
 .todaybtn{position:fixed;right:14px;bottom:calc(78px + env(safe-area-inset-bottom));background:var(--ink);color:#fff;border-radius:999px;padding:9px 14px;font-size:13px;font-weight:700;box-shadow:0 6px 18px -6px rgba(0,0,0,.4);z-index:15;display:none}
@@ -333,6 +352,13 @@ nav a.on{color:var(--maple);font-weight:700;background:var(--maple-soft)}
         <b>避開公休</b>：NO COFFEE 週一休、REC 博多烘焙所週二休、COFFEE COUNTY 週三休、FILTER SUPPLY 週三四休。
       </div>
     </div>
+  </section>
+
+  <!-- 聊天 -->
+  <section class="view" id="v-chat">
+    <div class="chat-top" id="chatTop"></div>
+    <div class="chat-list" id="chatList"></div>
+    <div class="chat-bar" id="chatBar"><input id="chatIn" maxlength="500" placeholder="輸入訊息…" enterkeyhint="send" autocomplete="off"><button id="chatSend">送出</button></div>
   </section>
 
   <!-- 工具 -->
@@ -417,6 +443,7 @@ nav a.on{color:var(--maple);font-weight:700;background:var(--maple-soft)}
   <a href="#map" data-v="map"><i>🗺️</i>地圖</a>
   <a href="#list" data-v="list"><i>✅</i>清單</a>
   <a href="#coffee" data-v="coffee"><i>☕</i>咖啡</a>
+  <a href="#chat" data-v="chat"><i>💬</i>聊天<span class="nbadge" id="chatBadge"></span></a>
   <a href="#tools" data-v="tools"><i>🧰</i>工具</a>
 </nav>
 
@@ -963,12 +990,12 @@ $('#cafes').addEventListener('click',e=>{
 drawCafes();
 
 /* ---------- routing ---------- */
-const VIEWS=['trip','map','list','coffee','tools'];
+const VIEWS=['trip','map','list','coffee','chat','tools'];
 function currentView(){const h=location.hash.slice(1);return VIEWS.includes(h)?h:'trip'}
 function route(){const v=currentView();VIEWS.forEach(x=>$('#v-'+x).classList.toggle('on',x===v));
  document.querySelectorAll('nav a').forEach(a=>a.classList.toggle('on',a.dataset.v===v));
  $('#todayBtn').classList.toggle('on',v==='trip'&&ti>=0&&ti<8&&curDay!==ti);window.scrollTo(0,0);
- if(v==='map')drawMap()}
+ if(v==='map')drawMap();if(v==='chat'&&window.FS)FS.chatOpen()}
 window.addEventListener('hashchange',route);
 
 /* ---------- family sync (Firebase Realtime Database, REST + 串流) ---------- */
@@ -1024,6 +1051,36 @@ const FS=(function(){
   el.innerHTML=`<div class="hint" style="margin:12px 0 4px">已加入的手機（${a.length}）：</div>`+(a.length?a.map(m=>`<div class="fam-m${Date.now()-m.t<360000?' live':''}"><i></i><b>${esc(m.n||'還沒填暱稱的手機')}${m.id===dev?'（你）':''}</b><span>${ago(m.t)}</span></div>`).join(''):'<div class="hint" style="margin:0">讀取中…</div>');
   const ask=$('#famAsk');if(ask)ask.classList.toggle('on',!!code&&!myName&&!raw.get('famSkip'))}
  function setName(v){v=(v||'').trim().slice(0,12);if(!v){toast('請先填暱稱');return}myName=v;raw.set('famName',v);beat(true);draw();drawMem();toast('👋 '+v+'，家人看得到你加入了')}
+ let lastRead=+raw.get('famRead')||0,chatN=-1;
+ function chats(){const E={};for(const p in R)if(p.startsWith('chat/'))E[p]=R[p];for(const p in Q)if(p.startsWith('chat/')){if(Q[p]===null)delete E[p];else E[p]=Q[p]}
+  const a=[];for(const p in E){try{const m=JSON.parse(E[p]);if(m&&m.t&&typeof m.m==='string')a.push({id:p.slice(5),n:String(m.n||''),d:m.d,t:+m.t,m:m.m,q:p in Q})}catch(e){}}
+  return a.sort((x,y)=>x.t-y.t||(x.id<y.id?-1:1)).slice(-300)}
+ const hm=t=>{const d=new Date(t);return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')};
+ const inChat=()=>currentView()==='chat'&&!document.hidden;
+ function drawChat(notify){
+  const a=code?chats():[],list=$('#chatList'),bar=$('#chatBar'),top=$('#chatTop');if(!list)return;
+  bar.classList.toggle('on',!!code);
+  if(!code){top.textContent='';list.innerHTML='<div class="chat-empty">💬 這裡是全家的聊天室。<br>先到「工具」頁建立或加入「家人共用」，就能在這裡留言討論。<br><a href="#tools" style="color:var(--maple);font-weight:700">前往工具頁 →</a></div>';$('#chatBadge').classList.remove('on');return}
+  const on=members().filter(m=>Date.now()-m.t<360000);
+  top.textContent=on.length?'🟢 上線中：'+on.map(m=>(m.n||'未命名')+(m.id===dev?'（你）':'')).join('、'):'';
+  const nearEnd=window.innerHeight+window.scrollY>=document.documentElement.scrollHeight-120;
+  let h='',pd='';
+  a.forEach(m=>{const d=new Date(m.t),ds=(d.getMonth()+1)+'/'+d.getDate()+'（'+'日一二三四五六'[d.getDay()]+'）';
+   if(ds!==pd){h+=`<div class="chat-day">${ds}</div>`;pd=ds}
+   const me=m.d===dev;
+   h+=`<div class="msg${me?' me':''}">${me?'':`<div class="who">${esc(m.n||'未命名')}</div>`}<div class="bub">${esc(m.m)}</div><div class="mtm">${hm(m.t)}${m.q?'・傳送中':''}${me?`<button data-unsend="${esc(m.id)}">收回</button>`:''}</div></div>`});
+  list.innerHTML=h||'<div class="chat-empty">還沒有訊息，說點什麼吧 👋</div>';
+  const fresh=a.filter(m=>m.t>lastRead&&m.d!==dev);
+  if(inChat()){if(a.length){lastRead=Math.max(lastRead,a[a.length-1].t);raw.set('famRead',String(lastRead))}
+   if(nearEnd||chatN<0||notify==='mine')window.scrollTo(0,document.documentElement.scrollHeight)}
+  else if(notify===true&&chatN>=0&&fresh.length&&a.length>chatN){const m=fresh[fresh.length-1];toast('💬 '+(m.n||'家人')+'：'+m.m.slice(0,24))}
+  const un=inChat()?0:fresh.length,bd=$('#chatBadge');bd.textContent=un>99?'99+':un;bd.classList.toggle('on',un>0);
+  chatN=a.length;
+ }
+ function send(){const el=$('#chatIn'),t=el.value.trim();if(!t||!code)return;
+  if(!myName){toast('先填個暱稱，家人才知道是誰');const k=$('#famAsk');raw.del('famSkip');k.classList.add('on');$('#famAskIn').focus();return}
+  const now=Date.now(),id=now.toString(36)+Math.random().toString(36).slice(2,6);
+  Q['chat/'+id]=JSON.stringify({n:myName,d:dev,t:now,m:t.slice(0,500)});saveQ();el.value='';drawChat('mine');clearTimeout(flushT);flush()}
  function setState(st){state=st;draw()}
  async function flush(){
   if(!code||sending||!Object.keys(Q).length)return;
@@ -1031,7 +1088,7 @@ const FS=(function(){
   try{const r=await fetch(FB_URL+'/trips/'+code+'.json',{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify(sent)});
    if(!r.ok)throw new Error('http '+r.status);
    for(const p in sent){if(sent[p]===null)delete R[p];else R[p]=sent[p];if(Q[p]===sent[p])delete Q[p]}
-   saveQ();sending=false;if(state==='err'&&es&&es.readyState===1)setState('ok');
+   saveQ();sending=false;if(state==='err'&&es&&es.readyState===1)setState('ok');drawChat();
    if(Object.keys(Q).length)flush();
   }catch(e){sending=false;clearTimeout(flushT);flushT=setTimeout(flush,6000);if(state==='ok')setState('wait')}
  }
@@ -1056,16 +1113,16 @@ const FS=(function(){
   es=new EventSource(FB_URL+'/trips/'+code+'.json');
   const h=kind=>e=>{let m;try{m=JSON.parse(e.data)}catch(x){return}if(!m)return;
    const path=(m.path||'/').replace(/^\/+|\/+$/g,'');
-   if(kind==='put'){put(path,m.data);if(!path){setState('ok');onSnap();beat(true);drawMem();return}}
+   if(kind==='put'){put(path,m.data);if(!path){setState('ok');onSnap();beat(true);drawMem();drawChat(chatN>=0);if(chatN<0)chatN=0;return}}
    else if(m.data&&typeof m.data==='object'){for(const k in m.data)put(path?path+'/'+k:k,m.data[k])}
-   if(state!=='ok')setState('ok');apply();drawMem()};
+   if(state!=='ok')setState('ok');apply();drawMem();drawChat(true)};
   es.addEventListener('put',h('put'));es.addEventListener('patch',h('patch'));
   es.addEventListener('cancel',()=>{es.close();setState('err')});
   es.addEventListener('auth_revoked',()=>{es.close();setState('err')});
   es.onerror=()=>{if(!es)return;if(es.readyState===2){setState('err');setTimeout(()=>{if(code&&state==='err')connect()},15000)}else setState('wait')};
  }
- function start(c){code=c;raw.set('fam',c);joined=raw.get('famJ')===c;Q={};saveQ();R={};sig='';snapLocal();connect()}
- function stop(){if(es){es.close();es=null}try{fetch(FB_URL+'/trips/'+code+'/members/'+dev+'.json',{method:'DELETE',keepalive:true})}catch(e){}code=null;raw.del('fam');raw.del('famJ');Q={};saveQ();R={};sig='';setState('off');renderDay(true)}
+ function start(c){chatN=-1;code=c;raw.set('fam',c);joined=raw.get('famJ')===c;Q={};saveQ();R={};sig='';snapLocal();connect()}
+ function stop(){if(es){es.close();es=null}try{fetch(FB_URL+'/trips/'+code+'/members/'+dev+'.json',{method:'DELETE',keepalive:true})}catch(e){}code=null;raw.del('fam');raw.del('famJ');Q={};saveQ();R={};sig='';setState('off');renderDay(true);drawChat()}
  const link=()=>location.origin+location.pathname+'?fam='+code;
  function draw(){
   const pill=$('#famPill');if(pill){pill.classList.toggle('on',!!code);pill.textContent=state==='ok'?'👨‍👩‍👧 共用中':state==='off'?'':'👨‍👩‍👧 連線中…'}
@@ -1090,6 +1147,8 @@ const FS=(function(){
   if(id==='famJoin'){let v=$('#famIn').value.trim();const m=v.match(/[?&]fam=([A-Za-z0-9_-]+)/);if(m)v=m[1];if(!okCode(v)){toast('共用碼格式不對');return}start(v);return}
   if(id==='famCopy'){try{await navigator.clipboard.writeText(link());toast('✅ 已複製邀請連結')}catch(x){toast('請長按上面的連結複製')}return}
   if(id==='famShare'){if(navigator.share){try{await navigator.share({title:'福岡 8天7夜',text:'福岡行程（全家共用）',url:link()})}catch(x){}}else $('#famCopy').click();return}
+  if(id==='chatSend'){send();return}
+  const us=e.target.dataset&&e.target.dataset.unsend;if(us){if(e.target.dataset.arm){Q['chat/'+us]=null;saveQ();drawChat();clearTimeout(flushT);flush()}else{e.target.dataset.arm=1;e.target.textContent='再按一次收回'}return}
   if(id==='famNameOk'){setName($('#famName').value);return}
   if(id==='famAskOk'){setName($('#famAskIn').value);return}
   if(id==='famAskX'){raw.set('famSkip','1');drawMem();return}
@@ -1100,8 +1159,11 @@ const FS=(function(){
  window.addEventListener('online',()=>{if(code){connect();flush()}});
  document.addEventListener('visibilitychange',()=>{if(document.hidden){hidAt=Date.now();return}
   if(code&&(Date.now()-hidAt>20000||!es||es.readyState===2))connect();flush()});
+ document.addEventListener('keydown',e=>{if(e.target.id==='chatIn'&&e.key==='Enter'&&!e.isComposing){e.preventDefault();send()}});
+ const navH=()=>document.documentElement.style.setProperty('--navh',document.querySelector('nav').offsetHeight+'px');navH();window.addEventListener('resize',navH);
+ document.addEventListener('visibilitychange',()=>{if(!document.hidden)drawChat()});
  window.famSync=onLocal;
- return{on:()=>!!code,init(){try{Q=JSON.parse(raw.get('famQ'))||{}}catch(e){Q={}}joined=!!code&&raw.get('famJ')===code;snapLocal();draw();if(code)connect()}};
+ return{on:()=>!!code,chatOpen(){navH();chatN=-1;drawChat()},init(){window.FS=this;drawChat();try{Q=JSON.parse(raw.get('famQ'))||{}}catch(e){Q={}}joined=!!code&&raw.get('famJ')===code;snapLocal();draw();if(code)connect()}};
 })();
 
 renderChips();renderDay();route();loadWx(false);FS.init();
