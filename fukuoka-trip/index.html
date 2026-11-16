@@ -278,6 +278,12 @@ nav a{position:relative}
 .sec h3 .xh{margin-left:auto;display:flex;gap:2px}.sec h3 .xh button{font-size:14px;padding:2px 6px;opacity:.65}
 .xfoot{margin:14px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}.xfoot .hint{flex:1 1 100%;font-size:12px;color:var(--sub)}
 .xempty{font-size:13px;color:var(--sub);padding:6px 0}
+.fd-area{margin:16px 0 4px;padding:10px 12px;border-radius:12px;background:#f8f3ec}.fd-area:first-child{margin-top:4px}
+.fd-area b{font-size:15.5px;display:block}.fd-area .when{font-size:12.5px;color:#2f6b4a;margin-top:3px;line-height:1.6}.fd-area .when a{color:#2f6b4a;font-weight:700}.fd-area .when.no{color:var(--sub)}
+.fd-tags{margin-left:32px;display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}.fd-tags span{font-size:11.5px;padding:1px 8px;border-radius:999px;background:#f3ece4;color:#5b4d43}.fd-tags span.kid{background:#e9f4ec;color:#2f6b4a}
+.foodbox{display:block;margin-top:8px;background:#fdf0ea;border:1px solid #f3cfc5;border-radius:10px;padding:8px 10px;text-decoration:none;color:#5b4d43;font-size:12.5px;line-height:1.6}
+.foodbox b{display:block;color:#a23d24;font-size:13px}.foodbox em{display:block;font-style:normal;font-weight:700;color:var(--maple);margin-top:2px}
+.tr.fd{background:#fdf0ea;color:#a23d24;margin-left:6px}
 .cardc{padding:12px 0;border-bottom:1px dashed var(--line)}.cardc:last-child{border-bottom:0}
 .cardc-h{display:flex;gap:10px;align-items:center;cursor:pointer}.cardc-h b{flex:1;font-size:15px}.cardc-h em{font-style:normal;font-weight:900;color:var(--maple);font-size:16px}
 .cardc.on .box{background:#3f7d5c;border-color:#3f7d5c}.cardc.on .box::after{content:"✓";color:#fff;display:grid;place-items:center;height:100%;font-size:14px;font-weight:900}
@@ -304,7 +310,7 @@ nav a{position:relative}
 .tx-sum{background:#e9f4ec;color:#2f6b4a;border-radius:12px;padding:10px 12px;margin:8px 0;font-size:14px;line-height:1.7}
 .subnav{display:none;gap:6px;padding:10px 14px 0;justify-content:center}
 .subnav.on{display:flex}
-.subnav a{flex:1;max-width:180px;text-align:center;text-decoration:none;padding:8px 4px;white-space:nowrap;border-radius:12px;border:1.5px solid var(--line);background:#fff;color:var(--sub);font-size:13.5px;font-weight:700}
+.subnav a{flex:1;max-width:180px;text-align:center;text-decoration:none;padding:8px 2px;white-space:nowrap;font-size:12.5px!important;border-radius:12px;border:1.5px solid var(--line);background:#fff;color:var(--sub);font-size:13.5px;font-weight:700}
 .subnav a.on{background:var(--ink);border-color:var(--ink);color:#fff}
 .tr.gf{background:#fff3c4;color:#8a6200;margin-left:6px}
 .giftbox{display:block;margin-top:8px;background:#fff8e1;border:1px solid #f1dfa8;border-radius:10px;padding:8px 10px;text-decoration:none;color:#5b4d43;font-size:12.5px;line-height:1.6}
@@ -438,6 +444,16 @@ nav a.on{color:var(--maple);font-weight:700;background:var(--maple-soft)}
     </div>
   </section>
 
+  <!-- 美食 -->
+  <section class="view" id="v-food">
+    <div class="sec">
+      <h3>🍜 依地點找美食</h3>
+      <div class="hint">依行程會經過的地方分區，每區上面標出你們哪天會在那裡。想吃的點一下打勾（開著家人共用時全家看得到）。營業時間和公休日可能變動，出發前用「地圖」再確認。</div>
+      <div class="seg" id="foodSeg"></div>
+      <div id="foods"></div>
+    </div>
+  </section>
+
   <!-- 刷卡 -->
   <section class="view" id="v-card">
     <div class="sec">
@@ -568,7 +584,7 @@ nav a.on{color:var(--maple);font-weight:700;background:var(--maple-soft)}
 
 <nav>
   <a href="#trip" data-g="trip"><i>🗓️</i>行程</a>
-  <a href="#coffee" data-g="buy"><i>🛍️</i>吃喝買</a>
+  <a href="#food" data-g="buy"><i>🛍️</i>吃喝買</a>
   <a href="#list" data-g="list"><i>✅</i>清單</a>
   <a href="#chat" data-g="chat"><i>💬</i>聊天<span class="nbadge" id="chatBadge"></span></a>
   <a href="#tools" data-g="tools"><i>🧰</i>工具</a>
@@ -796,7 +812,7 @@ function renderDay(keep){
  if(editing){h+=`<div class="edtools"><button class="btn" data-act="add">＋ 新增一站</button><button class="btn" data-act="sort">⏱ 依時間排序</button>${dayChanged(curDay)?'<button class="btn" data-act="reset">↩ 還原這天</button>':''}</div>`}
  else h+=wxHtml(curDay);
  h+='<div class="tl">';
- const SG=editing?{}:stopGifts(curDay),gw=S.get('gifts',{});
+ const SG=editing?{}:stopGifts(curDay),gw=S.get('gifts',{}),SF=editing?{}:stopFoods(curDay),fw=S.get('foods',{});
  d.stops.forEach((s,i)=>{const isD=!!done[s.id],[ic,cls]=trIcon(s.tr);const tt=s.t.replace('-','<br>–<br>');
   if(editing){
    h+=`<div class="stop ed" data-id="${s.id}" data-i="${i}"><span class="dot"></span><div class="tm">${tt}</div>
@@ -807,8 +823,9 @@ function renderDay(keep){
    <button class="dot" data-act="done" aria-label="完成"></button>
    <div class="tm">${tt}</div>
    <div class="sc"><div class="sc-h" data-act="toggle"><div class="main"><div class="t">${esc(s.t)}${i===nowI?'<span class="now-tag">現在</span>':''}</div><h3>${esc(s.n)}</h3>
-   <span class="tr ${cls}">${ic} ${esc(s.tr)}</span>${SG[s.id]?`<span class="tr gf">🎁 伴手禮 ${SG[s.id].length} 款</span>`:''}</div><span class="chev">⌄</span></div>
-   <div class="more">${esc(s.d)}${s.tip?`<div class="tip">💡 ${esc(s.tip)}</div>`:''}${SG[s.id]?(()=>{const gs=SG[s.id].slice().sort((a,b)=>(gw[b.id]?1:0)-(gw[a.id]?1:0)),nw=gs.filter(g=>gw[g.id]).length;
+   <span class="tr ${cls}">${ic} ${esc(s.tr)}</span>${SF[s.id]?`<span class="tr fd">🍜 美食 ${FOODS.filter(f=>f.a===SF[s.id].k).length} 間</span>`:''}${SG[s.id]?`<span class="tr gf">🎁 伴手禮 ${SG[s.id].length} 款</span>`:''}</div><span class="chev">⌄</span></div>
+   <div class="more">${esc(s.d)}${s.tip?`<div class="tip">💡 ${esc(s.tip)}</div>`:''}${SF[s.id]?(()=>{const a=SF[s.id],fs=FOODS.filter(f=>f.a===a.k).sort((x,y)=>(fw[y.id]?1:0)-(fw[x.id]?1:0)),nw=fs.filter(f=>fw[f.id]).length;
+    return `<a class="foodbox" href="#food" data-farea="${a.k}"><b>🍜 ${a.n}附近好吃的 ${fs.length} 間${nw?`（${nw} 間在想吃清單）`:''}</b><span>${fs.map(f=>(fw[f.id]?'✓ ':'')+esc(f.n.replace(/（.*?）/g,''))).join('、')}</span><em>看推薦 ›</em></a>`})():''}${SG[s.id]?(()=>{const gs=SG[s.id].slice().sort((a,b)=>(gw[b.id]?1:0)-(gw[a.id]?1:0)),nw=gs.filter(g=>gw[g.id]).length;
     return (curDay>=6&&/機場|空港/.test(stopText(s))?`<a class="giftbox" href="#tax" style="background:#e9f4ec;border-color:#c5dccb"><b style="color:#2f6b4a">🧾 有買免稅品？託運行李「之前」要先辦免稅手續</b><span>新制要在機場掃護照做海關確認才會退稅，順序錯了就退不回來。</span><em>看退稅教學 ›</em></a>`:'')+`<a class="giftbox" href="#gift" data-gf=""${gs.map(g=>g.id).join(',')}" data-gl="${esc(s.n)}"><b>🎁 這一站買得到 ${gs.length} 款伴手禮${nw?`（其中 ${nw} 款在想買清單）`:''}</b><span>${gs.slice(0,8).map(g=>(gw[g.id]?'✓ ':'')+esc(gShort(g))).join('、')}${gs.length>8?'…':''}</span><em>看介紹 ›</em></a>`})():''}
    <div class="acts"><a class="btn" href="${mapUrl(s.q||s.n)}" target="_blank" rel="noopener">📍 地圖導航</a>
    ${s.jr?'<a class="btn" href="#tools" data-act="jr">🎫 買票小抄</a>':''}
@@ -1278,6 +1295,69 @@ $('#imgov').addEventListener('click',e=>{if(e.target.id==='imgovD'){const b=e.ta
 reloaders.push(drawGifts);reloaders.push(drawCafes);
 drawGifts();
 
+/* ---------- 美食（依地點） ---------- */
+const FAREAS=[
+ {k:'hakata',n:'博多站周邊',kw:['博多駅','博多車站','AMU','マイング','博多站']},
+ {k:'tenjin',n:'天神・中洲',kw:['天神','中洲','屋台','警固']},
+ {k:'kawabata',n:'櫛田神社・川端',kw:['櫛田','川端']},
+ {k:'dazaifu',n:'太宰府',kw:['太宰府']},
+ {k:'yufuin',n:'由布院',kw:['由布院','湯布院']},
+ {k:'moji',n:'門司港・唐戶',kw:['門司港','唐戸','九州鉄道','ブルーウィング']},
+ {k:'kokura',n:'小倉',kw:['小倉城']}
+];
+const FOODS=[
+ {id:'ikkousha',a:'hakata',n:'博多一幸舍',jp:'博多一幸舎 総本店',t:'拉麵',d:'湯頭表面有一層細泡的濃郁豚骨拉麵，博多站步行可到，晚上也開。',tip:'豚骨味較濃，怕腥的人先點小碗或加大蒜。'},
+ {id:'menkaido',a:'hakata',n:'博多拉麵街道',jp:'博多めん街道',t:'拉麵',d:'博多站內一整層都是拉麵店，各家口味一次比較，不用出車站。',tip:'就在車站裡，適合抵達當晚或玩累的晚上。',kid:1},
+ {id:'maedaya',a:'hakata',n:'博多牛腸鍋 前田屋 博多店',jp:'博多もつ鍋 前田屋 博多店',t:'牛腸鍋',d:'只用國產和牛小腸，臭味少，不太敢吃內臟的人也能接受。博多店每天中午就開。',tip:'很難排，建議先預約；有兒童友善座位。',kid:1},
+ {id:'rakutenchi',a:'hakata',n:'元祖牛腸鍋 樂天地 博多站前店',jp:'元祖もつ鍋楽天地 博多駅前店',t:'牛腸鍋',d:'老字號連鎖，韭菜堆成小山的招牌牛腸鍋，價格親民，分店多比較好訂。',tip:''},
+ {id:'ichiran',a:'tenjin',n:'一蘭 本社總本店',jp:'一蘭 本社総本店',t:'拉麵',d:'一蘭的總店，24 小時營業，可以填單自選湯頭濃度、辣度、麵的硬度。',tip:'一人一格的座位，小孩坐要大人陪；人多時排隊快。',kid:1},
+ {id:'mentaiju',a:'tenjin',n:'元祖博多明太重',jp:'元祖博多めんたい重',t:'明太子',d:'整條明太子鋪在白飯上、淋特製昆布醬的「明太重」，福岡代表名物。在中洲那珂川旁。',tip:'早上 7 點就開，開店時段最好排。'},
+ {id:'hyoutan',a:'tenjin',n:'葫蘆壽司',jp:'ひょうたん寿司',t:'海鮮',d:'天神的人氣壽司店，魚料新鮮、價格實在，午餐套餐最划算。',tip:'常常要排隊，可以先去登記再逛天神。'},
+ {id:'hirao',a:'tenjin',n:'天婦羅 平尾 大名店',jp:'天ぷら ひらお 大名店',t:'定食',d:'炸好一樣送一樣的現炸天婦羅定食，桌上的醃烏賊鹽辛和漬物免費吃到飽，便宜又快。',tip:'小孩可以點炸蝦和雞肉，接受度高。',kid:1},
+ {id:'shinshin',a:'tenjin',n:'Shin-Shin 天神本店',jp:'ShinShin 天神本店',t:'拉麵',d:'極細麵＋清爽一點的豚骨湯，比一蘭、一幸舍好入口，福岡人也常吃。',tip:''},
+ {id:'yatai',a:'tenjin',n:'中洲屋台',jp:'中洲屋台',t:'小吃',d:'那珂川旁的路邊攤，拉麵、關東煮、烤串、煎餃都有，是福岡夜晚的代表風景（D3 晚上已排）。',tip:'多數只收現金、座位少，一攤坐不下就分兩攤；小孩建議點拉麵和煎餃。',kid:1},
+ {id:'zenzai',a:'kawabata',n:'川端善哉廣場',jp:'川端ぜんざい広場',t:'甜點',d:'川端商店街裡的紅豆湯老店，熱呼呼的善哉配鹹昆布，逛完櫛田神社剛好休息。',tip:'通常只有週五到週日和假日營業，11/28（六）可以去，出發前再確認。',kid:1},
+ {id:'kasanoya',a:'dazaifu',n:'笠之家 梅枝餅',jp:'かさの家',t:'甜點',d:'參道上的老店，現烤梅枝餅外皮微脆、紅豆餡熱燙，店內有茶屋可以坐著吃。',tip:'一個約 150 日圓，人人都買一個邊走邊吃。',kid:1},
+ {id:'sbdaz',a:'dazaifu',n:'星巴克 太宰府天滿宮表參道店',jp:'スターバックス 太宰府天満宮表参道店',t:'咖啡',d:'隈研吾設計、用木條交錯搭出的店面，本身就是景點，順便讓小孩上廁所休息。',tip:'拍照的人多，想坐要碰運氣。',kid:1},
+ {id:'yufumabushi',a:'yufuin',n:'由布釜飯 心（由布まぶし）',jp:'由布まぶし 心',t:'定食',d:'由布院名物「三吃」飯，有豐後牛、鰻魚、地雞三種，先直接吃、再加佐料、最後加高湯做茶泡飯。',tip:'有駅前店和金鱗湖本店；本店週二休，11/25（三）有開。熱門名店，建議早點去或預約。',kid:1},
+ {id:'korokke',a:'yufuin',n:'湯布院 金賞可樂餅',jp:'湯布院 金賞コロッケ',t:'小吃',d:'湯之坪街道上的現炸可樂餅，得過可樂餅大賽金賞，是邊走邊吃的首選。',tip:'',kid:1},
+ {id:'milch',a:'yufuin',n:'由布院 Milch 起司蛋糕',jp:'由布院ミルヒ',t:'甜點',d:'溫熱的半熟起司蛋糕「Käsekuchen」，用由布院牛奶做的，一顆一顆小小的很好分。',tip:'',kid:1},
+ {id:'karato',a:'moji',n:'唐戶市場 活力馬關街',jp:'唐戸市場 活きいき馬関街',t:'海鮮',d:'一樓幾十家魚店擺出握壽司、海鮮丼、炸河豚、河豚味噌湯，自己夾、自己挑，坐在海邊吃。',tip:'只在週五到週日和假日舉行，你們 11/27 剛好是週五 ✓。中午前去選擇最多，賣完就收。',kid:1},
+ {id:'bearfruits',a:'moji',n:'BEAR FRUITS 燒咖哩',jp:'BEAR FRUITS 門司港本店',t:'燒咖哩',d:'門司港名物「燒咖哩」的人氣店，起司底下藏著半熟蛋。門司港車站一出來就到。',tip:'不能預約，假日中午可能排 30–45 分鐘；有不辣的兒童選項可問。',kid:1},
+ {id:'curryhonpo',a:'moji',n:'伽哩本舖 門司港 Retro 店',jp:'伽哩本舗 門司港レトロ店',t:'燒咖哩',d:'用 320 度特製烤箱烤的燒咖哩，口味有牛、豬、雞、海鮮可選。',tip:'BEAR FRUITS 排太久可以來這裡。'},
+ {id:'mooon',a:'moji',n:'Mooon de Retro 香蕉聖代',jp:'Fruit factory Mooon de Retro',t:'甜點',d:'舊門司稅關一樓的水果甜點店，門司港限定的「烤香蕉聖代」。',tip:'',kid:1},
+ {id:'sukesan',a:'kokura',n:'資さん烏龍麵',jp:'資さんうどん',t:'烏龍麵',d:'北九州人從小吃到大的烏龍麵連鎖，招牌是牛肉烏龍麵和萩餅（おはぎ），營業到很晚。',tip:'小倉站附近有分店，從小倉城回程前可以吃一碗。',kid:1}
+];
+let fArea='all';
+function areaHits(a){const out=[];DAYS.forEach((_,i)=>{const ms=D(i).stops.filter(s=>a.kw.some(k=>stopText(s).includes(k)));if(ms.length)out.push({i,s:ms.find(s=>MEALRX.test(s.n))||ms[0]})});return out}
+function drawFoods(){
+ const want=S.get('foods',{});
+ $('#foodSeg').innerHTML=[['all','全部'],['want','想吃的（'+FOODS.filter(f=>want[f.id]).length+'）']].concat(FAREAS.map(a=>[a.k,a.n])).map(x=>`<button class="${x[0]===fArea?'on':''}" data-a="${x[0]}">${x[1]}</button>`).join('');
+ let h='';
+ FAREAS.forEach(a=>{
+  if(fArea!=='all'&&fArea!=='want'&&fArea!==a.k)return;
+  const L=FOODS.filter(f=>f.a===a.k&&(fArea!=='want'||want[f.id]));if(!L.length)return;
+  const hits=areaHits(a);
+  h+=`<div class="fd-area"><b>📍 ${a.n}</b>${hits.length?`<div class="when">你們會來：${hits.map(x=>`<a href="#trip" data-go="${x.i}" data-id="${esc(x.s.id)}">${dayLbl(x.i)}・${esc(trunc(x.s.n,10))}</a>`).join('、')}</div>`:'<div class="when no">目前行程沒有排到這裡</div>'}</div>`;
+  h+=L.map(f=>`<div class="cafe${want[f.id]?' on':''}" data-id="${f.id}">
+   <div class="cafe-h"><span class="box"></span><b>${esc(f.n)}</b></div>
+   <div class="fd-tags"><span>${esc(f.t)}</span>${f.kid?'<span class="kid">👶 小孩友善</span>':''}</div>
+   <div class="cafe-d">${esc(f.d)}</div>
+   ${f.tip?`<div class="gift-k">💡 ${esc(f.tip)}</div>`:''}
+   <div class="cafe-b"><a class="btn" href="${mapUrl(f.jp)}" target="_blank" rel="noopener">📍 地圖</a><button class="btn ghost" data-fshow="${f.id}">🔍 給店員看</button></div>
+  </div>`).join('');
+ });
+ $('#foods').innerHTML=h||'<div class="xempty">還沒有勾選想吃的店。</div>';
+}
+$('#foodSeg').onclick=e=>{const b=e.target.closest('button');if(!b)return;fArea=b.dataset.a;drawFoods()};
+$('#foods').addEventListener('click',e=>{
+ const sh=e.target.closest('[data-fshow]');if(sh){const f=FOODS.find(x=>x.id===sh.dataset.fshow);big(f.jp+'に行きたいです','我想去「'+f.n+'」');$('#ovJp').style.whiteSpace='normal';return}
+ const r=e.target.closest('.cafe-h');if(!r)return;const id=r.parentNode.dataset.id,w=S.get('foods',{});w[id]=!w[id];if(!w[id])delete w[id];S.set('foods',w);drawFoods()});
+document.addEventListener('click',e=>{const a=e.target.closest('[data-farea]');if(!a)return;fArea=a.dataset.farea});
+reloaders.push(()=>{if(currentView()==='food')drawFoods()});
+const MEALRX=/午餐|晚餐|美食|屋台|海鮮|散策|街道|商店街|參道|小倉城/;
+function stopFoods(day){const m={};FAREAS.forEach(a=>{const s=D(day).stops.find(s=>MEALRX.test(s.n)&&a.kw.some(k=>stopText(s).includes(k)));if(s&&!m[s.id])m[s.id]=a});return m}
+
 /* ---------- 刷卡攻略 ---------- */
 const CARDS=[
  {id:'uniopen',n:'中信 uniopen 聯名卡',max:'11%',br:'Mastercard',d:'海外實體消費 3% 無上限，再加碼 8%（每月上限 500 點，大約刷到 NT$6,250 就滿）。',need:'2026 年免領券。回饋是 OPENPOINT 點數。',until:'2026/12/31',fit:'便利商店、餐廳、一般小額實體消費'},
@@ -1383,8 +1463,8 @@ reloaders.push(()=>{if(currentView()==='tax')drawTxLog()});
 drawCards();drawTax();
 
 /* ---------- routing ---------- */
-const VIEWS=['trip','map','list','coffee','gift','card','tax','chat','tools'];
-const GROUPS={trip:[['trip','🗓️ 每日行程'],['map','🗺️ 地圖']],buy:[['coffee','☕ 咖啡'],['gift','🎁 伴手禮'],['card','💳 刷卡'],['tax','🧾 退稅']],list:[['list','']],chat:[['chat','']],tools:[['tools','']]};
+const VIEWS=['trip','map','list','food','coffee','gift','card','tax','chat','tools'];
+const GROUPS={trip:[['trip','🗓️ 每日行程'],['map','🗺️ 地圖']],buy:[['food','🍜 美食'],['coffee','☕ 咖啡'],['gift','🎁 伴手禮'],['card','💳 刷卡'],['tax','🧾 退稅']],list:[['list','']],chat:[['chat','']],tools:[['tools','']]};
 const groupOf=v=>Object.keys(GROUPS).find(g=>GROUPS[g].some(x=>x[0]===v));
 function currentView(){const h=location.hash.slice(1);return VIEWS.includes(h)?h:'trip'}
 function route(){const v=currentView();VIEWS.forEach(x=>$('#v-'+x).classList.toggle('on',x===v));
@@ -1392,13 +1472,13 @@ function route(){const v=currentView();VIEWS.forEach(x=>$('#v-'+x).classList.tog
  document.querySelectorAll('nav a').forEach(a=>{a.classList.toggle('on',a.dataset.g===g);if(a.dataset.g===g&&g==='buy')a.setAttribute('href','#'+v)});
  const sn=$('#subnav');sn.classList.toggle('on',sub.length>1);sn.innerHTML=sub.length>1?sub.map(x=>`<a href="#${x[0]}" class="${x[0]===v?'on':''}">${x[1]}</a>`).join(''):'';
  $('#todayBtn').classList.toggle('on',v==='trip'&&ti>=0&&ti<8&&curDay!==ti);window.scrollTo(0,0);
- if(v==='map')drawMap();if(v==='trip'&&!editing)renderDay(true);if(v==='gift')drawGifts();if(v==='card')drawCards();if(v==='tax')drawTax();if(v==='coffee')drawCafes();if(v==='chat'&&window.FS)FS.chatOpen()}
+ if(v==='map')drawMap();if(v==='trip'&&!editing)renderDay(true);if(v==='gift')drawGifts();if(v==='food')drawFoods();if(v==='card')drawCards();if(v==='tax')drawTax();if(v==='coffee')drawCafes();if(v==='chat'&&window.FS)FS.chatOpen()}
 window.addEventListener('hashchange',route);
 
 /* ---------- family sync (Firebase Realtime Database, REST + 串流) ---------- */
 const FB_URL='https://molecule-match-default-rtdb.asia-southeast1.firebasedatabase.app';
 const FS=(function(){
- const KEYS=['done','cafes','gifts','gphoto','memo','savedNotes','edits','todo','pack','tax','xtabs','xlists'];
+ const KEYS=['done','cafes','gifts','foods','gphoto','memo','savedNotes','edits','todo','pack','tax','xtabs','xlists'];
  const raw={get(k){try{return localStorage.getItem('fuk26_'+k)}catch(e){return null}},set(k,v){try{localStorage.setItem('fuk26_'+k,v)}catch(e){}},del(k){try{localStorage.removeItem('fuk26_'+k)}catch(e){}}};
  const okCode=c=>/^[A-Za-z0-9_-]{8,40}$/.test(c||'');
  const enc=k=>encodeURIComponent(k).replace(/\./g,'%2E'),dec=k=>{try{return decodeURIComponent(k)}catch(e){return k}};
@@ -1408,7 +1488,7 @@ const FS=(function(){
  try{const u=new URLSearchParams(location.search).get('fam');if(okCode(u))raw.set('fam',u)}catch(e){}
  code=raw.get('fam');if(!okCode(code))code=null;
  function leaves(key,v){const o={};if(v==null)return o;
-  if(key==='done'||key==='cafes'||key==='gifts'){for(const k in v)if(v[k])o[key+'/'+enc(k)]=true}
+  if(key==='done'||key==='cafes'||key==='gifts'||key==='foods'){for(const k in v)if(v[k])o[key+'/'+enc(k)]=true}
   else if(key==='memo'){for(const k in v)if(v[k])o['memo/m'+k]=String(v[k])}
   else if(key==='savedNotes'){for(const k in v)if(v[k])o['notes/'+enc(k)]=String(v[k])}
   else if(key==='gphoto'){for(const k in v)if(v[k]&&v[k].h)o['gp/'+k]=v[k].h}
@@ -1419,7 +1499,7 @@ const FS=(function(){
   return o}
  function fromLeaves(key,E){
   const sub=pre=>{const o={};for(const p in E)if(p.startsWith(pre))o[p.slice(pre.length)]=E[p];return o};
-  if(key==='done'||key==='cafes'||key==='gifts'){const o={},x=sub(key+'/');for(const k in x)if(x[k])o[dec(k)]=true;return o}
+  if(key==='done'||key==='cafes'||key==='gifts'||key==='foods'){const o={},x=sub(key+'/');for(const k in x)if(x[k])o[dec(k)]=true;return o}
   if(key==='memo'){const o={},x=sub('memo/m');for(const k in x)o[k]=String(x[k]);return o}
   if(key==='savedNotes'){const o={},x=sub('notes/');for(const k in x)o[dec(k)]=String(x[k]);return o}
   if(key==='gphoto'){const o={},x=sub('gp/');for(const k in x)o[k]={h:String(x[k]),u:null};return o}
