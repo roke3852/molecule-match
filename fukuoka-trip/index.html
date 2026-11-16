@@ -367,6 +367,26 @@ nav a.on{color:var(--maple);font-weight:700;background:var(--maple-soft)}
     </div>
 
     <div class="sec">
+      <h3>🔖 收藏連結</h3>
+      <div class="hint">你存下來的旅遊影片與連結。點「開啟」去看；在下面那格寫上這則在講什麼（店名、景點），會記在這台手機上。</div>
+      <div id="saved"></div>
+    </div>
+
+    <div class="sec">
+      <h3>🛬 入境日本小抄</h3>
+      <div class="hint">整理自你存的 Trip.com 入境攻略（該文以香港護照為對象，流程通用；規定以日本官方公告為準）。</div>
+      <ol class="steps" style="padding-left:20px;margin:0">
+        <li><b>Visit Japan Web（VJW）：</b>非強制但建議先填。出發前約 2 週可開始，最遲抵達前 6 小時完成。只有官方網站、沒有官方 App。</li>
+        <li><b>每人一個 QR 碼：</b>6 歲以下幼童可列為同行人。入境審查＋海關申報會合成一個 QR，截圖存手機備用。</li>
+        <li><b>入境卡二選一：</b>有 VJW 的 QR 就不用再填紙本，不要兩種都交。</li>
+        <li><b>海關免稅額（20 歲以上）：</b>酒 3 瓶（每瓶約 760ml）、香菸 200 支、香水 2 盎司；現金等超過 100 萬日圓要申報。</li>
+        <li><b>不能帶：</b>肉類與肉製品、大部分水果蔬菜。</li>
+      </ol>
+      <div class="acts" style="margin-top:12px"><a class="btn pri" href="https://www.vjw.digital.go.jp/" target="_blank" rel="noopener">開啟 Visit Japan Web</a><a class="btn" href="https://tw.trip.com/blog/japan-travel-information?locale=zh-TW&curr=TWD&channel=" target="_blank" rel="noopener">看原文</a></div>
+      <div class="tip">⚠️ 文中的自助通關機（Joint Kiosk）只列了羽田、成田、關西，沒有提到福岡機場，到場以現場指示為準。</div>
+    </div>
+
+    <div class="sec">
       <h3>🆘 緊急電話（日本）</h3>
       <div class="sos"><div><b>110</b><span>警察</span></div><div><b>119</b><span>救護車／消防</span></div></div>
     </div>
@@ -876,6 +896,24 @@ twd.oninput=()=>{jpy.value=twd.value===''?'':Math.round(twd.value/rate.value)};
 rate.oninput=()=>{S.set('rate',+rate.value||0);jpy.oninput()};
 
 /* ---------- phrases ---------- */
+const SAVED=[
+ {k:'IG 影片',n:'由布院（備註：查看星期一）',u:'https://www.instagram.com/reel/DPYsidHkwRk/'},
+ {k:'Agoda',n:'Agoda 分享連結',u:'https://www.agoda.com/sh-app/dPuCXrwbw3S'},
+ {k:'IG 影片',n:'IG 影片 2',u:'https://www.instagram.com/reel/C_r9rQAy30Y/'},
+ {k:'FB 影片',n:'Facebook 影片',u:'https://www.facebook.com/share/r/18eVdEGPiw/?mibextid=wwXIfr'},
+ {k:'IG 影片',n:'IG 影片 3',u:'https://www.instagram.com/reel/DdWayOvBmCw/'},
+ {k:'IG 影片',n:'IG 影片 4',u:'https://www.instagram.com/reel/De1MO_DzS9a/'},
+ {k:'Trip.com',n:'日本入境／Visit Japan Web 攻略',u:'https://tw.trip.com/blog/japan-travel-information?locale=zh-TW&curr=TWD&channel='},
+ {k:'Klook',n:'Klook 體驗分享連結',u:'https://s.klook.com/c/D1Zoe8bAyo'},
+ {k:'IG 影片',n:'IG 影片 5',u:'https://www.instagram.com/reel/DddsLKvq28A/'},
+ {k:'IG 影片',n:'IG 影片 6',u:'https://www.instagram.com/reel/DfohNw8Pvva/'},
+ {k:'IG 影片',n:'IG 影片 7',u:'https://www.instagram.com/reel/DdJhDmpvoYo/'},
+ {k:'IG 影片',n:'IG 影片 8',u:'https://www.instagram.com/reel/DYi8dOUxECf/'}
+];
+(function(){const notes=S.get('savedNotes',{});const box=$('#saved');
+ box.innerHTML=SAVED.map((x,i)=>`<div class="ph" style="flex-wrap:wrap"><div class="z"><b style="font-size:14.5px">${esc(x.n)}</b><span>${esc(x.k)}</span></div><a class="btn" style="flex:0 0 auto;font-size:12px;padding:6px 10px" href="${esc(x.u)}" target="_blank" rel="noopener">開啟</a><input data-i="${i}" placeholder="我的備註：這則在講什麼…" value="${esc(notes[x.u]||'')}" style="flex:1 1 100%;font-size:13px"></div>`).join('');
+ box.addEventListener('input',e=>{const i=e.target.dataset.i;if(i==null)return;const u=SAVED[i].u;if(e.target.value)notes[u]=e.target.value;else delete notes[u];S.set('savedNotes',notes)});
+})();
 $('#phrases').innerHTML=PHR.map((p,i)=>`<div class="ph"><div class="z"><b class="jp">${esc(p.jp)}</b><span>${esc(p.zh)}</span></div><button data-i="${i}">放大</button></div>`).join('');
 $('#phrases').onclick=e=>{const b=e.target.closest('button');if(!b)return;const p=PHR[+b.dataset.i];big(p.jp,p.zh);$('#ovJp').style.whiteSpace='normal'};
 
