@@ -30,6 +30,12 @@ header::after{content:"";position:absolute;right:-30px;top:-30px;width:170px;hei
 .count{background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.35);border-radius:14px;padding:6px 10px;text-align:center;min-width:76px;backdrop-filter:blur(4px)}
 .count b{display:block;font-size:22px;line-height:1.1}
 .count span{font-size:11px;opacity:.9}
+.fam-pill{display:none;margin-left:8px;font-size:11.5px;padding:2px 8px;border-radius:999px;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);color:#fff;text-decoration:none;white-space:nowrap}
+.fam-pill.on{display:inline-block}
+.fam-st{display:flex;align-items:center;gap:8px;font-size:13.5px;font-weight:700;margin:4px 0 10px}
+.fam-st i{flex:0 0 auto;width:10px;height:10px;border-radius:50%;background:#bdb3a9}
+.fam-st.ok i{background:#3fae5a}.fam-st.busy i{background:#e0a100}.fam-st.err i{background:#d9534f}
+.fam-code{font-family:ui-monospace,Menlo,monospace;font-size:12px;word-break:break-all;background:#f3ece4;border-radius:8px;padding:6px 8px;margin-bottom:10px}
 .hotel-line{margin-top:10px;font-size:12.5px;opacity:.95;position:relative;z-index:1}
 
 /* views */
@@ -275,7 +281,7 @@ nav a.on{color:var(--maple);font-weight:700;background:var(--maple-soft)}
     </div>
     <div class="count" id="count"><b>–</b><span></span></div>
   </div>
-  <div class="hotel-line">🏨 福岡蒙特利飯店 Hotel Monterey Fukuoka</div>
+  <div class="hotel-line">🏨 福岡蒙特利飯店 Hotel Monterey Fukuoka<a class="fam-pill" id="famPill" href="#tools">👨‍👩‍👧 共用中</a></div>
 </header>
 
 <main>
@@ -326,6 +332,12 @@ nav a.on{color:var(--maple);font-weight:700;background:var(--maple-soft)}
 
   <!-- 工具 -->
   <section class="view" id="v-tools">
+    <div class="sec" id="famSec">
+      <h3>👨‍👩‍👧‍👦 家人共用</h3>
+      <div class="hint">全家共用同一份紀錄：打勾、改行程、筆記、清單、咖啡店，任何人改了其他人都會看到。</div>
+      <div id="famBox"></div>
+    </div>
+
     <div class="sec">
       <h3>🚕 計程車目的地卡</h3>
       <div class="hint">選目的地，按「放大給司機看」。</div>
@@ -427,7 +439,8 @@ nav a.on{color:var(--maple);font-weight:700;background:var(--maple-soft)}
 <script>
 /* ---------- storage (safe) ---------- */
 const S={get(k,d){try{const v=localStorage.getItem('fuk26_'+k);return v==null?d:JSON.parse(v)}catch(e){return d}},
-         set(k,v){try{localStorage.setItem('fuk26_'+k,JSON.stringify(v))}catch(e){}}};
+         set(k,v){try{localStorage.setItem('fuk26_'+k,JSON.stringify(v))}catch(e){}if(window.famSync)famSync(k,v)}};
+const reloaders=[];
 
 /* ---------- data ---------- */
 const DAYS=[
@@ -612,7 +625,7 @@ function renderDay(keep){
  const n=d.stops.length,k=d.stops.filter(s=>done[s.id]).length;
  let h='';
  if(ed&&ed.v!==BASEV&&anyChanged())h+=`<div class="banner">📣 正式版行程已更新，但這台手機還有你自己的修改。<div class="acts"><button class="btn pri" data-act="useBase">改用正式版</button><button class="btn" data-act="keepMine">保留我的</button></div></div>`;
- h+=`<div class="hero${editing?' editing':''}"><div class="hero-band"><div class="lbl">Day ${curDay+1}・${d.date}（${d.wk}）${dayChanged(curDay)?'<span class="mod">已修改・只在這台手機</span>':''}</div>
+ h+=`<div class="hero${editing?' editing':''}"><div class="hero-band"><div class="lbl">Day ${curDay+1}・${d.date}（${d.wk}）${dayChanged(curDay)?`<span class="mod">${FS.on()?'已修改・全家同步':'已修改・只在這台手機'}</span>`:''}</div>
  ${editing?`<input class="title-in" id="titleIn" value="${esc(d.title)}">`:`<h2>${esc(d.title)}</h2>`}</div>
  <div class="hero-meta"><span class="pill${d.payWarn?' warn':''}">💳 ${esc(d.pay)}</span>${d.payNote?`<span class="pill" style="background:#f3ece4;color:#5b4d43">${esc(d.payNote)}</span>`:''}
  ${editing?'':'<button class="editbtn mapbtn" data-act="map">🗺️ 地圖</button>'}<button class="editbtn" data-act="edit">${editing?'✓ 完成編輯':'✏️ 編輯'}</button>
@@ -638,8 +651,8 @@ function renderDay(keep){
  if(!n)h+='<div class="empty">這天還沒有行程</div>';
  h+='</div>';
  if(!editing&&d.extras)h+=`<div class="extras"><h4>✨ 有空可加碼</h4>${d.extras.map(x=>`<a href="${mapUrl(x)}" target="_blank" rel="noopener">📍 ${esc(x)}</a>`).join('')}</div>`;
- if(!editing&&anyChanged())h+=`<div class="pub"><b>📤 改好了？發布給全家</b><div>你的修改只在這台手機。按下面按鈕複製修改內容，貼給 Claude，就會更新成全家都看得到的正式版。</div><button class="btn pri" data-act="export">📋 複製修改內容</button></div>`;
- if(!editing)h+=`<div class="memo"><h4>📝 今日筆記（只存在這台手機）</h4><textarea id="memo" placeholder="訂位編號、想吃的店、花費…">${esc(memos[curDay]||'')}</textarea></div>`;
+ if(!editing&&anyChanged()&&!FS.on())h+=`<div class="pub"><b>📤 改好了？發布給全家</b><div>你的修改只在這台手機。按下面按鈕複製修改內容，貼給 Claude，就會更新成全家都看得到的正式版。</div><button class="btn pri" data-act="export">📋 複製修改內容</button></div>`;
+ if(!editing)h+=`<div class="memo"><h4>📝 今日筆記（${FS.on()?'全家共用':'只存在這台手機'}）</h4><textarea id="memo" placeholder="訂位編號、想吃的店、花費…">${esc(memos[curDay]||'')}</textarea></div>`;
  $('#dayview').innerHTML=h;
  opened.forEach(id=>{const el=document.querySelector(`.stop[data-id="${id}"]`);if(el)el.classList.add('open')});
  const m=$('#memo');if(m)m.addEventListener('input',e=>{memos[curDay]=e.target.value;S.set('memo',memos)});
@@ -657,7 +670,7 @@ $('#dayview').addEventListener('click',e=>{
   renderDay(true);if(done[id]){const el=document.querySelector(`.stop[data-id="${id}"]`);if(el)el.classList.remove('open')}
   if(done[id])toast('👍 完成！');return}
  if(act==='map'){showMap(curDay);return}
- if(act==='edit'){editing=!editing;delArm=null;renderDay();if(!editing&&anyChanged())toast('已存在這台手機');return}
+ if(act==='edit'){editing=!editing;delArm=null;renderDay();if(!editing&&anyChanged())toast(FS.on()?'已同步給家人':'已存在這台手機');return}
  if(act==='useBase'){ed=null;S.set('edits',null);renderChips();renderDay();toast('已改用正式版');return}
  if(act==='keepMine'){ed.v=BASEV;saveEd();renderDay();return}
  if(act==='export'){openExport();return}
@@ -852,6 +865,7 @@ function showMap(day){if(day!=null){mapDay=day;mapSel=null}location.hash='map'}
 function list(key,defaults,el){
  let items=S.get(key,null);if(!items)items=defaults.map(x=>typeof x==='string'?{t:x}:{...x});
  const save=()=>S.set(key,items);
+ reloaders.push(()=>{items=S.get(key,null);if(!items)items=defaults.map(x=>typeof x==='string'?{t:x}:{...x});draw()});
  const draw=()=>{el.innerHTML=items.map((x,i)=>`<div class="ck${x.on?' on':''}" data-i="${i}"><span class="box"></span><span class="txt">${x.g?`<span class="tag">${esc(x.g)}</span>`:''}${esc(x.t)}</span><button class="del" data-del="${i}" aria-label="刪除">×</button></div>`).join('')};
  el.addEventListener('click',e=>{const dl=e.target.closest('[data-del]');if(dl){items.splice(+dl.dataset.del,1);save();draw();return}
   const r=e.target.closest('.ck');if(!r)return;items[+r.dataset.i].on=!items[+r.dataset.i].on;save();draw()});
@@ -910,8 +924,9 @@ const SAVED=[
  {k:'IG 影片',n:'IG 影片 7',u:'https://www.instagram.com/reel/DdJhDmpvoYo/'},
  {k:'IG 影片',n:'IG 影片 8',u:'https://www.instagram.com/reel/DYi8dOUxECf/'}
 ];
-(function(){const notes=S.get('savedNotes',{});const box=$('#saved');
- box.innerHTML=SAVED.map((x,i)=>`<div class="ph" style="flex-wrap:wrap"><div class="z"><b style="font-size:14.5px">${esc(x.n)}</b><span>${esc(x.k)}</span></div><a class="btn" style="flex:0 0 auto;font-size:12px;padding:6px 10px" href="${esc(x.u)}" target="_blank" rel="noopener">開啟</a><input data-i="${i}" placeholder="我的備註：這則在講什麼…" value="${esc(notes[x.u]||'')}" style="flex:1 1 100%;font-size:13px"></div>`).join('');
+(function(){let notes=S.get('savedNotes',{});const box=$('#saved');
+ const drawSaved=()=>{box.innerHTML=SAVED.map((x,i)=>`<div class="ph" style="flex-wrap:wrap"><div class="z"><b style="font-size:14.5px">${esc(x.n)}</b><span>${esc(x.k)}</span></div><a class="btn" style="flex:0 0 auto;font-size:12px;padding:6px 10px" href="${esc(x.u)}" target="_blank" rel="noopener">開啟</a><input data-i="${i}" placeholder="我的備註：這則在講什麼…" value="${esc(notes[x.u]||'')}" style="flex:1 1 100%;font-size:13px"></div>`).join('')};drawSaved();
+ reloaders.push(()=>{notes=S.get('savedNotes',{});drawSaved()});
  box.addEventListener('input',e=>{const i=e.target.dataset.i;if(i==null)return;const u=SAVED[i].u;if(e.target.value)notes[u]=e.target.value;else delete notes[u];S.set('savedNotes',notes)});
 })();
 $('#phrases').innerHTML=PHR.map((p,i)=>`<div class="ph"><div class="z"><b class="jp">${esc(p.jp)}</b><span>${esc(p.zh)}</span></div><button data-i="${i}">放大</button></div>`).join('');
@@ -950,7 +965,121 @@ function route(){const v=currentView();VIEWS.forEach(x=>$('#v-'+x).classList.tog
  if(v==='map')drawMap()}
 window.addEventListener('hashchange',route);
 
-renderChips();renderDay();route();loadWx(false);
+/* ---------- family sync (Firebase Realtime Database, REST + 串流) ---------- */
+const FB_URL='https://molecule-match-default-rtdb.asia-southeast1.firebasedatabase.app';
+const FS=(function(){
+ const KEYS=['done','cafes','memo','savedNotes','edits','todo','pack'];
+ const raw={get(k){try{return localStorage.getItem('fuk26_'+k)}catch(e){return null}},set(k,v){try{localStorage.setItem('fuk26_'+k,v)}catch(e){}},del(k){try{localStorage.removeItem('fuk26_'+k)}catch(e){}}};
+ const okCode=c=>/^[A-Za-z0-9_-]{8,40}$/.test(c||'');
+ const enc=k=>encodeURIComponent(k).replace(/\./g,'%2E'),dec=k=>{try{return decodeURIComponent(k)}catch(e){return k}};
+ let code=null,R={},Q={},cache={},joined=false,es=null,state='off',dirty=false,sig='',flushT=null,sending=false,hidAt=0;
+ try{const u=new URLSearchParams(location.search).get('fam');if(okCode(u))raw.set('fam',u)}catch(e){}
+ code=raw.get('fam');if(!okCode(code))code=null;
+ function leaves(key,v){const o={};if(v==null)return o;
+  if(key==='done'||key==='cafes'){for(const k in v)if(v[k])o[key+'/'+enc(k)]=true}
+  else if(key==='memo'){for(const k in v)if(v[k])o['memo/m'+k]=String(v[k])}
+  else if(key==='savedNotes'){for(const k in v)if(v[k])o['notes/'+enc(k)]=String(v[k])}
+  else if(key==='edits'){o['edits/v']=v.v||1;(v.days||[]).forEach((d,i)=>{o['edits/d'+i]=JSON.stringify(d)})}
+  else o[key]=JSON.stringify(v);
+  return o}
+ function fromLeaves(key,E){
+  const sub=pre=>{const o={};for(const p in E)if(p.startsWith(pre))o[p.slice(pre.length)]=E[p];return o};
+  if(key==='done'||key==='cafes'){const o={},x=sub(key+'/');for(const k in x)if(x[k])o[dec(k)]=true;return o}
+  if(key==='memo'){const o={},x=sub('memo/m');for(const k in x)o[k]=String(x[k]);return o}
+  if(key==='savedNotes'){const o={},x=sub('notes/');for(const k in x)o[dec(k)]=String(x[k]);return o}
+  if(key==='edits'){const x=sub('edits/d');if(!Object.keys(x).length)return null;
+   return{v:+E['edits/v']||BASEV,days:DAYS.map((_,i)=>{try{const d=JSON.parse(x[i]);if(d&&Array.isArray(d.stops))return d}catch(e){}return baseDay(i)})}}
+  try{const a=JSON.parse(E[key]);return Array.isArray(a)?a:null}catch(e){return null}}
+ const snapLocal=()=>{KEYS.forEach(k=>{let v=null;try{v=JSON.parse(raw.get(k))}catch(e){}cache[k]=leaves(k,v)})};
+ const saveQ=()=>raw.set('famQ',JSON.stringify(Q));
+ function flat(d,pre,out){if(d===null||d===undefined)return;
+  if(typeof d==='object'){for(const k in d)flat(d[k],pre?pre+'/'+k:String(k),out)}else if(pre)out[pre]=d}
+ function put(path,data){for(const p in R)if(!path||p===path||p.startsWith(path+'/'))delete R[p];flat(data,path,R)}
+ const busy=()=>editing||$('#sheet').classList.contains('on')||/^(INPUT|TEXTAREA|SELECT)$/.test((document.activeElement||{}).tagName||'');
+ function apply(force){
+  const E=Object.assign({},R);for(const p in Q){if(Q[p]===null)delete E[p];else E[p]=Q[p]}
+  const ns=JSON.stringify(Object.keys(E).sort().map(k=>[k,E[k]]));
+  if(ns===sig){dirty=false;return}
+  if(busy()&&!force){dirty=true;return}
+  dirty=false;sig=ns;
+  KEYS.forEach(k=>{const v=fromLeaves(k,E);if(v==null)raw.del(k);else raw.set(k,JSON.stringify(v));cache[k]=leaves(k,v)});
+  done=S.get('done',{});memos=S.get('memo',{});ed=S.get('edits',null);
+  renderChips();renderDay(true);drawCafes();reloaders.forEach(f=>{try{f()}catch(e){}});
+ }
+ function setState(st){state=st;draw()}
+ async function flush(){
+  if(!code||sending||!Object.keys(Q).length)return;
+  sending=true;const sent=Object.assign({},Q);
+  try{const r=await fetch(FB_URL+'/trips/'+code+'.json',{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify(sent)});
+   if(!r.ok)throw new Error('http '+r.status);
+   for(const p in sent){if(sent[p]===null)delete R[p];else R[p]=sent[p];if(Q[p]===sent[p])delete Q[p]}
+   saveQ();sending=false;if(state==='err'&&es&&es.readyState===1)setState('ok');
+   if(Object.keys(Q).length)flush();
+  }catch(e){sending=false;clearTimeout(flushT);flushT=setTimeout(flush,6000);if(state==='ok')setState('wait')}
+ }
+ function onLocal(key,v){
+  if(!code||!KEYS.includes(key))return;
+  const nw=leaves(key,v),old=cache[key]||{};
+  for(const p in nw)if(old[p]!==nw[p])Q[p]=nw[p];
+  for(const p in old)if(!(p in nw))Q[p]=null;
+  cache[key]=nw;saveQ();clearTimeout(flushT);flushT=setTimeout(flush,700);
+ }
+ function onSnap(){
+  const empty=!Object.keys(R).length;
+  if(!joined||empty){ /* 第一次加入（或雲端是空的）：把這台手機已有的紀錄併上去，雲端已有的以雲端為準 */
+   for(const k of KEYS)for(const p in cache[k])if(!(p in R)&&!(p in Q))Q[p]=cache[k][p];
+   joined=true;raw.set('famJ',code);saveQ()}
+  apply();flush();
+ }
+ function connect(){
+  if(es){es.close();es=null}
+  if(!code||!FB_URL)return;
+  setState('busy');
+  es=new EventSource(FB_URL+'/trips/'+code+'.json');
+  const h=kind=>e=>{let m;try{m=JSON.parse(e.data)}catch(x){return}if(!m)return;
+   const path=(m.path||'/').replace(/^\/+|\/+$/g,'');
+   if(kind==='put'){put(path,m.data);if(!path){setState('ok');onSnap();return}}
+   else if(m.data&&typeof m.data==='object'){for(const k in m.data)put(path?path+'/'+k:k,m.data[k])}
+   if(state!=='ok')setState('ok');apply()};
+  es.addEventListener('put',h('put'));es.addEventListener('patch',h('patch'));
+  es.addEventListener('cancel',()=>{es.close();setState('err')});
+  es.addEventListener('auth_revoked',()=>{es.close();setState('err')});
+  es.onerror=()=>{if(!es)return;if(es.readyState===2){setState('err');setTimeout(()=>{if(code&&state==='err')connect()},15000)}else setState('wait')};
+ }
+ function start(c){code=c;raw.set('fam',c);joined=raw.get('famJ')===c;Q={};saveQ();R={};sig='';snapLocal();connect()}
+ function stop(){if(es){es.close();es=null}code=null;raw.del('fam');raw.del('famJ');Q={};saveQ();R={};sig='';setState('off');renderDay(true)}
+ const link=()=>location.origin+location.pathname+'?fam='+code;
+ function draw(){
+  const pill=$('#famPill');if(pill){pill.classList.toggle('on',!!code);pill.textContent=state==='ok'?'👨‍👩‍👧 共用中':state==='off'?'':'👨‍👩‍👧 連線中…'}
+  const box=$('#famBox');if(!box)return;
+  if(!FB_URL){box.innerHTML='<div class="fam-st"><i></i>尚未設定雲端資料庫</div>';return}
+  if(!code){box.innerHTML=`<div class="fam-st"><i></i>目前只存在這台手機</div>
+   <div class="acts"><button class="btn pri" id="famNew">建立家庭共用</button></div>
+   <div class="hint" style="margin:12px 0 6px">家人已經建立了？貼上邀請連結或共用碼：</div>
+   <div class="addrow" style="margin-top:0"><input id="famIn" placeholder="邀請連結或共用碼" autocapitalize="off" autocorrect="off"><button id="famJoin">加入</button></div>`;return}
+  const T={ok:['ok','已連線，全家同步中'],busy:['busy','連線中…'],wait:['busy','沒有網路，改動先存在這台，連上後自動補傳'],err:['err','連不上雲端，稍後會自動再試']}[state]||['busy','連線中…'];
+  box.innerHTML=`<div class="fam-st ${T[0]}"><i></i>${T[1]}</div>
+   <div class="hint" style="margin:0 0 4px">邀請連結（傳到家人群組，打開就會加入）：</div><div class="fam-code">${esc(link())}</div>
+   <div class="acts"><button class="btn pri" id="famShare">📤 傳給家人</button><button class="btn" id="famCopy">複製連結</button><button class="btn ghost" id="famStop">停止共用</button></div>
+   <div class="hint" style="margin:10px 0 0">知道這個連結的人都能看和改，請只傳給家人。同一天的行程若兩人同時修改，以後存的為準。</div>`;
+ }
+ document.addEventListener('click',async e=>{
+  const id=e.target.id;
+  if(id==='famNew'){const a=new Uint8Array(16);crypto.getRandomValues(a);const ab='abcdefghjkmnpqrstuvwxyz23456789';start([...a].map(x=>ab[x%ab.length]).join(''));toast('已建立，把邀請連結傳給家人');return}
+  if(id==='famJoin'){let v=$('#famIn').value.trim();const m=v.match(/[?&]fam=([A-Za-z0-9_-]+)/);if(m)v=m[1];if(!okCode(v)){toast('共用碼格式不對');return}start(v);return}
+  if(id==='famCopy'){try{await navigator.clipboard.writeText(link());toast('✅ 已複製邀請連結')}catch(x){toast('請長按上面的連結複製')}return}
+  if(id==='famShare'){if(navigator.share){try{await navigator.share({title:'福岡 8天7夜',text:'福岡行程（全家共用）',url:link()})}catch(x){}}else $('#famCopy').click();return}
+  if(id==='famStop'){if(e.target.dataset.arm){stop();toast('已停止共用，紀錄留在這台手機')}else{e.target.dataset.arm=1;e.target.textContent='再按一次確定'}return}
+ });
+ setInterval(()=>{if(dirty&&!busy())apply()},1500);
+ window.addEventListener('online',()=>{if(code){connect();flush()}});
+ document.addEventListener('visibilitychange',()=>{if(document.hidden){hidAt=Date.now();return}
+  if(code&&(Date.now()-hidAt>20000||!es||es.readyState===2))connect();flush()});
+ window.famSync=onLocal;
+ return{on:()=>!!code,init(){try{Q=JSON.parse(raw.get('famQ'))||{}}catch(e){Q={}}joined=!!code&&raw.get('famJ')===code;snapLocal();draw();if(code)connect()}};
+})();
+
+renderChips();renderDay();route();loadWx(false);FS.init();
 setInterval(()=>{if(!editing&&currentView()==='trip'&&curDay===ti&&document.activeElement.id!=='memo')renderDay(true)},60000);
 </script>
 </body>
