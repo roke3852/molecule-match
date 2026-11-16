@@ -229,6 +229,18 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
 .nz-verdict .nz-concl{font-size:16px;font-weight:700;line-height:1.6;margin:6px 0 10px}
 .nz-verdict ul{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px;line-height:1.6;font-size:14.5px}
 .nz-tblwrap{overflow-x:auto}
+.nz-stages{display:flex;flex-direction:column;gap:8px}
+.nz-stg{border:1px solid var(--line);border-radius:10px;padding:10px 12px;cursor:pointer}
+.nz-stg.on{border-color:var(--accent);background:var(--accent-soft)}
+.nz-stg .hd{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.nz-stg .hd b{font-size:15px}.nz-stg .hd span{font-family:var(--f-mono);font-size:12px;color:var(--muted)}
+.nz-stg .imp{font-size:14.5px;margin:4px 0 6px;line-height:1.5}
+.nz-stg .fb{display:flex;height:10px;border-radius:5px;overflow:hidden;margin-bottom:6px}
+.nz-stg .fb i{display:block;height:100%}
+.nz-stg .kv{display:flex;flex-wrap:wrap;gap:2px 14px;font-size:12.5px;color:var(--muted)}
+.nz-stg .kv b{color:var(--ink);font-family:var(--f-mono);font-weight:500}
+.nz-famkey{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:12px;margin-bottom:10px}
+.nz-famkey span{display:flex;align-items:center;gap:5px}.nz-famkey i{width:10px;height:10px;border-radius:3px;display:block}
 .nz-tbl td small{display:block;font-family:var(--f-body);font-size:11px;color:var(--muted)}
 .nz-tbl td:first-child{color:var(--ink);white-space:nowrap;font-family:var(--f-body)}
 .nz-tbl td:nth-child(2),.nz-tbl th{white-space:nowrap;font-family:var(--f-body)}
@@ -846,6 +858,14 @@ button,input,select,label,.seg,.stepper,.card{touch-action:manipulation}
     <p class="nz-phase" id="nzPhase"></p>
   </section>
 
+  <section class="panel">
+    <h2>各階段混在一起，聞起來像什麼</h2>
+    <p class="label" style="margin:4px 0 8px">把分子歸成 9 個香氣家族，看每個階段的整體印象。「甜香」＝花果＋焦糖奶油＋一半麥芽；「苦澀感氣味」＝煙燻焦苦＋青草紙板＋霉土＋一半硫味＋一半烘烤。鼻子沒有苦味、澀味受器，「聞起來苦澀」是大腦把這些氣味和喝到的苦澀連在一起。</p>
+    <div class="nz-mode"><div class="seg" id="nzFat" role="group" aria-label="嗅覺疲勞"><button data-v="1" aria-pressed="true">算入嗅覺疲勞</button><button data-v="0" aria-pressed="false">不算</button></div></div>
+    <div class="nz-stages" id="nzStages"></div>
+    <p class="nz-cap">嗅覺疲勞：一直聞到的氣味，感受會逐漸打折（以約 45 秒的平均暴露量折算）；一直很強的烘烤主調折得最多。在這個模型裡，疲勞主要讓後段整體聞起來更淡，對甜香和苦澀感的比例影響不大。</p>
+  </section>
+
   <section class="nz-duo">
     <div class="panel">
       <h2>👃 此刻聞到</h2>
@@ -866,7 +886,7 @@ button,input,select,label,.seg,.stepper,.card{touch-action:manipulation}
   <section class="panel">
     <h2>氣味感受怎麼變？苦澀有沒有一起動？</h2>
     <p class="label" style="margin:4px 0 8px">氣味分三組：閾值低（≤ 1 μg/L）、少量就主導感受的<b style="color:var(--accent)">強正面</b>和<b style="color:var(--fail)">強負面</b>，以及閾值高或好壞看量、只當背景的<b style="color:var(--gold)">背景氣味</b>。</p>
-    <div class="nz-mode"><div class="seg" id="nzCMode" role="group" aria-label="圖表顯示"><button data-v="abs" aria-pressed="true">感受強度</button><button data-v="share" aria-pressed="false">占比</button></div></div>
+    <div class="nz-mode"><div class="seg" id="nzCMode" role="group" aria-label="圖表顯示"><button data-v="abs" aria-pressed="true">感受強度</button><button data-v="share" aria-pressed="false">占比</button><button data-v="fam" aria-pressed="false">甜香 vs 苦澀感</button></div></div>
     <div class="nz-key" id="nzKey"></div>
     <div id="nzChart" class="nz-chart"></div>
   </section>
@@ -3541,7 +3561,7 @@ const ODOR=[
  {id:'vanil',n:'香草醛',en:'vanillin',cls:'pos',note:'香草',mw:152.15,c:4800,r:[.8,1,1],kaw:1e-7,thr:25,logp:1.2},
  {id:'lina',n:'沉香醇',en:'linalool',cls:'pos',note:'花香',mw:154.25,c:200,r:[3,1,.3],kaw:9e-4,thr:6,logp:3.0},
  {id:'gera',n:'香葉醇',en:'geraniol',cls:'pos',note:'玫瑰',mw:154.25,c:100,r:[2,1,.4],kaw:5e-4,thr:7.5,logp:3.5},
- {id:'dama',n:'β-大馬士酮',en:'β-damascenone',cls:'pos',note:'蜂蜜、熟果',mw:190.28,c:200,r:[1.2,1,.8],kaw:3e-3,thr:.002,logp:4.0},
+ {id:'dama',n:'β-大馬士酮',en:'β-damascenone',cls:'pos',note:'蜂蜜、熟果',mw:190.28,c:200,r:[1.2,1,.8],kaw:3e-3,thr:.002,logp:4.0,sx:.3},
  {id:'mesh',n:'甲硫醇',en:'methanethiol',cls:'neg',note:'硫味、爛高麗菜',mw:48.11,c:4500,r:[.7,1,1.5],kaw:.13,thr:.2,logp:.8},
  {id:'acet',n:'乙酸（過量時）',en:'acetic acid',cls:'neg',note:'醋味、刺激',mw:60.05,c:800000,r:[1.4,1,.6],kaw:1e-5,thr:22000,logp:-.17},
  {id:'pyr',n:'吡啶',en:'pyridine',cls:'neg',note:'焦苦、灰燼',mw:79.10,c:30000,r:[.2,1,4],kaw:4.5e-4,thr:2000,logp:.65},
@@ -3593,7 +3613,8 @@ function noseRun(cfg){
     // 聞粉層＝聞液面上方的空氣：頭空間濃度 ≈ Kaw × 液體濃度，在水中嗅覺閾值時正好聞得到，所以 OAV ≈ 液體濃度 ÷ 閾值（Kaw 抵銷），再乘上熱度與稀釋
     const sniff=.3*Math.exp(.04*(b.T-92));
     const oav=ODOR.map((o,i)=>sniff*(L[i]/Vliq*1000)/o.thr);
-    const inten=oav.map(v=>v>1?Math.sqrt(v):0);
+    // β-大馬士酮的濃度–感受曲線特別平（Grosch 的缺省實驗：拿掉它幾乎不影響咖啡香），所以用較小的冪次，避免只因閾值極低就主導
+    const inten=oav.map((v,i)=>v>1?Math.pow(v,ODOR[i].sx||.5):0);
     // 這一秒流進杯子的味道成分（重量）
     const dTaste=[0,1,2,3,4].map(k=>Math.max(0,b.cupM[k]-a.cupM[k]));
     out.push({t:b.t,T:b.T,pouring:b.pouring,Vb:b.Vb,cupV:b.cupV,cupM:b.cupM.slice(0,5),flux,inten,mass:flux.slice(),dTaste,
@@ -3609,7 +3630,20 @@ const PLANS={
   three:{name:'三段',dose:15,ratio:16,plan:[45,65,65,65],planT:[0,45,75,105]},
   k46:{name:'4:6 五段',dose:20,ratio:15,plan:[50,70,60,60,60],planT:[0,45,90,135,180]},
   one:{name:'一刀流',dose:15,ratio:16,plan:[45,195],planT:[0,40],planD:[null,60]}};
-const S={roast:3,plan:'three',grind:650,temp:93,defect:'',basis:'int',cmode:'abs',t:60};
+const S={roast:3,plan:'three',grind:650,temp:93,defect:'',basis:'int',cmode:'abs',fat:1,t:60};
+// 香氣家族：sw = 甜香權重，bt = 「聞起來苦澀」權重（氣味與味覺的聯想）
+const FAM=[
+ {k:'flo',n:'花果',c:'#e87fb0',sw:1,bt:0,ids:['acald','lina','gera','dama']},
+ {k:'car',n:'焦糖奶油',c:'#f2a444',sw:1,bt:0,ids:['furan','soto','vanil','diac','pent']},
+ {k:'mal',n:'麥芽可可',c:'#c98a5a',sw:.5,bt:0,ids:['mprop','mbut']},
+ {k:'roa',n:'烘烤堅果',c:'#8d6e4f',sw:0,bt:.5,ids:['fft','edmp']},
+ {k:'smo',n:'煙燻焦苦',c:'#7d8590',sw:0,bt:1,ids:['gua','egua','vgua','pyr']},
+ {k:'sul',n:'硫味',c:'#c9c13a',sw:0,bt:.5,ids:['mesh','dmts']},
+ {k:'grn',n:'青草紙板',c:'#6fae6a',sw:0,bt:1,ids:['hex','non']},
+ {k:'sou',n:'酸、發酵',c:'#5fb5c9',sw:0,bt:0,ids:['acet','iva']},
+ {k:'mus',n:'霉土',c:'#a06bd0',sw:0,bt:1,ids:['ipmp','mib','geo','tca']}];
+const FIDX=FAM.map(f=>f.ids.map(id=>ODOR.findIndex(o=>o.id===id)));
+const FAT_TAU=45,FAT_K=6;
 let R=null,playing=false,last=0,acc=0;
 const fmt=t=>Math.floor(t/60)+':'+String(Math.floor(t%60)).padStart(2,'0');
 const CLS={pos:['正面','var(--accent)'],neu:['看量','var(--gold)'],neg:['負面','var(--fail)']};
@@ -3630,6 +3664,12 @@ function run(){
     const G={sp:0,bg:0,sn:0};ODOR.forEach((d,i)=>G[grpOf(d)]+=I[i]);o.G=G;o.snr=(G.sp+G.sn)>0?G.sn/(G.sp+G.sn):0;
     const ts=o.dTaste.reduce((a,b)=>a+b,0);o.dsum=ts;o.ba=ts>1e-5?(o.dTaste[3]+o.dTaste[4])/ts:null;});
   R.peak=peak||1;
+  // 家族強度＋嗅覺疲勞（對每個家族的近期暴露量做指數平均，暴露越多感受打折越多）
+  const A=FAM.map(()=>0);
+  R.out.forEach((o,j)=>{const dt=j?o.t-R.out[j-1].t:1;
+    o.F=FIDX.map(ix=>ix.reduce((a,i)=>a+o.inten[i],0));
+    o.Fp=o.F.map((v,f)=>{A[f]+=(v/R.peak-A[f])*Math.min(1,dt/FAT_TAU);return v/(1+FAT_K*A[f]);});});
+  famAgg();
   // 每一步（STEP）
   const st=[];R.segs.forEach((g,i)=>st.push({s:g.s,e:g.e,n:i===0?'悶蒸':'第 '+i+' 注'}));
   const lastE=R.segs[R.segs.length-1].e;
@@ -3639,7 +3679,30 @@ function run(){
   $('nzTime').max=R.endT;S.t=Math.min(S.t,R.endT);$('nzTime').value=S.t;
   $('nzSteps').innerHTML=st.map((x,i)=>'<button data-i="'+i+'"><b>'+x.n+'</b><span>'+fmt(x.s)+'–'+fmt(x.e)+'</span></button>').join('');
   $('nzSteps').querySelectorAll('button').forEach(b=>b.onclick=()=>{const x=st[+b.dataset.i];setT(Math.min(R.endT,Math.max(1,Math.round(x.e-1))));});
-  renderChart();renderFate();renderVerdict();render();
+  renderStages();renderChart();renderFate();renderVerdict();render();
+}
+function famAgg(){R.out.forEach(o=>{const F=S.fat?o.Fp:o.F;let sw=0,bt=0,tot=0;F.forEach((v,f)=>{sw+=v*FAM[f].sw;bt+=v*FAM[f].bt;tot+=v;});
+  o.ftot=tot;o.sw=tot?sw/tot:0;o.bt=tot?bt/tot:0;o.btr=(sw+bt)>0?bt/(sw+bt):null;});
+  R.fpeak=Math.max(...R.out.map(o=>o.ftot))||1;}
+function renderStages(){
+  const pc=v=>Math.round(v*100)+'%';
+  const rows=R.steps.map((x,i)=>{
+    let a=x.s,b=x.e;if(x.n==='滴濾')a=x.e-Math.max(4,(x.e-x.s)/3);else if(i<R.steps.length-1)b=R.steps[i+1].s;   // 每一步含注完後的等待；滴濾取最後一段
+    const os=R.out.filter(o=>o.t>a&&o.t<=b);if(!os.length)return '';
+    const F=FAM.map((_,f)=>os.reduce((s,o)=>s+(S.fat?o.Fp:o.F)[f],0)/os.length),tot=F.reduce((s,v)=>s+v,0)||1;
+    const avg=fn=>{const v=os.map(fn).filter(v=>v!=null);return v.length?v.reduce((s,q)=>s+q,0)/v.length:null;};
+    const top=F.map((v,f)=>({f,v:v/tot})).sort((p,q)=>q.v-p.v);
+    const btr=avg(o=>o.btr),ba=avg(o=>o.ba),inten=avg(o=>o.ftot)/R.fpeak;
+    const lead=top[0].v>.45?FAM[top[0].f].n+'為主':FAM[top[0].f].n+'、'+FAM[top[1].f].n;
+    const side=top.slice(top[0].v>.45?1:2,top[0].v>.45?3:4).filter(q=>q.v>.08).map(q=>FAM[q.f].n).join('、');
+    const tone=btr==null?'':btr<.4?'整體偏甜香':btr<.55?'甜香和苦澀感拉鋸':btr<.7?'苦澀感氣味占上風':'聞起來明顯偏苦澀';
+    const str=inten>.7?'香氣濃':inten>.4?'香氣中等':inten>.2?'香氣變淡':'香氣很淡';
+    return '<div class="nz-stg" data-t="'+Math.round((a+b)/2)+'" data-i="'+i+'"><div class="hd"><b>'+x.n+'</b><span>'+fmt(x.s)+'–'+fmt(b)+'</span></div>'+
+      '<div class="imp">'+str+'：'+lead+(side?'，帶'+side:'')+'。'+tone+'。</div>'+
+      '<div class="fb">'+top.map(q=>'<i style="width:'+q.v*100+'%;background:'+FAM[q.f].c+'" title="'+FAM[q.f].n+' '+pc(q.v)+'"></i>').join('')+'</div>'+
+      '<div class="kv"><span>強度 <b>'+Math.round(inten*100)+'</b></span><span>'+top.slice(0,3).map(q=>FAM[q.f].n+' <b>'+pc(q.v)+'</b>').join('　')+'</span><span>苦澀感氣味：甜香 <b>'+(btr==null?'—':pc(btr)+'：'+pc(1-btr))+'</b></span><span>同時滴下的苦＋澀 <b>'+(ba==null?'還沒滴':pc(ba))+'</b></span></div></div>';}).join('');
+  $('nzStages').innerHTML='<div class="nz-famkey">'+FAM.map(f=>'<span><i style="background:'+f.c+'"></i>'+f.n+'</span>').join('')+'</div>'+rows;
+  $('nzStages').querySelectorAll('.nz-stg').forEach(el=>el.onclick=()=>setT(Math.max(1,Math.min(R.endT,+el.dataset.t))));
 }
 function phaseAt(t){const st=R.steps;for(let i=st.length-1;i>=0;i--){if(t>=st[i].s)return {i,x:st[i],pour:i<st.length-1&&t<st[i].e};}return {i:0,x:st[0],pour:true};}
 function at(t){return R.out[Math.max(0,Math.min(R.out.length-1,Math.round(t)-1))];}
@@ -3680,7 +3743,8 @@ let CW=640,CH=230,PADL=36,PADR=10,PADT=10,PADB=28;
 const X=t=>PADL+(t/R.endT)*(CW-PADL-PADR), Y=v=>PADT+(1-v)*(CH-PADT-PADB);
 function path(fn){let d='',on=false;R.out.forEach(o=>{const v=fn(o);if(v==null||isNaN(v)){on=false;return;}d+=(on?'L':'M')+X(o.t).toFixed(1)+','+Y(Math.max(0,Math.min(1,v))).toFixed(1);on=true;});return d;}
 function renderChart(){
-  $('nzKey').innerHTML=(S.cmode==='abs'?
+  $('nzKey').innerHTML=(S.cmode==='fam'?
+    '<span><i style="background:var(--accent)"></i>甜香占比</span><span><i style="background:var(--fail)"></i>苦澀感氣味占比</span><span><i class="dash" style="border-color:var(--gold)"></i>香氣總強度</span><small>'+(S.fat?'已算入嗅覺疲勞':'未算嗅覺疲勞')+'；在上方「各階段」面板切換</small>':S.cmode==='abs'?
     '<span><i style="background:var(--accent)"></i>強正面的感受強度</span><span><i style="background:var(--fail)"></i>強負面的感受強度</span><span><i class="dash" style="border-color:var(--gold)"></i>背景氣味的感受強度</span><small>強度以整段最香的時刻（三組加總）＝100</small>':
     '<span><i style="background:var(--accent)"></i>強正面占比</span><span><i style="background:var(--fail)"></i>強負面占比</span><span><i class="dash" style="border-color:var(--gold)"></i>背景氣味占比</span>')+
     '<span><i style="background:var(--cga)"></i>正在滴下的液體裡，苦＋澀的占比</span>';
@@ -3690,9 +3754,10 @@ function renderChart(){
   [0,.25,.5,.75,1].forEach(v=>{s+='<line x1="'+PADL+'" x2="'+(CW-PADR)+'" y1="'+Y(v)+'" y2="'+Y(v)+'" stroke="var(--line)"/><text x="'+(PADL-6)+'" y="'+(Y(v)+4)+'" text-anchor="end" font-size="11" fill="var(--muted)">'+v*100+'</text>';});
   for(let t=0;t<=R.endT;t+=30)s+='<text x="'+X(t)+'" y="'+(CH-8)+'" text-anchor="middle" font-size="11" fill="var(--muted)">'+fmt(t)+'</text>';
   const ab=S.cmode==='abs',gv=k=>o=>ab?o.G[k]/R.peak:(o.tot?o.G[k]/o.tot:null);
-  s+='<path d="'+path(gv('bg'))+'" fill="none" stroke="var(--gold)" stroke-width="2" stroke-dasharray="5 4"/>';
-  s+='<path d="'+path(gv('sp'))+'" fill="none" stroke="var(--accent)" stroke-width="2.5"/>';
-  s+='<path d="'+path(gv('sn'))+'" fill="none" stroke="var(--fail)" stroke-width="2.5"/>';
+  const fm=S.cmode==='fam';
+  s+='<path d="'+path(fm?(o=>o.ftot/R.fpeak):gv('bg'))+'" fill="none" stroke="var(--gold)" stroke-width="2" stroke-dasharray="5 4"/>';
+  s+='<path d="'+path(fm?(o=>o.sw):gv('sp'))+'" fill="none" stroke="var(--accent)" stroke-width="2.5"/>';
+  s+='<path d="'+path(fm?(o=>o.bt):gv('sn'))+'" fill="none" stroke="var(--fail)" stroke-width="2.5"/>';
   s+='<path d="'+path(o=>o.ba)+'" fill="none" stroke="var(--cga)" stroke-width="2.5"/>';
   s+='<line id="nzCur" x1="0" x2="0" y1="'+PADT+'" y2="'+(CH-PADB)+'" stroke="var(--ink)" stroke-width="1.5"/>';
   s+='<rect id="nzHit" x="'+PADL+'" y="0" width="'+(CW-PADL-PADR)+'" height="'+CH+'" fill="transparent" style="cursor:pointer"/></svg>';
@@ -3738,6 +3803,9 @@ function renderVerdict(){
   let li=[];
   li.push('<li><b>強負面占比：</b>悶蒸時最高約 '+pc(negEarly)+'，到最後約 '+pc(negLate)+'，'+(Math.abs(dNeg)<.05?'幾乎沒變。':dNeg>0?'上升 '+pc(dNeg)+'。':'反而下降 '+pc(-dNeg)+'。')+'和滴下液體苦澀占比的相關係數 '+rr(rNeg)+'，'+(Math.abs(dNeg)<.05?'但負面占比本身只變動幾個百分點，鼻子分辨不出來，這個相關沒有實際意義。':rNeg!=null&&rNeg<=-.3?'方向相反：苦澀變多時，負面氣味的比例反而下降。':strong(rNeg)?'兩者同步上升。':mid(rNeg)?'有一點同步，但不可靠。':'幾乎沒有同步。')+'</li>');
   li.push('<li><b>背景氣味占比：</b>悶蒸後約 '+pc(bgEarly)+'，到最後約 '+pc(bgLate)+'；強正面從 '+pc(spEarly)+' 變成 '+pc(spLate)+'。'+(bgEarly-bgLate>.05?'焦糖、奶油、花香這類背景香氣比主調掉得快，聞起來會從「甜、豐富」變成「只剩烘烤主調、單調」。和苦澀占比的相關係數 '+rr(rBg)+'。':'背景和主調的比例變化不大。')+'</li>');
+  { const fo=after.filter(o=>o.btr!=null),rB=corr(fo.map(o=>o.btr),fo.map(o=>o.ba));
+    const e0=early.filter(o=>o.btr!=null),b0=e0.length?avg(e0,o=>o.btr):null,b1=avg(tail.filter(o=>o.btr!=null),o=>o.btr);
+    if(b0!=null)li.push('<li><b>聞起來的苦澀感（'+(S.fat?'算入':'不算')+'嗅覺疲勞）：</b>苦澀感氣味對甜香的比重，從悶蒸後的 '+pc(b0)+' 變成最後的 '+pc(b1)+'，和滴下液體苦澀占比的相關係數 '+rr(rB)+'。'+(b1-b0>.05&&rB>=.5?'整體印象確實從甜香往苦澀感移動，而且和杯裡的苦澀同步。':b1-b0>.05?'整體印象往苦澀感移動。':'整體印象變化不大。')+'</li>'); }
   li.push('<li><b>香氣總強度：</b>最後只剩最高時的 '+pc(intLate)+'。和苦澀占比的相關係數 '+rr(rInt)+'，'+(rInt!=null&&rInt<=-.6?'香氣越淡，滴下來的越苦澀，兩者明顯同步。':rInt!=null&&rInt<=-.3?'有一定的同步。':'同步不明顯。')+'</li>');
   if(firstDrip&&lastDrip)li.push('<li><b>滴下液體的苦＋澀占比：</b>從第一滴的 '+pc(firstDrip.ba)+' 上升到最後的 '+pc(lastDrip.ba)+'。這是溶得很慢的苦味大分子在後段比例變高。</li>');
   const defOn=S.defect&&ODOR.some((d,i)=>d.def===S.defect&&R.E0[i]>0);
@@ -3760,6 +3828,7 @@ function renderFate(){
 // ---- 控制 ----
 function seg(id,key,cast){$(id).querySelectorAll('button').forEach(b=>b.onclick=()=>{$(id).querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',x===b));S[key]=cast?cast(b.dataset.v):b.dataset.v;key==='basis'?render():run();});}
 seg('nzRoast','roast',Number);seg('nzPlan','plan');seg('nzDef','defect');seg('nzBasis','basis');
+$('nzFat').querySelectorAll('button').forEach(b=>b.onclick=()=>{$('nzFat').querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',x===b));S.fat=+b.dataset.v;famAgg();renderStages();renderChart();renderVerdict();render();});
 $('nzCMode').querySelectorAll('button').forEach(b=>b.onclick=()=>{$('nzCMode').querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',x===b));S.cmode=b.dataset.v;renderChart();render();});
 $('nzGrind').oninput=e=>{S.grind=+e.target.value;$('nzGrindV').textContent=S.grind+' μm';};$('nzGrind').onchange=run;
 $('nzTemp').oninput=e=>{S.temp=+e.target.value;$('nzTempV').textContent=S.temp+'°C';};$('nzTemp').onchange=run;
