@@ -127,6 +127,7 @@ table.t td.n{text-align:center;font-variant-numeric:tabular-nums}
 .fam-st{display:flex;align-items:center;gap:8px;font-weight:700;margin-bottom:10px}
 .fam-st i{flex:none;width:10px;height:10px;border-radius:50%;background:#bdb3a9}
 .fam-st.ok i{background:#3fae5a}.fam-st.busy i{background:#e0a100}.fam-st.err i{background:#d9534f}
+.fam-m small{font-weight:400;font-size:11.5px;color:#a8998c}.fam-m button{font-size:12px;color:#b9a99b;padding:2px 6px;border:0;background:none}
 .fam-m{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--line)}
 .fam-m:last-child{border-bottom:0}.fam-m i{flex:none;width:8px;height:8px;border-radius:50%;background:#cfc4b8}.fam-m.live i{background:#3fae5a}
 .fam-m b{flex:1}.fam-m span{font-size:12px;color:var(--mute)}
@@ -799,9 +800,17 @@ const FS=(function(){
  function members(){const E={};for(const p in R)if(p.startsWith('members/'))E[p]=R[p];for(const p in Q)if(p.startsWith('members/'))E[p]=Q[p];
   const a=[];for(const p in E){try{const m=JSON.parse(E[p]);if(m&&m.t)a.push({id:p.slice(8),n:String(m.n||''),t:+m.t})}catch(e){}}
   return a.sort((x,y)=>(y.id===dev)-(x.id===dev)||y.t-x.t)}
- function drawMem(){
-  const el=$("#famMem");if(!el)return;const a=members();
-  el.innerHTML=`<div class="hint" style="margin-top:12px">已加入的手機（${a.length}）：</div>`+(a.length?a.map(m=>`<div class="fam-m${Date.now()-m.t<360000?' live':''}"><i></i><b>${esc(m.n||'還沒填暱稱的手機')}${m.id===dev?'（你）':''}</b><span>${ago(m.t)}</span></div>`).join(''):'<div class="hint">讀取中…</div>')}
+ function memRows(){const now=Date.now(),g={};let cleaned=false;
+  members().forEach(m=>{const age=now-m.t,me=m.id===dev;
+   if(!me&&((!m.n&&age>7200000)||age>604800000)){Q['members/'+m.id]=null;cleaned=true;return} /* 沒填暱稱超過 2 小時、或 7 天沒出現的舊紀錄自動清掉 */
+   if(!m.n&&!me&&age>360000)return; /* 沒填暱稱又不在線上的不列出 */
+   const k=m.n?'n:'+m.n:(me?'me':'u:'+m.id),r=g[k]=g[k]||{n:m.n,ids:[],t:0,me:false};r.ids.push(m.id);r.t=Math.max(r.t,m.t);if(me)r.me=true});
+  if(cleaned){saveQ();clearTimeout(flushT);flushT=setTimeout(flush,400)}
+  return Object.values(g).sort((x,y)=>(y.me-x.me)||y.t-x.t)}
+ function drawMem(){const el=$('#famMem');if(!el)return;const a=memRows(),now=Date.now();
+  el.innerHTML=`<div class="hint" style="margin:12px 0 4px">已加入的家人（${a.length}）：</div>`+(a.length?a.map(m=>{const live=now-m.t<360000;
+   return `<div class="fam-m${live?' live':''}"><i></i><b>${esc(m.n||'還沒填暱稱的裝置')}${m.me?'（你）':''}${m.ids.length>1?`<small>・${m.ids.length} 台裝置</small>`:''}</b><span>${ago(m.t)}</span>${!live&&!m.me?`<button data-mrm="${m.ids.join(',')}" aria-label="移除">✕</button>`:''}</div>`}).join(''):'<div class="hint" style="margin:0">讀取中…</div>');
+  }
  function setName(v){v=(v||'').trim().slice(0,12);if(!v){toast('請先填暱稱');return}myName=v;ls.set('cf-famName',v);beat(true);if(document.activeElement)document.activeElement.blur();draw();toast('👋 '+v+'，家人看得到你加入了')}
  function setState(st){state=st;draw()}
  function start(c){code=c;ls.set('cf-fam',c);Q={};saveQ();R={};want={};upDone={};ls.del('cf-famP');connect()}
@@ -830,6 +839,7 @@ const FS=(function(){
   if(id==='famJoin'){let v=$("#famIn").value.trim();const m=v.match(/[?&]fam=([A-Za-z0-9_-]+)/);if(m)v=m[1];if(!okCode(v)){toast('共用碼格式不對');return}start(v);return}
   if(id==='famCopy'){try{await navigator.clipboard.writeText(link());toast('✅ 已複製邀請連結')}catch(x){toast('請長按上面的連結複製')}return}
   if(id==='famShare'){if(navigator.share){try{await navigator.share({title:'毛毛的飲食紀錄',text:'毛毛的飲食紀錄（全家共用）',url:link()})}catch(x){}}else $("#famCopy").click();return}
+  const mr=e.target.dataset&&e.target.dataset.mrm;if(mr){if(e.target.dataset.arm){mr.split(',').forEach(i=>{Q['members/'+i]=null});saveQ();drawMem();clearTimeout(flushT);flush()}else{e.target.dataset.arm=1;e.target.textContent='確定移除？'}return}
   if(id==='famNameOk'){setName($("#famName").value);return}
   if(id==='famAskOk'){setName($("#famAskIn").value);return}
   if(id==='famAskX'){ls.set('cf-famSkip','1');drawMem();return}
