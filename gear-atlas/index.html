@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>咖啡器材圖鑑</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+/* 版面想法：器材型錄 + 工程藍圖。全頁安靜的鋼灰紙面，唯一大膽處是藍圖色的原理圖板。 */
+:root{
+  --bg:#e8ebe9; --surface:#f6f7f5; --ink:#172026; --muted:#55626a; --line:#c3cac7;
+  --accent:#1d4ed0; --accent-ink:#ffffff; --brass:#8f6216;
+  --bp-bg:#173a8f; --bp-line:#e2eaff; --bp-dim:#8fa8e6; --bp-hot:#ffb869;
+  --ok:#1f7a4d; --bad:#b3372f;
+  --f-display:"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;
+  --f-body:"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0f1519; --surface:#172029; --ink:#e5ebee; --muted:#93a1a9; --line:#2b3843;
+    --accent:#86abff; --accent-ink:#0b1430; --brass:#dba95a;
+    --bp-bg:#10286a; --bp-line:#dfe8ff; --bp-dim:#7f98da; --bp-hot:#ffb869;
+    --ok:#5fcf95; --bad:#ff8d85; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0f1519; --surface:#172029; --ink:#e5ebee; --muted:#93a1a9; --line:#2b3843;
+  --accent:#86abff; --accent-ink:#0b1430; --brass:#dba95a;
+  --bp-bg:#10286a; --bp-line:#dfe8ff; --bp-dim:#7f98da; --bp-hot:#ffb869;
+  --ok:#5fcf95; --bad:#ff8d85; color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.65;-webkit-text-size-adjust:100%}
+button,input{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.wrap{max-width:860px;margin:0 auto;padding:0 16px}
+header.top{padding:22px 0 10px}
+.eyebrow{font-family:var(--f-mono);font-size:12px;letter-spacing:.14em;color:var(--brass);text-transform:uppercase}
+h1{font-family:var(--f-display);font-weight:900;font-size:clamp(30px,8vw,46px);line-height:1.1;margin:4px 0 6px;letter-spacing:.02em;text-wrap:balance}
+.lede{color:var(--muted);margin:0;max-width:34em;font-size:15px}
+.search{margin:14px 0 0;display:flex;gap:8px}
+.search input{flex:1;min-width:0;background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:10px 12px}
+nav.tabs{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:2px solid var(--ink);margin-top:14px}
+nav.tabs .wrap{display:flex;gap:0;overflow-x:auto;scrollbar-width:none}
+nav.tabs .wrap::-webkit-scrollbar{display:none}
+.tab{flex:0 0 auto;background:none;border:0;padding:12px 14px 10px;font-weight:700;font-size:15px;color:var(--muted);border-bottom:4px solid transparent;margin-bottom:-2px;white-space:nowrap}
+.tab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
+main{padding:18px 0 110px}
+h2{font-family:var(--f-display);font-weight:900;font-size:22px;margin:0 0 4px;text-wrap:balance}
+h3{font-size:16px;margin:0}
+.sec-note{color:var(--muted);font-size:14px;margin:0 0 12px}
+section + section{margin-top:28px}
+
+/* 原理圖板 */
+.bp{background:var(--bp-bg);color:var(--bp-line);border-radius:6px;overflow:hidden}
+.bp-tabs{display:flex;flex-wrap:wrap;gap:6px;padding:12px 12px 0}
+.bp-tab{background:transparent;border:1px solid var(--bp-dim);color:var(--bp-line);border-radius:3px;padding:6px 12px;font-size:14px;font-weight:500}
+.bp-tab[aria-pressed="true"]{background:var(--bp-line);color:var(--bp-bg);border-color:var(--bp-line);font-weight:700}
+.bp-body{display:grid;grid-template-columns:1fr;gap:4px;padding:8px 12px 14px}
+@media(min-width:680px){.bp-body{grid-template-columns:320px 1fr;gap:18px;align-items:center}}
+.bp svg{width:100%;height:auto;display:block;max-width:360px;margin:0 auto}
+.bp svg text{font-family:var(--f-mono);font-size:10.5px;fill:var(--bp-line)}
+.bp h3{font-size:18px;font-weight:900;margin-bottom:4px}
+.bp p{margin:0 0 8px;font-size:14.5px;line-height:1.7}
+.bp ul{margin:0;padding:0;list-style:none;display:grid;gap:4px}
+.bp li{font-size:13.5px;display:grid;grid-template-columns:4.6em 1fr;gap:8px;border-top:1px solid rgba(226,234,255,.22);padding-top:4px}
+.bp li b{font-family:var(--f-mono);font-weight:500;color:var(--bp-hot)}
+.bp .cap{font-family:var(--f-mono);font-size:11px;color:var(--bp-dim);margin-top:6px}
+
+/* 篩選 */
+.filters{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 12px}
+.chip{background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:5px 13px;font-size:14px}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink);font-weight:700}
+.count{font-family:var(--f-mono);font-size:12px;color:var(--muted);margin:0 0 8px}
+
+/* 器材卡 */
+.list{display:grid;gap:10px}
+@media(min-width:680px){.list{grid-template-columns:1fr 1fr;align-items:start}}
+.card{background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--ink);border-radius:4px;padding:12px 14px}
+.card.fav{border-left-color:var(--brass)}
+.card .meta{font-family:var(--f-mono);font-size:11.5px;color:var(--muted);letter-spacing:.03em}
+.card h3{font-weight:900;font-size:17.5px;line-height:1.3;margin:2px 0 4px}
+.pills{display:flex;flex-wrap:wrap;gap:5px;margin:0 0 6px}
+.pill{font-size:12px;border:1px solid var(--line);border-radius:3px;padding:0 7px;color:var(--muted)}
+.pill.tier{border-color:var(--brass);color:var(--brass)}
+.card p{margin:0;font-size:14.5px}
+.acts{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.btn{background:transparent;border:1px solid var(--ink);border-radius:3px;padding:5px 11px;font-size:13.5px;font-weight:500}
+.btn[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.fav[aria-pressed="true"]{background:var(--brass);border-color:var(--brass);color:var(--bg)}
+.btn.solid{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:700}
+.detail{margin-top:10px;border-top:1px dashed var(--line);padding-top:8px}
+dl.spec{margin:0 0 8px;display:grid;grid-template-columns:5.2em 1fr;gap:2px 10px;font-size:13.5px}
+dl.spec dt{font-family:var(--f-mono);color:var(--muted);font-size:12.5px;padding-top:1px}
+dl.spec dd{margin:0}
+.detail h4{margin:8px 0 0;font-size:12.5px;font-family:var(--f-mono);font-weight:500;color:var(--brass);letter-spacing:.06em}
+.empty{color:var(--muted);padding:24px 0;text-align:center}
+
+/* 比較列與面板 */
+.cmpbar{position:fixed;left:0;right:0;bottom:0;z-index:8;background:var(--ink);color:var(--bg);padding:10px 0;padding-bottom:calc(10px + env(safe-area-inset-bottom))}
+.cmpbar .wrap{display:flex;align-items:center;gap:10px;justify-content:space-between}
+.cmpbar span{font-size:14px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cmpbar .btn{border-color:var(--bg);color:var(--bg);flex:0 0 auto}
+.cmpbar .btn.solid{background:var(--bg);color:var(--ink)}
+.sheet{position:fixed;inset:0;z-index:10;background:var(--bg);overflow:auto;padding:16px 0 40px}
+.sheet-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px}
+.tblwrap{overflow-x:auto;border:1px solid var(--line);border-radius:4px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;min-width:520px;font-size:13.5px}
+th,td{text-align:left;vertical-align:top;padding:8px 10px;border-bottom:1px solid var(--line)}
+thead th{font-weight:900;font-size:15px;border-bottom:2px solid var(--ink)}
+tbody th{font-family:var(--f-mono);font-weight:500;color:var(--muted);font-size:12px;width:5.5em;white-space:nowrap}
+
+/* 測驗 */
+.quiz{background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:16px}
+.quiz .prog{font-family:var(--f-mono);font-size:12px;color:var(--muted)}
+.quiz h3{font-size:18px;font-weight:900;margin:6px 0 12px;line-height:1.45}
+.opts{display:grid;gap:8px}
+.opt{text-align:left;background:var(--bg);border:1px solid var(--line);border-radius:4px;padding:10px 12px;font-size:15px}
+.opt.right{border-color:var(--ok);color:var(--ok);font-weight:700}
+.opt.wrong{border-color:var(--bad);color:var(--bad)}
+.opt:disabled{cursor:default}
+.explain{margin:12px 0 0;font-size:14.5px;border-left:3px solid var(--brass);padding-left:10px}
+.score{font-family:var(--f-mono);font-size:44px;font-weight:600;line-height:1.1}
+footer{color:var(--muted);font-size:12.5px;margin-top:30px;border-top:1px solid var(--line);padding-top:10px}
+@media (prefers-reduced-motion:no-preference){.bp svg .flow{animation:dash 1.6s linear infinite}@keyframes dash{to{stroke-dashoffset:-16}}}
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <div class="eyebrow">Coffee Gear Atlas</div>
+  <h1>咖啡器材圖鑑</h1>
+  <p class="lede">從磨豆機、濾杯、義式咖啡機到烘豆機。先看懂原理，再認識代表機種，最後放在一起比較。</p>
+  <div class="search"><input id="q" type="search" placeholder="搜尋器材、品牌或關鍵字，例如 錐刀、E61、台灣" aria-label="搜尋器材"></div>
+</div></header>
+<nav class="tabs" aria-label="分類"><div class="wrap" id="tabs" role="tablist"></div></nav>
+<main><div class="wrap" id="app"></div></main>
+<div id="cmpbar"></div>
+<div id="sheet"></div>
+
+<script>
+/* ---------- 資料 ---------- */
+const TIERS={a:"入門",b:"進階",c:"專業／商用"};
+const CATS=[
+{id:"grinders",name:"磨豆機",title:"磨豆機",note:"研磨決定粉粒的大小與均勻度，是影響一杯咖啡最直接的器材。",
+ subs:[["hand","手搖"],["home","家用電動"],["pro","商用／旗艦"]],
+ principles:[
+  {k:"conical",label:"錐刀",h:"錐刀 Conical Burr",p:"錐形內刀在環形外刀中旋轉，豆子靠重力由上往下被碾碎。轉速低、發熱少，手搖磨豆機幾乎都用這種結構。",pts:[["粒徑","主峰較寬，細粉比例較高"],["風味","層次多、口感厚實、甜感明顯"],["常見於","手搖磨、家用義式磨"]]},
+  {k:"flat",label:"平刀",h:"平刀 Flat Burr",p:"兩片平行刀盤相對，豆子從中心進入，被離心力甩向外圈逐步切細。需要較高轉速與馬力。",pts:[["粒徑","分布集中、均勻度高"],["風味","乾淨、清晰、風味分離度好"],["常見於","電動磨、商用義式磨"]]},
+  {k:"ghost",label:"鬼齒",h:"鬼齒 Ghost Burr",p:"刀盤上佈滿凸起的齒丘，用輾壓與剪切的方式磨碎。源自日本的磨豆機傳統，顆粒形狀偏圓潤。",pts:[["粒徑","細粉少、顆粒偏圓"],["風味","甜感高、口感圓潤厚實"],["常見於","日系手沖用電動磨"]]}],
+ items:[
+  {n:"Comandante C40 MK4",b:"Comandante・德國",s:"hand",t:"b",d:"手沖界的參考基準，許多比賽配方直接以「C40 幾格」標示刻度。",sp:[["刀盤","39mm 錐刀，高氮不鏽鋼 Nitro Blade"],["調整","內調段數，每格約 30 微米"],["粉倉","玻璃罐"]],f:"風味均衡、甜感與厚度兼具，細粉帶來層次。",w:"想要一支通用、資料多、配方好對照的手沖磨。"},
+  {n:"1Zpresso ZP6 Special",b:"1Zpresso・台灣",s:"hand",t:"b",d:"專為手沖設計的錐刀，以細粉少、乾淨度高聞名。",sp:[["刀盤","48mm 七角錐刀"],["調整","上方外調，每格約 22 微米"],["用途","手沖專用，不適合義式"]],f:"清晰明亮、茶感、風味分離度接近平刀。",w:"喜歡淺焙、花果調與乾淨杯感的人。"},
+  {n:"1Zpresso K-Ultra",b:"1Zpresso・台灣",s:"hand",t:"b",d:"手沖與義式都能應付的全能型手搖磨。",sp:[["刀盤","48mm 錐刀"],["調整","外調環，每格約 20 微米"],["特色","可折疊手把、磁吸粉杯"]],f:"均衡偏明亮，甜感好。",w:"只想買一支手搖磨、手沖義式都會做的人。"},
+  {n:"1Zpresso J-Ultra",b:"1Zpresso・台灣",s:"hand",t:"b",d:"為義式調校的手搖磨，刻度極細。",sp:[["刀盤","48mm 錐刀（義式向）"],["調整","外調環，每格約 8 微米"],["用途","義式為主"]],f:"醇厚、質地濃稠，適合濃縮。",w:"搭配拉霸機或家用義式機的手搖方案。"},
+  {n:"Kinu M47 Classic",b:"Kinu・德國",s:"hand",t:"b",d:"全金屬機身、無段微調的義式向手搖磨。",sp:[["刀盤","47mm 錐刀"],["調整","無段式"],["機身","不鏽鋼，重量扎實"]],f:"濃縮口感厚實、穩定。",w:"重視做工與義式研磨精度的人。"},
+  {n:"Timemore 栗子 C3",b:"Timemore 泰摩・中國",s:"hand",t:"a",d:"入門價位就有金屬刀盤與雙軸承的手搖磨。",sp:[["刀盤","38mm S2C 錐刀"],["調整","內調段數"],["機身","鋁合金"]],f:"均衡、好上手。",w:"第一支手搖磨、露營或辦公室用。"},
+  {n:"Baratza Encore",b:"Baratza・美國",s:"home",t:"a",d:"歐美最常被推薦的入門電動磨，零件好買、可自行維修。",sp:[["刀盤","40mm 錐刀"],["調整","40 段"],["用途","手沖、法壓、美式機"]],f:"均衡、口感偏厚。",w:"每天沖煮、想省下手搖力氣的入門者。"},
+  {n:"Fellow Ode Gen 2",b:"Fellow・美國",s:"home",t:"b",d:"專為手沖設計的家用平刀磨，不做義式。",sp:[["刀盤","64mm 平刀"],["調整","31 段"],["特色","單份研磨、可換其他 64mm 刀盤"]],f:"乾淨、清晰，甜感佳。",w:"想在家用平刀喝淺焙手沖的人。"},
+  {n:"Fuji Royal R-220 小富士",b:"富士珈機・日本",s:"home",t:"b",d:"日本自家烘焙店櫃台常見的經典機，有鬼齒與平刀（cut）兩種版本。",sp:[["刀盤","鬼齒 或 平刀"],["調整","段數旋鈕"],["機身","鑄造機身，馬達低速有力"]],f:"鬼齒版甜感高、圓潤飽滿。",w:"偏好日式手沖厚實甜感的人。"},
+  {n:"Niche Zero",b:"Niche・英國",s:"home",t:"b",d:"帶起「單份研磨、零殘粉」風潮的家用機。",sp:[["刀盤","63mm 錐刀（Mazzer Kony 規格）"],["調整","無段式"],["用途","義式與手沖可快速切換"]],f:"濃縮醇厚、巧克力調明顯。",w:"每杯換豆、不想浪費粉的家用義式玩家。"},
+  {n:"Eureka Mignon Specialita",b:"Eureka・義大利",s:"home",t:"b",d:"體積小、聲音安靜的家用義式定量磨。",sp:[["刀盤","55mm 平刀"],["調整","無段式微調"],["特色","觸控定時出粉"]],f:"濃縮均衡、甜感乾淨。",w:"固定一支豆做義式與奶咖的人。"},
+  {n:"Option-O Lagom P64",b:"Option-O・澳洲",s:"pro",t:"c",d:"家用旗艦級單份研磨平刀磨，可換多種 64mm 刀盤。",sp:[["刀盤","64mm 平刀（可選 SSP 等）"],["調整","無段式"],["特色","可變轉速、低殘粉"]],f:"依刀盤而定，可從厚實調到極乾淨。",w:"想用換刀盤來調整風味取向的進階玩家。"},
+  {n:"Mahlkönig EK43",b:"Mahlkönig・德國",s:"pro",t:"c",d:"原本是商用大量研磨機，2013 年前後因咖啡師比賽被用來磨濃縮而成為精品咖啡館象徵。",sp:[["刀盤","98mm 平刀"],["調整","無段旋鈕"],["定位","吧台單品、杯測、零售研磨"]],f:"均勻度極高、乾淨透亮、萃取率高。",w:"咖啡館吧台與烘豆室。"},
+  {n:"Mazzer Super Jolly",b:"Mazzer・義大利",s:"pro",t:"c",d:"耐操的商用義式磨經典，二手市場流通量大。",sp:[["刀盤","64mm 平刀"],["調整","無段式"],["定位","中小型咖啡館義式"]],f:"傳統義式的厚實與均衡。",w:"開店或想改裝成單份研磨的玩家。"}
+ ]},
+{id:"brewers",name:"濾杯與沖煮",title:"濾杯與沖煮器具",note:"濾杯的形狀、肋骨與出水孔決定水流速度，也決定你有多少操作空間。",
+ subs:[["cone","錐形"],["flatb","平底"],["fan","扇形"],["imm","浸泡／混合"],["press","加壓／其他"]],
+ principles:[
+  {k:"cone",label:"錐形",h:"錐形濾杯",p:"粉層集中在中央、深度大，底部一個大孔。流速主要由注水手法與研磨度控制，自由度最高。",pts:[["流速","快，隨手法變化大"],["風味","明亮、層次分明"],["難度","較吃手法"]]},
+  {k:"flatb",label:"平底",h:"平底濾杯",p:"粉床平坦、厚度一致，水流均勻通過。多數搭配波浪濾紙，濾紙不貼壁，保溫與流速都穩定。",pts:[["流速","中等、穩定"],["風味","甜感高、均衡"],["難度","容錯高"]]},
+  {k:"fan",label:"扇形",h:"扇形（梯形）濾杯",p:"底部是一條線而非一個點，出水孔小。水在濾杯內停留較久，帶一點浸泡效果。",pts:[["流速","慢"],["風味","濃厚、醇度高"],["難度","穩定好沖"]]},
+  {k:"imm",label:"浸泡",h:"浸泡與混合式",p:"先用閥門把水留住，讓粉水充分接觸，再開閥過濾。萃取均勻，幾乎不受注水手法影響。",pts:[["流速","由你決定何時開閥"],["風味","圓潤、甜、一致性高"],["難度","最容易重現"]]}],
+ items:[
+  {n:"Hario V60",b:"Hario・日本",s:"cone",t:"a",d:"60 度錐角、螺旋肋骨與單一大孔，是全世界最普及的手沖濾杯。",sp:[["結構","60° 錐形，螺旋長肋骨"],["出水","單一大孔"],["材質","樹脂、陶瓷、玻璃、金屬"]],f:"明亮、乾淨、層次清楚。",w:"想練手法、玩各種沖煮配方的人。"},
+  {n:"Kono 名門",b:"珈琲サイフオン・日本",s:"cone",t:"b",d:"錐形濾杯的先驅。肋骨只做在下半部，上半部濾紙貼壁，水只能往下走。",sp:[["結構","錐形，短直肋骨"],["出水","單一大孔，流速偏慢"],["材質","樹脂"]],f:"厚實圓潤、甜感集中。",w:"喜歡日式點滴法與中深焙的人。"},
+  {n:"Origami 摺紙濾杯",b:"Origami・日本",s:"cone",t:"b",d:"20 道摺紋形成排氣通道，可用錐形濾紙也可用波浪濾紙。2019 年世界沖煮賽冠軍使用後聲名大噪。",sp:[["結構","錐形，20 道深摺紋"],["濾紙","錐形或波浪皆可"],["材質","美濃燒陶瓷、樹脂"]],f:"流速快、乾淨通透；換波浪濾紙則更甜。",w:"想用一個濾杯玩兩種流速的人。"},
+  {n:"Chemex",b:"Chemex・美國",s:"cone",t:"b",d:"1941 年由化學家設計的一體式玻璃壺，專用濾紙特別厚。",sp:[["結構","濾杯與下壺一體"],["濾紙","厚質專用濾紙"],["容量","3 至 10 杯"]],f:"非常乾淨、油脂少、茶感。",w:"一次沖多人份、喜歡清爽口感的人。"},
+  {n:"Kalita Wave",b:"Kalita・日本",s:"flatb",t:"a",d:"平底三孔搭配波浪濾紙，以穩定著稱。",sp:[["結構","平底，三個小孔"],["濾紙","波浪（蛋糕）濾紙"],["材質","不鏽鋼、玻璃、陶瓷"]],f:"甜感高、均衡飽滿。",w:"想要每天都沖得穩的人。"},
+  {n:"April Brewer",b:"April・丹麥",s:"flatb",t:"b",d:"由丹麥烘豆商設計的平底濾杯，主打簡單的兩段式注水。",sp:[["結構","平底，底部多孔"],["濾紙","波浪濾紙"],["材質","玻璃、樹脂"]],f:"乾淨、甜、酸質柔和。",w:"淺焙北歐風格愛好者。"},
+  {n:"Orea",b:"Orea・英國",s:"flatb",t:"b",d:"底部開口極大的平底濾杯，阻力幾乎全由濾紙與粉床決定。",sp:[["結構","平底，大開口底座"],["濾紙","波浪或平底專用濾紙"],["特色","流速快，可細研磨"]],f:"高萃取、清晰、甜感明確。",w:"喜歡細研磨快流速配方的進階玩家。"},
+  {n:"Melitta 扇形濾杯",b:"Melitta・德國",s:"fan",t:"a",d:"1908 年發明濾紙滴濾法的品牌。單一小孔，倒水後交給濾杯控制流速。",sp:[["結構","扇形（梯形），直肋骨"],["出水","單一小孔"],["材質","樹脂、陶瓷"]],f:"濃厚、醇度高、苦甜平衡。",w:"中深焙、想一次注水就完成的人。"},
+  {n:"Clever 聰明濾杯",b:"台灣設計",s:"imm",t:"a",d:"台灣發明的浸泡式濾杯。底部活塞閥在放上杯子時才打開。",sp:[["結構","扇形杯身，底部活塞閥"],["濾紙","扇形濾紙"],["方式","浸泡後過濾"]],f:"圓潤、甜、杯杯一致。",w:"新手、辦公室、想測試豆子本質時。"},
+  {n:"Hario Switch",b:"Hario・日本",s:"imm",t:"b",d:"V60 玻璃濾杯加上開關閥，浸泡與滴濾可以自由組合。",sp:[["結構","V60 錐形加球閥底座"],["濾紙","V60 錐形濾紙"],["方式","浸泡、滴濾或混合"]],f:"前段滴濾取香氣，後段浸泡補甜感。",w:"想實驗混合式配方的人。"},
+  {n:"法式濾壓壺",b:"通用器具",s:"imm",t:"a",d:"粗研磨浸泡約四分鐘後，用金屬濾網下壓分離。",sp:[["過濾","金屬濾網"],["研磨","粗"],["特色","保留咖啡油脂"]],f:"醇厚、油脂感明顯，有些微細粉。",w:"不想買濾紙、喜歡厚重口感的人。"},
+  {n:"AeroPress 愛樂壓",b:"AeroPress・美國",s:"press",t:"a",d:"2005 年問世的針筒式沖煮器，浸泡後用手壓出。輕巧耐摔，有自己的世界大賽。",sp:[["方式","浸泡加手動加壓"],["濾材","圓形濾紙或金屬濾片"],["玩法","正放、倒置皆可"]],f:"乾淨又有厚度，配方變化極多。",w:"旅行、露營與愛實驗的人。"},
+  {n:"虹吸壺 Siphon",b:"通用器具",s:"press",t:"b",d:"加熱下壺產生蒸氣壓把水推到上壺，熄火後咖啡被吸回下壺。",sp:[["方式","高溫浸泡，真空回吸"],["濾材","濾布或濾紙"],["熱源","酒精燈、瓦斯、鹵素燈"]],f:"香氣奔放、溫度高、口感乾淨。",w:"喜歡儀式感與日式喫茶店風格的人。"},
+  {n:"摩卡壺 Moka Pot",b:"Bialetti・義大利",s:"press",t:"a",d:"1933 年誕生的爐上咖啡壺，利用下壺蒸氣壓把熱水推過粉層。",sp:[["壓力","約 1 至 2 bar"],["研磨","比義式略粗"],["熱源","瓦斯爐或電爐"]],f:"濃郁、苦甜，接近濃縮但沒有厚 crema。",w:"想在家做濃咖啡與牛奶咖啡的入門者。"}
+ ]},
+{id:"espresso",name:"義式咖啡機",title:"義式咖啡機",note:"用約 9 bar 的壓力，在 25 到 30 秒內萃取出一小杯濃縮。差別在於怎麼加熱、怎麼加壓。",
+ subs:[["sb","單鍋爐／即熱"],["hx","熱交換 HX"],["db","雙鍋爐"],["lever","拉霸"],["com","商用"],["auto","全自動"]],
+ principles:[
+  {k:"sb",label:"單鍋爐",h:"單鍋爐 Single Boiler",p:"一個鍋爐負責煮咖啡與打蒸氣。兩種溫度不同，所以要切換並等待升降溫。",pts:[["優點","結構簡單、價格低"],["限制","萃取與打奶不能同時"],["適合","以濃縮為主的家用"]]},
+  {k:"hx",label:"熱交換",h:"熱交換 Heat Exchanger",p:"鍋爐維持蒸氣溫度，一條管路穿過鍋爐，冷水流經時被加熱成萃取用水。",pts:[["優點","可同時萃取與打奶"],["限制","水溫需靠放水習慣管理"],["適合","常做奶咖的家庭"]]},
+  {k:"db",label:"雙鍋爐",h:"雙鍋爐 Dual Boiler",p:"萃取與蒸氣各有一個鍋爐，各自由 PID 控溫，互不干擾。",pts:[["優點","水溫精準穩定"],["限制","體積大、價格高、熱機久"],["適合","追求穩定與連續出杯"]]},
+  {k:"lever",label:"拉霸",h:"拉霸 Lever",p:"不用電動幫浦，靠手臂或彈簧推動活塞加壓。壓力曲線由操作者決定。",pts:[["優點","安靜、可自由控制壓力"],["限制","需要練習，出杯慢"],["適合","享受手感的玩家"]]},
+  {k:"tb",label:"即熱式",h:"即熱式 Thermoblock",p:"水流經加熱模組時瞬間升溫，不需要儲水鍋爐，開機幾秒就能使用。",pts:[["優點","熱機快、省電、機身小"],["限制","溫度穩定度較依賴控制"],["適合","空間小、偶爾使用"]]}],
+ items:[
+  {n:"Gaggia Classic",b:"Gaggia・義大利",s:"sb",t:"a",d:"1991 年推出至今的入門經典，使用商用規格 58mm 把手，改裝社群龐大。",sp:[["加熱","單鍋爐"],["把手","58mm"],["幫浦","振動式"]],f:"基本功能齊全，改裝空間大（加 PID、調壓）。",w:"預算有限、喜歡動手的人。"},
+  {n:"Rancilio Silvia",b:"Rancilio・義大利",s:"sb",t:"a",d:"以商用零件打造的家用單鍋爐機，耐用度高。",sp:[["加熱","單鍋爐（黃銅）"],["把手","58mm"],["蒸氣","力道強"]],f:"蒸氣強、機身扎實，溫度需靠手法掌握。",w:"想長期使用一台機器的入門者。"},
+  {n:"Breville Bambino Plus",b:"Breville・澳洲",s:"sb",t:"a",d:"即熱式小型機，開機約 3 秒可萃取，並有自動打奶功能。",sp:[["加熱","即熱式 ThermoJet"],["把手","54mm"],["特色","自動奶泡、預浸"]],f:"快速方便、體積小。",w:"廚房空間小、早上趕時間的人。"},
+  {n:"Breville Barista Express",b:"Breville・澳洲",s:"sb",t:"a",d:"內建磨豆機的一體機，一台完成研磨到萃取。",sp:[["加熱","即熱式"],["把手","54mm"],["磨豆","內建錐刀磨"]],f:"不必另購磨豆機，學習曲線平緩。",w:"想一次買齊的新手。"},
+  {n:"Rocket Appartamento",b:"Rocket・義大利",s:"hx",t:"b",d:"為公寓廚房設計的小型 HX 機，側板圓孔是招牌外觀。",sp:[["加熱","熱交換鍋爐"],["沖煮頭","E61"],["幫浦","振動式"]],f:"可同時萃取與打奶，經典 E61 手感。",w:"奶咖比例高、重視外型的家庭。"},
+  {n:"Lelit Bianca",b:"Lelit・義大利",s:"db",t:"b",d:"E61 沖煮頭上加裝流量撥桿，家用機中少見能手動控制流量的機型。",sp:[["加熱","雙鍋爐 PID"],["沖煮頭","E61 加流量控制撥桿"],["幫浦","迴轉式"]],f:"可玩長預浸與變壓萃取，適合淺焙濃縮。",w:"想研究流量曲線的進階玩家。"},
+  {n:"La Marzocco Linea Mini",b:"La Marzocco・義大利",s:"db",t:"c",d:"把咖啡館的 Linea Classic 縮小搬回家。",sp:[["加熱","雙鍋爐 PID"],["沖煮頭","整合式沖煮頭"],["幫浦","迴轉式"]],f:"溫度穩定、蒸氣強，手感接近商用機。",w:"想在家得到咖啡館水準的人。"},
+  {n:"La Marzocco Linea Micra",b:"La Marzocco・義大利",s:"db",t:"c",d:"比 Linea Mini 更小的雙鍋爐機，熱機快。",sp:[["加熱","雙鍋爐"],["把手","58mm"],["特色","體積小、熱機迅速"]],f:"小廚房也放得下的商用血統。",w:"空間有限但不想妥協品質的人。"},
+  {n:"Decent DE1",b:"Decent Espresso",s:"db",t:"c",d:"用平板即時顯示並控制壓力、流量與溫度曲線，可以模仿各種機型的萃取方式。",sp:[["加熱","即熱式加混水控溫"],["控制","平板軟體，曲線可分享"],["特色","即時壓力與流量圖"]],f:"把萃取變成看得見的資料。",w:"喜歡數據與實驗的人。"},
+  {n:"La Pavoni Europiccola",b:"La Pavoni・義大利",s:"lever",t:"b",d:"1961 年問世的家用拉霸機，鍍鉻外型幾十年沒大改。",sp:[["加壓","手動拉桿"],["加熱","小型鍋爐"],["把手","約 51mm"]],f:"壓力全靠手感，連續出杯會過熱。",w:"喜歡經典機械感的玩家。"},
+  {n:"Flair 58",b:"Flair・美國",s:"lever",t:"b",d:"沒有鍋爐的手壓機，沖煮頭可電熱預熱，使用標準 58mm 粉杯。",sp:[["加壓","手動拉桿"],["熱水","另外煮水倒入"],["把手","58mm"]],f:"壓力表即時回饋，可做各種壓力曲線。",w:"預算放在磨豆機、想用手壓做精品濃縮的人。"},
+  {n:"Cafelat Robot",b:"Cafelat",s:"lever",t:"b",d:"完全不用電的雙臂手壓機，結構簡單好清理。",sp:[["加壓","雙臂手壓"],["熱水","另外煮水倒入"],["特色","免預熱、全金屬"]],f:"簡單直接，濃縮品質意外地高。",w:"喜歡極簡與旅行攜帶的人。"},
+  {n:"La Marzocco Linea PB",b:"La Marzocco・義大利",s:"com",t:"c",d:"精品咖啡館最常見的吧台機之一。",sp:[["加熱","雙鍋爐，飽和式沖煮頭"],["幫浦","迴轉式"],["定位","多沖煮頭商用機"]],f:"連續出杯溫度穩定、耐用。",w:"咖啡館。"},
+  {n:"Victoria Arduino Black Eagle",b:"Victoria Arduino・義大利",s:"com",t:"c",d:"曾是世界咖啡師大賽的指定用機，可用內建電子秤依出液重量停止萃取。",sp:[["加熱","各沖煮頭獨立控溫"],["特色","Gravimetric 重量控制"],["定位","比賽與旗艦店"]],f:"以重量取代時間或流量，杯杯一致。",w:"高出杯量、重視一致性的店家。"},
+  {n:"Slayer Espresso",b:"Slayer・美國",s:"com",t:"c",d:"用針閥限制流量做長時間低流速預浸，帶起流量控制的風潮。",sp:[["控制","針閥預浸加撥桿"],["加熱","雙鍋爐加沖煮頭獨立鍋爐"],["定位","精品咖啡館"]],f:"淺焙濃縮也能做出甜感與厚度。",w:"以單品濃縮為主打的店家。"},
+  {n:"全自動咖啡機",b:"Jura、De’Longhi 等",s:"auto",t:"a",d:"按一個鍵完成磨豆、填壓、萃取與清洗，內部有可動的沖煮模組。",sp:[["操作","一鍵出杯"],["磨豆","內建"],["保養","需定期除垢與清洗沖煮器"]],f:"方便優先，風味可調整範圍有限。",w:"辦公室、家中多人使用。"}
+ ]},
+{id:"roasters",name:"烘焙設備",title:"烘焙設備",note:"烘豆是把熱送進生豆的過程。熱從哪裡來、怎麼傳給豆子，決定了烘豆機的性格。",
+ subs:[["manual","手動器具"],["homer","家用"],["sample","樣品機"],["shop","店用／工廠"]],
+ principles:[
+  {k:"direct",label:"直火",h:"直火式",p:"滾筒上有孔洞，火焰的熱與輻射直接接觸豆子。升溫反應快，對火力很敏感。",pts:[["熱源","傳導加輻射為主"],["風味","香氣濃烈、厚實，帶焙火感"],["難度","容易烘焦或不均"]]},
+  {k:"semi",label:"半熱風",h:"半熱風式",p:"火焰加熱實心滾筒，同時把熱空氣從後方抽進滾筒。傳導與對流並用，是最普遍的設計。",pts:[["熱源","傳導加對流"],["風味","均衡，甜感與厚度兼具"],["難度","穩定、可調整範圍大"]]},
+  {k:"air",label:"熱風",h:"熱風式",p:"燃燒室與滾筒分開，幾乎完全靠熱空氣加熱豆子。升溫快而均勻。",pts:[["熱源","對流為主"],["風味","乾淨、明亮、酸質清楚"],["難度","重現性高"]]},
+  {k:"fluid",label:"流體床",h:"流體床式",p:"沒有滾筒，熱風從下方把豆子吹起來翻滾。批次小、速度快，適合樣品烘焙。",pts:[["熱源","純對流"],["風味","非常乾淨，口感偏輕"],["難度","曲線可程式化"]]}],
+ items:[
+  {n:"手網與陶鍋",b:"通用器具",s:"manual",t:"a",d:"在瓦斯爐上搖晃烘焙，能直接看到顏色變化、聽到一爆聲。",sp:[["批量","約 50 至 100g"],["熱源","瓦斯爐"],["控制","全靠手與感官"]],f:"成本最低，是理解烘焙階段最直接的方法。",w:"想先體驗烘豆的人。"},
+  {n:"Gene Café CBR-101",b:"Genesis・韓國",s:"homer",t:"a",d:"斜軸旋轉的玻璃烘焙筒，整個過程都看得見。",sp:[["批量","約 250g"],["加熱","電熱熱風"],["控制","溫度與時間旋鈕"]],f:"均勻、乾淨，操作直覺。",w:"家用入門。"},
+  {n:"Behmor",b:"Behmor・美國",s:"homer",t:"a",d:"外型像烤箱的家用電熱滾筒機，內建抑煙設計。",sp:[["批量","最多約 450g"],["加熱","石英電熱管"],["控制","預設程式加手動"]],f:"適合中淺焙，批量大。",w:"在室內烘、一次想烘多一點的人。"},
+  {n:"Hottop",b:"Hottop・台灣",s:"homer",t:"b",d:"台灣製的家用電熱滾筒機，有觀景窗與冷卻盤，可接電腦記錄曲線。",sp:[["批量","約 250g"],["加熱","電熱滾筒"],["控制","火力與風門可調"]],f:"操作邏輯接近商用滾筒機。",w:"想學曲線概念的家用玩家。"},
+  {n:"Aillio Bullet R1",b:"Aillio・台灣生產",s:"homer",t:"b",d:"用電磁感應加熱滾筒的 1 公斤機，搭配 RoasTime 軟體記錄與重播曲線。",sp:[["批量","最多 1kg"],["加熱","電磁感應（IH）"],["感測","紅外線豆溫感測"]],f:"反應快、可重現，家用到小量接單都夠用。",w:"進階玩家與微型烘焙工作室。"},
+  {n:"Ikawa",b:"Ikawa・英國",s:"sample",t:"c",d:"用 App 設定曲線的流體床樣品機，生豆商與莊園常用來評估樣品。",sp:[["批量","約 50 至 100g"],["加熱","電熱流體床"],["控制","App 曲線，可分享"]],f:"同一條曲線在任何地方都能重現。",w:"生豆採購、品管、比賽選豆。"},
+  {n:"Kaffelogic Nano 7",b:"Kaffelogic・紐西蘭",s:"sample",t:"b",d:"桌上型流體床機，依設定曲線自動控制。",sp:[["批量","約 50 至 120g"],["加熱","電熱流體床"],["控制","曲線檔可編輯"]],f:"小批量、乾淨、容易重複。",w:"家用樣品烘焙與曲線實驗。"},
+  {n:"Stronghold S7",b:"Stronghold・韓國",s:"shop",t:"c",d:"直立式電熱烘豆機，結合熱風與鹵素燈，可自動重播儲存的曲線。",sp:[["批量","約 850g"],["加熱","電熱熱風加鹵素"],["特色","自動重現、不需瓦斯"]],f:"乾淨明亮，店內安裝門檻低。",w:"沒有瓦斯管線的店面。"},
+  {n:"楊家飛馬 800N",b:"楊家機器・台灣",s:"shop",t:"b",d:"台灣自家烘焙店常見的 1 公斤瓦斯機。",sp:[["批量","約 1kg"],["加熱","瓦斯"],["型式","半熱風／直火"]],f:"結構單純、維修方便。",w:"小型自家烘焙店起步。"},
+  {n:"Fuji Royal R-101／R-103",b:"富士珈機・日本",s:"shop",t:"c",d:"日本自家烘焙店的標準配備，可選直火或半熱風。",sp:[["批量","1kg／3kg"],["加熱","瓦斯"],["型式","直火或半熱風"]],f:"直火版香氣濃厚，是日式深焙的代表。",w:"喜歡日系風格的烘焙店。"},
+  {n:"Probat",b:"Probat・德國",s:"shop",t:"c",d:"1868 年創立的烘豆機品牌，鑄鐵滾筒蓄熱好，老機型在收藏市場很搶手。",sp:[["批量","1kg 到工廠級"],["加熱","瓦斯"],["型式","半熱風，鑄鐵滾筒"]],f:"厚實、甜感高、穩定。",w:"各種規模的專業烘焙廠。"},
+  {n:"Giesen",b:"Giesen・荷蘭",s:"shop",t:"c",d:"鑄鐵機身，可精細調整滾筒轉速與風壓，曾是世界烘豆大賽的指定用機。",sp:[["批量","1kg 到工廠級"],["加熱","瓦斯"],["特色","風壓與轉速可調"]],f:"可調參數多，風味塑造空間大。",w:"精品烘焙店與比賽選手。"},
+  {n:"Diedrich",b:"Diedrich・美國",s:"shop",t:"c",d:"使用紅外線燃燒器的滾筒機，加熱柔和均勻。",sp:[["批量","1kg 到工廠級"],["加熱","瓦斯紅外線燃燒器"],["型式","半熱風"]],f:"乾淨、甜感清楚。",w:"精品烘焙廠。"},
+  {n:"Loring",b:"Loring・美國",s:"shop",t:"c",d:"單一燃燒器同時負責加熱與處理煙氣，熱風循環使用，相當省燃料。",sp:[["批量","7kg 到工廠級"],["加熱","瓦斯，全熱風循環"],["特色","免外加後燃機"]],f:"乾淨、明亮、重現性極高。",w:"中大型精品烘焙廠。"}
+ ]}
+];
+CATS.forEach(c=>c.items.forEach((it,i)=>{it.id=c.id+"-"+i;it.cat=c}));
+const ALL=CATS.flatMap(c=>c.items);
+
+const QUIZ=[
+ {q:"哪一種刀盤的粒徑分布通常最集中、風味最乾淨？",o:["錐刀","平刀","砍豆式刀片"],a:1,e:"平刀靠兩片平行刀盤逐步切細，粒徑集中，乾淨度與分離度高。"},
+ {q:"手搖磨豆機大多採用哪種刀盤？",o:["錐刀","平刀","鬼齒"],a:0,e:"錐刀所需轉速與扭力低，適合人力驅動。"},
+ {q:"Hario V60 名稱裡的 60 指的是什麼？",o:["容量 60 毫升","錐角 60 度","60 條肋骨"],a:1,e:"V 是錐形的形狀，60 是錐角角度。"},
+ {q:"Kalita Wave 屬於哪一類濾杯？",o:["錐形","平底","扇形"],a:1,e:"平底三孔，搭配波浪濾紙，以穩定與甜感著稱。"},
+ {q:"哪個器具是先浸泡、放上杯子後才開閥過濾？",o:["Chemex","聰明濾杯","摩卡壺"],a:1,e:"聰明濾杯底部有活塞閥，放上杯子被頂開才出水。"},
+ {q:"義式濃縮的標準萃取壓力大約是多少？",o:["約 1.5 bar","約 9 bar","約 30 bar"],a:1,e:"約 9 bar。摩卡壺只有 1 至 2 bar，所以不算真正的濃縮。"},
+ {q:"哪種鍋爐設計讓萃取與蒸氣各有獨立鍋爐？",o:["單鍋爐","熱交換","雙鍋爐"],a:2,e:"雙鍋爐各自控溫，水溫最穩定。"},
+ {q:"熱交換（HX）機的萃取用水是怎麼加熱的？",o:["流經穿過蒸氣鍋爐的管路","直接取用蒸氣鍋爐的水","用微波加熱"],a:0,e:"冷水流過穿越蒸氣鍋爐的管路，途中被加熱。"},
+ {q:"拉霸機的壓力來自哪裡？",o:["電動幫浦","手臂或彈簧推動活塞","蒸氣壓"],a:1,e:"拉霸機用活塞加壓，壓力曲線由操作者或彈簧決定。"},
+ {q:"哪一種烘豆機完全沒有滾筒？",o:["直火式","半熱風式","流體床式"],a:2,e:"流體床用熱風把豆子吹起翻滾。"},
+ {q:"直火式烘豆機的滾筒有什麼特徵？",o:["滾筒上有孔洞","滾筒是雙層的","沒有攪拌葉片"],a:0,e:"孔洞讓火焰的熱直接接觸豆子。"},
+ {q:"Chemex 的杯感乾淨，主要原因是什麼？",o:["玻璃材質","濾紙特別厚","水溫較低"],a:1,e:"厚濾紙攔下更多油脂與細粉。"},
+ {q:"Kono 濾杯的肋骨只做在下半部，目的是什麼？",o:["讓上半部濾紙貼壁，水只往下流","方便清洗","節省材料"],a:0,e:"上半部貼壁後空氣只能從下方排出，流速較慢、口感厚實。"},
+ {q:"單份研磨（single dosing）的主要好處是什麼？",o:["磨得更快","殘粉少、每杯可換豆","不需要校正"],a:1,e:"每次只磨要用的量，殘粉少、豆子新鮮。"},
+ {q:"半熱風烘豆機主要靠哪兩種方式傳熱？",o:["傳導與對流","輻射與微波","只有傳導"],a:0,e:"火焰加熱滾筒（傳導），同時抽入熱空氣（對流）。"},
+ {q:"EK43 原本的設計用途是什麼？",o:["家用手沖","商用大量研磨","義式定量磨"],a:1,e:"它原是商用大量研磨機，後來才被精品咖啡館用於單品與濃縮。"}
+];
+
+/* ---------- 狀態 ---------- */
+const store={get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+const S={cat:"grinders",sub:"all",q:"",favOnly:false,open:{},prin:{},cmp:[],favs:new Set(store.get("gear-favs",[])),sheet:false,quiz:null};
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+/* ---------- 原理圖 ---------- */
+const L='stroke="var(--bp-line)" fill="none" stroke-width="1.5"';
+const HOT='stroke="var(--bp-hot)" fill="none" stroke-width="1.5"';
+const FLOW='class="flow" stroke-dasharray="4 4"';
+function svg(inner,h=170){return `<svg viewBox="0 0 300 ${h}" role="img">${inner}</svg>`}
+function dist(main,fs,fa){
+  const g=(x,m,s)=>Math.exp(-((x-m)**2)/(2*s*s));let pts=[];
+  for(let x=20;x<=280;x+=4){const y=g(x,195,main)+fa*g(x,70,fs);pts.push(`${x},${(232-y*52).toFixed(1)}`)}
+  return `<line x1="20" y1="232" x2="280" y2="232" ${L} stroke-width="1"/><polyline points="${pts.join(" ")}" ${HOT} stroke-width="2"/><text x="20" y="246">細</text><text x="268" y="246">粗</text><text x="118" y="246">粒徑分布示意</text>`;
+}
+const dots=(xs,y,c)=>xs.map((x,i)=>`<circle cx="${x}" cy="${y+(i%2)*5}" r="${c}" fill="var(--bp-hot)"/>`).join("");
+const DIAG={
+ conical:()=>svg(`<polygon points="62,14 105,14 118,128 62,128" ${L}/><polygon points="238,14 195,14 182,128 238,128" ${L}/><polygon points="140,30 160,30 176,128 124,128" ${L}/>${dots([120,130,170,182],12,3.5)}${dots([121,123,179,177],140,1.5)}<line x1="150" y1="30" x2="150" y2="6" ${L}/><text x="132" y="90">內刀</text><text x="66" y="76">外刀</text><text x="200" y="76">固定</text><path d="M112 40 L120 110" ${HOT} ${FLOW}/><path d="M188 40 L180 110" ${HOT} ${FLOW}/>${dist(40,22,.42)}`,252),
+ flat:()=>svg(`<rect x="55" y="48" width="82" height="20" ${L}/><rect x="163" y="48" width="82" height="20" ${L}/><rect x="55" y="76" width="190" height="20" ${L}/><line x1="150" y1="96" x2="150" y2="128" ${L}/>${dots([144,150,156],22,3.5)}<path d="M150 36 L150 70" ${HOT} ${FLOW}/><path d="M146 72 L50 72" ${HOT} ${FLOW}/><path d="M154 72 L250 72" ${HOT} ${FLOW}/>${dots([40,34,262,268],70,1.5)}<text x="58" y="42">上刀盤 固定</text><text x="58" y="112">下刀盤 旋轉</text>${dist(24,18,.2)}`,252),
+ ghost:()=>{let t="";for(let x=62;x<=240;x+=14){if(x<136||x>162)t+=`<path d="M${x} 68 q5 7 10 0" ${L}/>`;t+=`<path d="M${x} 82 q5 -7 10 0" ${L}/>`}
+  return svg(`<rect x="55" y="42" width="82" height="26" ${L}/><rect x="163" y="42" width="82" height="26" ${L}/><rect x="55" y="82" width="190" height="26" ${L}/>${t}<line x1="150" y1="108" x2="150" y2="132" ${L}/>${dots([144,150,156],18,3.5)}<path d="M150 30 L150 72" ${HOT} ${FLOW}/><path d="M146 75 L50 75" ${HOT} ${FLOW}/><path d="M154 75 L250 75" ${HOT} ${FLOW}/><text x="58" y="36">齒丘輾壓</text><text x="58" y="124">顆粒偏圓</text>${dist(30,18,.14)}`,252)},
+ cone:()=>svg(`<polygon points="80,20 220,20 158,120 142,120" ${L}/><path d="M96 34 L204 34 L160 106 L140 106 Z" fill="var(--bp-hot)" opacity=".28"/><path d="M120 30 q20 40 26 86" ${L} stroke-width="1"/><path d="M180 30 q-20 40 -26 86" ${L} stroke-width="1"/><path d="M150 122 L150 160" ${HOT} ${FLOW}/><text x="10" y="70">粉層深</text><text x="226" y="70">單一大孔</text><text x="160" y="150">流速快</text>`),
+ flatb:()=>svg(`<polygon points="75,20 225,20 200,110 100,110" ${L}/><path d="M92 58 L208 58 L196 104 L104 104 Z" fill="var(--bp-hot)" opacity=".28"/><path d="M125 112 L125 158" ${HOT} ${FLOW}/><path d="M150 112 L150 158" ${HOT} ${FLOW}/><path d="M175 112 L175 158" ${HOT} ${FLOW}/><text x="6" y="88">粉床平坦</text><text x="230" y="88">三小孔</text><text x="186" y="150">流速穩定</text>`),
+ fan:()=>svg(`<polygon points="70,20 230,20 180,115 120,115" ${L}/><path d="M92 50 L208 50 L178 109 L122 109 Z" fill="var(--bp-hot)" opacity=".28"/><line x1="120" y1="115" x2="180" y2="115" ${L} stroke-width="3"/><path d="M150 118 L150 158" ${HOT} ${FLOW}/><text x="6" y="80">底部一線</text><text x="226" y="80">單一小孔</text><text x="160" y="150">流速慢</text>`),
+ imm:()=>svg(`<polygon points="75,20 225,20 162,112 138,112" ${L}/><path d="M86 30 L214 30 L164 104 L136 104 Z" fill="var(--bp-hot)" opacity=".28"/><rect x="128" y="112" width="44" height="12" ${HOT} fill="var(--bp-bg)"/><text x="178" y="122">閥門關閉</text><text x="110" y="70">粉水浸泡</text><path d="M150 128 L150 160" ${L} stroke-dasharray="2 5"/><text x="160" y="152">開閥後才過濾</text>`),
+ direct:()=>svg(`<circle cx="150" cy="72" r="52" ${L} stroke-dasharray="6 5"/>${dots([126,140,156,170,134,164],96,4)}<path d="M110 150 q8 -20 0 -32 M150 152 q8 -22 0 -36 M190 150 q8 -20 0 -32" ${HOT} stroke-width="2.5"/><text x="210" y="50">滾筒有孔洞</text><text x="206" y="160">火焰直接加熱</text>`),
+ semi:()=>svg(`<circle cx="150" cy="72" r="52" ${L}/>${dots([126,140,156,170,134,164],96,4)}<path d="M110 150 q8 -18 0 -24 M150 152 q8 -18 0 -24 M190 150 q8 -18 0 -24" ${HOT} stroke-width="2.5"/><path d="M20 72 L96 72" ${HOT} ${FLOW}/><path d="M204 72 L282 72" ${L} ${FLOW}/><text x="14" y="62">熱空氣</text><text x="238" y="62">排氣</text><text x="206" y="160">火加熱滾筒</text>`),
+ air:()=>svg(`<circle cx="180" cy="72" r="50" ${L}/>${dots([158,172,188,200,166,194],94,4)}<rect x="16" y="50" width="62" height="44" ${L}/><path d="M38 86 q8 -18 0 -26 M56 86 q8 -18 0 -26" ${HOT} stroke-width="2.5"/><path d="M80 72 L128 72" ${HOT} ${FLOW}/><path d="M232 72 L290 72" ${L} ${FLOW}/><text x="18" y="42">獨立燃燒室</text><text x="92" y="62">熱風</text><text x="130" y="150">火不接觸滾筒</text>`),
+ fluid:()=>svg(`<path d="M110 14 L110 110 L135 138 L165 138 L190 110 L190 14" ${L}/>${dots([126,150,172,138,162,146],40,4)}${dots([132,158,170,142],78,4)}<path d="M150 166 L150 120" ${HOT} ${FLOW} stroke-width="2.5"/><path d="M138 112 L124 60" ${HOT} ${FLOW}/><path d="M162 112 L176 60" ${HOT} ${FLOW}/><text x="200" y="60">豆子被吹起</text><text x="162" y="160">熱風由下往上</text>`)
+};
+function boxes(bs,ls){
+  return svg(ls.map(l=>`<path d="${l.d}" ${l.hot?HOT:L} ${FLOW}/>`).join("")+bs.map(b=>`<rect x="${b.x}" y="${b.y}" width="${b.w}" height="${b.h}" ${b.hot?HOT:L} fill="var(--bp-bg)"/><text x="${b.x+b.w/2}" y="${b.y+b.h/2+4}" text-anchor="middle">${b.t}</text>`).join(""));
+}
+Object.assign(DIAG,{
+ sb:()=>boxes([{x:10,y:66,w:56,h:34,t:"幫浦"},{x:104,y:50,w:92,h:66,t:"鍋爐（共用）",hot:1},{x:226,y:22,w:66,h:34,t:"蒸氣棒"},{x:226,y:112,w:66,h:34,t:"沖煮頭"}],[{d:"M66 83 L104 83"},{d:"M196 66 L226 40",hot:1},{d:"M196 100 L226 128",hot:1}]),
+ hx:()=>boxes([{x:10,y:66,w:56,h:34,t:"幫浦"},{x:100,y:30,w:100,h:106,t:"",hot:1},{x:226,y:22,w:66,h:34,t:"蒸氣棒"},{x:226,y:112,w:66,h:34,t:"沖煮頭"}],[{d:"M66 83 L226 128"},{d:"M200 50 L226 40",hot:1}]).replace("</svg>",`<text x="150" y="50" text-anchor="middle">蒸氣鍋爐</text><text x="150" y="128" text-anchor="middle">管路穿過鍋爐</text></svg>`),
+ db:()=>boxes([{x:10,y:66,w:56,h:34,t:"幫浦"},{x:104,y:18,w:92,h:46,t:"蒸氣鍋爐",hot:1},{x:104,y:102,w:92,h:46,t:"萃取鍋爐",hot:1},{x:226,y:24,w:66,h:34,t:"蒸氣棒"},{x:226,y:108,w:66,h:34,t:"沖煮頭"}],[{d:"M66 76 L104 46"},{d:"M66 90 L104 122"},{d:"M196 41 L226 41",hot:1},{d:"M196 125 L226 125",hot:1}]),
+ lever:()=>svg(`<path d="M150 62 L236 22" ${L} stroke-width="3"/><circle cx="240" cy="20" r="5" ${L}/><rect x="124" y="60" width="52" height="62" ${L}/><rect x="128" y="76" width="44" height="10" ${HOT}/><line x1="150" y1="62" x2="150" y2="76" ${L}/><path d="M132 92 L168 92 L168 118 L132 118 Z" fill="var(--bp-hot)" opacity=".28"/><rect x="118" y="122" width="64" height="12" ${L}/><path d="M150 136 L150 164" ${HOT} ${FLOW}/><text x="186" y="84">活塞</text><text x="186" y="110">熱水</text><text x="52" y="132">粉餅</text><text x="186" y="40">拉桿</text>`),
+ tb:()=>boxes([{x:10,y:66,w:56,h:34,t:"幫浦"},{x:104,y:58,w:92,h:50,t:"即熱模組",hot:1},{x:226,y:66,w:66,h:34,t:"沖煮頭"}],[{d:"M66 83 L104 83"},{d:"M196 83 L226 83",hot:1}])
+});
+
+/* ---------- 畫面 ---------- */
+function renderTabs(){
+  $("#tabs").innerHTML=CATS.map(c=>`<button class="tab" role="tab" aria-selected="${S.cat===c.id}" data-act="cat" data-v="${c.id}">${c.name}</button>`).join("")+`<button class="tab" role="tab" aria-selected="${S.cat==="quiz"}" data-act="cat" data-v="quiz">小測驗</button>`;
+}
+function card(it,showCat){
+  const open=!!S.open[it.id],fav=S.favs.has(it.id),cmp=S.cmp.includes(it.id);
+  const subLabel=(it.cat.subs.find(s=>s[0]===it.s)||[])[1]||"";
+  return `<article class="card${fav?" fav":""}">
+    <div class="meta">${esc(it.b)}${showCat?"　／　"+it.cat.name:""}</div>
+    <h3>${esc(it.n)}</h3>
+    <div class="pills"><span class="pill">${subLabel}</span><span class="pill tier">${TIERS[it.t]}</span></div>
+    <p>${esc(it.d)}</p>
+    ${open?`<div class="detail"><dl class="spec">${it.sp.map(r=>`<dt>${esc(r[0])}</dt><dd>${esc(r[1])}</dd>`).join("")}</dl><h4>特色</h4><p>${esc(it.f)}</p><h4>適合</h4><p>${esc(it.w)}</p></div>`:""}
+    <div class="acts">
+      <button class="btn" data-act="open" data-v="${it.id}" aria-expanded="${open}">${open?"收合":"看規格"}</button>
+      <button class="btn fav" data-act="fav" data-v="${it.id}" aria-pressed="${fav}">${fav?"★ 已收藏":"☆ 收藏"}</button>
+      <button class="btn" data-act="cmp" data-v="${it.id}" aria-pressed="${cmp}">${cmp?"✓ 比較中":"＋ 比較"}</button>
+    </div></article>`;
+}
+function match(it,q){return (it.n+it.b+it.d+it.f+it.w+it.sp.flat().join("")+it.cat.name+TIERS[it.t]).toLowerCase().includes(q)}
+function renderCat(){
+  const q=S.q.trim().toLowerCase();
+  if(q){
+    const hits=ALL.filter(it=>match(it,q));
+    return `<section><h2>搜尋「${esc(S.q.trim())}」</h2><p class="count">${hits.length} 項符合，涵蓋全部分類</p>${hits.length?`<div class="list">${hits.map(it=>card(it,true)).join("")}</div>`:`<p class="empty">找不到符合的器材。試試品牌名、刀盤類型或產地。</p>`}</section>`;
+  }
+  const c=CATS.find(x=>x.id===S.cat);
+  const pi=S.prin[c.id]||0,p=c.principles[pi];
+  let items=c.items.filter(it=>(S.sub==="all"||it.s===S.sub)&&(!S.favOnly||S.favs.has(it.id)));
+  return `<section><h2>${c.title}</h2><p class="sec-note">${c.note}</p>
+    <div class="bp"><div class="bp-tabs">${c.principles.map((x,i)=>`<button class="bp-tab" data-act="prin" data-v="${i}" aria-pressed="${i===pi}">${x.label}</button>`).join("")}</div>
+    <div class="bp-body"><div>${DIAG[p.k]()}</div><div><h3>${p.h}</h3><p>${p.p}</p><ul>${p.pts.map(r=>`<li><b>${r[0]}</b><span>${r[1]}</span></li>`).join("")}</ul><div class="cap">示意圖，僅說明結構與趨勢</div></div></div></div>
+  </section>
+  <section><h2>代表器材</h2><p class="sec-note">點「看規格」展開細節，點「＋ 比較」最多選 3 項並排。</p>
+    <div class="filters"><button class="chip" data-act="sub" data-v="all" aria-pressed="${S.sub==="all"}">全部</button>${c.subs.map(s=>`<button class="chip" data-act="sub" data-v="${s[0]}" aria-pressed="${S.sub===s[0]}">${s[1]}</button>`).join("")}<button class="chip" data-act="favonly" aria-pressed="${S.favOnly}">★ 只看收藏</button></div>
+    <p class="count">${items.length} 項</p>
+    ${items.length?`<div class="list">${items.map(it=>card(it)).join("")}</div>`:`<p class="empty">${S.favOnly?"這個分類還沒有收藏。":"沒有符合的器材。"}</p>`}
+  </section>
+  <footer>規格為各機型常見版本的概略資料，改款後可能不同。風味描述是一般傾向，實際結果仍取決於豆子與沖煮方式。</footer>`;
+}
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function newQuiz(){S.quiz={qs:shuffle(QUIZ.map((_,i)=>i)).slice(0,8),i:0,score:0,pick:null}}
+function renderQuiz(){
+  if(!S.quiz)newQuiz();
+  const z=S.quiz,best=store.get("gear-quiz-best",0);
+  if(z.i>=z.qs.length){
+    return `<section><h2>器材小測驗</h2><div class="quiz"><div class="prog">完成</div><div class="score">${z.score} / ${z.qs.length}</div><p>${z.score===z.qs.length?"全對，可以去當器材顧問了。":z.score>=6?"基礎很穩，再看一次原理圖就能全對。":"回到各分類看看原理圖，再來挑戰一次。"}</p><p class="prog">最佳紀錄 ${Math.max(best,z.score)} / 8</p><div class="acts"><button class="btn solid" data-act="quiznew">再玩一次</button></div></div></section>`;
+  }
+  const Q=QUIZ[z.qs[z.i]],done=z.pick!==null;
+  return `<section><h2>器材小測驗</h2><p class="sec-note">每回合從題庫隨機抽 8 題。</p><div class="quiz"><div class="prog">第 ${z.i+1} 題／共 ${z.qs.length} 題　目前 ${z.score} 分</div><h3>${Q.q}</h3>
+   <div class="opts">${Q.o.map((o,i)=>`<button class="opt${done&&i===Q.a?" right":done&&i===z.pick?" wrong":""}" data-act="ans" data-v="${i}" ${done?"disabled":""}>${o}</button>`).join("")}</div>
+   ${done?`<p class="explain">${z.pick===Q.a?"答對了。":"答錯了。"}${Q.e}</p><div class="acts"><button class="btn solid" data-act="next">${z.i+1<z.qs.length?"下一題":"看成績"}</button></div>`:""}</div></section>`;
+}
+function renderCmp(){
+  const its=S.cmp.map(id=>ALL.find(x=>x.id===id)).filter(Boolean);
+  $("#cmpbar").innerHTML=its.length?`<div class="cmpbar"><div class="wrap"><span>比較：${its.map(i=>esc(i.n)).join("、")}</span><span style="display:flex;gap:6px;flex:0 0 auto"><button class="btn" data-act="cmpclear">清除</button><button class="btn solid" data-act="sheet">並排比較（${its.length}）</button></span></div></div>`:"";
+  if(!S.sheet||!its.length){$("#sheet").innerHTML="";S.sheet=false;return}
+  const keys=[];its.forEach(i=>i.sp.forEach(r=>{if(!keys.includes(r[0]))keys.push(r[0])}));
+  const row=(h,f)=>`<tr><th>${h}</th>${its.map(i=>`<td>${esc(f(i)||"—")}</td>`).join("")}</tr>`;
+  $("#sheet").innerHTML=`<div class="sheet" role="dialog" aria-label="並排比較"><div class="wrap"><div class="sheet-head"><h2>並排比較</h2><button class="btn solid" data-act="sheetclose">關閉</button></div>
+   <div class="tblwrap"><table><thead><tr><th></th>${its.map(i=>`<th>${esc(i.n)}</th>`).join("")}</tr></thead><tbody>
+   ${row("分類",i=>i.cat.name)}${row("類型",i=>(i.cat.subs.find(s=>s[0]===i.s)||[])[1])}${row("定位",i=>TIERS[i.t])}${row("品牌",i=>i.b)}
+   ${keys.map(k=>row(k,i=>(i.sp.find(r=>r[0]===k)||[])[1])).join("")}${row("特色",i=>i.f)}${row("適合",i=>i.w)}
+   </tbody></table></div></div></div>`;
+}
+function render(){
+  renderTabs();
+  $("#app").innerHTML=(S.cat==="quiz"&&!S.q.trim())?renderQuiz():renderCat();
+  renderCmp();
+}
+
+/* ---------- 事件 ---------- */
+document.addEventListener("click",e=>{
+  const b=e.target.closest("[data-act]");if(!b)return;
+  const a=b.dataset.act,v=b.dataset.v;
+  if(a==="cat"){S.cat=v;S.sub="all";S.favOnly=false;S.q="";$("#q").value="";try{history.replaceState(null,"","#"+v)}catch(_){location.hash=v}window.scrollTo(0,0)}
+  else if(a==="sub")S.sub=v;
+  else if(a==="favonly")S.favOnly=!S.favOnly;
+  else if(a==="prin")S.prin[S.cat]=+v;
+  else if(a==="open")S.open[v]=!S.open[v];
+  else if(a==="fav"){S.favs.has(v)?S.favs.delete(v):S.favs.add(v);store.set("gear-favs",[...S.favs])}
+  else if(a==="cmp"){const i=S.cmp.indexOf(v);if(i>=0)S.cmp.splice(i,1);else{if(S.cmp.length>=3)S.cmp.shift();S.cmp.push(v)}}
+  else if(a==="cmpclear"){S.cmp=[];S.sheet=false}
+  else if(a==="sheet")S.sheet=true;
+  else if(a==="sheetclose")S.sheet=false;
+  else if(a==="quiznew")newQuiz();
+  else if(a==="ans"){const z=S.quiz;if(z.pick===null){z.pick=+v;if(z.pick===QUIZ[z.qs[z.i]].a)z.score++}}
+  else if(a==="next"){const z=S.quiz;z.i++;z.pick=null;if(z.i>=z.qs.length){const best=store.get("gear-quiz-best",0);if(z.score>best)store.set("gear-quiz-best",z.score)}}
+  render();
+});
+$("#q").addEventListener("input",e=>{S.q=e.target.value;renderTabs();$("#app").innerHTML=(S.cat==="quiz"&&!S.q.trim())?renderQuiz():renderCat()});
+function fromHash(){const h=location.hash.slice(1);if(h==="quiz"||CATS.some(c=>c.id===h)){S.cat=h;S.sub="all"}}
+window.addEventListener("hashchange",()=>{fromHash();render()});
+function start(d){
+  if(d&&d.cat){Object.assign(S,{cat:d.cat,sub:d.sub||"all",cmp:d.cmp||[],open:d.open||{},prin:d.prin||{},quiz:d.quiz||null})}
+  fromHash();render();
+}
+window.claude?.hot?.snapshot?.(()=>({cat:S.cat,sub:S.sub,cmp:S.cmp,open:S.open,prin:S.prin,quiz:S.quiz}));
+window.claude?.hot?.ready?window.claude.hot.ready(start):start(window.claude?.hot?.data??{});
+</script>
+</body>
+</html>
