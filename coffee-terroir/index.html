@@ -43,7 +43,7 @@ a.map::before{content:"";width:8px;height:8px;border-radius:50% 50% 50% 0;backgr
 .dot{width:38px;height:38px;border-radius:50%;flex:none;display:grid;place-items:center;color:#fff;font-family:"Noto Serif TC",serif;font-weight:900;font-size:15px}
 .note{background:#fbf3e3;border-left:3px solid var(--honey);padding:9px 12px;border-radius:0 10px 10px 0;font-size:13.5px;margin:0 0 12px}
 nav{position:fixed;left:0;right:0;bottom:0;background:var(--ink);display:flex;justify-content:center;padding:6px 4px calc(6px + env(safe-area-inset-bottom,0px));z-index:9}
-nav a{flex:1;max-width:120px;text-align:center;color:#c9b8a6;text-decoration:none;font-size:12.5px;padding:8px 0;border-radius:10px}
+nav a{flex:1;max-width:110px;text-align:center;color:#c9b8a6;text-decoration:none;font-size:12.5px;padding:8px 0;border-radius:10px}
 nav a i{display:block;font-style:normal;font-family:"Noto Serif TC",serif;font-size:17px;font-weight:900;line-height:1.2}
 nav a.on{background:#4a3327;color:#fff}nav a.on i{color:var(--honey)}
 .btn{border:0;border-radius:10px;background:var(--ink);color:#fff;font:inherit;font-weight:500;padding:9px 16px;cursor:pointer}
@@ -101,6 +101,14 @@ canvas{width:100%;height:230px;display:block}
 .fd{margin:6px 0 10px;font-size:13.5px;border-top:1px dashed var(--line);padding-top:8px}
 .fd dt{color:var(--cherry);font-size:12px;letter-spacing:.06em;margin-top:6px}
 .fd dd{margin:1px 0 0}
+.cbar{display:flex;height:26px;border-radius:8px;overflow:hidden;margin:6px 0}
+.cbar span{display:grid;place-items:center;color:#fff;font-size:11.5px;white-space:nowrap;overflow:hidden;transition:flex .3s}
+.blend-grid{display:grid;grid-template-columns:1fr;gap:6px;align-items:center}
+@media(min-width:560px){.blend-grid{grid-template-columns:260px 1fr}}
+.radar{width:100%;max-width:280px;display:block;margin:auto}
+.contrib{display:grid;grid-template-columns:auto 1fr;gap:4px 8px;font-size:13.5px;margin-top:6px}
+.contrib i{width:10px;height:10px;border-radius:3px;margin-top:6px;display:block}
+.msl{display:grid;grid-template-columns:7.4em 1fr 2.6em;gap:6px;align-items:center;font-size:13px}
 .win{text-align:center;padding:26px 14px}.win .st{font-size:38px;color:var(--honey);letter-spacing:4px}
 </style>
 </head>
@@ -164,6 +172,18 @@ canvas{width:100%;height:230px;display:block}
   <div class="rpanel result" id="rRes" style="display:none"></div>
   <div class="rpanel" id="rLogBox" style="display:none"><b>我的烘焙紀錄</b><div class="rlog" id="rLog" style="margin-top:6px"></div></div>
   <div id="rInfo"></div>
+</section>
+<section class="view" id="v-blends">
+  <h2 class="vt">配方豆組與風味圖解</h2><p class="vs">配方豆是把不同產地的豆子混在一起，讓各自的優點互補</p>
+  <div class="note">為什麼要做配方？單一產地像獨奏，配方像合奏：用<b>巴西</b>打底給醇厚與堅果巧克力，<b>哥倫比亞／中美洲</b>補甜感與平衡，<b>衣索比亞／肯亞</b>點綴花果香與酸質，<b>曼特寧</b>或<b>羅布斯塔</b>加厚度與苦韻。下面的比例是常見範例，各家烘豆商的實際配方不同。</div>
+  <div class="chips" id="bChips"></div>
+  <div class="rpanel" id="bCard"></div>
+  <h2 class="vt" style="margin-top:18px">自己調一支配方</h2><p class="vs">拖動滑桿調整比例與焙度，雷達圖即時顯示風味變化</p>
+  <div class="rpanel"><div class="blend-grid"><div id="mRadar"></div><div><div id="mBar" class="cbar"></div><div id="mTags" class="tags" style="margin-top:6px"></div></div></div>
+    <div id="mSliders"></div>
+    <label style="font-size:13px;display:block;margin-top:8px">焙度 <b id="mRoastV"></b></label><input type="range" id="mRoast" min="0" max="100" value="45">
+    <div class="row" style="margin-top:8px"><button class="btn sec" id="mReset">清空</button><span id="mHint" style="font-size:12.5px;color:var(--mut)"></span></div>
+  </div>
 </section>
 <section class="view" id="v-game">
   <h2 class="vt">咖啡知識消消樂</h2><p class="vs">點兩張互相對應的牌（名詞 ↔ 說明）就能消除</p>
@@ -353,7 +373,7 @@ const PAIRS={
 PAIRS['綜合']=Object.values(PAIRS).flat();
 
 /* ---------- NAV / ROUTING ---------- */
-const VIEWS=[['origins','產地','地'],['varieties','品種','種'],['farms','莊園','園'],['process','處理法','洗'],['roast','烘焙','烘'],['game','消消樂','玩']];
+const VIEWS=[['origins','產地','地'],['varieties','品種','種'],['farms','莊園','園'],['process','處理法','洗'],['roast','烘焙','烘'],['blends','配方','配'],['game','消消樂','玩']];
 $('#nav').innerHTML=VIEWS.map(v=>`<a href="#${v[0]}" data-v="${v[0]}"><i>${v[2]}</i>${v[1]}</a>`).join('');
 function route(){let v=location.hash.slice(1);if(!VIEWS.some(x=>x[0]===v))v=store.get('ct-view','origins');
   if(!VIEWS.some(x=>x[0]===v))v='origins';store.set('ct-view',v);
@@ -548,6 +568,76 @@ function finish(win){
   $('#gAgain').onclick=()=>startLevel(G.lv);const nx=$('#gNextLv');if(nx)nx.onclick=()=>startLevel(G.lv+1);
 }
 $('#gBack').onclick=()=>{clearInterval(G.timer);$('#gPlay').style.display='none';$('#gMenu').style.display='block';drawMenu()};
+
+/* ---------- BLENDS ---------- */
+// 風味維度：酸質、甜感、醇厚、苦味、花果香、堅果巧克力（0–5，以中焙為基準）
+const BDIM=['酸質','甜感','醇厚','苦味','花果香','堅果巧克力'];
+const BCOMP={
+ '巴西':{c:'#7a5a2b',v:[1.5,3.5,4,2.5,1,4.5],r:'醇厚、堅果、巧克力，低酸，是多數配方的基底'},
+ '哥倫比亞':{c:'#c27a1e',v:[3,4,3,2,2.5,3],r:'焦糖甜感與均衡，讓配方圓潤'},
+ '瓜地馬拉':{c:'#5d4a8a',v:[3,3.5,3.5,2.5,2,3.5],r:'可可與微煙燻，加深結構'},
+ '哥斯大黎加':{c:'#d99a2b',v:[3,4.5,3,1.5,3,2.5],r:'蜂蜜甜感、乾淨'},
+ '衣索比亞水洗':{c:'#e0a03a',v:[4.5,3,2,1,5,1],r:'茉莉花香、柑橘，提亮香氣'},
+ '衣索比亞日曬':{c:'#b3382c',v:[3.5,4.5,3,1,4.5,1.5],r:'莓果、熱帶水果甜香'},
+ '肯亞':{c:'#8c2f39',v:[5,3,3,1.5,4,1],r:'黑醋栗般的明亮酸質'},
+ '曼特寧':{c:'#3f5c3a',v:[1,2.5,5,3.5,0.5,3],r:'厚重、草本、杉木，低酸'},
+ '葉門':{c:'#9c5a3c',v:[3,3.5,4,2,4,2.5],r:'酒香、果乾、香料'},
+ '羅布斯塔':{c:'#4a3327',v:[0.5,1.5,5,5,0,2.5],r:'厚實 crema、強烈苦韻與咖啡因'},
+};
+const BLENDS=[
+ {n:'摩卡爪哇',en:'Mocha-Java',roast:55,mix:{'葉門':50,'曼特寧':50},d:'世界上最古老的配方之一：當年從葉門摩卡港與印尼爪哇運出的咖啡混在一起。現在常用衣索比亞日曬代替葉門、蘇門答臘或爪哇代替爪哇。',use:'手沖、法壓'},
+ {n:'曼巴',en:'Mandheling + Brazil',roast:65,mix:{'曼特寧':50,'巴西':50},d:'台灣咖啡館的經典綜合豆。曼特寧給厚重與草本，巴西補上堅果甜感、修飾苦味。',use:'手沖、虹吸、加奶'},
+ {n:'經典義式配方',en:'Classic Espresso Blend',roast:65,mix:{'巴西':60,'哥倫比亞':25,'衣索比亞日曬':15},d:'以巴西打底、哥倫比亞補甜，少量衣索比亞日曬點綴果香。萃取濃縮時巧克力焦糖感明顯，加奶也不會被蓋掉。',use:'義式濃縮、拿鐵、卡布'},
+ {n:'南義傳統配方',en:'Southern Italian Blend',roast:85,mix:{'巴西':60,'羅布斯塔':20,'瓜地馬拉':20},d:'義大利南部常見的深焙配方，加入羅布斯塔讓 crema 更厚、苦韻更強、咖啡因更高。',use:'濃縮、摩卡壺'},
+ {n:'淺焙季節配方',en:'Light Roast Seasonal',roast:15,mix:{'衣索比亞水洗':50,'肯亞':30,'哥倫比亞':20},d:'北歐與精品店常見的淺焙配方：花香、柑橘與明亮酸質為主，哥倫比亞讓甜感與口感不至於太單薄。',use:'手沖、淺焙濃縮'},
+ {n:'早餐配方',en:'Breakfast Blend',roast:40,mix:{'哥倫比亞':40,'哥斯大黎加':30,'巴西':30},d:'中淺焙、均衡好入口，酸度溫和、甜感明顯，適合每天喝。',use:'美式、濾掛、手沖'},
+ {n:'牛奶咖啡配方',en:'Milk Blend',roast:60,mix:{'巴西':50,'瓜地馬拉':30,'衣索比亞日曬':20},d:'專為拿鐵設計：巧克力、堅果與莓果甜感在牛奶中最容易表現。',use:'拿鐵、澳白、卡布'},
+ {n:'冷萃配方',en:'Cold Brew Blend',roast:50,mix:{'巴西':50,'衣索比亞日曬':30,'哥倫比亞':20},d:'冷萃會壓低酸質與苦味，所以選甜感高、帶巧克力與莓果調的組合。',use:'冷萃、冰滴'},
+ {n:'藍山風味配方',en:'Blue Mountain Style',roast:45,mix:{'哥倫比亞':50,'巴西':30,'瓜地馬拉':20},d:'模仿牙買加藍山溫和、均衡、低苦的風格。市面上很多「藍山綜合」只含少量甚至沒有真正的藍山豆，購買時看清楚比例。',use:'手沖、美式'},
+];
+function blendVec(mix,roast){const tot=Object.values(mix).reduce((a,b)=>a+b,0)||1;const v=[0,0,0,0,0,0];
+  Object.entries(mix).forEach(([k,w])=>BCOMP[k].v.forEach((x,i)=>v[i]+=x*w/tot));
+  const r=(roast-50)/50; // -1 淺 … +1 深
+  const adj=[-1.6*r,-0.6*Math.abs(r)+(r<0?0.2:0),0.9*r,1.8*r,-1.4*r,0.9*r];
+  return v.map((x,i)=>Math.max(0,Math.min(5,x+adj[i])))}
+function radarSVG(vec,col){const R=95,cx=130,cy=120,n=vec.length,pt=(i,val)=>{const a=-Math.PI/2+i*2*Math.PI/n;return[cx+Math.cos(a)*R*val/5,cy+Math.sin(a)*R*val/5]};
+  let g='';for(let l=1;l<=5;l++)g+=`<polygon points="${vec.map((_,i)=>pt(i,l).join(',')).join(' ')}" fill="none" stroke="#e2d5c3" stroke-width="1"/>`;
+  vec.forEach((_,i)=>{const[x,y]=pt(i,5);g+=`<line x1="${cx}" y1="${cy}" x2="${x}" y2="${y}" stroke="#e2d5c3"/>`;const[lx,ly]=pt(i,6.15);g+=`<text x="${lx}" y="${ly+4}" text-anchor="middle" font-size="11.5" fill="#7a6656">${BDIM[i]}</text>`});
+  g+=`<polygon points="${vec.map((v,i)=>pt(i,v).join(',')).join(' ')}" fill="${col}55" stroke="${col}" stroke-width="2"/>`;
+  vec.forEach((v,i)=>{const[x,y]=pt(i,v);g+=`<circle cx="${x}" cy="${y}" r="3" fill="${col}"/>`});
+  return `<svg class="radar" viewBox="0 -12 260 262">${g}</svg>`}
+function cbar(mix){const tot=Object.values(mix).reduce((a,b)=>a+b,0)||1;return Object.entries(mix).filter(([,w])=>w>0).map(([k,w])=>`<span style="flex:${w};background:${BCOMP[k].c}">${Math.round(w/tot*100)>=12?k+' '+Math.round(w/tot*100)+'%':''}</span>`).join('')}
+function roastName(r){return r<25?'淺焙':r<45?'中淺焙':r<62?'中焙':r<78?'中深焙':'深焙'}
+function flavorTags(v){const t=[];if(v[0]>=3.5)t.push('明亮酸質');if(v[4]>=3.5)t.push('花果香');if(v[1]>=3.8)t.push('甜感突出');if(v[2]>=3.8)t.push('醇厚');if(v[5]>=3.5)t.push('堅果巧克力');if(v[3]>=3.5)t.push('苦韻強');if(v[0]<1.5)t.push('低酸');if(!t.length)t.push('均衡');return t}
+let bi=0;
+function drawBlend(){
+  $('#bChips').innerHTML=BLENDS.map((b,i)=>`<button class="chip ${i===bi?'on':''}" data-b="${i}">${b.n}</button>`).join('');
+  const b=BLENDS[bi],v=blendVec(b.mix,b.roast);
+  $('#bCard').innerHTML=`<h3>${b.n} <span style="font-size:13px;color:var(--mut);font-family:'Noto Sans TC'">${b.en} · ${roastName(b.roast)}</span></h3>
+  <div class="cbar">${cbar(b.mix)}</div>
+  <div class="blend-grid">${radarSVG(v,'#6b3f22')}<div><div style="font-size:14px">${b.d}</div>${tags(flavorTags(v),'r')}<dl class="kv"><dt>適合</dt><dd>${b.use}</dd></dl>
+  <b style="font-size:13px">每支豆子負責什麼</b><div class="contrib">${Object.keys(b.mix).map(k=>`<i style="background:${BCOMP[k].c}"></i><span><b>${k}</b>：${BCOMP[k].r}</span>`).join('')}</div>
+  <button class="btn sec" style="margin-top:10px" id="bTry">用這個比例自己調整 ↓</button></div></div>`;
+  $('#bTry').onclick=()=>{Object.keys(MIX).forEach(k=>MIX[k]=b.mix[k]||0);$('#mRoast').value=b.roast;drawMix();document.querySelector('#mRadar').scrollIntoView({behavior:'smooth',block:'center'})};
+}
+$('#bChips').onclick=e=>{if(e.target.dataset.b){bi=+e.target.dataset.b;drawBlend()}};
+const MIX={};Object.keys(BCOMP).forEach(k=>MIX[k]=0);Object.assign(MIX,{'巴西':60,'哥倫比亞':25,'衣索比亞日曬':15});
+$('#mSliders').innerHTML=Object.keys(BCOMP).map(k=>`<div class="msl"><span><i style="display:inline-block;width:9px;height:9px;border-radius:2px;background:${BCOMP[k].c};margin-right:4px"></i>${k}</span><input type="range" min="0" max="100" step="5" data-k="${k}"><b data-v="${k}"></b></div>`).join('');
+function drawMix(){
+  document.querySelectorAll('#mSliders input').forEach(i=>i.value=MIX[i.dataset.k]);
+  const tot=Object.values(MIX).reduce((a,b)=>a+b,0),r=+$('#mRoast').value;
+  document.querySelectorAll('#mSliders b').forEach(x=>x.textContent=tot?Math.round(MIX[x.dataset.v]/tot*100)+'%':'0%');
+  $('#mRoastV').textContent=roastName(r);
+  if(!tot){$('#mRadar').innerHTML=radarSVG([0,0,0,0,0,0],'#b3382c');$('#mBar').innerHTML='';$('#mTags').innerHTML='';$('#mHint').textContent='至少加入一支豆子';return}
+  const v=blendVec(MIX,r);$('#mRadar').innerHTML=radarSVG(v,'#b3382c');$('#mBar').innerHTML=cbar(MIX);
+  $('#mTags').innerHTML=flavorTags(v).map(t=>`<span class="tag r">${t}</span>`).join('');
+  const n=Object.values(MIX).filter(x=>x>0).length;
+  $('#mHint').textContent=n>4?'一般配方 2–4 支豆子就夠，太多會互相抵消':n===1?'只有一支豆子＝單品，再加一支試試':'比例會自動換算成 100%';
+}
+$('#mSliders').oninput=e=>{if(e.target.dataset.k){MIX[e.target.dataset.k]=+e.target.value;drawMix()}};
+$('#mRoast').oninput=drawMix;
+$('#mReset').onclick=()=>{Object.keys(MIX).forEach(k=>MIX[k]=0);drawMix()};
+drawBlend();drawMix();
 drawMenu();route();
 </script>
 <script>
