@@ -101,6 +101,10 @@ a.btn{text-decoration:none;color:inherit;display:inline-block}
 .viewer{position:fixed;inset:0;z-index:12;background:var(--bg);overflow:auto;padding:16px 0 40px}
 .viewer img{display:block;max-width:100%;max-height:70vh;margin:0 auto;border:1px solid var(--line);border-radius:4px}
 .toast{position:fixed;left:16px;right:16px;bottom:76px;z-index:14;background:var(--ink);color:var(--bg);padding:10px 14px;border-radius:4px;font-size:14px;text-align:center}
+.cloudrow{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;margin-top:10px}
+.cloudrow span{font-size:13px;color:var(--muted)}
+.cloudrow .btn.on{border-color:var(--ok);color:var(--ok)}
+.cloudrow .btn.err{border-color:var(--bad);color:var(--bad)}
 .detail{margin-top:10px;border-top:1px dashed var(--line);padding-top:8px}
 dl.spec{margin:0 0 8px;display:grid;grid-template-columns:5.2em 1fr;gap:2px 10px;font-size:13.5px}
 dl.spec dt{font-family:var(--f-mono);color:var(--muted);font-size:12.5px;padding-top:1px}
@@ -143,6 +147,7 @@ footer{color:var(--muted);font-size:12.5px;margin-top:30px;border-top:1px solid 
   <h1>咖啡器材圖鑑</h1>
   <p class="lede">從磨豆機、濾杯、義式咖啡機到烘豆機。先看懂原理，再認識代表機種，最後放在一起比較。</p>
   <div class="search"><input id="q" type="search" placeholder="搜尋器材、品牌或關鍵字，例如 錐刀、E61、台灣" aria-label="搜尋器材"></div>
+  <div class="cloudrow"><button id="cloud" class="btn">☁ 用 Google 帳號同步</button><span id="cloudnote">收藏與照片目前只存在這台裝置</span></div>
 </div></header>
 <nav class="tabs" aria-label="分類"><div class="wrap" id="tabs" role="tablist"></div></nav>
 <main><div class="wrap" id="app"></div></main>
@@ -277,14 +282,21 @@ const QUIZ=[
 const store={get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
 const S={cat:"grinders",sub:"all",q:"",favOnly:false,open:{},prin:{},cmp:[],favs:new Set(store.get("gear-favs",[])),sheet:false,quiz:null};
 const $=s=>document.querySelector(s);
+/* 收藏：每筆帶時間，雲端合併時取較新的 */
+let FAVM=store.get("gear-favm",null);
+if(!FAVM){FAVM={};S.favs.forEach(k=>FAVM[k]={on:true,t:1})}
+function saveFavs(){store.set("gear-favm",FAVM);S.favs=new Set(Object.keys(FAVM).filter(k=>FAVM[k].on))}
+saveFavs();
+const rid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,8);
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 
 /* ---------- 照片（存在這台裝置的瀏覽器） ---------- */
 const PH={};let phDB=null,phTarget=null;
-function phOpen(){return new Promise(res=>{try{const r=indexedDB.open("gear-atlas-photos",1);
+let DEL=store.get("gear-phdel",{});   /* 已刪除照片的紀錄，同步後清掉 */
+function phOpen(){const mig=[];return new Promise(res=>{try{const r=indexedDB.open("gear-atlas-photos",1);
   r.onupgradeneeded=()=>r.result.createObjectStore("p");
   r.onsuccess=()=>{phDB=r.result;const c=phDB.transaction("p").objectStore("p").openCursor();
-    c.onsuccess=()=>{const cur=c.result;if(cur){PH[cur.key]=cur.value;cur.continue()}else res()};c.onerror=()=>res()};
+    c.onsuccess=()=>{const cur=c.result;if(cur){let old=false;PH[cur.key]=cur.value.map(x=>typeof x==="string"?(old=true,{id:rid(),u:x,t:Date.now()}):x);if(old)mig.push(cur.key);cur.continue()}else{mig.forEach(phSave);res()}};c.onerror=()=>res()};
   r.onerror=()=>res()}catch(e){res()}})}
 function phSave(id){try{const st=phDB.transaction("p","readwrite").objectStore("p");(PH[id]&&PH[id].length)?st.put(PH[id],id):st.delete(id);return true}catch(e){return false}}
 function shrink(file){return new Promise((res,rej)=>{const u=URL.createObjectURL(file),im=new Image();
@@ -298,7 +310,7 @@ function renderViewer(){
   if(!v||!ph||!ph[v.i]){S.view=null;$("#viewer").innerHTML="";return}
   const it=ALL.find(x=>x.id===v.id);
   $("#viewer").innerHTML=`<div class="viewer" role="dialog" aria-label="照片"><div class="wrap"><div class="sheet-head"><h2>${esc(it.n)}</h2><button class="btn solid" data-act="viewclose">關閉</button></div>
-   <img src="${ph[v.i]}" alt="${esc(it.n)} 照片"><p class="count" style="text-align:center;margin-top:8px">第 ${v.i+1} 張／共 ${ph.length} 張</p>
+   <img src="${ph[v.i].u}" alt="${esc(it.n)} 照片"><p class="count" style="text-align:center;margin-top:8px">第 ${v.i+1} 張／共 ${ph.length} 張</p>
    <div class="acts" style="justify-content:center">${ph.length>1?`<button class="btn" data-act="viewstep" data-v="-1">上一張</button><button class="btn" data-act="viewstep" data-v="1">下一張</button>`:""}<button class="btn" data-act="photodel">刪除這張</button></div></div></div>`;
 }
 
@@ -351,7 +363,7 @@ function card(it,showCat){
     <h3>${esc(it.n)}</h3>
     <div class="pills"><span class="pill">${subLabel}</span><span class="pill tier">${TIERS[it.t]}</span></div>
     <p>${esc(it.d)}</p>
-    ${ph.length?`<div class="photos">${ph.map((u,i)=>`<button data-act="view" data-v="${it.id}" data-i="${i}" aria-label="放大第 ${i+1} 張照片"><img src="${u}" alt="${esc(it.n)} 照片 ${i+1}"></button>`).join("")}</div>`:""}
+    ${ph.length?`<div class="photos">${ph.map((p,i)=>`<button data-act="view" data-v="${it.id}" data-i="${i}" aria-label="放大第 ${i+1} 張照片"><img src="${p.u}" alt="${esc(it.n)} 照片 ${i+1}"></button>`).join("")}</div>`:""}
     ${open?`<div class="detail"><dl class="spec">${it.sp.map(r=>`<dt>${esc(r[0])}</dt><dd>${esc(r[1])}</dd>`).join("")}</dl><h4>特色</h4><p>${esc(it.f)}</p><h4>適合</h4><p>${esc(it.w)}</p></div>`:""}
     <div class="acts">
       <button class="btn" data-act="open" data-v="${it.id}" aria-expanded="${open}">${open?"收合":"看規格"}</button>
@@ -423,7 +435,7 @@ document.addEventListener("click",e=>{
   else if(a==="favonly")S.favOnly=!S.favOnly;
   else if(a==="prin")S.prin[S.cat]=+v;
   else if(a==="open")S.open[v]=!S.open[v];
-  else if(a==="fav"){S.favs.has(v)?S.favs.delete(v):S.favs.add(v);store.set("gear-favs",[...S.favs])}
+  else if(a==="fav"){FAVM[v]={on:!S.favs.has(v),t:Date.now()};saveFavs();CLOUD.changed()}
   else if(a==="cmp"){const i=S.cmp.indexOf(v);if(i>=0)S.cmp.splice(i,1);else{if(S.cmp.length>=3)S.cmp.shift();S.cmp.push(v)}}
   else if(a==="cmpclear"){S.cmp=[];S.sheet=false}
   else if(a==="sheet")S.sheet=true;
@@ -432,27 +444,113 @@ document.addEventListener("click",e=>{
   else if(a==="view")S.view={id:v,i:+b.dataset.i};
   else if(a==="viewclose")S.view=null;
   else if(a==="viewstep"){const n=PH[S.view.id].length;S.view.i=(S.view.i+ +v+n)%n}
-  else if(a==="photodel"){const p=PH[S.view.id];p.splice(S.view.i,1);phSave(S.view.id);if(!p.length)S.view=null;else S.view.i=Math.min(S.view.i,p.length-1)}
+  else if(a==="photodel"){const p=PH[S.view.id],x=p.splice(S.view.i,1)[0];DEL[x.id]=Date.now();store.set("gear-phdel",DEL);phSave(S.view.id);CLOUD.changed();if(!p.length)S.view=null;else S.view.i=Math.min(S.view.i,p.length-1)}
   else if(a==="quiznew")newQuiz();
   else if(a==="ans"){const z=S.quiz;if(z.pick===null){z.pick=+v;if(z.pick===QUIZ[z.qs[z.i]].a)z.score++}}
-  else if(a==="next"){const z=S.quiz;z.i++;z.pick=null;if(z.i>=z.qs.length){const best=store.get("gear-quiz-best",0);if(z.score>best)store.set("gear-quiz-best",z.score)}}
+  else if(a==="next"){const z=S.quiz;z.i++;z.pick=null;if(z.i>=z.qs.length){const best=store.get("gear-quiz-best",0);if(z.score>best){store.set("gear-quiz-best",z.score);CLOUD.changed()}}}
   render();
 });
 $("#q").addEventListener("input",e=>{S.q=e.target.value;renderTabs();$("#app").innerHTML=(S.cat==="quiz"&&!S.q.trim())?renderQuiz():renderCat()});
 $("#file").addEventListener("change",async e=>{
   const files=[...e.target.files],id=phTarget;if(!id||!files.length)return;
   let bad=0;PH[id]=PH[id]||[];
-  for(const f of files){try{PH[id].push(await shrink(f))}catch(_){bad++}}
-  const saved=phSave(id);e.target.value="";render();
+  for(const f of files){try{PH[id].push({id:rid(),u:await shrink(f),t:Date.now()})}catch(_){bad++}}
+  const saved=phSave(id);CLOUD.changed();e.target.value="";render();
   if(bad)toast(`有 ${bad} 張照片讀不出來，請改用 JPG 或 PNG。`);
   else if(!saved)toast("照片已加入，但這個瀏覽器無法儲存，關閉頁面後會消失。");
 });
+/* ---------- Google 雲端同步：存在你自己 Google 雲端硬碟的隱藏 App 資料夾（只在 GitHub 網址啟用） ---------- */
+const CLOUD=(function(){
+  const ui=(cls,b,n)=>{const e=$("#cloud");e.className="btn "+cls;e.textContent=b;$("#cloudnote").textContent=n};
+  if(!/github\.io$/.test(location.hostname||"")){
+    $("#cloud").onclick=()=>toast("雲端儲存要用 roke3852.github.io 的網址打開才能用");
+    return {changed(){}};
+  }
+  const GCLIENT="267421312122-l2ggo7t35tqpf8ej5osqttt08ke30lr1.apps.googleusercontent.com";
+  const GAPI="https://www.googleapis.com",META="gear-atlas.json",SCOPE="https://www.googleapis.com/auth/drive.appdata";
+  let tok=null,exp=0,client=null,on=false,files={},timer=null,busy=false,again=false;
+  const flag=()=>store.get("gear-g",0)===1;
+  try{const t=JSON.parse(sessionStorage.getItem("gear-gtok")||"null");if(t&&t.exp>Date.now()){tok=t.tok;exp=t.exp}}catch(e){}
+  function lib(){return new Promise((ok,no)=>{if(window.google&&google.accounts&&google.accounts.oauth2)return ok();const sc=document.createElement("script");sc.src="https://accounts.google.com/gsi/client";sc.onload=()=>ok();sc.onerror=()=>no();document.head.appendChild(sc)})}
+  async function gf(url,opt={}){
+    if(!tok||Date.now()>exp)throw new Error("auth");
+    const r=await fetch(url,Object.assign({},opt,{headers:Object.assign({Authorization:"Bearer "+tok},opt.headers||{})}));
+    if(r.status===401){tok=null;throw new Error("auth")}
+    if(!r.ok)throw new Error("http "+r.status);
+    return r;
+  }
+  async function up(name,body,ct){
+    if(files[name]){await gf(GAPI+"/upload/drive/v3/files/"+files[name]+"?uploadType=media",{method:"PATCH",headers:{"Content-Type":ct},body});return}
+    const b="ga"+Date.now()+Math.random().toString(36).slice(2),meta=JSON.stringify({name,parents:["appDataFolder"]});
+    const mp="--"+b+"\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n"+meta+"\r\n--"+b+"\r\nContent-Type: "+ct+"\r\n\r\n"+body+"\r\n--"+b+"--";
+    const r=await gf(GAPI+"/upload/drive/v3/files?uploadType=multipart&fields=id",{method:"POST",headers:{"Content-Type":"multipart/related; boundary="+b},body:mp});
+    files[name]=(await r.json()).id;
+  }
+  const expired=()=>ui("err","☁ 點這裡連回 Google","連線已過期，資料先存在這台裝置");
+  async function sync(manual){
+    if(!on)return;
+    if(busy){again=true;return}
+    if(!tok||Date.now()>exp){expired();return}
+    busy=true;ui("","☁ 同步中…","正在和 Google 雲端硬碟同步");
+    try{
+      files={};let pt="";
+      do{const j=await (await gf(GAPI+"/drive/v3/files?spaces=appDataFolder&pageSize=1000&fields=nextPageToken,files(id,name)"+(pt?"&pageToken="+encodeURIComponent(pt):""))).json();
+        (j.files||[]).forEach(f=>files[f.name]=f.id);pt=j.nextPageToken||""}while(pt);
+      let rem=null;
+      if(files[META])rem=await (await gf(GAPI+"/drive/v3/files/"+files[META]+"?alt=media")).json().catch(()=>null);
+      rem=Object.assign({favs:{},photos:{},best:0},rem||{});
+      /* 收藏：每筆取較新的 */
+      for(const k in rem.favs){const a=FAVM[k],b=rem.favs[k];if(b&&typeof b.t==="number"&&(!a||b.t>a.t))FAVM[k]={on:!!b.on,t:b.t}}
+      saveFavs();
+      const best=Math.max(+rem.best||0,store.get("gear-quiz-best",0));store.set("gear-quiz-best",best);
+      /* 照片：一張一個檔案，索引記在 META */
+      const idx=rem.photos||{},loc={};
+      for(const item in PH)PH[item].forEach(p=>loc[p.id]={item,p});
+      for(const id in DEL)if(!idx[id]||!idx[id].del)idx[id]={item:(idx[id]||{}).item||"",t:DEL[id],del:true};
+      let got=0,sent=0;
+      for(const id of Object.keys(idx)){
+        const e=idx[id],fn="gp-"+id;
+        if(e.del){
+          if(loc[id]){const it=loc[id].item;PH[it]=PH[it].filter(p=>p.id!==id);phSave(it);delete loc[id]}
+          if(files[fn]){await gf(GAPI+"/drive/v3/files/"+files[fn],{method:"DELETE"});delete files[fn]}
+        }else if(!loc[id]){
+          if(files[fn]&&ALL.some(x=>x.id===e.item)){
+            const u=await (await gf(GAPI+"/drive/v3/files/"+files[fn]+"?alt=media")).text();
+            if(u.startsWith("data:image/")){(PH[e.item]=PH[e.item]||[]).push({id,u,t:e.t});phSave(e.item);got++}
+          }else if(!files[fn])delete idx[id];
+        }
+      }
+      for(const id in loc)if(!idx[id]){await up("gp-"+id,loc[id].p.u,"text/plain");idx[id]={item:loc[id].item,t:loc[id].p.t||Date.now()};sent++}
+      await up(META,JSON.stringify({v:1,favs:FAVM,photos:idx,best}),"application/json");
+      DEL={};store.set("gear-phdel",DEL);
+      const hm=new Date().toLocaleTimeString("zh-TW",{hour:"2-digit",minute:"2-digit",hour12:false});
+      ui("on","☁ 已同步 "+hm,"收藏與照片已存到你的 Google 雲端硬碟，點按鈕可立即同步");
+      if(manual||got)toast("已同步"+(got?"，下載 "+got+" 張照片":"")+(sent?"，上傳 "+sent+" 張照片":""));
+      render();
+    }catch(e){if(e.message==="auth")expired();else ui("err","☁ 同步失敗，點此重試","資料先存在這台裝置")}
+    finally{busy=false;if(again){again=false;sync()}}
+  }
+  function login(){
+    const go=()=>{
+      if(!client)client=google.accounts.oauth2.initTokenClient({client_id:GCLIENT,scope:SCOPE,
+        callback:t=>{if(t&&t.access_token){tok=t.access_token;exp=Date.now()+((+t.expires_in||3600)-120)*1000;try{sessionStorage.setItem("gear-gtok",JSON.stringify({tok,exp}))}catch(e){}on=true;store.set("gear-g",1);sync(true)}else ui("err","☁ 用 Google 帳號同步","Google 登入沒有完成")},
+        error_callback:()=>ui("err","☁ 用 Google 帳號同步","登入被取消或被擋，請允許彈出視窗後再試")});
+      client.requestAccessToken({prompt:flag()?"":"consent"});
+    };
+    lib().then(go,()=>ui("err","☁ 用 Google 帳號同步","無法載入 Google 登入，請確認網路"));
+  }
+  $("#cloud").onclick=()=>{if(on&&tok&&Date.now()<exp)sync(true);else login()};
+  document.addEventListener("visibilitychange",()=>{if(document.hidden&&timer){clearTimeout(timer);timer=null;sync()}});
+  setTimeout(()=>lib().catch(()=>{}),600);
+  return {changed(){if(!on)return;clearTimeout(timer);timer=setTimeout(()=>{timer=null;sync()},1500)},
+    boot(){if(!flag())return;if(tok){on=true;sync()}else expired()}};
+})();
 function fromHash(){const h=location.hash.slice(1);if(h==="quiz"||CATS.some(c=>c.id===h)){S.cat=h;S.sub="all"}}
 window.addEventListener("hashchange",()=>{fromHash();render()});
 function start(d){
   if(d&&d.cat){Object.assign(S,{cat:d.cat,sub:d.sub||"all",cmp:d.cmp||[],open:d.open||{},prin:d.prin||{},quiz:d.quiz||null})}
   fromHash();render();
-  phOpen().then(render);
+  phOpen().then(()=>{render();CLOUD.boot&&CLOUD.boot()});
 }
 window.claude?.hot?.snapshot?.(()=>({cat:S.cat,sub:S.sub,cmp:S.cmp,open:S.open,prin:S.prin,quiz:S.quiz}));
 window.claude?.hot?.ready?window.claude.hot.ready(start):start(window.claude?.hot?.data??{});
