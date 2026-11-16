@@ -150,6 +150,12 @@ table.t td.n{text-align:center;font-variant-numeric:tabular-nums}
 <div class="toast" id="toast"></div>
 
 <script>
+/* 主畫面 App 模式：Google 登入用整頁跳轉，回來時從網址取 token */
+(function(){const h=location.hash;if(h.indexOf('access_token=')<0&&h.indexOf('error=')<0)return;
+const p=new URLSearchParams(h.slice(1));
+if(p.get('state')==='cf'&&p.get('access_token')){try{sessionStorage.setItem('cf-gtok',JSON.stringify({tok:p.get('access_token'),exp:Date.now()+((+p.get('expires_in')||3600)-120)*1000}));localStorage.setItem('cf-g','1')}catch(e){}}
+let v='cat';try{v=sessionStorage.getItem('cf-back')||'cat'}catch(e){}
+history.replaceState(null,'',location.pathname+location.search+'#'+v)})();
 /* ===================== 資料 ===================== */
 const KEY="catfood-v1";
 const PROT=["雞","火雞","鴨","鵝","牛","羊","豬","兔","鹿","袋鼠","鮪魚","鰹魚","鮭魚","白身魚","鯖魚","沙丁魚","蝦蟹貝","雞蛋","乳製品","穀物/麩質","豆類","其他"];
@@ -675,6 +681,13 @@ async function afterLogin(){
   }catch(e){if(e.message==='auth')expired();else{note('⚠️ 讀取 Google 雲端失敗');cloudState('err','☁️ 讀取失敗')}}
 }
 function login(){
+  if(navigator.standalone||matchMedia('(display-mode: standalone)').matches){
+    try{sessionStorage.setItem('cf-back',location.hash.slice(1)||'cat')}catch(e){}
+    note('正在前往 Google 登入…');cloudState('busy','☁️ 前往登入');
+    const q=new URLSearchParams({client_id:GCLIENT,redirect_uri:location.origin+location.pathname,response_type:'token',scope:'https://www.googleapis.com/auth/drive.appdata',include_granted_scopes:'true',state:'cf'});
+    if(ls.get('cf-g')!=='1')q.set('prompt','consent');
+    location.href='https://accounts.google.com/o/oauth2/v2/auth?'+q;return;
+  }
   const go=()=>{
     if(!gClient)gClient=google.accounts.oauth2.initTokenClient({client_id:GCLIENT,scope:'https://www.googleapis.com/auth/drive.appdata',
       callback:t=>{if(t&&t.access_token){gTok=t.access_token;gTokExp=Date.now()+((+t.expires_in||3600)-120)*1000;try{sessionStorage.setItem('cf-gtok',JSON.stringify({tok:gTok,exp:gTokExp}))}catch(e){}afterLogin()}else note('⚠️ Google 登入沒有完成')},
