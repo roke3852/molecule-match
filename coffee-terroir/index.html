@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>咖啡風土圖鑑</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@600;900&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f4ede2;--card:#fffaf2;--ink:#2a1c14;--mut:#7a6656;--line:#e2d5c3;--cherry:#b3382c;--leaf:#55734a;--honey:#d99a2b;--brown:#6b3f22;--sky:#3e6f8e}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:"Noto Sans TC",system-ui,sans-serif;font-size:15px;line-height:1.65;padding-bottom:76px}
+h1,h2,h3{font-family:"Noto Serif TC",serif;margin:0;line-height:1.3}
+header{padding:18px 16px 10px;max-width:760px;margin:auto}
+header h1{font-size:26px;font-weight:900;letter-spacing:.04em}
+header h1 span{color:var(--cherry)}
+header p{margin:2px 0 0;color:var(--mut);font-size:13px}
+main{max-width:760px;margin:auto;padding:0 12px}
+section.view{display:none}section.view.on{display:block}
+.vt{font-size:19px;margin:8px 4px 2px}.vs{color:var(--mut);font-size:13px;margin:0 4px 10px}
+.chips{display:flex;gap:6px;overflow-x:auto;padding:2px 2px 10px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:99px;padding:5px 13px;font:inherit;font-size:13px;cursor:pointer}
+.chip.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;margin-bottom:10px;overflow:hidden}
+.card>button.hd{display:flex;width:100%;text-align:left;background:none;border:0;padding:13px 14px;font:inherit;color:inherit;cursor:pointer;gap:10px;align-items:center}
+.hd .nm{font-family:"Noto Serif TC",serif;font-weight:600;font-size:17px}
+.hd .en{color:var(--mut);font-size:12px;display:block}
+.hd .grow{flex:1;min-width:0}
+.hd .arr{color:var(--mut);transition:transform .2s}
+.card.open .arr{transform:rotate(90deg)}
+.bd{display:none;padding:0 14px 14px}.card.open .bd{display:block}
+.tags{display:flex;flex-wrap:wrap;gap:5px;margin:4px 0}
+.tag{font-size:12px;padding:2px 9px;border-radius:99px;background:#f0e2cc;color:var(--brown)}
+.tag.g{background:#e1ead9;color:var(--leaf)}.tag.r{background:#f6dcd6;color:var(--cherry)}
+.kv{display:grid;grid-template-columns:4.6em 1fr;gap:3px 8px;font-size:13.5px;margin:8px 0}
+.kv dt{color:var(--mut)}.kv dd{margin:0}
+.bd h4{margin:12px 0 4px;font-size:13px;color:var(--cherry);letter-spacing:.08em}
+.bd ul{margin:0;padding-left:1.2em;font-size:14px}
+a.map{display:inline-flex;align-items:center;gap:5px;font-size:13px;color:var(--sky);text-decoration:none;border:1px solid #c9dbe6;background:#eef5f9;border-radius:99px;padding:3px 11px;margin:3px 4px 3px 0}
+a.map::before{content:"";width:8px;height:8px;border-radius:50% 50% 50% 0;background:var(--sky);transform:rotate(-45deg)}
+.dot{width:38px;height:38px;border-radius:50%;flex:none;display:grid;place-items:center;color:#fff;font-family:"Noto Serif TC",serif;font-weight:900;font-size:15px}
+.note{background:#fbf3e3;border-left:3px solid var(--honey);padding:9px 12px;border-radius:0 10px 10px 0;font-size:13.5px;margin:0 0 12px}
+nav{position:fixed;left:0;right:0;bottom:0;background:var(--ink);display:flex;justify-content:center;padding:6px 4px calc(6px + env(safe-area-inset-bottom,0px));z-index:9}
+nav a{flex:1;max-width:120px;text-align:center;color:#c9b8a6;text-decoration:none;font-size:12.5px;padding:8px 0;border-radius:10px}
+nav a i{display:block;font-style:normal;font-family:"Noto Serif TC",serif;font-size:17px;font-weight:900;line-height:1.2}
+nav a.on{background:#4a3327;color:#fff}nav a.on i{color:var(--honey)}
+.btn{border:0;border-radius:10px;background:var(--ink);color:#fff;font:inherit;font-weight:500;padding:9px 16px;cursor:pointer}
+.btn.sec{background:#e9dcc8;color:var(--ink)}.btn.red{background:var(--cherry)}.btn:disabled{opacity:.4}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+/* process */
+.proc{display:grid;gap:12px}
+@media(min-width:620px){.proc{grid-template-columns:240px 1fr}}
+.cherrybox{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px;text-align:center}
+.cherrybox svg{width:190px;max-width:100%}
+.cherrybox svg *{transition:opacity .5s,fill .5s}
+.lg{display:grid;grid-template-columns:1fr 1fr;gap:2px 8px;text-align:left;font-size:12.5px;margin-top:4px}
+.lg span{display:flex;align-items:center;gap:5px}.lg b{width:10px;height:10px;border-radius:3px;flex:none;border:1px solid #0002}
+.lg .off{opacity:.35;text-decoration:line-through}
+.step{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px}
+.step .n{color:var(--cherry);font-size:12px;letter-spacing:.1em}
+.step h3{font-size:18px;margin:2px 0 6px}
+.pg{display:flex;gap:4px;margin:10px 0}.pg i{flex:1;height:4px;border-radius:2px;background:var(--line)}.pg i.on{background:var(--cherry)}
+.bars{display:grid;grid-template-columns:4.5em 1fr;gap:5px 8px;font-size:13px;align-items:center;margin-top:8px}
+.bar{height:8px;background:var(--line);border-radius:4px;overflow:hidden}.bar i{display:block;height:100%;background:var(--brown);border-radius:4px;transition:width .4s}
+input[type=range]{width:100%;accent-color:var(--cherry)}
+/* roast */
+.rpanel{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:10px}
+canvas{width:100%;height:230px;display:block}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;text-align:center;margin:8px 0}
+.stats div{background:#f3e7d5;border-radius:10px;padding:6px 2px}
+.stats b{display:block;font-size:17px;font-variant-numeric:tabular-nums}.stats span{font-size:11.5px;color:var(--mut)}
+.beanrow{display:flex;gap:12px;align-items:center;margin:6px 0}
+#bean{width:54px;height:70px;border-radius:50%;flex:none;position:relative;background:#8a9a5b;transition:background .3s;box-shadow:inset -6px -6px 12px #0003}
+#bean::after{content:"";position:absolute;left:50%;top:8%;bottom:8%;width:3px;background:#0004;border-radius:3px;transform:translateX(-50%) rotate(4deg)}
+#stage{font-family:"Noto Serif TC",serif;font-size:17px;font-weight:600}
+#stageD{font-size:13px;color:var(--mut)}
+.result{border:2px solid var(--honey);background:#fff7e6}
+/* game */
+.lvgrid{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin:6px 0 12px}
+.lv{aspect-ratio:1;border-radius:12px;border:1px solid var(--line);background:var(--card);font:inherit;cursor:pointer;display:grid;place-items:center;line-height:1.1;color:var(--ink)}
+.lv b{font-family:"Noto Serif TC",serif;font-size:18px}.lv small{font-size:10px;color:var(--honey);letter-spacing:-1px}
+.lv:disabled{opacity:.35}
+.board{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+.tile{min-height:74px;border-radius:12px;border:0;font:inherit;font-size:13px;line-height:1.35;padding:6px;cursor:pointer;display:grid;place-items:center;text-align:center;transition:transform .15s,opacity .35s;color:#fff;background:var(--brown)}
+.tile.d{background:#efe0c8;color:var(--ink)}
+.tile.t{font-family:"Noto Serif TC",serif;font-size:16px;font-weight:600}
+.tile.sel{outline:3px solid var(--honey);transform:scale(1.04)}
+.tile.gone{opacity:0;transform:scale(.5);pointer-events:none}
+.tile.bad{animation:sh .35s}
+@keyframes sh{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.hud{display:flex;justify-content:space-between;align-items:center;margin:4px 2px 10px;font-size:13.5px}
+#toast{min-height:44px;font-size:13.5px;margin-top:10px;padding:8px 12px;border-radius:10px;background:#e1ead9;color:#2f4a26;visibility:hidden}
+#toast.on{visibility:visible}
+.win{text-align:center;padding:26px 14px}.win .st{font-size:38px;color:var(--honey);letter-spacing:4px}
+</style>
+</head>
+<body>
+<header><h1>咖啡<span>風土</span>圖鑑</h1><p>產地 · 品種 · 莊園 · 處理法 · 烘焙 · 消消樂</p></header>
+<main>
+<section class="view" id="v-origins">
+  <h2 class="vt">產地與風味成因</h2><p class="vs">點開產地看風味特色、為什麼會有這種味道，以及地圖連結</p>
+  <div class="note"><b>風味從哪裡來？</b> 一杯咖啡的味道大致由五件事疊加：<b>品種</b>（基因決定香氣潛力）、<b>海拔與氣候</b>（越高越涼，果實熟得慢，糖與有機酸累積越多）、<b>土壤</b>、<b>處理法</b>（發酵與乾燥方式）與<b>烘焙</b>。</div>
+  <div class="chips" id="oChips"></div><div id="oList"></div>
+</section>
+<section class="view" id="v-varieties">
+  <h2 class="vt">咖啡品種</h2><p class="vs">身世、血緣與典型風味</p>
+  <div class="chips" id="vChips"></div><div id="vList"></div>
+</section>
+<section class="view" id="v-farms">
+  <h2 class="vt">知名莊園</h2><p class="vs">點「Google Maps」直接開啟莊園位置</p>
+  <div class="chips" id="fChips"></div><div id="fList"></div>
+</section>
+<section class="view" id="v-process">
+  <h2 class="vt">處理法互動教學</h2><p class="vs">選一種處理法，一步步看咖啡果實哪一層被去掉</p>
+  <div class="chips" id="pChips"></div>
+  <div class="proc">
+    <div class="cherrybox">
+      <svg viewBox="0 0 200 200" id="cherry">
+        <ellipse id="L-skin" cx="100" cy="100" rx="92" ry="88" fill="#b3382c"/>
+        <ellipse id="L-pulp" cx="100" cy="100" rx="83" ry="79" fill="#e58b7c"/>
+        <ellipse id="L-muc" cx="100" cy="100" rx="64" ry="72" fill="#e9b949"/>
+        <ellipse id="L-parch" cx="100" cy="100" rx="55" ry="64" fill="#e8d9b5"/>
+        <ellipse id="L-silver" cx="100" cy="100" rx="48" ry="58" fill="#bfc3c4"/>
+        <ellipse id="L-bean" cx="100" cy="100" rx="44" ry="54" fill="#8fa37a"/>
+        <path id="L-cut" d="M100 52 C92 80 108 120 100 148" stroke="#4d5c3f" stroke-width="4" fill="none" stroke-linecap="round"/>
+      </svg>
+      <div class="lg" id="pLegend"></div>
+    </div>
+    <div>
+      <div class="step"><div class="n" id="pN"></div><h3 id="pT"></h3><div id="pD"></div>
+        <div class="pg" id="pPg"></div>
+        <div class="row"><button class="btn sec" id="pPrev">上一步</button><button class="btn" id="pNext">下一步</button></div>
+      </div>
+      <div class="step" id="honeyBox" style="margin-top:10px;display:none">
+        <b>果膠保留量：<span id="hLab"></span></b>
+        <input type="range" id="hR" min="10" max="100" value="60">
+        <div style="font-size:13px;color:var(--mut)" id="hTxt"></div>
+      </div>
+      <div class="step" style="margin-top:10px"><b>風味傾向</b><div class="bars" id="pBars"></div><div id="pSum" style="font-size:13.5px;margin-top:8px"></div></div>
+    </div>
+  </div>
+</section>
+<section class="view" id="v-roast">
+  <h2 class="vt">烘豆互動教學</h2><p class="vs">控制火力烘一鍋豆子：看曲線、聽一爆、決定何時下豆</p>
+  <div class="rpanel">
+    <canvas id="cv"></canvas>
+    <div class="stats"><div><b id="sT">0:00</b><span>時間</span></div><div><b id="sB">–</b><span>豆溫 °C</span></div><div><b id="sR">–</b><span>RoR °C/分</span></div><div><b id="sD">–</b><span>發展比 DTR</span></div></div>
+    <div class="beanrow"><div id="bean"></div><div><div id="stage">準備入豆</div><div id="stageD">按「入豆開始」，用火力滑桿控制升溫。</div></div></div>
+    <label style="font-size:13px">火力 <b id="hV">75</b>%</label><input type="range" id="heat" min="0" max="100" value="75">
+    <div class="row" style="margin-top:8px"><button class="btn" id="rStart">入豆開始</button><button class="btn red" id="rDrop" disabled>下豆！</button><button class="btn sec" id="rSpd">速度 ×10</button></div>
+  </div>
+  <div class="rpanel result" id="rRes" style="display:none"></div>
+  <div id="rInfo"></div>
+</section>
+<section class="view" id="v-game">
+  <h2 class="vt">咖啡知識消消樂</h2><p class="vs">點兩張互相對應的牌（名詞 ↔ 說明）就能消除</p>
+  <div id="gMenu"><div class="chips" id="gChips"></div><div class="lvgrid" id="gLv"></div>
+    <div class="note">關卡由易到難：前面學過的牌會反覆出現，同時逐步加入新牌。失誤越少星星越多，過關才解鎖下一關。第 6 關限時 90 秒。</div></div>
+  <div id="gPlay" style="display:none">
+    <div class="hud"><button class="btn sec" id="gBack">← 選關</button><span id="gHud"></span></div>
+    <div class="board" id="board"></div><div id="toast"></div>
+  </div>
+</section>
+</main>
+<nav id="nav"></nav>
+<script>
+const $=s=>document.querySelector(s), el=(h)=>{const t=document.createElement('template');t.innerHTML=h.trim();return t.content.firstChild};
+const gmap=q=>'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(q);
+const mapA=(label,q)=>`<a class="map" target="_blank" rel="noopener" href="${gmap(q)}">${label}</a>`;
+const store={get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+
+/* ---------- DATA ---------- */
+const ORIGINS=[
+{zh:'衣索比亞',en:'Ethiopia',c:'非洲',col:'#b3382c',alt:'1,700–2,300 m',vars:'原生種（Heirloom／74110、74112 等）',proc:'水洗、日曬',fl:['茉莉花','柑橘','莓果','紅茶感'],
+ regs:[['耶加雪菲','Yirgacheffe Ethiopia'],['古吉','Guji Zone Ethiopia'],['西達馬','Sidama Ethiopia'],['利姆','Limu Ethiopia'],['哈拉','Harar Ethiopia']],
+ why:['阿拉比卡的原生地，野生與地方品種的基因多樣性全球最高，香氣類型特別豐富。','產區多在 1,800 m 以上，日夜溫差大，果實成熟慢，糖分與有機酸累積多。','水洗批次乾淨帶花香與檸檬調；日曬批次因果肉糖分與發酵，轉為草莓、藍莓等莓果調。']},
+{zh:'肯亞',en:'Kenya',c:'非洲',col:'#8c2f39',alt:'1,500–2,100 m',vars:'SL28、SL34、Ruiru 11、Batian',proc:'肯亞式水洗（雙重發酵）',fl:['黑醋栗','番茄','烏梅','明亮酸質'],
+ regs:[['尼耶利','Nyeri Kenya'],['基里尼亞加','Kirinyaga Kenya'],['基安布','Kiambu Kenya'],['恩布','Embu Kenya']],
+ why:['SL28／SL34 品種本身帶有強烈的黑醋栗與深色莓果調性。','肯亞山周邊的火山紅土深厚、排水好、礦物質豐富。','肯亞式水洗：發酵、清洗後再發酵一次，最後再泡水，酸質格外乾淨銳利。','合作社處理廠以 AA、AB 等顆粒大小分級。']},
+{zh:'盧安達',en:'Rwanda',c:'非洲',col:'#a8552f',alt:'1,500–2,000 m',vars:'紅波旁',proc:'水洗為主',fl:['紅茶','紅蘋果','柑橘','焦糖'],
+ regs:[['基伏湖','Lake Kivu Rwanda'],['尼亞馬舍克','Nyamasheke Rwanda'],['胡耶山','Huye Rwanda']],
+ why:['「千丘之國」幾乎全境高海拔，火山土壤加上基伏湖調節氣候。','幾乎清一色波旁品種，帶來茶感與細緻甜味。','2000 年代後大量興建水洗站，品質快速提升；偶見由椿象造成的「馬鈴薯味」瑕疵。']},
+{zh:'巴拿馬',en:'Panama',c:'中南美',col:'#2f6b5a',alt:'1,400–2,000 m',vars:'藝伎、卡杜艾、鐵比卡',proc:'水洗、日曬、厭氧',fl:['茉莉','佛手柑','水蜜桃','蜂蜜'],
+ regs:[['波奎特','Boquete Panama'],['沃肯','Volcan Chiriqui Panama'],['雷納西米安托','Renacimiento Chiriqui Panama']],
+ why:['巴魯火山的火山土壤肥沃、排水佳。','太平洋與加勒比海兩側氣流交會，形成多變微氣候與稱為 Bajareque 的霧雨，降溫並延長成熟期。','藝伎品種需要高海拔才能展現花香；2004 年翡翠莊園以藝伎在 Best of Panama 一戰成名。']},
+{zh:'哥倫比亞',en:'Colombia',c:'中南美',col:'#c27a1e',alt:'1,200–2,200 m',vars:'卡杜拉、卡斯提優、粉紅波旁、藝伎',proc:'水洗；近年厭氧與特殊發酵興盛',fl:['焦糖','紅蘋果','柑橘','均衡'],
+ regs:[['薇拉','Huila Colombia'],['娜玲瓏','Nariño Colombia'],['考卡','Cauca Colombia'],['金迪奧','Quindío Colombia'],['托利馬','Tolima Colombia']],
+ why:['安地斯山脈在境內分成三條支脈，造就大量不同的微氣候。','靠近赤道，高海拔仍然不結霜；許多產區一年有主、副兩個產季。','傳統水洗帶來乾淨均衡；新一代生產者把發酵控制做到極致，出現熱帶水果、酒香等強烈風味。']},
+{zh:'瓜地馬拉',en:'Guatemala',c:'中南美',col:'#5d4a8a',alt:'1,300–2,000 m',vars:'波旁、卡杜拉、帕卡瑪拉、藝伎',proc:'水洗為主',fl:['可可','堅果','柑橘','煙燻感'],
+ regs:[['安提瓜','Antigua Guatemala'],['薇薇特南果','Huehuetenango Guatemala'],['阿卡特南果','Acatenango Guatemala'],['阿蒂特蘭','Lake Atitlan Guatemala']],
+ why:['安提瓜被三座火山環繞，火山浮石土壤保水，帶出可可與微微煙燻感。','薇薇特南果有來自墨西哥特萬特佩克平原的乾熱風，保護咖啡免受霜害，所以能種到近 2,000 m，果酸更明亮。']},
+{zh:'哥斯大黎加',en:'Costa Rica',c:'中南美',col:'#d99a2b',alt:'1,200–1,900 m',vars:'卡杜拉、卡杜艾、薇拉沙奇、藝伎',proc:'蜜處理、水洗、日曬',fl:['蜂蜜','杏桃','柑橘','乾淨甜感'],
+ regs:[['塔拉珠','Tarrazú Costa Rica'],['西部谷地','West Valley Naranjo Costa Rica'],['中央谷地','Central Valley Alajuela Costa Rica']],
+ why:['2000 年代的「微型處理廠革命」讓小農自己處理、可追溯到單一地塊。','把蜜處理發揚光大：保留果膠乾燥，甜感與稠度提升。','長年以法規鼓勵只種阿拉比卡，整體品質穩定。']},
+{zh:'巴西',en:'Brazil',c:'中南美',col:'#7a5a2b',alt:'800–1,300 m',vars:'黃波旁、新世界、卡杜艾',proc:'日曬、去皮日曬',fl:['堅果','巧克力','低酸','厚實'],
+ regs:[['喜拉朵','Cerrado Mineiro Brazil'],['南米納斯','Sul de Minas Brazil'],['摩吉安納','Mogiana São Paulo Brazil'],['聖埃斯皮里圖','Espírito Santo Brazil']],
+ why:['海拔相對低、氣溫較高，果實成熟快，酸質較低。','地勢平緩，可機械採收；乾季明顯，適合大面積日曬。','日曬與去皮日曬帶出堅果、巧克力與厚實口感，是義式配方常見的基底。']},
+{zh:'印尼',en:'Indonesia',c:'亞太',col:'#3f5c3a',alt:'1,100–1,600 m',vars:'鐵比卡、Ateng、Tim Tim',proc:'濕剝法（Giling Basah）',fl:['草本','杉木','香料','厚重低酸'],
+ regs:[['林東（曼特寧）','Lintong Nihuta Sumatra'],['迦佑高地','Gayo Highlands Aceh Takengon'],['托拉查','Tana Toraja Sulawesi'],['爪哇伊真','Ijen Java Indonesia']],
+ why:['氣候潮濕、乾燥困難，農民在豆子含水率仍高時就脫去羊皮層再曬（濕剝法），縮短乾燥時間。','濕剝讓生豆直接暴露，產生草本、木質、泥土調與厚重口感，酸質低。']},
+{zh:'葉門',en:'Yemen',c:'亞太',col:'#9c5a3c',alt:'1,500–2,500 m',vars:'古老地方品種（Udaini、Dawairi、Jaadi）',proc:'傳統日曬',fl:['酒香','果乾','香料','巧克力'],
+ regs:[['哈拉茲','Haraz Yemen'],['巴尼馬塔爾','Bani Matar Yemen'],['摩卡港','Mokha Yemen']],
+ why:['最早商業種植咖啡的地方，古老梯田、乾旱缺水，果實小而濃縮。','整顆果實在屋頂或露台上日曬，帶出酒香與果乾風味。','「摩卡」之名來自當年出口咖啡的摩卡港。']},
+{zh:'台灣',en:'Taiwan',c:'亞太',col:'#3e6f8e',alt:'600–1,400 m',vars:'鐵比卡、SL34、藝伎',proc:'水洗、蜜處理、日曬、厭氧',fl:['茶感','蔗糖','柑橘','花香'],
+ regs:[['阿里山','阿里山 咖啡 嘉義'],['古坑','古坑 咖啡 雲林'],['國姓','國姓鄉 咖啡 南投'],['屏東泰武','泰武鄉 咖啡 屏東'],['台東太麻里','太麻里 咖啡 台東']],
+ why:['北回歸線通過，緯度較高補足海拔，1,000 m 上下就有足夠涼爽的氣候。','小農規模小、採收與處理做得很細，並把製茶的發酵與乾燥經驗帶進咖啡。','產量少、人工成本高，多走精品與競標路線。']},
+{zh:'牙買加',en:'Jamaica',c:'中南美',col:'#2d5f8a',alt:'900–1,700 m',vars:'鐵比卡',proc:'水洗',fl:['溫和','乾淨','堅果','均衡'],
+ regs:[['藍山','Blue Mountains Jamaica']],
+ why:['藍山終年雲霧形成天然遮蔭，氣溫涼爽、成熟緩慢。','以鐵比卡為主，風味溫和均衡、酸質柔和；依法定產區與海拔認證，並以木桶裝運。']},
+{zh:'夏威夷',en:'Hawaii',c:'亞太',col:'#c2573f',alt:'150–900 m',vars:'可娜鐵比卡',proc:'水洗',fl:['堅果','奶油','紅糖','柔和酸'],
+ regs:[['可娜','Kona Hawaii coffee'],['咖霧','Kau Hawaii coffee']],
+ why:['茂納羅亞與華拉萊火山西坡的火山土壤。','上午晴朗、午後固定起雲並下雨，形成天然遮蔭；緯度高，所以低海拔也能有好品質。']}
+];
+const VARS=[
+{zh:'鐵比卡',en:'Typica',g:'鐵比卡系',from:'衣索比亞 → 葉門 → 爪哇 → 傳遍全球',fl:['清甜','乾淨','柔和酸'],d:'最古老的栽培品種之一，許多品種的祖先。樹高、頂葉常呈古銅色，產量低、易染葉鏽病。藍山、可娜都是鐵比卡的名產地。'},
+{zh:'象豆',en:'Maragogipe',g:'鐵比卡系',from:'巴西巴伊亞州',fl:['溫和','花香','輕盈'],d:'鐵比卡的巨型突變種，葉、果、豆都特別大，產量低。是帕卡瑪拉的親本之一。'},
+{zh:'波旁',en:'Bourbon',g:'波旁系',from:'葉門 → 留尼旺島（舊稱波旁島）',fl:['甜感','圓潤','焦糖'],d:'與鐵比卡並列兩大古老品系。豆形較圓、甜度高，有紅、黃、橘等果色。盧安達、薩爾瓦多、巴西都很常見。'},
+{zh:'卡杜拉',en:'Caturra',g:'波旁系',from:'巴西米納斯吉拉斯',fl:['明亮酸','柑橘','中等醇厚'],d:'20 世紀初發現的波旁矮種突變。植株矮、可密植、產量高，是中美洲與哥倫比亞的主力，也是許多混種的親本。'},
+{zh:'尖身波旁',en:'Laurina / Bourbon Pointu',g:'波旁系',from:'留尼旺島',fl:['細緻','甜','低苦'],d:'波旁的突變種，豆形尖長，咖啡因含量約只有一般阿拉比卡的一半，是天然低因品種。'},
+{zh:'SL28／SL34',en:'SL28 / SL34',g:'波旁系',from:'肯亞 Scott 農業實驗室（1930 年代）',fl:['黑醋栗','烏梅','強烈酸質'],d:'SL 是 Scott Laboratories 的縮寫。SL28 耐旱、風味出眾；SL34 適應高海拔多雨環境。兩者是肯亞風味的核心。'},
+{zh:'卡杜艾',en:'Catuaí',g:'混種',from:'巴西 IAC 育種',fl:['堅果','甜','均衡'],d:'新世界（Mundo Novo）× 卡杜拉。矮株、高產、果實不易被風雨打落，有紅、黃兩種果色，巴西與中美洲廣泛種植。'},
+{zh:'帕卡瑪拉',en:'Pacamara',g:'混種',from:'薩爾瓦多',fl:['複雜果酸','熱帶水果','草本'],d:'帕卡斯（Pacas，波旁矮種突變）× 象豆。豆子非常大，風味複雜多變，常見於瓜地馬拉與薩爾瓦多的競賽批次。'},
+{zh:'卡蒂莫',en:'Catimor',g:'混種',from:'葡萄牙育種',fl:['厚實','草本','較高苦味'],d:'卡杜拉 × 提摩混種（Timor Hybrid，阿拉比卡與羅布斯塔的天然雜交）。帶有羅布斯塔基因，抗葉鏽病、高產，風味通常較粗獷。'},
+{zh:'藝伎／瑰夏',en:'Geisha / Gesha',g:'衣索比亞系',from:'衣索比亞 Gesha 森林 → 坦尚尼亞 → 哥斯大黎加 → 巴拿馬',fl:['茉莉花','佛手柑','水蜜桃','蜂蜜'],d:'1930 年代在衣索比亞西南部採集，輾轉傳到中美洲，原本因抗病被引進。2004 年翡翠莊園在 Best of Panama 以它奪冠，從此成為最昂貴的品種。豆形細長，高海拔才有典型花香。'},
+{zh:'衣索比亞原生種',en:'Ethiopian Landrace (Heirloom)',g:'衣索比亞系',from:'衣索比亞',fl:['花香','柑橘','莓果'],d:'成千上萬野生與地方品種的統稱。吉馬農業研究中心（JARC）選育的 74110、74112、74158 等編號品種，是古吉、耶加雪菲常見的品種。'},
+{zh:'粉紅波旁',en:'Pink Bourbon',g:'衣索比亞系',from:'哥倫比亞薇拉',fl:['花香','粉紅葡萄柚','甜'],d:'果實成熟時呈粉橘色。名字雖有波旁，但基因研究顯示它更接近衣索比亞原生種，所以帶花香與明亮果酸。'},
+{zh:'希爪',en:'Sidra',g:'衣索比亞系',from:'厄瓜多',fl:['花香','紅色水果','葡萄酒感'],d:'來源說法不一，基因上接近衣索比亞原生種。甜度高、果香濃，近年在世界咖啡大賽中很常見。'},
+{zh:'Wush Wush',en:'Wush Wush',g:'衣索比亞系',from:'衣索比亞西南部',fl:['熱帶水果','香料','花香'],d:'以發源地命名的衣索比亞地方品種，後來被引進哥倫比亞種植，產量低、風味濃郁奔放。'},
+{zh:'尤金諾伊狄絲',en:'Coffea eugenioides',g:'其他物種',from:'東非高地',fl:['極高甜感','低酸','穀物甜'],d:'不是阿拉比卡，而是它的親本之一（另一個是羅布斯塔）。咖啡因低、苦味極低、甜感突出，產量非常少。'},
+{zh:'羅布斯塔',en:'Coffea canephora (Robusta)',g:'其他物種',from:'中西非',fl:['厚重','麥茶','苦'],d:'另一個咖啡物種，也是阿拉比卡的親本之一。耐熱抗病、咖啡因約為阿拉比卡的兩倍，常用於義式配方與即溶咖啡；近年也有精品等級的羅布斯塔。'}
+];
+const FARMS=[
+{zh:'翡翠莊園',en:'Hacienda La Esmeralda',c:'巴拿馬',loc:'波奎特',q:'Hacienda La Esmeralda Boquete Panama',d:'Peterson 家族經營。2004 年以藝伎在 Best of Panama 奪冠，開啟藝伎時代；依地塊與海拔分成不同系列批次販售。',t:['藝伎','水洗／日曬']},
+{zh:'艾利達莊園',en:'Elida Estate',c:'巴拿馬',loc:'波奎特 Alto Quiel',q:'Elida Estate Coffee Boquete Panama',d:'Lamastus 家族經營，部分園區位於巴魯火山國家公園內，海拔極高。Best of Panama 常勝軍，多次刷新競標價紀錄。',t:['藝伎','厭氧慢乾日曬']},
+{zh:'九十+ 藝伎莊園',en:'Ninety Plus Gesha Estates',c:'巴拿馬',loc:'沃肯',q:'Ninety Plus Gesha Estates Volcan Panama',d:'Joseph Brodsky 創立，在森林遮蔭下種植藝伎，以獨家發酵處理與風味導向的批次命名聞名，世界賽選手愛用。',t:['藝伎','創新處理']},
+{zh:'黛博拉莊園',en:'Finca Deborah',c:'巴拿馬',loc:'沃肯',q:'Finca Deborah Volcan Chiriqui Panama',d:'Jamison Savage 創立，海拔約 1,900 m 以上。以碳浸漬（CM）與氮氣發酵等精密控制的處理法著稱。',t:['藝伎','碳浸漬']},
+{zh:'茵赫特莊園',en:'Finca El Injerto',c:'瓜地馬拉',loc:'薇薇特南果',q:'Finca El Injerto Huehuetenango Guatemala',d:'Aguirre 家族經營，瓜地馬拉卓越杯（COE）多次冠軍，帕卡瑪拉與摩卡小圓豆批次很有名。',t:['帕卡瑪拉','水洗']},
+{zh:'聖費麗莎莊園',en:'Finca Santa Felisa',c:'瓜地馬拉',loc:'阿卡特南果',q:'Finca Santa Felisa Acatenango Guatemala',d:'百年家族莊園，由 Meneses 家族經營，以藝伎與多樣化的實驗性發酵批次著稱。',t:['藝伎','實驗發酵']},
+{zh:'天堂莊園',en:'Finca El Paraíso',c:'哥倫比亞',loc:'考卡 Piendamó',q:'Finca El Paraiso Piendamo Cauca Colombia',d:'Diego Bermúdez 經營，以「熱衝擊」（thermal shock）雙重厭氧處理聞名，風味像荔枝、玫瑰、水蜜桃般強烈。',t:['卡斯提優','熱衝擊厭氧']},
+{zh:'棕櫚樹與大嘴鳥',en:'La Palma y El Tucán',c:'哥倫比亞',loc:'昆迪納馬卡 Zipacón',q:'La Palma y El Tucan Zipacon Colombia',d:'推動「鄰居與作物」計畫，收購周邊小農果實集中處理；以乳酸發酵等處理法與生態友善種植聞名。',t:['藝伎／希爪','乳酸發酵']},
+{zh:'希望莊園',en:'Café Granja La Esperanza',c:'哥倫比亞',loc:'考卡山谷',q:'Cafe Granja La Esperanza Valle del Cauca Colombia',d:'旗下有 Cerro Azul、Las Margaritas、Potosí 等園區。很早就把巴拿馬藝伎帶回哥倫比亞種植，競賽常客。',t:['藝伎','多園區']},
+{zh:'迪維索莊園',en:'Finca El Diviso',c:'哥倫比亞',loc:'薇拉 Pitalito',q:'Finca El Diviso Pitalito Huila Colombia',d:'Lasso 家族的年輕一代經營，以希爪、Ombligon 等品種搭配精密厭氧發酵，近年在世界咖啡師大賽中受到矚目。',t:['希爪','厭氧']},
+{zh:'達特拉莊園',en:'Daterra Coffee',c:'巴西',loc:'喜拉朵 Patrocínio',q:'Daterra Coffee Patrocinio Minas Gerais Brazil',d:'巴西精品咖啡與永續農業的標竿，大規模但精細管理，以研究、分級與實驗批次（Masterpieces）聞名。',t:['多品種','日曬／厭氧']},
+{zh:'拉斯拉哈斯',en:'Las Lajas Micromill',c:'哥斯大黎加',loc:'中央谷地 Sabanilla de Alajuela',q:'Beneficio Las Lajas Sabanilla Alajuela Costa Rica',d:'Chacón 家族經營的有機微型處理廠，是哥斯大黎加蜜處理與日曬的先驅，「黑蜜」「Perla Negra」等批次很知名。',t:['卡杜拉／卡杜艾','蜜處理']},
+{zh:'藝伎村',en:'Gesha Village Coffee Estate',c:'衣索比亞',loc:'Bench Maji（近 Gesha 森林）',q:'Gesha Village Coffee Estate Ethiopia',d:'Adam Overton 與 Rachel Samuel 於 2011 年創立，在藝伎品種的發源地附近建立莊園，種植從當地森林選出的藝伎。',t:['藝伎','日曬／水洗']},
+{zh:'瓦哈娜莊園',en:'Wahana Estate',c:'印尼',loc:'北蘇門答臘 Sidikalang',q:'Wahana Estate Sidikalang North Sumatra',d:'蘇門答臘少見的大型單一莊園，除了傳統濕剝，也做日曬、水洗與單一品種批次。',t:['Rasuna／Longberry','多種處理']},
+{zh:'鄒築園',en:'Zou Zhou Yuan',c:'台灣',loc:'嘉義阿里山 樂野',q:'鄒築園 阿里山',d:'方政倫經營，台灣精品咖啡代表人物之一，多次在國內生豆評鑑獲獎，藝伎與各式處理法批次都很受歡迎。',t:['藝伎／SL34','多種處理']},
+{zh:'卓武山咖啡農場',en:'Zhuo-Wu Coffee Farm',c:'台灣',loc:'嘉義阿里山',q:'卓武山咖啡農場',d:'許峻榮經營，阿里山的知名莊園，藝伎批次在國內外競標中屢獲佳績。',t:['藝伎','水洗／日曬']},
+{zh:'嵩岳咖啡莊園',en:'Songyue Coffee',c:'台灣',loc:'雲林古坑 石壁',q:'嵩岳咖啡莊園 古坑',d:'郭章盛經營，位於古坑高海拔的石壁地區，是台灣咖啡評鑑的常勝莊園。',t:['鐵比卡／藝伎','蜜處理']},
+{zh:'格林威爾農場',en:'Greenwell Farms',c:'夏威夷',loc:'可娜 Kealakekua',q:'Greenwell Farms Kealakekua Hawaii',d:'1850 年創立的可娜老牌農場，可參觀導覽，了解可娜咖啡從採收到處理的流程。',t:['可娜鐵比卡','水洗']},
+{zh:'克里夫頓山莊園',en:'Clifton Mount Estate',c:'牙買加',loc:'藍山 Newcastle',q:'Clifton Mount Estate Blue Mountains Jamaica',d:'藍山歷史最悠久且仍在運作的莊園之一，海拔約 1,300 m，是藍山咖啡的代表。',t:['鐵比卡','水洗']}
+];
+const LAYERS=[['skin','果皮','#b3382c'],['pulp','果肉','#e58b7c'],['muc','果膠','#e9b949'],['parch','羊皮層','#e8d9b5'],['silver','銀皮','#bfc3c4'],['bean','生豆','#8fa37a']];
+const ALL=['skin','pulp','muc','parch','silver','bean'];
+const PROCS=[
+{zh:'日曬',en:'Natural',bars:[3,5,4,2,4],sum:'整顆果實帶皮曬乾，果肉的糖分與發酵風味留在豆子裡：莓果、熱帶水果、酒香，甜感與厚度高，但乾淨度較難控制。最古老、最省水的方法，常見於衣索比亞、巴西、葉門。',
+ steps:[['採收與浮選','只採全紅果，倒入水槽：浮起來的未熟果、蟲蛀果撈掉。',ALL],
+ ['整果日曬','整顆果實鋪在高架棚架或曬場上，薄薄一層、定時翻動，避免發霉與過度發酵。約 2–4 週，果實慢慢變成深紫黑色的果乾。',ALL,1],
+ ['靜置熟成','曬到含水率約 10–12% 後，帶殼入倉靜置數週，讓水分分布均勻、風味穩定。',ALL,1],
+ ['脫殼','用脫殼機一次去掉乾燥的果皮、果肉、果膠與羊皮層，露出生豆。',['silver','bean']],
+ ['分級與手選','依大小、密度、顏色篩選，挑除瑕疵豆後裝袋。',['silver','bean']]]},
+{zh:'水洗',en:'Washed',bars:[5,3,2,5,1],sum:'先去掉果皮果肉，再靠發酵把果膠分解洗掉，風味最能反映品種與產地本身：酸質明亮、乾淨、花香與柑橘調清楚。需要大量用水。肯亞、哥倫比亞、中美洲的主流。',
+ steps:[['採收與浮選','採全紅果並浮選，去除未熟與瑕疵果。',ALL],
+ ['去皮','用去皮機擠掉果皮與大部分果肉，留下裹著黏滑果膠的帶殼豆。',['muc','parch','silver','bean']],
+ ['發酵','放入發酵槽 12–72 小時（依溫度而定）。微生物把果膠分解，直到摸起來不再黏滑、有沙沙的顆粒感。',['muc','parch','silver','bean'],0,.45],
+ ['清洗','在水道中攪拌沖洗，把分解的果膠洗掉；密度低的豆子會被水流帶走，順便分級。',['parch','silver','bean']],
+ ['乾燥','帶殼豆在棚架或露台曬 1–2 週，直到含水率 10–12%。',['parch','silver','bean']],
+ ['靜置、脫殼、分級','入倉靜置後脫去羊皮層，篩選分級。',['silver','bean']]]},
+{zh:'蜜處理',en:'Honey',honey:1,bars:[3,5,4,3,2],sum:'去皮後「保留果膠」直接乾燥，介於水洗與日曬之間：甜感、稠度比水洗高，又比日曬乾淨。果膠留得越多、乾燥越慢，顏色越深、發酵感越重。哥斯大黎加發揚光大。',
+ steps:[['採收與浮選','採全紅果並浮選。糖度越高，蜜處理的甜感越好。',ALL],
+ ['去皮並保留果膠','去掉果皮果肉，調整機器決定留下多少果膠——用下方滑桿試試看。',['muc','parch','silver','bean']],
+ ['帶果膠乾燥','黏黏的帶殼豆鋪上棚架。初期要非常頻繁地翻動，否則容易發霉或發酸。果膠氧化後由金黃變紅、變黑。',['muc','parch','silver','bean']],
+ ['靜置與脫殼','乾燥至含水率 10–12% 後靜置，再脫去乾掉的果膠與羊皮層。',['silver','bean']]]},
+{zh:'濕剝',en:'Wet-hulled',bars:[1,2,5,2,2],sum:'印尼蘇門答臘的傳統做法（Giling Basah）。因為氣候潮濕，趁豆子還濕軟就脫去羊皮層再曬，乾燥時間大幅縮短。帶來草本、杉木、泥土調與厚重口感，酸質低；生豆呈深綠色，容易出現裂開的「羊蹄豆」。',
+ steps:[['採收與去皮','小農採收後，當天用手搖去皮機去掉果皮果肉。',['muc','parch','silver','bean']],
+ ['短暫發酵與清洗','帶果膠的豆子放一夜，隔天把果膠洗掉。',['parch','silver','bean']],
+ ['初步乾燥','只曬幾個小時到一兩天，含水率還有 30–50% 就賣給收購商。',['parch','silver','bean']],
+ ['濕剝','趁豆子濕軟，用機器剝掉羊皮層。這是與其他處理法最大的差別——其他方法都是乾了才脫殼。',['silver','bean']],
+ ['生豆直接曬乾','沒有羊皮層保護的生豆直接曝曬到含水率 12–13%，乾得很快，風味也因此獨特。',['silver','bean']]]},
+{zh:'厭氧／碳浸漬',en:'Anaerobic / Carbonic Maceration',bars:[3,4,4,2,5],sum:'把果實或去皮豆放進密封容器，在缺氧環境下發酵，由不同的微生物族群主導，產生強烈的熱帶水果、酒香、肉桂、乳酸感。碳浸漬（CM）借自葡萄酒：整顆果實入桶並灌入二氧化碳。風味誇張、辨識度高，但控制不好容易有過度發酵的味道。',
+ steps:[['嚴選果實','只用糖度高的全熟果，常以糖度計測量 Brix。',ALL],
+ ['密封入桶','厭氧：整果或去皮後入桶密封，裝上單向排氣閥。碳浸漬：整顆果實入桶並灌入二氧化碳排出氧氣。',ALL],
+ ['監控發酵','記錄溫度、pH 與時間，從 24 小時到 200 小時以上都有；低溫可以拉長發酵、讓風味更乾淨。',ALL,1],
+ ['出桶後乾燥','之後依日曬（整果）、蜜處理或水洗的流程乾燥，所以會看到「厭氧日曬」「厭氧水洗」等名稱。',['muc','parch','silver','bean']],
+ ['靜置與脫殼','乾燥到含水率 10–12%，靜置後脫殼分級。',['silver','bean']]]}
+];
+const PB=['酸質','甜感','醇厚','乾淨度','發酵感'];
+const ROASTINFO=[
+['脫水期（室溫 → 約 150°C）','生豆含水率約 10–12%。入豆後豆溫探針讀數先下降，到「回溫點」後開始上升。水分蒸發，豆色由綠轉淺黃，聞起來像青草、烤麵包。'],
+['梅納期（約 150 → 196°C）','胺基酸與還原糖發生<b>梅納反應</b>，產生數百種香氣物質與褐色的類黑素；約 170°C 以上糖類開始<b>焦糖化</b>。這段決定甜感、醇厚與香氣複雜度。'],
+['一爆（約 196°C）','豆內水蒸氣壓力衝破細胞結構，發出像爆米花的劈啪聲，豆體膨脹、銀皮脫落。從這一刻到下豆稱為<b>發展期</b>，佔總時間的比例就是 DTR（常見目標 15–25%）。'],
+['淺 → 中 → 深','一爆中後段下豆是淺焙：酸質明亮、花果香明顯。一爆結束到二爆前是中焙：甜感與均衡最佳。約 224°C 進入<b>二爆</b>（細胞壁破裂、油脂浮出），之後是深焙：苦甜、煙燻、厚實，產地特色變淡。'],
+['常見失誤','<b>發展不足</b>：太早下豆或 DTR 太低，有青草、穀物味。<b>烤焙感（Baked）</b>：升溫停滯、時間拖太長，風味扁平像紙板。<b>焦燒（Scorching）</b>：前段火太大，豆表燒焦。<b>RoR</b>（升溫速率）平順下降通常是好曲線。']
+];
+const PAIRS={
+'產地':[['耶加雪菲','花香、柑橘、茶感'],['肯亞','黑醋栗、番茄般的酸'],['巴西','堅果、巧克力、低酸'],['曼特寧','草本、杉木、厚重'],['巴拿馬藝伎','茉莉、佛手柑、水蜜桃'],['安提瓜','火山環繞，可可與煙燻'],['哥斯大黎加','蜜處理發揚光大'],['葉門','古老梯田，酒香果乾'],['藍山','牙買加，溫和均衡'],['可娜','夏威夷火山西坡'],['阿里山','台灣高山，茶感蔗糖'],['薇薇特南果','乾熱風保護免於霜害']],
+'品種':[['藝伎','源自衣索比亞 Gesha 森林'],['波旁','名字來自留尼旺島舊稱'],['鐵比卡','最古老栽培品種之一'],['SL28','肯亞 Scott 實驗室選育'],['卡杜拉','波旁的矮種突變'],['帕卡瑪拉','帕卡斯 × 象豆'],['卡杜艾','新世界 × 卡杜拉'],['卡蒂莫','卡杜拉 × 提摩混種'],['象豆','鐵比卡的巨型突變'],['尖身波旁','天然低咖啡因'],['粉紅波旁','哥倫比亞薇拉的粉橘色果實'],['尤金諾伊狄絲','阿拉比卡的親本物種']],
+'處理法':[['日曬','整顆果實直接曬乾'],['水洗','發酵去除果膠再乾燥'],['蜜處理','保留果膠直接乾燥'],['濕剝','豆子還濕軟就脫殼'],['厭氧發酵','密封缺氧環境中發酵'],['碳浸漬','整果入桶灌二氧化碳'],['果膠','黏滑含糖的一層'],['羊皮層','包住生豆的硬殼'],['銀皮','烘焙時脫落的薄膜'],['黑蜜','果膠保留最多的蜜處理'],['浮選','用水撈除未熟與蟲蛀果'],['肯亞式水洗','雙重發酵後再泡水']],
+'烘焙':[['一爆','約 196°C 水蒸氣爆裂聲'],['二爆','約 224°C 細胞壁破裂出油'],['梅納反應','胺基酸與還原糖的褐變'],['焦糖化','糖類在高溫下分解'],['回溫點','豆溫降到最低後回升'],['RoR','每分鐘的升溫速率'],['發展期','一爆開始到下豆'],['脫水期','生豆由綠轉黃'],['淺焙','酸質明亮、花果香'],['深焙','苦甜、煙燻、厚實'],['烤焙感','升溫停滯，風味扁平'],['冷卻','下豆後快速降溫']],
+'莊園':[['翡翠莊園','2004 年讓藝伎成名'],['艾利達莊園','巴拿馬 Lamastus 家族'],['茵赫特莊園','瓜地馬拉薇薇特南果'],['天堂莊園','哥倫比亞，熱衝擊處理'],['達特拉莊園','巴西喜拉朵的永續標竿'],['拉斯拉哈斯','哥斯大黎加蜜處理先驅'],['藝伎村','衣索比亞，藝伎發源地旁'],['鄒築園','阿里山，方政倫'],['嵩岳咖啡','雲林古坑石壁'],['格林威爾農場','夏威夷可娜老牌農場'],['黛博拉莊園','巴拿馬沃肯，碳浸漬'],['克里夫頓山','牙買加藍山']]
+};
+PAIRS['綜合']=Object.values(PAIRS).flat();
+
+/* ---------- NAV / ROUTING ---------- */
+const VIEWS=[['origins','產地','地'],['varieties','品種','種'],['farms','莊園','園'],['process','處理法','洗'],['roast','烘焙','烘'],['game','消消樂','玩']];
+$('#nav').innerHTML=VIEWS.map(v=>`<a href="#${v[0]}" data-v="${v[0]}"><i>${v[2]}</i>${v[1]}</a>`).join('');
+function route(){let v=location.hash.slice(1);if(!VIEWS.some(x=>x[0]===v))v=store.get('ct-view','origins');
+  if(!VIEWS.some(x=>x[0]===v))v='origins';store.set('ct-view',v);
+  document.querySelectorAll('.view').forEach(s=>s.classList.toggle('on',s.id==='v-'+v));
+  document.querySelectorAll('nav a').forEach(a=>a.classList.toggle('on',a.dataset.v===v));
+  if(v==='roast')drawRoast();window.scrollTo(0,0)}
+addEventListener('hashchange',route);
+
+/* ---------- LIST VIEWS ---------- */
+function listView(chipsSel,listSel,data,key,render){
+  const cats=['全部',...new Set(data.map(d=>d[key]))];let cur='全部';
+  const draw=()=>{$(chipsSel).innerHTML=cats.map(c=>`<button class="chip ${c===cur?'on':''}">${c}</button>`).join('');
+    $(listSel).innerHTML=data.filter(d=>cur==='全部'||d[key]===cur).map(render).join('')};
+  $(chipsSel).onclick=e=>{if(e.target.classList.contains('chip')){cur=e.target.textContent;draw()}};
+  $(listSel).onclick=e=>{const h=e.target.closest('.hd');if(h)h.parentNode.classList.toggle('open')};
+  draw();
+}
+const tags=(a,c='')=>`<div class="tags">${a.map(t=>`<span class="tag ${c}">${t}</span>`).join('')}</div>`;
+listView('#oChips','#oList',ORIGINS,'c',o=>`<div class="card"><button class="hd"><span class="dot" style="background:${o.col}">${o.zh[0]}</span><span class="grow"><span class="nm">${o.zh}</span><span class="en">${o.en} · ${o.fl.slice(0,3).join('、')}</span></span><span class="arr">›</span></button>
+<div class="bd">${tags(o.fl,'r')}<dl class="kv"><dt>海拔</dt><dd>${o.alt}</dd><dt>常見品種</dt><dd>${o.vars}</dd><dt>處理法</dt><dd>${o.proc}</dd></dl>
+<h4>為什麼是這個味道</h4><ul>${o.why.map(w=>`<li>${w}</li>`).join('')}</ul>
+<h4>產區地圖</h4>${o.regs.map(r=>mapA(r[0],r[1])).join('')}</div></div>`);
+listView('#vChips','#vList',VARS,'g',v=>`<div class="card"><button class="hd"><span class="grow"><span class="nm">${v.zh}</span><span class="en">${v.en}</span></span><span class="tag g">${v.g}</span><span class="arr">›</span></button>
+<div class="bd">${tags(v.fl,'r')}<dl class="kv"><dt>身世</dt><dd>${v.from}</dd></dl><div style="font-size:14px">${v.d}</div></div></div>`);
+listView('#fChips','#fList',FARMS,'c',f=>`<div class="card open"><button class="hd"><span class="grow"><span class="nm">${f.zh}</span><span class="en">${f.en} · ${f.c} ${f.loc}</span></span><span class="arr">›</span></button>
+<div class="bd">${tags(f.t)}<div style="font-size:14px;margin:4px 0 8px">${f.d}</div>${mapA('Google Maps：'+f.zh,f.q)}</div></div>`);
+
+/* ---------- PROCESS ---------- */
+let pi=0,ps=0;
+function honeyInfo(v){return v<30?['白蜜','果膠留得少、乾得快，接近水洗：乾淨、酸質清楚。']:v<55?['黃蜜','甜感提升，仍保有明亮酸質。']:v<80?['紅蜜','甜感與稠度明顯，帶熟果與蜂蜜調。']:['黑蜜','果膠幾乎全留、乾燥最慢，最接近日曬：濃甜、果乾、發酵感，也最難做。']}
+function drawProc(){
+  const p=PROCS[pi],s=p.steps[ps],keep=s[2],dried=s[3],fade=s[4];
+  $('#pChips').innerHTML=PROCS.map((x,i)=>`<button class="chip ${i===pi?'on':''}" data-i="${i}">${x.zh}</button>`).join('');
+  LAYERS.forEach(([id])=>{const e=$('#L-'+id);e.style.opacity=keep.includes(id)?(id==='muc'&&fade?fade:1):0});
+  $('#L-cut').style.opacity=1;
+  $('#L-skin').style.fill=dried?'#4a1f24':'#b3382c';$('#L-pulp').style.fill=dried?'#7a3a35':'#e58b7c';
+  let mucCol='#e9b949';
+  if(p.honey){const v=+$('#hR').value,[lab,txt]=honeyInfo(v);$('#hLab').textContent=`${lab}（約 ${v}%）`;$('#hTxt').textContent=txt+' 各莊園對顏色的定義不完全相同，也和乾燥時間、遮蔭有關。';
+    mucCol=v<30?'#f3e6b8':v<55?'#e9b949':v<80?'#c4642d':'#4a2a1c';
+    $('#L-muc').setAttribute('rx',55+9*v/100);$('#L-muc').setAttribute('ry',64+8*v/100)}
+  else{$('#L-muc').setAttribute('rx',64);$('#L-muc').setAttribute('ry',72)}
+  $('#L-muc').style.fill=mucCol;
+  $('#honeyBox').style.display=p.honey?'block':'none';
+  $('#pLegend').innerHTML=LAYERS.map(([id,zh,c])=>`<span class="${keep.includes(id)?'':'off'}"><b style="background:${c}"></b>${zh}</span>`).join('');
+  $('#pN').textContent=`${p.zh} ${p.en} · 步驟 ${ps+1} / ${p.steps.length}`;$('#pT').textContent=s[0];$('#pD').textContent=s[1];
+  $('#pPg').innerHTML=p.steps.map((_,i)=>`<i class="${i<=ps?'on':''}"></i>`).join('');
+  $('#pPrev').disabled=ps===0;$('#pNext').textContent=ps===p.steps.length-1?'重新開始':'下一步';
+  let bars=p.bars.slice();
+  if(p.honey){const k=(+$('#hR').value-10)/90;bars=[4.5-2*k,3.5+1.5*k,2.5+2*k,4.5-2.5*k,1+3*k]}
+  $('#pBars').innerHTML=PB.map((n,i)=>`<span>${n}</span><div class="bar"><i style="width:${bars[i]*20}%"></i></div>`).join('');
+  $('#pSum').textContent=p.sum;
+}
+$('#pChips').onclick=e=>{if(e.target.dataset.i){pi=+e.target.dataset.i;ps=0;drawProc()}};
+$('#pNext').onclick=()=>{ps=ps===PROCS[pi].steps.length-1?0:ps+1;drawProc()};
+$('#pPrev').onclick=()=>{if(ps>0){ps--;drawProc()}};
+$('#hR').oninput=drawProc;drawProc();
+
+/* ---------- ROAST ---------- */
+const R={t:0,bean:25,run:false,done:false,pts:[],ev:{},spd:10,timer:null,scorch:0,stall:0};
+const fmt=s=>Math.floor(s/60)+':'+String(Math.floor(s%60)).padStart(2,'0');
+const lerp=(a,b,k)=>a+(b-a)*k;
+function beanColor(T){const st=[[25,[138,154,91]],[150,[217,178,95]],[196,[168,104,58]],[212,[110,66,36]],[228,[60,37,23]],[245,[24,16,14]]];
+  for(let i=1;i<st.length;i++)if(T<=st[i][0]){const k=(T-st[i-1][0])/(st[i][0]-st[i-1][0]);return 'rgb('+st[i][1].map((c,j)=>Math.round(lerp(st[i-1][1][j],c,Math.max(0,k)))).join(',')+')'}
+  return 'rgb(24,16,14)'}
+function drawRoast(){
+  const cv=$('#cv'),dpr=window.devicePixelRatio||1,W=cv.clientWidth,H=cv.clientHeight;if(!W)return;
+  cv.width=W*dpr;cv.height=H*dpr;const c=cv.getContext('2d');c.scale(dpr,dpr);c.clearRect(0,0,W,H);
+  const L=34,B=22,T=8,Rr=8,X=t=>L+(W-L-Rr)*t/960,Y=v=>H-B-(H-B-T)*(v-40)/(250-40);
+  c.font='11px sans-serif';c.fillStyle='#7a6656';c.strokeStyle='#e2d5c3';c.lineWidth=1;
+  for(let v=50;v<=250;v+=50){c.beginPath();c.moveTo(L,Y(v));c.lineTo(W-Rr,Y(v));c.stroke();c.fillText(v,6,Y(v)+4)}
+  for(let m=0;m<=16;m+=2){c.fillText(m+'′',X(m*60)-5,H-6)}
+  [[150,'轉黃','#d99a2b'],[196,'一爆','#b3382c'],[224,'二爆','#2a1c14']].forEach(([v,l,col])=>{c.setLineDash([4,4]);c.strokeStyle=col;c.beginPath();c.moveTo(L,Y(v));c.lineTo(W-Rr,Y(v));c.stroke();c.setLineDash([]);c.fillStyle=col;c.fillText(l,W-Rr-26,Y(v)-3)});
+  if(R.pts.length>1){c.strokeStyle='#6b3f22';c.lineWidth=2.5;c.lineJoin='round';c.beginPath();R.pts.forEach((p,i)=>i?c.lineTo(X(p[0]),Y(p[1])):c.moveTo(X(p[0]),Y(p[1])));c.stroke()}
+  Object.entries(R.ev).forEach(([k,p])=>{c.fillStyle='#b3382c';c.beginPath();c.arc(X(p[0]),Y(p[1]),4.5,0,7);c.fill();c.fillStyle='#2a1c14';c.fillText(k,Math.min(X(p[0])+6,W-40),Y(p[1])+14)});
+}
+function stageOf(T){return T<150?['脫水期','水分蒸發，豆色由綠轉黃，聞起來像青草與烤麵包。']:T<196?['梅納期','梅納反應與焦糖化進行中，香氣與褐色快速生成。']:T<224?['發展期（一爆後）','劈啪！一爆開始。現在下豆是淺到中焙，留意發展比。']:['二爆／深焙','二爆開始、油脂浮出，苦味與煙燻感快速增加。']}
+function tick(){
+  const dt=R.spd/10,heat=+$('#heat').value,env=140+heat*1.4;
+  R.t+=dt;R.bean+=0.003*(env-R.bean)*dt;
+  const probe=R.bean+(200-R.bean)*Math.exp(-R.t/30),last=R.pts[R.pts.length-1];
+  if(last&&!R.ev['回溫點']&&R.t>20&&probe>last[1])R.ev['回溫點']=[R.t,probe];
+  R.pts.push([R.t,probe]);
+  if(!R.ev['轉黃']&&R.bean>=150)R.ev['轉黃']=[R.t,probe];
+  if(!R.ev['一爆']&&R.bean>=196){R.ev['一爆']=[R.t,probe]}
+  if(!R.ev['二爆']&&R.bean>=224)R.ev['二爆']=[R.t,probe];
+  let ror=null;const back=R.pts.find(p=>p[0]>=R.t-30);if(back&&R.t>60&&R.t-back[0]>5)ror=(probe-back[1])/(R.t-back[0])*60;
+  if(heat>90&&R.bean<150)R.scorch+=dt;
+  if(ror!==null&&ror<3&&R.bean>120&&R.bean<196)R.stall+=dt;
+  $('#sT').textContent=fmt(R.t);$('#sB').textContent=probe.toFixed(0);$('#sR').textContent=ror===null?'–':ror.toFixed(1);
+  $('#sD').textContent=R.ev['一爆']?Math.round((R.t-R.ev['一爆'][0])/R.t*100)+'%':'–';
+  $('#bean').style.background=beanColor(R.bean);const st=stageOf(R.bean);$('#stage').textContent=st[0];$('#stageD').textContent=st[1];
+  drawRoast();
+  if(R.bean>=243||R.t>=950)drop(true);
+}
+function drop(auto){
+  clearInterval(R.timer);R.run=false;R.done=true;$('#rDrop').disabled=true;$('#rStart').textContent='再烘一鍋';$('#rStart').disabled=false;
+  const T=R.bean,fc=R.ev['一爆'],dtr=fc?(R.t-fc[0])/R.t*100:0;R.ev['下豆']=[R.t,R.pts[R.pts.length-1][1]];drawRoast();
+  let deg=T<196?'未熟（一爆前下豆）':T<205?'淺焙':T<214?'中焙':T<224?'中深焙':T<236?'深焙':'極深焙／焦黑';
+  const notes=[];
+  if(auto&&T>=243)notes.push('豆溫過高，已經燒焦冒煙——現實中這有起火風險，要更早下豆。');
+  if(auto&&T<243)notes.push('烘了 16 分鐘還沒完成：火力太小，升溫停滯。');
+  if(T<196)notes.push('還沒到一爆就下豆：豆芯未熟，會有青草、生穀物味與尖銳的酸。');
+  else{if(dtr<12)notes.push(`發展比只有 ${dtr.toFixed(0)}%，偏低：可能<b>發展不足</b>，酸尖、帶穀物味。一爆後多等一下。`);
+    else if(dtr>28)notes.push(`發展比 ${dtr.toFixed(0)}% 偏高：風味可能變得平淡、偏苦，產地特色流失。`);
+    else notes.push(`發展比 ${dtr.toFixed(0)}%，落在常見的 15–25% 目標附近，發展充足。`)}
+  if(R.t<360&&T>=196)notes.push('總時間不到 6 分鐘：升溫太猛，容易外焦內生。');
+  if(R.t>840||R.stall>90)notes.push('升溫一度停滯或總時間過長：容易出現<b>烤焙感</b>，風味扁平。試著在梅納期維持足夠火力。');
+  if(R.scorch>60)notes.push('脫水期火力長時間超過 90%：豆表可能<b>焦燒</b>，出現焦點與焦苦味。');
+  if(notes.length===1&&T>=196&&dtr>=12&&dtr<=28)notes.push('這是一條漂亮的曲線！可以換個下豆溫度比較風味差異。');
+  const d=Math.max(0,T-196),cl=v=>Math.max(5,Math.min(100,v));
+  const fl=T<196?[90,20,20,15]:[cl(100-d*2.6),cl(100-Math.abs(T-210)*3.2),cl(40+d*1.6),cl(10+d*2.4)];
+  $('#rRes').style.display='block';
+  $('#rRes').innerHTML=`<h3>烘焙結果：${deg}</h3><dl class="kv"><dt>下豆</dt><dd>${fmt(R.t)}，豆溫約 ${T.toFixed(0)}°C</dd><dt>一爆</dt><dd>${fc?fmt(fc[0]):'未到達'}</dd><dt>發展比</dt><dd>${fc?dtr.toFixed(0)+'%':'–'}</dd></dl>
+  <ul style="padding-left:1.2em;margin:0 0 8px;font-size:14px">${notes.map(n=>`<li>${n}</li>`).join('')}</ul>
+  <div class="bars">${['酸質','甜感','醇厚','苦味'].map((n,i)=>`<span>${n}</span><div class="bar"><i style="width:${fl[i]}%"></i></div>`).join('')}</div>`;
+}
+$('#rStart').onclick=()=>{Object.assign(R,{t:0,bean:25,run:true,done:false,pts:[],ev:{},scorch:0,stall:0});$('#rRes').style.display='none';
+  $('#rStart').disabled=true;$('#rDrop').disabled=false;clearInterval(R.timer);R.timer=setInterval(tick,100)};
+$('#rDrop').onclick=()=>{if(R.run)drop(false)};
+$('#rSpd').onclick=()=>{R.spd=R.spd===10?20:R.spd===20?5:10;$('#rSpd').textContent='速度 ×'+R.spd};
+$('#heat').oninput=e=>$('#hV').textContent=e.target.value;
+$('#rInfo').innerHTML=`<div class="note">小提示：火力 75% 左右起步，接近一爆時把火降到 50–60%，讓升溫速率平順下降，再依想要的焙度決定下豆時機。模擬的 1 秒約等於實際 ${'10'} 秒，數字為教學用的簡化模型，實際溫度會因機器與探針位置而不同。</div>`+
+  ROASTINFO.map((r,i)=>`<div class="card ${i?'':'open'}"><button class="hd"><span class="grow"><span class="nm">${r[0]}</span></span><span class="arr">›</span></button><div class="bd" style="font-size:14px">${r[1]}</div></div>`).join('');
+$('#rInfo').onclick=e=>{const h=e.target.closest('.hd');if(h)h.parentNode.classList.toggle('open')};
+addEventListener('resize',drawRoast);
+
+/* ---------- GAME ---------- */
+const G={theme:'產地',prog:store.get('ct-game',{}),lv:1,sel:null,left:0,miss:0,t0:0,timer:null};
+const shuffle=a=>{for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+function drawMenu(){
+  $('#gChips').innerHTML=Object.keys(PAIRS).map(k=>`<button class="chip ${k===G.theme?'on':''}">${k}</button>`).join('');
+  const p=G.prog[G.theme]||{};
+  $('#gLv').innerHTML=[1,2,3,4,5,6].map(n=>{const open=n===1||p[n-1];return `<button class="lv" data-n="${n}" ${open?'':'disabled'}><span><b>${n}</b><br><small>${'★'.repeat(p[n]||0)}${'☆'.repeat(3-(p[n]||0))}</small></span></button>`}).join('');
+}
+$('#gChips').onclick=e=>{if(e.target.classList.contains('chip')){G.theme=e.target.textContent;drawMenu()}};
+$('#gLv').onclick=e=>{const b=e.target.closest('.lv');if(b&&!b.disabled)startLevel(+b.dataset.n)};
+function startLevel(n){
+  G.lv=n;const all=PAIRS[G.theme],mixed=G.theme==='綜合';
+  const pool=mixed?all:all.slice(0,Math.min(all.length,4+2*n)),cnt=n<=3?6:9;
+  let pick;
+  if(mixed||n>=5)pick=shuffle(pool.slice()).slice(0,cnt);
+  else{const fresh=n===1?[]:pool.slice(-2),rest=shuffle(pool.slice(0,pool.length-fresh.length));pick=fresh.concat(rest).slice(0,cnt)}
+  const tiles=shuffle(pick.flatMap((p,i)=>[{id:i,txt:p[0],k:'t'},{id:i,txt:p[1],k:'d'}]));
+  G.pick=pick;G.sel=null;G.left=cnt;G.miss=0;G.t0=Date.now();
+  $('#board').innerHTML=tiles.map(t=>`<button class="tile ${t.k}" data-id="${t.id}" data-k="${t.k}">${t.txt}</button>`).join('');
+  $('#gMenu').style.display='none';$('#gPlay').style.display='block';$('#toast').className='';
+  clearInterval(G.timer);G.timer=setInterval(hud,500);hud();
+}
+function hud(){const s=Math.floor((Date.now()-G.t0)/1000),lim=G.lv===6?90:0;
+  $('#gHud').textContent=`${G.theme} 第 ${G.lv} 關 · 失誤 ${G.miss} · ${lim?'剩 '+Math.max(0,lim-s)+' 秒':fmt(s)}`;
+  if(lim&&s>=lim&&G.left>0)finish(false)}
+$('#board').onclick=e=>{
+  const b=e.target.closest('.tile');if(!b||b.classList.contains('gone'))return;
+  if(G.sel===b){b.classList.remove('sel');G.sel=null;return}
+  if(!G.sel){G.sel=b;b.classList.add('sel');return}
+  const a=G.sel;G.sel=null;a.classList.remove('sel');
+  if(a.dataset.id===b.dataset.id&&a.dataset.k!==b.dataset.k){a.classList.add('gone');b.classList.add('gone');G.left--;
+    const p=G.pick[+a.dataset.id];$('#toast').textContent=`✓ ${p[0]} — ${p[1]}`;$('#toast').className='on';
+    if(G.left===0)setTimeout(()=>finish(true),450)}
+  else{G.miss++;[a,b].forEach(x=>{x.classList.remove('bad');void x.offsetWidth;x.classList.add('bad')});hud()}
+};
+function finish(win){
+  clearInterval(G.timer);const stars=win?(G.miss<=1?3:G.miss<=4?2:1):0;
+  if(win){const p=G.prog[G.theme]=G.prog[G.theme]||{};p[G.lv]=Math.max(p[G.lv]||0,stars);store.set('ct-game',G.prog)}
+  $('#toast').className='';
+  $('#board').innerHTML=`<div class="win" style="grid-column:1/-1"><div class="st">${win?'★'.repeat(stars)+'☆'.repeat(3-stars):'時間到'}</div>
+  <h3>${win?'過關！':'再試一次'}</h3><p>失誤 ${G.miss} 次 · 用時 ${fmt((Date.now()-G.t0)/1000)}</p>
+  <div class="row" style="justify-content:center"><button class="btn sec" id="gAgain">再玩一次</button>${win&&G.lv<6?'<button class="btn" id="gNextLv">下一關</button>':''}</div></div>`;
+  $('#gAgain').onclick=()=>startLevel(G.lv);const nx=$('#gNextLv');if(nx)nx.onclick=()=>startLevel(G.lv+1);
+}
+$('#gBack').onclick=()=>{clearInterval(G.timer);$('#gPlay').style.display='none';$('#gMenu').style.display='block';drawMenu()};
+drawMenu();route();
+</script>
+</body>
+</html>
