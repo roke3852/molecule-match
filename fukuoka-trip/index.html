@@ -862,8 +862,8 @@ function nowStopIndex(day){
 }
 const SPMAX=8;
 function stopPhotoKeys(id){const g=S.get('gphoto',{}),pre='s_'+id+'_';return Object.keys(g).filter(k=>k.startsWith(pre)&&g[k]&&g[k].h).sort((a,b)=>+a.slice(pre.length)-+b.slice(pre.length))}
-function photoBox(id){const g=S.get('gphoto',{}),pre='s_'+id+'_',ks=stopPhotoKeys(id),mx=ks.reduce((m,k)=>Math.max(m,+k.slice(pre.length)||0),-1);
- return `<div class="sph">${ks.map(k=>g[k].u?`<img src="${g[k].u}" data-szoom="${k}" alt="照片">`:`<span class="ld">載入中…</span>`).join('')}${ks.length<SPMAX?`<button class="add" data-sphoto="${pre}${mx+1}">📷 ${ks.length?'再加一張':'加照片'}</button>`:''}</div>`}
+function photoBox(id,q){const g=S.get('gphoto',{}),pre='s_'+id+'_',ks=stopPhotoKeys(id),mx=ks.reduce((m,k)=>Math.max(m,+k.slice(pre.length)||0),-1);
+ return `<div class="sph">${ks.map(k=>g[k].u?`<img src="${g[k].u}" data-szoom="${k}" alt="照片">`:`<span class="ld">載入中…</span>`).join('')}${ks.length<SPMAX?`<button class="add" data-sphoto="${pre}${mx+1}">📷 ${ks.length?'再加一張':'加照片'}</button>`:''}<a class="add" style="display:inline-flex;align-items:center;text-decoration:none" href="https://www.google.com/search?tbm=isch&q=${encodeURIComponent(q)}" target="_blank" rel="noopener">🔍 搜尋照片</a></div>`}
 function renderDay(keep){
  const opened=keep?[...document.querySelectorAll('.stop.open')].map(x=>x.dataset.id):[];
  const d=D(curDay);document.documentElement.style.setProperty('--day',d.c);document.documentElement.style.setProperty('--day-soft',soft(d.c));
@@ -895,7 +895,7 @@ function renderDay(keep){
    <div class="more">${esc(s.d)}${s.tip?`<div class="tip">💡 ${esc(s.tip)}</div>`:''}${SF[s.id]?(()=>{const a=SF[s.id],fs=FOODS.filter(f=>f.a===a.k).sort((x,y)=>(fw[y.id]?1:0)-(fw[x.id]?1:0)),nw=fs.filter(f=>fw[f.id]).length;
     return `<a class="foodbox" href="#food" data-farea="${a.k}"><b>🍜 ${a.n}附近好吃的 ${fs.length} 間${nw?`（${nw} 間在想吃清單）`:''}</b><span>${fs.map(f=>(fw[f.id]?'✓ ':'')+esc(f.n.replace(/（.*?）/g,''))).join('、')}</span><em>看推薦 ›</em></a>`})():''}${SG[s.id]?(()=>{const gs=SG[s.id].slice().sort((a,b)=>(gw[b.id]?1:0)-(gw[a.id]?1:0)),nw=gs.filter(g=>gw[g.id]).length;
     return (curDay>=6&&/機場|空港/.test(stopText(s))?`<a class="giftbox" href="#tax" style="background:#e9f4ec;border-color:#c5dccb"><b style="color:#2f6b4a">🧾 有買免稅品？託運行李「之前」要先辦免稅手續</b><span>新制要在機場掃護照做海關確認才會退稅，順序錯了就退不回來。</span><em>看退稅教學 ›</em></a>`:'')+`<a class="giftbox" href="#gift" data-gf=""${gs.map(g=>g.id).join(',')}" data-gl="${esc(s.n)}"><b>🎁 這一站買得到 ${gs.length} 款伴手禮${nw?`（其中 ${nw} 款在想買清單）`:''}</b><span>${gs.slice(0,8).map(g=>(gw[g.id]?'✓ ':'')+esc(gShort(g))).join('、')}${gs.length>8?'…':''}</span><em>看介紹 ›</em></a>`})():''}
-   ${photoBox(s.id)}
+   ${photoBox(s.id,s.q||s.n)}
    <div class="acts"><a class="btn" href="${mapUrl(s.q||s.n)}" target="_blank" rel="noopener">📍 地圖導航</a>
    ${s.jr?'<a class="btn" href="#tools" data-act="jr">🎫 買票小抄</a>':''}
    <button class="btn pri" data-act="done">${isD?'↺ 取消完成':'✓ 完成'}</button></div></div></div></div>`});
