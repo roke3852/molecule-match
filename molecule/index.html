@@ -1398,6 +1398,7 @@ const GCLIENT='267421312122-l2ggo7t35tqpf8ej5osqttt08ke30lr1.apps.googleusercont
 const GFILE='molpairs.json',GAPI='https://www.googleapis.com';
 let gTok=null,gTokExp=0,gFileId=null,gClient=null,gPending=null;
 function gLoadLib(){return new Promise((ok,no)=>{if(window.google&&google.accounts&&google.accounts.oauth2)return ok();const sc=document.createElement('script');sc.src='https://accounts.google.com/gsi/client';sc.onload=()=>ok();sc.onerror=()=>no(new Error('lib'));document.head.appendChild(sc)})}
+setTimeout(()=>gLoadLib().catch(()=>{}),600);
 async function gFetch(url,opt={}){
   if(!gTok||Date.now()>gTokExp)throw new Error('auth');
   const r=await fetch(url,Object.assign({},opt,{headers:Object.assign({Authorization:'Bearer '+gTok},opt.headers||{})}));
@@ -1480,7 +1481,7 @@ async function gAfterLogin(){
 }
 async function gLogin(){
   if(!GCLIENT){syncNote('尚未設定 Google 用戶端 ID（GCLIENT），請先完成 Google Cloud 設定');return}
-  try{await gLoadLib()}catch(e){syncNote('⚠️ 無法載入 Google 登入，請確認網路');return}
+  if(!(window.google&&google.accounts&&google.accounts.oauth2)){try{await gLoadLib()}catch(e){syncNote('⚠️ 無法載入 Google 登入，請確認網路');return}}
   if(!gClient)gClient=google.accounts.oauth2.initTokenClient({client_id:GCLIENT,scope:'https://www.googleapis.com/auth/drive.appdata',
     callback:t=>{if(t&&t.access_token){gTok=t.access_token;gTokExp=Date.now()+((+t.expires_in||3600)-120)*1000;gAfterLogin()}else syncNote('⚠️ Google 登入沒有完成')},
     error_callback:()=>syncNote('⚠️ Google 登入被取消或被擋（請允許彈出視窗）')});

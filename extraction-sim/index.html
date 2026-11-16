@@ -3491,6 +3491,7 @@ function parse(v){if(v==null)return undefined;try{return JSON.parse(v)}catch(e){
 function snapshot(){const o={savedAt:+ls.get(STAMP)||0};SYNC_KEYS.forEach(k=>{const v=parse(ls.get(k));if(v!==undefined)o[k]=v});return o}
 function schedule(){if(!gOn)return;clearTimeout(pushT);pushT=setTimeout(push,1500)}
 function libLoad(){return new Promise((ok,no)=>{if(window.google&&google.accounts&&google.accounts.oauth2)return ok();const sc=document.createElement('script');sc.src='https://accounts.google.com/gsi/client';sc.onload=()=>ok();sc.onerror=()=>no(new Error('lib'));document.head.appendChild(sc)})}
+setTimeout(()=>libLoad().catch(()=>{}),600);
 async function gf(url,opt={}){
   if(!gTok||Date.now()>gTokExp)throw new Error('auth');
   const r=await fetch(url,Object.assign({},opt,{headers:Object.assign({Authorization:'Bearer '+gTok},opt.headers||{})}));
@@ -3552,12 +3553,13 @@ async function afterLogin(){
   }catch(e){note(e.message==='auth'?'Google 連線已過期，再點一次':'⚠️ 讀取 Google 雲端失敗')}
 }
 function login(){
-  libLoad().then(()=>{
+  const go=()=>{
     if(!gClient)gClient=google.accounts.oauth2.initTokenClient({client_id:GCLIENT,scope:'https://www.googleapis.com/auth/drive.appdata',
       callback:t=>{if(t&&t.access_token){gTok=t.access_token;gTokExp=Date.now()+((+t.expires_in||3600)-120)*1000;try{sessionStorage.setItem(TOKK,JSON.stringify({tok:gTok,exp:gTokExp}))}catch(e){}afterLogin()}else note('⚠️ Google 登入沒有完成')},
       error_callback:()=>note('⚠️ Google 登入被取消或被擋（請允許彈出視窗）')});
     gClient.requestAccessToken({prompt:ls.get(GFLAG)==='1'?'':'consent'});
-  },()=>note('⚠️ 無法載入 Google 登入，請確認網路'));
+  };
+  if(window.google&&google.accounts&&google.accounts.oauth2)go();else libLoad().then(go,()=>note('⚠️ 無法載入 Google 登入，請確認網路'));
 }
 $('gBtn').onclick=()=>{if(gOn&&gTok&&Date.now()<gTokExp){push();return}login()};
 if(gTok&&ls.get(GFLAG)==='1')afterLogin();
