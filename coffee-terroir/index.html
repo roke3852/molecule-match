@@ -115,8 +115,8 @@ canvas{width:100%;height:230px;display:block}
   <div class="chips" id="vChips"></div><div id="vList"></div>
 </section>
 <section class="view" id="v-farms">
-  <h2 class="vt">知名莊園</h2><p class="vs">點「Google Maps」直接開啟莊園位置</p>
-  <div class="chips" id="fChips"></div><div id="fList"></div>
+  <h2 class="vt">莊園與處理站</h2><p class="vs">莊園自己種、自己處理；處理站收購周邊小農的果實集中處理。點「Google Maps」開啟位置</p>
+  <div class="chips" id="fType"></div><div class="chips" id="fChips"></div><div class="vs" id="fCount" style="margin-top:-4px"></div><div id="fList"></div>
 </section>
 <section class="view" id="v-process">
   <h2 class="vt">處理法互動教學</h2><p class="vs">選一種處理法，一步步看咖啡果實哪一層被去掉</p>
@@ -252,6 +252,8 @@ const FARMS=[
 {zh:'達特拉莊園',en:'Daterra Coffee',c:'巴西',loc:'喜拉朵 Patrocínio',q:'Daterra Coffee Patrocinio Minas Gerais Brazil',d:'巴西精品咖啡與永續農業的標竿，大規模但精細管理，以研究、分級與實驗批次（Masterpieces）聞名。',t:['多品種','日曬／厭氧']},
 {zh:'拉斯拉哈斯',en:'Las Lajas Micromill',c:'哥斯大黎加',loc:'中央谷地 Sabanilla de Alajuela',q:'Beneficio Las Lajas Sabanilla Alajuela Costa Rica',d:'Chacón 家族經營的有機微型處理廠，是哥斯大黎加蜜處理與日曬的先驅，「黑蜜」「Perla Negra」等批次很知名。',t:['卡杜拉／卡杜艾','蜜處理']},
 {zh:'藝伎村',en:'Gesha Village Coffee Estate',c:'衣索比亞',loc:'Bench Maji（近 Gesha 森林）',q:'Gesha Village Coffee Estate Ethiopia',d:'Adam Overton 與 Rachel Samuel 於 2011 年創立，在藝伎品種的發源地附近建立莊園，種植從當地森林選出的藝伎。',t:['藝伎','日曬／水洗']},
+{zh:'卡永山莊園',en:'Kayon Mountain Coffee Farm',c:'衣索比亞',loc:'古吉 Shakiso',q:'Kayon Mountain Coffee Farm Shakiso Guji Ethiopia',d:'衣索比亞少見的私人莊園，Ismael Hassen Aredo 家族經營，自己種植、自己處理，日曬批次常帶草莓、藍莓與花香。',t:['原生種','日曬／水洗']},
+{zh:'班奇馬吉瑰夏莊園',en:'Bench Maji Gesha Farm',c:'衣索比亞',loc:'班奇馬吉',q:'Bench Sheko Zone Ethiopia',d:'台灣豆單常見的班奇馬吉藝伎莊園，海拔約 1,900–2,100 m，多為棚架日曬，風味偏熱帶水果與酒香。地圖只能定位到所在區域。',t:['藝伎','日曬']},
 {zh:'飛雀處理站',en:'Fair Trade Station（Bench Maji）',c:'衣索比亞',loc:'班奇馬吉（今 Bench Sheko 一帶）',q:'Bench Sheko Zone Ethiopia',d:'台灣烘豆商常譯「飛雀」，其實是處理站而不是單一莊園：收購周邊農民的咖啡果實集中處理。位在藝伎品種的故鄉班奇馬吉，海拔約 2,360 m，藝伎有水洗與日曬批次，常見茉莉、柑橘、芒果、紅茶調。地圖只能定位到所在區域。',t:['藝伎','水洗／日曬','處理站']},
 {zh:'露西處理站',en:'Lucy Station（Bench Maji）',c:'衣索比亞',loc:'班奇馬吉 Gesha 地區',q:'Bench Sheko Zone Ethiopia',d:'同樣位於班奇馬吉的 Gesha 地區，海拔約 2,280 m，啟用不到十年，以「露西藝伎」打響名號，常見日曬與厭氧日曬批次。地圖只能定位到所在區域。',t:['藝伎','日曬／厭氧','處理站']},
 {zh:'詹森莊園',en:'Janson Coffee Farm',c:'巴拿馬',loc:'沃肯',q:'Janson Coffee Farm Volcan Panama',d:'Janson 家族經營，位於巴魯火山西側的沃肯。藝伎批次在 Best of Panama 名列前茅，以乾淨、精準的處理著稱。',t:['藝伎','水洗／日曬']},
@@ -347,11 +349,18 @@ function route(){let v=location.hash.slice(1);if(!VIEWS.some(x=>x[0]===v))v=stor
 addEventListener('hashchange',route);
 
 /* ---------- LIST VIEWS ---------- */
-function listView(chipsSel,listSel,data,key,render){
-  const cats=['全部',...new Set(data.map(d=>d[key]))];let cur='全部';
-  const draw=()=>{$(chipsSel).innerHTML=cats.map(c=>`<button class="chip ${c===cur?'on':''}">${c}</button>`).join('');
-    $(listSel).innerHTML=data.filter(d=>cur==='全部'||d[key]===cur).map(render).join('')};
+function listView(chipsSel,listSel,data,key,render,ty){
+  const cats=['全部',...new Set(data.map(d=>d[key]))];let cur='全部',tcur='全部';
+  const draw=()=>{
+    const pool=ty?data.filter(d=>tcur==='全部'||ty.of(d)===tcur):data;
+    const have=new Set(pool.map(d=>d[key]));if(cur!=='全部'&&!have.has(cur))cur='全部';
+    $(chipsSel).innerHTML=cats.filter(c=>c==='全部'||have.has(c)).map(c=>`<button class="chip ${c===cur?'on':''}">${c}</button>`).join('');
+    const list=pool.filter(d=>cur==='全部'||d[key]===cur);
+    if(ty){$(ty.sel).innerHTML=['全部',...ty.opts].map(c=>`<button class="chip ${c===tcur?'on':''}">${c==='全部'?'全部類型':c}</button>`).join('');
+      const n=k=>list.filter(d=>ty.of(d)===k).length;$(ty.count).textContent=ty.opts.map(k=>`${k} ${n(k)}`).join(' · ')}
+    $(listSel).innerHTML=list.map(render).join('')};
   $(chipsSel).onclick=e=>{if(e.target.classList.contains('chip')){cur=e.target.textContent;draw()}};
+  if(ty)$(ty.sel).onclick=e=>{if(e.target.classList.contains('chip')){const t=e.target.textContent;tcur=t==='全部類型'?'全部':t;draw()}};
   $(listSel).onclick=e=>{const h=e.target.closest('.hd');if(h)h.parentNode.classList.toggle('open')};
   draw();
 }
@@ -362,8 +371,9 @@ listView('#oChips','#oList',ORIGINS,'c',o=>`<div class="card"><button class="hd"
 <h4>產區地圖</h4>${o.regs.map(r=>mapA(r[0],r[1])).join('')}</div></div>`);
 listView('#vChips','#vList',VARS,'g',v=>`<div class="card"><button class="hd"><span class="grow"><span class="nm">${v.zh}</span><span class="en">${v.en}</span></span><span class="tag g">${v.g}</span><span class="arr">›</span></button>
 <div class="bd">${tags(v.fl,'r')}<dl class="kv"><dt>身世</dt><dd>${v.from}</dd></dl><div style="font-size:14px">${v.d}</div></div></div>`);
+const farmKind=f=>f.t.includes('處理站')?'處理站':'莊園';
 listView('#fChips','#fList',FARMS,'c',f=>`<div class="card open"><button class="hd"><span class="grow"><span class="nm">${f.zh}</span><span class="en">${f.en} · ${f.c} ${f.loc}</span></span><span class="arr">›</span></button>
-<div class="bd">${tags(f.t)}<div style="font-size:14px;margin:4px 0 8px">${f.d}</div>${mapA('Google Maps：'+f.zh,f.q)}</div></div>`);
+<div class="bd">${tags(f.t)}<div style="font-size:14px;margin:4px 0 8px">${f.d}</div>${mapA('Google Maps：'+f.zh,f.q)}</div></div>`,{sel:'#fType',count:'#fCount',opts:['莊園','處理站'],of:farmKind});
 
 /* ---------- PROCESS ---------- */
 let pi=0,ps=0;
