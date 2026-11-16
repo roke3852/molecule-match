@@ -286,6 +286,8 @@ nav a{position:relative}
 .lk.no{background:#f3ece4;color:#5b4d43}.lk.no .btn{display:block;margin-top:5px;font-size:12.5px;padding:6px 10px;width:100%;text-align:left}
 .gift-k{margin-left:32px;font-size:12px;color:var(--sub);margin-top:4px}
 .gift-w{margin-left:32px;font-size:12.5px;color:#8a6200;background:#fff3c4;border-radius:8px;padding:4px 8px;margin-top:6px}
+.swb{position:fixed;left:0;top:50%;width:44px;height:44px;margin-top:-22px;border-radius:0 22px 22px 0;background:rgba(43,36,32,.82);color:#fff;font-size:26px;line-height:42px;text-align:center;z-index:80;pointer-events:none;opacity:0;transform:translateX(-44px)}
+.swb.go{background:var(--maple)}
 .nbadge{display:none;position:absolute;top:0;left:50%;margin-left:6px;min-width:17px;height:17px;border-radius:9px;background:var(--maple);color:#fff;font-size:10.5px;font-weight:700;line-height:17px;padding:0 4px}
 .nbadge.on{display:block}
 .chat-top{margin:10px 14px 0;font-size:12px;color:var(--sub)}
@@ -516,6 +518,7 @@ nav a.on{color:var(--maple);font-weight:700;background:var(--maple-soft)}
   <div class="acts" style="margin-top:12px"><button class="btn" id="exClose">關閉</button><button class="btn pri" id="exCopy">複製</button></div>
 </div></div>
 <div class="fam-ask" id="famAsk"><button class="x" id="famAskX" aria-label="略過">×</button><b>👋 你是哪一位？</b><div class="hint" style="margin:2px 0 0;font-size:12px;color:var(--sub)">填個暱稱，家人就知道你加入共用了。</div><div class="addrow" style="margin-top:8px"><input id="famAskIn" maxlength="12" placeholder="例如：媽媽"><button id="famAskOk">確定</button></div></div>
+<div class="swb" id="swb">‹</div>
 <div class="toast" id="toast"></div>
 
 <script>
@@ -1358,6 +1361,33 @@ const FS=(function(){
  document.addEventListener('visibilitychange',()=>{if(!document.hidden)drawChat()});
  window.famSync=onLocal;
  return{on:()=>!!code,chatOpen(){navH();chatN=-1;drawChat()},init(){window.FS=this;drawChat();try{Q=JSON.parse(raw.get('famQ'))||{}}catch(e){Q={}}joined=!!code&&raw.get('famJ')===code;snapLocal();draw();if(code)connect()}};
+})();
+
+/* ---------- 由左往右滑：回上一頁 ---------- */
+(function(){
+ let depth=0;window.addEventListener('hashchange',()=>{if(goingBack){goingBack=false;depth=Math.max(0,depth-1)}else depth++});
+ let goingBack=false,t0=null;const swb=$('#swb'),standalone=navigator.standalone||matchMedia('(display-mode: standalone)').matches;
+ function back(){
+  if($('#ov').classList.contains('on')){$('#ov').classList.remove('on');return}
+  if($('#sheet').classList.contains('on')){closeSheet();return}
+  if($('#export').classList.contains('on')){$('#export').classList.remove('on');return}
+  if(currentView()==='map'){if(mapDay>=0){mapDay=-1;mapSel=null;drawMap();return}if(zs){zoomTo(zr,null);return}if(zr){zoomTo(null,null);return}}
+  if(depth>0){goingBack=true;history.back();return}
+  if(currentView()!=='trip'){location.hash='trip';return}
+  if(history.length>1)history.back();
+ }
+ const scrollsX=el=>{for(;el&&el!==document.body;el=el.parentNode){if(el.scrollWidth>el.clientWidth+4&&/(auto|scroll)/.test(getComputedStyle(el).overflowX))return true}return false};
+ document.addEventListener('touchstart',e=>{t0=null;if(e.touches.length!==1)return;const t=e.touches[0];
+  if(!standalone&&t.clientX<28)return; /* Safari 自己的邊緣返回手勢，交給瀏覽器 */
+  if(/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName)||scrollsX(e.target))return;
+  t0={x:t.clientX,y:t.clientY,t:Date.now(),ok:null}},{passive:true});
+ document.addEventListener('touchmove',e=>{if(!t0)return;const t=e.touches[0],dx=t.clientX-t0.x,dy=t.clientY-t0.y;
+  if(t0.ok===null&&(Math.abs(dx)>12||Math.abs(dy)>12))t0.ok=dx>0&&Math.abs(dx)>Math.abs(dy)*1.8;
+  if(t0.ok){const pr=Math.min(1,dx/90);swb.style.opacity=pr;swb.style.transform=`translateX(${-44+44*pr}px)`;swb.classList.toggle('go',dx>=90)}
+  else if(t0.ok===false){t0=null}},{passive:true});
+ const end=e=>{if(!t0)return;const t=(e.changedTouches||[])[0],dx=t?t.clientX-t0.x:0,ok=t0.ok&&dx>=90&&Date.now()-t0.t<900;t0=null;
+  swb.style.opacity=0;swb.style.transform='translateX(-44px)';swb.classList.remove('go');if(ok&&e.type==='touchend')back()};
+ document.addEventListener('touchend',end,{passive:true});document.addEventListener('touchcancel',end,{passive:true});
 })();
 
 renderChips();renderDay();route();loadWx(false);FS.init();
