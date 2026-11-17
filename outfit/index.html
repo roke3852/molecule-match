@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="穿搭試衣間">
 <meta name="theme-color" content="#2f3a4a">
-<meta name="app-version" content="1.12">
+<meta name="app-version" content="1.13">
 <title>穿搭試衣間</title>
 <style>
 :root{--bg:#f4f1ec;--card:#fff;--ink:#23201d;--mute:#857b70;--line:#e5ddd2;--accent:#2f3a4a;--hot:#c8553d;--soft:#ece6dc;--ok:#2f8f5b}
@@ -16,6 +16,7 @@ header{position:sticky;top:0;z-index:8;background:var(--accent);color:#fff;paddi
 header a{color:#fff;text-decoration:none;font-size:22px;opacity:.85;line-height:1}
 header h1{font-size:17px;margin:0;flex:1}
 header button{font:inherit;font-size:13px;background:rgba(255,255,255,.16);color:#fff;border:0;border-radius:16px;padding:5px 11px;cursor:pointer}
+header .cb{font-size:11.5px;padding:4px 8px;background:rgba(255,255,255,.12)}header .cb.ok{background:rgba(70,190,120,.35)}header .cb.busy,header .cb.wait{background:rgba(255,200,80,.35)}header .cb.off,header .cb.err{background:rgba(230,90,80,.5)}
 main{max-width:720px;margin:0 auto;padding:10px 12px}
 nav{position:fixed;bottom:0;left:0;right:0;z-index:9;background:#fff;border-top:1px solid var(--line);display:flex;padding-bottom:env(safe-area-inset-bottom)}
 nav button{flex:1;border:0;background:none;font:inherit;font-size:11px;color:var(--mute);padding:7px 0 6px;display:flex;flex-direction:column;align-items:center;gap:1px;cursor:pointer}
@@ -181,7 +182,7 @@ label.f{display:block;font-size:12.5px;color:var(--mute);margin:10px 0 4px}
 <linearGradient id="sh-l"><stop offset="0" stop-color="#000" stop-opacity=".28"/><stop offset=".2" stop-color="#000" stop-opacity=".04"/><stop offset=".55" stop-color="#fff" stop-opacity=".07"/><stop offset="1" stop-color="#000" stop-opacity=".05"/></linearGradient>
 <linearGradient id="sh-v" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#000" stop-opacity=".2"/><stop offset=".35" stop-color="#000" stop-opacity="0"/></linearGradient>
 </defs></svg>
-<header><a href="../" aria-label="回目錄">‹</a><h1>穿搭試衣間</h1><button id="userBtn" style="display:none"></button></header>
+<header><a href="../" aria-label="回目錄">‹</a><h1>穿搭試衣間</h1><button id="cloudBadge" class="cb" style="display:none">☁</button><button id="userBtn" style="display:none"></button></header>
 <main id="app"></main>
 <nav id="nav" style="display:none">
 <button data-tab="try"><span class="i">🧍</span>試穿</button>
@@ -812,9 +813,23 @@ try{const d=JSON.parse(localStorage.getItem(LSK)||'null');if(d&&d.users)DB=d;}ca
 let viewBack=false,flipNow=false,U=null,UK=null,tab='try',cloud='',accSel=0,closetView='own',shopBrand='全部',shopSlot='all',addSlot='top',online=false;
 function saveLocal(){try{localStorage.setItem(LSK,JSON.stringify(DB));}catch(e){toast('這台裝置的儲存空間滿了，照片可能沒存到');}}
 let pushT=null;
-function save(){if(!U)return;U.up=Date.now();DB.users[UK]=U;saveLocal();clearTimeout(pushT);cloud='待同步';pushT=setTimeout(push,1500);}
-async function push(){if(!U)return;pushAv();try{const r=await fetch(FB+'/data/'+UK+'.json',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(U),keepalive:JSON.stringify(U).length<60000});
-  cloud=r.ok?'已同步到雲端':'雲端同步失敗（'+r.status+'）';}catch(e){cloud='離線中，已存在這台裝置';}const el=$('#cloudSt');if(el)el.textContent=cloud;}
+let dirty=false,retryT=null,pulling=false;
+const hm=()=>{const d=new Date();return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');};
+function setCloud(s,kind){cloud=s;const el=$('#cloudSt');if(el)el.textContent=s;const b=$('#cloudBadge');if(b){b.style.display=U?'':'none';b.textContent={ok:'☁ 已同步',busy:'☁ 同步中…',wait:'☁ 待同步',off:'☁ 離線',err:'☁ 重試中'}[kind]||'☁';b.className='cb '+(kind||'');b.title=s;}}
+function save(){if(!U)return;U.up=Date.now();DB.users[UK]=U;saveLocal();dirty=true;clearTimeout(pushT);setCloud('有變更，稍後自動存到雲端','wait');pushT=setTimeout(()=>{pushT=null;push();},1200);}
+async function push(){if(!U)return;const k=UK,sent=U.up;clearTimeout(pushT);pushT=null;clearTimeout(retryT);pushAv();setCloud('正在存到雲端…','busy');
+  try{const body=JSON.stringify(U),r=await fetch(FB+'/data/'+k+'.json',{method:'PUT',headers:{'Content-Type':'application/json'},body,keepalive:body.length<60000});
+    if(k!==UK)return;
+    if(r.ok){if(U.up===sent)dirty=false;setCloud('已自動存到雲端（'+hm()+'）','ok');}
+    else{setCloud('雲端存檔失敗（'+r.status+'），資料先留在這台裝置，會自動重試','err');retryT=setTimeout(push,15000);}
+  }catch(e){if(k!==UK)return;setCloud('離線中，資料先留在這台裝置，連上網路會自動補存','off');retryT=setTimeout(push,15000);}}
+/* 其他裝置有更新時自動載入（這台沒有未存的變更才載入） */
+async function pull(){if(!U||dirty||pulling||$('#sheet .sheet'))return;pulling=true;const k=UK;
+  try{const r=await fetch(FB+'/data/'+k+'/up.json');if(r.ok){const up=await r.json();
+      if(k===UK&&!dirty&&up&&up>(U.up||0)){const r2=await fetch(FB+'/data/'+k+'.json'),d=r2.ok?await r2.json():null;
+        if(k===UK&&!dirty&&d&&d.up>(U.up||0)){U=fix(d);DB.users[k]=U;saveLocal();_gk='';render();setCloud('已載入其他裝置的更新（'+hm()+'）','ok');toast('已載入其他裝置的最新紀錄');}}
+      else if(k===UK&&!dirty)setCloud('已自動存到雲端（'+hm()+'）','ok');}
+  }catch(e){}pulling=false;}
 let lastAv='';
 function pushAv(){if(!U)return;const kn=DB.known[UK]||{name:U.name,pin:''},av={b:U.body,o:U.outfit},s=JSON.stringify(av);kn.av=av;DB.known[UK]=kn;saveLocal();if(s===lastAv)return;lastAv=s;
   fetch(FB+'/names/'+UK+'.json',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:kn.name,pin:kn.pin||'',up:Date.now(),av})}).catch(()=>{});}
@@ -929,7 +944,7 @@ function sceneStudio(o,R){
   for(let i=0;i<10;i++)o.push(`<path class="tw" d="M${R(90,310).toFixed(0)},${R(50,250).toFixed(0)} l2,5 l5,2 l-5,2 l-2,5 l-2,-5 l-5,-2 l5,-2 z" fill="#f2b705" style="animation-delay:${R(-3,0).toFixed(2)}s"/>`);}
 function sceneSvg(kind){const R=(a,b)=>a+Math.random()*(b-a),o=[];({night:sceneNight,japan:sceneJapan,taiwan:sceneTaiwan,beach:sceneBeach,studio:sceneStudio}[kind]||sceneNight)(o,R);
   return`<svg class="scene" viewBox="0 0 400 460" preserveAspectRatio="xMidYMid slice">${o.join('')}</svg>`;}
-function loginView(msg){U=null;UK=null;$('#nav').style.display='none';$('#userBtn').style.display='none';clearInterval(lgTimer);
+function loginView(msg){U=null;UK=null;dirty=false;clearTimeout(pushT);clearTimeout(retryT);{const cb=$('#cloudBadge');if(cb)cb.style.display='none';}$('#nav').style.display='none';$('#userBtn').style.display='none';clearInterval(lgTimer);
   const ks=Object.keys(DB.known).sort((a,b)=>(b===DB.last)-(a===DB.last)||DB.known[a].name.localeCompare(DB.known[b].name,'zh-Hant'));
   const deco=`<div class="deco">${['👕','👗','👟','🧢','🧥','👖','👓','🎒','🧣','👒'].map((e,i)=>`<span style="left:${(i*10+4)}%;animation-delay:${-(i*1.3)}s;animation-duration:${9+i%4*2}s">${e}</span>`).join('')}</div>`;
   const pl=ks,real=pl.length>0,NS=4;
@@ -961,7 +976,7 @@ async function enter(k,sex){const kn=DB.known[k];let local=DB.users[k]||null,rem
   try{const r=await fetch(FB+'/data/'+k+'.json');if(r.ok)remote=await r.json();}catch(e){}
   let u=remote&&(!local||(remote.up||0)>=(local.up||0))?remote:local;
   if(!u){u=newUser(kn?kn.name:'我',(sex||'m').replace('k',''),/^k/.test(sex||''));if(!sex&&kn&&kn.av&&kn.av.b){u.body=kn.av.b;u.outfit=kn.av.o||u.outfit;}}U=fix(u);UK=k;DB.users[k]=U;DB.cur=k;DB.last=k;saveLocal();
-  cloud=remote?'已同步到雲端':(online?'已同步到雲端':'離線中，已存在這台裝置');
+  dirty=false;setCloud(remote||online?'已和雲端同步（'+hm()+'）':'離線中，資料先留在這台裝置，連上網路會自動補存',remote||online?'ok':'off');
   if(!remote&&online)push();else pushAv();
   $('#nav').style.display='flex';const ub=$('#userBtn');ub.style.display='';ub.textContent='👤 '+U.name;
   if(!U.closet.length&&U.ui.src==='closet')U.ui.src='cat';tab='try';render();}
@@ -1115,7 +1130,9 @@ function vMe(){const b=U.body,kn=DB.known[UK]||{};
   <button class="btn" style="margin-top:8px" data-act="est">依身高體重估算其他數據</button></div></div>
   ${faceCard()}
   <div class="card"><b>參考尺碼與穿搭建議</b><div id="sizeBox" style="margin-top:8px">${sizeBox()}</div></div>
-  <div class="card"><b>帳號：${esc(U.name)}</b><div class="muted" id="cloudSt" style="margin:4px 0 8px">${cloud}</div>
+  <div class="card"><b>帳號：${esc(U.name)}</b><div class="muted" id="cloudSt" style="margin:4px 0 4px">${cloud}</div>
+  <div class="muted" style="margin-bottom:8px">自動雲端紀錄：身形、捏臉、穿搭、衣櫃、想買清單、收藏，每次變更約 1 秒後自動存到雲端；換手機或電腦登入同一個名字就會接續，另一台有更新時這台也會自動載入。</div>
+  <button class="btn sm" data-act="syncnow" style="margin-bottom:10px">☁ 立即同步</button>
   <div class="bar"><input type="password" id="newPin" inputmode="numeric" maxlength="4" placeholder="${kn.pin?'新的四碼密碼':'設定四碼密碼'}" style="width:150px"><button class="btn" data-act="setpin">${kn.pin?'更改密碼':'設定密碼'}</button>${kn.pin?'<button class="btn" data-act="nopin">取消密碼</button>':''}</div>
   <div class="muted" style="margin:8px 0">目前${kn.pin?'有':'沒有'}設密碼。密碼只是防止家人點錯名字的簡單鎖，資料存在共用的雲端空間，請不要放敏感資料。</div>
   <button class="btn" data-act="logout">切換使用者</button></div>`;}
@@ -1149,7 +1166,7 @@ function setImgFile(f){if(!f)return;const r=new FileReader();r.onload=()=>{const
 /* --- 事件 --- */
 document.addEventListener('click',async ev=>{
   const nb=ev.target.closest('#nav button');if(nb)return go(nb.dataset.tab);
-  if(ev.target.id==='userBtn')return go('me');
+  if(ev.target.id==='userBtn'||ev.target.id==='cloudBadge')return go('me');
   const el=ev.target.closest('[data-act]');if(!el)return;const a=el.dataset.act,d=el.dataset,o=U&&U.outfit;
   if(a==='sheetbg'){if(ev.target===el)sheet('');return;}
   if(a==='close')return sheet('');
@@ -1169,6 +1186,7 @@ document.addEventListener('click',async ev=>{
   else if(a==='color'){const s=U.ui.slot,e=s==='acc'?o.acc[Math.min(accSel,o.acc.length-1)]:o[s];if(e){e.c=d.c;save();}}
   else if(a==='off'){if(d.s==='acc')o.acc.splice(+d.i,1);else delete o[d.s];save();}
   else if(a==='turn'){viewBack=!viewBack;flipNow=true;}
+  else if(a==='syncnow'){if(dirty)await push();else{await pull();toast(cloud);}return;}
   else if(a==='random')randomLook();
   else if(a==='tuck'){o.tuck=!o.tuck;save();}
   else if(a==='clear'){U.outfit={acc:[]};save();}
@@ -1227,7 +1245,11 @@ document.addEventListener('change',ev=>{const e=ev.target;if(!U)return;
   if(k==='url'){const v=e.value.trim();readEd();if(!v){return;}if(!/^https?:\/\//.test(v))return toast('請貼上 http 開頭的圖片網址');const im=new Image();im.onload=()=>{ED.img=v;drawEdit();};im.onerror=()=>toast('這個網址讀不到圖片，請改用「複製圖片網址」或存圖後上傳');im.src=v;}
   if(k==='name'||k==='brand'){readEd();const it=ITEM[ED.base],l=$('#imgSearch');if(l)l.href=gUrl([ED.brand,ED.name||it.name,COL[ED.color]?ED.color+'色':''].filter(Boolean).join(' '),true);}});
 document.addEventListener('paste',ev=>{if(!ED||!$('#sheet .sheet'))return;const it=[...(ev.clipboardData||{}).items||[]].find(i=>i.type.startsWith('image/'));if(it){ev.preventDefault();setImgFile(it.getAsFile());}});
-window.addEventListener('pagehide',()=>{if(U&&cloud==='待同步')push();});
+window.addEventListener('pagehide',()=>{if(U&&dirty)push();});
+document.addEventListener('visibilitychange',()=>{if(!U)return;if(document.visibilityState==='hidden'){if(dirty)push();}else pull();});
+window.addEventListener('online',()=>{if(U){if(dirty)push();else pull();}});
+window.addEventListener('focus',()=>{if(U)pull();});
+setInterval(()=>{if(U&&document.visibilityState==='visible'){if(dirty&&!pushT)push();else pull();}},45000);
 
 (async function init(){
   loginView();await fetchNames();if(!U&&lgStep!=='new')loginView();
