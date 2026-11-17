@@ -48,7 +48,7 @@ header{padding:10px 16px 10px;display:flex;flex-direction:column;gap:6px;backgro
 .chip i{width:11px;height:11px;border-radius:50%;box-shadow:inset 0 0 0 1px rgba(0,0,0,.25)}
 .chip.ok{color:var(--ink);background:var(--mark);border-color:var(--mark)}
 .chip.over{color:var(--bad);border-color:var(--bad)}
-.status{margin:0;font-size:13px;color:var(--mute);flex:1;min-width:10em}
+.status{margin:0;font-size:13px;color:var(--mute);flex:1 1 100%}
 .status.warn{color:var(--bad)}
 
 /* 工作桌 */
@@ -102,6 +102,43 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-acti
 .cloud{margin-top:6px;padding:12px;border-radius:12px;border:1px solid var(--line);background:var(--ink-2);display:grid;gap:8px}
 .cloud .tool{min-height:42px;font-size:14px}
 .cloud p{margin:0;font-size:12.5px;color:var(--mute)}
+.me{margin-top:6px;padding:14px;border-radius:14px;background:var(--mat);display:grid;gap:10px}
+.me .who{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.me .who b{font-size:22px;font-weight:900;overflow-wrap:anywhere}
+.badge{display:inline-block;padding:2px 10px;border-radius:999px;background:var(--mark);color:var(--ink);font-size:12.5px;font-weight:700;white-space:nowrap}
+.me .nums{font-family:var(--f-num);font-size:18px;font-weight:500;font-variant-numeric:tabular-nums;display:flex;gap:16px;flex-wrap:wrap}
+.me .nums span b{font-size:24px;font-weight:600;color:var(--mark);margin-right:4px}
+.me .acts{display:flex;gap:8px;flex-wrap:wrap}
+.me .acts .tool{background:var(--ink);min-height:38px;flex:1}
+.tabs{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:14px;padding:4px;border-radius:12px;background:var(--ink-2)}
+.tab{min-height:40px;border-radius:9px;font-weight:700;color:var(--mute)}
+.tab small{font-family:var(--f-num);font-weight:500;font-size:14px;margin-left:6px}
+.tab[aria-pressed="true"]{background:var(--mark);color:var(--ink)}
+.lv .st{font-size:11px;letter-spacing:1px;color:var(--mark);display:flex;justify-content:space-between;font-family:var(--f-num)}
+.lv .st i{font-style:normal;color:var(--paper);font-size:13px;letter-spacing:0}
+.sub{z-index:7}
+.sub .lead{margin:4px 0 12px;font-size:13px;color:var(--mute)}
+.rows{display:grid;gap:6px}
+.rowp{display:grid;grid-template-columns:28px 1fr auto;gap:10px;align-items:center;padding:10px 12px;border-radius:12px;background:var(--ink-2);border:1px solid var(--line);text-align:left;width:100%}
+.rowp.you{border-color:var(--mark);background:var(--mat)}
+.rowp .rk{font-family:var(--f-num);font-size:20px;font-weight:600;color:var(--mark);text-align:center}
+.rowp .nm{min-width:0}
+.rowp .nm b{display:block;font-size:15.5px;overflow-wrap:anywhere}
+.rowp .nm small{color:var(--mute);font-size:12px}
+.rowp .sc{font-family:var(--f-num);font-size:22px;font-weight:600;font-variant-numeric:tabular-nums;text-align:right;line-height:1.1}
+.rowp .sc small{display:block;font-size:13px;font-weight:500;color:var(--mute)}
+.trow{grid-template-columns:28px 1fr}
+.trow.off{opacity:.5}
+.trow.on .rk{color:var(--mark)}
+.newp{display:flex;gap:8px;margin-top:14px}
+.newp input{flex:1;min-width:0;min-height:46px;border-radius:12px;border:1px solid var(--line);background:var(--ink-2);color:var(--paper);font:inherit;font-size:16px;padding:0 14px}
+.newp input:focus-visible{outline:2px solid var(--mark);outline-offset:2px}
+.newp .tool{min-height:46px;min-width:76px;font-size:15px}
+.timer{font-family:var(--f-num);font-size:17px;font-weight:500;font-variant-numeric:tabular-nums;color:var(--mute);margin-left:auto}
+.sheet .score{display:flex;gap:14px;align-items:baseline;flex-wrap:wrap;margin:0 0 6px;font-family:var(--f-num);font-size:17px}
+.sheet .score b{font-size:30px;font-weight:600;color:#1d5a50;line-height:1}
+.sheet .score .stars{color:#c98a00;font-size:20px;letter-spacing:2px}
+.sheet .got{margin:0 0 8px;font-weight:700;color:#1d5a50}
 .chap{margin-top:16px}
 .chap h3{margin:0 0 8px;font-size:13px;font-weight:500;color:var(--mute);letter-spacing:.06em;display:flex;justify-content:space-between}
 .chap h3 b{font-family:var(--f-num);font-size:15px;font-weight:500;color:var(--mark)}
@@ -134,6 +171,7 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-acti
     </div>
     <div class="meta">
       <div class="chips" id="chips"></div>
+      <span class="timer" id="timer" aria-label="這一關的時間"></span>
       <p class="status" id="status" aria-live="polite"></p>
     </div>
   </header>
@@ -161,6 +199,8 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-acti
   <section class="sheet" id="win" hidden>
     <div class="tag" id="winTag">組裝完成</div>
     <h2><b id="winName"></b><span id="winFormula"></span></h2>
+    <div class="score" id="winScore" hidden></div>
+    <p class="got" id="winGot" hidden></p>
     <p id="winFact"></p>
     <div class="row">
       <button class="stay" id="btnStay" type="button">再看一下</button>
@@ -170,11 +210,38 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-acti
 
   <section class="overlay" id="levels" hidden>
     <div class="top"><h2>關卡表</h2><button class="pill" id="btnCloseLevels" type="button">回到工作桌</button></div>
-    <div class="cloud" id="cloud" hidden>
-      <button class="tool go" id="gBtn" type="button">用 Google 帳號同步進度</button>
-      <p id="gNote" aria-live="polite">過關紀錄會存進你自己的 Google 雲端硬碟，換手機、清瀏覽器都接得回來。</p>
+    <div class="me" id="me"></div>
+    <div class="tabs">
+      <button class="tab" id="tabBasic" type="button" aria-pressed="true">基礎</button>
+      <button class="tab" id="tabAdv" type="button" aria-pressed="false">進階</button>
     </div>
     <div id="levelList"></div>
+    <div class="cloud" id="cloud" hidden style="margin-top:22px">
+      <button class="tool go" id="gBtn" type="button">用 Google 帳號備份紀錄</button>
+      <p id="gNote" aria-live="polite">這台裝置上所有玩家的紀錄，會存進你自己的 Google 雲端硬碟，換手機、清瀏覽器都接得回來。</p>
+    </div>
+  </section>
+
+  <section class="overlay sub" id="board" hidden>
+    <div class="top"><h2>分數排行榜</h2><button class="pill" data-close="board" type="button">返回</button></div>
+    <p class="lead" id="boardNote"></p>
+    <div class="rows" id="boardList"></div>
+  </section>
+
+  <section class="overlay sub" id="titles" hidden>
+    <div class="top"><h2>稱號</h2><button class="pill" data-close="titles" type="button">返回</button></div>
+    <p class="lead">達成條件就會解鎖。名字旁邊顯示的是你目前最高的稱號。</p>
+    <div class="rows" id="titleList"></div>
+  </section>
+
+  <section class="overlay sub" id="who" hidden>
+    <div class="top"><h2>誰在玩？</h2><button class="pill" id="btnWhoClose" data-close="who" type="button">返回</button></div>
+    <p class="lead">輸入名字就能開始，每個名字有自己的過關紀錄、分數和稱號。名字和總分會出現在公開的排行榜上，建議用暱稱。</p>
+    <div class="rows" id="whoList"></div>
+    <form class="newp" id="whoForm">
+      <input id="whoName" type="text" maxlength="12" autocomplete="off" placeholder="輸入名字（最多 12 個字）" aria-label="玩家名字">
+      <button class="tool go" type="submit">開始</button>
+    </form>
   </section>
 </div>
 
@@ -260,7 +327,7 @@ const CHAPTERS=[
    tip:'把碳鏈頭尾兩顆球接起來，就圍成環。複雜的分子可以按「立體」，用手指拖著轉來看。',
    fact:'六個碳圍成正六邊形，整個分子是平的。許多香氣分子都帶著這個環。'}
  ]},
- {title:'咖啡的酸與甜',autoH:true,levels:[
+ {title:'咖啡的酸與甜',autoH:true,adv:true,levels:[
   {id:'lactic',n:'乳酸',f:'C3H6O3',a:'C C C O O O',b:'0-1 1-2 1-3 2=4 2-5',hint:'CH₃–CH(OH)–C(=O)–OH',
    fact:'優格般圓潤的酸。厭氧、乳酸發酵處理的咖啡，乳酸會比較多。'},
   {id:'malic',n:'蘋果酸',f:'C4H6O5',a:'C C C C O O O O O',b:'0-1 1-2 2-3 0=4 0-5 2-6 3=7 3-8',hint:'HOOC–CH₂–CH(OH)–COOH',
@@ -272,9 +339,12 @@ const CHAPTERS=[
    fact:'綠原酸在烘焙時會分解出奎寧酸。全是單鍵的環不是平的，立體看是皺起來的。'},
   {id:'glucose',n:'葡萄糖',f:'C6H12O6',a:'O C C C C C C O O O O O',b:'0-1 1-2 2-3 3-4 4-5 5-0 5-6 1-7 2-8 3-9 4-10 6-11',
    hint:'六員環：1 個 O 加 5 個 C。O 旁邊的一個 C 接 –CH₂OH，其餘 4 個 C 各接一個 –OH',
-   fact:'生豆裡的蔗糖由葡萄糖和果糖組成。烘焙時糖會焦糖化、參與梅納反應，變成香氣和顏色。'}
+   fact:'生豆裡的蔗糖由葡萄糖和果糖組成。烘焙時糖會焦糖化、參與梅納反應，變成香氣和顏色。'},
+  {id:'hmf',n:'羥甲基糠醛',f:'C6H6O3',a:'O C C C C C O C O',b:'0-1 1=2 2-3 3=4 4-0 1-5 5=6 4-7 7-8',
+   hint:'呋喃環上，O 兩旁的 C 一個接 –CH=O，另一個接 –CH₂–OH',
+   fact:'糖受熱脫水的產物，簡稱 HMF，可以用來判斷焦糖化進行到什麼程度。'}
  ]},
- {title:'咖啡的香氣',autoH:true,levels:[
+ {title:'咖啡的香氣',autoH:true,adv:true,levels:[
   {id:'c2h4o',n:'乙醛',f:'C2H4O',a:'C C O',b:'0-1 1=2',hint:'CH₃–CH=O',
    fact:'帶青蘋果般果香的揮發性分子，烘焙後的咖啡裡找得到。'},
   {id:'c4h8o2',n:'乙酸乙酯',f:'C4H8O2',a:'C C O O C C',b:'0-1 1=2 1-3 3-4 4-5',hint:'CH₃–C(=O)–O–CH₂–CH₃',
@@ -302,9 +372,12 @@ const CHAPTERS=[
    fact:'煙燻、丁香般的氣味，深焙咖啡比較明顯。來自綠原酸類分子的熱分解。'},
   {id:'vanillin',n:'香草醛',f:'C8H8O3',a:'C C C C C C C O O C O',b:'0=1 1-2 2=3 3-4 4=5 5-0 0-6 6=7 2-8 8-9 3-10',alt:['0-1 1=2 2-3 3=4 4-5 5=0 0-6 6=7 2-8 8-9 3-10'],
    hint:'苯環接 –CH=O；隔一個 C 接 –O–CH₃，再下一個 C 接 –OH',
-   fact:'香草的主要香氣。它就是愈創木酚再多一個醛基，烘焙咖啡裡也有微量。'}
+   fact:'香草的主要香氣。它就是愈創木酚再多一個醛基，烘焙咖啡裡也有微量。'},
+  {id:'vg4',n:'4-乙烯基愈創木酚',f:'C9H10O2',a:'C C C C C C O O C C C',b:'0=1 1-2 2=3 3-4 4=5 5-0 0-6 1-7 7-8 3-9 9=10',alt:['0-1 1=2 2-3 3=4 4-5 5=0 0-6 1-7 7-8 3-9 9=10'],
+   hint:'愈創木酚的苯環上，在 –OH 正對面的 C 接一個 –CH=CH₂',
+   fact:'丁香、煙燻般的辛香。帶阿魏酸的綠原酸類分子在烘焙時分解，就會產生它。'}
  ]},
- {title:'咖啡因家族',autoH:true,levels:[
+ {title:'咖啡因家族',autoH:true,adv:true,levels:[
   {id:'niacin',n:'菸鹼酸',f:'C6H5NO2',a:'N C C C C C C O O',b:'0=1 1-2 2=3 3-4 4=5 5-0 2-6 6=7 6-8',alt:['0-1 1=2 2-3 3=4 4-5 5=0 2-6 6=7 6-8'],
    hint:'吡啶環上，和 N 隔一個 C 的位置接 –COOH',
    fact:'也就是維生素 B3。葫蘆巴鹼在烘焙時分解，一部分會變成它。'},
@@ -320,6 +393,20 @@ const CHAPTERS=[
    b:'0-1 1-2 2=3 3-4 4=5 5-1 5-6 6=7 6-8 8-9 9=10 9-11 11-4 11-12',
    hint:'和咖啡因一樣的雙環，只是六員環上夾在兩個 C=O 中間的 N 不接 CH₃，改接 H',
    fact:'巧克力裡的主要生物鹼。和茶鹼是同分異構物，只差甲基接在哪個氮上。'}
+ ]},
+ {title:'大分子挑戰',autoH:true,adv:true,levels:[
+  {id:'caffeic',n:'咖啡酸',f:'C9H8O4',a:'C C C C C C C C C O O O O',b:'0=1 1-2 2=3 3-4 4=5 5-0 0-6 6=7 7-8 8=9 8-10 2-11 3-12',alt:['0-1 1=2 2-3 3=4 4-5 5=0 0-6 6=7 7-8 8=9 8-10 2-11 3-12'],
+   hint:'苯環接 –CH=CH–COOH；隔一個 C 之後，相鄰的兩個 C 各接一個 –OH',
+   fact:'綠原酸的其中一半。名字裡有咖啡，但它和咖啡因是完全不同的分子。'},
+  {id:'cga',n:'綠原酸',f:'C16H18O9',a:'C C C C C C C C C O O C C C C C C C O O O O O O O',
+   b:'0=1 1-2 2=3 3-4 4=5 5-0 0-6 6=7 7-8 8=9 8-10 10-15 11-12 12-13 13-14 14-15 15-16 16-11 11-17 17=18 17-19 11-20 13-21 14-22 2-23 3-24',
+   alt:['0-1 1=2 2-3 3=4 4-5 5=0 0-6 6=7 7-8 8=9 8-10 10-15 11-12 12-13 13-14 14-15 15-16 16-11 11-17 17=18 17-19 11-20 13-21 14-22 2-23 3-24'],
+   hint:'一半是咖啡酸，一半是奎寧酸。咖啡酸的 –COOH 拿掉 H，改接到奎寧酸環上：連續三個接 O 的 C 之中，邊上那個 C 的 O',
+   fact:'咖啡生豆裡含量最多的多酚，佔生豆重量的好幾個百分比。烘焙時它會分解出奎寧酸和咖啡酸，再變成愈創木酚這類煙燻香氣。'},
+  {id:'sucrose',n:'蔗糖',f:'C12H22O11',a:'O C C C C C C O O O O O C O C C C C O O O C O',
+   b:'0-1 1-2 2-3 3-4 4-5 5-0 5-6 6-7 2-8 3-9 4-10 1-11 11-12 12-13 13-14 14-15 15-16 16-12 12-17 17-18 16-19 15-20 14-21 21-22',
+   hint:'六員環（葡萄糖）和五員環（果糖）中間用一個 O 相連。六員環：環上 O 旁邊的 C，一個接 –CH₂OH，另一個接那個連接的 O，其餘 3 個 C 各接 –OH。五員環：環上 O 旁邊的 C，一個接 –CH₂OH，另一個同時接 –CH₂OH 和連接的 O，其餘 2 個 C 各接 –OH',
+   fact:'生豆裡最主要的糖，45 顆原子。烘焙時幾乎全部分解，變成焦糖香、有機酸和褐色物質。'}
  ]}
 ];
 const BO={'-':1,'=':2,'#':3};
@@ -379,8 +466,45 @@ CHAPTERS.forEach((ch,ci)=>ch.levels.forEach((lv,li)=>{
   const t=buildTarget(lv),tsigs=[sig(t.atoms,t.bonds)];
   for(const b of lv.alt||[]){const u=buildTarget({a:lv.a,b});tsigs.push(sig(u.atoms,u.bonds));}
   const hv=t.atoms.filter(a=>a.e!=='H').length;
-  LEVELS.push(Object.assign(lv,{ci,li,autoH:!!ch.autoH,target:t,tsig:tsigs[0],tsigs,need:countEl(t.atoms),d3:t.bonds.length>=t.atoms.length||hv>=6}));
+  const n=t.atoms.length;
+  LEVELS.push(Object.assign(lv,{ci,li,autoH:!!ch.autoH,adv:!!ch.adv,target:t,tsig:tsigs[0],tsigs,need:countEl(t.atoms),d3:t.bonds.length>=n||hv>=6,
+    base:100+20*n,par:15+7*hv+(ch.autoH?0:2*(n-hv))}));
 }));
+/* 計分：基本分看分子大小；在標準時間內完成加 50%，超過 3 倍標準時間就沒有加成；看過提示打 7 折 */
+function scoreOf(lv,sec,hint){
+  const tf=Math.max(0,Math.min(1,1-(sec-lv.par)/(2*lv.par)));
+  return{s:Math.round(lv.base*(1+.5*tf)*(hint?.7:1)),st:1+(hint?0:1)+(sec<=lv.par?1:0)};
+}
+function stats(p){let s=0,st=0,n=0;for(const l of LEVELS){const b=p.best[l.id];if(b){s+=b.s;st+=b.st;n++;}}return{s,st,n};}
+const chDone=(p,ci)=>CHAPTERS[ci].levels.every(l=>p.best[l.id]);
+const TITLES=[
+  {n:'實驗室新生',d:'取好名字，開始遊戲',ok:()=>true},
+  {n:'原子學徒',d:'完成 3 關',ok:(p,s)=>s.n>=3},
+  {n:'鍵結技師',d:'完成「雙鍵與三鍵」全部關卡',ok:p=>chDone(p,1)},
+  {n:'碳鏈工匠',d:'完成「碳鏈與醇」全部關卡',ok:p=>chDone(p,2)},
+  {n:'官能基獵人',d:'完成「官能基」全部關卡',ok:p=>chDone(p,3)},
+  {n:'有機化學助教',d:'完成全部基礎關卡',ok:p=>[0,1,2,3].every(c=>chDone(p,c))},
+  {n:'酸質鑑定員',d:'完成「咖啡的酸與甜」全部關卡',ok:p=>chDone(p,4)},
+  {n:'香氣調香師',d:'完成「咖啡的香氣」全部關卡',ok:p=>chDone(p,5)},
+  {n:'咖啡因博士',d:'完成「咖啡因家族」全部關卡',ok:p=>chDone(p,6)},
+  {n:'大分子建築師',d:'完成「大分子挑戰」全部關卡',ok:p=>chDone(p,7)},
+  {n:'三星收藏家',d:'累積 100 顆星',ok:(p,s)=>s.st>=100},
+  {n:'分子大師',d:'全部關卡都拿到三星',ok:(p,s)=>s.st>=LEVELS.length*3}
+];
+function titleIdx(p){const s=stats(p);let t=0;TITLES.forEach((x,i)=>{if(x.ok(p,s))t=i;});return t;}
+function mergePlayers(into,from){
+  for(const f of from||[]){
+    if(!f||typeof f.name!=='string'||!f.best)continue;
+    let p=into.find(x=>x.name===f.name);
+    if(!p){into.push({name:f.name,best:Object.assign({},f.best),made:f.made||Date.now(),up:f.up||0});continue;}
+    for(const id in f.best){
+      const a=p.best[id],b=f.best[id];
+      p.best[id]=a?{s:Math.max(a.s,b.s),st:Math.max(a.st,b.st),t:a.t&&b.t?Math.min(a.t,b.t):(a.t||b.t||0)}:b;
+    }
+    p.up=Math.max(p.up||0,f.up||0);
+  }
+  return into;
+}
 /* 教學模式：把目標分子拆成一步一步的組裝順序 */
 function buildSteps(lv){
   const T=lv.target,isH=id=>T.atoms[id].e==='H';
@@ -427,12 +551,12 @@ const $=id=>document.getElementById(id);
 const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const fHtml=f=>f.replace(/(\d+)/g,'<sub>$1</sub>');
 const cv=$('cv'),ctx=cv.getContext('2d');
-let W=300,H=300,S=1,dpr=1;
+let W=300,H=300,S=1,dpr=1,topPad=0;
 let st={lvl:0,atoms:[],bonds:[],sel:null,won:false,nid:1};
-let done=new Set(),drag=null,raf=0,awake=0,fx=[],flash=null,flashT=0,hintOn=false,bottomPad=0;
+let drag=null,raf=0,awake=0,fx=[],flash=null,flashT=0,hintOn=false,bottomPad=0;
 let tut={on:false,steps:[],i:0,A:null,B:null,map:null,good:null,off:false,hl:{atoms:[],bond:null}};
 const EMPTY=sig([],[]);
-let view3=false,rot={x:-.35,y:.5},fit=1,spinHold=0,topPad=0;
+let view3=false,rot={x:-.35,y:.5},fit=1,spinHold=0;
 const F3=700;
 
 const R=e=>EL[e].r*S;
@@ -443,19 +567,45 @@ function used(id){let s=0;for(const k of st.bonds)if(k.a===id||k.b===id)s+=k.o;r
 const free=a=>EL[a.e].v-used(a.id);
 const level=()=>LEVELS[st.lvl];
 
-function load(){try{done=new Set(JSON.parse(localStorage.getItem('bskit-done')||'[]'));}catch(e){}}
-function save(){try{localStorage.setItem('bskit-done',JSON.stringify([...done]));localStorage.setItem('bskit-lvl',String(st.lvl));}catch(e){}}
+let store={players:[],cur:null,legacy:null},lastLvl=0;
+let att={on:false,t0:0,el:0,hint:false,assist:false};
+const player=()=>store.players.find(p=>p.name===store.cur)||null;
+const best=id=>{const p=player();return p?p.best[id]:null;};
+function load(){
+  try{const s=JSON.parse(localStorage.getItem('bskit-v2')||'null');if(s&&Array.isArray(s.players)){store=s;store.players=mergePlayers([],s.players);}}catch(e){}
+  try{lastLvl=+(localStorage.getItem('bskit-lvl')||0)||0;}catch(e){}
+  /* 舊版（沒有名字的時候）的過關紀錄：留給第一位取名字的玩家 */
+  try{if(!store.players.length&&!store.legacy){const old=JSON.parse(localStorage.getItem('bskit-done')||'[]');if(old.length)store.legacy=old;}}catch(e){}
+}
+function save(){try{localStorage.setItem('bskit-v2',JSON.stringify(store));localStorage.setItem('bskit-lvl',String(st.lvl));}catch(e){}}
+function grantLegacy(p,ids){
+  for(const id of ids||[]){const l=LEVELS.find(x=>x.id===id);if(l&&!p.best[id])p.best[id]={s:l.base,st:1,t:0};}
+}
+/* 這一關的計時 */
+const fmtT=sec=>Math.floor(sec/60)+':'+String(Math.floor(sec%60)).padStart(2,'0');
+const attSec=()=>(att.el+(att.t0?Date.now()-att.t0:0))/1000;
+function attReset(){att={on:false,t0:0,el:0,hint:hintOn,assist:tut.on};showTimer();}
+function attStart(){if(!att.on&&!st.won){att.on=true;att.t0=Date.now();showTimer();}}
+function showTimer(){
+  const el=$('timer');if(!el)return;
+  el.textContent=tut.on||att.assist?'教學中':att.on||st.won?fmtT(attSec())+' / '+fmtT(level().par):'標準 '+fmtT(level().par);
+}
+setInterval(()=>{if(att.on&&!st.won)showTimer();},500);
+document.addEventListener('visibilitychange',()=>{
+  if(!att.on||st.won)return;
+  if(document.hidden){if(att.t0){att.el+=Date.now()-att.t0;att.t0=0;}}else att.t0=Date.now();
+});
 let gQueue=()=>{};
 
 /* ---------- 畫面資訊 ---------- */
 function setScale(){
   const n=level().target.atoms.length;
   const base=Math.max(.8,Math.min(1.2,Math.min(W,H)/400));
-  S=base*(n>20?.64:n>14?.74:n>9?.88:1);
+  S=base*(n>36?.5:n>28?.56:n>20?.64:n>14?.74:n>9?.88:1);
 }
 function renderHead(){
   const lv=level(),ch=CHAPTERS[lv.ci];
-  $('crumb').textContent=`${lv.ci+1}-${lv.li+1}　${ch.title}`;
+  $('crumb').textContent=`${lv.adv?'進階':'基礎'} ${lv.ci+1}-${lv.li+1}　${ch.title}`;
   $('name').textContent=lv.n;
   $('formula').innerHTML=fHtml(lv.f);
   $('hint').innerHTML='接法　<b>'+lv.hint+'</b>';
@@ -534,7 +684,7 @@ function pegAngles(a){
 }
 function clampAtom(a){
   const r=R(a.e)+4;
-  a.x=Math.max(r,Math.min(W-r,a.x));a.y=Math.max(r,Math.min(Math.max(r+40,H-r-bottomPad),a.y));
+  a.x=Math.max(r,Math.min(W-r,a.x));a.y=Math.max(r+topPad,Math.min(Math.max(r+topPad+40,H-r-bottomPad),a.y));
 }
 function newAtom(e,x,y){
   const a={id:st.nid++,e,x,y,vx:0,vy:0,comp:0};clampAtom(a);st.atoms.push(a);return a;
@@ -542,7 +692,7 @@ function newAtom(e,x,y){
 function freeSpot(){
   let best=null,bd=-1;
   for(let i=0;i<40;i++){
-    const x=W*(.2+Math.random()*.6),y=(H-bottomPad)*(.2+Math.random()*.6);
+    const x=W*(.2+Math.random()*.6),y=topPad+(H-topPad-bottomPad)*(.2+Math.random()*.6);
     let d=1e9;for(const a of st.atoms)d=Math.min(d,Math.hypot(a.x-x,a.y-y));
     if(d>70*S)return{x,y};
     if(d>bd){bd=d;best={x,y};}
@@ -555,7 +705,8 @@ function locked(){
 }
 function addPart(e){
   if(locked())return;
-  if(st.atoms.length>=40){toast('桌面放滿了，先移除幾顆');return;}
+  attStart();
+  if(st.atoms.length>=60){toast('桌面放滿了，先移除幾顆');return;}
   const s=st.sel!=null?atomBy(st.sel):null;
   if(s&&free(s)>0){
     const ang=pegAngles(s)[0],tmp={e};
@@ -571,6 +722,7 @@ function addPart(e){
 }
 function shake(a){a.shake=performance.now();kick(30);}
 function connect(ida,idb){
+  attStart();
   const a=atomBy(ida),b=atomBy(idb),k=bondOf(ida,idb);
   if(k){cycle(k);return;}
   for(const x of [a,b]){
@@ -591,14 +743,14 @@ function removeSel(){
   st.atoms=st.atoms.filter(a=>a.id!==id);
   st.sel=null;changed();
 }
-function clearAll(){st.atoms=[];st.bonds=[];st.sel=null;st.won=false;$('win').hidden=true;changed();}
+function clearAll(){st.atoms=[];st.bonds=[];st.sel=null;st.won=false;$('win').hidden=true;attReset();changed();}
 function autoH(){
   if(locked())return;
   const heavy=st.atoms.filter(a=>a.e!=='H'&&free(a)>0);
   if(!heavy.length){toast(st.atoms.some(a=>a.e!=='H')?'沒有空著的手可以補':'先放上 C、O、N 接好骨架');return;}
   for(const a of heavy){
     for(const ang of pegAngles(a)){
-      if(st.atoms.length>=40)break;
+      if(st.atoms.length>=60)break;
       const L=restLen(a,{e:'H'},1);
       const h=newAtom('H',a.x+Math.cos(ang)*L,a.y+Math.sin(ang)*L);
       st.bonds.push({a:a.id,b:h.id,o:1});
@@ -616,7 +768,22 @@ function tapAtom(id){
 function win(){
   st.won=true;st.sel=null;
   const lv=level();
-  if(!tut.on){done.add(lv.id);save();gQueue();}
+  const sec=attSec();if(att.t0){att.el+=Date.now()-att.t0;att.t0=0;}
+  const p=player(),sc=$('winScore'),got=$('winGot');sc.hidden=true;got.hidden=true;
+  if(!tut.on&&att.assist){got.hidden=false;got.textContent='這次中途用了教學，不計分。按「清空」重組一次就會計分。';}
+  else if(!tut.on&&p){
+    const r=scoreOf(lv,sec,att.hint),old=p.best[lv.id],t0=titleIdx(p);
+    p.best[lv.id]={s:Math.max(r.s,old?old.s:0),st:Math.max(r.st,old?old.st:0),t:old&&old.t&&old.t<sec?old.t:Math.round(sec)};
+    p.up=Date.now();save();gQueue();boardPush();
+    sc.hidden=false;
+    sc.innerHTML=`<span><b>${r.s}</b> 分</span><span class="stars">${'★'.repeat(r.st)+'☆'.repeat(3-r.st)}</span><span>${fmtT(sec)}（標準 ${fmtT(lv.par)}）</span>`;
+    const notes=[];
+    if(!old)notes.push('第一次完成');else if(r.s>old.s)notes.push(`新紀錄，比上次多 ${r.s-old.s} 分`);else notes.push(`最佳紀錄仍是 ${old.s} 分`);
+    if(att.hint)notes.push('看過提示，分數打 7 折');
+    const t1=titleIdx(p);if(t1>t0)notes.unshift(`獲得稱號「${TITLES[t1].n}」`);
+    got.hidden=false;got.textContent=notes.join('　·　');
+  }
+  showTimer();
   $('winTag').textContent=tut.on?'教學完成':'組裝完成';
   $('btnStay').textContent=tut.on?'自己組一次':'再看一下';
   if(!reduced){
@@ -631,10 +798,12 @@ function win(){
 function goLevel(i,keep){
   st.lvl=Math.max(0,Math.min(LEVELS.length-1,i));
   if(!keep){st.atoms=[];st.bonds=[];st.sel=null;st.won=false;st.nid=1;}
-  hintOn=tut.on;$('win').hidden=true;$('levels').hidden=true;
+  hintOn=tut.on&&LEVELS[st.lvl].hint.length<=40;$('win').hidden=true;$('levels').hidden=true;
   if(view3)setView3(false);
   if(tut.on){tut.steps=buildSteps(level());tut.i=0;tut.off=false;}
-  setScale();renderHead();save();changed();
+  setScale();renderHead();save();
+  if(!keep)attReset();
+  changed();showTimer();
 }
 
 /* ---------- 教學模式 ---------- */
@@ -698,7 +867,8 @@ function renderCoach(){
 }
 function setTut(on){
   tut.on=on;$('btnTut').setAttribute('aria-pressed',on);
-  hintOn=on;$('hint').hidden=!on;$('btnHint').setAttribute('aria-pressed',on);
+  if(on)att.assist=true;
+  hintOn=on&&level().hint.length<=40;$('hint').hidden=!hintOn;$('btnHint').setAttribute('aria-pressed',hintOn);
   if(on){
     tut.steps=buildSteps(level());tut.i=0;tut.off=false;
     if(st.won||!tutMatch(sig(st.atoms,st.bonds))){st.atoms=[];st.bonds=[];st.sel=null;st.won=false;$('win').hidden=true;}
@@ -729,9 +899,11 @@ function step(){
     }
     a.fx+=ux*f;a.fy+=uy*f;b.fx-=ux*f;b.fy-=uy*f;
   }
-  let mx=0;
+  let mx=0,gx=0,gy=0;
+  if(n>=8&&!drag){for(const a of A){gx+=a.x;gy+=a.y;}gx=(W/2-gx/n)*.012;gy=(topPad+(H-topPad-bottomPad)/2-gy/n)*.012;}
   for(const a of A){
     if(!view3&&drag&&drag.moved&&drag.id===a.id){a.vx=a.vy=0;continue;}
+    a.x+=gx;a.y+=gy;
     a.vx=(a.vx+a.fx)*.72;a.vy=(a.vy+a.fy)*.72;
     a.x+=a.vx;a.y+=a.vy;clampAtom(a);
     mx=Math.max(mx,Math.abs(a.vx)+Math.abs(a.vy));
@@ -1035,7 +1207,7 @@ $('parts').addEventListener('click',ev=>{const b=ev.target.closest('.part');if(b
 $('btnDel').addEventListener('click',removeSel);
 $('btnClear').addEventListener('click',clearAll);
 $('btnH').addEventListener('click',autoH);
-$('btnHint').addEventListener('click',()=>{hintOn=!hintOn;$('hint').hidden=!hintOn;$('btnHint').setAttribute('aria-pressed',hintOn);renderMeta();kick();});
+$('btnHint').addEventListener('click',()=>{hintOn=!hintOn;if(hintOn)att.hint=true;$('hint').hidden=!hintOn;$('btnHint').setAttribute('aria-pressed',hintOn);renderMeta();kick();});
 $('btnStay').addEventListener('click',()=>{
   if(tut.on){tut.on=false;$('btnTut').setAttribute('aria-pressed',false);hintOn=false;$('hint').hidden=true;$('btnHint').setAttribute('aria-pressed',false);clearAll();}
   else{$('win').hidden=true;renderCoach();kick();}
@@ -1046,17 +1218,106 @@ $('btnBack').addEventListener('click',tutBack);
 $('btnNext').addEventListener('click',()=>{if(st.lvl+1<LEVELS.length)goLevel(st.lvl+1);else{$('win').hidden=true;openLevels();}});
 $('btnLevels').addEventListener('click',openLevels);
 $('btnCloseLevels').addEventListener('click',()=>{$('levels').hidden=true;});
-function openLevels(){
+let tab='basic';
+function renderMe(){
+  const p=player();if(!p){$('me').innerHTML='';return;}
+  const s=stats(p);
+  $('me').innerHTML=`<div class="who"><b>${esc(p.name)}</b><span class="badge">${TITLES[titleIdx(p)].n}</span></div>
+    <div class="nums"><span><b>${s.s}</b>分</span><span><b>${s.st}</b>顆星</span><span><b>${s.n}</b>/ ${LEVELS.length} 關</span></div>
+    <div class="acts"><button class="tool" type="button" data-open="board">排行榜</button><button class="tool" type="button" data-open="titles">稱號</button><button class="tool" type="button" data-open="who">切換玩家</button></div>`;
+}
+const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function openLevels(keepTab){
+  if(!keepTab)tab=level().adv?'adv':'basic';
+  renderMe();
+  for(const [id,k] of [['tabBasic','basic'],['tabAdv','adv']]){
+    const ls=LEVELS.filter(l=>(k==='adv')===l.adv);
+    $(id).setAttribute('aria-pressed',tab===k);
+    $(id).innerHTML=(k==='adv'?'進階':'基礎')+`<small>${ls.filter(l=>best(l.id)).length} / ${ls.length}</small>`;
+  }
   $('levelList').innerHTML=CHAPTERS.map((ch,ci)=>{
-    const got=ch.levels.filter(l=>done.has(l.id)).length;
+    if((tab==='adv')!==!!ch.adv)return'';
+    const got=ch.levels.filter(l=>best(l.id)).length;
     return `<div class="chap"><h3><span>第 ${ci+1} 章　${ch.title}</span><b>${got} / ${ch.levels.length}</b></h3><div class="grid">`+
-      ch.levels.map(l=>{const i=LEVELS.indexOf(l);
-        return `<button class="lv ${done.has(l.id)?'done':''} ${i===st.lvl?'cur':''}" type="button" data-i="${i}"><span class="f">${fHtml(l.f)}</span><span class="n">${l.n}${done.has(l.id)?'　✓':''}</span></button>`;}).join('')+
+      ch.levels.map(l=>{const i=LEVELS.indexOf(l),b=best(l.id);
+        return `<button class="lv ${b?'done':''} ${i===st.lvl?'cur':''}" type="button" data-i="${i}"><span class="f">${fHtml(l.f)}</span><span class="n">${l.n}</span>`+
+          (b?`<span class="st">${'★'.repeat(b.st)+'☆'.repeat(3-b.st)}<i>${b.s}</i></span>`:'')+`</button>`;}).join('')+
       '</div></div>';
   }).join('');
   $('levels').hidden=false;
 }
 $('levelList').addEventListener('click',ev=>{const b=ev.target.closest('.lv');if(b)goLevel(+b.dataset.i);});
+$('tabBasic').addEventListener('click',()=>{tab='basic';openLevels(true);});
+$('tabAdv').addEventListener('click',()=>{tab='adv';openLevels(true);});
+
+/* ---------- 玩家、稱號、排行榜 ---------- */
+function openWho(force){
+  $('btnWhoClose').hidden=!!force||!player();
+  $('whoList').innerHTML=store.players.map(p=>{const s=stats(p);
+    return `<button class="rowp ${p.name===store.cur?'you':''}" type="button" data-name="${esc(p.name)}"><span class="rk">${p.name===store.cur?'●':''}</span><span class="nm"><b>${esc(p.name)}</b><small>${TITLES[titleIdx(p)].n}　${s.n} 關</small></span><span class="sc">${s.s}<small>分</small></span></button>`;}).join('');
+  $('whoName').value='';$('who').hidden=false;
+}
+function setPlayer(name){
+  name=String(name||'').replace(/\s+/g,' ').trim().slice(0,12);
+  if(!name)return;
+  let p=store.players.find(x=>x.name===name);
+  if(!p){p={name,best:{},made:Date.now(),up:Date.now()};store.players.push(p);if(store.legacy){grantLegacy(p,store.legacy);store.legacy=null;try{localStorage.removeItem('bskit-done');}catch(e){}}}
+  store.cur=name;save();gQueue();boardPush();
+  $('who').hidden=true;
+  if(!$('levels').hidden)openLevels(true);
+  if(st.won)clearAll();else{attReset();renderMeta();}
+}
+$('whoList').addEventListener('click',ev=>{const b=ev.target.closest('.rowp');if(b)setPlayer(b.dataset.name);});
+$('whoForm').addEventListener('submit',ev=>{ev.preventDefault();setPlayer($('whoName').value);});
+function openTitles(){
+  const p=player();if(!p)return;const s=stats(p),cur=titleIdx(p);
+  $('titleList').innerHTML=TITLES.map((t,i)=>{const ok=t.ok(p,s);
+    return `<div class="rowp trow ${ok?'on':'off'} ${i===cur?'you':''}"><span class="rk">${ok?'✓':'·'}</span><span class="nm"><b>${t.n}${i===cur?'　（目前）':''}</b><small>${t.d}</small></span></div>`;}).join('');
+  $('titles').hidden=false;
+}
+/* 排行榜：每位玩家只上傳名字、總分、星數、關數和稱號 */
+const FB='https://molecule-match-default-rtdb.asia-southeast1.firebasedatabase.app/trips/ballstick-board/players';
+const fbKey=n=>Array.from(n).map(c=>c.codePointAt(0).toString(36)).join('-');
+let boardRemote=null,boardT=0;
+function boardRow(p){const s=stats(p);return{n:p.name,s:s.s,st:s.st,lv:s.n,ti:titleIdx(p),u:Date.now()};}
+function boardPush(){
+  clearTimeout(boardT);
+  boardT=setTimeout(async()=>{
+    const p=player();if(!p)return;const row=boardRow(p);if(!row.s)return;
+    try{
+      const url=FB+'/'+fbKey(p.name)+'.json';
+      const r=await fetch(url);const old=r.ok?await r.json():null;
+      if(old&&old.s>=row.s)return;
+      await fetch(url,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(row),keepalive:true});
+    }catch(e){}
+  },900);
+}
+function renderBoard(){
+  const m=new Map();
+  for(const k in boardRemote||{}){const r=boardRemote[k];if(r&&typeof r.n==='string'&&r.s>0)m.set(r.n,{n:r.n.slice(0,12),s:+r.s||0,st:+r.st||0,lv:+r.lv||0,ti:Math.max(0,Math.min(TITLES.length-1,+r.ti||0))});}
+  for(const p of store.players){const r=boardRow(p),o=m.get(p.name);if(r.s>0&&(!o||r.s>=o.s))m.set(p.name,r);}
+  const rows=[...m.values()].sort((a,b)=>b.s-a.s||b.st-a.st).slice(0,50);
+  $('boardList').innerHTML=rows.length?rows.map((r,i)=>
+    `<div class="rowp ${r.n===store.cur?'you':''}"><span class="rk">${i+1}</span><span class="nm"><b>${esc(r.n)}</b><small>${TITLES[r.ti].n}　${r.lv} 關　★ ${r.st}</small></span><span class="sc">${r.s}<small>分</small></span></div>`).join('')
+    :'<p class="lead">還沒有人上榜。完成任何一關（不用教學）就會出現在這裡。</p>';
+}
+async function openBoard(){
+  $('board').hidden=false;
+  $('boardNote').textContent='正在讀取線上排行榜…';renderBoard();
+  try{
+    const r=await fetch(FB+'.json');if(!r.ok)throw new Error(r.status);
+    boardRemote=await r.json()||{};
+    $('boardNote').textContent='所有玩家的總分排名（每一關取最佳分數加總）。這個榜是公開的。';
+  }catch(e){
+    $('boardNote').textContent='連不上線上排行榜，先顯示這台裝置上的玩家。';
+  }
+  renderBoard();
+}
+document.addEventListener('click',ev=>{
+  const o=ev.target.closest('[data-open]'),c=ev.target.closest('[data-close]');
+  if(o){({board:openBoard,titles:openTitles,who:()=>openWho(false)})[o.dataset.open]();}
+  if(c)$(c.dataset.close).hidden=true;
+});
 
 /* ---------- 雲端存檔：過關紀錄存成玩家自己 Google 雲端硬碟裡的隱藏 App 檔 ---------- */
 const GCLIENT='267421312122-l2ggo7t35tqpf8ej5osqttt08ke30lr1.apps.googleusercontent.com';
@@ -1082,7 +1343,7 @@ async function gFindFile(){
   const j=await r.json();return j.files&&j.files[0]?j.files[0].id:null;
 }
 async function gWrite(){
-  const body=JSON.stringify({done:[...done],lvl:st.lvl,savedAt:Date.now()});
+  const body=JSON.stringify({v:2,players:store.players,savedAt:Date.now()});
   if(gFileId)return gFetch(GAPI+'/upload/drive/v3/files/'+gFileId+'?uploadType=media',{method:'PATCH',keepalive:true,headers:{'Content-Type':'application/json'},body});
   const b='bskit'+Date.now(),meta=JSON.stringify({name:GFILE,parents:['appDataFolder']});
   const mp='--'+b+'\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n'+meta+'\r\n--'+b+'\r\nContent-Type: application/json\r\n\r\n'+body+'\r\n--'+b+'--';
@@ -1094,12 +1355,12 @@ function gPush(){
   gTimer=0;
   if(!gOn)return;
   if(!gTok||Date.now()>gTokExp){gExpired();return;}
-  gWrite().then(()=>{gBtn('已連上 Google 同步');gNote('已同步到 Google 雲端硬碟　'+gTime());})
+  gWrite().then(()=>{gBtn('已連上 Google 備份');gNote('已備份到 Google 雲端硬碟　'+gTime());})
     .catch(e=>{if(e.message==='auth')gExpired();else gNote('雲端同步失敗，進度先存在這台。稍後過關時會再試一次。');});
 }
 gQueue=()=>{
   if(gOn){clearTimeout(gTimer);gTimer=setTimeout(gPush,800);}
-  else if(gLinked())setTimeout(()=>toast('進度先存在這台。到「關卡」連回 Google 就會同步'),60);
+  else if(gLinked()&&st.won)setTimeout(()=>toast('紀錄先存在這台。到「關卡」連回 Google 就會備份'),60);
 };
 async function gAfterLogin(){
   gNote('正在讀取 Google 雲端的進度…');
@@ -1107,15 +1368,17 @@ async function gAfterLogin(){
     gFileId=await gFindFile();
     let d=null;
     if(gFileId){const r=await gFetch(GAPI+'/drive/v3/files/'+gFileId+'?alt=media');d=await r.json().catch(()=>null);}
-    const before=done.size;
-    if(d&&Array.isArray(d.done))for(const id of d.done)if(LEVELS.some(l=>l.id===id))done.add(id);
+    const cnt=()=>store.players.reduce((n,p)=>n+Object.keys(p.best).length,0),before=cnt();
+    if(d&&Array.isArray(d.players))mergePlayers(store.players,d.players);
+    if(d&&Array.isArray(d.done)){const p=player();if(p)grantLegacy(p,d.done);else store.legacy=(store.legacy||[]).concat(d.done);}
     save();gOn=true;
     try{localStorage.setItem('bskit-g','1');}catch(e){}
-    if(!$('levels').hidden)openLevels();
-    const got=done.size-before;
+    if(!$('levels').hidden)openLevels(true);
+    if(!$('who').hidden)openWho(!player());
+    const got=cnt()-before;
     await gWrite();
     gBtn('已連上 Google 同步');
-    gNote((got>0?`從雲端接回 ${got} 關。`:'')+'已同步到 Google 雲端硬碟　'+gTime());
+    gNote((got>0?`從雲端接回 ${got} 筆過關紀錄。`:'')+'已同步到 Google 雲端硬碟　'+gTime());
   }catch(e){
     if(e.message==='auth')gExpired();else gNote('讀取 Google 雲端失敗（'+e.message+'）。進度仍存在這台，請再點一次按鈕。');
   }
@@ -1154,9 +1417,6 @@ new ResizeObserver(resize).observe($('stage'));
 /* ---------- 啟動 ---------- */
 function start(data){
   load();
-  let lvl=0;
-  try{lvl=+(localStorage.getItem('bskit-lvl')||0)||0;}catch(e){}
-  if(data&&Array.isArray(data.done))data.done.forEach(d=>done.add(d));
   resize();
   if(data&&typeof data.lvl==='number'&&Array.isArray(data.atoms)){
     st={lvl:data.lvl,atoms:data.atoms.map(a=>({id:a.id,e:a.e,x:a.x,y:a.y,vx:0,vy:0,comp:0})).filter(a=>EL[a.e]),
@@ -1164,13 +1424,14 @@ function start(data){
     goLevel(st.lvl,true);
   }else{
     // 第一次開啟時，在桌上先放兩顆氫當示範
-    goLevel(lvl);
-    if(st.lvl===0&&!done.has('h2')){newAtom('H',W*.38,H*.45);newAtom('H',W*.62,H*.5);changed();}
+    goLevel(lastLvl);
+    if(st.lvl===0&&!best('h2')){newAtom('H',W*.38,H*.45);newAtom('H',W*.62,H*.5);changed();}
   }
   if(data&&data.tut)setTut(true);
+  if(!player())openWho(true);
   if(document.fonts&&document.fonts.ready)document.fonts.ready.then(()=>kick());
 }
-window.claude?.hot?.snapshot?.(()=>({lvl:st.lvl,nid:st.nid,done:[...done],tut:tut.on,
+window.claude?.hot?.snapshot?.(()=>({lvl:st.lvl,nid:st.nid,tut:tut.on,
   atoms:st.atoms.map(a=>({id:a.id,e:a.e,x:a.x,y:a.y})),bonds:st.bonds.map(k=>({a:k.a,b:k.b,o:k.o}))}));
 if(window.claude?.hot?.ready)window.claude.hot.ready(start);else start(window.claude?.hot?.data??{});
 </script>
