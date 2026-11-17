@@ -490,15 +490,6 @@ nav a.on{color:var(--maple);font-weight:700;background:var(--maple-soft)}
       </div>
     </div>
     <div class="sec">
-      <h3>🛍️ 福岡百元商店</h3>
-      <div class="hint">想去的點一下打勾。DAISO、Standard Products、THREEPPY 是同一家公司（大創），兩個大店都是三個牌子在同一層一起逛。營業時間可能調整，出發前按「地圖」確認。</div>
-      <div id="shops"></div>
-      <div class="hint" style="margin:10px 0 0">
-        <b>排進行程</b>：11/21 晚上逛博多站 AMU PLAZA 時，博多巴士總站 5 樓營業到 21:00，可以順路；11/22 在天神，Can★Do 在新天町地下、Seria 在 Mina 天神 6 樓。<br>
-        <b>免稅</b>：百元商店多半買不到免稅門檻（同一店同一天含稅 5,000 日圓以上），不用特別準備護照。
-      </div>
-    </div>
-    <div class="sec">
       <h3>🛃 帶回台灣要注意</h3>
       <div class="hint" style="margin-bottom:0">
         <b>肉類一律不行</b>：肉乾、香腸、含肉的調理包（門司港燒咖哩、牛腸鍋組合）、含肉的麵包飯糰都不能帶進台灣，違規罰款很重。<br>
@@ -506,6 +497,19 @@ nav a.on{color:var(--maple);font-weight:700;background:var(--maple-soft)}
         <b>溫泉蛋、溏心蛋、新鮮水果</b>：不能帶。<br>
         <b>明太子</b>：是魚卵不是肉類，但要全程冷藏，請店家附保冷劑，回台當天就冰起來。<br>
         規定可能調整，出發前可到動植物防疫檢疫署網站再確認。
+      </div>
+    </div>
+  </section>
+
+  <!-- 百元店 -->
+  <section class="view" id="v-shop">
+    <div class="sec">
+      <h3>🛍️ 福岡百元商店</h3>
+      <div class="hint">想去的點一下打勾。DAISO、Standard Products、THREEPPY 是同一家公司（大創），兩個大店都是三個牌子在同一層一起逛。營業時間可能調整，出發前按「地圖」確認。</div>
+      <div id="shops"></div>
+      <div class="hint" style="margin:10px 0 0">
+        <b>排進行程</b>：11/21 晚上逛博多站 AMU PLAZA 時，博多巴士總站 5 樓營業到 21:00，可以順路；11/22 在天神，Can★Do 在新天町地下、Seria 在 Mina 天神 6 樓。<br>
+        <b>免稅</b>：百元商店多半買不到免稅門檻（同一店同一天含稅 5,000 日圓以上），不用特別準備護照。
       </div>
     </div>
   </section>
@@ -1698,8 +1702,8 @@ reloaders.push(()=>{if(currentView()==='tax')drawTxLog()});
 drawCards();drawTax();
 
 /* ---------- routing ---------- */
-const VIEWS=['trip','map','sim','list','food','coffee','gift','card','tax','chat','tools'];
-const GROUPS={trip:[['trip','🗓️ 每日行程'],['map','🗺️ 地圖'],['sim','▶️ 模擬']],buy:[['food','🍜 美食'],['coffee','☕ 咖啡'],['gift','🎁 伴手禮'],['card','💳 刷卡'],['tax','🧾 退稅']],list:[['list','']],chat:[['chat','']],tools:[['tools','']]};
+const VIEWS=['trip','map','sim','list','food','coffee','gift','shop','card','tax','chat','tools'];
+const GROUPS={trip:[['trip','🗓️ 每日行程'],['map','🗺️ 地圖'],['sim','▶️ 模擬']],buy:[['food','🍜 美食'],['coffee','☕ 咖啡'],['gift','🎁 伴手禮'],['shop','🛍️ 百元店'],['card','💳 刷卡'],['tax','🧾 退稅']],list:[['list','']],chat:[['chat','']],tools:[['tools','']]};
 const groupOf=v=>Object.keys(GROUPS).find(g=>GROUPS[g].some(x=>x[0]===v));
 function currentView(){const h=location.hash.slice(1);return VIEWS.includes(h)?h:'trip'}
 function route(){const v=currentView();VIEWS.forEach(x=>$('#v-'+x).classList.toggle('on',x===v));
@@ -1707,7 +1711,7 @@ function route(){const v=currentView();VIEWS.forEach(x=>$('#v-'+x).classList.tog
  document.querySelectorAll('nav a').forEach(a=>{a.classList.toggle('on',a.dataset.g===g);if(a.dataset.g===g&&g==='buy')a.setAttribute('href','#'+v)});
  const sn=$('#subnav');sn.classList.toggle('on',sub.length>1);sn.innerHTML=sub.length>1?sub.map(x=>`<a href="#${x[0]}" class="${x[0]===v?'on':''}">${x[1]}</a>`).join(''):'';
  $('#todayBtn').classList.toggle('on',v==='trip'&&ti>=0&&ti<8&&curDay!==ti);window.scrollTo(0,0);
- if(v==='map')drawMap();if(v==='trip'&&!editing)renderDay(true);if(v==='gift')drawGifts();if(v==='sim')drawSim();else simStop();if(v==='food')drawFoods();if(v==='card')drawCards();if(v==='tax')drawTax();if(v==='coffee')drawCafes();if(v==='chat'&&window.FS)FS.chatOpen()}
+ if(v==='map')drawMap();if(v==='trip'&&!editing)renderDay(true);if(v==='gift')drawGifts();if(v==='shop')drawShops();if(v==='sim')drawSim();else simStop();if(v==='food')drawFoods();if(v==='card')drawCards();if(v==='tax')drawTax();if(v==='coffee')drawCafes();if(v==='chat'&&window.FS)FS.chatOpen()}
 window.addEventListener('hashchange',route);
 
 /* ---------- family sync (Firebase Realtime Database, REST + 串流) ---------- */
