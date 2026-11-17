@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="author" content="Jim Lu">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>分子球棍組裝</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -24,7 +24,10 @@
   --f-body:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
   --f-num:"Barlow Condensed","Noto Sans TC","PingFang TC",sans-serif;
 }
-*{box-sizing:border-box}
+*{box-sizing:border-box;touch-action:manipulation}
+html{-webkit-text-size-adjust:100%}
+body{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+input{-webkit-user-select:text;user-select:text}
 [hidden]{display:none!important}
 html,body{height:100%;margin:0}
 body{background:var(--ink);color:var(--paper);font-family:var(--f-body);font-size:15px;line-height:1.5;-webkit-tap-highlight-color:transparent;overflow:hidden}
@@ -1690,6 +1693,14 @@ $('btnTitle').addEventListener('click',()=>{$('levels').hidden=true;showTitle();
   c.addEventListener('pointerdown',ev=>{tDrag={x:ev.clientX,y:ev.clientY};try{c.setPointerCapture(ev.pointerId);}catch(e){}if(!tRaf)tRaf=requestAnimationFrame(titleFrame);});
   c.addEventListener('pointermove',ev=>{if(!tDrag)return;tRot.y+=(ev.clientX-tDrag.x)*.011;tRot.x=Math.max(-1.5,Math.min(1.5,tRot.x-(ev.clientY-tDrag.y)*.011));tDrag={x:ev.clientX,y:ev.clientY};});
   const end=()=>{tDrag=null;};c.addEventListener('pointerup',end);c.addEventListener('pointercancel',end);
+})();
+
+/* ---------- 不要點兩下放大、也不要雙指縮放：連點是這個遊戲的正常操作 ---------- */
+(()=>{
+  /* 點兩下放大由 CSS 的 touch-action:manipulation 關掉；這樣連續快點零件時，每一下都還是算數 */
+  document.addEventListener('dblclick',ev=>ev.preventDefault());
+  for(const t of ['gesturestart','gesturechange','gestureend'])document.addEventListener(t,ev=>ev.preventDefault());
+  document.addEventListener('touchmove',ev=>{if(ev.touches.length>1)ev.preventDefault();},{passive:false});
 })();
 
 /* ---------- 尺寸 ---------- */
