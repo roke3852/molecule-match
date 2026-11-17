@@ -58,6 +58,10 @@ input{display:block;width:100%;margin:4px 0 12px;padding:10px;font-size:17px;fon
 #who{display:inline-block;background:linear-gradient(#f6d46a,#d9a83a);color:#2a1414;font-weight:900;padding:1px 12px;margin-bottom:7px;font-size:15px;letter-spacing:2px;border:1px solid #7a5a1a;box-shadow:inset 0 1px 0 #fff6,1px 2px 0 #000}
 #txt{font-size:17px;line-height:1.75;min-height:90px}
 #txt.nar{color:#d8c9a6;font-style:normal}
+#bNext{display:none;position:absolute;right:10px;bottom:8px;padding:7px 16px;font-size:15px;font-weight:600;letter-spacing:1px;color:#2a1414;background:linear-gradient(#f6d46a,#d9a83a);border:1px solid #7a5a1a;box-shadow:inset 0 1px 0 #fff6,2px 2px 0 #000}
+#bNext:active{transform:translate(1px,1px);box-shadow:1px 1px 0 #000}
+.note-on #bNext{display:block}.note-on #nextTip{display:none}.note-on #dlg{cursor:default;padding-bottom:50px}
+.note-off u[data-g],.note-off u.pn,.note-off .an{text-decoration:none;cursor:inherit}
 #nextTip{position:absolute;right:12px;bottom:6px;font-size:12px;animation:bl 1s steps(2) infinite}
 @keyframes bl{50%{opacity:0}}
 #qbox{display:none;padding:10px 12px;overflow-y:auto;max-height:62%}
@@ -150,10 +154,10 @@ u[data-g]{text-decoration:underline dotted #f6cf5a;text-underline-offset:5px;cur
 </section>
 
 <section class="screen" id="sGame">
-  <div class="bar"><b id="gTitle"></b><button data-go="sBook" id="gBook">卷宗</button><button id="gQuit">離開</button></div>
+  <div class="bar"><b id="gTitle"></b><button id="gNote">註解：開</button><button data-go="sBook" id="gBook">卷宗</button><button id="gQuit">離開</button></div>
   <div id="stage"><img id="bg" alt=""><img id="port" alt="">
     <div class="stats"><span id="stF"></span><span id="stI"></span><span id="stR"></span></div></div>
-    <div id="dlg" class="px"><div id="who"></div><div id="txt"></div><div id="nextTip">▼</div></div>
+    <div id="dlg" class="px"><div id="who"></div><div id="txt"></div><div id="nextTip">▼</div><button id="bNext">下一句 ▶</button></div>
   <div id="qbox" class="px" style="margin:6px"></div>
   
 </section>
@@ -177,6 +181,7 @@ u[data-g]{text-decoration:underline dotted #f6cf5a;text-underline-offset:5px;cur
   <p><span class="qk">解語</span> 猜出對方那句話背後真正的意思。<br><span class="qk">奏對</span> 皇上問話，你怎麼回。<br><span class="qk">決斷</span> 局勢當前，替主子拿主意。<br><span class="qk">國文</span> 經典出處與文義。</p>
   <p>每個選擇會影響三項數值：<br><b>聖眷</b>——皇上對你的信任，歸零即遭貶謫，本回重來。<br><b>城府</b>——你聽懂了多少弦外之音。<br><b>清譽</b>——你是否守住了讀書人的本分。</p>
   <p>台詞中畫了線的字可以點：<br><u data-g="硃批">金色虛線</u> 是難字難詞，點一下顯示讀音與解釋；<br><span style="text-decoration:underline wavy #ff9a7a;text-underline-offset:6px">紅色波浪線</span> 是值得細讀的句子，點一下顯示文言句式、修辭、典故或話術的解析。<br><u class="pn">青色實線</u> 是人名，點一下顯示頭像與人物簡介；對話框上的說話者名字也可以點。<br>不點就不顯示，不會打斷劇情。</p>
+  <p>遊戲畫面右上角可切換 <b>註解模式</b>：<br><b>開</b>——畫線的字可以點，要按對話框右下角的「下一句」才會前進，不怕誤觸。<br><b>關</b>——不顯示畫線，點對話框任何地方就是下一句，適合只想看劇情的時候。</p>
   <p>有些題目藏著一個不太正經的選項，選了會得到 <b class="jk">奇策</b>：不加分也不扣分，但會發生奇怪的事，並收入「奇策錄」。</p>
   <p>每回結束按表現評為甲、乙、丙等。作答後的「弦外之音」會說明背後的史實與典故。出場人物與名句會陸續收入「卷宗」。</p>
   <p style="opacity:.7;font-size:13.5px">本作依《清史稿》、清代硃批諭旨及筆記軼聞改編，部分情節為戲劇化處理；對白為原創，引用之古文與硃批均註明出處。</p>
@@ -1210,6 +1215,7 @@ function mk(t){const ar=[];ANA.forEach((a,ix)=>{const p=t.indexOf(a[0]);if(p<0)r
 function showPop(h){const p=$('#pop');p.innerHTML=h+'<div class="pc">點此關閉</div>';p.style.display='block'}
 function hidePop(){$('#pop').style.display='none'}
 document.addEventListener('click',e=>{const el=e.target.closest&&e.target.closest('[data-g],[data-a],[data-p]');
+ if(el&&!noteMode&&el.closest('#sGame'))return;
  if(el){e.stopPropagation();e.preventDefault();if(typing)endType();
   if(el.dataset.p){const id=PKEY[el.dataset.p],c=CHARS[id],x=PEXTRA[id];showPop(c?`<div style="display:flex;gap:10px"><img src="${portrait(id)}" style="width:64px;height:76px;flex:none" alt=""><div><b class="pt">${c.n}</b><p style="margin:2px 0 0;font-size:13px;opacity:.8">${c.t}</p></div></div><p>${c.b}</p>`:`<b class="pt">${id}</b><p style="margin:2px 0 0;font-size:13px;opacity:.8">${x[0]}</p><p>${x[1]}</p>`)}
   else if(el.dataset.g){const k=el.dataset.g,g=GLOSS[k];showPop(`<b class="pt">${k}</b>${g[0]?`<i>${g[0]}</i>`:''}<p>${g[1]}</p>`)}
@@ -1297,7 +1303,12 @@ function step(){if(ip>=script.length)return finish();const s=script[ip++];
 function say(t,nar){const el=$('#txt');el.className=nar?'nar':'';full=t;typing=true;let n=0;el.textContent='';$('#nextTip').style.visibility='hidden';clearInterval(tm);
  tm=setInterval(()=>{n+=1;el.textContent=full.slice(0,n);if(n>=full.length)endType()},28)}
 function endType(){clearInterval(tm);typing=false;$('#txt').innerHTML=mk(full);$('#nextTip').style.visibility='visible'}
-$('#dlg').onclick=()=>{if(typing)endType();else step()};
+let noteMode=true;try{noteMode=localStorage.getItem('sanchao-note')!=='0'}catch(e){}
+function setNote(v){noteMode=v;try{localStorage.setItem('sanchao-note',v?'1':'0')}catch(e){}const g=$('#sGame');g.classList.toggle('note-on',v);g.classList.toggle('note-off',!v);$('#gNote').textContent='註解：'+(v?'開':'關');if(!v)hidePop()}
+$('#gNote').onclick=()=>{setNote(!noteMode);toast(noteMode?'註解模式開啟：點畫線的字看說明，按「下一句」前進':'註解模式關閉：點任何地方前進')};
+$('#bNext').onclick=e=>{e.stopPropagation();hidePop();if(typing)endType();else step()};
+$('#dlg').onclick=()=>{if(noteMode){if(typing)endType();return}if(typing)endType();else step()};
+setNote(noteMode);
 function ask(q){$('#dlg').style.display='none';$('#port').style.display='none';const b=$('#qbox');b.style.display='block';
  const ord=q.o.map((o,i)=>i).sort(()=>Math.random()-.5);
  b.innerHTML=`<span class="qk">${q.k}</span><div class="qp">${mk(q.p)}</div>`+ord.map(i=>`<button class="btn" data-i="${i}">${mk(q.o[i].t)}</button>`).join('');b.scrollTop=0;
