@@ -802,6 +802,8 @@ u.rest,.bd.rest{background:#5a8aa0}u.peak,.bd.peak{background:#c9a66b}u.fade,.bd
 .nsc{font-family:var(--f-mono);font-size:20px;color:var(--accent)}.nsc.bad{color:var(--fail)}
 .nplan{display:flex;flex-direction:column;gap:2px;font-family:var(--f-mono);font-size:12px;color:var(--muted);margin-top:6px}
 .nmemo{width:100%;margin-top:8px;background:transparent;border:1px solid var(--line);border-radius:6px;color:var(--ink);font:inherit;font-size:14px;padding:8px}
+.bagrow{display:grid;grid-template-columns:60px 1fr;gap:12px;align-items:start}.bagrow>div{display:flex;flex-direction:column;gap:3px;min-width:0}.bag{filter:drop-shadow(0 3px 5px rgba(0,0,0,.45))}
+.seller{display:inline-flex;align-items:center;gap:6px;font-size:12px;letter-spacing:.08em;color:var(--gold);border:1px solid var(--line);border-radius:999px;padding:2px 10px 2px 6px}
 .brew-anim .smoke{opacity:0}.brew-anim.go .smoke{animation:baSteam 1.2s ease-out 2s 3}
 </style>
 <script>
@@ -4934,6 +4936,27 @@ function agePlot(B){const W=210,H=46,A=ageInfo(B.roast,B.age),X=d=>Math.min(60,d
    '<path d="'+p+'" fill="none" stroke="#f3e9d6" stroke-width="2"/><line x1="'+X(B.age)+'" x2="'+X(B.age)+'" y1="0" y2="'+H+'" stroke="#e0569b" stroke-width="1.5"/><circle cx="'+X(B.age)+'" cy="'+Y(freshF(B.roast,B.age))+'" r="4" fill="#e0569b"/>'+
    (X(A.rest)>=24?'<text x="2" y="'+(H+10)+'" font-size="9" fill="#9fb7c4">養豆</text>':'')+'<text x="'+(X(A.rest)+2)+'" y="'+(H+10)+'" font-size="9" fill="#d9bd86">賞味期</text><text x="'+(X(A.stale)+2)+'" y="'+(H+10)+'" font-size="9" fill="#999">走味</text></svg>';}
 function ageBars(B){const t=taste(B),t0=taste(beanOf(B.src)||B);return '<div class="tb">'+Object.keys(TD).map(k=>{const dv=t[k]-t0[k];return '<div><span>'+TD[k]+(Math.abs(dv)>=.4?'<em class="'+(dv>0?'up':'dn')+'">'+(dv>0?'▲':'▼')+'</em>':'')+'</span><i style="position:relative;overflow:visible"><b style="width:'+t[k]*10+'%;border-radius:4px"></b><u style="left:'+t0[k]*10+'%"></u></i></div>';}).join('')+'</div>';}
+/* ---------- 豆子包裝：產區決定袋子顏色、烘焙度決定色帶、每個賣家有自己的標誌 ---------- */
+const REGC={'非洲':['#b5523a','#8a3a28'],'中南美洲':['#2f7a66','#215848'],'亞洲':['#39508f','#283a6b'],'共同發酵':['#a04a86','#763463'],'配方豆':['#3c3a3a','#262525']};
+const REGX={jie_hon:'亞洲',sig_jie:'亞洲',man_g1:'亞洲',ethw_g1:'非洲',sig_abebe:'非洲',sig_k:'非洲',sig_lucia:'中南美洲'};
+const SELLER={store:'好豆量販',jie:'阿傑・阿里山',lucia:'Lucía Café',abebe:'Abebe Buna',k:'老K 貿易'};
+function logoG(w,x,y,c){const t='translate('+x+' '+y+')';
+  if(w==='jie')return '<g transform="'+t+'" fill="'+c+'"><path d="M-8 5L-2-5 2 1 4-2 8 5z"/><circle cx="5" cy="-6" r="1.6"/></g>';
+  if(w==='lucia')return '<g transform="'+t+'" stroke="'+c+'" stroke-width="1.4" fill="none"><circle r="3.2" fill="'+c+'"/>'+[0,45,90,135,180,225,270,315].map(a=>'<path d="M0-5v-2.6" transform="rotate('+a+')"/>').join('')+'</g>';
+  if(w==='abebe')return '<g transform="'+t+'" fill="'+c+'">'+[0,72,144,216,288].map(a=>'<ellipse cx="0" cy="-4" rx="2" ry="3.2" transform="rotate('+a+')"/>').join('')+'<circle r="1.6" fill="#f3e9d6"/></g>';
+  if(w==='k')return '<g transform="'+t+'"><rect x="-7" y="-7" width="14" height="14" fill="none" stroke="'+c+'" stroke-width="1.4"/><path d="M-3-4v8M-3 0l5-4M-2 0l4 4" stroke="'+c+'" stroke-width="1.8" fill="none"/></g>';
+  return '<g transform="'+t+'"><ellipse rx="6.5" ry="4.6" fill="'+c+'" transform="rotate(-25)"/><path d="M-4 3c3-1 2-5 8-6" stroke="#f3e9d6" stroke-width="1.2" fill="none"/></g>';}
+function bag(id,seller,green){const B=beanOf(id),rg=REGX[id]||B.region,C=REGC[rg]||REGC['配方豆'],nm=esc(B.name.slice(0,5)),gold=B.sig?'#d9bd86':null;
+  if(green)return '<svg class="bag" viewBox="0 0 60 84" width="60" height="84" aria-hidden="true"><path d="M9 14c-5-6-2-10 3-8l6 4h24l6-4c5-2 8 2 3 8l3 60c0 4-2 6-6 6H12c-4 0-6-2-6-6z" fill="#c2a878" stroke="#8f7a52" stroke-width="1.2"/>'+
+    '<path d="M8 22h44M7 34h46M7 46h46M6 58h48M6 70h48" stroke="#a8905f" stroke-width=".6"/><path d="M18 12v68M30 10v70M42 12v68" stroke="#a8905f" stroke-width=".6"/>'+
+    '<rect x="6.5" y="24" width="47" height="4" fill="'+C[0]+'" opacity=".85"/><rect x="6" y="66" width="48" height="4" fill="'+C[0]+'" opacity=".85"/>'+(gold?'<rect x="6.5" y="29" width="47" height="1.5" fill="'+gold+'"/>':'')+
+    logoG(seller,30,41,C[1])+'<text x="30" y="59" text-anchor="middle" font-size="7.5" font-weight="700" fill="'+C[1]+'">'+nm+'</text><text x="30" y="78" text-anchor="middle" font-size="5.5" fill="#6b5a3a">GREEN・生豆</text></svg>';
+  return '<svg class="bag" viewBox="0 0 60 84" width="60" height="84" aria-hidden="true"><path d="M8 12h44l4 64c0 4-2 6-6 6H10c-4 0-6-2-6-6z" fill="'+C[0]+'"/><path d="M8 12h44l4 64c0 4-2 6-6 6h-6V12z" fill="'+C[1]+'" opacity=".55"/>'+
+    '<rect x="7" y="4" width="46" height="9" rx="1.5" fill="'+C[1]+'"/><path d="M11 6v5M16 6v5M21 6v5M26 6v5M31 6v5M36 6v5M41 6v5M46 6v5" stroke="'+C[0]+'" stroke-width="1"/>'+
+    '<circle cx="45" cy="22" r="3" fill="'+C[1]+'"/><circle cx="45" cy="22" r="1" fill="#1a1512"/>'+
+    '<rect x="11" y="28" width="38" height="36" rx="2" fill="#f3e9d6"/>'+logoG(seller,30,39,C[0])+'<text x="30" y="53" text-anchor="middle" font-size="7.5" font-weight="700" fill="#2a2420">'+nm+'</text><text x="30" y="61" text-anchor="middle" font-size="5" fill="#6b5a45">'+ROAST_NAME(B.roast)+'</text>'+
+    '<rect x="5" y="68" width="50.5" height="7" fill="'+roastCol(B.roast)+'"/><rect x="5" y="68" width="50.5" height="1" fill="#f3e9d6" opacity=".5"/></svg>';}
+const sellerTag=w=>'<span class="seller"><svg viewBox="-9 -9 18 18" width="18" height="18" aria-hidden="true">'+logoG(w,0,0,'currentColor')+'</svg>'+SELLER[w]+'</span>';
 const cellOpen=new Set();
 function cellarHTML(){const s=S(),ids=Object.keys(s.beans).filter(id=>s.beans[id]>0&&beanOf(id)).sort((a,b)=>beanOf(a).no-beanOf(b).no),all=ids.length&&ids.every(id=>cellOpen.has(id)),tot=ids.reduce((a,id)=>a+s.beans[id],0);
   return nav()+head('儲豆櫃','每一批豆子的狀態')+'<p class="label">每批豆子有自己的編號，不會混在同一罐。剛烘好要先養豆（排氣），之後進入賞味期；放太久香氣和甜感會流失、苦味變明顯。淺焙要養久一點，但也放得久；深焙很快能喝，也比較快走味。量販店的豆子買來時已經烘好一陣子了。</p>'+
@@ -5246,18 +5269,18 @@ function personHTML(){const s=S(),C=CM[curPerson],R=rel(C.id);
    '<p class="label" style="margin-top:8px">回答過的問題 '+R.q.length+' / '+C.qs.length+'</p></div>';}
 /* ---------- 採購：量販店、尋豆師、器材行 ---------- */
 function buyHTML(){const s=S();let h=nav()+head('採購',buyTab==='store'?'好豆量販店':buyTab==='hunt'?'尋豆師':'咖啡器材行');
-  if(buyTab==='store'){h+='<p class="label">買了馬上拿到。常見的豆子都有，五百克的大包裝打 85 折。好豆子和比賽豆要找尋豆師。</p><div class="c-cards">'+STORE_BEANS.map(id=>{const B=beanOf(id),p5=Math.round(B.price*5*.85/10)*10;
-    return '<div class="c-card"><b>'+B.name+'</b><small>'+B.sub+'・'+ROAST_NAME(B.roast)+'</small><small>'+B.tags.join('・')+'・商業級 80 分</small>'+info(id)+'<span class="pr">'+(s.beans[id]?'庫存 '+s.beans[id]+' g':'')+'</span>'+
+  if(buyTab==='store'){h+='<p class="label">買了馬上拿到。常見的豆子都有，五百克的大包裝打 85 折。好豆子和比賽豆要找尋豆師。袋子顏色代表產區（紅：非洲、綠：中南美洲、藍：亞洲、黑：配方），底下的色帶是烘焙度。</p>'+'<p>'+sellerTag('store')+'</p><div class="c-cards wide">'+STORE_BEANS.map(id=>{const B=beanOf(id),p5=Math.round(B.price*5*.85/10)*10;
+    return '<div class="c-card"><div class="bagrow">'+bag(id,'store')+'<div><b>'+B.name+'</b><small>'+B.sub+'・'+ROAST_NAME(B.roast)+'</small><small>'+B.tags.join('・')+'</small><small>商業級 80 分</small>'+info(id)+'</div></div>'+'<span class="pr">'+(s.beans[id]?'庫存 '+s.beans[id]+' g':'')+'</span>'+
      '<div class="buyrow"><button data-sb="'+id+':100"'+(s.money<B.price?' disabled':'')+'>100 g<br>'+NT(B.price)+'</button><button data-sb="'+id+':500"'+(s.money<p5?' disabled':'')+'>500 g<br>'+NT(p5)+'</button></div></div>';}).join('')+'</div>';}
   if(buyTab==='hunt'){const hs=hunters(s);
     h+='<p class="label">尋豆師賣的是<b>生豆</b>，到貨後要在「烘豆室」自己烘。每天的批次品質不一樣：尋豆師說的是宣稱分數，花點錢杯測樣品才知道真實品質。也可以試著議價。</p>';
     if(!hs.length)h+='<p class="c-hint">還沒有認識任何尋豆師。繼續營業，他們會找上門的。</p>';
     h+=hs.map(H=>{const tr=s.trust[H.id]||0,st=H.story[s.hch[H.id]||0],ready=st&&tr>=st.at;const items=H.cat.concat(s.sigs.includes(H.sig)?[[H.sig,0]]:[]);
-      return '<div class="panel hunter"><div class="c-cust">'+av(H)+'<div><div class="c-row"><h2>'+H.name+'</h2><span class="label">'+H.role+'</span></div>'+
+      return '<div class="panel hunter"><div class="c-cust">'+av(H)+'<div><div class="c-row"><h2>'+H.name+'</h2><span class="label">'+H.role+'</span></div>'+sellerTag(H.id)+''+
        '<div class="rl"><span>信任</span><span class="lbar"><i style="width:'+tr+'%"></i></span><span class="label">'+tr+'</span></div><span class="label">下單後 '+H.lead+' 天到貨・'+(s.sigs.includes(H.sig)?'已建立招牌豆':'信任 70 可建立招牌咖啡')+'</span>'+
        (ready?'<div><button class="c-pill hot" data-hs="'+H.id+'">💬 '+H.name+'有話想跟你說</button></div>':'')+'</div></div><div class="c-cards wide" style="margin-top:10px">'+
        items.map(([id,need])=>{const B=beanOf(id),lk=tr<need,cq=cupd(H.id,id),dl=deal(H.id,id),gp=greenPrice(id,H.id);
-        return '<div class="c-card'+(B.sig?' sigc':'')+'"><b>'+(B.sig?'★ ':'')+B.name+' <small>生豆</small></b><small>'+B.sub+'・建議 '+ROAST_NAME(B.roast)+'</small><small>'+B.tags.join('・')+'</small>'+info(id)+
+        return '<div class="c-card'+(B.sig?' sigc':'')+'"><div class="bagrow">'+bag(id,H.id,1)+'<div><b>'+(B.sig?'★ ':'')+B.name+' <small>生豆</small></b><small>'+B.sub+'・建議 '+ROAST_NAME(B.roast)+'</small><small>'+B.tags.join('・')+'</small>'+info(id)+'</div></div>'+
         (lk?'<span class="pr">🔒 信任 '+need+' 解鎖</span>':'<div class="qline"><span>宣稱 '+(CLAIM[id]||84)+' 分</span>'+(cq!=null?'<b class="'+(cq>=(CLAIM[id]||84)?'up':'dn')+'">杯測 '+cq+' 分</b>':'<button class="c-pill" data-cup="'+H.id+':'+id+'"'+(s.money<100?' disabled':'')+'>☕ 杯測樣品 NT$100</button>')+'</div>'+
           '<span class="pr">'+(dl&&dl.rate<1?'<s>'+NT(Math.round(B.price*.55))+'</s> ':'')+NT(gp)+'／100 g 生豆'+(dl&&dl.rate<1?'（議價成功）':'')+'</span>'+
           '<div class="buyrow">'+[100,250,500].map(g=>{const p=Math.round(gp*g/100);return '<button data-ho="'+H.id+':'+id+':'+g+'"'+(s.money<p?' disabled':'')+'>'+g+' g<br>'+NT(p)+'</button>';}).join('')+(dl?'':'<button data-bar="'+H.id+':'+id+'">議價</button>')+'</div>')+'</div>';}).join('')+'</div></div>';}).join('');
