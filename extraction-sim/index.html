@@ -672,9 +672,9 @@ h1,h2,h3{letter-spacing:.02em}
 .c-toast.on{opacity:1}
 
 /* ===== v7：熟客劇情、對話框、豆櫃、動畫、烘豆、比賽 ===== */
-.c-nav{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin:0 -2px;padding:2px}
+.c-nav{display:flex;flex-wrap:wrap;gap:6px;margin:0 -2px;padding:2px}
 .c-nav::-webkit-scrollbar{display:none}
-.c-nav button{position:relative;flex:0 0 auto;background:var(--panel);border:1px solid var(--line);color:var(--muted);border-radius:999px;font:inherit;font-size:14px;font-weight:700;padding:7px 14px;cursor:pointer;white-space:nowrap}
+.c-nav button{position:relative;flex:1 0 auto;background:var(--panel);border:1px solid var(--line);color:var(--muted);border-radius:999px;font:inherit;font-size:14px;font-weight:700;padding:7px 14px;cursor:pointer;white-space:nowrap}
 .c-nav button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
 .c-nav .dot,.newst{display:inline-block;width:7px;height:7px;border-radius:50%;background:#e0569b;margin-left:5px;vertical-align:2px}
 .newst{width:auto;height:auto;font-style:normal;font-size:11px;color:#fff;padding:1px 7px;border-radius:999px}
@@ -791,7 +791,7 @@ h1,h2,h3{letter-spacing:.02em}
 .jar .glass u{position:absolute;right:2px;top:2px;width:8px;height:8px;border-radius:50%;border:1px solid rgba(0,0,0,.4)}
 u.rest,.bd.rest{background:#5a8aa0}u.peak,.bd.peak{background:#c9a66b}u.fade,.bd.fade{background:#b07a42}u.stale,.bd.stale{background:#777}
 .cellar{display:flex;flex-direction:column;gap:12px}.lotc{display:flex;flex-direction:column;gap:8px}.lotc.stale{opacity:.8}
-.lot-h{display:grid;grid-template-columns:62px 1fr;gap:12px;align-items:center}.lot-h small{display:block;font-size:12px;color:var(--muted)}.lot-h .jar span,.lot-h .jar small{display:none}
+.lot-h{display:grid;grid-template-columns:62px 1fr 16px;gap:12px;align-items:center;background:transparent;border:0;padding:0;color:var(--ink);font:inherit;text-align:left;cursor:pointer;width:100%}.lot-h b{display:flex;justify-content:space-between;gap:8px;align-items:baseline}.lot-g{font-family:var(--f-mono);font-weight:500;color:var(--gold);white-space:nowrap}.chev{font-style:normal;font-size:10px;color:var(--muted)}.lot-h small{display:block;font-size:12px;color:var(--muted)}.lot-h .jar span,.lot-h .jar small{display:none}
 .lot-st{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:4px}.bd{font-style:normal;font-size:12px;font-weight:700;color:#1a1512;border-radius:999px;padding:1px 9px}.bd.stale,.bd.rest{color:#fff}
 .ageplot{display:block;max-width:420px}
 .tb u{position:absolute;top:-3px;width:2px;height:14px;background:#f3e9d6;margin-left:-1px}.tb em{font-style:normal;font-size:10px;margin-left:3px}.tb em.up{color:#7fd39a}.tb em.dn{color:#d9705f}
@@ -4928,13 +4928,14 @@ function takeSrc(src,g){const s=S();let age=0;batchesOf(src).forEach(id=>{if(g<=
 function agePlot(B){const W=210,H=46,A=ageInfo(B.roast,B.age),X=d=>Math.min(60,d)/60*W,Y=v=>H-4-(v-.4)/.6*(H-10);let p='';for(let d=0;d<=60;d+=2)p+=(d?'L':'M')+X(d).toFixed(1)+' '+Y(freshF(B.roast,d)).toFixed(1);
   return '<svg class="ageplot" viewBox="0 0 '+W+' '+(H+12)+'" width="100%" role="img" aria-label="風味隨時間變化：'+A.st+'"><rect x="0" y="0" width="'+X(A.rest)+'" height="'+H+'" fill="#5a8aa0" opacity=".18"/><rect x="'+X(A.rest)+'" y="0" width="'+(X(A.stale)-X(A.rest))+'" height="'+H+'" fill="#c9a66b" opacity=".22"/><rect x="'+X(A.stale)+'" y="0" width="'+(W-X(A.stale))+'" height="'+H+'" fill="#777" opacity=".16"/>'+
    '<path d="'+p+'" fill="none" stroke="#f3e9d6" stroke-width="2"/><line x1="'+X(B.age)+'" x2="'+X(B.age)+'" y1="0" y2="'+H+'" stroke="#e0569b" stroke-width="1.5"/><circle cx="'+X(B.age)+'" cy="'+Y(freshF(B.roast,B.age))+'" r="4" fill="#e0569b"/>'+
-   '<text x="2" y="'+(H+10)+'" font-size="9" fill="#9fb7c4">養豆</text><text x="'+(X(A.rest)+2)+'" y="'+(H+10)+'" font-size="9" fill="#d9bd86">賞味期</text><text x="'+(X(A.stale)+2)+'" y="'+(H+10)+'" font-size="9" fill="#999">走味</text></svg>';}
+   (X(A.rest)>=24?'<text x="2" y="'+(H+10)+'" font-size="9" fill="#9fb7c4">養豆</text>':'')+'<text x="'+(X(A.rest)+2)+'" y="'+(H+10)+'" font-size="9" fill="#d9bd86">賞味期</text><text x="'+(X(A.stale)+2)+'" y="'+(H+10)+'" font-size="9" fill="#999">走味</text></svg>';}
 function ageBars(B){const t=taste(B),t0=taste(beanOf(B.src)||B);return '<div class="tb">'+Object.keys(TD).map(k=>{const dv=t[k]-t0[k];return '<div><span>'+TD[k]+(Math.abs(dv)>=.4?'<em class="'+(dv>0?'up':'dn')+'">'+(dv>0?'▲':'▼')+'</em>':'')+'</span><i style="position:relative;overflow:visible"><b style="width:'+t[k]*10+'%;border-radius:4px"></b><u style="left:'+t0[k]*10+'%"></u></i></div>';}).join('')+'</div>';}
-function cellarHTML(){const s=S(),ids=Object.keys(s.beans).filter(id=>s.beans[id]>0&&beanOf(id)).sort((a,b)=>beanOf(a).no-beanOf(b).no);
+const cellOpen=new Set();
+function cellarHTML(){const s=S(),ids=Object.keys(s.beans).filter(id=>s.beans[id]>0&&beanOf(id)).sort((a,b)=>beanOf(a).no-beanOf(b).no),all=ids.length&&ids.every(id=>cellOpen.has(id)),tot=ids.reduce((a,id)=>a+s.beans[id],0);
   return nav()+head('儲豆櫃','每一批豆子的狀態')+'<p class="label">每批豆子有自己的編號，不會混在同一罐。剛烘好要先養豆（排氣），之後進入賞味期；放太久香氣和甜感會流失、苦味變明顯。淺焙要養久一點，但也放得久；深焙很快能喝，也比較快走味。量販店的豆子買來時已經烘好一陣子了。</p>'+
-   (ids.length?'':'<p class="c-hint">儲豆櫃是空的。</p>')+'<div class="cellar">'+ids.map(id=>{const B=beanOf(id),A=ageInfo(B.roast,B.age);
-    return '<div class="panel lotc '+A.cls+'"><div class="lot-h">'+jar(id,s.beans[id])+'<div><b>'+esc(B.name)+'</b><small>'+esc((beanOf(B.src)||B).sub||'')+(/^r\./.test(B.src)?'':'・'+ROAST_NAME(B.roast))+'</small><div class="lot-st"><em class="bd '+A.cls+'">'+A.st+'</em><span>烘焙後第 '+B.age+' 天・'+A.note+'</span></div></div></div>'+
-     agePlot(B)+ageBars(B)+'<p class="label">粉紅線是今天；橫條是現在的風味，白色刻度是這支豆子狀態最好時的樣子。</p><div class="buyrow"><button data-dump="'+id+'">倒掉這一批</button></div></div>';}).join('')+'</div>';}
+   (ids.length?'<div class="c-row"><span class="label">共 '+ids.length+' 批・'+tot+' g</span><button class="c-pill" data-a="cellall">'+(all?'全部收合':'全部展開')+'</button></div>':'<p class="c-hint">儲豆櫃是空的。</p>')+'<div class="cellar">'+ids.map(id=>{const B=beanOf(id),A=ageInfo(B.roast,B.age),op=cellOpen.has(id),g=s.beans[id];
+    return '<div class="panel lotc '+A.cls+'"><button class="lot-h" data-cell="'+id+'" aria-expanded="'+op+'">'+jar(id,g)+'<div><b>'+esc(B.name)+'<span class="lot-g">'+g+' g</span></b><small>'+esc((beanOf(B.src)||B).sub||'')+(/^r\./.test(B.src)?'':'・'+ROAST_NAME(B.roast))+'・可沖 '+Math.floor(g/DOSE)+' 杯</small><div class="lot-st"><em class="bd '+A.cls+'">'+A.st+'</em><span>烘焙後第 '+B.age+' 天・'+A.note+'</span></div></div><i class="chev">'+(op?'▲':'▼')+'</i></button>'+
+     (op?agePlot(B)+ageBars(B)+'<p class="label">粉紅線是今天；橫條是現在的風味，白色刻度是這支豆子狀態最好時的樣子。</p><div class="buyrow"><button data-dump="'+id+'">倒掉這一批</button></div>':'')+'</div>';}).join('')+'</div>';}
 const rid=(base,roast,q)=>'r.'+base+'.'+Math.round(roast*10)+'.'+q;
 /* 尋豆師今天這批的真實品質：宣稱分數上下浮動，信任越高越不會被唬 */
 function offerQ(h,id,day){const s=S(),tr=s.trust[h]||0,r=hsh(day*313+idn(h+id));return Math.round(((CLAIM[id]||84)-4+5*r+Math.min(1.5,tr/50))*2)/2;}
@@ -5544,6 +5545,7 @@ $('shopBox').addEventListener('click',e=>{const b=e.target.closest('button');if(
     if(s.brewers.includes(n.brewer))o.brewer=n.brewer;else miss.push('濾杯');if(s.grinders.includes(n.grinder))o.grinder=n.grinder;else miss.push('磨豆機');snapGrind();persist();
     toast(miss.length?'參數套用了，但店裡沒有那個'+miss.join('和'):'參數套用好了');SFX.p('save');if(notesFrom==='serve'||notesFrom==='comprun'){view=notesFrom;render();scrollTo(0,0);}return;}
   if(d.ndel){s.notes.splice(+d.ndel,1);SFX.p('trash');persist();render();return;}
+  if(d.cell){if(cellOpen.has(d.cell))cellOpen.delete(d.cell);else cellOpen.add(d.cell);SFX.p('tick');render();return;}
   if(d.dump){const B=beanOf(d.dump);delete s.beans[d.dump];toast('倒掉了 '+B.name);SFX.p('trash');persist();render();return;}
   if(d.mv){const [k,id]=d.mv.split(':'),shop=k==='brewer'?s.brewers:s.grinders,home=s.home[k+'s'],cap=k==='brewer'?capB(s):capG(s);
     if(shop.includes(id)){if(shop.length<=1){toast('店裡至少要留一個'+(k==='brewer'?'濾杯':'磨豆機'));return;}shop.splice(shop.indexOf(id),1);home.push(id);toast('收回家了');}
@@ -5575,6 +5577,7 @@ $('shopBox').addEventListener('click',e=>{const b=e.target.closest('button');if(
     s.blends.push(bl);regBlend(bl);draft=null;persist();toast('存好配方「'+bl.name+'」，可以開始拼豆了');SFX.p('save');render();}
   else if(a==='cbrew')compBrew();
   else if(a==='note')saveNote();
+  else if(a==='cellall'){const ids=Object.keys(s.beans).filter(id=>s.beans[id]>0&&beanOf(id));if(ids.every(id=>cellOpen.has(id)))cellOpen.clear();else ids.forEach(id=>cellOpen.add(id));render();}
   else if(a==='doroast')doRoast();
   else if(a==='cretry'){res=null;render();scrollTo(0,0);}
   else if(a==='csubmit')compSubmit();
