@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="穿搭試衣間">
 <meta name="theme-color" content="#2f3a4a">
-<meta name="app-version" content="1.11">
+<meta name="app-version" content="1.12">
 <title>穿搭試衣間</title>
 <style>
 :root{--bg:#f4f1ec;--card:#fff;--ink:#23201d;--mute:#857b70;--line:#e5ddd2;--accent:#2f3a4a;--hot:#c8553d;--soft:#ece6dc;--ok:#2f8f5b}
@@ -149,6 +149,12 @@ label.f{display:block;font-size:12.5px;color:var(--mute);margin:10px 0 4px}
 @keyframes flash{0%,93%{opacity:0}94%{opacity:.95}97%{opacity:.2}100%{opacity:0}}
 .scene .conf{animation:conf 7s linear infinite}
 @keyframes conf{0%{transform:translateY(0) rotate(0)}100%{transform:translateY(480px) rotate(540deg)}}
+.scene .wave{animation:wave 3.2s linear infinite}
+@keyframes wave{0%{transform:translateX(0)}100%{transform:translateX(40px)}}
+.scene .steam{animation:steam 2s ease-in-out infinite}
+@keyframes steam{0%{opacity:0;transform:translateY(4px)}50%{opacity:.8}100%{opacity:0;transform:translateY(-8px)}}
+.bgs{position:relative;display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-top:10px}
+.bgs .chip.on{background:#ff4f7a;border-color:#ff4f7a}
 .runway.big .rw{padding:0 14% 9%}
 .runway.big .pose{height:74%;filter:drop-shadow(0 6px 6px rgba(0,0,0,.35))}
 .runway.big .pose.pl{height:70%}
@@ -837,8 +843,7 @@ function tight(b,o){const g=geom(b),h=FLOOR+14-(g.top-36),w=h*.52;return figure(
 function avSvg(av){try{return tight(av.b,av.o);}catch(e){return tight(tBody('m'),presetLook('休閒','m',false));}}
 function demoFig(t,n){const b=tBody(t),st=STYLES[(n+TYPES.findIndex(x=>x[0]===t)*3)%STYLES.length];if(t==='f')b.hair=['long','pony','bob','wavy'][n%4];if(t==='m')b.glasses=n%3===1?'bigthin':'none';
   return figure(b,presetLook(st,b.sex,b.kid),{cls:'av',vb:'45 -22 210 618'});}
-function sceneSvg(){
-  const R=(a,b)=>a+Math.random()*(b-a),o=[];
+function sceneNight(o,R){
   o.push(`<defs><linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3b2a7a"/><stop offset=".45" stop-color="#c2468f"/><stop offset=".78" stop-color="#ff9a5a"/><stop offset="1" stop-color="#ffd27a"/></linearGradient>
   <linearGradient id="floor" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7a2f6b"/><stop offset="1" stop-color="#2b1d4f"/></linearGradient>
   <linearGradient id="beam" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".55"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
@@ -861,6 +866,68 @@ function sceneSvg(){
   for(const[x,rot,d]of[[70,18,0],[330,-18,-2]])o.push(`<g class="sweep" style="transform-origin:${x}px 0px;animation-delay:${d}s"><path d="M${x},0 L${x-70},460 h140 z" fill="url(#beam)" opacity=".5"/></g>`);
   for(const s of[1,-1])for(let i=0;i<4;i++){const x=200+s*(120+i*22),y=372+i*20;o.push(`<g fill="#1d1338"><circle cx="${x}" cy="${y}" r="${9+i}"/><rect x="${x-13-i}" y="${y+8}" width="${26+2*i}" height="60" rx="10"/></g><circle class="flash" cx="${x-s*6}" cy="${y+2}" r="${8+i*2}" fill="#fff" style="animation-delay:${R(-4,0).toFixed(2)}s"/>`);}
   for(let i=0;i<22;i++)o.push(`<rect class="conf" x="${R(0,400).toFixed(0)}" y="-12" width="5" height="9" rx="1" fill="${fc[i%6]}" style="animation-delay:${R(-7,0).toFixed(2)}s;animation-duration:${R(5,9).toFixed(1)}s"/>`);
+}
+
+const BGS=[['night','🌃 服飾街'],['japan','🗼 日本街頭'],['taiwan','🏮 台灣街頭'],['beach','🏖 海邊'],['studio','📸 攝影棚']];
+const TXT=(x,y,s,sz,fill,ex='')=>`<text x="${x}" y="${y}" font-size="${sz}" font-weight="900" fill="${fill}" text-anchor="middle" font-family="-apple-system,'PingFang TC','Noto Sans TC','Hiragino Sans',sans-serif" ${ex}>${s}</text>`;
+const VT=(x,y,s,sz,fill)=>Array.from(s).map((c,i)=>TXT(x,y+i*sz*1.08,c,sz,fill)).join('');
+function lanterns(o,y0,n,col){o.push(`<path d="M0,${y0} Q200,${y0+34} 400,${y0}" fill="none" stroke="#3a2a2a" stroke-width="1.2"/>`);
+  for(let i=0;i<n;i++){const t=(i+.5)/n,x=t*400,y=y0+34*2*t*(1-t)*1+2;o.push(`<g class="flag" style="animation-delay:${(-i*.21).toFixed(2)}s;transform-origin:${x.toFixed(0)}px ${y.toFixed(0)}px"><line x1="${x}" x2="${x}" y1="${y}" y2="${y+5}" stroke="#3a2a2a"/><ellipse cx="${x}" cy="${y+15}" rx="9" ry="11" fill="${col}"/><rect x="${x-6}" y="${y+4.5}" width="12" height="3" rx="1" fill="#2a2020"/><rect x="${x-6}" y="${y+23}" width="12" height="3" rx="1" fill="#2a2020"/><ellipse class="bulb" cx="${x}" cy="${y+15}" rx="4.5" ry="7" fill="#ffe9a8" opacity=".7" style="animation-delay:${(-i*.3).toFixed(1)}s"/></g>`);}}
+function sceneJapan(o,R){
+  o.push(`<defs><linearGradient id="jsky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7cc4f5"/><stop offset=".6" stop-color="#ffd9e8"/><stop offset="1" stop-color="#fff1d6"/></linearGradient></defs><rect width="400" height="460" fill="url(#jsky)"/>`);
+  o.push(`<path d="M150,250 L215,140 Q226,128 237,140 L310,250 Z" fill="#6f86c9" opacity=".75"/><path d="M196,172 L215,140 Q226,128 237,140 L258,172 L246,164 L236,176 L226,162 L214,176 L206,165 Z" fill="#fff"/>`);
+  for(const[x,y,s,d]of[[60,60,1,0],[280,90,.8,-9]])o.push(`<g class="cloud" style="animation-delay:${d}s"><g transform="translate(${x},${y}) scale(${s})" fill="#fff" opacity=".85"><ellipse cx="0" cy="0" rx="34" ry="12"/><ellipse cx="-16" cy="-8" rx="16" ry="11"/><ellipse cx="10" cy="-11" rx="20" ry="14"/></g></g>`);
+  const B=[[0,58,170,'#d9d2c4'],[58,64,206,'#b9c4d2'],[122,50,150,'#e8d9c0'],[228,56,176,'#c9b9a8'],[284,62,214,'#aebccb'],[346,54,160,'#e2d6c6']];
+  B.forEach(([x,w,h,c])=>{const y=338-h;o.push(`<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${c}"/><rect x="${x}" y="${y}" width="${w}" height="5" fill="#6b6257"/>`);
+    for(let r=0;r<Math.floor((h-60)/24);r++)for(let k=0;k<2;k++)o.push(`<rect x="${x+8+k*(w/2-3)}" y="${y+14+r*24}" width="${w/2-13}" height="14" fill="#8fb4d6" stroke="#fff" stroke-width="1"/>`);
+    o.push(`<rect x="${x+5}" y="${338-40}" width="${w-10}" height="40" fill="#3a3430"/><rect x="${x+9}" y="${338-34}" width="${w-18}" height="34" fill="#ffe9b8"/>`);});
+  [[29,'#d83a3a','ラーメン','#fff'],[90,'#1f8a5a','カラオケ','#fff'],[147,'#f2b705','喫茶店','#3a2a10'],[256,'#2f5fb8','古着屋','#fff'],[315,'#e0569a','居酒屋','#fff'],[373,'#fff','薬','#d83a3a']].forEach(([x,c,t,f],i)=>{const n=Array.from(t).length,h=n*15+10,y=338-58-h-(i%2)*14;o.push(`<rect class="win" x="${x-10}" y="${y}" width="20" height="${h}" rx="3" fill="${c}" stroke="#2a2420" stroke-width="1" style="animation-delay:${R(-4,0).toFixed(1)}s"/>`+VT(x,y+17,t,13,f));});
+  o.push(`<path d="M150,300 h100 M158,300 v38 M242,300 v38 M144,292 q56,-9 112,0 v8 h-112 z" fill="#d83a3a" stroke="#d83a3a" stroke-width="5" stroke-linecap="round" opacity=".0"/>`);
+  o.push(`<rect x="196" y="110" width="5" height="228" fill="#5a524a"/><rect x="176" y="128" width="46" height="4" fill="#5a524a"/><path d="M0,120 Q100,150 198,130 Q300,150 400,118 M0,134 Q100,166 198,146 Q300,168 400,132" fill="none" stroke="#3a3430" stroke-width="1"/>`);
+  o.push(`<rect x="6" y="${338-56}" width="30" height="56" rx="3" fill="#e9eef2" stroke="#8a949c"/><rect x="9" y="${338-52}" width="24" height="22" fill="#bfe3f5"/>`);for(let k=0;k<3;k++)for(let r=0;r<2;r++)o.push(`<rect x="${11+k*7.5}" y="${338-50+r*10}" width="5" height="8" rx="1" fill="${['#d83a3a','#f2b705','#1f8a5a'][k]}"/>`);o.push(`<rect x="9" y="${338-22}" width="24" height="8" fill="#3a3430"/>`);
+  o.push(`<path d="M372,338 q-4,-60 6,-100 q6,40 4,100 z" fill="#6b4a35"/>`);for(const[x,y,r]of[[378,236,30],[352,250,22],[396,256,22],[368,214,22],[388,206,18]])o.push(`<circle cx="${x}" cy="${y}" r="${r}" fill="#ffb7cf" opacity=".92"/>`);for(const[x,y,r]of[[366,228,10],[390,240,9],[376,204,8]])o.push(`<circle cx="${x}" cy="${y}" r="${r}" fill="#ffd3e2"/>`);
+  lanterns(o,24,9,'#e23b3b');
+  o.push(`<path d="M0,338 h400 v122 h-400 z" fill="#5d626c"/><path d="M150,338 h100 l90,122 h-280 z" fill="#6c717c"/>`);
+  for(let i=0;i<6;i++){const y1=342+i*i*3.6+i*4,y2=y1+5+i*2.2;if(y2>458)break;o.push(`<path d="M${150-(y1-338)*.74+4},${y1} L${250+(y1-338)*.74-4},${y1} L${250+(y2-338)*.74-4},${y2} L${150-(y2-338)*.74+4},${y2} Z" fill="#f4f1ea" opacity=".9"/>`);}
+  for(let i=0;i<20;i++)o.push(`<ellipse class="conf" cx="${R(0,400).toFixed(0)}" cy="-10" rx="4" ry="2.4" fill="#ffb7cf" style="animation-delay:${R(-8,0).toFixed(2)}s;animation-duration:${R(6,10).toFixed(1)}s"/>`);}
+function scooter(x,y,c,fl){return`<g transform="translate(${x},${y}) scale(${fl?-1:1},1)"><circle cx="-16" cy="0" r="7" fill="#222"/><circle cx="18" cy="0" r="7" fill="#222"/><circle cx="-16" cy="0" r="3" fill="#888"/><circle cx="18" cy="0" r="3" fill="#888"/><path d="M-22,-6 q4,-12 18,-12 h14 l6,-14 h6 l-3,16 l5,10 h-12 q-2,-8 -10,-8 h-14 q-4,0 -6,8 z" fill="${c}"/><rect x="-20" y="-24" width="20" height="6" rx="3" fill="#2a2420"/><path d="M19,-32 h8" stroke="#2a2420" stroke-width="2.5" stroke-linecap="round"/><circle cx="26" cy="-22" r="3" fill="#ffe9a8"/></g>`;}
+function sceneTaiwan(o,R){
+  o.push(`<defs><linearGradient id="tsky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1f2a5c"/><stop offset=".5" stop-color="#7a4a8a"/><stop offset=".85" stop-color="#f08a5a"/><stop offset="1" stop-color="#ffd27a"/></linearGradient></defs><rect width="400" height="460" fill="url(#tsky)"/>`);
+  for(let i=0;i<16;i++)o.push(`<circle class="tw" cx="${R(5,395).toFixed(0)}" cy="${R(8,120).toFixed(0)}" r="${R(.7,1.8).toFixed(1)}" fill="#fff" style="animation-delay:${R(-3,0).toFixed(2)}s"/>`);
+  let ty=250;o.push(`<rect x="188" y="${ty}" width="34" height="90" fill="#2c3f6e"/>`);for(let i=0;i<8;i++){const w=30-i*.6;ty-=17;o.push(`<path d="M${205-w/2+3},${ty+17} L${205-w/2-2},${ty} h${w+4} L${205+w/2-3},${ty+17} z" fill="#35508a" stroke="#22335c" stroke-width=".6"/>`);}o.push(`<rect x="200" y="${ty-16}" width="10" height="16" fill="#35508a"/><line x1="205" x2="205" y1="${ty-16}" y2="${ty-40}" stroke="#35508a" stroke-width="2"/><circle class="bulb" cx="205" cy="${ty-41}" r="2.5" fill="#ff5a5a"/>`);
+  const B=[[0,70,150,'#8a8f98'],[70,62,176,'#b7a58f'],[132,52,138,'#7f8a8f'],[232,60,160,'#a89a8a'],[292,58,188,'#8f9aa3'],[350,50,146,'#b9a894']];
+  B.forEach(([x,w,h,c],bi)=>{const y=338-h;o.push(`<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${c}"/>`);
+    for(let r=0;r<Math.floor((h-66)/22);r++){o.push(`<rect x="${x+5}" y="${y+10+r*22}" width="${w-10}" height="13" fill="#3a4658"/>`);for(let k=0;k<3;k++)o.push(`<rect class="win" x="${x+7+k*(w-14)/3}" y="${y+12+r*22}" width="${(w-14)/3-3}" height="9" fill="#ffe9a8" style="animation-delay:${R(-5,0).toFixed(1)}s"/>`);
+      if((r+bi)%2)o.push(`<rect x="${x+w-17}" y="${y+16+r*22}" width="12" height="8" fill="#d9dde2" stroke="#6b737c" stroke-width=".6"/>`);}
+    o.push(`<rect x="${x}" y="${338-52}" width="${w}" height="52" fill="#2a2730"/><rect x="${x+4}" y="${338-40}" width="${w-8}" height="40" fill="#ffdf9a"/><rect x="${x}" y="${338-52}" width="5" height="52" fill="${c}"/><rect x="${x+w-5}" y="${338-52}" width="5" height="52" fill="${c}"/>`);});
+  [[35,'#e23b3b','珍珠奶茶','#fff',64],[101,'#f2b705','雞排','#7a1d1d',40],[158,'#1f8a5a','牛肉麵','#fff',50],[262,'#2f5fb8','便當','#fff',40],[321,'#e0569a','鹹酥雞','#fff',52],[375,'#fff','豆花','#1f8a5a',38]].forEach(([x,c,t,f,w],i)=>{o.push(`<rect class="win" x="${x-w/2}" y="${338-52-17}" width="${w}" height="17" rx="2" fill="${c}" stroke="#2a2420" stroke-width="1" style="animation-delay:${R(-4,0).toFixed(1)}s"/>`+TXT(x,338-52-4,t,12,f));});
+  [[62,'#fff','藥局','#1f8a5a'],[136,'#e23b3b','機車行','#fff'],[236,'#f2b705','服飾','#3a2a10'],[296,'#7a3fb8','按摩','#fff'],[352,'#1f8a5a','早餐店','#fff']].forEach(([x,c,t,f],i)=>{const n=Array.from(t).length,h=n*15+10,y=338-80-h-(i%3)*18;o.push(`<rect class="win" x="${x-10}" y="${y}" width="20" height="${h}" rx="2" fill="${c}" stroke="#2a2420" stroke-width="1" style="animation-delay:${R(-4,0).toFixed(1)}s"/>`+VT(x,y+17,t,13,f));});
+  lanterns(o,18,10,'#e23b3b');
+  o.push(`<path d="M0,62 Q200,92 400,62" fill="none" stroke="#3a2a2a" stroke-width="1"/>`);for(let i=0;i<14;i++){const t=(i+.5)/14;o.push(`<circle class="bulb" cx="${(t*400).toFixed(0)}" cy="${(62+60*t*(1-t)+3).toFixed(0)}" r="3" fill="${['#ffe9a8','#ff9a5a','#7ae0c6'][i%3]}" style="animation-delay:${(-i*.17).toFixed(2)}s"/>`);}
+  o.push(`<path d="M0,338 h400 v122 h-400 z" fill="#3f424c"/><path d="M150,338 h100 l90,122 h-280 z" fill="#4c505c"/>`);
+  for(let i=0;i<5;i++){const y1=344+i*i*4+i*6,y2=y1+8+i*3;if(y2>458)break;o.push(`<path d="M198,${y1} h4 l${1+i*.4},${y2-y1} h${-6-i*.8} z" fill="#f2b705"/>`);}
+  for(const s of[1,-1])o.push(`<path d="M${200+s*52},340 L${200+s*142},460" stroke="#fff" stroke-width="2" opacity=".7"/>`);
+  o.push(scooter(44,352,'#e23b3b'),scooter(96,360,'#2f8fd0'),scooter(352,352,'#f2b705',1),scooter(300,362,'#7ae0c6',1));
+  for(const[x,y]of[[20,392],[380,396]])o.push(`<g><rect x="${x-17}" y="${y-30}" width="34" height="34" rx="3" fill="#b8472f"/><path d="M${x-22},${y-30} h44 l-5,-12 h-34 z" fill="#f2b705"/><rect x="${x-13}" y="${y+4}" width="4" height="26" fill="#5a524a"/><rect x="${x+9}" y="${y+4}" width="4" height="26" fill="#5a524a"/><circle class="bulb" cx="${x}" cy="${y-48}" r="5" fill="#ffe9a8"/><path class="steam" d="M${x-6},${y-34} q-5,-9 0,-16 M${x+6},${y-34} q5,-9 0,-18" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round" opacity=".7"/></g>`);}
+function sceneBeach(o,R){
+  o.push(`<defs><linearGradient id="bsky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3fb0f0"/><stop offset="1" stop-color="#c9f0ff"/></linearGradient><linearGradient id="sea" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1f8fd0"/><stop offset="1" stop-color="#7fe0e0"/></linearGradient></defs><rect width="400" height="460" fill="url(#bsky)"/><circle cx="318" cy="76" r="34" fill="#fff3a8"/><circle class="bulb" cx="318" cy="76" r="48" fill="#fff3a8" opacity=".35"/>`);
+  for(const[x,y,s,d]of[[60,70,1.1,0],[220,48,.8,-10],[140,120,.7,-17]])o.push(`<g class="cloud" style="animation-delay:${d}s"><g transform="translate(${x},${y}) scale(${s})" fill="#fff" opacity=".95"><ellipse cx="0" cy="0" rx="34" ry="12"/><ellipse cx="-16" cy="-8" rx="16" ry="11"/><ellipse cx="10" cy="-11" rx="20" ry="14"/></g></g>`);
+  o.push(`<rect y="236" width="400" height="110" fill="url(#sea)"/>`);
+  for(let r=0;r<5;r++){let d=`M-80,${252+r*20}`;for(let x=-80;x<480;x+=40)d+=` q10,-6 20,0 t20,0`;o.push(`<path class="wave" d="${d}" fill="none" stroke="#fff" stroke-width="${1.2+r*.4}" opacity=".7" style="animation-delay:${-r*.7}s"/>`);}
+  o.push(`<path d="M20,236 l34,-58 l34,58 z" fill="#fff"/><path d="M54,178 v58" stroke="#8a6a4a" stroke-width="2"/><path d="M10,240 h90 l-10,10 h-70 z" fill="#e23b3b"/>`);
+  for(const[x,y]of[[150,110],[176,96],[250,130]])o.push(`<path class="flag" d="M${x-9},${y} q4.5,-7 9,0 q4.5,-7 9,0" fill="none" stroke="#3a3a4a" stroke-width="1.6" style="transform-origin:${x}px ${y}px"/>`);
+  o.push(`<path d="M0,338 h400 v122 h-400 z" fill="#f4dca4"/><path d="M0,338 q100,-10 200,0 t200,0 v14 h-400 z" fill="#fff" opacity=".8"/><path d="M150,338 h100 l90,122 h-280 z" fill="#c99a62"/>`);
+  for(let i=1;i<7;i++){const y=338+i*i*3.4;if(y>458)break;o.push(`<line x1="${150-(y-338)*.74}" x2="${250+(y-338)*.74}" y1="${y}" y2="${y}" stroke="#8a6238" stroke-width="1.2"/>`);}
+  for(const[x,s]of[[36,1],[364,-1]]){o.push(`<path d="M${x},400 q${s*-10},-90 ${s*14},-170" fill="none" stroke="#8a6238" stroke-width="9" stroke-linecap="round"/>`);for(const a of[-70,-30,10,50,95,140])o.push(`<path class="flag" d="M${x+s*14},230 q${Math.cos(a*Math.PI/180)*34},${-Math.sin(a*Math.PI/180)*34-14} ${Math.cos(a*Math.PI/180)*62},${-Math.sin(a*Math.PI/180)*30+12}" fill="none" stroke="#2f9a5a" stroke-width="7" stroke-linecap="round" style="transform-origin:${x+s*14}px 230px;animation-delay:${-a/90}s"/>`);}
+  o.push(`<path d="M300,420 q26,-52 52,0 z" fill="#ff5a7a"/><path d="M300,420 q26,-52 52,0" fill="none" stroke="#fff" stroke-width="3" stroke-dasharray="9 9"/><line x1="326" x2="326" y1="394" y2="446" stroke="#8a6238" stroke-width="2.5"/><circle cx="84" cy="430" r="13" fill="#ffd45a"/><path d="M71,430 a13,13 0 0 1 26,0 M84,417 v26" stroke="#ff5a7a" stroke-width="2.5" fill="none"/>`);}
+function sceneStudio(o,R){
+  o.push(`<defs><linearGradient id="swall" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3a3d46"/><stop offset="1" stop-color="#5a5e6a"/></linearGradient><linearGradient id="roll" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fdfbf6"/><stop offset=".72" stop-color="#f1ece2"/><stop offset="1" stop-color="#ddd6c8"/></linearGradient></defs><rect width="400" height="460" fill="url(#swall)"/>`);
+  o.push(`<rect x="70" y="26" width="260" height="10" rx="5" fill="#8a8f98"/><path d="M84,36 h232 v290 q0,30 40,60 l30,74 h-372 l30,-74 q40,-30 40,-60 z" fill="url(#roll)"/>`);
+  for(const s of[1,-1]){const x=200+s*150;o.push(`<line x1="${x}" x2="${x}" y1="150" y2="400" stroke="#22242a" stroke-width="4"/><path d="M${x-16},400 h32 M${x},400 l-18,22 M${x},400 l18,22" stroke="#22242a" stroke-width="4" stroke-linecap="round"/><g transform="rotate(${s*-14} ${x} 130)"><rect x="${x-34}" y="86" width="68" height="88" rx="6" fill="#16171b"/><rect x="${x-28}" y="92" width="56" height="76" rx="3" fill="#fffbe8"/><rect class="flash" x="${x-28}" y="92" width="56" height="76" rx="3" fill="#fff" style="animation-delay:${s>0?-1:-3}s"/></g><path class="sweep" d="M${x},130 L${200-s*60},460 h${s*200} z" fill="#fff" opacity=".1" style="transform-origin:${x}px 130px"/>`);}
+  o.push(`<rect class="flash" width="400" height="460" fill="#fff" style="animation-delay:-2s;animation-duration:6s"/>`);
+  o.push(`<g transform="translate(40,420)"><rect x="-14" y="-52" width="6" height="52" fill="#22242a"/><rect x="-30" y="-78" width="38" height="26" rx="4" fill="#16171b"/><circle cx="-11" cy="-65" r="9" fill="#3a6a9a" stroke="#888" stroke-width="2"/><circle class="bulb" cx="2" cy="-74" r="2.5" fill="#ff3a3a"/></g>`);
+  for(let i=0;i<10;i++)o.push(`<path class="tw" d="M${R(90,310).toFixed(0)},${R(50,250).toFixed(0)} l2,5 l5,2 l-5,2 l-2,5 l-2,-5 l-5,-2 l5,-2 z" fill="#f2b705" style="animation-delay:${R(-3,0).toFixed(2)}s"/>`);}
+function sceneSvg(kind){const R=(a,b)=>a+Math.random()*(b-a),o=[];({night:sceneNight,japan:sceneJapan,taiwan:sceneTaiwan,beach:sceneBeach,studio:sceneStudio}[kind]||sceneNight)(o,R);
   return`<svg class="scene" viewBox="0 0 400 460" preserveAspectRatio="xMidYMid slice">${o.join('')}</svg>`;}
 function loginView(msg){U=null;UK=null;$('#nav').style.display='none';$('#userBtn').style.display='none';clearInterval(lgTimer);
   const ks=Object.keys(DB.known).sort((a,b)=>(b===DB.last)-(a===DB.last)||DB.known[a].name.localeCompare(DB.known[b].name,'zh-Hant'));
@@ -872,7 +939,8 @@ function loginView(msg){U=null;UK=null;$('#nav').style.display='none';$('#userBt
   const nShow=real?Math.min(NS,pl.length):3,row=n=>Array.from({length:nShow},(_,i)=>slot(i,n)).join('');
   if(lgStep==='title'){
     app.innerHTML=`<div class="game ti">${deco}<div class="logo">${'穿搭試衣間'.split('').map((c,i)=>`<b style="animation-delay:${i*.12}s;color:${['#ff5a7a','#ff9a3c','#f2b705','#2bb39a','#5a8dff'][i]}">${c}</b>`).join('')}<i class="sp s1">✦</i><i class="sp s2">✦</i><i class="sp s3">✧</i></div><div class="tag">✨ DRESS-UP STUDIO ✨</div>
-    <div class="runway big">${sceneSvg()}<div class="rw" id="rw">${row(lgTick)}</div>${real?'<div class="rwcap">大家現在的穿搭・點人物直接登入</div>':''}</div>
+    <div class="runway big">${sceneSvg(DB.bg||'night')}<div class="rw" id="rw">${row(lgTick)}</div>${real?'<div class="rwcap">大家現在的穿搭・點人物直接登入</div>':''}</div>
+    <div class="bgs">${BGS.map(([k,n])=>`<button class="chip ${(DB.bg||'night')===k?'on':''}" data-act="bg" data-v="${k}">${n}</button>`).join('')}</div>
     <button class="start" data-act="lgstart">▶ 開始遊戲</button>
     <div class="muted" id="lgMsg" style="text-align:center;margin-top:10px">${esc(msg||(ks.length?`已有 ${ks.length} 位玩家`+(pl.length>NS?'，伸展台會輪流展示':''):'建立你的角色，開始搭配'))}</div></div>`;
     lgTimer=setInterval(()=>{const r=$('#rw');if(!r||U){clearInterval(lgTimer);return;}if(real&&pl.length<=NS)return;lgTick++;r.innerHTML=row(lgTick);r.querySelectorAll('.pose').forEach(p=>p.classList.add('pop'));},real?3200:2200);
@@ -1089,6 +1157,7 @@ document.addEventListener('click',async ev=>{
   if(a==='pinok'){const k=d.k,v=$('#pinIn').value;if(hash(k+':'+v)!==DB.known[k].pin)return toast('密碼不對');sheet('');return enter(k);}
   if(a==='register')return register();
   if(a==='lgstart'){lgStep=Object.keys(DB.known).length?'select':'new';return loginView();}
+  if(a==='bg'){DB.bg=d.v;saveLocal();return loginView();}
   if(a==='lgnew'){lgStep='new';return loginView();}
   if(a==='lgback'){lgStep='select';return loginView();}
   if(a==='lgtype'){const n=$('#nName').value,p=$('#nPin').value;lgType=d.v;loginView();$('#nName').value=n;$('#nPin').value=p;return;}
