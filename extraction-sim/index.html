@@ -739,7 +739,7 @@ h1,h2,h3{letter-spacing:.02em}
 .dlg-ch button:active{background:rgba(201,166,107,.15)}
 .dlg-more{align-self:flex-end;font-size:11px;color:#a59887;animation:tBlink 1.6s infinite}
 /* 沖煮・烘豆動畫 */
-.brew-anim{position:fixed;inset:0;z-index:75;background:rgba(10,8,6,.82);display:flex;align-items:center;justify-content:center;cursor:pointer}
+.brew-anim{position:fixed;inset:0;z-index:75;background:rgba(10,8,6,.95);display:flex;align-items:center;justify-content:center;cursor:pointer}
 .ba-box{width:min(420px,92vw);display:flex;flex-direction:column;align-items:center;gap:8px}
 .ba-cap{font-family:var(--f-display);font-size:18px;color:#f3e9d6;letter-spacing:.06em}.ba-skip{font-size:11px;color:#a59887}
 .brew-anim .bn{opacity:0;transform:translateY(-30px)}
@@ -772,11 +772,22 @@ h1,h2,h3{letter-spacing:.02em}
 .brew-anim .ba-prog{width:70%;height:6px;border-radius:3px;background:rgba(255,255,255,.12);overflow:hidden}.brew-anim .ba-prog i{display:block;height:100%;width:0;background:#c9a66b}
 .brew-anim .ba-tip{font-size:14px;color:#d9bd86;min-height:1.4em;text-align:center}
 .brew-anim .ba-skip{background:transparent;border:1px solid #6b5a45;border-radius:999px;color:#a59887;font:inherit;font-size:12px;padding:5px 14px;cursor:pointer}
-.brew-anim{touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+.brew-anim{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 .brew-anim.beans-in .bn{animation:baDrop .55s cubic-bezier(.5,0,.8,.6) forwards}
 .brew-anim .gd{opacity:0}.brew-anim.grinding .gd{animation:baFall .45s linear infinite}
 .brew-anim .dr{opacity:0}.brew-anim.dripping .dr{animation:baDrip .6s linear infinite}.brew-anim.dripping .d2{animation-delay:.3s}
 #baKt{transition:transform .25s ease-out}
+#baGr svg,.gic svg,.tool svg{image-rendering:pixelated}
+.gic{line-height:0}.skn{display:flex;align-items:center;gap:5px}.skn i,.skins i{display:inline-block;width:10px;height:10px;border-radius:2px;border:1px solid rgba(255,255,255,.35)}
+.skins{display:flex;gap:5px;flex-wrap:wrap;margin-top:4px}.skins button{display:flex;align-items:center;gap:4px;background:transparent;border:1px solid var(--line);border-radius:999px;color:var(--muted);font:inherit;font-size:11px;padding:2px 8px;cursor:pointer}.skins button[aria-pressed="true"]{border-color:var(--accent);color:var(--accent)}
+.dialrow{display:grid;grid-template-columns:38px 1fr 38px;gap:6px;align-items:stretch;margin:6px 0}.dialrow button{background:transparent;border:1px solid var(--line);border-radius:8px;color:var(--ink);font:inherit;font-size:20px;cursor:pointer}
+.gdial{width:100%;height:66px;border-radius:8px;border:1px solid #14161a;touch-action:pan-y;cursor:ew-resize;display:block;box-shadow:inset 0 2px 6px rgba(0,0,0,.5)}
+.ba-pour{width:100%;display:flex;flex-direction:column;gap:8px;align-items:stretch}.ba-pour[hidden]{display:none}
+.ba-stat{display:flex;align-items:baseline;justify-content:center;gap:14px;color:#d9cdb8;font-family:var(--f-mono);font-size:14px}.ba-stat b{font-size:34px;color:#f3e9d6;font-weight:500}.ba-stat .hit{color:#7fd39a}.ba-stat .over{color:#d9705f}
+.ba-flow button{color:#d9cdb8}
+.ba-btns{display:flex;gap:8px}.ba-btns button{flex:1;border-radius:10px;border:1px solid #6b5a45;background:transparent;color:#f3e9d6;font:inherit;font-weight:700;font-size:15px;padding:13px 6px;cursor:pointer}
+.ba-btns .pri{flex:1.6;background:#c9a66b;border-color:#c9a66b;color:#1a1512}.ba-btns .stop{background:#d9705f;border-color:#d9705f;color:#fff}
+.brew-anim{touch-action:manipulation}
 .brew-anim .smoke{opacity:0}.brew-anim.go .smoke{animation:baSteam 1.2s ease-out 2s 3}
 </style>
 <script>
@@ -832,6 +843,8 @@ window.SFX=(()=>{
     skip:t=>tone({f:300,f2:200,t,d:.3,v:.07,type:'triangle'}),
     day:t=>{chord([65,69,72],t,{d:1,v:.04,type:'sine'});chord([67,71,74,79],t+.45,{gap:.06,d:1,v:.045,type:'sine'})},
     hint:t=>{tone({f:1318,t,d:.3,v:.05,wet:.3});tone({f:1760,t:t+.08,d:.4,v:.045,wet:.3})},
+    motor:t=>{noise({t,d:.13,v:.09,f:420,q:1.2});tone({f:118,t,d:.13,v:.05,type:'sawtooth',lp:600});noise({t,d:.05,v:.05,f:R(2200,3600),q:4})},
+    bladefx:t=>{noise({t,d:.11,v:.13,f:R(1800,2600),q:.8});tone({f:R(300,360),t,d:.1,v:.04,type:'sawtooth',lp:1500});noise({t:t+.03,d:.03,v:.1,f:R(3500,5200),q:5})},
     blip:(t,k)=>tone({f:k==='n'?520:k==='me'?880:R(640,760),t,d:.035,v:.022,type:'square',lp:2200}),
     heart:t=>{[88,91,96].forEach((m,i)=>tone({f:hz(m),t:t+i*.06,d:.35,v:.045,wet:.4}));noise({t:t+.05,d:.3,v:.025,f:6000,q:2})},
     heartDn:t=>{tone({f:hz(64),f2:hz(58),t,d:.35,v:.05,type:'triangle'})},
@@ -4867,7 +4880,7 @@ let view='lobby',buyTab='store',gearTab='use',res=null,hintOn=false,curPerson=nu
 function mig(s){
   s.rel=s.rel||{};s.flags=s.flags||{};s.blends=s.blends||[];s.trust=s.trust||{};s.orders=s.orders||[];s.lots=s.lots||{};s.mk=s.mk||1.6;
   s.home=s.home||{brewers:[],grinders:[]};s.paid=s.paid||{};s.cw=s.cw||{};s.sigs=s.sigs||[];s.mseen=s.mseen||{};s.hch=s.hch||{};s.sold=s.sold||0;
-  s.green=s.green||[];s.roasters=s.roasters||['pan'];if(!s.roaster||!s.roasters.includes(s.roaster))s.roaster=s.roasters[s.roasters.length-1];s.xp=s.xp||0;s.charm=s.charm||0;s.deal=s.deal||{};s.cupd=s.cupd||{};
+  s.green=s.green||[];s.skins=s.skins||{};s.skin=s.skin||{};s.roasters=s.roasters||['pan'];if(!s.roaster||!s.roasters.includes(s.roaster))s.roaster=s.roasters[s.roasters.length-1];s.xp=s.xp||0;s.charm=s.charm||0;s.deal=s.deal||{};s.cupd=s.cupd||{};
   if(s.today&&!s.today.v7)s.today=null;
   Object.keys(s.beans).forEach(ensureBean);s.blends.forEach(bl=>{bl.parts.forEach(p=>ensureBean(p[0]));regBlend(bl);});Object.values(s.rel).forEach(R=>{if(R.fav)ensureBean(R.fav);});}
 /* ---------- 經驗、魅力 ---------- */
@@ -4940,15 +4953,75 @@ const grindName=g=>g<450?'細':g<750?'中細':g<950?'中粗':'粗';
 const av=(p,sz)=>'<div class="c-av" style="background:'+(p.color||'#777')+(sz?';width:'+sz+'px;height:'+sz+'px;font-size:'+Math.round(sz*.45)+'px':'')+'">'+esc((p.name||'?')[0])+'</div>';
 function hearts(v){return '<span class="c-hearts" aria-label="'+v+' / 100">'+[20,40,60,80,100].map(t=>'<i class="'+(v>=t?'on':v>=t-10?'half':'')+'">♥</i>').join('')+'</span>';}
 const roastCol=r=>['#c99a5e','#b07a42','#8a5a2e','#6a4022','#4a2a16','#2e1a0e'][Math.max(0,Math.min(5,Math.round(r)))];
-function icoBrewer(id){const st='fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"';
-  if(id==='press')return '<svg viewBox="0 0 32 32" width="30" height="30" '+st+'><rect x="9" y="9" width="12" height="18" rx="1.5"/><path d="M8 9h14M15 3v6M12 3h6M21 13h3v9h-3"/><path d="M10 20h10" opacity=".5"/></svg>';
-  if(id==='switch')return '<svg viewBox="0 0 32 32" width="30" height="30" '+st+'><path d="M6 8h20l-6 13h-8z"/><path d="M12 21h8v3h-8zM13 27h6"/><circle cx="24" cy="23" r="1.5"/></svg>';
-  if(['orea','kalita','origami_w'].includes(id))return '<svg viewBox="0 0 32 32" width="30" height="30" '+st+'><path d="M5 9h22l-4 12H9z"/><path d="M9 21h14M8 25h16"/><path d="M9 12l2 7M14 12l1 7M19 12l-1 7M24 12l-2 7" opacity=".5"/></svg>';
-  return '<svg viewBox="0 0 32 32" width="30" height="30" '+st+'><path d="M5 8h22l-9 15h-4z"/><path d="M11 23h10M8 27h16"/>'+(id==='v60'||id==='origami_c'?'<path d="M10 11l5 8M17 11l-1 8M22 11l-4 8" opacity=".5"/>':'')+(id==='solo'?'<path d="M14 23v2h4v-2" />':'')+'</svg>';}
-function icoGrinder(g){const st='fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"';
-  if(/電動/.test(g.type))return '<svg viewBox="0 0 32 32" width="30" height="30" '+st+'><path d="M11 3h10l-2 7h-6z"/><rect x="9" y="10" width="14" height="13" rx="2"/><path d="M12 23v4h8v-4M14 16h4"/></svg>';
-  return '<svg viewBox="0 0 32 32" width="30" height="30" '+st+'><rect x="11" y="9" width="10" height="17" rx="3"/><path d="M16 9V5h9M25 5v4" /><circle cx="25" cy="10" r="1.6"/><path d="M11 21h10" opacity=".5"/></svg>';}
-function icoRoaster(){return '<svg viewBox="0 0 32 32" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"><path d="M12 3h8l-2 5h-4z"/><circle cx="16" cy="17" r="8"/><circle cx="16" cy="17" r="3"/><path d="M24 17h4M8 27h16M11 25l-1 2M21 25l1 2"/></svg>';}
+/* ---------- 點陣器材圖：A/B/C 是主色／暗面／亮面，會依配色替換；H/K 是手搖把手 ---------- */
+const PB={k:'#2a2420',w:'#f4efe6',g:'#9aa3ad',d:'#5a6068',s:'#d5dbe0',b:'#8a5a34',n:'#5a3a22',c:'#4a2a16',l:'#bfe0ea',r:'#c0503a',y:'#d9bd86',o:'#23201e',f:'#f0a040',H:'#4a4f57',K:'#8a5a34',m:'#7d868f',e:'#e8c14a',q:'#8a9a5a'};
+const HAND=['.........KK.....','.........KK.....','....HHHHHHH.....','......HH........'];
+const GS={
+ cone:['.AAAAAAAAAAAA...','.CAAAAAAAAAABBB.','..CAAAAAAAAB..B.','..CAAAAAAAAB..B.','...CAAAAAAB.BB..','...CAAAAAAB.....','....CAAAAB......','....CAAAAB......','.....CAAB.......','..BBBBBBBBBB....','..AAAAAAAAAA....'],
+ v60:['.AAAAAAAAAAAA...','.CABAAABAAABABB.','..CABAAABAAB..B.','..CAABAAABAB..B.','...CABAAABB.BB..','...CAABAABB.....','....CABAAB......','....CAABAB......','.....CAAB.......','...AAAAAAAA.....','..BBBBBBBBBB....'],
+ orea:['.AAAAAAAAAAAAAA.','.CAAAAAAAAAAAAB.','..CAAAAAAAAAAB..','..CAAAAAAAAAAB..','...CAAAAAAAAB...','...CAAAAAAAAB...','...BBBBBBBBBB...','....B.B..B.B....'],
+ origami_c:['.A.A.A.A.A.A.A..','.ABABABABABABA..','..ABABABABABA...','..CBABABABABA...','...ABABABABA....','....BABABAB.....','....ABABABA.....','.....BABAB......','.....ABABA......','..nnnnnnnnnnn...','...nnnnnnnnn....'],
+ origami_w:['.w.w.w.w.w.w.w..','.A.A.A.A.A.A.A..','.ABABABABABABA..','..ABABABABABA...','..CBABABABABA...','...ABABABABA....','....BABABAB.....','....ABABABA.....','....BABABAB.....','..nnnnnnnnnnn...','...nnnnnnnnn....'],
+ kalita:['.AAAAAAAAAAAAA..','.CAAAAAAAAAAABBB','..CAAAAAAAAAB..B','..CABABABABAB..B','..CAAAAAAAAABBB.','...AAAAAAAAAB...','.BBBBBBBBBBBBB..','.AAAAAAAAAAAAA..'],
+ solo:['....AAAAAAAA....','....CAAAAAAB....','....CAAAAAAB....','.....CAAAAB.....','.....CAAAAB.....','.....CAAAAB.....','......CAAB......','......CAAB......','......CAAB......','.......AB.......','....BBBBBBBB....'],
+ switch:['.llllllllllll...','.wlllllllllll...','..wlllllllll....','..wlllllllll....','...wlllllll.....','...wlllllll.....','....wlllll......','..AAAAAAAAAA....','..ABBBBBBBBAyy..','..AAAAAAAAAA.y..','...AAAAAAAA.....'],
+ press:['.......oo.......','.......AA.......','....AAAAAAAA....','....llllllllAA..','....llllllll..A.','....lccccccl..A.','....lccccccl..A.','....lccccccl..A.','....lcccccclAA..','....lccccccl....','....AAAAAAAA....','...AAAAAAAAAA...'],
+ c40:HAND.concat(['.....ssssss.....','.....AAAAAA.....','.....ACAAAB.....','.....ACAAAB.....','.....ACAAAB.....','.....ACAAAB.....','.....ssssss.....','.....llllll.....','.....lccccl.....','.....lccccl.....','.....llllll.....']),
+ c40rc:HAND.concat(['.....ssssss.....','.....AAAAAA.....','.....ACAAAB.....','.....ACAAAB.....','.....ACAAAB.....','.....ACAAAB.....','.....rrrrrr.....','.....llllll.....','.....lccccl.....','.....lccccl.....','.....llllll.....']),
+ kultra:HAND.concat(['.....AAAAAA.....','.....ACAAAB.....','.....ACAAAB.....','.....ACAAAB.....','.....dddddd.....','.....dwdwdw.....','.....dddddd.....','.....AAAAAA.....','.....ACAAAB.....','.....ACAAAB.....','.....AAAAAA.....']),
+ zp6:HAND.concat(['.....AAAAAA.....','.....mmmmmm.....','.....mwmrmw.....','.....AAAAAA.....','.....ACAAAB.....','.....ACAAAB.....','.....ACAAAB.....','.....mmmmmm.....','.....ACAAAB.....','.....ACAAAB.....','.....AAAAAA.....']),
+ k6:HAND.concat(['.....yyyyyy.....','.....dwdwdw.....','.....AAAAAA.....','.....ACAAAB.....','.....ACAAAB.....','.....ACAAAB.....','.....ACAAAB.....','.....mmmmmm.....','.....ACAAAB.....','.....ACAAAB.....','.....AAAAAA.....']),
+ p80:['.....llllll.....','......llll......','....AAAAAAAA....','....ACAAAAAB....','....ACAAAAAB....','....AAAyyAAB....','....ACAyyAAB....','....AAAAAAAAmm..','....AAAAAAAB.m..','....AAAAAAAB....','....AAAAAAAB.ss.','....AAAAAAAB.ss.','...oooooooooooo.'],
+ ek43:['.....llllll.....','.....lccccl.....','.....lccccl.....','......llll......','....AAAAAAAA....','...AAAAAAAAAA...','...AAAyyAAAABmm.','...AAAyyAAAABm..','...AAAAAAAAAB...','....AAAAAAAB....','....ACAAAAAB....','....ACAAAAAB....','....ACAAAAAB....','..AAAAAAAAAAAA..'],
+ encore:['....llllllll....','....lccccccl....','.....llllll.....','....AAAAAAAA....','....ACAAAAAB....','....ACAAyAAB....','....ACAAAAAB....','....AAAAAAAA....','....AllllllB....','....AlccccoB....','....AlccccoB....','...AAAAAAAAAA...'],
+ blade:['.....llllll.....','....llllllll....','....lllsslll....','....llllllll....','....AAAAAAAA....','....ACAAAAAB....','....ACAArAAB....','....ACAAAAAB....','....ACAAAAAB....','....ACAAAAAB....','....AAAAAAAA....','....BBBBBBBB....'],
+ pan:['..mmmmmmm.......','.m.m.m.m.m......','.mm.m.m.mmnnnnnn','.m.m.m.m.m......','..mmmmmmm.......','................','....f...f.......','...fff.fff......','..ooooooooo.....','..o.......o.....'],
+ popper:['....llllll......','...llllllll.....','...ll....ll.....','...llllllll.....','...eeeeeeee.....','...eeeeeeee.....','...errrrrre.....','...eeeeeeee.....','...eeeeoeee.....','...eeeeeeee.....','..oooooooooo....'],
+ gene:['..oooooooooooo..','.olllllllllllo..','.olqlqlqlqlllo..','.ollqlqlqllllo..','.olllllllllllo..','..oooooooooooo..','..rrrrrrrrrrrr..','..rrryrrrrrwwr..','..rrrrrrrrrrrr..','..oo........oo..'],
+ nano:['.....ssssss.....','.....llllll.....','.....lqqqql.....','.....llllll.....','.....oooooo.....','.....oooooo.....','.....owwwwo.....','.....owwwwo.....','.....oooooo.....','.....oooyoo.....','....oooooooo....'],
+ huky:['.........mm.....','.........mm.....','...mmm...mm.....','...mmm.ssssss...','..sssssssssssn..','..ssdddssssss...','..ssdlddsssss...','..ssdddssssss...','..sssssssssss...','...o..ff...o....','...o.ffff..o....','..ooooooooooo...'],
+ giesen:['..mm............','..mm..ooo.......','..mm..ooo.......','.oooooooooo.....','.orrrrrrrro.....','.orryyrrrronn...','.orryyrrrro.....','.orrrrrrrro.....','.oooooooooosssss','..oo....oo.sssss','..oo....oo..o.o.','.oooooooooo.o.o.']
+};
+/* 配色與材質：[名稱, 主色, 暗面, 亮面]，第一個是標準款 */
+const C_={white:['#efe9dc','#c9c0ad','#ffffff'],black:['#3a3a3e','#232326','#5c5c62'],clear:['#bfe0ea','#8fb8c6','#e6f6fa'],red:['#c0392b','#8e2a20','#e06a5a'],copper:['#c77b4a','#8f5230','#e8a878'],steel:['#c9ced4','#8a95a1','#eef2f5'],
+ teal:['#3aa6a0','#2a7a76','#6fcfc8'],pink:['#e79bb0','#b9728a','#f6c4d2'],yellow:['#e8c14a','#b39030','#f4dc86'],wood:['#9a5a34','#6b3c20','#c07a4c'],blue:['#2f4f8f','#213866','#5a7ac0'],grey:['#5a6068','#3d4248','#80868e'],snow:['#ece8e0','#bdb8ae','#ffffff']};
+const sk=(n,c)=>[n].concat(C_[c]);
+const ORI=[sk('美濃燒・白','white'),sk('土耳其藍','teal'),sk('粉紅','pink'),sk('芥末黃','yellow'),sk('霧黑','black')];
+const SK={cone:[sk('白色樹脂','white')],v60:[sk('陶瓷白','white'),sk('透明樹脂','clear'),sk('紅色陶瓷','red'),sk('銅製','copper'),sk('霧黑','black')],orea:[sk('霧黑','black'),sk('白色','white'),sk('透明','clear')],
+ origami_c:ORI,origami_w:ORI,kalita:[sk('不鏽鋼','steel'),sk('陶瓷白','white'),sk('耐熱玻璃','clear'),sk('銅製','copper')],solo:[sk('黑色','black'),sk('白色','white')],switch:[sk('黑色底座','black'),sk('白色底座','white'),sk('紅色底座','red')],
+ press:[sk('不鏽鋼','steel'),sk('黑色','black'),sk('銅色','copper')],c40:[sk('美國櫻桃木','wood'),sk('黑色','black'),sk('紅色','red'),sk('雪白','snow'),sk('鈷藍','blue')],c40rc:[sk('美國櫻桃木','wood'),sk('黑色','black'),sk('鈷藍','blue')],
+ kultra:[sk('銀色','steel'),sk('鐵灰','grey')],zp6:[sk('黑色','black'),sk('銀色','steel')],k6:[sk('鐵灰','grey'),sk('銀色','steel'),sk('黑色','black')],p80:[sk('黑色','black'),sk('白色','snow')],
+ ek43:[sk('黑色','black'),sk('白色','snow'),sk('紅色','red')],encore:[sk('黑色','black'),sk('白色','snow')],blade:[sk('白色','snow')]};
+const skinOf=id=>{const s=S();return (s.skin&&s.skin[id])||0;};
+function palOf(id,i){const L=SK[id],v=L&&L[i==null?skinOf(id):i]||L&&L[0];return v?Object.assign({},PB,{A:v[1],B:v[2],C:v[3]}):PB;}
+function sprG(rows,pal){let h='';rows.forEach((r,y)=>{let x=0;while(x<r.length){const ch=r[x];let e=x+1;while(e<r.length&&r[e]===ch)e++;const c=pal[ch];if(c)h+='<rect x="'+x+'" y="'+y+'" width="'+(e-x)+'" height="1" fill="'+c+'"/>';x=e;}});return h;}
+function spr(id,i,size){const rows=GS[id];if(!rows)return '';const n=rows.length,sz=size||38;return '<svg viewBox="0 '+(n-16)+' 16 16" width="'+sz+'" height="'+sz+'" shape-rendering="crispEdges" aria-hidden="true">'+sprG(rows,palOf(id,i))+'</svg>';}
+const icoBrewer=(id,i)=>spr(id,i),icoGrinder=(g,i)=>spr(g.id,i),icoRoaster=id=>spr(id||S().roaster||'pan');
+function daySkin(day,id){const L=SK[id];if(!L||L.length<2)return 0;if(hsh(day*53+idn(id)*5)<.5)return 0;return 1+Math.floor(hsh(day*29+idn(id))*(L.length-1));}
+/* 研磨刻度：依每台磨豆機的實際格數顯示 */
+function fmtGrind(Gd,um){if(!Gd.um)return grindName(um)+'（'+um+' μm・無段）';const n=Math.round((um-(Gd.z||0))/Gd.um);let t;
+  if(Gd.dial==='num'){const rot=Gd.rot||100,tr=Math.floor(n/rot),rm=n%rot;t='刻度 '+(tr?tr+' 圈＋':'')+(rm/10).toFixed(1);}else t='第 '+n+' 格';
+  return t+'・'+grindName(um)+'（約 '+um+' μm）';}
+function snapGrind(){const o=S().last,Gd=GRINDERS.find(g=>g.id===o.grinder);if(!Gd)return;const st=Gd.um||5,z=Gd.um?(Gd.z||0):0,lo=Math.ceil((300-z)/st),hi=Math.floor((1200-z)/st);
+  o.grind=Math.round(z+Math.max(lo,Math.min(hi,Math.round((o.grind-z)/st)))*st);}
+function initDial(){const cv=$('gDial');if(!cv)return;const o=S().last,Gd=GRINDERS.find(g=>g.id===o.grinder),st=Gd.um||5,z=Gd.um?(Gd.z||0):0,PX=Gd.um?14:4;
+  const lo=Math.ceil((300-z)/st),hi=Math.floor((1200-z)/st);let cur=Math.max(lo,Math.min(hi,Math.round((o.grind-z)/st))),pos=cur,drag=null,lastS=0;
+  const dpr=window.devicePixelRatio||1,W=cv.clientWidth||300,H=66;cv.width=W*dpr;cv.height=H*dpr;const c=cv.getContext('2d');c.setTransform(dpr,0,0,dpr,0,0);
+  const major=Gd.um?(Gd.um>20?5:10):20,mid=Gd.um?(Gd.um>20?0:5):10;
+  const lab=i=>!Gd.um?String(i*st):Gd.dial==='num'?String(Math.floor((i%(Gd.rot||100))/10)):String(i);
+  function draw(){const g=c.createLinearGradient(0,0,0,H);g.addColorStop(0,'#2e3238');g.addColorStop(.45,'#6a7078');g.addColorStop(1,'#2a2d32');c.fillStyle=g;c.fillRect(0,0,W,H);
+    for(let x=((-pos*PX)%4+4)%4;x<W;x+=4){c.fillStyle='rgba(0,0,0,.18)';c.fillRect(x,H-12,2,12);}
+    const a=Math.floor(pos-W/2/PX)-1,b=Math.ceil(pos+W/2/PX)+1;c.textAlign='center';c.font='600 12px ui-monospace,Menlo,monospace';
+    for(let i=a;i<=b;i++){if(i<lo||i>hi)continue;const x=W/2+(i-pos)*PX,mj=i%major===0,md=mid&&i%mid===0;if(!Gd.um&&i%2)continue;
+      c.fillStyle=mj?'#f3e9d6':'rgba(243,233,214,.65)';c.fillRect(Math.round(x)-.5,mj?22:md?28:33,mj?2:1,mj?22:md?16:11);if(mj)c.fillText(lab(i),x,16);}
+    const s2=c.createLinearGradient(0,0,W,0);s2.addColorStop(0,'rgba(0,0,0,.55)');s2.addColorStop(.25,'rgba(0,0,0,0)');s2.addColorStop(.75,'rgba(0,0,0,0)');s2.addColorStop(1,'rgba(0,0,0,.55)');c.fillStyle=s2;c.fillRect(0,0,W,H);
+    c.fillStyle='#c9a66b';c.beginPath();c.moveTo(W/2-7,H);c.lineTo(W/2+7,H);c.lineTo(W/2,H-13);c.fill();c.fillRect(W/2-.5,20,1,H-30);}
+  function set(n){cur=n;o.grind=Math.round(z+n*st);const el=$('kGrindO');if(el)el.textContent=fmtGrind(Gd,o.grind);}
+  cv.onpointerdown=e=>{drag={x:e.clientX,p:pos};try{cv.setPointerCapture(e.pointerId)}catch(_){}};
+  cv.onpointermove=e=>{if(!drag)return;pos=Math.max(lo,Math.min(hi,drag.p-(e.clientX-drag.x)/PX));const n=Math.round(pos);
+    if(n!==cur){set(n);const t=performance.now();if(Gd.um){SFX.p('grind');if(navigator.vibrate)try{navigator.vibrate(4)}catch(_){}}else if(t-lastS>60){SFX.p('tick');lastS=t;}}draw();};
+  cv.onpointerup=cv.onpointercancel=()=>{if(!drag)return;drag=null;pos=cur;draw();persist();};
+  draw();}
 function jar(id,g){const B=beanOf(id);if(!B)return '';const h=Math.max(6,Math.min(100,g/5));
   return '<div class="jar'+(B.blend?' bl':B.sig?' sg':'')+'" title="'+esc(B.name)+' '+g+' g"><div class="glass"><i style="height:'+h+'%;background:'+roastCol(B.roast)+'"></i>'+(B.blend||B.sig?'<em>'+(B.sig?'招':'配')+'</em>':'')+'</div><span>'+esc(B.name)+'</span><small>'+(B.base?ROAST_NAME(B.roast)+'・'+B.q+'分・':'')+g+' g</small></div>';}
 function cabinet(opt){const s=S(),ids=Object.keys(s.beans).filter(id=>s.beans[id]>0&&beanOf(id));
@@ -5003,54 +5076,79 @@ function playMain(m){busy=true;SFX.p('story');const s=S();dlg({t:'主線・'+m.t
   setTimeout(()=>{const n=mainPending();if(n&&view==='lobby')playMain(n);},200);});}
 /* ---------- 動畫：倒豆、磨豆、沖煮 ---------- */
 const AN=document.createElement('div');AN.className='brew-anim';AN.hidden=true;document.body.appendChild(AN);
-function brewAnim(beanId,brewer,done){const B=beanOf(beanId)||{roast:3},col=roastCol(B.roast),imm=brewer==='press'||brewer==='switch';
-  const RM=matchMedia('(prefers-reduced-motion:reduce)').matches;
-  const beans=Array.from({length:14},(_,i)=>'<ellipse class="bn" cx="'+(72+(i%5)*6-12)+'" cy="18" rx="3.4" ry="2.3" fill="'+col+'" style="animation-delay:'+(i*.05)+'s"/>').join('');
-  const drops=Array.from({length:8},(_,i)=>'<circle class="gd" cx="'+(68+(i%4)*3)+'" cy="150" r="1.2" fill="'+col+'" style="animation-delay:'+(i*.07)+'s"/>').join('');
-  AN.innerHTML='<div class="ba-box"><svg viewBox="0 0 300 230" width="100%" aria-hidden="true">'+
-   '<rect x="0" y="206" width="300" height="24" fill="#2a1c14"/><rect x="0" y="204" width="300" height="3" fill="#8a5a34"/>'+
-   // 手搖磨豆機
-   '<g id="baGr" class="tapme"><path d="M54 40h36l-5 22H59z" fill="#3a3f47" stroke="#9aa3ad" stroke-width="1.5"/>'+beans+
-   '<rect x="56" y="62" width="32" height="70" rx="6" fill="#c9ced4" stroke="#7d868f" stroke-width="1.5"/><rect x="56" y="98" width="32" height="5" fill="#9aa3ad"/>'+
-   '<g id="baCrank"><path d="M72 40V30h28" stroke="#7d868f" stroke-width="3" fill="none" stroke-linecap="round"/><circle cx="100" cy="30" r="5" fill="#6b4024"/></g>'+
-   '<path d="M62 132h20l-3 14h-14z" fill="#9aa3ad"/><g id="baGd">'+drops+'</g><path d="M56 186h32v20H56z" fill="none" stroke="#cfe6ee" stroke-width="1.5"/><rect id="baGp" x="57" y="186" width="30" height="19" fill="'+col+'"/></g>'+
-   // 手沖壺：壺嘴朝右、對準濾杯
-   '<g id="baKt" class="tapme"><path d="M118 60c-9 0-11 16 0 20" stroke="#3a2a22" stroke-width="4" fill="none"/><path d="M120 54h36v28h-36z" fill="#aab4bf"/><path d="M123 57h4v22h-4z" fill="#e6edf2"/><path d="M126 50h24v4h-24z" fill="#8a95a1"/><path d="M136 46h4v4h-4z" fill="#e6edf2"/>'+
-   '<path d="M155 76c10 0 14-6 18-14s8-12 18-10" stroke="#aab4bf" stroke-width="4" fill="none" stroke-linecap="round"/><path d="M190 52l6 2" stroke="#e6edf2" stroke-width="3" stroke-linecap="round"/></g>'+
-   '<path id="baStream" d="M202 82 Q210 96 215 113" fill="none" stroke="#bfe6ff" stroke-width="2.2" stroke-dasharray="4 3"/>'+
-   // 濾杯與下壺
-   '<path d="M196 110h40l-14 26h-12z" fill="#f1ece0" stroke="#c9c0ad" stroke-width="1.5"/><path id="baBed" d="M201 114h30l-3 6h-24z" fill="'+col+'"/>'+
-   '<circle class="dr" cx="216" cy="140" r="1.6" fill="#5a2f14"/><circle class="dr d2" cx="216" cy="140" r="1.6" fill="#5a2f14"/>'+
-   '<path d="M198 138h36v66h-36z" fill="rgba(190,225,238,.12)" stroke="#cfe6ee" stroke-width="1.5"/><rect id="baCup" x="199" y="169" width="34" height="34" fill="#3a1c0c"/>'+
-   '<g id="baSteam"><path d="M208 104c-4-8 4-10 0-18M218 104c-4-8 4-10 0-18M228 104c-4-8 4-10 0-18" stroke="#fff" stroke-width="1.5" fill="none" opacity=".6"/></g>'+
-   '</svg><div class="ba-cap">把豆子倒進磨豆機…</div><div class="ba-prog"><i></i></div><div class="ba-tip"></div><button class="ba-skip" type="button">自動完成 ›</button></div>';
+function brewAnim(opt,done){const B=beanOf(opt.bean)||{roast:3},col=roastCol(B.roast),br=opt.brewer,press=br==='press',sw=br==='switch',Gd=GRINDERS.find(g=>g.id===opt.grinder)||GRINDERS[0];
+  if(matchMedia('(prefers-reduced-motion:reduce)').matches)return done(null);
+  const kind=Gd.id==='blade'?'blade':/電動/.test(Gd.type)?'elec':'hand',rows=GS[Gd.id]||GS.c40,gh=rows.length*8,gy=204-gh,gp=Object.assign({},palOf(Gd.id),{H:null,K:null});
+  const dose=DOSE,target=Math.round(dose*opt.ratio),maxPour=dose*18+6,CAPW=press?330:sw?290:200,grind=S().last.grind;
+  const flat=['orea','kalita','origami_w'].includes(br),topW=br==='solo'?40:58,botW=flat?34:br==='solo'?10:14,bp=palOf(br);
+  const BF={v60:1.2,origami_c:1.3,solo:1.3,cone:1,orea:1,origami_w:.95,kalita:.75,switch:1.05},rate=4.2*Math.max(.5,Math.min(1.6,grind/700))*(BF[br]||1)*(1-Gd.fines*1.2);
+  const dpath='M'+(216-topW/2)+' 98h'+topW+'l-'+(topW-botW)/2+' 34h-'+botW+'z';
+  const beans=Array.from({length:12},(_,i)=>'<ellipse class="bn" cx="'+(70+(i%5)*6)+'" cy="'+(gy-26)+'" rx="3.4" ry="2.3" fill="'+col+'" style="animation-delay:'+(i*.05)+'s"/>').join('');
+  AN.innerHTML='<div class="ba-box"><svg viewBox="0 0 300 230" width="100%" aria-hidden="true"><defs><clipPath id="baClip"><path d="'+(press?'M197 100h38v104h-38z':dpath)+'"/></clipPath></defs>'+
+   '<rect x="0" y="206" width="300" height="24" fill="#2a1c14"/><rect x="0" y="204" width="300" height="3" fill="#8a5a34"/>'+beans+
+   '<g id="baGr"><svg x="18" y="'+gy+'" width="128" height="'+gh+'" viewBox="0 0 16 '+rows.length+'" shape-rendering="crispEdges">'+sprG(rows,gp)+'</svg>'+
+   (kind==='hand'?'<rect x="74" y="'+(gy+24)+'" width="16" height="8" fill="#4a4f57"/><line id="baArm" x1="82" y1="'+(gy+20)+'" x2="114" y2="'+(gy+20)+'" stroke="#4a4f57" stroke-width="7"/><rect id="baKnob" x="108" y="'+(gy+2)+'" width="12" height="18" fill="#8a5a34"/>':'')+
+   (kind==='blade'?'<g id="baBits"></g>':'')+'</g>'+
+   '<g id="baKt"><path d="M118 60c-9 0-11 16 0 20" stroke="#3a2a22" stroke-width="4" fill="none"/><path d="M120 54h36v28h-36z" fill="#aab4bf"/><path d="M123 57h4v22h-4z" fill="#e6edf2"/><path d="M126 50h24v4h-24z" fill="#8a95a1"/><path d="M136 46h4v4h-4z" fill="#e6edf2"/>'+
+   '<path d="M155 76c10 0 14-6 18-14s8-12 18-10" stroke="#aab4bf" stroke-width="4" fill="none" stroke-linecap="round"/></g>'+
+   '<path id="baStream" d="M202 82 Q210 92 215 '+(press?108:102)+'" fill="none" stroke="#bfe6ff" stroke-width="2.5" stroke-dasharray="4 3"/>'+
+   (press?'<g clip-path="url(#baClip)"><rect id="baWater" x="197" y="204" width="38" height="0" fill="#5a2f14" opacity=".85"/><rect x="197" y="196" width="38" height="8" fill="'+col+'"/></g><path d="M196 100v104h40v-104" fill="rgba(190,225,238,.1)" stroke="#cfe6ee" stroke-width="1.5"/><path d="M236 118c12 0 12 40 0 40" fill="none" stroke="'+bp.A+'" stroke-width="4"/><g id="baPl"><rect x="214" y="70" width="4" height="30" fill="#8a95a1"/><rect x="208" y="66" width="16" height="5" fill="#23201e"/><rect x="197" y="98" width="38" height="4" fill="#8a95a1"/></g>':
+    '<path d="'+dpath+'" fill="'+bp.A+'" stroke="'+bp.B+'" stroke-width="1.5"/><g clip-path="url(#baClip)"><rect x="180" y="98" width="72" height="34" fill="#f1ece0" opacity=".9"/><rect id="baWater" x="180" y="132" width="72" height="0" fill="#6b3a1c" opacity=".85"/><rect id="baBed" x="180" y="'+(flat?123:118)+'" width="72" height="'+(flat?9:14)+'" fill="'+col+'"/></g>'+
+    (sw?'<rect x="204" y="132" width="24" height="7" fill="'+bp.A+'"/><rect id="baVI" x="228" y="133" width="10" height="4" fill="#5fbf7a"/>':'')+
+    '<circle class="dr" cx="216" cy="142" r="1.6" fill="#5a2f14"/><circle class="dr d2" cx="216" cy="142" r="1.6" fill="#5a2f14"/>'+
+    '<path d="M198 140h36v64h-36z" fill="rgba(190,225,238,.12)" stroke="#cfe6ee" stroke-width="1.5"/><rect id="baCup" x="199" y="141" width="34" height="62" fill="#3a1c0c"/>')+
+   '</svg><div class="ba-cap">把豆子倒進 '+esc(Gd.name.replace(/（.*/,''))+'…</div><div class="ba-prog"><i></i></div><div class="ba-tip"></div>'+
+   '<div class="ba-pour" hidden><div class="ba-stat"><b id="baT">0:00</b><span id="baW">0 / '+target+' g</span><span id="baS">第 0 段</span></div>'+
+   '<div class="seg ba-flow" role="group" aria-label="水流大小">'+[['3','小水流'],['5','中水流'],['8','大水流']].map(([v,n])=>'<button type="button" data-fl="'+v+'" aria-pressed="'+(v==='5')+'">'+n+'</button>').join('')+'</div>'+
+   '<div class="ba-btns"><button type="button" id="baPour" class="pri">開始注水</button>'+(sw?'<button type="button" id="baValve">關上閥門</button>':'')+'<button type="button" id="baEnd">'+(press?'壓下濾網':'結束沖煮')+'</button></div></div>'+
+   '<button class="ba-skip" type="button">自動完成 ›</button></div>';
   AN.hidden=false;AN.className='brew-anim';void AN.offsetWidth;AN.classList.add('beans-in');SFX.p('beans');
-  const $q=id=>AN.querySelector('#'+id),cap=AN.querySelector('.ba-cap'),tip=AN.querySelector('.ba-tip'),bar=AN.querySelector('.ba-prog i');
-  const crank=$q('baCrank'),gp=$q('baGp'),kt=$q('baKt'),st=$q('baStream'),bed=$q('baBed'),cup=$q('baCup'),steam=$q('baSteam');
-  [gp,cup].forEach(e=>{e.style.transformBox='fill-box';e.style.transformOrigin='50% 100%';e.style.transform='scaleY(0)';});
-  kt.style.transformBox='fill-box';kt.style.transformOrigin='35% 60%';bed.style.transformBox='fill-box';bed.style.transformOrigin='50% 50%';
-  st.style.opacity=0;steam.style.opacity=0;
-  let stage='beans',prog=0,hold=false,ang=0,last=performance.now(),raf=0,lastG=0,lastP=0,bloomed=false,ended=false;
-  const setBar=()=>{bar.style.width=Math.min(100,prog*100)+'%';};
-  function toGrind(){stage='grind';prog=0;setBar();cap.textContent='磨豆';tip.textContent='按住或連點畫面轉動把手';AN.classList.add('grinding-ready');}
-  function toPour(){stage='pour';prog=0;setBar();AN.classList.remove('grinding');cap.textContent=imm?'注水，準備浸泡':'注水';tip.textContent=imm?'按住注水，把熱水倒滿':'按住注水，放開就停；先注一點點悶蒸';}
-  function finish(){if(ended)return;ended=true;stage='done';cancelAnimationFrame(raf);hold=false;cap.textContent='完成，端給客人！';tip.textContent='';st.style.opacity=0;kt.style.transform='';
-    cup.style.transform='scaleY(1)';steam.style.transition='opacity .4s';steam.style.opacity=.8;SFX.p('pass',0,0);setTimeout(close,650);}
-  function close(){cancelAnimationFrame(raf);AN.onpointerdown=AN.onpointerup=AN.onpointercancel=null;removeEventListener('pointerup',up);AN.className='brew-anim';AN.hidden=true;done();}
+  const $q=id=>AN.querySelector('#'+id),cap=AN.querySelector('.ba-cap'),tip=AN.querySelector('.ba-tip'),bar=AN.querySelector('.ba-prog i'),pbox=AN.querySelector('.ba-pour');
+  const grG=$q('baGr'),arm=$q('baArm'),knob=$q('baKnob'),bits=$q('baBits'),kt=$q('baKt'),st=$q('baStream'),water=$q('baWater'),cup=$q('baCup'),vi=$q('baVI'),pl=$q('baPl'),bPour=$q('baPour'),bValve=$q('baValve'),bEnd=$q('baEnd');
+  if(cup){cup.style.transformBox='fill-box';cup.style.transformOrigin='50% 100%';cup.style.transform='scaleY(0)';}
+  kt.style.transformBox='fill-box';kt.style.transformOrigin='35% 60%';st.style.opacity=0;
+  let stage='beans',prog=0,hold=false,ang=0,last=performance.now(),raf=0,lastS=0,ended=false;
+  let pouring=false,flow=5,t=0,started=false,poured=0,Wd=0,cupG=0,segs=0,lastStop=-99,open=true,closedT=0,lastPS=0;
+  const fm=x=>Math.floor(x/60)+':'+String(Math.floor(x%60)).padStart(2,'0');
+  function toGrind(){stage='grind';cap.textContent='磨豆・'+fmtGrind(Gd,grind).split('・')[0];tip.textContent=kind==='hand'?'按住或連點畫面，轉動把手':kind==='blade'?'按住畫面，按下砍豆機':'按住畫面，啟動磨豆機';}
+  function toPour(){stage='pour';hold=false;grG.removeAttribute('transform');bar.parentNode.hidden=true;pbox.hidden=false;cap.textContent='注水・目標 '+target+' g（1 : '+opt.ratio+'）';
+    tip.textContent=press?'注水後等咖啡浸泡，時間到了再壓下濾網':sw?'關上閥門可以浸泡，打開閥門才會滴濾':'先注一點點水悶蒸，再分段注水';}
+  function setPour(v){if(v&&poured>=maxPour)return;if(v&&Wd>=CAPW-4){tip.textContent='快滿出來了！等水位降下來再注水';return;}pouring=v;bPour.textContent=v?'停止注水':(started?'繼續注水':'開始注水');bPour.classList.toggle('stop',v);
+    if(v){started=true;if(t-lastStop>3||!segs){segs++;}SFX.p('pour');lastPS=performance.now();}else lastStop=t;}
+  function result(){const ratio=Math.max(12,Math.min(18,Math.round(poured/dose*2)/2)),ex={ratio,pour:segs<=1?'cont':segs<=4?'three':'multi'};
+    if(sw)ex.steep=Math.max(60,Math.min(600,Math.round(closedT/15)*15));if(press)ex.steep=Math.max(60,Math.min(600,Math.round(t/15)*15));
+    ex.txt='你的手法：注水 '+segs+' 段・'+Math.round(poured)+' g（1 : '+ratio+'）・'+fm(t)+(sw?'・浸泡 '+fm(closedT):'');return ex;}
+  function finish(auto){if(ended)return;ended=true;stage='done';cancelAnimationFrame(raf);pouring=false;st.style.opacity=0;kt.style.transform='';cap.textContent='完成，端給客人！';tip.textContent='';
+    if(cup)cup.style.transform='scaleY('+(auto?.85:Math.min(1,cupG/270)).toFixed(2)+')';if(pl)pl.style.transform='translateY(90px)';
+    const ex=auto||!started||poured<dose*6?null:result();SFX.p('pass');setTimeout(()=>close(ex),700);}
+  function close(ex){cancelAnimationFrame(raf);AN.onpointerdown=null;removeEventListener('pointerup',up);removeEventListener('pointercancel',up);AN.className='brew-anim';AN.hidden=true;done(ex);}
   function loop(now){const dt=Math.min(.05,(now-last)/1000);last=now;
-    if(stage==='grind'){if(hold){ang+=dt*600;prog+=dt/1.8;if(now-lastG>70){SFX.p('grind');lastG=now;}}crank.setAttribute('transform','rotate('+ang.toFixed(1)+' 72 40)');
-      AN.classList.toggle('grinding',hold);gp.style.transform='scaleY('+Math.min(1,prog).toFixed(3)+')';setBar();if(prog>=1){toPour();}}
-    else if(stage==='pour'){kt.style.transform=hold?'translate(4px,6px) rotate(24deg)':'';st.style.opacity=hold?.9:0;st.style.strokeDashoffset=(-now/12).toFixed(0);
-      if(hold){prog+=dt/2.6;if(now-lastP>1600){SFX.p('pour');lastP=now;}
-        if(!bloomed&&prog>.12){bloomed=true;tip.textContent=imm?'繼續注水':'悶蒸中，粉床膨脹起來了，繼續注水';}}
-      bed.style.transform='scaleY('+(1+Math.min(.8,prog*3)).toFixed(2)+')';AN.classList.toggle('dripping',prog>.15);
-      cup.style.transform='scaleY('+Math.max(0,Math.min(1,(prog-.1)/.9)).toFixed(3)+')';setBar();if(prog>=1){finish();return;}}
+    if(stage==='grind'){if(hold){prog+=dt/(kind==='hand'?2.2:kind==='blade'?1.5:Gd.id==='ek43'?.7:1.1);
+        if(now-lastS>(kind==='hand'?75:95)){SFX.p(kind==='hand'?'grind':kind==='blade'?'bladefx':'motor');lastS=now;}
+        if(kind==='hand'){ang+=dt*9;}else{const j=kind==='blade'?2:.9;grG.setAttribute('transform','translate('+((Math.random()-.5)*j*2).toFixed(1)+' '+((Math.random()-.5)*j).toFixed(1)+')');
+          if(bits)bits.innerHTML=Array.from({length:7},()=>'<rect x="'+(60+Math.random()*44).toFixed(0)+'" y="'+(gy+4+Math.random()*24).toFixed(0)+'" width="3" height="3" fill="'+col+'"/>').join('');}}
+      else if(kind!=='hand'){grG.removeAttribute('transform');if(bits)bits.innerHTML='';}
+      if(arm){const x=82+32*Math.cos(ang);arm.setAttribute('x2',x.toFixed(1));knob.setAttribute('x',(x-6).toFixed(1));knob.setAttribute('height',(18-4*Math.sin(ang)).toFixed(1));}
+      bar.style.width=Math.min(100,prog*100)+'%';if(prog>=1)toPour();}
+    else if(stage==='pour'){const sc=(!pouring&&poured>=target-2)||(press&&!pouring&&started)?30:12,g=dt*sc;
+      if(pouring){const a=flow*g;poured+=a;Wd+=a;if(now-lastPS>1650){SFX.p('pour');lastPS=now;}if(poured>=maxPour){setPour(false);tip.textContent='水加太多了，已經到上限';}else if(Wd>=CAPW){setPour(false);tip.textContent='快滿出來了！等水位降下來再注水';}}
+      const dr=Math.max(0,Wd-2*dose);if(!press&&open&&dr>0){const d=Math.min(dr,rate*Math.min(1,dr/25+.15)*g);Wd-=d;cupG+=d;}
+      if(started)t+=g;if(sw&&!open&&Wd>2*dose)closedT+=g;
+      kt.style.transform=pouring?'translate(4px,6px) rotate(24deg)':'';st.style.opacity=pouring?.95:0;st.style.strokeWidth=flow<4?1.6:flow<6?2.6:4.2;st.style.strokeDashoffset=(-now/10).toFixed(0);
+      const L=Math.min(1,Wd/CAPW);if(press){water.setAttribute('y',(204-104*L).toFixed(1));water.setAttribute('height',(104*L).toFixed(1));}
+      else{const hh=4+30*Math.min(1,Math.max(0,Wd-dose)/(CAPW-dose));water.setAttribute('y',(132-hh).toFixed(1));water.setAttribute('height',hh.toFixed(1));cup.style.transform='scaleY('+Math.min(1,cupG/270).toFixed(3)+')';AN.classList.toggle('dripping',open&&dr>1);}
+      $q('baT').textContent=fm(t);$q('baW').textContent=Math.round(poured)+' / '+target+' g';$q('baW').className=poured>target+8?'over':poured>=target-4?'hit':'';$q('baS').textContent='第 '+segs+' 段'+(sw?'・浸泡 '+fm(closedT):'');
+      if(pouring&&poured>=target&&poured-flow*g<target){setPour(false);tip.textContent='到目標水量了，等它滴完'+(press?'，再壓下濾網':'');SFX.p('hint');}
+      if(!press&&started&&!pouring&&poured>=target-2&&dr<1&&open){finish();return;}}
     raf=requestAnimationFrame(loop);}
   const up=()=>{hold=false;};
-  AN.onpointerdown=e=>{if(e.target.closest('.ba-skip'))return;e.preventDefault();if(stage==='grind'){hold=true;prog+=.04;ang+=40;SFX.p('grind');}else if(stage==='pour'){hold=true;lastP=0;}};
-  AN.onpointerup=up;AN.onpointercancel=up;addEventListener('pointerup',up);
-  AN.querySelector('.ba-skip').onclick=e=>{e.stopPropagation();finish();};
-  if(RM){finish();return;}
+  AN.onpointerdown=e=>{if(e.target.closest('button'))return;if(stage==='grind'){e.preventDefault();hold=true;if(kind==='hand'){prog+=.04;ang+=.7;SFX.p('grind');}}};
+  addEventListener('pointerup',up);addEventListener('pointercancel',up);
+  bPour.onclick=()=>{if(stage==='pour')setPour(!pouring);};
+  AN.querySelectorAll('[data-fl]').forEach(b=>b.onclick=()=>{flow=+b.dataset.fl;AN.querySelectorAll('[data-fl]').forEach(x=>x.setAttribute('aria-pressed',x===b));});
+  if(bValve)bValve.onclick=()=>{open=!open;bValve.textContent=open?'關上閥門':'打開閥門';bValve.classList.toggle('stop',!open);vi.setAttribute('fill',open?'#5fbf7a':'#d9705f');vi.setAttribute('x',open?228:222);SFX.p('tick');};
+  bEnd.onclick=()=>{if(stage!=='pour')return;if(!started){tip.textContent='還沒注水呢';return;}finish();};
+  AN.querySelector('.ba-skip').onclick=()=>finish(true);
   setTimeout(()=>{if(!ended){toGrind();last=performance.now();raf=requestAnimationFrame(loop);}},900);}
 /* ---------- 共用：頁首、分頁 ---------- */
 function head(label,title){const s=S();return '<div class="c-head"><div><div class="label">'+label+'</div><h1>'+title+'</h1></div><div class="c-money">'+NT(s.money)+'</div></div>';}
@@ -5116,9 +5214,9 @@ function buyHTML(){const s=S();let h=nav()+head('採購',buyTab==='store'?'好�
           '<div class="buyrow">'+[100,250,500].map(g=>{const p=Math.round(gp*g/100);return '<button data-ho="'+H.id+':'+id+':'+g+'"'+(s.money<p?' disabled':'')+'>'+g+' g<br>'+NT(p)+'</button>';}).join('')+(dl?'':'<button data-bar="'+H.id+':'+id+'">議價</button>')+'</div>')+'</div>';}).join('')+'</div></div>';}).join('');
     const pend=s.orders;if(pend.length)h+='<div class="panel"><h3 class="c-h3">運送中的訂單</h3><div class="c-list">'+pend.map(o=>'<div><span>'+esc(beanOf(o.id).name)+' 生豆 '+o.g+' g</span><small>第 '+o.at+' 天到貨</small></div>').join('')+'</div></div>';}
   if(buyTab==='gear'){h+='<p class="label">器材行每天進貨不一樣：有時候打折，有時候賣光。'+(s.day%10===0?'<b style="color:var(--gold)">今天週年慶，全館至少 8 折！</b>':'每逢第 10、20、30… 天是週年慶。')+'買來的器材，店裡放不下就先收在家裡。</p>';
-    const row=(kind,list,price,nameOf,subOf)=>'<div class="c-cards">'+list.map(it=>{const id=it.id,own=s.brewers.includes(id)||s.grinders.includes(id)||s.home.brewers.includes(id)||s.home.grinders.includes(id)||s.roasters.includes(id),base=price[id]||0,M=market(s.day,id,base);
-      return '<div class="c-card'+(own?' own':'')+(M.off&&!own?' sale':'')+'">'+(M.off&&!own&&!M.out?'<em class="tag">'+Math.round(M.off*100)+'% OFF</em>':'')+'<div class="gic">'+(kind==='brewer'?icoBrewer(id):kind==='roaster'?icoRoaster():icoGrinder(it))+'</div><b>'+esc(nameOf(it))+'</b><small>'+esc(subOf(it))+'</small>'+
-       (own?'<span class="pr">✓ 已擁有</span>':M.out?'<span class="pr out">售完・約 '+restock(s.day,id)+' 天後補貨</span>':'<span class="pr">'+(M.off?'<s>'+NT(base)+'</s> ':'')+NT(M.price)+'</span><div class="buyrow"><button data-gb="'+kind+':'+id+'"'+(s.money<M.price?' disabled':'')+'>買下</button></div>')+'</div>';}).join('')+'</div>';
+    const row=(kind,list,price,nameOf,subOf)=>'<div class="c-cards">'+list.map(it=>{const id=it.id,own=s.brewers.includes(id)||s.grinders.includes(id)||s.home.brewers.includes(id)||s.home.grinders.includes(id)||s.roasters.includes(id),base=price[id]||0,M=market(s.day,id,base),sk0=daySkin(s.day,id),SL=SK[id],has=(s.skins[id]||[0]).includes(sk0),sp=Math.min(1500,Math.max(100,Math.round(base*.15/10)*10));
+      return '<div class="c-card'+(own?' own':'')+(M.off&&!own?' sale':'')+'">'+(M.off&&!own&&!M.out?'<em class="tag">'+Math.round(M.off*100)+'% OFF</em>':'')+'<div class="gic">'+(kind==='brewer'?icoBrewer(id,sk0):kind==='roaster'?icoRoaster(id):icoGrinder(it,sk0))+'</div><b>'+esc(nameOf(it))+'</b><small>'+esc(subOf(it))+'</small>'+(SL&&SL.length>1?'<small class="skn"><i style="background:'+SL[sk0][1]+'"></i>今日到貨：'+SL[sk0][0]+(sk0?'（特別款）':'')+'</small>':'')+
+       (own?'<span class="pr">✓ 已擁有</span>'+(SL&&!has&&!M.out?'<div class="buyrow"><button data-gs="'+id+':'+sk0+':'+sp+'"'+(s.money<sp?' disabled':'')+'>加購這個配色 '+NT(sp)+'</button></div>':''):M.out?'<span class="pr out">售完・約 '+restock(s.day,id)+' 天後補貨</span>':'<span class="pr">'+(M.off?'<s>'+NT(base)+'</s> ':'')+NT(M.price)+'</span><div class="buyrow"><button data-gb="'+kind+':'+id+'"'+(s.money<M.price?' disabled':'')+'>買下</button></div>')+'</div>';}).join('')+'</div>';
     h+='<h3 class="c-h3">濾杯與器具</h3>'+row('brewer',G.BREWERS.filter(b=>BREWER_PRICE[b.id]),BREWER_PRICE,b=>b.name,b=>b.sub)+'<h3 class="c-h3" style="margin-top:14px">烘豆機</h3><p class="label">烘豆機越好，烘出來的豆子品質越高；後段比賽一定要有好機器。</p>'+row('roaster',ROASTERS.filter(r=>r.price),RPRICE,r=>r.name,r=>r.type+'・品質 '+Math.round(r.rq*100))+'<h3 class="c-h3" style="margin-top:14px">磨豆機</h3>'+row('grinder',GRINDERS.filter(g=>GRINDER_PRICE[g.id]).sort((a,b)=>GRINDER_PRICE[a.id]-GRINDER_PRICE[b.id]),GRINDER_PRICE,g=>g.name,g=>g.type+'・細粉 '+Math.round(g.fines*100)+'%');}
   return h;}
 /* ---------- 配方豆實驗室 ---------- */
@@ -5154,7 +5252,7 @@ function gearHTML(){const s=S();let h=nav()+head('器材庫',gearTab==='use'?'�
    '<div class="seg" role="group">'+[['use','器材庫'],['dex','圖鑑']].map(([k,n])=>'<button data-gtab="'+k+'" aria-pressed="'+(gearTab===k)+'">'+n+'</button>').join('')+'</div>';
   const bn=id=>G.BREWERS.find(b=>b.id===id),gn=id=>GRINDERS.find(g=>g.id===id);
   if(gearTab==='use'){
-    const item=(kind,id,where)=>{const it=kind==='brewer'?bn(id):gn(id);return '<div class="gitem">'+'<div class="gic">'+(kind==='brewer'?icoBrewer(id):icoGrinder(it))+'</div><div><b>'+esc(it.name)+'</b><small>'+esc(kind==='brewer'?it.sub:it.type)+'</small></div><button data-mv="'+kind+':'+id+'">'+(where==='shop'?'收回家':'帶去店裡')+'</button></div>';};
+    const item=(kind,id,where)=>{const it=kind==='brewer'?bn(id):gn(id);return '<div class="gitem">'+'<div class="gic">'+(kind==='brewer'?icoBrewer(id):icoGrinder(it))+'</div><div><b>'+esc(it.name)+'</b><small>'+esc(kind==='brewer'?it.sub:it.type)+'</small>'+((s.skins[id]||[0]).length>1?'<div class="skins">'+(s.skins[id]).map(i=>'<button data-sk="'+id+':'+i+'" aria-pressed="'+(skinOf(id)===i)+'" title="'+SK[id][i][0]+'"><i style="background:'+SK[id][i][1]+'"></i>'+SK[id][i][0]+'</button>').join('')+'</div>':SK[id]&&SK[id].length>1?'<small>'+SK[id][skinOf(id)][0]+'</small>':'')+'</div><button data-mv="'+kind+':'+id+'">'+(where==='shop'?'收回家':'帶去店裡')+'</button></div>';};
     h+='<p class="label">只有放在店裡的器材能拿來沖咖啡。店裡位置有限（名聲越高店越大），其他的收在家裡，要用再拿出來。</p>'+
      '<div class="panel shop-shelf"><h3 class="c-h3">🏪 店裡<span class="label">濾杯 '+s.brewers.length+'/'+capB(s)+'・磨豆機 '+s.grinders.length+'/'+capG(s)+'</span></h3>'+s.brewers.map(id=>item('brewer',id,'shop')).join('')+s.grinders.map(id=>item('grinder',id,'shop')).join('')+'</div>'+
      '<div class="panel home-shelf"><h3 class="c-h3">🏠 家裡收藏</h3>'+((s.home.brewers.map(id=>item('brewer',id,'home')).join('')+s.home.grinders.map(id=>item('grinder',id,'home')).join(''))||'<span class="label">家裡還沒有器材</span>')+'</div>';}
@@ -5163,8 +5261,8 @@ function gearHTML(){const s=S();let h=nav()+head('器材庫',gearTab==='use'?'�
     const n=all.filter(([k,it])=>own(it.id)).length;
     h+='<div class="panel"><div class="c-row"><b>收藏 '+n+' / '+all.length+'</b><span class="label">'+(n===all.length?'全部收集完成！':'收集全部器材吧')+'</span></div><div class="c-bar"><i style="width:'+n/all.length*100+'%"></i></div></div><div class="dex">'+
      all.map(([k,it])=>{const o=own(it.id),pd=s.paid[it.id],base=(k==='brewer'?BREWER_PRICE:k==='roaster'?RPRICE:GRINDER_PRICE)[it.id]||0,where=k==='roaster'?'烘豆室':s.brewers.includes(it.id)||s.grinders.includes(it.id)?'店裡':'家裡';
-      return '<div class="dex-c'+(o?'':' no')+'"><div class="gic">'+(k==='brewer'?icoBrewer(it.id):k==='roaster'?icoRoaster():icoGrinder(it))+'</div><b>'+(o?esc(it.name):'？？？')+'</b><small>'+(o?esc(k==='brewer'?it.sub:k==='roaster'?it.type+'・品質 '+Math.round(it.rq*100):it.type+'・細粉 '+Math.round(it.fines*100)+'%'):'定價 '+NT(base))+'</small>'+
-       (o?'<p>'+esc(GLORE[it.id]||it.lore||'')+'</p><small class="pr">放在'+where+(pd?'・買入 '+NT(pd.p)+(pd.off?'（'+Math.round(pd.off*100)+'% OFF 撿到便宜）':''):'・一開始就有')+'</small>':'')+'</div>';}).join('')+'</div>';}
+      return '<div class="dex-c'+(o?'':' no')+'"><div class="gic">'+(k==='brewer'?icoBrewer(it.id):k==='roaster'?icoRoaster(it.id):icoGrinder(it))+'</div><b>'+(o?esc(it.name):'？？？')+'</b><small>'+(o?esc(k==='brewer'?it.sub:k==='roaster'?it.type+'・品質 '+Math.round(it.rq*100):it.type+'・細粉 '+Math.round(it.fines*100)+'%'):'定價 '+NT(base))+'</small>'+
+       (o?'<p>'+esc(GLORE[it.id]||it.lore||'')+'</p><small class="pr">'+(SK[it.id]&&SK[it.id].length>1?'配色 '+(s.skins[it.id]||[0]).length+'/'+SK[it.id].length+'・':'')+'放在'+where+(pd?'・買入 '+NT(pd.p)+(pd.off?'（'+Math.round(pd.off*100)+'% OFF 撿到便宜）':''):'・一開始就有')+'</small>':'')+'</div>';}).join('')+'</div>';}
   return h;}
 /* ---------- 烘豆室 ---------- */
 let rsel=null;
@@ -5173,7 +5271,7 @@ function cupSheet(id,q,who,done){SFX.p('slurp');const B=beanOf(id),t=taste(B),sc
 function roastHTML(){const s=S(),R0=ROASTERS.find(r=>r.id===s.roaster)||ROASTERS[0],gl=s.green.filter(l=>l.g>0);
   let h=nav()+head('烘豆室','把生豆烘成咖啡豆')+
    '<div class="panel"><h3 class="c-h3">烘豆機</h3><div class="chips">'+s.roasters.map(id=>{const r=ROASTERS.find(x=>x.id===id);return '<button data-rs="'+id+'" aria-pressed="'+(s.roaster===id)+'">'+esc(r.name)+'</button>';}).join('')+'</div>'+
-   '<div class="c-row" style="margin-top:8px"><div class="gic">'+icoRoaster()+'</div><span class="label" style="flex:1">'+esc(R0.type)+'・品質保留 '+Math.round(R0.rq*100)+'・一次最多 '+R0.batch+' g</span></div><p class="label">烘豆機會讓品質分數打折：手網大約少 4.5 分，商用機幾乎不損失。烘焙度離這支豆子的建議太遠，也會扣分。更好的烘豆機在「採購 → 器材行」。</p></div>';
+   '<div class="c-row" style="margin-top:8px"><div class="gic">'+icoRoaster(s.roaster)+'</div><span class="label" style="flex:1">'+esc(R0.type)+'・品質保留 '+Math.round(R0.rq*100)+'・一次最多 '+R0.batch+' g</span></div><p class="label">烘豆機會讓品質分數打折：手網大約少 4.5 分，商用機幾乎不損失。烘焙度離這支豆子的建議太遠，也會扣分。更好的烘豆機在「採購 → 器材行」。</p></div>';
   if(!gl.length)h+='<p class="c-hint">沒有生豆了。向尋豆師訂生豆，到貨後就能在這裡烘。</p>';
   h+='<div class="c-cards wide">'+gl.map(l=>{const B=beanOf(l.id);return '<div class="c-card'+(rsel&&rsel.k===l.k?' selc':'')+'"><b>'+esc(B.name)+' <small>生豆 '+l.g+' g</small></b><small>'+(l.h?'來自 '+esc(PEOPLE[l.h].name)+'・':'')+'建議 '+ROAST_NAME(B.roast)+'</small>'+info(l.id)+
     '<div class="qline"><span>'+(l.known?'杯測 <b>'+l.q+'</b> 分':'未杯測（宣稱 '+(CLAIM[l.id]||84)+' 分）')+'</span>'+(l.known?'':'<button class="c-pill" data-gcup="'+l.k+'"'+(l.g<20?' disabled':'')+'>☕ 取 10 g 杯測</button>')+'</div>'+
@@ -5239,10 +5337,10 @@ function compRunHTML(){const s=S(),X=CC[curComp],C=G.COMPS[X.ci],B=beanOf(C.bean
 function gearPick(){const s=S(),o=s.last;return '<div class="c-cards">'+s.brewers.map(id=>{const b=G.BREWERS.find(x=>x.id===id);return '<button class="c-card" data-set="brewer:'+id+'" aria-pressed="'+(o.brewer===id)+'"><div class="gic">'+icoBrewer(id)+'</div><b>'+b.name+'</b><small>'+b.sub+'</small></button>';}).join('')+'</div>'+
    '<h3 class="c-h3" style="margin-top:14px">磨豆機</h3><div class="c-cards">'+s.grinders.map(id=>{const g=GRINDERS.find(x=>x.id===id);return '<button class="c-card" data-set="grinder:'+id+'" aria-pressed="'+(o.grinder===id)+'"><div class="gic">'+icoGrinder(g)+'</div><b>'+g.name+'</b><small>細粉量 '+Math.round(g.fines*100)+'%</small></button>';}).join('')+'</div>'+
    (s.home.brewers.length||s.home.grinders.length?'<p class="label">家裡還有 '+(s.home.brewers.length+s.home.grinders.length)+' 件器材，可以到「器材庫」帶來店裡。</p>':'');}
-function ctlHTML(){const o=S().last,imm=o.brewer==='press'||o.brewer==='switch';
+function ctlHTML(){snapGrind();const o=S().last,Gd=GRINDERS.find(g=>g.id===o.grinder),imm=o.brewer==='press'||o.brewer==='switch';
   return '<div class="panel"><h3 class="c-h3"><span class="n">3</span>沖煮手法</h3><div class="params">'+
    '<div class="param"><div class="row"><label for="kTemp" class="label">水溫</label><output id="kTempO">'+o.temp+' °C</output></div><input id="kTemp" data-k="temp" type="range" min="80" max="100" step="1" value="'+o.temp+'"></div>'+
-   '<div class="param"><div class="row"><label for="kGrind" class="label">研磨粒徑</label><output id="kGrindO">'+grindName(o.grind)+'（'+o.grind+' μm）</output></div><input id="kGrind" data-k="grind" type="range" min="300" max="1200" step="50" value="'+o.grind+'"></div>'+
+   '<div class="param"><div class="row"><span class="label">研磨刻度・'+esc(Gd.name)+'</span><output id="kGrindO">'+fmtGrind(Gd,o.grind)+'</output></div><div class="dialrow"><button data-gstep="-1" aria-label="調細一格">−</button><canvas id="gDial" class="gdial"></canvas><button data-gstep="1" aria-label="調粗一格">＋</button></div><span class="label">用手指左右滑動刻度環'+(Gd.um?'，每格約 '+Gd.um+' μm':'（無段調整）')+'。數字越大越粗。</span></div>'+
    '<div class="param"><div class="row"><label for="kRatio" class="label">粉水比</label><output id="kRatioO">1 : '+o.ratio+'</output></div><input id="kRatio" data-k="ratio" type="range" min="12" max="18" step="0.5" value="'+o.ratio+'"></div>'+
    (imm?'<div class="param"><div class="row"><label for="kSteep" class="label">'+(o.brewer==='switch'?'關閥浸泡時間':'浸泡時間')+'</label><output id="kSteepO">'+Math.floor(o.steep/60)+':'+String(o.steep%60).padStart(2,'0')+'</output></div><input id="kSteep" data-k="steep" type="range" min="60" max="600" step="15" value="'+o.steep+'"></div>':
     '<div class="param"><span class="label">注水方式</span><div class="seg">'+[['three','三段式'],['cont','一刀流'],['multi','少量多次']].map(([k,n])=>'<button data-set="pour:'+k+'" aria-pressed="'+(o.pour===k)+'">'+n+'</button>').join('')+'</div></div>')+
@@ -5320,7 +5418,7 @@ function closeHTML(){const s=S(),t=s.today,cz=closeCalc(),rent=rentOf(s),net=t.i
 function render(){if(!me)return;ensureDay();const s=S(),t=s.today;
   if(view==='serve'&&t.idx>=t.q.length)view='close';
   const V={roast:roastHTML,store:buyHTML,buy:buyHTML,serve:serveHTML,close:closeHTML,regs:regsHTML,person:personHTML,blend:blendHTML,shelf:shelfHTML,gear:gearHTML,comp:compHTML,comprun:compRunHTML}[view]||lobbyHTML;
-  $('shopBox').innerHTML=V();navWho();if(DL.hidden)BGM.set(view==='roast'?'roast':view==='comprun'?'comp':'cafe');
+  $('shopBox').innerHTML=V();initDial();navWho();if(DL.hidden)BGM.set(view==='roast'?'roast':view==='comprun'?'comp':'cafe');
   if(view==='lobby'&&!busy){const m=mainPending();if(m)setTimeout(()=>{if(!busy&&view==='lobby'&&DL.hidden)playMain(m);},350);}}
 window.shopRender=render;
 window.shopBack=()=>{if(!DL.hidden)return true;if(view==='lobby')return false;view=view==='person'?'regs':view==='comprun'?'comp':'lobby';res=null;hintOn=false;render();scrollTo(0,0);return true;};
@@ -5333,11 +5431,11 @@ function settle(){const s=S(),t=s.today,X=curCust(),r=res,R=X.R;r.final=true;con
   if(sigAsk&&!isSig){dA-=2;r.say='這……不是你們的招牌吧？';}
   r.pay=pay;r.tip=tip;r.dRep=dRep;r.used=X.c.tries;r.cost=X.c.cost;r.dA=dA;r.dL=dL;bump(X.C.id,dA,dL,true);
   s.money+=pay;s.earned+=pay;s.cups+=1;t.income+=pay;t.served+=1;s.rep=Math.max(0,Math.min(100,s.rep+dRep));persist();}
-function brewNow(){const s=S(),o=s.last,Gr=GRINDERS.find(g=>g.id===o.grinder);
+function brewNow(ex){const s=S(),o=Object.assign({},s.last,ex||{}),Gr=GRINDERS.find(g=>g.id===o.grinder);
   return G.brew({mode:'simple',bean:o.bean,brewer:o.brewer,temp:o.temp,grind:o.grind,ratio:o.ratio,pour:o.pour,stir:o.stir,steep:o.steep,forceFines:Gr.fines});}
 function doBrew(){const s=S(),t=s.today,X=curCust(),L=X.C,o=s.last;if(!o.bean||!beanOK(o.bean)||busy)return;busy=true;
-  brewAnim(o.bean,o.brewer,()=>{busy=false;
-  const B=beanOf(o.bean),r=brewNow(),pf=G.profile(r),sc=G.score(pf,L.want,L.tol);
+  brewAnim({bean:o.bean,brewer:o.brewer,grinder:o.grinder,ratio:o.ratio},ex=>{busy=false;if(ex)setTimeout(()=>toast(ex.txt),900);
+  const B=beanOf(o.bean),r=brewNow(ex),pf=G.profile(r),sc=G.score(pf,L.want,L.tol);
   const c=Math.round(B.price*DOSE/100)+CUP_COST;s.beans[o.bean]-=DOSE;if(s.beans[o.bean]<=0)delete s.beans[o.bean];
   s.money-=CUP_COST;t.cost+=c;X.c.tries+=1;X.c.cost=(X.c.cost||0)+c;
   const pass=sc>=X.target,near=!pass&&sc>=X.target-12;
@@ -5347,7 +5445,7 @@ function doBrew(){const s=S(),t=s.today,X=curCust(),L=X.C,o=s.last;if(!o.bean||!
   SFX.p(pass?'pass':near?'near':'fail');if(res.final&&res.pay>0)SFX.p('cash',0,.6);
   render();const el=document.querySelector('#shopBox .c-res');if(el)el.scrollIntoView({behavior:'smooth',block:'start'});});}
 function compBrew(){const s=S(),X=CC[curComp],C=G.COMPS[X.ci],id=s.last.cbean;if(!id||(s.beans[id]||0)<DOSE||busy)return;busy=true;
-  brewAnim(id,s.last.brewer,()=>{busy=false;const o=s.last,Gr=GRINDERS.find(g=>g.id===o.grinder);
+  brewAnim({bean:id,brewer:s.last.brewer,grinder:s.last.grinder,ratio:s.last.ratio},ex=>{busy=false;if(ex)setTimeout(()=>toast(ex.txt),900);const o=Object.assign({},s.last,ex||{}),Gr=GRINDERS.find(g=>g.id===o.grinder);
     const r=G.brew({mode:'simple',bean:id,brewer:o.brewer,temp:o.temp,grind:o.grind,ratio:o.ratio,pour:o.pour,stir:o.stir,steep:o.steep,forceFines:Gr.fines});
     const J=G.judge(r,C);s.beans[id]-=DOSE;if(s.beans[id]<=0)delete s.beans[id];s.money-=CUP_COST;res={comp:1,r,J,sc:J.total};persist();render();
     const el=document.querySelector('#shopBox .c-res');if(el)el.scrollIntoView({behavior:'smooth',block:'start'});});}
@@ -5375,11 +5473,14 @@ $('shopBox').addEventListener('click',e=>{const b=e.target.closest('button');if(
   if(d.gcup){const L=s.green.find(l=>l.k===d.gcup);if(!L||L.g<20)return;L.g-=10;L.known=true;gain(2,0);persist();cupSheet(L.id,L.q,L.h||'de',()=>render());return;}
   if(d.rsel){const L=s.green.find(l=>l.k===d.rsel);rsel={k:d.rsel,g:0,roast:beanOf(L.id).roast};render();return;}
   if(d.rs){s.roaster=d.rs;persist();render();return;}
-  if(d.gb){const [k,id]=d.gb.split(':'),PR=k==='brewer'?BREWER_PRICE:k==='roaster'?RPRICE:GRINDER_PRICE,M=market(s.day,id,PR[id]);if(M.out||s.money<M.price)return;s.money-=M.price;s.paid[id]={p:M.price,off:M.off,day:s.day};
+  if(d.gb){const [k,id]=d.gb.split(':'),PR=k==='brewer'?BREWER_PRICE:k==='roaster'?RPRICE:GRINDER_PRICE,M=market(s.day,id,PR[id]);if(M.out||s.money<M.price)return;s.money-=M.price;s.paid[id]={p:M.price,off:M.off,day:s.day};const sk0=daySkin(s.day,id);s.skins[id]=[sk0];s.skin[id]=sk0;
     if(k==='roaster'){s.roasters.push(id);s.roaster=id;toast('買了 '+ROASTERS.find(r=>r.id===id).name+(M.off?'（省 '+NT(PR[id]-M.price)+'）':'')+'，搬進烘豆室了');SFX.p('cash');gain(5,0);persist();render();return;}
     const arr=k==='brewer'?s.brewers:s.grinders,cap=k==='brewer'?capB(s):capG(s);let txt;
     if(arr.length<cap){arr.push(id);s.last[k]=id;txt='放進店裡了';}else{s.home[k+'s'].push(id);txt='店裡放不下，先收在家裡';}
     toast('買了 '+(k==='brewer'?G.BREWERS:GRINDERS).find(x=>x.id===id).name+(M.off?'（省 '+NT((k==='brewer'?BREWER_PRICE:GRINDER_PRICE)[id]-M.price)+'）':'')+'，'+txt);SFX.p('cash');persist();render();return;}
+  if(d.gs){const [id,i,pp]=d.gs.split(':');if(s.money<+pp)return;s.money-=+pp;(s.skins[id]=s.skins[id]||[0]).push(+i);s.skin[id]=+i;toast('買到新配色：'+SK[id][+i][0]);SFX.p('cash');persist();render();return;}
+  if(d.sk){const [id,i]=d.sk.split(':');s.skin[id]=+i;SFX.p('tick');persist();render();return;}
+  if(d.gstep){const o=s.last,Gd=GRINDERS.find(g=>g.id===o.grinder);o.grind+=(+d.gstep)*(Gd.um||10);snapGrind();SFX.p('grind');persist();render();return;}
   if(d.mv){const [k,id]=d.mv.split(':'),shop=k==='brewer'?s.brewers:s.grinders,home=s.home[k+'s'],cap=k==='brewer'?capB(s):capG(s);
     if(shop.includes(id)){if(shop.length<=1){toast('店裡至少要留一個'+(k==='brewer'?'濾杯':'磨豆機'));return;}shop.splice(shop.indexOf(id),1);home.push(id);toast('收回家了');}
     else{if(shop.length>=cap){toast('店裡放滿了，先收一件回家');return;}home.splice(home.indexOf(id),1);shop.push(id);toast('帶去店裡了');}
@@ -5418,7 +5519,7 @@ $('shopBox').addEventListener('input',e=>{const el=e.target;if(el.id==='blName'&
   if(el.id==='rG'&&rsel){rsel.g=+el.value;$('rGO').textContent=rsel.g+' g → 熟豆約 '+Math.round(rsel.g*.85)+' g';return;}
   if(el.id==='rR'&&rsel){rsel.roast=+el.value;render();return;}
   const k=el.dataset&&el.dataset.k;if(!k)return;const o=S().last;o[k]=+el.value;
-  if(k==='temp')$('kTempO').textContent=o.temp+' °C';if(k==='grind')$('kGrindO').textContent=grindName(o.grind)+'（'+o.grind+' μm）';
+  if(k==='temp')$('kTempO').textContent=o.temp+' °C';
   if(k==='ratio')$('kRatioO').textContent='1 : '+o.ratio;if(k==='steep')$('kSteepO').textContent=Math.floor(o.steep/60)+':'+String(o.steep%60).padStart(2,'0');});
 $('shopBox').addEventListener('change',e=>{if(e.target.dataset&&e.target.dataset.k)persist();});
 
