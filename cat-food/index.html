@@ -19,7 +19,7 @@ header h1{font-size:18px;margin:0;flex:1}
 header .sub{font-size:12px;opacity:.8}
 main{max-width:680px;margin:0 auto;padding:12px 14px}
 nav{position:fixed;bottom:0;left:0;right:0;z-index:6;background:#fff;border-top:1px solid var(--line);display:flex;padding-bottom:env(safe-area-inset-bottom)}
-nav button{flex:1;border:0;background:none;font:inherit;font-size:11px;color:var(--mute);padding:7px 0 6px;display:flex;flex-direction:column;align-items:center;gap:1px;cursor:pointer}
+nav button{flex:1;min-width:0;border:0;background:none;font:inherit;font-size:11px;color:var(--mute);padding:7px 0 6px;display:flex;flex-direction:column;align-items:center;gap:1px;cursor:pointer}
 nav button .i{font-size:21px}
 nav button.on{color:var(--accent);font-weight:700}
 .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-bottom:10px}
@@ -146,7 +146,7 @@ table.t td.n{text-align:center;font-variant-numeric:tabular-nums}
 <header>
   <a href="../" aria-label="回 App 目錄">‹</a>
   <span id="hAv"></span>
-  <div style="flex:1"><h1 id="hTitle">🐱 毛毛的飲食紀錄</h1><div class="sub">罐頭過敏・喜好・熱量・減重</div></div>
+  <div style="flex:1"><h1 id="hTitle">🐱 毛毛的飲食紀錄</h1><div class="sub">過敏・喜好・熱量・減重・用藥</div></div>
   <button class="cloud" id="hCloud" aria-label="雲端存檔"><span class="dt"></span><span id="hCloudT">☁️ 雲端存檔</span></button>
 </header>
 <main id="view"></main>
@@ -154,6 +154,7 @@ table.t td.n{text-align:center;font-variant-numeric:tabular-nums}
   <button data-v="today"><span class="i">🍽️</span>今天</button>
   <button data-v="foods"><span class="i">🥫</span>食物庫</button>
   <button data-v="history"><span class="i">📅</span>紀錄</button>
+  <button data-v="meds"><span class="i">💊</span>用藥</button>
   <button data-v="analysis"><span class="i">🔍</span>過敏分析</button>
   <button data-v="cat"><span class="i">🐱</span>毛毛</button>
 </nav>
@@ -177,6 +178,9 @@ const ALLERGIC=s=>s==="mild"||s==="clear"||s==="severe";
 const SYM=["嘔吐","腹瀉","軟便","便秘","搔癢","抓臉/耳朵","舔毛過度","掉毛/禿","皮膚紅疹","黑下巴","耳朵髒","打噴嚏","眼睛分泌物","食慾變差","精神差"];
 const LIKE={0:{n:"還不知道",e:"❔"},1:{n:"不吃",e:"😾"},2:{n:"普通",e:"😐"},3:{n:"愛吃",e:"😺"},4:{n:"超愛",e:"😻"}};
 const ATE={all:{n:"吃光",f:1},most:{n:"吃大部分",f:.75},half:{n:"吃一半",f:.5},little:{n:"吃一點",f:.25},none:{n:"沒吃",f:0}};
+const EF={wait:{n:"還在觀察",c:"st-watch"},good:{n:"明顯改善",c:"st-none"},some:{n:"有點改善",c:"st-mild"},no:{n:"沒效果",c:"st-unk"},worse:{n:"變更糟",c:"st-severe"}};
+const MODE={once:"單次",on:"持續用藥中",done:"已結束"};
+const MSYM=SYM.concat(["耳朵發炎","驅蟲","保健"]);
 const RE={none:{n:"沒反應",c:"st-none"},watch:{n:"再觀察",c:"st-watch"},yes:{n:"有反應",c:"st-clear"}};
 
 const $=s=>document.querySelector(s);
@@ -190,13 +194,15 @@ const r1=n=>Math.round(n*10)/10;
 const fmtD=s=>{const d=new Date(s+"T00:00");return (d.getMonth()+1)+"/"+d.getDate()+" 週"+"日一二三四五六"[d.getDay()]};
 
 let S;
-function blank(){return{cat:{name:"毛毛",target:null,goal:null,factor:0.8,updatedAt:0},foods:{},logs:{},weights:{},savedAt:0}}
-function load(){try{S=JSON.parse(localStorage.getItem(KEY))}catch(e){}if(!S||!S.foods)S=blank();["foods","logs","weights"].forEach(k=>S[k]=S[k]||{})}
+function blank(){return{cat:{name:"毛毛",target:null,goal:null,factor:0.8,updatedAt:0},foods:{},logs:{},weights:{},meds:{},savedAt:0}}
+function load(){try{S=JSON.parse(localStorage.getItem(KEY))}catch(e){}if(!S||!S.foods)S=blank();["foods","logs","weights","meds"].forEach(k=>S[k]=S[k]||{})}
 let onSaved=()=>{};
 function save(){S.savedAt=Date.now();try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){toast("⚠️ 存檔失敗")}onSaved()}
 const live=o=>Object.values(o).filter(x=>!x.del);
 const foods=()=>live(S.foods);
 const logs=()=>live(S.logs);
+const meds=()=>live(S.meds).sort((a,b)=>a.date<b.date?1:a.date>b.date?-1:(b.updatedAt||0)-(a.updatedAt||0));
+const medOn=(m,d)=>m.mode==="on"?m.date<=d&&d<=today():m.mode==="done"?m.date<=d&&d<=(m.end||m.date):m.date===d;
 const weights=()=>live(S.weights).sort((a,b)=>a.date<b.date?-1:a.date>b.date?1:0);
 function put(coll,obj){obj.updatedAt=Date.now();S[coll][obj.id]=obj;save()}
 function remove(coll,id){const o=S[coll][id];if(!o)return;S[coll][id]={id,del:1,updatedAt:Date.now()};save()}
@@ -230,7 +236,7 @@ function render(){
   document.querySelectorAll("#nav button").forEach(b=>b.classList.toggle("on",b.dataset.v===V));
   $("#hTitle").textContent=(S.cat.photo?"":"🐱 ")+(S.cat.name||"毛毛")+"的飲食紀錄";
   $("#hAv").innerHTML=S.cat.photo?`<img class="hav" src="${S.cat.photo}" alt="">`:"";
-  ({today:vToday,foods:vFoods,history:vHistory,analysis:vAnalysis,cat:vCat}[V]||vToday)();
+  ({today:vToday,foods:vFoods,history:vHistory,analysis:vAnalysis,meds:vMeds,cat:vCat}[V]||vToday)();
 }
 const alPill=s=>`<span class="pill ${AL[s||"unk"].c}">${AL[s||"unk"].n}</span>`;
 const likeTxt=v=>LIKE[v||0].e+" "+LIKE[v||0].n;
@@ -253,7 +259,10 @@ function vToday(){
   <button class="btn pri big" id="addLog">＋ 記一餐</button>
   <h2>這天吃了什麼</h2>
   <div class="card">${L.length?L.map(logRow).join(""):`<div class="empty">還沒有紀錄<br>每餐記一下，之後才找得出是哪個成分讓${esc(S.cat.name)}過敏</div>`}</div>
+  <h2>💊 這天的用藥<span class="r"><button class="btn sm" id="addMed">＋ 記用藥</button></span></h2>
+  <div class="card">${(M=>M.length?M.map(medRow).join(""):`<div class="empty" style="padding:10px">這天沒有用藥</div>`)(meds().filter(m=>medOn(m,day)))}</div>
   ${pendingWatch()}`;
+  $("#addMed").onclick=()=>medSheet(null,day);bindMeds();
   $("#view").querySelectorAll("[data-d]").forEach(b=>b.onclick=()=>{const d=new Date(day+"T00:00");d.setDate(d.getDate()+ +b.dataset.d);day=ymd(d);render()});
   $("#dpick").onchange=e=>{if(e.target.value){day=e.target.value;render()}};
   $("#addLog").onclick=()=>logSheet();
@@ -415,15 +424,92 @@ let hDays=14;
 function vHistory(){
   const L=logs(),G=goal();
   const by={};L.forEach(l=>(by[l.date]=by[l.date]||[]).push(l));
+  const MD=meds();MD.forEach(m=>{by[m.date]=by[m.date]||[]});
   const ds=Object.keys(by).sort().reverse();
   const shown=ds.slice(0,hDays);
   $("#view").innerHTML=`<h2>每日紀錄<span class="r muted">${ds.length} 天</span></h2>
   ${shown.length?shown.map(d=>{const a=by[d].sort((x,y)=>(x.time||"")<(y.time||"")?-1:1),k=Math.round(a.reduce((s,l)=>s+logKcal(l),0)),re=a.some(l=>l.react==="yes");
-    return `<div class="card"><div class="row" style="margin-bottom:2px"><b style="cursor:pointer" data-day="${d}">${fmtD(d)}</b>${re?`<span class="pill st-clear">有反應</span>`:""}<span style="margin-left:auto;font-weight:700;${G&&k>G?"color:var(--bad)":""}">${k} kcal</span>${G?`<span class="muted">/ ${G}</span>`:""}</div>${a.map(logRow).join("")}</div>`}).join(""):`<div class="card empty">還沒有任何紀錄</div>`}
+    return `<div class="card"><div class="row" style="margin-bottom:2px"><b style="cursor:pointer" data-day="${d}">${fmtD(d)}</b>${re?`<span class="pill st-clear">有反應</span>`:""}<span style="margin-left:auto;font-weight:700;${G&&k>G?"color:var(--bad)":""}">${k} kcal</span>${G?`<span class="muted">/ ${G}</span>`:""}</div>${a.map(logRow).join("")}${(M=>M.length?`<div class="muted" style="${a.length?"border-top:1px solid var(--line);":""}padding-top:8px;cursor:pointer" data-go="meds">💊 用藥：${M.map(m=>esc(m.name)).join("、")}</div>`:"")(MD.filter(m=>medOn(m,d)))}</div>`}).join(""):`<div class="card empty">還沒有任何紀錄</div>`}
   ${ds.length>hDays?`<button class="btn big" id="more">再看更早的</button>`:""}`;
   bindLogs();
   $("#view").querySelectorAll("[data-day]").forEach(e=>e.onclick=()=>{day=e.dataset.day;go("today")});
+  $("#view").querySelectorAll("[data-go]").forEach(e=>e.onclick=()=>go(e.dataset.go));
   if($("#more"))$("#more").onclick=()=>{hDays+=14;vHistory()};
+}
+
+/* ---------- 用藥（藥名、原因、效果） ---------- */
+const md=s=>{const d=new Date(s+"T00:00");return (d.getMonth()+1)+"/"+d.getDate()};
+const dayN=(a,b)=>Math.round((new Date(b+"T00:00")-new Date(a+"T00:00"))/864e5)+1;
+const medSpan=m=>m.mode==="on"?`${md(m.date)} 起・持續中（第 ${dayN(m.date,today())} 天）`:m.mode==="done"?`${md(m.date)} – ${md(m.end||m.date)}（${dayN(m.date,m.end||m.date)} 天）`:fmtD(m.date)+(m.time?" "+m.time:"");
+const medReason=m=>[...(m.sym||[]),m.reason].filter(Boolean).join("、");
+function medRow(m){
+  const e=EF[m.effect]||EF.wait,r=medReason(m);
+  return `<div class="log" data-med="${m.id}" style="align-items:flex-start"><div class="b">
+   <div class="nm">💊 ${esc(m.name)}${m.dose?` <span class="muted" style="font-weight:400">${esc(m.dose)}</span>`:""}</div>
+   <div class="muted">${medSpan(m)}</div>
+   ${r?`<div class="muted" style="color:var(--ink)">原因：${esc(r)}</div>`:""}
+   ${m.effectNote?`<div class="muted" style="color:var(--ink)">效果：${esc(m.effectNote)}</div>`:""}
+   ${m.side?`<div class="muted" style="color:var(--bad)">副作用：${esc(m.side)}</div>`:""}</div>
+   <span class="pill ${e.c}" style="flex:none">${e.n}</span></div>`;
+}
+function bindMeds(){$("#view").querySelectorAll("[data-med]").forEach(e=>e.onclick=()=>medSheet(S.meds[e.dataset.med]))}
+function vMeds(){
+  const M=meds(),W=M.filter(m=>(m.effect||"wait")==="wait"),on=M.filter(m=>m.mode==="on");
+  const by={};M.forEach(m=>{const k=m.name.trim();(by[k]=by[k]||[]).push(m)});
+  const names=Object.keys(by).sort((a,b)=>by[b][0].date.localeCompare(by[a][0].date));
+  $("#view").innerHTML=`
+  <div class="stat"><div><b>${names.length}</b><span>用過的藥</span></div><div><b style="color:var(--ok)">${on.length}</b><span>正在使用</span></div><div><b style="color:var(--warn)">${W.length}</b><span>待填效果</span></div></div>
+  <button class="btn pri big" id="mAdd" style="margin-top:10px">＋ 記用藥</button>
+  ${W.length?`<h2>⏳ 還沒填效果的用藥</h2><div class="card"><div class="hint" style="margin:0 0 4px">用藥幾天後回來點一下，補上效果。</div>${W.map(medRow).join("")}</div>`:""}
+  <h2>用藥紀錄<span class="r muted">${M.length} 筆</span></h2>
+  <div class="card">${M.length?M.map(medRow).join(""):`<div class="empty">還沒有用藥紀錄<br>記下用了什麼藥、為什麼用、用了之後有沒有改善，回診時給獸醫看很有幫助</div>`}</div>
+  ${names.length?`<h2>每種藥的效果整理</h2><div class="card"><table class="t"><tr><th>藥名</th><th style="text-align:center">次數</th><th>效果</th><th>最近一次</th></tr>
+   ${names.map(n=>{const a=by[n],c={};a.forEach(m=>{const k=m.effect||"wait";c[k]=(c[k]||0)+1});
+    return `<tr><td><b>${esc(n)}</b></td><td class="n">${a.length}</td><td>${Object.keys(EF).filter(k=>c[k]).map(k=>`<span class="pill ${EF[k].c}" style="margin:1px 0">${EF[k].n}${c[k]>1?" ×"+c[k]:""}</span>`).join(" ")}</td><td class="muted">${md(a[0].date)}</td></tr>`}).join("")}</table></div>`:""}
+  <div class="infobox">📌 這裡只是紀錄。用什麼藥、劑量、何時停藥請依獸醫指示，人用的藥不要自行給貓咪吃。</div>`;
+  $("#mAdd").onclick=()=>medSheet();
+  bindMeds();
+}
+function medSheet(m,d){
+  const isNew=!m;
+  m=m?JSON.parse(JSON.stringify(m)):{id:uid(),date:d||today(),time:nowHM(),name:"",dose:"",mode:"once",end:"",sym:[],reason:"",effect:"wait",effectNote:"",side:""};
+  m.sym=m.sym||[];m.mode=m.mode||"once";m.effect=m.effect||"wait";
+  const known=[...new Set(meds().map(x=>x.name.trim()))];
+  open(`<h3>${isNew?"記用藥":"編輯用藥"}<button data-x>×</button></h3>
+  <label class="f">藥名</label><input class="f" id="mName" list="mNames" value="${esc(m.name)}" placeholder="例如：類固醇、抗組織胺、止吐藥、耳藥">
+  <datalist id="mNames">${known.map(n=>`<option value="${esc(n)}">`).join("")}</datalist>
+  ${known.length&&isNew?`<div class="opt" id="mQuick" style="margin-top:6px">${known.slice(0,6).map(n=>`<button data-n="${esc(n)}">${esc(n)}</button>`).join("")}</div>`:""}
+  <label class="f">劑量與頻率</label><input class="f" id="mDose" value="${esc(m.dose)}" placeholder="例如：半顆，一天兩次">
+  <label class="f">用藥期間</label>
+  <div class="opt" id="mMode">${Object.entries(MODE).map(([k,v])=>`<button data-v="${k}" class="${m.mode===k?"on":""}">${v}</button>`).join("")}</div>
+  <div class="two"><div><label class="f" id="mDL">日期</label><input class="f" type="date" id="mDate" value="${m.date}"></div>
+   <div id="mTB"><label class="f">時間</label><input class="f" type="time" id="mTime" value="${m.time||""}"></div>
+   <div id="mEB"><label class="f">結束日期</label><input class="f" type="date" id="mEnd" value="${m.end||""}"></div></div>
+  <label class="f">為什麼用藥（可複選）</label>
+  <div class="opt sym" id="mSym">${MSYM.map(x=>`<button data-v="${x}" class="${m.sym.includes(x)?"on":""}">${x}</button>`).join("")}</div>
+  <textarea class="f" id="mReason" style="margin-top:8px" placeholder="補充原因，例如：吃了新罐頭後一直抓臉，獸醫開的">${esc(m.reason)}</textarea>
+  <label class="f">用藥後的效果</label>
+  <div class="opt" id="mEf">${Object.entries(EF).map(([k,v])=>`<button data-v="${k}" class="${m.effect===k?"on":""}">${v.n}</button>`).join("")}</div>
+  <textarea class="f" id="mEfN" style="margin-top:8px" placeholder="效果說明，例如：第二天就不抓了，停藥三天後又復發">${esc(m.effectNote)}</textarea>
+  <label class="f">副作用（沒有就留空）</label><input class="f" id="mSide" value="${esc(m.side)}" placeholder="例如：嗜睡、食慾變大、流口水">
+  <div class="actions">${isNew?"":`<button class="btn del" id="mDel">刪除</button>`}<button class="btn pri" id="mSave">儲存</button></div>`);
+  const sync=()=>{$("#mDL").textContent=m.mode==="once"?"日期":"開始日期";$("#mTB").style.display=m.mode==="once"?"":"none";$("#mEB").style.display=m.mode==="done"?"":"none"};
+  sync();
+  opt("#mMode",v=>{m.mode=v;if(v==="done"&&!$("#mEnd").value)$("#mEnd").value=today();sync()});
+  opt("#mEf",v=>{m.effect=v});
+  multi("#mSym",m.sym);
+  if($("#mQuick"))$("#mQuick").onclick=e=>{const b=e.target.closest("button");if(!b)return;$("#mName").value=b.dataset.n;
+    const last=meds().find(x=>x.name.trim()===b.dataset.n);if(last&&!$("#mDose").value)$("#mDose").value=last.dose||""};
+  $("#mSave").onclick=()=>{
+    const n=$("#mName").value.trim();if(!n)return toast("請填藥名");
+    m.name=n;m.dose=$("#mDose").value.trim();m.date=$("#mDate").value||today();
+    m.time=m.mode==="once"?$("#mTime").value:"";
+    m.end=m.mode==="done"?($("#mEnd").value||m.date):"";
+    if(m.end&&m.end<m.date)return toast("結束日期不能早於開始日期");
+    m.reason=$("#mReason").value.trim();m.effectNote=$("#mEfN").value.trim();m.side=$("#mSide").value.trim();
+    put("meds",m);close();render();toast(m.effect==="wait"?"已記錄，之後記得回來填效果":"已記錄");
+  };
+  if(!isNew)$("#mDel").onclick=()=>{if(confirm("刪除這筆用藥紀錄？")){remove("meds",m.id);close();render()}};
 }
 
 /* ---------- 過敏分析 ---------- */
@@ -476,7 +562,7 @@ function vCat(){
   <div class="card">
    <div class="sync" id="syncRow" style="margin-bottom:10px"><button class="btn pri" id="gBtn"><span id="gBtnT">☁️ 用 Google 帳號同步</span></button><span class="muted" id="syncNote">存到你自己的 Google 雲端硬碟，換手機也看得到</span></div>
    <div class="row"><button class="btn" id="exp">⬇️ 匯出備份</button><button class="btn" id="imp">⬆️ 匯入備份</button><input type="file" id="impF" accept=".json,application/json" style="display:none"></div>
-   <div class="hint">連上 Google 後，每次修改都會自動存到你自己的 Google 雲端硬碟（隱藏的 App 資料夾，別人看不到）；換手機登入同一個帳號會自動合併回來。沒連的話資料只存在這支手機的瀏覽器裡，記得定期匯出備份。<br>食物 ${foods().length} 款・餐點紀錄 ${logs().length} 筆・體重 ${W.length} 筆</div>
+   <div class="hint">連上 Google 後，每次修改都會自動存到你自己的 Google 雲端硬碟（隱藏的 App 資料夾，別人看不到）；換手機登入同一個帳號會自動合併回來。沒連的話資料只存在這支手機的瀏覽器裡，記得定期匯出備份。<br>食物 ${foods().length} 款・餐點紀錄 ${logs().length} 筆・體重 ${W.length} 筆・用藥 ${meds().length} 筆</div>
   </div>
   <div class="stat"><div><b>${cw!=null?cw:"–"}</b><span>目前 kg</span></div><div><b>${t||"–"}</b><span>目標 kg</span></div><div><b>${cw&&t?r1(cw-t):"–"}</b><span>還差 kg</span></div></div>
   <h2>體重紀錄<span class="r"><button class="btn pri sm" id="wAdd">＋ 記體重</button></span></h2>
@@ -635,7 +721,7 @@ function multi(sel,arr){const el=$(sel);el.onclick=e=>{const b=e.target.closest(
 
 /* ---------- 合併（匯入、雲端同步共用）：每筆取較新的 ---------- */
 function merge(d){
-  ["foods","logs","weights"].forEach(k=>{Object.values(d[k]||{}).forEach(o=>{const m=S[k][o.id];if(!m||(o.updatedAt||0)>(m.updatedAt||0))S[k][o.id]=o})});
+  ["foods","logs","weights","meds"].forEach(k=>{S[k]=S[k]||{};Object.values(d[k]||{}).forEach(o=>{const m=S[k][o.id];if(!m||(o.updatedAt||0)>(m.updatedAt||0))S[k][o.id]=o})});
   if(d.cat&&(d.cat.updatedAt||0)>(S.cat.updatedAt||0))S.cat=d.cat;
 }
 
@@ -716,7 +802,7 @@ else if(ls.get('cf-g')==='1'){btn('☁️ 點這裡連回 Google 同步');cloudS
 
 /* ---------- 家人共用（Firebase Realtime Database，REST + 串流）：每筆紀錄取較新的，照片另外存 ---------- */
 const FS=(function(){
- const FB_URL='https://molecule-match-default-rtdb.asia-southeast1.firebasedatabase.app',COLLS=['foods','logs','weights'];
+ const FB_URL='https://molecule-match-default-rtdb.asia-southeast1.firebasedatabase.app',COLLS=['foods','logs','weights','meds'];
  const ls={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}},del(k){try{localStorage.removeItem(k)}catch(e){}}};
  const okCode=c=>/^[A-Za-z0-9_-]{8,40}$/.test(c||'');
  const enc=k=>encodeURIComponent(k).replace(/\./g,'%2E'),dec=k=>{try{return decodeURIComponent(k)}catch(e){return k}};
@@ -755,7 +841,7 @@ const FS=(function(){
  function reconcile(){
   if(!code)return;let changed=false;
   for(const path in R){let r;try{r=JSON.parse(R[path])}catch(e){continue}
-   if(!r||typeof r!=='object')continue;if(path!=='cat'&&(!/^(foods|logs|weights)\//.test(path)||!r.id))continue;
+   if(!r||typeof r!=='object')continue;if(path!=='cat'&&(!/^(foods|logs|weights|meds)\//.test(path)||!r.id))continue;
    const m=recAt(path),ru=r.updatedAt||0,mu=m?(m.updatedAt||0):-1,h=r._p;delete r._p;
    if(ru>mu){
     if(h){const ph=(m&&m.photo&&hash(m.photo)===h)?m.photo:photoByHash(h);if(ph)r.photo=ph;else want[path]={h,u:ru}}else delete want[path];
