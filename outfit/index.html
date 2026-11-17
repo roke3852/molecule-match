@@ -3,15 +3,16 @@
 <head>
 <meta charset="utf-8">
 <meta name="author" content="Jim Lu">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="穿搭試衣間">
 <meta name="theme-color" content="#2f3a4a">
-<meta name="app-version" content="1.13">
+<meta name="app-version" content="1.14">
 <title>穿搭試衣間</title>
 <style>
 :root{--bg:#f4f1ec;--card:#fff;--ink:#23201d;--mute:#857b70;--line:#e5ddd2;--accent:#2f3a4a;--hot:#c8553d;--soft:#ece6dc;--ok:#2f8f5b}
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;font-size:15px;padding-bottom:calc(70px + env(safe-area-inset-bottom))}
 header{position:sticky;top:0;z-index:8;background:var(--accent);color:#fff;padding:calc(9px + env(safe-area-inset-top)) 14px 9px;display:flex;align-items:center;gap:10px}
 header a{color:#fff;text-decoration:none;font-size:22px;opacity:.85;line-height:1}
@@ -1246,6 +1247,8 @@ document.addEventListener('change',ev=>{const e=ev.target;if(!U)return;
   if(k==='url'){const v=e.value.trim();readEd();if(!v){return;}if(!/^https?:\/\//.test(v))return toast('請貼上 http 開頭的圖片網址');const im=new Image();im.onload=()=>{ED.img=v;drawEdit();};im.onerror=()=>toast('這個網址讀不到圖片，請改用「複製圖片網址」或存圖後上傳');im.src=v;}
   if(k==='name'||k==='brand'){readEd();const it=ITEM[ED.base],l=$('#imgSearch');if(l)l.href=gUrl([ED.brand,ED.name||it.name,COL[ED.color]?ED.color+'色':''].filter(Boolean).join(' '),true);}});
 document.addEventListener('paste',ev=>{if(!ED||!$('#sheet .sheet'))return;const it=[...(ev.clipboardData||{}).items||[]].find(i=>i.type.startsWith('image/'));if(it){ev.preventDefault();setImgFile(it.getAsFile());}});
+/* 取消按兩下放大：主要靠 CSS touch-action:manipulation；這行處理桌機雙擊 */
+document.addEventListener('dblclick',e=>e.preventDefault(),{passive:false});
 window.addEventListener('pagehide',()=>{if(U&&dirty)push();});
 document.addEventListener('visibilitychange',()=>{if(!U)return;if(document.visibilityState==='hidden'){if(dirty)push();}else pull();});
 window.addEventListener('online',()=>{if(U){if(dirty)push();else pull();}});
