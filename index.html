@@ -11,6 +11,7 @@
 <style>
 :root{--bg:#f6f1ea;--card:#fff;--ink:#2b2018;--mute:#8a7a6c;--line:#e4d9cc;--accent:#3b2a20;--star:#f5a524;--new:#e5484d}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body,button,a,select,label{touch-action:manipulation}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;padding:calc(20px + env(safe-area-inset-top)) 16px calc(24px + env(safe-area-inset-bottom))}
 main{max-width:640px;margin:0 auto}
 h1{font-size:26px;margin:4px 0 4px}
@@ -106,7 +107,7 @@ footer{margin-top:28px;font-size:12px;color:var(--mute);text-align:center;line-h
   <footer>按右上角「↻ 更新」會重新抓這頁和所有 App 的最新版。<br>新增或更新 App：在這頁的 APPS 清單加一行或改 ver / updated（日期＋時間）/ note。<br>版本號一變，首頁就會在那個 App 上顯示「新版」。<br><span id="hubVer"></span></footer>
 </main>
 <script>
-const HUB_VER = "2.1";
+const HUB_VER = "2.2";
 /* 分類：App 的 cat 填這裡的 id；順序就是分類標籤與分組的順序 */
 const CATS = [
   { id:"coffee", name:"咖啡", icon:"☕" },
@@ -363,6 +364,18 @@ document.getElementById("notice").addEventListener("click", e=>{
 });
 /* 從 App 返回首頁時（iOS 的返回快取）重新整理狀態 */
 window.addEventListener("pageshow", ()=>{ S = load() || S; render(); });
+/* 關閉點兩下放大（雙指縮放仍可用） */
+let lastTap = 0, tapX = 0, tapY = 0;
+document.addEventListener("touchstart", e=>{ tapX = e.touches[0].clientX; tapY = e.touches[0].clientY; }, {passive:true});
+document.addEventListener("touchend", e=>{
+  const t = e.changedTouches[0], now = Date.now();
+  const still = Math.abs(t.clientX - tapX) < 10 && Math.abs(t.clientY - tapY) < 10;
+  if(still && e.touches.length === 0){
+    if(now - lastTap < 350 && !e.target.closest("input,textarea,select")){ e.preventDefault(); e.target.click(); }
+    lastTap = now;
+  }
+}, {passive:false});
+document.addEventListener("dblclick", e=>e.preventDefault());
 render();
 </script>
 <!-- Made by Jim Lu -->
