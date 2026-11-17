@@ -110,7 +110,9 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-acti
 .me .nums{font-family:var(--f-num);font-size:18px;font-weight:500;font-variant-numeric:tabular-nums;display:flex;gap:16px;flex-wrap:wrap}
 .me .nums span b{font-size:24px;font-weight:600;color:var(--mark);margin-right:4px}
 .me .acts{display:flex;gap:8px;flex-wrap:wrap}
-.me .acts .tool{background:var(--ink);min-height:38px;flex:1}
+.me .acts .tool{background:var(--ink);min-height:38px;flex:1 1 40%}
+.rowp .tagx{display:inline-block;margin-left:6px;padding:0 6px;border-radius:6px;border:1px solid var(--line);font-size:11px;color:var(--mute);font-weight:400;vertical-align:middle}
+.whosec{margin:14px 0 2px;font-size:12.5px;color:var(--mute);letter-spacing:.06em}
 .tabs{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:14px;padding:4px;border-radius:12px;background:var(--ink-2)}
 .tab{min-height:40px;border-radius:9px;font-weight:700;color:var(--mute)}
 .tab small{font-family:var(--f-num);font-weight:500;font-size:14px;margin-left:6px}
@@ -235,10 +237,21 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-acti
     <div class="rows" id="titleList"></div>
   </section>
 
+  <section class="overlay sub" id="pin" hidden style="z-index:9">
+    <div class="top"><h2 id="pinTitle">輸入密碼</h2><button class="pill" data-close="pin" type="button">取消</button></div>
+    <p class="lead" id="pinLead"></p>
+    <form class="newp" id="pinForm">
+      <input id="pinIn" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="off" placeholder="4 個數字" aria-label="4 碼密碼">
+      <button class="tool go" type="submit">確認</button>
+    </form>
+    <p class="lead" id="pinErr" style="color:var(--bad);margin-top:10px" aria-live="polite"></p>
+  </section>
+
   <section class="overlay sub" id="who" hidden>
     <div class="top"><h2>誰在玩？</h2><button class="pill" id="btnWhoClose" data-close="who" type="button">返回</button></div>
-    <p class="lead">輸入名字就能開始，每個名字有自己的過關紀錄、分數和稱號。名字和總分會出現在公開的排行榜上，建議用暱稱。</p>
+    <p class="lead">玩過的人直接點自己的名字。第一次玩就在下面輸入名字，每個名字有自己的過關紀錄、分數和稱號。名字和總分會出現在公開的排行榜上，建議用暱稱。</p>
     <div class="rows" id="whoList"></div>
+    <p class="lead" id="whoMsg" style="margin-top:10px" aria-live="polite"></p>
     <form class="newp" id="whoForm">
       <input id="whoName" type="text" maxlength="12" autocomplete="off" placeholder="輸入名字（最多 12 個字）" aria-label="玩家名字">
       <button class="tool go" type="submit">開始</button>
@@ -493,11 +506,20 @@ const TITLES=[
   {n:'分子大師',d:'全部關卡都拿到三星',ok:(p,s)=>s.st>=LEVELS.length*3}
 ];
 function titleIdx(p){const s=stats(p);let t=0;TITLES.forEach((x,i)=>{if(x.ok(p,s))t=i;});return t;}
+/* 4 碼密碼只存雜湊，用來防止選錯人，不是真正的保密 */
+function pinHash(name,pin){
+  const str='bskit:'+name+':'+pin;let h1=0xdeadbeef,h2=0x41c6ce57;
+  for(let i=0;i<str.length;i++){const c=str.charCodeAt(i);h1=Math.imul(h1^c,2654435761);h2=Math.imul(h2^c,1597334677);}
+  h1=Math.imul(h1^(h1>>>16),2246822507)^Math.imul(h2^(h2>>>13),3266489909);
+  h2=Math.imul(h2^(h2>>>16),2246822507)^Math.imul(h1^(h1>>>13),3266489909);
+  return (4294967296*(2097151&h2)+(h1>>>0)).toString(36);
+}
 function mergePlayers(into,from){
   for(const f of from||[]){
     if(!f||typeof f.name!=='string'||!f.best)continue;
     let p=into.find(x=>x.name===f.name);
-    if(!p){into.push({name:f.name,best:Object.assign({},f.best),made:f.made||Date.now(),up:f.up||0});continue;}
+    if(!p){into.push({name:f.name,best:Object.assign({},f.best),made:f.made||Date.now(),up:f.up||0,ph:f.ph||null});continue;}
+    if(!p.ph&&f.ph)p.ph=f.ph;
     for(const id in f.best){
       const a=p.best[id],b=f.best[id];
       p.best[id]=a?{s:Math.max(a.s,b.s),st:Math.max(a.st,b.st),t:a.t&&b.t?Math.min(a.t,b.t):(a.t||b.t||0)}:b;
@@ -1246,7 +1268,7 @@ function renderMe(){
   const s=stats(p);
   $('me').innerHTML=`<div class="who"><b>${esc(p.name)}</b><span class="badge">${TITLES[titleIdx(p)].n}</span></div>
     <div class="nums"><span><b>${s.s}</b>分</span><span><b>${s.st}</b>顆星</span><span><b>${s.n}</b>/ ${LEVELS.length} 關</span></div>
-    <div class="acts"><button class="tool" type="button" data-open="board">排行榜</button><button class="tool" type="button" data-open="titles">稱號</button><button class="tool" type="button" data-open="who">切換玩家</button></div>`;
+    <div class="acts"><button class="tool" type="button" data-open="board">排行榜</button><button class="tool" type="button" data-open="titles">稱號</button><button class="tool" type="button" data-open="who">切換玩家</button><button class="tool" type="button" data-open="setpin">${p.ph?'更改密碼':'設定密碼'}</button></div>`;
 }
 const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 function openLevels(keepTab){
@@ -1273,24 +1295,81 @@ $('tabBasic').addEventListener('click',()=>{tab='basic';openLevels(true);});
 $('tabAdv').addEventListener('click',()=>{tab='adv';openLevels(true);});
 
 /* ---------- 玩家、稱號、排行榜 ---------- */
-function openWho(force){
-  $('btnWhoClose').hidden=!!force||!player();
-  $('whoList').innerHTML=store.players.map(p=>{const s=stats(p);
-    return `<button class="rowp ${p.name===store.cur?'you':''}" type="button" data-name="${esc(p.name)}"><span class="rk">${p.name===store.cur?'●':''}</span><span class="nm"><b>${esc(p.name)}</b><small>${TITLES[titleIdx(p)].n}　${s.n} 關</small></span><span class="sc">${s.s}<small>分</small></span></button>`;}).join('');
-  $('whoName').value='';$('who').hidden=false;
+const whoRow=(name,sub,score,cur,lock,far)=>`<button class="rowp ${cur?'you':''}" type="button" data-name="${esc(name)}"><span class="rk">${cur?'●':''}</span><span class="nm"><b>${esc(name)}${lock?'<span class="tagx">有密碼</span>':''}</b><small>${sub}</small></span><span class="sc">${score}<small>分</small></span></button>`;
+function renderWho(){
+  const loc=store.players.map(p=>{const s=stats(p);return whoRow(p.name,`${TITLES[titleIdx(p)].n}　${s.n} 關`,s.s,p.name===store.cur,!!p.ph);});
+  const far=[];
+  for(const k in boardRemote||{}){
+    const r=boardRemote[k];
+    if(!r||typeof r.n!=='string'||!(r.s>0)||store.players.some(p=>p.name===r.n))continue;
+    far.push([+r.s||0,whoRow(r.n.slice(0,12),`${TITLES[Math.max(0,Math.min(TITLES.length-1,+r.ti||0))].n}　${+r.lv||0} 關`,+r.s||0,false,!!r.lk)]);
+  }
+  far.sort((a,b)=>b[0]-a[0]);
+  $('whoList').innerHTML=(loc.length?'<p class="whosec">這台裝置玩過的人</p>'+loc.join(''):'')+
+    (far.length?'<p class="whosec">在其他裝置玩過的人</p>'+far.slice(0,40).map(x=>x[1]).join(''):'');
 }
-function setPlayer(name){
-  name=String(name||'').replace(/\s+/g,' ').trim().slice(0,12);
-  if(!name)return;
-  let p=store.players.find(x=>x.name===name);
-  if(!p){p={name,best:{},made:Date.now(),up:Date.now()};store.players.push(p);if(store.legacy){grantLegacy(p,store.legacy);store.legacy=null;try{localStorage.removeItem('bskit-done');}catch(e){}}}
+async function openWho(force){
+  $('btnWhoClose').hidden=!!force||!player();
+  $('whoName').value='';$('whoMsg').textContent='';$('who').hidden=false;
+  renderWho();
+  try{const r=await fetch(FB+'.json');if(r.ok){boardRemote=await r.json()||{};renderWho();}}catch(e){}
+}
+function enter(name){
   store.cur=name;save();gQueue();boardPush();
-  $('who').hidden=true;
+  $('who').hidden=true;$('pin').hidden=true;
   if(!$('levels').hidden)openLevels(true);
   if(st.won)clearAll();else{attReset();renderMeta();}
 }
-$('whoList').addEventListener('click',ev=>{const b=ev.target.closest('.rowp');if(b)setPlayer(b.dataset.name);});
-$('whoForm').addEventListener('submit',ev=>{ev.preventDefault();setPlayer($('whoName').value);});
+/* 選一個名字：這台有 → 直接用；別台玩過 → 把紀錄接回來；都沒有 → 新玩家。有密碼的要先輸入 */
+async function pickPlayer(raw){
+  const name=String(raw||'').replace(/\s+/g,' ').trim().slice(0,12);
+  if(!name)return;
+  const p=store.players.find(x=>x.name===name);
+  if(p){
+    if(p.ph&&name!==store.cur)askPin(name,p.ph,()=>enter(name));else enter(name);
+    return;
+  }
+  $('whoMsg').textContent='正在查「'+name+'」有沒有玩過…';
+  const rem=await savePull(name);
+  $('whoMsg').textContent='';
+  if(rem&&rem.best){
+    const fin=()=>{mergePlayers(store.players,[{name,best:rem.best,up:rem.up,ph:rem.ph||null}]);enter(name);toast('接回「'+name+'」之前的紀錄');};
+    if(rem.ph)askPin(name,rem.ph,fin);else fin();
+    return;
+  }
+  const np={name,best:{},made:Date.now(),up:Date.now(),ph:null};store.players.push(np);
+  if(store.legacy){grantLegacy(np,store.legacy);store.legacy=null;try{localStorage.removeItem('bskit-done');}catch(e){}}
+  enter(name);
+}
+$('whoList').addEventListener('click',ev=>{const b=ev.target.closest('.rowp');if(b)pickPlayer(b.dataset.name);});
+$('whoForm').addEventListener('submit',ev=>{ev.preventDefault();pickPlayer($('whoName').value);});
+let pinCtx=null;
+function openPin(ctx,title,lead){
+  pinCtx=ctx;$('pinTitle').textContent=title;$('pinLead').textContent=lead;$('pinErr').textContent='';$('pinIn').value='';
+  $('pin').hidden=false;try{$('pinIn').focus();}catch(e){}
+}
+function askPin(name,hash,ok){openPin({mode:'ask',name,hash,ok},'輸入密碼','「'+name+'」設了 4 碼密碼，輸入正確才能用這份紀錄。');}
+function setPin(){
+  const p=player();if(!p)return;
+  openPin({mode:'set',name:p.name},p.ph?'更改密碼':'設定密碼',
+    '幫「'+p.name+'」設 4 個數字的密碼，之後別人要選這個名字就得先輸入。'+(p.ph?'留空白再按確認，可以取消密碼。':'')+'這只是防止選錯人的簡單密碼，請不要用提款卡或手機的密碼。');
+}
+$('pinForm').addEventListener('submit',ev=>{
+  ev.preventDefault();
+  const c=pinCtx,v=$('pinIn').value.trim();if(!c)return;
+  if(c.mode==='ask'){
+    if(pinHash(c.name,v)===c.hash){$('pin').hidden=true;c.ok();}
+    else{$('pinErr').textContent='密碼不對，再試一次。';$('pinIn').value='';}
+    return;
+  }
+  const p=player();if(!p)return;
+  if(v===''&&p.ph){p.ph=null;}
+  else if(/^[0-9]{4}$/.test(v)){p.ph=pinHash(p.name,v);}
+  else{$('pinErr').textContent='請輸入剛好 4 個數字。';return;}
+  p.up=Date.now();save();gQueue();boardPush(true);
+  $('pin').hidden=true;renderMe();
+  toast(p.ph?'密碼設好了':'密碼已取消');
+});
 function openTitles(){
   const p=player();if(!p)return;const s=stats(p),cur=titleIdx(p);
   $('titleList').innerHTML=TITLES.map((t,i)=>{const ok=t.ok(p,s);
@@ -1301,18 +1380,26 @@ function openTitles(){
 const FB='https://molecule-match-default-rtdb.asia-southeast1.firebasedatabase.app/trips/ballstick-board/players';
 const fbKey=n=>Array.from(n).map(c=>c.codePointAt(0).toString(36)).join('-');
 let boardRemote=null,boardT=0;
-function boardRow(p){const s=stats(p);return{n:p.name,s:s.s,st:s.st,lv:s.n,ti:titleIdx(p),u:Date.now()};}
-function boardPush(){
+function boardRow(p){const s=stats(p);return{n:p.name,s:s.s,st:s.st,lv:s.n,ti:titleIdx(p),lk:p.ph?1:0,u:Date.now()};}
+const FBS=FB.replace(/players$/,'saves');
+async function savePull(name){
+  try{const r=await fetch(FBS+'/'+fbKey(name)+'.json');return r.ok?await r.json():null;}catch(e){return null;}
+}
+/* 上傳目前玩家：完整紀錄（讓別台裝置能接回）＋排行榜的一列。別人鎖了密碼的同名紀錄不會被蓋掉 */
+function boardPush(force){
   clearTimeout(boardT);
   boardT=setTimeout(async()=>{
-    const p=player();if(!p)return;const row=boardRow(p);if(!row.s)return;
+    const p=player();if(!p)return;
     try{
-      const url=FB+'/'+fbKey(p.name)+'.json';
-      const r=await fetch(url);const old=r.ok?await r.json():null;
-      if(old&&old.s>=row.s)return;
-      await fetch(url,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(row),keepalive:true});
+      const key=fbKey(p.name),old=await savePull(p.name);
+      if(old&&old.ph&&old.ph!==p.ph&&!force)return;
+      if(old&&old.best){mergePlayers([p],[{name:p.name,best:old.best,up:old.up}]);save();}
+      const row=boardRow(p);if(!row.s&&!p.ph&&!old)return;
+      const put=(u,d)=>fetch(u,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(d),keepalive:true});
+      await put(FBS+'/'+key+'.json',{n:p.name,best:p.best,ph:p.ph||null,up:Date.now()});
+      if(row.s)await put(FB+'/'+key+'.json',row);
     }catch(e){}
-  },900);
+  },force?50:900);
 }
 function renderBoard(){
   const m=new Map();
@@ -1337,7 +1424,7 @@ async function openBoard(){
 }
 document.addEventListener('click',ev=>{
   const o=ev.target.closest('[data-open]'),c=ev.target.closest('[data-close]');
-  if(o){({board:openBoard,titles:openTitles,who:()=>openWho(false)})[o.dataset.open]();}
+  if(o){({board:openBoard,titles:openTitles,who:()=>openWho(false),setpin:setPin})[o.dataset.open]();}
   if(c)$(c.dataset.close).hidden=true;
 });
 
@@ -1396,7 +1483,7 @@ async function gAfterLogin(){
     save();gOn=true;
     try{localStorage.setItem('bskit-g','1');}catch(e){}
     if(!$('levels').hidden)openLevels(true);
-    if(!$('who').hidden)openWho(!player());
+    if(!$('who').hidden)renderWho();
     const got=cnt()-before;
     await gWrite();
     gBtn('已連上 Google 同步');
