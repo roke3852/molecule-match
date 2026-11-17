@@ -2,13 +2,13 @@
 <html lang="zh-Hant">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <title>三朝聽音 — 康雍乾宮廷文字遊戲</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;600;900&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{margin:0;height:100%;background:#120c0c;color:#f3e6c8;font-family:"Noto Serif TC","PMingLiU","Songti TC","Source Han Serif TC",serif}
+html,body{touch-action:manipulation;-webkit-text-size-adjust:100%;text-size-adjust:100%;overscroll-behavior:none;margin:0;height:100%;background:#120c0c;color:#f3e6c8;font-family:"Noto Serif TC","PMingLiU","Songti TC","Source Han Serif TC",serif}
 img,canvas{image-rendering:pixelated;image-rendering:crisp-edges}
 /* iPhone 從主畫面開啟時，系統會在最上面蓋一層霧面。頂部整段留給裝飾框，內容從框下方開始 */
 :root{--sat:env(safe-area-inset-top,0px);--deco:18px;--top:calc(var(--sat) + var(--deco))}
@@ -1264,6 +1264,10 @@ function drawDeco(){const c=$('#decoCv'),w=Math.round(c.clientWidth),h=Math.roun
  // 簷口投影
  for(let x=0;x<w;x+=2)R('#00000055',x,sy,1,1)}
 if(window.ResizeObserver)new ResizeObserver(drawDeco).observe($('#decoCv'));else setTimeout(drawDeco,50);
+// ---------- 禁止兩指縮放與雙擊放大（iOS Safari 會忽略 user-scalable=no，需另外攔截） ----------
+['gesturestart','gesturechange','gestureend'].forEach(t=>document.addEventListener(t,e=>e.preventDefault(),{passive:false}));
+document.addEventListener('touchmove',e=>{if(e.touches.length>1||(e.scale!==undefined&&e.scale!==1))e.preventDefault()},{passive:false});
+// 雙擊放大由 CSS touch-action:manipulation 處理；不攔 touchend，以免快速連點對話時吃掉點擊
 // ---------- nav ----------
 let prev='sTitle',cur='sTitle';
 function go(id){if(id==='sBook'){prev=cur;renderBook('c')}cur=id;$$('.screen').forEach(s=>s.classList.toggle('on',s.id===id));if(id==='sChap')renderChaps();if(id==='sTitle')renderTitle()}
