@@ -171,7 +171,7 @@ svg{display:block;max-width:100%}
 .title button.primary{background:#c8323c;border-color:#c8323c;color:#fff;font-size:18px;min-height:56px;letter-spacing:.12em;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;box-shadow:0 0 0 0 rgba(200,50,60,.6);animation:tpulse 2.4s ease-out infinite}
 .title button.primary span{font-family:var(--mono);font-size:12px;letter-spacing:0;font-weight:500;opacity:.9}
 @keyframes tpulse{70%{box-shadow:0 0 0 14px rgba(200,50,60,0)}100%{box-shadow:0 0 0 0 rgba(200,50,60,0)}}
-.trow{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.trow{display:grid;grid-template-columns:repeat(auto-fit,minmax(0,1fr));gap:10px}
 .trow button{font-size:14px;padding:9px 6px}
 .tstat{font-size:12px;margin-top:2px}
 .tstat .row{flex-wrap:nowrap}
@@ -468,7 +468,7 @@ function xpBar(){const lv=level(),a=LV[lv-1],b=LV[lv];
   return `<div class="stack" style="gap:4px"><div class="row between small"><b>Lv ${lv}　${LVN[lv-1]}</b><span class="num muted">${b?save.meta.xp+' / '+b+' 經驗':save.meta.xp+' 經驗'}</span></div><div class="daybar" style="margin:0;height:6px"><i style="width:${b?pct(save.meta.xp,a,b):100}%;background:var(--leaf)"></i></div></div>`}
 
 /* ---------- 畫面 ---------- */
-const CS=()=>({wait:'線上存檔連線中…',ok:'進度會自動存到線上。',off:'連不上線上存檔，進度只存在這台裝置。',err:'線上存檔失敗，下次操作時會再試。'}[cloud.state]);
+const CS=()=>({wait:'自動雲端紀錄同步中…',ok:'自動雲端紀錄已同步。',off:'目前連不上雲端，紀錄先存在這台裝置，恢復連線後會自動補上。',err:'雲端紀錄上傳失敗，會自動再試。'}[cloud.state]);
 function hud(){const bags=S.inv.reduce((s,l)=>s+l.bags,0);
   return `<div class="hud"><div class="cells g4">
   <div><div class="k">資金</div><div class="v">${$(S.cash)}</div></div>
@@ -514,9 +514,9 @@ function vIntro(){let g=null;try{g=save.game&&JSON.parse(save.game)}catch(e){}
   <div class="tmenu">
    ${P.list.length?`<button class="primary" data-a="players">繼續遊戲<span>從紀錄選擇${g?`・${esc(pl.n)} 剩 ${g.days} 天`:''}</span></button>`:''}
    <button class="${P.list.length?'':'primary'}" data-a="newgame">新遊戲</button>
-   <div class="trow"><button data-a="meta">生涯・圖鑑・故事</button><button data-a="tut">新手教學</button></div>
+   <div class="trow"><button data-a="meta">生涯・圖鑑・故事</button><button data-a="tut">新手教學</button>${GOK&&G.state!=='on'?'<button data-a="players">Google 備份</button>':''}</div>
    <div class="tstat"><div class="row between"><b>${pl?esc(pl.n)+'　':''}Lv ${lv}　${LVN[lv-1]}</b><span class="num">${save.best!==null?'最佳 '+$(save.best)+'・':''}${save.seasons} 季</span></div>
-    <div class="tbar"><i style="width:${b?pct(save.meta.xp,a,b):100}%"></i></div><div class="tcloud">${pl?CS():'輸入名字後，進度會存到線上，換裝置也能接著玩。'}</div></div></div></div>`}
+    <div class="tbar"><i style="width:${b?pct(save.meta.xp,a,b):100}%"></i></div><div class="tcloud">${pl?CS():'輸入名字後，進度會存到線上，換裝置也能接著玩。'}${GOK?'　Google 備份：'+{off:'未連上',busy:'連線中',on:'自動備份中',relink:'需要重新連線',err:'連線失敗'}[G.state]:''}</div></div></div></div>`}
 function vBrief(){const first=save.seasons===0, c=CH.find(x=>x[0]===S.ch);
   return `<div class="hero stack" style="padding-top:24px"><div class="eyebrow">${S.month} 月・季前會議</div><h1>${first?STORY[0][0]:'新的一季'}</h1></div>
   <div class="stack">${first?STORY[0][1].map(l=>say(l[0],l[1],l[2])).join('')+'<hr>':''}
@@ -690,7 +690,7 @@ const net={ready:(async()=>{try{if(window.claude){const d=await window.claude.us
   async get(col,k){if(dbc){const s=await dbc.doc(col+'/'+k).get();return s.exists?JSON.parse(JSON.stringify(s.data())):null}
     const r=await fetch(`${FB}/${col}/${k}.json`);if(!r.ok)throw 0;return await r.json()},
   async set(col,k,d){if(dbc)return dbc.doc(col+'/'+k).set(d);
-    const r=await fetch(`${FB}/${col}/${k}.json`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});if(!r.ok)throw 0},
+    const b=JSON.stringify(d),r=await fetch(`${FB}/${col}/${k}.json`,{method:'PUT',headers:{'Content-Type':'application/json'},body:b,keepalive:b.length<20000});if(!r.ok)throw 0},
   async list(col){if(dbc){const q=await dbc.collection(col).limit(300).get();return q.docs.map(d=>JSON.parse(JSON.stringify(d.data())))}
     const r=await fetch(`${FB}/${col}.json`);if(!r.ok)throw 0;return Object.values(await r.json()||{})}};
 const curP=()=>P.list.find(p=>p.k===P.cur)||null;
@@ -710,10 +710,10 @@ function flush(force){const pl=curP();if(!pl)return;if(!force&&cloud.busy){cloud
   const k=pl.k,body={n:pl.n,best:save.best,seasons:save.seasons,game:save.game,at:save.at,meta:JSON.parse(JSON.stringify(save.meta))},
     row={n:pl.n,ph:pl.ph||'',best:save.best,seasons:save.seasons,lv:level(),xp:save.meta.xp,at:save.at};
   net.ready.then(()=>Promise.all([net.set('saves',k,body),net.set('board',k,row)]))
-   .then(()=>{if(P.cur===k&&cloud.state!=='ok'){cloud.state='ok';if(!S)render()}},()=>{if(P.cur===k)cloud.state='err'})
+   .then(()=>{cloud.need=false;cloud.syncAt=Date.now();if(P.cur===k&&cloud.state!=='ok'){cloud.state='ok';if(!S)render()}},()=>{cloud.need=true;if(P.cur===k)cloud.state='err'})
    .then(()=>{if(force)return;cloud.busy=false;if(cloud.dirty){cloud.dirty=false;flush()}})}
-function persist(){if(!P.cur)return;if(S)save.game=pack();const k=keyOf();if(k===lastKey)return;lastKey=k;save.at=Date.now();
-  writeLocal();clearTimeout(cloud.timer);cloud.timer=setTimeout(flush,900)}
+function persist(){if(!P.cur)return;if(S)save.game=pack();const k=keyOf();if(k===lastKey){if(cloud.need){clearTimeout(cloud.timer);cloud.timer=setTimeout(flush,900)}return}lastKey=k;save.at=Date.now();
+  writeLocal();clearTimeout(cloud.timer);cloud.timer=setTimeout(()=>{cloud.timer=0;flush()},900);gQueue()}
 function merge(d){const localNewer=save.at>(d.at||0),best=[save.best,d.best].filter(x=>typeof x==='number');
   save.best=best.length?Math.max(...best):null;save.seasons=Math.max(save.seasons,d.seasons||0);
   if(d.meta&&(+d.meta.xp||0)>=save.meta.xp&&!(S&&S.res))save.meta=metaOf(d.meta);
@@ -722,10 +722,15 @@ function merge(d){const localNewer=save.at>(d.at||0),best=[save.best,d.best].fil
 async function pull(k){cloud.state='wait';
   try{await net.ready;const d=await net.get('saves',k);if(P.cur!==k)return;
     if(d){const push=merge(d),key=keyOf();if(key!==lastKey||push){lastKey=key;writeLocal();if(push)flush()}}else if(save.at)flush();
-    cloud.state='ok'}catch(e){if(P.cur===k)cloud.state='off'}
+    cloud.state='ok';cloud.syncAt=Date.now()}catch(e){if(P.cur===k){cloud.state='off';if(save.at)cloud.need=true}}
   if(P.cur===k&&(!S||S.view==='world'))render()}
 function usePlayer(k){clearTimeout(cloud.timer);if(P.cur&&P.cur!==k&&save.at)flush(true);
   P.cur=k;saveP();S=null;save=readLocal(k)||blank();lastKey=keyOf();return pull(k)}
+/* 自動雲端紀錄：開啟、每次操作、換玩家、回到前景、恢復連線時都會自己同步，不用按任何按鈕 */
+function syncNow(){if(!P.cur)return;clearTimeout(cloud.timer);cloud.timer=0;if(S)flush();else pull(P.cur)}
+if(typeof addEventListener==='function'){addEventListener('online',()=>syncNow());
+  document.addEventListener('visibilitychange',()=>{if(document.hidden){if(cloud.timer){clearTimeout(cloud.timer);cloud.timer=0;flush()}if(G.timer){clearTimeout(G.timer);G.timer=0;gPush()}}
+    else if(Date.now()-(cloud.syncAt||0)>30000)syncNow()})}
 async function login(name,pin){name=String(name||'').replace(/\s+/g,' ').trim().slice(0,12);pin=String(pin||'').trim();
   if(!name){PV.msg='請輸入名字。';return}
   if(pin&&!/^\d{4}$/.test(pin)){PV.msg='密碼要剛好 4 個數字，或是留空不設密碼。';return}
@@ -755,10 +760,58 @@ function vPlayers(){const lvOf=xp=>LV.filter(x=>x<=xp).length, nw=PV.mode==='new
    ${PV.msg?`<div class="msg">${PV.msg}</div>`:''}
    <button class="primary" data-a="login" ${PV.busy?'disabled':''}>${PV.busy?'連線中…':nw?'建立並開始':'登入'}</button>
    <p class="small muted">新名字會直接建立；用過的名字會接回原本的紀錄，換手機也一樣。名字會出現在排行榜上，建議用暱稱。密碼只是避免別人誤用你的名字，保護力不高，請不要用重要的密碼。</p></div>
-  <h3>排行榜</h3><div class="card">${board}</div></div>`}
+  ${gCard()}<h3>排行榜</h3><div class="card">${board}</div></div>`}
 try{const d=JSON.parse(localStorage.getItem(LSP)||'null');if(d&&Array.isArray(d.list))P={cur:d.list.some(p=>p.k===d.cur)?d.cur:null,list:d.list.filter(p=>p&&p.k&&p.n)}}catch(e){}
 if(P.cur){save=readLocal(P.cur)||blank();setTimeout(()=>pull(P.cur),0)}
 lastKey=keyOf();
+
+/* ---------- Google 雲端硬碟自動備份（只在 github.io 網址可用） ---------- */
+const GOK=typeof location!=='undefined'&&/github\.io$/.test(location.hostname);
+const GCLIENT='267421312122-l2ggo7t35tqpf8ej5osqttt08ke30lr1.apps.googleusercontent.com', GFILE='beanhunter.json', GAPI='https://www.googleapis.com';
+let G={state:'off',note:'',tok:null,exp:0,file:null,client:null,timer:0};
+const gLinked=()=>{try{return localStorage.getItem('beanhunter-g')==='1'}catch(e){return false}};
+const gTime=()=>new Date().toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'});
+const gShow=()=>{if(!S||PV.on)render()};
+const mergeSave=(a,b)=>{const n=a.at>=b.at?a:b,bs=[a.best,b.best].filter(x=>typeof x==='number');
+  return {best:bs.length?Math.max(...bs):null,seasons:Math.max(a.seasons,b.seasons),game:n.game,at:n.at,meta:metaOf((b.meta.xp>a.meta.xp?b:a).meta)}};
+function gLoadLib(){return new Promise((ok,no)=>{if(window.google&&google.accounts&&google.accounts.oauth2)return ok();
+  const sc=document.createElement('script');sc.src='https://accounts.google.com/gsi/client';sc.onload=()=>ok();sc.onerror=()=>no(new Error('lib'));document.head.appendChild(sc)})}
+async function gFetch(url,opt={}){if(!G.tok||Date.now()>G.exp)throw new Error('auth');
+  const r=await fetch(url,Object.assign({},opt,{headers:Object.assign({Authorization:'Bearer '+G.tok},opt.headers||{})}));
+  if(r.status===401){G.tok=null;throw new Error('auth')}if(!r.ok)throw new Error('http '+r.status);return r}
+async function gFind(){const r=await gFetch(GAPI+'/drive/v3/files?spaces=appDataFolder&fields=files(id)&q='+encodeURIComponent("name='"+GFILE+"'"));
+  const j=await r.json();return j.files&&j.files[0]?j.files[0].id:null}
+async function gWrite(){const body=JSON.stringify({v:1,savedAt:Date.now(),players:P.list.map(p=>({k:p.k,n:p.n,ph:p.ph||'',save:p.k===P.cur?save:readLocal(p.k)||blank()}))});
+  if(G.file)return gFetch(GAPI+'/upload/drive/v3/files/'+G.file+'?uploadType=media',{method:'PATCH',headers:{'Content-Type':'application/json'},body});
+  const b='bh'+Date.now(),meta=JSON.stringify({name:GFILE,parents:['appDataFolder']});
+  const mp='--'+b+'\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n'+meta+'\r\n--'+b+'\r\nContent-Type: application/json\r\n\r\n'+body+'\r\n--'+b+'--';
+  const r=await gFetch(GAPI+'/upload/drive/v3/files?uploadType=multipart&fields=id',{method:'POST',headers:{'Content-Type':'multipart/related; boundary='+b},body:mp});
+  G.file=(await r.json()).id}
+function gExpired(){G.state='relink';G.note='Google 連線過期了。進度仍會存在這台裝置和線上存檔，重新連上後會補上備份。'}
+function gPush(){if(G.state!=='on')return;if(!G.tok||Date.now()>G.exp){gExpired();gShow();return}
+  gWrite().then(()=>{G.note='已自動備份到 Google 雲端硬碟　'+gTime()},e=>{if(e.message==='auth')gExpired();else G.note='Google 備份失敗，下次操作時會再試。'}).then(gShow)}
+function gQueue(){if(G.state!=='on')return;clearTimeout(G.timer);G.timer=setTimeout(()=>{G.timer=0;gPush()},1500)}
+async function gAfter(){G.state='busy';G.note='正在讀取 Google 雲端的紀錄…';gShow();
+  try{G.file=await gFind();let d=null,got=0;if(G.file){const r=await gFetch(GAPI+'/drive/v3/files/'+G.file+'?alt=media');d=await r.json().catch(()=>null)}
+    if(d&&Array.isArray(d.players))for(const rp of d.players){if(!rp||typeof rp.k!=='string'||typeof rp.n!=='string')continue;
+      const rs=shape(rp.save||{}),lp=P.list.find(p=>p.k===rp.k),put=(k,v)=>{try{localStorage.setItem(lsKey(k),JSON.stringify(v))}catch(e){}};
+      if(!lp){P.list.push({k:rp.k,n:rp.n.slice(0,12),ph:rp.ph||''});put(rp.k,rs);got++}
+      else if(rp.k===P.cur){const m=mergeSave(save,rs);if(S){m.game=save.game;m.at=save.at}save=m;lastKey=keyOf();writeLocal()}
+      else put(rp.k,mergeSave(readLocal(rp.k)||blank(),rs))}
+    saveP();try{localStorage.setItem('beanhunter-g','1')}catch(e){}
+    await gWrite();G.state='on';G.note=(got?`從 Google 接回 ${got} 位玩家的紀錄。`:'')+'已自動備份到 Google 雲端硬碟　'+gTime()
+  }catch(e){if(e.message==='auth')gExpired();else{G.state='err';G.note='讀取 Google 雲端失敗，紀錄仍在這台裝置。請再點一次按鈕。'}}
+  gShow()}
+async function gLogin(){G.state='busy';G.note='';gShow();
+  if(!(window.google&&google.accounts&&google.accounts.oauth2)){try{await gLoadLib()}catch(e){G.state='err';G.note='無法載入 Google 登入，請確認網路後再試。';gShow();return}}
+  if(!G.client)G.client=google.accounts.oauth2.initTokenClient({client_id:GCLIENT,scope:'https://www.googleapis.com/auth/drive.appdata',
+    callback:t=>{if(t&&t.access_token){G.tok=t.access_token;G.exp=Date.now()+((+t.expires_in||3600)-120)*1000;gAfter()}else{G.state='err';G.note='Google 登入沒有完成，請再試一次。';gShow()}},
+    error_callback:()=>{G.state=gLinked()?'relink':'off';G.note='Google 登入被取消或被擋住了。請允許彈出視窗後再點一次。';gShow()}});
+  G.client.requestAccessToken({prompt:gLinked()?'':'consent'})}
+if(GOK&&gLinked()){G.state='relink';G.note='點按鈕連回 Google，就會繼續自動備份。'}
+const gCard=()=>!GOK?'':`<div class="card stack"><div class="row between"><h3>Google 雲端自動備份</h3>${G.state==='on'?'<span class="tag hit">已連上</span>':G.state==='relink'?'<span class="tag late">需要重新連線</span>':''}</div>
+  ${G.state==='on'?'':`<button data-a="glogin" ${G.state==='busy'?'disabled':''}>${G.state==='busy'?'連線中…':G.state==='relink'?'點這裡連回 Google':'連上 Google，開始自動備份'}</button>`}
+  <p class="small muted">${G.note||'連上後，這台裝置上所有玩家的紀錄，每次變動都會自動存到你自己的 Google 雲端硬碟（隱藏的 App 資料夾，別人看不到）。換手機連上同一個 Google 帳號，就會把紀錄接回來。'}</p></div>`;
 
 /* ---------- 教學 ---------- */
 let T={on:false,step:0,cup:null};
@@ -866,6 +919,7 @@ const A={
  newas(d){const s=d.k===P.cur?save:readLocal(d.k);if(s&&s.game&&PV.sure!==d.k){PV.sure=d.k;return}
   if(d.k!==P.cur)usePlayer(d.k);PV.on=false;newGame();M.on=false;window.scrollTo(0,0)},
  pclose(){PV.on=false},
+ glogin(){gLogin()},
  pick(d){if(d.k!==P.cur)usePlayer(d.k);PV.on=false;if(save.game){try{S=unpack(save.game)}catch(e){save.game=null}}window.scrollTo(0,0)},
  forget(d){if(d.k===P.cur)return;P.list=P.list.filter(p=>p.k!==d.k);saveP();try{localStorage.removeItem(lsKey(d.k))}catch(e){}},
  login(){const v=id=>{const el=document.getElementById(id);return el&&el.value||''},n=v('pname'),p=v('ppin');PV.busy=true;PV.msg='';
