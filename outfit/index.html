@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="穿搭試衣間">
 <meta name="theme-color" content="#2f3a4a">
-<meta name="app-version" content="1.5">
+<meta name="app-version" content="1.6">
 <title>穿搭試衣間</title>
 <style>
 :root{--bg:#f4f1ec;--card:#fff;--ink:#23201d;--mute:#857b70;--line:#e5ddd2;--accent:#2f3a4a;--hot:#c8553d;--soft:#ece6dc;--ok:#2f8f5b}
@@ -40,6 +40,9 @@ h2{font-size:14px;margin:16px 2px 8px;color:var(--mute);font-weight:600}
 .stage .side{position:absolute;right:8px;top:8px;display:flex;flex-direction:column;gap:6px}
 .stage .side button{font:inherit;font-size:12px;border:1px solid var(--line);background:rgba(255,255,255,.92);border-radius:10px;padding:6px 8px;cursor:pointer;min-width:54px}
 .stage .side button.on{background:var(--accent);color:#fff}
+.stage .turn{position:absolute;left:50%;bottom:8px;transform:translateX(-50%);font:inherit;font-size:13px;font-weight:600;border:1px solid var(--line);background:rgba(255,255,255,.94);border-radius:16px;padding:6px 14px;cursor:pointer}
+.stage svg.flip{animation:flip .45s ease}
+@keyframes flip{0%{transform:scaleX(1)}50%{transform:scaleX(.02)}100%{transform:scaleX(1)}}
 .stage .who{position:absolute;left:10px;top:8px;font-size:12px;color:var(--mute);background:rgba(255,255,255,.8);border-radius:10px;padding:3px 8px}
 .rail{display:flex;gap:8px;overflow-x:auto;padding:2px 0 8px}
 .it{flex:none;width:92px;background:#fff;border:2px solid var(--line);border-radius:12px;padding:4px;cursor:pointer;text-align:center;position:relative}
@@ -209,13 +212,23 @@ function drawBody(g,skin,p){
   const cy=g.top+g.headH/2,fp=p||{};
   for(const s of[1,-1])o.push(`<ellipse cx="${f1(s*g.headW/2)}" cy="${f1(cy+2)}" rx="2.4" ry="4.5" fill="${skin}" stroke="${st}" stroke-width=".8"/>`);
   const hd=headPath(g,fp.faceShape);o.push(P(hd,skin,st,.8),`<path d="${hd}" fill="url(#sh-h)" opacity=".6"/>`);
-  if(p)o.push(drawFace(g,p,skin));
+  if(p&&!g.back)o.push(drawFace(g,p,skin));
   return o.join('');}
 
 function drawHair(g,p,hat){
   const style=p.hair||'short',bang=p.bang||'std',c=p.hairColor||'#2b2420';
   const t=g.top,w=g.headW,h=g.headH,st=shade(c,-.25),back=[],front=[],hi=shade(c,.16);
   if(style==='bald')return{back:'',front:''};
+  if(g.back){const o=[],bz=style==='buzz',nape=bz?.7:style==='short'||style==='curly'||style==='bun'||style==='pony'?.84:.9;
+    o.push(P(sp(mir([[0,t-(bz?.5:1.6)*K],[w*.5+(bz?.2:1)*K,t+h*.2],[w*.5+(bz?.1:.8)*K,t+h*.6],[w*.34,t+h*nape],[0,t+h*(nape+.05)]])),c,st,.8,bz?'opacity=".85"':''));
+    if(style==='long')o.push(P(sp(mir([[0,t+h*.3],[w*.5+1.6*K,t+h*.3],[w*.5+2.4*K,g.chin],[w*.5+2.2*K,g.chestY-1*K],[w*.3,g.chestY+2*K],[0,g.chestY+2.6*K]])),c,st,.8));
+    if(style==='wavy'){const R=[[0,t+h*.3],[w*.5+1.8*K,t+h*.3]];for(let i=0;i<5;i++)R.push([w*.5+(i%2?1.4:3)*K,lerp(g.chin-h*.2,g.chestY,i/4)]);R.push([w*.25,g.chestY+2.2*K],[0,g.chestY+1.4*K]);o.push(P(sp(mir(R)),c,st,.8));}
+    if(style==='bob')o.push(P(sp(mir([[0,t+h*.3],[w*.5+1.8*K,t+h*.3],[w*.5+2*K,g.chin-1*K],[w*.5+.4*K,g.chin+1.6*K],[0,g.chin+2*K]])),c,st,.8));
+    if(style==='pony')o.push(P(sp(mir([[0,t+h*.42],[2.4*K,t+h*.6],[2.8*K,g.shY+2*K],[0,g.shY+g.slope+5*K,1]])),c,st,.8),`<rect x="${f1(-1.6*K)}" y="${f1(t+h*.42)}" width="${f1(3.2*K)}" height="${f1(1.4*K)}" rx="2" fill="${shade(c,-.4)}"/>`);
+    if(style==='curly'&&!hat)for(let a=0;a<=7;a++){const an=Math.PI*a/7;o.push(`<circle cx="${f1(Math.cos(an)*(w*.5+.5*K))}" cy="${f1(t+h*.26-Math.sin(an)*(h*.26+1.2*K))}" r="${f1(2.5*K)}" fill="${c}" stroke="${st}" stroke-width=".6"/>`);}
+    if(style==='bun'&&!hat)o.push(`<circle cx="0" cy="${f1(t-3.4*K)}" r="${f1(3.2*K)}" fill="${c}" stroke="${st}" stroke-width=".8"/>`);
+    if(!bz)o.push(`<path d="M${f1(-w*.22)},${f1(t+h*.1)} Q0,${f1(t+h*.02)} ${f1(w*.22)},${f1(t+h*.1)}" fill="none" stroke="${hi}" stroke-width="1.3" stroke-linecap="round" opacity=".6"/>`);
+    return{back:'',front:o.join('')};}
   if(style==='long')back.push(P(sp(mir([[0,t-1.5*K],[w*.5+1.6*K,t+h*.25],[w*.5+2.4*K,g.chin],[w*.5+2.2*K,g.chestY-1*K,1]])),c,st,.8));
   if(style==='wavy'){const R=[[0,t-1.5*K],[w*.5+1.8*K,t+h*.25]];for(let i=0;i<5;i++)R.push([w*.5+(i%2?1.4:3)*K,lerp(g.chin-h*.2,g.chestY,i/4),i===4?1:0]);back.push(P(sp(mir(R)),c,st,.8));}
   if(style==='bob')back.push(P(sp(mir([[0,t-1.5*K],[w*.5+1.8*K,t+h*.3],[w*.5+2*K,g.chin-1*K],[w*.5+.6*K,g.chin+1.4*K,1]])),c,st,.8));
@@ -240,7 +253,9 @@ function sleevePath(g,s,len,extra,drop){
   return sp([[s*(x0+drop*.3-g.ua*.1),y0-(g.ua/2+extra*.5)*.6],...R,...L.reverse()]);}
 
 function drawTop(g,it,c,outer){
-  const st=strokeOf(c),o=[],det=it.det||[],neck=it.neck||'crew',sl=it.slv||'none';
+  const B=g.back,FR=['buttons','placket','zip','zipdiag','pocket','chestpocket','pocket2','kangaroo','print','bear','double','snaps'];
+  if(B)it=Object.assign({},it,{open:0});
+  const st=strokeOf(c),o=[],det=(it.det||[]).filter(x=>!B||!FR.includes(x)),neck=it.neck||'crew',sl=it.slv||'none';
   const fit={slim:.35,regular:1.1,over:3.2}[it.fit||'regular']*K*(outer?1.15:1)+(outer?.7*K:0);
   const drop=(it.fit==='over'?2*K:0)+(outer?.5*K:.1*K);
   let nw=g.neckW/2+({crew:1.3,v:1.3,boat:4.2,collar:.7,camp:1.4,turtle:.3,hood:1.6,lapel:1.2,stand:.8}[neck]||1.3)*K;
@@ -267,8 +282,8 @@ function drawTop(g,it,c,outer){
   let vY=0,gap=0;
   if(it.open){gap=(it.gap==null?2.2:it.gap)*K;vY=ny+(g.waistY-ny)*(it.vy||.15);
     for(const s of[1,-1])bodies.push(sp([[s*nw,ny,1],...side.map(p=>[s*p[0],p[1],p[2]]),[s*gap*1.15,hemY,1],[s*gap,vY,1]]));}
-  else{const dep={crew:2.4,v:it.vdeep||9,boat:1.1,collar:2,camp:5,turtle:1.5,hood:3.2,stand:1.4,lapel:6}[neck]*K;
-    bodies.push(sp(mir([[0,ny+dep,neck==='v'||neck==='camp'?1:0],[nw,ny,1],...side])));}
+  else{const dep=B?.9*K:{crew:2.4,v:it.vdeep||9,boat:1.1,collar:2,camp:5,turtle:1.5,hood:3.2,stand:1.4,lapel:6}[neck]*K;
+    bodies.push(sp(mir([[0,ny+dep,!B&&(neck==='v'||neck==='camp')?1:0],[nw,ny,1],...side])));}
   sleeves.forEach(d=>o.push(P(d,c,st)));bodies.forEach(d=>o.push(DS(d)));bodies.forEach(d=>o.push(P(d,c,st)));
   const pat=det.includes('stripe')?(lum(c)>.5?'p-stripe-d':'p-stripe-l'):det.includes('plaid')?'p-plaid':det.includes('knit')?'p-knit':det.includes('quilt')?'p-quilt':det.includes('floral')?'p-floral':'';
   if(pat)[...sleeves,...bodies].forEach(d=>o.push(P(d,`url(#${pat})`,'none')));
@@ -279,12 +294,18 @@ function drawTop(g,it,c,outer){
   const dk=shade(c,lum(c)<.22?.22:-.14),lt=lum(c)>.8?shade(c,-.3):'#fff';
   if(slen>=.7&&(det.includes('cuff')||it.rib))for(const s of[1,-1]){const[x,y]=g.arm(slen-.07),hw=g.armW(1)/2+fit*.4;o.push(LN(s*(x-hw),y,s*(x+hw),y,st,1));}
   if(it.rib)o.push(LN(-hemW+1,hemY-2.2*K,hemW-1,hemY-2.2*K,st,1));
-  if(neck==='collar'||neck==='camp'){const cl=neck==='camp'?5.5:4;for(const s of[1,-1])o.push(P(sp([[s*(nw-.2*K),ny-1*K,1],[s*(it.open?Math.max(gap,.3*K):.3*K),ny+(neck==='camp'?4.5:1.9)*K,1],[s*(nw+1.6*K),ny+cl*K,1]]),shade(c,lum(c)<.22?.12:.06),st));}
+  if(B){
+    if(neck==='collar'||neck==='camp'||neck==='lapel')o.push(P(sp(mir([[0,ny-1.6*K],[nw+.3*K,ny-1.2*K,1],[nw+.6*K,ny+1.1*K,1],[0,ny+2*K]])),shade(c,lum(c)<.22?.12:.06),st));
+    if(neck==='hood')o.push(P(sp(mir([[0,ny-1.2*K],[nw+1.4*K,ny-.6*K],[nw+2.4*K,ny+5*K],[nw*.5,ny+10*K],[0,ny+11*K]])),dk,st),SH(sp(mir([[0,ny-1.2*K],[nw+1.4*K,ny-.6*K],[nw+2.4*K,ny+5*K],[nw*.5,ny+10*K],[0,ny+11*K]]))));
+    if(neck==='collar'&&slen)o.push(FD(`M${f1(-apx+1.5*K)},${f1(ny+5*K)} Q0,${f1(ny+6.2*K)} ${f1(apx-1.5*K)},${f1(ny+5*K)}`,st,.55));
+    if(neck==='lapel'){o.push(LN(0,ny+2.2*K,0,hemY,st,.9,'opacity=".6"'));o.push(LN(0,hemY-Math.min(9*K,(hemY-g.waistY)*.6),0,hemY,st,1.3));}
+  }
+  if(!B&&(neck==='collar'||neck==='camp')){const cl=neck==='camp'?5.5:4;for(const s of[1,-1])o.push(P(sp([[s*(nw-.2*K),ny-1*K,1],[s*(it.open?Math.max(gap,.3*K):.3*K),ny+(neck==='camp'?4.5:1.9)*K,1],[s*(nw+1.6*K),ny+cl*K,1]]),shade(c,lum(c)<.22?.12:.06),st));}
   if(neck==='turtle'){const x=g.neckW/2+.9*K,y0=g.chin+.6*K;o.push(`<rect x="${f1(-x)}" y="${f1(y0)}" width="${f1(2*x)}" height="${f1(ny+1.8*K-y0)}" rx="3" fill="${c}" stroke="${st}"/>`);}
   if(neck==='stand'){const x=nw+.2*K,y0=ny-2.4*K;o.push(`<rect x="${f1(-x)}" y="${f1(y0)}" width="${f1(2*x)}" height="${f1(3.4*K)}" rx="3" fill="${dk}" stroke="${st}"/>`);}
-  if(neck==='hood'){o.push(P(sp(mir([[0,ny+3.6*K],[nw+.8*K,ny+1.2*K],[nw+2.2*K,ny-1.6*K],[nw+.4*K,ny-3.2*K,1],[nw-1.2*K,ny-.6*K],[0,ny+1.6*K]])),dk,st));
+  if(!B&&neck==='hood'){o.push(P(sp(mir([[0,ny+3.6*K],[nw+.8*K,ny+1.2*K],[nw+2.2*K,ny-1.6*K],[nw+.4*K,ny-3.2*K,1],[nw-1.2*K,ny-.6*K],[0,ny+1.6*K]])),dk,st));
     if(!det.includes('zip'))for(const s of[1,-1])o.push(LN(s*1.1*K,ny+3.4*K,s*1.3*K,ny+9*K,lt,1.3));}
-  if(neck==='lapel'&&it.open)for(const s of[1,-1])o.push(P(sp([[s*nw,ny,1],[s*Math.min(sx*.8,nw+4.6*K),lerp(ny,vY,.42),1],[s*(gap+.2*K),vY,1],[s*(gap+.1*K),lerp(ny,vY,.45)]]),dk,st));
+  if(!B&&neck==='lapel'&&it.open)for(const s of[1,-1])o.push(P(sp([[s*nw,ny,1],[s*Math.min(sx*.8,nw+4.6*K),lerp(ny,vY,.42),1],[s*(gap+.2*K),vY,1],[s*(gap+.1*K),lerp(ny,vY,.45)]]),dk,st));
   const cy0=it.open?vY+1.5*K:ny+(neck==='collar'?3:4)*K;
   if(det.includes('buttons')){const x=it.open?gap+1.2*K:0;if(!it.open)o.push(LN(0,ny+2*K,0,hemY,st,.9));for(let y=cy0;y<hemY-1.5*K;y+=5.5*K)o.push(`<circle cx="${f1(x)}" cy="${f1(y)}" r="1.5" fill="${lt}" stroke="${st}" stroke-width=".6"/>`);}
   if(det.includes('double'))for(let y=vY+2*K;y<Math.min(hemY,g.hipY)-1*K;y+=6*K)for(const s of[1,-1])o.push(`<circle cx="${f1(s*3.2*K)}" cy="${f1(y)}" r="1.7" fill="${dk}" stroke="${st}" stroke-width=".6"/>`);
@@ -299,12 +320,12 @@ function drawTop(g,it,c,outer){
   if(det.includes('bear')){const r=apx*.2,cy=g.chestY+r*.9,bc=lum(c)<.45&&hsl(c)[1]<.5?'#e9dcc6':'#a9744f';
     o.push(`<circle cx="${f1(-r*.72)}" cy="${f1(cy-r*.75)}" r="${f1(r*.38)}" fill="${bc}"/><circle cx="${f1(r*.72)}" cy="${f1(cy-r*.75)}" r="${f1(r*.38)}" fill="${bc}"/><circle cx="0" cy="${f1(cy)}" r="${f1(r)}" fill="${bc}"/><ellipse cx="0" cy="${f1(cy+r*.3)}" rx="${f1(r*.42)}" ry="${f1(r*.32)}" fill="#fff" opacity=".85"/><circle cx="${f1(-r*.38)}" cy="${f1(cy-r*.15)}" r="${f1(r*.11)}" fill="#2e2622"/><circle cx="${f1(r*.38)}" cy="${f1(cy-r*.15)}" r="${f1(r*.11)}" fill="#2e2622"/><circle cx="0" cy="${f1(cy+r*.2)}" r="${f1(r*.12)}" fill="#2e2622"/>`);}
   if(det.includes('sideline'))for(const s of[1,-1])o.push(LN(s*(apx-1.5*K),apy+1*K,s*(hemW-1.5*K),hemY-1,lt,1.6));
-  if(det.includes('belt')){o.push(`<rect x="${f1(-waW-.5)}" y="${f1(g.waistY-.9*K)}" width="${f1(2*waW+1)}" height="${f1(1.9*K)}" fill="${dk}" stroke="${st}"/>`);o.push(`<rect x="${f1(-1.4*K)}" y="${f1(g.waistY-1.2*K)}" width="${f1(2.8*K)}" height="${f1(2.5*K)}" rx="1" fill="none" stroke="${lum(c)<.3?'#ddd':'#5a4a3a'}" stroke-width="1.3"/>`);}
+  if(det.includes('belt')){o.push(`<rect x="${f1(-waW-.5)}" y="${f1(g.waistY-.9*K)}" width="${f1(2*waW+1)}" height="${f1(1.9*K)}" fill="${dk}" stroke="${st}"/>`);if(!B)o.push(`<rect x="${f1(-1.4*K)}" y="${f1(g.waistY-1.2*K)}" width="${f1(2.8*K)}" height="${f1(2.5*K)}" rx="1" fill="none" stroke="${lum(c)<.3?'#ddd':'#5a4a3a'}" stroke-width="1.3"/>`);}
   if(det.includes('snaps'))for(let y=ny+4*K;y<hemY-1.5*K;y+=5*K)o.push(`<circle cx="0" cy="${f1(y)}" r="1.4" fill="#d5d5d5"/>`);
   return o.join('');}
 
 function drawBottom(g,it,c){
-  const st=strokeOf(c),o=[],det=it.det||[],fit=it.fit||'regular';
+  const B=g.back,st=strokeOf(c),o=[],det=(it.det||[]).filter(x=>!B||x!=='drawstring'),fit=it.fit||'regular';
   const wy=g.waistY-(it.high?3*K:0),e={slim:.3,regular:.9,tapered:1.1,wide:2.6,flare:.7}[fit]*K||.9*K;
   const waW=g.wa+e*.5,lt=lum(c)>.8?shade(c,-.3):'#fff';
   if(it.kind==='skirt'){
@@ -339,7 +360,11 @@ function drawBottom(g,it,c){
       if(det.includes('denim'))o.push(`<path d="M${f1(s*waW*.5)},${f1(wy+2.2*K)} Q${f1(s*g.hi*.82)},${f1(wy+3*K)} ${f1(s*(g.hi+e*.5))},${f1(g.hipY-1.5*K)}" fill="none" stroke="${lum(c)<.3?'#888':'#c9a15a'}" stroke-width=".9"/>`);
       if(det.includes('kneeseam')&&endY>g.kneeY)o.push(LN(s*edge(g.kneeY)[0],g.kneeY-2*K,s*edge(g.kneeY)[1],g.kneeY-2*K,st,.8));
     }
-    if(det.includes('bib')){const bw=g.ch*.56,by=g.chestY-.5*K;
+    if(B&&fit!=='slim'&&it.len>.15&&!det.includes('sidestripe'))for(const s of[1,-1])o.push(`<path d="M${f1(s*g.hi*.2)},${f1(g.hipY-3.6*K)} h${f1(s*g.hi*.5)} v${f1(4*K)} l${f1(-s*g.hi*.25)},${f1(1.3*K)} l${f1(-s*g.hi*.25)},${f1(-1.3*K)} Z" fill="none" stroke="${st}" stroke-width=".9" opacity=".75"/>`);
+    if(B&&det.includes('bib')){const bw=g.ch*.34,by=g.waistY-(g.waistY-g.chestY)*.55;
+      for(const s of[1,-1])o.push(`<path d="M${f1(-s*bw*.6)},${f1(by+2)} L${f1(s*(g.neckW/2+2.4*K))},${f1(g.shY+g.slope*.25)}" stroke="${c}" stroke-width="${f1(1.7*K)}" stroke-linecap="round" fill="none"/>`);
+      o.push(`<rect x="${f1(-bw)}" y="${f1(by)}" width="${f1(2*bw)}" height="${f1(wy-by+2)}" rx="2.5" fill="${c}" stroke="${st}"/>`);}
+    if(!B&&det.includes('bib')){const bw=g.ch*.56,by=g.chestY-.5*K;
       for(const s of[1,-1])o.push(`<path d="M${f1(s*bw*.8)},${f1(by+1)} L${f1(s*(g.neckW/2+2.4*K))},${f1(g.shY+g.slope*.25)}" stroke="${c}" stroke-width="${f1(1.7*K)}" stroke-linecap="round" fill="none"/>`);
       o.push(`<rect x="${f1(-bw)}" y="${f1(by)}" width="${f1(2*bw)}" height="${f1(wy-by+2)}" rx="2.5" fill="${c}" stroke="${st}"/><rect x="${f1(-bw*.5)}" y="${f1(by+(wy-by)*.3)}" width="${f1(bw)}" height="${f1((wy-by)*.4)}" rx="1.5" fill="none" stroke="${st}" opacity=".7"/>`);
       for(const s of[1,-1])o.push(`<circle cx="${f1(s*bw*.78)}" cy="${f1(by+1.2*K)}" r="1.6" fill="#d9c58a" stroke="${st}" stroke-width=".5"/>`);}
@@ -364,7 +389,8 @@ function drawShoes(g,it,c){
     if(shaft)pts.push([X(-aw/2-1.1*K),g.ankY+.5*K]);
     {const dd=sp(pts);o.push(P(dd,c,st),SH(dd,s>0?'sh-r':'sh-l'));}
     o.push(`<rect x="${f1(Math.min(X(-W*.48),X(W*.62)))}" y="${f1(by)}" width="${f1(W*1.1)}" height="${f1(sole)}" rx="2" fill="${sc}" stroke="${st}" stroke-width=".8"/>`);
-    const det=it.det||[];
+    const det=g.back?[]:(it.det||[]);
+    if(g.back)o.push(LN(X(-.2*K),topY+1,X(-.2*K),by-1,st,.9,'opacity=".5"'));
     if(det.includes('toecap'))o.push(`<path d="M${f1(X(-W*.4))},${f1(by)} Q${f1(X(W*.08))},${f1(by-4.4*K)} ${f1(X(W*.55))},${f1(by)} Z" fill="#f3f0e9" stroke="${st}" stroke-width=".7"/>`);
     if(det.includes('laces'))for(let y=topY+1.2*K,i=0;y<by-2.6*K&&i<6;y+=1.7*K,i++)o.push(LN(X(-1.3*K),y,X(1.6*K),y,lt,1.1));
     if(det.includes('stripe'))o.push(LN(X(W*.1),by-3.6*K,X(W*.45),by-.6*K,lt,1.8));
@@ -382,7 +408,7 @@ function drawSocks(g,c,h){const st=strokeOf(c),o=[],y0=g.ankY-h*K;
 
 function drawHat(g,it,c){
   const t=g.top,w=g.headW,h=g.headH,st=strokeOf(c),dk=shade(c,lum(c)<.22?.2:-.15),o=[],hw=w*.5+1.2*K;
-  if(it.kind==='cap'){o.push(P(sp(mir([[0,t-2*K],[hw,t+h*.2],[hw+.2*K,t+h*.36,1]])),c,st));o.push(`<ellipse cx="0" cy="${f1(t+h*.37)}" rx="${f1(w*.6)}" ry="${f1(h*.065)}" fill="${dk}" stroke="${st}"/>`);o.push(`<circle cx="0" cy="${f1(t-2*K)}" r="1.6" fill="${dk}"/>`);}
+  if(it.kind==='cap'){o.push(P(sp(mir([[0,t-2*K],[hw,t+h*.2],[hw+.2*K,t+h*.36,1]])),c,st));o.push(g.back?`<path d="M${f1(-w*.2)},${f1(t+h*.36)} Q0,${f1(t+h*.2)} ${f1(w*.2)},${f1(t+h*.36)}" fill="none" stroke="${st}" stroke-width="1.6"/>`:`<ellipse cx="0" cy="${f1(t+h*.37)}" rx="${f1(w*.6)}" ry="${f1(h*.065)}" fill="${dk}" stroke="${st}"/>`);o.push(`<circle cx="0" cy="${f1(t-2*K)}" r="1.6" fill="${dk}"/>`);}
   if(it.kind==='beanie'){o.push(P(sp(mir([[0,t-3.4*K],[hw+.3*K,t+h*.14],[hw+.3*K,t+h*.34,1]])),c,st));o.push(`<rect x="${f1(-hw-.8*K)}" y="${f1(t+h*.26)}" width="${f1(2*hw+1.6*K)}" height="${f1(h*.18)}" rx="4" fill="${dk}" stroke="${st}"/><rect x="${f1(-hw-.8*K)}" y="${f1(t+h*.26)}" width="${f1(2*hw+1.6*K)}" height="${f1(h*.18)}" rx="4" fill="url(#p-knit)"/>`);}
   if(it.kind==='bucket'){o.push(P(sp(mir([[0,t+h*.5],[hw+5*K,t+h*.47,1],[hw+.2*K,t+h*.27,1]])),dk,st));o.push(P(sp(mir([[0,t-2*K],[hw-.2*K,t+h*.02],[hw+.3*K,t+h*.3,1]])),c,st));}
   if(it.kind==='fedora'||it.kind==='straw'){const bw=it.kind==='straw'?9:5.5;o.push(`<ellipse cx="0" cy="${f1(t+h*.3)}" rx="${f1(hw+bw*K)}" ry="${f1((it.kind==='straw'?2.6:2)*K)}" fill="${dk}" stroke="${st}"/>`);
@@ -391,7 +417,11 @@ function drawHat(g,it,c){
   return o.join('');}
 
 function drawAcc(g,it,c,ctx){
-  const st=strokeOf(c),o=[],k=it.kind,ny=g.shY-1.3*K;
+  const st=strokeOf(c),o=[],k=it.kind,ny=g.shY-1.3*K,B=g.back;
+  if(B&&(k==='glasses'||k==='sun'||k==='tie'||k==='necklace'))return'';
+  if(B&&k==='backpack'){const bw=g.ch*.78,y0=g.shY+g.slope*.5,y1=g.waistY+2.5*K,d2=sp(mir([[0,y0-1.2*K],[bw*.8,y0],[bw,y0+4*K],[bw,y1-2*K],[bw*.8,y1],[0,y1+.5*K]]));
+    return`<path d="M${f1(-2*K)},${f1(y0-.6*K)} Q0,${f1(y0-4*K)} ${f1(2*K)},${f1(y0-.6*K)}" fill="none" stroke="${st}" stroke-width="2"/>`+P(d2,c,st)+SH(d2)+`<rect x="${f1(-bw*.62)}" y="${f1(lerp(y0,y1,.52))}" width="${f1(bw*1.24)}" height="${f1((y1-y0)*.34)}" rx="4" fill="${shade(c,lum(c)<.22?.14:-.1)}" stroke="${st}"/>`+LN(-bw*.7,y0+3.4*K,bw*.7,y0+3.4*K,st,1,'opacity=".6"');}
+  if(B&&k==='scarf'){const x=g.neckW/2+2.4*K;return`<rect x="${f1(-x)}" y="${f1(g.chin+.3*K)}" width="${f1(2*x)}" height="${f1(g.shY-g.chin+2.2*K)}" rx="${f1(2.4*K)}" fill="${c}" stroke="${st}"/><rect x="${f1(-x)}" y="${f1(g.chin+.3*K)}" width="${f1(2*x)}" height="${f1(g.shY-g.chin+2.2*K)}" rx="${f1(2.4*K)}" fill="url(#p-knit)"/>`;}
   if(k==='glasses'||k==='sun'){const ey=g.top+g.headH*.52,ex=g.headW*.21,r=g.headW*.17;
     for(const s of[1,-1])o.push(`<rect x="${f1(s*ex-r)}" y="${f1(ey-r*.75)}" width="${f1(2*r)}" height="${f1(r*1.5)}" rx="${f1(r*.5)}" fill="${k==='sun'?c:'rgba(255,255,255,.25)'}" stroke="${k==='sun'?st:c}" stroke-width="1.4"/>`);
     o.push(LN(-ex+r,ey,ex-r,ey,k==='sun'?st:c,1.3));}
@@ -402,13 +432,13 @@ function drawAcc(g,it,c,ctx){
   if(k==='cross'){const bx=-(g.hi+1.5*K),byy=g.hipY-3*K;o.push(LN(g.sh*.62,g.shY,bx+3*K,byy,shade(c,-.2),1.3*K));o.push(`<rect x="${f1(bx-3.5*K)}" y="${f1(byy-1*K)}" width="${f1(9.5*K)}" height="${f1(7*K)}" rx="4" fill="${c}" stroke="${st}"/>`);o.push(LN(bx-3.5*K,byy+1.6*K,bx+6*K,byy+1.6*K,st,.9));}
   if(k==='tote'){const[hx,hy]=g.arm(1.08);o.push(`<path d="M${f1(hx-3*K)},${f1(hy+7*K)} Q${f1(hx)},${f1(hy-3*K)} ${f1(hx+3*K)},${f1(hy+7*K)}" fill="none" stroke="${shade(c,-.25)}" stroke-width="2"/>`);o.push(`<rect x="${f1(hx-5.5*K)}" y="${f1(hy+6*K)}" width="${f1(11*K)}" height="${f1(12*K)}" rx="2" fill="${c}" stroke="${st}"/>`);}
   if(k==='backpack')for(const s of[1,-1])o.push(`<path d="M${f1(s*(g.neckW/2+2.4*K))},${f1(ny+.3*K)} Q${f1(s*(g.ch*.72))},${f1(g.chestY)} ${f1(s*(g.ch-.6*K))},${f1(g.chestY+7*K)}" fill="none" stroke="${c}" stroke-width="${f1(1.9*K)}" stroke-linecap="round"/>`);
-  if(k==='belt'&&ctx.wy!=null){const w=g.wa+1.2*K;o.push(`<rect x="${f1(-w)}" y="${f1(ctx.wy+.2*K)}" width="${f1(2*w)}" height="${f1(1.6*K)}" fill="${c}" stroke="${st}"/><rect x="${f1(-1.3*K)}" y="${f1(ctx.wy-.1*K)}" width="${f1(2.6*K)}" height="${f1(2.2*K)}" rx="1" fill="none" stroke="#c9b27a" stroke-width="1.4"/>`);}
+  if(k==='belt'&&ctx.wy!=null){const w=g.wa+1.2*K;o.push(`<rect x="${f1(-w)}" y="${f1(ctx.wy+.2*K)}" width="${f1(2*w)}" height="${f1(1.6*K)}" fill="${c}" stroke="${st}"/>${B?'':`<rect x="${f1(-1.3*K)}" y="${f1(ctx.wy-.1*K)}" width="${f1(2.6*K)}" height="${f1(2.2*K)}" rx="1" fill="none" stroke="#c9b27a" stroke-width="1.4"/>`}`);}
   if(k==='watch'){const[x,y]=g.arm(.97),w=g.wr/2+.5*K;o.push(`<rect x="${f1(-x-w)}" y="${f1(y-.8*K)}" width="${f1(2*w)}" height="${f1(1.6*K)}" rx="1" fill="${c}" stroke="${st}"/><circle cx="${f1(-x)}" cy="${f1(y)}" r="${f1(1.1*K)}" fill="#f4f1ea" stroke="${st}"/>`);}
   return o.join('');}
 
 /* 整體人形：p=身形資料，o=穿搭 */
 function figure(p,of,opt={}){
-  const g=opt.g||geom(p),L=[],T=id=>ITEM[id];
+  let g=opt.g||geom(p);if(opt.back)g=Object.assign({},g,{back:true});const L=[],T=id=>ITEM[id],FL=s=>opt.back&&s?`<g transform="scale(-1,1)">${s}</g>`:s;
   const hair=drawHair(g,p,!!(of.hat&&T(of.hat.t)));
   L.push(hair.back,drawBody(g,p.skin||'#f0cdb0',p));
   L.push(drawTop(g,{neck:'crew',slv:'none',fit:'slim',len:'regular'},'#eceae5'),drawBottom(g,{kind:'pants',fit:'slim',len:.1},'#eceae5').svg);
@@ -424,9 +454,9 @@ function figure(p,of,opt={}){
   if((of.tuck||bib)&&!of.dress)L.push(topS,botS,beltS);else L.push(botS,beltS,topS);
   for(const k of['tie','necklace']){const a=has(k);if(a)L.push(drawAcc(g,T(a.t),col(a.c),ctx));}
   if(of.outer&&T(of.outer.t))L.push(drawTop(g,T(of.outer.t),col(of.outer.c),true));
-  for(const k of['backpack','scarf','cross','tote','watch']){const a=has(k);if(a)L.push(drawAcc(g,T(a.t),col(a.c),ctx));}
+  for(const k of['backpack','scarf','cross','tote','watch']){const a=has(k);if(a)L.push(FL(drawAcc(g,T(a.t),col(a.c),ctx)));}
   L.push(hair.front);
-  if(of.hat&&T(of.hat.t))L.push(drawHat(g,T(of.hat.t),col(of.hat.c)));
+  if(of.hat&&T(of.hat.t))L.push(FL(drawHat(g,T(of.hat.t),col(of.hat.c))));
   for(const k of['glasses','sun']){const a=has(k);if(a)L.push(drawAcc(g,T(a.t),col(a.c),ctx));}
   let ruler='';
   if(opt.ruler){for(let cm=0;cm<=210;cm+=10){const y=FLOOR-cm*K,big=cm%50===0;ruler+=`<line x1="-150" x2="${big?-136:-143}" y1="${f1(y)}" y2="${f1(y)}" stroke="#b9ad9d" stroke-width="${big?1.2:.7}"/>`+(big&&cm?`<text x="-133" y="${f1(y+3.5)}" font-size="9" fill="#9a8d7c">${cm}</text>`:'');}
@@ -686,7 +716,7 @@ const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;'
 const nt=n=>'NT$'+Number(n||0).toLocaleString('en-US');
 let DB={users:{},known:{},cur:null};
 try{const d=JSON.parse(localStorage.getItem(LSK)||'null');if(d&&d.users)DB=d;}catch(e){}
-let U=null,UK=null,tab='try',cloud='',accSel=0,closetView='own',shopBrand='全部',shopSlot='all',addSlot='top',online=false;
+let viewBack=false,flipNow=false,U=null,UK=null,tab='try',cloud='',accSel=0,closetView='own',shopBrand='全部',shopSlot='all',addSlot='top',online=false;
 function saveLocal(){try{localStorage.setItem(LSK,JSON.stringify(DB));}catch(e){toast('這台裝置的儲存空間滿了，照片可能沒存到');}}
 let pushT=null;
 function save(){if(!U)return;U.up=Date.now();DB.users[UK]=U;saveLocal();clearTimeout(pushT);cloud='待同步';pushT=setTimeout(push,1500);}
@@ -782,7 +812,7 @@ const wishSum=()=>U.closet.filter(c=>c.status==='wish').reduce((a,c)=>a+(+c.pric
 const gUrl=(q,img)=>'https://www.google.com/search?'+(img?'tbm=isch&':'')+'q='+encodeURIComponent(q);
 
 /* --- 畫面 --- */
-function stage(ruler){return`<div class="stage">${figure(U.body,U.outfit,{g:G(),ruler})}<div class="who">${esc(U.name)}｜${U.body.h} cm · ${U.body.w} kg</div>
+function stage(ruler){const fl=flipNow;flipNow=false;return`<div class="stage">${figure(U.body,U.outfit,{g:G(),ruler,back:viewBack,cls:fl?'fig flip':'fig'})}<div class="who">${esc(U.name)}｜${U.body.h} cm · ${U.body.w} kg｜${viewBack?'背面':'正面'}</div><button class="turn" data-act="turn">↻ ${viewBack?'看正面':'看背面'}</button>
   <div class="side"><button data-act="random">🎲 隨機</button><button data-act="tuck" class="${U.outfit.tuck?'on':''}">${U.outfit.tuck?'紮進去':'放外面'}</button><button data-act="savelook">💾 收藏</button><button data-act="clear">清空</button></div></div>`;}
 function swatches(cur,act,cols){const all=[...new Set([...(cols||[]),...Object.keys(COL)])];
   return`<div class="sw">${all.map(n=>`<button title="${n}" data-act="${act}" data-c="${n}" class="${cur===n?'on':''}" style="background:${COL[n]}"></button>`).join('')}<input type="color" data-chg="${act}" value="${/^#/.test(cur||'')?cur:'#888888'}" title="自訂顏色"></div>`;}
@@ -924,6 +954,7 @@ document.addEventListener('click',async ev=>{
   else if(a==='wear'){const en=entries(U.ui.slot,U.ui.src).find(e=>e.k===d.k);if(en)wear(U.ui.slot,en);}
   else if(a==='color'){const s=U.ui.slot,e=s==='acc'?o.acc[Math.min(accSel,o.acc.length-1)]:o[s];if(e){e.c=d.c;save();}}
   else if(a==='off'){if(d.s==='acc')o.acc.splice(+d.i,1);else delete o[d.s];save();}
+  else if(a==='turn'){viewBack=!viewBack;flipNow=true;}
   else if(a==='random')randomLook();
   else if(a==='tuck'){o.tuck=!o.tuck;save();}
   else if(a==='clear'){U.outfit={acc:[]};save();}
