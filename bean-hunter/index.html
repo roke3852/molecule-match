@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>咖啡尋豆師</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@700;900&display=swap" rel="stylesheet">
+<style>
+/* 版面概念：尋豆師的田野筆記本。生豆的灰綠紙色、深墨綠字、咖啡櫻桃紅做重點，數字用等寬字像杯測表。 */
+:root{
+  --paper:#e6ece2; --card:#f5f8f1; --ink:#1c2a23; --muted:#5a6a60; --line:#c5d0c3;
+  --cherry:#b0252f; --leaf:#2c6a4d; --amber:#a66a12; --on-cherry:#fff; --land:#c3d0bf; --sea:#f5f8f1; --coffee:#5a3723;
+  --display:"Noto Serif TC","Songti TC",serif;
+  --body:"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --paper:#131a16; --card:#1b2520; --ink:#e4ebe4; --muted:#93a399; --line:#2f3d36;
+    --cherry:#ea6a72; --leaf:#72c39b; --amber:#e2b25c; --on-cherry:#1a0c0d; --land:#33443b; --sea:#1b2520; --coffee:#a9744f; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#131a16; --card:#1b2520; --ink:#e4ebe4; --muted:#93a399; --line:#2f3d36;
+  --cherry:#ea6a72; --leaf:#72c39b; --amber:#e2b25c; --on-cherry:#1a0c0d; --land:#33443b; --sea:#1b2520; --coffee:#a9744f; color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--paper);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.6;-webkit-text-size-adjust:100%}
+#app{max-width:560px;margin:0 auto;padding:0 16px 48px}
+h1,h2,h3{font-family:var(--display);text-wrap:balance;margin:0;line-height:1.25}
+h1{font-size:34px;font-weight:900;letter-spacing:.04em}
+h2{font-size:21px}
+h3{font-size:17px}
+p{margin:0}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.muted{color:var(--muted)}
+.small{font-size:13px}
+.stack{display:flex;flex-direction:column;gap:12px}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.between{justify-content:space-between}
+.hud{position:sticky;top:0;z-index:5;background:var(--paper);border-bottom:2px solid var(--ink);margin:0 -16px 16px;padding:10px 16px 8px}
+.hud .cells{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.hud .k{font-size:11px;color:var(--muted);letter-spacing:.08em}
+.hud .v{font-family:var(--mono);font-weight:600;font-size:17px}
+.daybar{height:4px;background:var(--line);margin-top:8px}
+.daybar i{display:block;height:100%;background:var(--cherry)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:4px;padding:14px}
+.card.tap{cursor:pointer;border-left:4px solid var(--leaf)}
+.card.off{opacity:.55}
+.tag{display:inline-block;font-size:12px;padding:1px 8px;border-radius:99px;border:1px solid var(--line);white-space:nowrap}
+.tag.in{background:var(--leaf);color:var(--card);border-color:var(--leaf)}
+.tag.late{border-color:var(--amber);color:var(--amber)}
+.tag.out{border-style:dashed;color:var(--muted)}
+.tag.hit{border-color:var(--leaf);color:var(--leaf)}
+.tag.bad{border-color:var(--cherry);color:var(--cherry)}
+button{font:inherit;color:var(--ink);background:var(--card);border:1.5px solid var(--ink);border-radius:4px;padding:9px 14px;cursor:pointer;min-height:42px}
+button:focus-visible,.card.tap:focus-visible{outline:3px solid var(--cherry);outline-offset:2px}
+button.primary{background:var(--cherry);border-color:var(--cherry);color:var(--on-cherry);font-weight:700}
+button.ghost{border-color:var(--line)}
+button.sm{padding:4px 10px;min-height:34px;font-size:13px}
+button:disabled{opacity:.4;cursor:not-allowed}
+.acts{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.acts button{padding:8px 4px;display:flex;flex-direction:column;align-items:center;gap:2px}
+.acts button span{font-size:11px;color:var(--muted)}
+.msg{border-left:4px solid var(--cherry);background:var(--card);padding:10px 12px;font-size:14px}
+.scale{position:relative;height:14px;background:repeating-linear-gradient(90deg,var(--line) 0 1px,transparent 1px 12.5%);border:1px solid var(--line)}
+.scale i{position:absolute;top:0;bottom:0;background:var(--leaf);opacity:.85}
+.scale i.s{background:var(--amber)}
+.scale b{position:absolute;top:-3px;bottom:-3px;width:3px;background:var(--cherry)}
+.attr{display:grid;grid-template-columns:4.5em 1fr 5.5em;gap:8px;align-items:center;font-size:13px}
+.attr .scale{height:8px}
+ul.notes{margin:0;padding-left:1.2em;font-size:14px}
+ul.notes li+li{margin-top:4px}
+hr{border:0;border-top:1px dashed var(--line);margin:4px 0}
+.big{font-family:var(--mono);font-size:30px;font-weight:600}
+table{width:100%;border-collapse:collapse;font-size:13px}
+td,th{text-align:left;padding:5px 4px;border-bottom:1px solid var(--line);vertical-align:top}
+td.r,th.r{text-align:right}
+details summary{cursor:pointer;font-weight:700}
+.hero{padding:36px 0 8px}
+.hero .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.2em;color:var(--cherry)}
+ol.rules{margin:0;padding-left:1.4em}
+ol.rules li+li{margin-top:6px}
+.hud .cells.g4{grid-template-columns:repeat(3,1fr) auto;align-items:center}
+.steps{display:flex;gap:4px}
+.steps i{flex:1;height:4px;background:var(--line)}
+.steps i.on{background:var(--cherry)}
+.flow{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:13px}
+.flow span{border:1px solid var(--ink);border-radius:4px;padding:2px 8px;background:var(--card)}
+.flow em{font-style:normal;color:var(--muted)}
+.tnav{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+svg{display:block;max-width:100%}
+.map{width:100%;height:auto;background:var(--sea);border:1px solid var(--line);border-radius:4px}
+.map .land{fill:var(--land)}
+.map .belt{fill:var(--leaf);opacity:.09}
+.map .beltl{stroke:var(--leaf);stroke-width:.6;stroke-dasharray:3 3;opacity:.6}
+.map text{font-family:var(--body);font-size:11px;fill:var(--ink)}
+.map .cap{font-size:8px;fill:var(--leaf);letter-spacing:.15em}
+.map .lead{stroke:var(--muted);stroke-width:.6}
+.map .pin{stroke:var(--sea);stroke-width:1.2}
+.map .pin.in{fill:var(--leaf)} .map .pin.late{fill:var(--amber)} .map .pin.out{fill:var(--sea);stroke:var(--muted);stroke-dasharray:2 1.5}
+.map .ring{fill:none;stroke:var(--cherry);stroke-width:1.6}
+.map .here{fill:none;stroke:var(--cherry);stroke-width:1.2;animation:ping 1.8s ease-out infinite;transform-box:fill-box;transform-origin:center}
+.map .route{fill:none;stroke:var(--cherry);stroke-width:1.2;stroke-dasharray:4 3}
+.map .hit{fill:transparent;cursor:pointer}
+.map g[data-a]:focus-visible{outline:2px solid var(--cherry)}
+@keyframes ping{0%{transform:scale(.6);opacity:1}100%{transform:scale(2.2);opacity:0}}
+@media (prefers-reduced-motion:reduce){.map .here{animation:none}}
+.legend{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:12px;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:4px}
+.dot{width:9px;height:9px;border-radius:50%;display:inline-block}
+.scene{width:100%;height:auto;border:1px solid var(--line);border-radius:4px;background:var(--sea)}
+.tray{width:100%;height:auto;background:var(--paper);border:1px solid var(--line);border-radius:4px}
+.beans{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12px;color:var(--muted)}
+.beans span{display:inline-flex;flex-direction:column;align-items:center;gap:2px}
+.ttl{display:flex;align-items:center;gap:8px}
+.bowls{display:inline-flex;gap:3px;vertical-align:middle}
+
+.map .trail{fill:none;stroke:var(--cherry);stroke-width:1.1;opacity:.4}
+.radar{width:100%;max-width:260px;height:auto;margin:0 auto}
+.radar .grid{fill:none;stroke:var(--line);stroke-width:.8}
+.radar text{font-family:var(--body);font-size:10px;fill:var(--muted)}
+.cups{width:100%;max-width:300px;height:auto}
+.cups.go .liq{transform-box:fill-box;transform-origin:center;animation:fillin .45s both;animation-delay:calc(var(--i)*.12s)}
+@keyframes fillin{from{transform:scale(0)}}
+.say{display:flex;gap:10px;align-items:flex-start}
+.say.me{flex-direction:row-reverse}
+.say .av{flex:none;width:40px;height:40px;border-radius:50%;overflow:hidden;border:1px solid var(--line)}
+.say .sb{min-width:0;max-width:calc(100% - 50px)}
+.say .who{font-size:12px;color:var(--muted);margin-bottom:2px}
+.say.me .who{text-align:right}
+.say .bub{background:var(--card);border:1px solid var(--line);border-radius:4px 12px 12px 12px;padding:8px 12px;font-size:14px}
+.say.me .bub{border-radius:12px 4px 12px 12px;background:var(--land)}
+.card .say .bub{background:var(--paper)}
+.stamp{display:inline-block;font-family:var(--display);font-weight:700;font-size:13px;padding:1px 8px;border:2px solid;border-radius:3px;transform:rotate(-3deg);letter-spacing:.08em}
+.stamp.ok{color:var(--leaf)} .stamp.warn{color:var(--amber)} .stamp.bad{color:var(--cherry)}
+.pop{animation:pop .45s ease-out}
+.pop .stamp{animation:thud .35s .9s both}
+@keyframes pop{from{transform:translateY(-14px);opacity:0}}
+@keyframes thud{from{transform:scale(2.2) rotate(-12deg);opacity:0}}
+.swap{position:relative}
+.swap .old{position:absolute;inset:0;animation:fade 1s .5s both}
+@keyframes fade{to{opacity:0}}
+.sea{width:100%;height:auto}
+.sea .ship{animation:sail 1.6s ease-out both}
+@keyframes sail{from{transform:translateX(-240px)}}
+.share{background:var(--ink);color:var(--paper);padding:16px;border-radius:6px}
+.share h2{color:var(--paper)} .share .big{color:var(--paper)}
+.share .k{font-size:11px;opacity:.7;letter-spacing:.08em} .share .v{font-family:var(--mono);font-weight:600;font-size:17px}
+.cells3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.acts button:disabled span{color:inherit}
+@media (prefers-reduced-motion:reduce){.pop,.pop .stamp,.swap .old,.sea .ship,.cups.go .liq{animation:none}.swap .old{display:none}}
+
+/* 開始畫面：固定的黎明山景，不跟主題切換 */
+.title{position:relative;margin:0 -16px -48px;height:100vh;height:100dvh;min-height:600px;max-height:860px;overflow:hidden;background:#0c1a14;color:#fdf6e3;display:flex;flex-direction:column;justify-content:space-between}
+.tscene{position:absolute;inset:0;width:100%;height:100%}
+.thead{position:relative;padding:max(44px,9vh) 24px 0;text-align:center}
+.teye{font-family:var(--mono);font-size:12px;letter-spacing:.34em;color:#f6d58a}
+.title h1{white-space:nowrap;font-size:clamp(40px,13.5vw,66px);letter-spacing:.06em;margin-top:10px;color:#fdf6e3;text-shadow:0 2px 0 #0c1a14,0 6px 22px rgba(12,26,20,.7)}
+.title h1 span{display:inline-block;animation:trise .7s cubic-bezier(.2,.9,.3,1.2) both}
+@keyframes trise{from{transform:translateY(26px);opacity:0}}
+.trule{display:flex;align-items:center;justify-content:center;gap:10px;margin-top:10px}
+.trule i{width:54px;height:1px;background:#f6d58a;opacity:.8}
+.ttag{margin-top:12px;font-size:15px;line-height:1.8;text-shadow:0 1px 8px rgba(12,26,20,.9)}
+.tmenu{position:relative;padding:0 24px max(22px,env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:10px}
+.title button{background:rgba(12,26,20,.6);color:#fdf6e3;border-color:rgba(253,246,227,.5);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)}
+.title button:focus-visible{outline:3px solid #f6d58a}
+.title button.primary{background:#c8323c;border-color:#c8323c;color:#fff;font-size:18px;min-height:56px;letter-spacing:.12em;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;box-shadow:0 0 0 0 rgba(200,50,60,.6);animation:tpulse 2.4s ease-out infinite}
+.title button.primary span{font-family:var(--mono);font-size:12px;letter-spacing:0;font-weight:500;opacity:.9}
+@keyframes tpulse{70%{box-shadow:0 0 0 14px rgba(200,50,60,0)}100%{box-shadow:0 0 0 0 rgba(200,50,60,0)}}
+.trow{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.trow button{font-size:14px;padding:9px 6px}
+.tstat{font-size:12px;margin-top:2px}
+.tstat .row{flex-wrap:nowrap}
+.tbar{height:4px;background:rgba(253,246,227,.25);margin:5px 0}
+.tbar i{display:block;height:100%;background:#f6d58a}
+.tcloud{opacity:.7}
+.tscene .tw{animation:ttw 3.6s ease-in-out infinite}
+@keyframes ttw{50%{opacity:.15}}
+.tscene .sun{animation:tsun 3.2s ease-out both}
+@keyframes tsun{from{transform:translateY(46px)}}
+.tscene .mist{animation:tmist 16s ease-in-out infinite alternate}
+.tscene .mist.m2{animation-duration:22s;animation-direction:alternate-reverse}
+@keyframes tmist{from{transform:translateX(-40px)}to{transform:translateX(40px)}}
+.tscene .plane{animation:tplane 22s linear infinite}
+@keyframes tplane{from{transform:translate(-40px,250px) rotate(-8deg)}to{transform:translate(480px,170px) rotate(-8deg)}}
+.tscene .branch{transform-box:fill-box;transform-origin:100% 100%;animation:tsway 5s ease-in-out infinite alternate}
+@keyframes tsway{from{transform:rotate(-1.4deg)}to{transform:rotate(1.4deg)}}
+.tscene .fb{opacity:0;animation:tfloat 12s linear infinite}
+@keyframes tfloat{0%{transform:translateY(600px);opacity:0}15%{opacity:.55}85%{opacity:.4}100%{transform:translateY(260px);opacity:0}}
+@media (prefers-reduced-motion:reduce){.title h1 span,.title button.primary,.tscene *{animation:none!important}.tscene .fb{display:none}.tscene .plane{transform:translate(120px,230px) rotate(-8deg)}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+"use strict";
+const R=(a,b)=>a+Math.random()*(b-a), RI=(a,b)=>Math.floor(R(a,b+1)), pick=a=>a[Math.floor(Math.random()*a.length)];
+const clamp=(x,a,b)=>Math.max(a,Math.min(b,x)), shuffle=a=>[...a].sort(()=>Math.random()-.5);
+const r1=x=>Math.round(x*10)/10, fl=x=>Math.floor(x*2+1e-9)/2, cl=x=>Math.ceil(x*2-1e-9)/2;
+const $=n=>(n<0?'−$':'$')+Math.abs(Math.round(n)).toLocaleString('en-US');
+const rnd=(s,i)=>{let x=(i+1)*374761393|0;for(const c of s)x=Math.imul(x^c.charCodeAt(0),668265263);x^=x>>>13;x=Math.imul(x,1274126177);return((x^(x>>>16))>>>0)/4294967296};
+const KG=60, SHIP=1, START=30000, DAYS=30;
+const CAT={floral:'花香柑橘',fruit:'莓果熱帶',nutty:'堅果可可',herbal:'草本木質'};
+const FLAV={floral:['茉莉花','佛手柑','檸檬','蜂蜜','白桃','伯爵茶'],fruit:['藍莓','草莓','芒果','黑醋栗','紅酒','烏梅'],nutty:['榛果','黑巧克力','焦糖','杏仁','紅糖','可可'],herbal:['雪松','草本','菸草','香料','黑巧克力','奶油']};
+const ATTR=['香氣','酸質','甜度','醇厚','乾淨度','餘韻'];
+const ORIGINS=[
+ {id:'eth',name:'衣索比亞',region:'古吉・耶加雪菲',months:[11,12,1,2],cost:2200,td:3,lo:84,hi:90.5,pLo:6,pHi:13,alt:[1900,2300],bags:[8,30],note:'原生種的故鄉，花香與莓果',
+  farms:['哈魯處理站','沃卡小農合作社','德里莎處理站','山霧莊園'],people:['阿貝貝','特斯法耶','梅塞雷特','哈娜'],
+  bio:['我父親是這個處理站的第一個工人。他說咖啡是森林送給我們的，不是我們種出來的。','合作社有七百戶小農，每戶後院就幾十棵樹。我的工作是說服大家只摘紅的。','我在阿迪斯阿貝巴念完農學才回來。村裡的人花了三年才相信一個女人能管處理站。','這片山以前沒有路。我祖母揹著櫻桃走半天到市集，現在換我開卡車。'],
+  tpl:[{v:'原生種 Heirloom',p:'水洗',cat:'floral'},{v:'原生種 Heirloom',p:'日曬',cat:'fruit'}]},
+ {id:'ken',name:'肯亞',region:'涅里',months:[11,12,1,2],cost:2300,td:3,lo:85,hi:90.5,pLo:9,pHi:16,alt:[1700,2000],bags:[6,20],note:'明亮酸質，黑醋栗與烏梅',
+  farms:['卡瑞尼處理廠','奇里雅合作社','紅土丘處理廠','姆溫加莊園'],people:['萬吉魯','卡馬烏','恩喬羅格','奧蒂諾'],
+  bio:['我們照老方法做，發酵完再泡一夜清水。年輕人嫌麻煩，可是味道騙不了人。','我以前在拍賣場當過杯測員，每週四喝三百杯。回來才知道種比喝難多了。','這片紅土是火山給的。雨來得準，咖啡就甜；雨來得不準，我們就禱告。','我爺爺替殖民時期的莊園做工，一輩子沒喝過自己種的咖啡。現在我每天早上先喝一杯。'],
+  tpl:[{v:'SL28・SL34',p:'水洗',cat:'fruit'}]},
+ {id:'yem',name:'葉門',region:'哈拉茲',months:[10,11,12,1],cost:2400,td:3,lo:85,hi:91,pLo:28,pHi:70,alt:[1900,2400],bags:[1,5],note:'古老梯田，酒香與香料',lv:3,
+  farms:['古城梯田小農','山巔合作社','石屋莊園','雲海小農'],people:['阿里','法蒂瑪','優素福','薩爾瑪'],
+  bio:['這些梯田有五百年了。石牆倒了我們就再疊，像我父親和他的父親那樣。','山上缺水，每棵樹都是用陶罐一罐一罐澆大的。所以一顆豆子都不能浪費。','我們把櫻桃曬在屋頂上，夜裡收進屋。屋子裡一整季都是果乾的味道。','很多人改種卡特草，比較好賺。我留著咖啡樹，因為那是我母親的嫁妝。'],
+  tpl:[{v:'葉門原生種',p:'日曬',cat:'fruit'}]},
+ {id:'col',name:'哥倫比亞',region:'薇拉',months:[5,6,7,11,12],cost:2000,td:3,lo:82,hi:89,pLo:6,pHi:14,alt:[1600,2000],bags:[6,25],note:'一年兩收，風格多變',
+  farms:['雲霧莊園','拉帕爾瑪莊園','聖荷西小農','三溪莊園'],people:['卡洛斯','瑪麗亞','胡安','路易莎'],
+  bio:['我在這面坡上摔斷過兩次腿。可是你看這個日照，全薇拉找不到第二塊。','粉紅波旁是我從鄰居那裡要來的三棵苗。大家笑我種不活，現在他們來跟我買苗。','我十四歲開始幫人採收，四十歲才買下自己的三公頃地。','我在家裡車庫做厭氧發酵的實驗，炸過兩個桶子。我先生到現在還不讓我用廚房。'],
+  tpl:[{v:'卡杜拉',p:'水洗',cat:'nutty'},{v:'粉紅波旁',p:'水洗',cat:'floral',adj:1,pm:1.3},{v:'卡斯提優',p:'厭氧日曬',cat:'fruit',pm:1.2}]},
+ {id:'pan',name:'巴拿馬',region:'波奎特',months:[1,2,3],cost:2500,td:3,lo:86,hi:93,pLo:38,pHi:110,alt:[1600,1950],bags:[1,4],note:'藝伎聖地，量少價高',
+  farms:['火山谷莊園','雲雀莊園','巴魯山莊園','石溪莊園'],people:['里卡多','安娜','荷西','艾蓮娜'],
+  bio:['藝伎樹又高又瘦，產量只有別人的一半。我父親差點把它們全砍了。','我們每一棵樹都有編號。哪一棵哪一天摘的，我的筆記本裡都查得到。','巴魯火山的風一吹，溫度一小時能掉十度。樹長得慢，味道就長得深。','我本來是鳥類學家，來這裡數鳥，結果留下來種咖啡。樹蔭下的鳥比以前多了。'],
+  tpl:[{v:'藝伎 Geisha',p:'水洗',cat:'floral'},{v:'藝伎 Geisha',p:'日曬',cat:'fruit'},{v:'卡杜艾',p:'水洗',cat:'nutty',adj:-3.5,pm:.18,bags:[5,15]}]},
+ {id:'gua',name:'瓜地馬拉',region:'薇薇特南果',months:[1,2,3,4],cost:1900,td:3,lo:82,hi:87.5,pLo:5,pHi:9.5,alt:[1500,1900],bags:[10,40],note:'穩定量大，配方豆好夥伴',
+  farms:['聖塔羅莎莊園','高原之星莊園','老橡樹莊園','薇薇谷小農'],people:['佩德羅','蘿莎','米格爾','伊莎貝'],
+  bio:['這座莊園傳到我是第四代。曾祖父的帳本還在，上面寫著一九二三年的雨量。','我們這裡有墨西哥吹來的乾熱風，所以種得比別人高也不怕霜。','莊園中間那棵老橡樹，我小時候在上面蓋過樹屋。現在採收工在樹下吃午飯。','我們家只有兩公頃，可是每一袋我都親手挑過。量少，才顧得來。'],
+  tpl:[{v:'波旁',p:'水洗',cat:'nutty'},{v:'卡杜拉',p:'水洗',cat:'nutty'},{v:'帕卡瑪拉',p:'水洗',cat:'floral',adj:1,pm:1.3}]},
+ {id:'bra',name:'巴西',region:'喜拉朵',months:[5,6,7,8,9],cost:2600,td:3,lo:80.5,hi:86,pLo:4,pHi:7.5,alt:[900,1250],bags:[15,50],note:'產量世界第一，堅果巧克力調',lv:2,
+  farms:['紅土莊園','聖保羅小農合作社','晨曦莊園','大草原莊園'],people:['若昂','卡蜜拉','費南多','貝雅翠絲'],
+  bio:['我們用機器採收，一天抵得上兩百個工人。難的是之後怎麼把生的熟的分開。','合作社的杯測室是我爭取來的。以前大家只知道自己的豆子有幾袋，不知道幾分。','一九九四年那場霜害我還記得，一夜之間整片樹都黑了。我父親隔天就開始補種。','大家都說巴西只有便宜豆。我想證明喜拉朵也種得出讓人記住的味道。'],
+  tpl:[{v:'黃波旁',p:'日曬',cat:'nutty'},{v:'卡杜艾',p:'日曬',cat:'nutty'},{v:'黃波旁',p:'蜜處理',cat:'nutty',adj:.5,pm:1.15}]},
+ {id:'sum',name:'印尼',region:'蘇門答臘・林東',months:[3,4,5,6,10,11,12],cost:1200,td:2,lo:80,hi:85.5,pLo:5,pHi:8.5,alt:[1200,1500],bags:[10,40],note:'濕剝法，厚實低酸',
+  farms:['湖畔合作社','多巴小農','迦佑山合作社','火山土莊園'],people:['布迪','西蒂','阿貢','黛薇'],
+  bio:['這裡天天下雨，豆子等不到乾，所以我們趁濕把殼剝掉。這是被天氣逼出來的做法。','多巴湖是火山炸出來的。我們種咖啡的土，就是那次噴發留下的。','合作社裡大部分是女人。男人去城裡打工，咖啡是我們顧大的。','我在雅加達當過咖啡師，才發現客人喝的曼特寧，跟我家鄉的完全不一樣。'],
+  tpl:[{v:'提比卡・Ateng',p:'濕剝法',cat:'herbal'},{v:'提比卡・Ateng',p:'濕剝法',cat:'herbal'},{v:'提比卡',p:'日曬',cat:'fruit',adj:1,pm:1.2}]},
+ {id:'twn',name:'台灣',region:'阿里山',months:[11,12,1,2,3],cost:150,td:1,lo:83,hi:88.5,pLo:55,pHi:95,alt:[1000,1400],bags:[1,3],note:'就在家門口，產量極少',
+  farms:['雲頂咖啡園','茶山莊園','樂野小農','石棹咖啡園'],people:['阿明','淑芬','志豪','美玲'],
+  bio:['我阿公種茶，我爸種茶，到我才改種咖啡。阿公到現在還是只喝烏龍。','工錢貴、地又小，我們拚不了量，只能把每一顆都顧到最好。','部落的長輩說，日本時代這裡就有咖啡樹了，只是後來沒人管，荒在山裡。','我本來在台北上班，颱風把我爸的園子吹垮那年才回來。一待就是十年。'],
+  tpl:[{v:'SL34',p:'水洗',cat:'floral'},{v:'藝伎 Geisha',p:'蜜處理',cat:'fruit',pm:1.2},{v:'提比卡',p:'日曬',cat:'fruit'}]}
+];
+const DEX=ORIGINS.flatMap(o=>[...new Set(o.tpl.map(t=>t.v+'|'+t.p))].map(k=>({o,k:o.id+'|'+k,v:k.split('|')[0],p:k.split('|')[1]})));
+const ORDERS=[
+ {id:'chain',name:'連鎖烘豆廠',who:'周經理',want:'配方用豆，產地風味不限',min:82,bags:25,pay:8.5,
+  intro:'量要穩、價要實。82 分以上 25 袋，別讓我的產線停下來。',ok:'準時到貨，分數也對。下一季的合約我先替你留著。',part:'只到一部分？剩下的我得去現貨市場補，成本你是知道的。',fail:'產線等不了人。這一季我只好找別人。'},
+ {id:'cafe',name:'巷口精品咖啡館',who:'店長小安',want:'水洗、花香柑橘調',min:85,bags:8,pay:15,proc:['水洗'],cat:['floral'],
+  intro:'熟客都在問今年的水洗豆什麼時候到。我想要一喝就聞到花香的那種，拜託你了。',ok:'昨天第一鍋烘出來，整條巷子都是花香。熟客已經先訂走三包了。',part:'豆子很好，可是量撐不到夏天。我會省著賣。',fail:'黑板上的「當季水洗」我擦掉了。沒關係，明年再麻煩你。'},
+ {id:'comp',name:'沖煮賽選手',who:'阿哲',want:'只要夠驚艷，什麼豆都行',min:89,bags:2,pay:95,
+  intro:'我今年要進決賽。給我一支評審喝第一口就會抬頭的豆子，價錢不是問題。',ok:'就是它。我練了一整晚，每一杯都不一樣，每一杯都好喝。決賽見。',part:'分數夠了，可是只有這些我不敢放心練。我會小心用。',fail:'我只好用去年剩下的豆子上場了。希望評審記性不好。'},
+ {id:'sub',name:'訂閱品牌「水果炸彈」',who:'創辦人 Mia',want:'日曬或厭氧處理',min:86,bags:6,pay:19,proc:['日曬','厭氧日曬'],
+  intro:'我們的訂戶就是愛那種一開袋就嚇一跳的果香。日曬或厭氧，越奔放越好。',ok:'開箱影片的留言全是「這真的是咖啡嗎」。續訂率創新高。',part:'這個月出得了貨，下個月我得再想辦法。',fail:'這個月只好寄備案的豆子，我先去準備道歉信。'},
+ {id:'esp',name:'義式老店',who:'羅伯伯',want:'堅果可可或草本木質調',min:83,bags:12,pay:10,cat:['nutty','herbal'],
+  intro:'我的客人喝了三十年同一個味道。不要酸的，不要花的，要厚、要甜、要像巧克力。',ok:'嗯，就是這個味道。老客人喝了一口，什麼都沒說，又點了一杯。',part:'味道對，就是不夠賣。我先摻著舊豆用。',fail:'沒有就算了，我庫房還有一點。年輕人，下次早點說。'},
+ {id:'tw',name:'台灣選物店',who:'主理人語晴',want:'只收台灣豆',min:84,bags:2,pay:130,origin:'twn',
+  intro:'很多客人不知道台灣種得出這麼好的咖啡。我想讓他們喝到，再貴都值得。',ok:'上架三天就賣完了。有位阿姨說，喝起來像她小時候山上的味道。',part:'量少也好，我會把故事寫清楚，一包一包慢慢賣。',fail:'今年的台灣豆專區只好先空著。'},
+ {id:'mich',name:'星級餐廳',who:'侍酒師顧先生',want:'菜單上的壓軸咖啡',min:90,bags:1,pay:160,lv:4,
+  intro:'主廚的甜點之後，需要一杯配得上的咖啡。90 分以下的不必帶來。',ok:'主廚喝完，把它寫進了菜單最後一行，還加上了莊園的名字。',part:'很好，我們會把它留給預約的貴賓。',fail:'那麼這一季的壓軸還是茶。'},
+ {id:'champ',name:'冠軍烘豆師',who:'沈老師',want:'水洗、花香柑橘調',min:88,bags:4,pay:42,proc:['水洗'],cat:['floral'],lv:4,
+  intro:'我烘豆不靠運氣，靠的是生豆。給我乾淨到挑不出毛病的水洗豆。',ok:'含水率、密度、顏色都漂亮。你驗豆的功夫，比不少進口商還仔細。',part:'豆子沒話說，就是不夠我把曲線試完。',fail:'沒有好生豆，我寧可這一季不出新品。'}
+];
+const LV=[0,120,300,550,900,1400], LVN=['見習尋豆師','助理買手','產地買手','資深買手','首席尋豆師','傳奇尋豆師'];
+const PERK={2:'解鎖產地：巴西',3:'解鎖產地：葉門，起始資金 +$5,000',4:'高價訂單開始出現',5:'起始資金再 +$5,000',6:'獲得「傳奇尋豆師」稱號'};
+const STORY=[
+ ['序章　一本舊筆記',[['chen','陳師傅','坐。這本筆記你拿去。三十年，我跑過的每一座莊園、喝過的每一支豆子，都在裡面。'],['me','你','師傅，店裡的帳……'],['chen','陳師傅','我知道，撐不過明年。所以我跟銀行借了最後一筆，三萬美金，三十天。'],['chen','陳師傅','我的膝蓋爬不動山了，換你去。記住三件事：自己看、自己喝、自己驗。別人說的都只是故事。'],['me','你','如果我買錯了呢？'],['chen','陳師傅','那就記在筆記的最後一頁。我那一頁，寫得比誰都滿。']]],
+ ['第一章　回頭的訂單',[['chen','陳師傅','周經理早上打電話來，沒找我，指名找你。'],['me','你','是上一季的豆子出了問題嗎？'],['chen','陳師傅','是沒出問題。做我們這一行，客人不打電話來罵，就是最大的稱讚。'],['chen','陳師傅','對了，我在巴西有個老朋友，喜拉朵那邊的。量大、便宜，配方豆去那裡找。地址我寫在筆記第四十頁。']]],
+ ['第二章　葉門來信',[['chen','陳師傅','有一封信，寄了兩個月才到。哈拉茲山上的阿里寫的。'],['me','你','葉門？那裡現在還能買豆子？'],['chen','陳師傅','難買，所以才值得去。那是全世界最老的咖啡產地，梯田比我們的族譜還長。'],['chen','陳師傅','銀行那邊我也談過了。看了你這幾季的帳，他們願意多借五千。別亂花。']]],
+ ['第三章　對手',[['lin','林曜','原來你就是陳師傅的徒弟。上個月巴拿馬那批競標，是我拿走的。'],['me','你','我記得你。你出的價，比那批豆子值的還多。'],['lin','林曜','貴不貴是客人決定的。你們這種小店慢慢喝、慢慢驗，我直接把整個產季包下來。'],['chen','陳師傅','別理他。會喊價的人很多，會說「這批我不要」的人很少。'],['chen','陳師傅','倒是有幾位講究的客人開始打聽你了。他們的門檻很高，出手也大方。']]],
+ ['第四章　病樹',[['me','你','師傅，瑪麗亞的莊園染了葉鏽病，今年的產量剩不到一半。'],['chen','陳師傅','葉鏽病我看過三次。第一次在一九八幾年，整個山谷的葉子一個月內掉光。'],['me','你','她說要是撐不過今年，就把地賣了。'],['chen','陳師傅','那你打算怎麼辦？'],['me','你','我想先付她明年的訂金，讓她補種抗病的品種。就算明年的豆子沒那麼好。'],['chen','陳師傅','……你這個決定，筆記裡沒有教。很好。銀行那邊我再去說。']]],
+ ['終章　鑰匙',[['chen','陳師傅','店的鑰匙，拿去。'],['me','你','師傅？'],['chen','陳師傅','別那個表情，我又不是要走。我只是不想再早起開門了。'],['chen','陳師傅','筆記的最後一頁，你自己寫的那些，我都看了。買錯的比我當年少，敢寫下來的比我當年多。'],['me','你','上個月有個年輕人來問，能不能跟著我去產地。'],['chen','陳師傅','那就帶他去。記得告訴他：自己看、自己喝、自己驗。']]]
+];
+const TIP={12:'十二月，東非和葉門正在採收，中美洲才剛開始。',1:'一月是好時節，非洲、中美洲、巴拿馬都有新豆。',2:'二月，各地的好批次都上桌了，對手也都到了。',3:'三月，東非進入尾聲，中美洲還有貨。手腳要快。',6:'六月不好買。哥倫比亞和印尼有新豆，其他地方多半是去年的陳貨，要多驗。'};
+const PERS=['直爽','精明','寡言','熱情'], persOf=id=>PERS[Math.floor(rnd(id,5)*4)];
+const LINE={
+ hi:{直爽:'來了就先喝一杯，喝完再談。',精明:'你來得正好，這批豆子已經有三位買家在問了。',寡言:'……樣品在桌上。',熱情:'歡迎歡迎！路上辛苦了，先坐下，我太太煮了吃的。'},
+ hiFriend:{直爽:'老朋友！我就知道你今年會來。',精明:'是你啊。看在老交情，我先不給別人看樣品。',寡言:'……你來了。我留了一批。',熱情:'我昨天才跟孩子們說你該到了！快進來！'},
+ hiCold:{直爽:'又是你。這次打算出多少？',精明:'上次的價錢我還記得很清楚。',寡言:'……',熱情:'喔，你好。樣品在那邊，請自便。'},
+ ok:{直爽:'好，就這個價，握手！',精明:'你很會談。成交，但別告訴別人這個價錢。',寡言:'……可以。',熱情:'成交！今年的學費有著落了，謝謝你。'},
+ no:{直爽:'這個價我連工錢都付不出來。',精明:'你再想想，我有的是時間。',寡言:'……不行。',熱情:'我也想賣給你，可是這個價我真的沒辦法。'},
+ mad:{直爽:'你這是在開玩笑。請回吧。',精明:'看來我們對這批豆子的看法差太多了。不送。',寡言:'（他把樣品收了起來，轉身走進屋裡。）',熱情:'我以為你是懂咖啡的人。對不起，我不賣了。'},
+ buy:{直爽:'好！我叫人今天就裝袋。',精明:'明智的選擇。合約我馬上準備。',寡言:'……謝謝。',熱情:'太好了！你一定要把這裡的故事告訴喝到的人。'},
+ good:{直爽:'今年老天賞臉，雨來得剛好。',精明:'非常好，是近五年最好的一季。',寡言:'還行。',熱情:'很好！孩子們放學都來幫忙摘，大家都很開心。'},
+ lie:{直爽:'還過得去啦。',精明:'非常好，沒有任何問題。你盡管放心。',寡言:'……還行。',熱情:'嗯……還可以，還可以。'}
+};
+const ISSUE={
+ cbb:{name:'咖啡果小蠹',en:'Coffee Berry Borer',see:'樹下落果很多，撿起來每一顆都有針孔大的蛀洞。',talk:'老實說，今年果小蠹鬧得兇。我們掛了誘捕瓶，還是擋不住。',fx:'母蟲鑽進果實裡產卵，幼蟲啃食豆子。生豆會出現蟲孔，瑕疵豆變多。',buy:'驗豆時看瑕疵豆數量，超過 8 顆會扣分。'},
+ rust:{name:'葉鏽病',en:'Coffee Leaf Rust',see:'葉子背面一片片橘黃色粉末，不少枝條的葉子已經掉光了。',talk:'葉鏽病。去年雨季太長，今年一半的樹都禿了，果子結得少，也長不飽滿。',fx:'真菌感染葉片，樹掉葉後養分不足，產量大減，果實風味變薄。',buy:'可售袋數變少、開價變高，杯測分數也會比往年低。'},
+ cbd:{name:'咖啡漿果病',en:'Coffee Berry Disease',at:['ken','eth'],see:'青果上有凹陷的黑斑，有些已經乾成黑色的僵果掛在枝頭。',talk:'漿果病。雨季的時候青果一顆顆變黑，我們只能盡量把壞的挑掉。',fx:'真菌侵襲未熟的青果，主要發生在非洲高海拔產區。壞果混入會讓批次不穩定。',buy:'容易喝到瑕疵杯，到港可能再掉分。多杯測幾輪。'},
+ cerc:{name:'褐眼病',en:'Cercospora Leaf Spot',see:'葉片上有一圈圈像眼睛的褐斑，同一串果實有紅有綠，熟得很不平均。',talk:'今年肥料貴，我們下得少，樹就長了褐眼病。果子熟得不整齊。',fx:'多半出在缺肥或日曬太強的樹上。果實成熟不均，喝起來帶澀感。',buy:'杯測分數會偏低，乾淨度尤其明顯。'},
+ ant:{name:'咖啡椿象',en:'Antestia Bug',at:['ken','eth'],see:'枝條上有幾隻黑橘相間的椿象。被叮過的果實表面留下小黑點。',talk:'椿象。牠們叮過的果子外表看不出來，烘出來才知道有怪味。',fx:'椿象刺吸果實，受害的豆子會帶異味，而且很難用肉眼挑出來。',buy:'五杯裡可能有一杯味道不對。多杯測幾輪才抓得到。'},
+ borer:{name:'咖啡天牛',en:'Coffee Stem Borer',at:['twn','sum'],see:'好幾棵樹的樹幹基部有蛀孔和木屑，整株葉子都黃了。',talk:'天牛。幼蟲在樹幹裡面鑽，等你發現的時候，那棵樹已經救不回來了。',fx:'幼蟲蛀食樹幹，整株枯死。受害的園子產量會少一大截。',buy:'可售袋數變少、開價變高，但豆子本身的品質不受影響。'}
+};
+const ACH=[
+ ['first','初次出航','完成第一季',r=>true],
+ ['all','使命必達','單季完成所有訂單',r=>r.full===r.ods.length],
+ ['gem','挖到寶','用 $15/kg 以下買到到港 89 分以上的豆',r=>r.lots.some(l=>l.price<=15&&l.arr>=89)],
+ ['clean','火眼金睛','買 3 批以上，而且全部零掉分',r=>r.lots.length>=3&&r.lots.every(l=>!penalty(l.f).length&&!(l.f.boost&&!l.f.cup.bulk))],
+ ['ninety','九十分俱樂部','帶回到港 90 分以上的豆',r=>r.lots.some(l=>l.arr>=90)],
+ ['p10','一萬美金','單季淨利達 $10,000',r=>r.profit>=10000],
+ ['p20','兩萬美金','單季淨利達 $20,000',r=>r.profit>=20000],
+ ['globe','空中飛人','單季走訪 4 個產地',r=>new Set(S.trail).size>=4],
+ ['auction','落槌','贏得一場競標',r=>r.lots.some(l=>l.f.auction)],
+ ['friend','老朋友','和一座莊園的交情達到滿格',r=>Object.values(save.meta.rel).some(v=>v>=5)],
+ ['dex','博物學家','生豆圖鑑收集過半',r=>Object.keys(save.meta.dex).length>=DEX.length/2],
+ ['doc','植物醫生','認識 4 種病蟲害',r=>Object.keys(save.meta.pest).length>=4],
+ ['storm','風雨無阻','單季遇到 3 次產地事件仍然獲利',r=>S.evn>=3&&r.profit>0]
+];
+const CH=[
+ ['days','剩 8 天以上就回國，而且有獲利',r=>S.days>=8&&r.profit>0],
+ ['full','完成全部訂單',r=>r.full===r.ods.length],
+ ['spot','沒有任何豆子流入現貨市場（至少買 3 批）',r=>r.lots.length>=3&&r.lots.every(l=>!l.spot)],
+ ['two','只去兩個產地以內，淨利達 $5,000',r=>new Set(S.trail).size<=2&&r.profit>=5000],
+ ['ins','買下的每一批都驗過豆（至少買 3 批）',r=>r.lots.length>=3&&r.lots.every(l=>l.f.inspected)]
+];
+let S=null;
+const metaOf=m=>({xp:+(m&&m.xp)||0,rel:{...(m&&m.rel)},dex:{...(m&&m.dex)},ach:{...(m&&m.ach)},pest:{...(m&&m.pest)}});
+let cloud={ref:null,state:'wait',busy:false,dirty:false,timer:0}, save={best:null,seasons:0,game:null,at:0,meta:metaOf()}, lastKey='';
+const level=()=>LV.filter(x=>x<=save.meta.xp).length;
+const startCash=()=>START+(level()>=3?5000:0)+(level()>=5?5000:0);
+function seasonOf(o,m){let d=12;for(const h of o.months){d=Math.min(d,(m-h+12)%12)}return d===0?'in':d<=2?'late':'out'}
+const SEASON={in:['當季','in'],late:['季末','late'],out:['非產季','out']};
+function makeFarm(o,i,season,star){
+  const t=star?o.tpl[0]:o.tpl[i%o.tpl.length], id=o.id+(star?'x':i), rel=star?0:(save.meta.rel[id]||0), notes=[];
+  let score=star?Math.round((o.hi-R(0,1.5))*4)/4:Math.round((o.lo+(o.hi-o.lo)*Math.pow(Math.random(),1.4)+(t.adj||0))*4)/4;
+  const q=clamp((score-(t.adj||0)-o.lo)/(o.hi-o.lo),0,1), boost=!star&&Math.random()<.18?R(1.8,3.2):0;
+  const pRel=clamp((score+boost-(t.adj||0)-o.lo)/(o.hi-o.lo),0,1.15), bg=t.bags||o.bags;
+  let ask=(o.pLo+(o.pHi-o.pLo)*Math.pow(pRel,1.3))*(t.pm||1)*R(.8,1.25)*(rel<0?1.08:1), bags=RI(bg[0],bg[1]);
+  let unstable=!star&&Math.random()<.05+(1-q)*.12, defects=Math.random()<.18?RI(9,14):RI(0,6);
+  const iks=Object.keys(ISSUE).filter(k=>!ISSUE[k].at||ISSUE[k].at.includes(o.id)), issue=!star&&Math.random()<.3?pick(iks):null;
+  if(issue==='cbb')defects=RI(9,15);
+  if(issue==='rust'){score-=1;bags=Math.max(1,Math.round(bags*.5));ask*=1.1}
+  if(issue==='cbd'){unstable=true;bags=Math.max(1,Math.round(bags*.6))}
+  if(issue==='cerc')score-=.75;
+  if(issue==='ant')unstable=true;
+  if(issue==='borer'){bags=Math.max(1,Math.round(bags*.5));ask*=1.08}
+  if(rel>=3){score+=.75;notes.push(`${o.people[i]}記得你，特別替你留了一批更好的。`)}
+  if(rel<0)notes.push('上次議價的事對方還記得，態度有點冷淡，開價也比較高。');
+  ask=r1(ask);
+  const base=(score-38)/6, attrs={}, n=ATTR.map(()=>R(-.5,.5)), mean=n.reduce((a,b)=>a+b)/6;
+  ATTR.forEach((k,j)=>attrs[k]=base+n[j]-mean);
+  if(issue==='cerc'){attrs['乾淨度']-=.4;attrs['甜度']+=.4}
+  const mr=Math.random(), moisture=r1(mr<.2?R(12.3,13.6):mr<.3?R(8.6,9.4):R(10,11.8));
+  const f={id,o:o.id,name:star?`${o.name}年度競標批次`:o.farms[i],who:star?'拍賣官':o.people[i],v:t.v,p:t.p,cat:t.cat,alt:Math.round(R(o.alt[0],o.alt[1])/50)*50,
+    score,boost,attrs,moisture,defects,past:!star&&Math.random()<{in:.05,late:.35,out:.75}[season],ask,price:ask,floor:ask*R(.75,.92)*(1-.02*Math.max(0,rel)),
+    mood:3+(rel>=2?1:0)-(rel<0?1:0),rel,unstable,issue,seen:false,bags,flav:shuffle(FLAV[t.cat]).slice(0,3),q,visited:false,inspected:false,cup:{},notes,asked:{},closed:false,dealt:false,hag:false};
+  if(star){f.bags=Math.min(RI(1,3),bg[1]);f.auction={cur:r1(ask*.7),max:r1(ask*R(.9,1.45)),rival:pick(['林曜','東京的烘豆商','首爾的咖啡館','奧斯陸的生豆商','杜拜的買家']),won:false}}
+  return f;
+}
+function newGame(){
+  const lv=level(), month=pick([12,1,2,3,6]);
+  const origins=ORIGINS.filter(o=>(o.lv||1)<=lv).map(o=>{const s=seasonOf(o,month),n=s==='out'?2:s==='late'?3:4;
+    return {...o,season:s,list:Array.from({length:n},(_,i)=>makeFarm(o,i,s))}});
+  shuffle(origins.filter(o=>o.season==='in')).slice(0,2).forEach(o=>o.list.push(makeFarm(o,0,'in',true)));
+  const rest=shuffle(ORDERS.slice(1).filter(o=>(o.lv||1)<=lv)).slice(0,3), c=startCash();
+  S={view:'brief',month,cash:c,start:c,days:DAYS,origins,orders:[ORDERS[0],...rest].map(o=>({...o})),inv:[],loc:null,farm:null,msg:'',say:null,offer:0,qty:1,sel:null,
+    trail:[],event:'',evn:0,calls:0,dialog:null,ch:pick(CH)[0],fly:null,res:null,anim:null};
+}
+const curO=()=>S.origins.find(o=>o.id===S.loc), curF=()=>curO().list.find(f=>f.id===S.farm);
+const allFarms=()=>S.origins.flatMap(o=>o.list);
+const penBase=f=>{const a=[];if(f.moisture>12)a.push([Math.round((f.moisture-12)*4)/2,'含水率過高，海運途中受潮']);
+  if(f.moisture<9.5)a.push([1,'含水率過低，風味流失']);if(f.past)a.push([2.5,'過季老豆，到港已有木質味']);
+  if(f.defects>8)a.push([1,f.issue==='cbb'?'果小蠹造成的蟲孔豆太多':'瑕疵豆太多']);return a};
+const penalty=f=>[...penBase(f),...(f.unstable?[[1.5,'批次不穩定，到港杯測出現瑕疵杯']]:[])];
+const arrival=f=>f.score-penalty(f).reduce((s,x)=>s+x[0],0);
+const bestEst=f=>f.cup.bulk||f.cup.sample||null;
+const matches=(od,f)=>(!od.proc||od.proc.includes(f.p))&&(!od.cat||od.cat.includes(f.cat))&&(!od.origin||od.origin===f.o);
+function fitTags(f){const e=bestEst(f);return S.orders.filter(od=>matches(od,f)).map(od=>{
+  if(!e)return `<span class="tag">${od.name}：類型符合，待杯測</span>`;
+  if(e.lo>=od.min)return `<span class="tag hit">${od.name}：達標</span>`;
+  if(e.hi>=od.min)return `<span class="tag late">${od.name}：可能達標</span>`;
+  return `<span class="tag bad">${od.name}：分數不足</span>`}).join(' ')||'<span class="muted small">不符合任何訂單的類型，只能賣現貨</span>'}
+const pct=(x,a,b)=>clamp((x-a)/(b-a)*100,0,100);
+const bar=(lo,hi,a,b,cls='')=>`<i class="${cls}" style="left:${pct(lo,a,b)}%;width:${Math.max(1.5,pct(hi,a,b)-pct(lo,a,b))}%"></i>`;
+const hearts=n=>n<0?'<span class="tag bad">有心結</span>':n>0?`<span class="num" style="color:var(--cherry)" aria-label="交情 ${n} 格">${'♥'.repeat(n)}${'♡'.repeat(5-n)}</span>`:'';
+
+/* ---------- 圖形 ---------- */
+const PX=lon=>(lon+126)*1.45, PY=lat=>(47-lat)*2.2;
+const LAND=[
+ [[-125,47],[-124,40],[-117,33],[-110,23],[-105,20],[-97,16],[-92,15],[-88,13],[-84,10],[-80,8],[-77,8],[-80,10],[-83,12],[-83,15],[-88,16],[-87,21],[-90,21],[-97,22],[-97,28],[-90,30],[-84,30],[-81,25],[-80,31],[-76,35],[-70,42],[-66,45],[-64,47]],
+ [[-77,8],[-72,12],[-62,10],[-52,5],[-50,0],[-35,-6],[-39,-15],[-48,-25],[-57,-36],[-65,-40],[-73,-40],[-71,-30],[-70,-18],[-76,-14],[-81,-5],[-78,2]],
+ [[-85,22],[-80,23],[-74,20],[-78,20]],[[-74,19.5],[-68.5,19],[-71,18]],
+ [[-17,15],[-16,21],[-10,29],[-6,35],[10,37],[11,33],[20,31],[32,31],[35,24],[39,15],[43,11],[51,12],[47,3],[40,-4],[40,-15],[35,-24],[30,-31],[20,-35],[18,-30],[12,-17],[13,-8],[9,1],[9,4],[-4,5],[-8,4],[-13,8]],
+ [[44,-16],[50,-15],[47,-25],[44,-23]],
+ [[-9,47],[-9,37],[-5,36],[0,39],[3,43],[8,44],[16,38],[18,40],[13,45],[20,40],[23,36.5],[27,37],[36,36],[35,31],[34,28],[43,13],[52,16],[59,22],[56,26],[50,30],[57,25.5],[67,25],[72,21],[77,8],[80,15],[87,22],[92,22],[94,16],[98,9],[103,1.5],[104,9],[109,12],[106,20],[110,21],[122,30],[121,38],[126,35],[129,36],[130,43],[135,47]],
+ [[130,32],[131,34],[136,35],[140,36],[141,40],[140,45],[142,45],[142,39],[140,35],[135,33]],
+ [[120.2,23],[121,25.2],[122,25],[121,22]],
+ [[95,5.5],[98,4],[104,-2],[106,-6],[102,-4],[98,1]],[[105,-6.5],[114,-7.5],[114,-8.5],[106,-7.5]],
+ [[109,1],[113,3],[117,7],[119,1],[116,-4],[110,-3]],[[120,18],[122,18],[124,13],[126,7],[122,7],[120,14]],
+ [[131,-1],[141,-3],[147,-6],[150,-10],[141,-9],[138,-7],[132,-4]],
+ [[114,-22],[122,-17],[130,-12],[136,-12],[137,-16],[142,-11],[146,-19],[150,-23],[153,-28],[150,-37],[144,-38],[138,-34],[131,-31.5],[124,-33],[115,-34]]
+].map(p=>`<polygon class="land" points="${p.map(([a,b])=>PX(a).toFixed(1)+','+PY(b).toFixed(1)).join(' ')}"/>`).join('');
+
+const PIN={gua:[-91.5,15.3,2,58],pan:[-82.6,8.8,96,62],col:[-76,2.2,6,116],bra:[-46,-19,128,161],yem:[44,15.5,262,81],eth:[38.5,6,259,98],ken:[37,-.5,259,115],sum:[98.8,2.6,304,132],twn:[120.8,23.5,370,60]};
+const XY=id=>[PX(PIN[id][0]),PY(PIN[id][1])];
+const curve=(a,b)=>`M${a[0].toFixed(1)} ${a[1].toFixed(1)} Q${((a[0]+b[0])/2).toFixed(1)} ${(Math.min(a[1],b[1])-34).toFixed(1)} ${b[0].toFixed(1)} ${b[1].toFixed(1)}`;
+function mapSvg(mode){const sel=S.sel, stat=!!mode;
+  const stops=['twn',...S.trail], legs=stops.slice(0,-1).map((id,i)=>[XY(id),XY(stops[i+1])]).filter(l=>l[0][0]!==l[1][0]);
+  const trail=(mode==='fly'?legs.slice(0,-1):legs).map(l=>`<path class="trail" d="${curve(l[0],l[1])}"/>`).join('');
+  let route='';if(!stat&&S.loc!==sel)route=`<path class="route" d="${curve(XY(S.loc||'twn'),XY(sel))}"/>`;
+  if(mode==='fly')route=`<path class="route" d="${curve(S.fly.a,S.fly.b)}"/><g id="plane" transform="translate(${S.fly.b[0]} ${S.fly.b[1]})"><polygon points="-6,-4 7,0 -6,4 -3,0" fill="var(--cherry)" stroke="var(--sea)" stroke-width=".8"/></g>`;
+  const pins=S.origins.map(o=>{const p=PIN[o.id],[x,y]=XY(o.id),w=o.name.length*11,on=!stat&&sel===o.id;
+    return `<g ${stat?'':`data-a="sel" data-id="${o.id}" tabindex="0" role="button" aria-label="${o.name}，${SEASON[o.season][0]}"`}>
+    <line class="lead" x1="${x}" y1="${y}" x2="${p[2]+w/2}" y2="${p[3]-4}"/>
+    ${!stat&&S.loc===o.id?`<circle class="here" cx="${x}" cy="${y}" r="6"/>`:''}${on?`<circle class="ring" cx="${x}" cy="${y}" r="7"/>`:''}
+    <circle class="pin ${o.season}" cx="${x}" cy="${y}" r="4.2"/>
+    <rect x="${p[2]-2}" y="${p[3]-11}" width="${w+4}" height="14" rx="2" fill="var(--sea)" opacity=".8"/>
+    <text x="${p[2]}" y="${p[3]}" font-weight="${on?700:500}" ${on?'style="fill:var(--cherry)"':''}>${o.name}</text>
+    ${stat?'':`<rect class="hit" x="${p[2]-6}" y="${p[3]-16}" width="${w+12}" height="24"/><circle class="hit" cx="${x}" cy="${y}" r="9"/>`}</g>`}).join('');
+  return `<svg class="map" viewBox="0 0 400 191" role="group" aria-label="咖啡產地地圖">
+  <rect class="belt" x="0" y="${PY(23.5)}" width="400" height="${PY(-23.5)-PY(23.5)}"/>
+  <line class="beltl" x1="0" x2="400" y1="${PY(23.5)}" y2="${PY(23.5)}"/><line class="beltl" x1="0" x2="400" y1="${PY(-23.5)}" y2="${PY(-23.5)}"/>
+  ${LAND}<text class="cap" x="150" y="${PY(-23.5)-4}">咖啡帶　COFFEE BELT</text>${trail}${route}${pins}</svg>`}
+const PROC={'水洗':'#9db89a','日曬':'#bdb478','厭氧日曬':'#c9a268','蜜處理':'#cfb06a','濕剝法':'#6c9085'};
+const bean=(x,y,r,rot,fill,kind)=>`<g transform="translate(${x.toFixed(1)} ${y.toFixed(1)}) rotate(${rot.toFixed(0)})"><ellipse rx="${r}" ry="${(r*.68).toFixed(1)}" fill="${fill}" stroke="var(--ink)" stroke-width=".8"/><path d="M${-r*.78} 0 C${-r*.3} ${-r*.38},${r*.3} ${r*.38},${r*.78} 0" fill="none" stroke="var(--ink)" stroke-width=".9" opacity=".55"/>${kind==='hole'?`<circle cx="${r*.35}" cy="${-r*.3}" r="1.6" fill="var(--ink)"/>`:''}</g>`;
+const beanIcon=(p,sz=22)=>`<svg width="${sz}" height="${sz}" viewBox="-12 -12 24 24" aria-hidden="true">${bean(0,0,10,-35,PROC[p])}</svg>`;
+function tray(f,truth){const base=truth&&f.past?'#ddd6b4':PROC[f.p], k=truth?Math.min(9,Math.ceil(f.defects/2)):0;
+  const order=Array.from({length:24},(_,i)=>i).sort((a,b)=>rnd(f.id,a+50)-rnd(f.id,b+50)), bad=new Set(order.slice(0,k));let s='';
+  for(let i=0;i<24;i++){const c=i%8,r=Math.floor(i/8),d=bad.has(i)?(f.issue==='cbb'||i%2?'hole':'black'):'';
+    s+=bean(19+c*29+(rnd(f.id,i)-.5)*7,16+r*26+(rnd(f.id,i+24)-.5)*6,10.5,(rnd(f.id,i+99)-.5)*90,d==='black'?'#3a2d24':base,d)}
+  return `<svg class="tray" viewBox="0 0 240 84" role="img" aria-label="生豆示意圖">${s}</svg>`}
+function scene(f){const h=18+(f.alt-900)/1500*36, W=320, H=74, sick=f.seen&&f.issue; let sh='';
+  for(let i=0;i<26;i++){const x=8+i*12+(rnd(f.id,i+7)-.5)*5,y=62+(i%2)*6,ill=sick&&rnd(f.id,i+70)<.45;
+    sh+=`<circle cx="${x.toFixed(1)}" cy="${y}" r="4.6" fill="${ill?(f.issue==='rust'?'#d08a2c':f.issue==='borer'?'#b9a24a':'var(--leaf)'):'var(--leaf)'}" opacity="${ill&&f.issue==='borer'?.6:.85}"/>`
+      +(rnd(f.id,i+40)<(.25+f.q*.6)?`<circle cx="${(x+1.5).toFixed(1)}" cy="${y-1}" r="1.5" fill="${ill&&(f.issue==='cbd'||f.issue==='ant')?'var(--ink)':'var(--cherry)'}"/>`:'')}
+  const px=190+rnd(f.id,3)*60, py=H-18-h;
+  return `<svg class="scene" viewBox="0 0 ${W} ${H}" role="img" aria-label="${f.name}，海拔 ${f.alt} 公尺">
+  <polygon points="0,${H-14} 50,${H-30-h*.5} 110,${H-18} 150,${H-26-h*.3} ${px},${py} 290,${H-22-h*.4} ${W},${H-16} ${W},${H} 0,${H}" fill="var(--land)"/>
+  <polygon points="0,${H-8} 80,${H-22} 170,${H-12} 250,${H-24} ${W},${H-10} ${W},${H} 0,${H}" fill="var(--leaf)" opacity=".25"/>
+  <line x1="${px}" y1="${py}" x2="${px}" y2="${H-14}" stroke="var(--muted)" stroke-width=".7" stroke-dasharray="2 2"/>
+  <text x="${px+5}" y="${py+4}" font-size="10" style="font-family:var(--mono);fill:var(--ink)">${f.alt} m</text>${sh}</svg>`}
+function pestIcon(k){const leaf=`<path d="M6 30 C6 12 20 4 40 6 C40 24 30 36 10 34 Z" fill="var(--leaf)" opacity=".8"/><path d="M8 32 L36 9" stroke="var(--card)" stroke-width="1.2"/>`, ch=`<circle cx="23" cy="22" r="14" fill="var(--cherry)"/><path d="M23 8 q2 -6 8 -6" stroke="var(--leaf)" stroke-width="2" fill="none"/>`;
+  const g={rust:leaf+[[16,22],[24,14],[28,24],[20,28],[32,12]].map(p=>`<circle cx="${p[0]}" cy="${p[1]}" r="2.6" fill="#e39a2b"/>`).join(''),
+   cerc:leaf+[[18,22],[28,16],[26,27]].map(p=>`<circle cx="${p[0]}" cy="${p[1]}" r="3.4" fill="#6b4a2a"/><circle cx="${p[0]}" cy="${p[1]}" r="1.3" fill="#e8dcc0"/>`).join(''),
+   cbb:ch+`<circle cx="23" cy="34" r="2" fill="var(--ink)"/><ellipse cx="34" cy="34" rx="3.4" ry="2.2" fill="var(--ink)"/>`,
+   cbd:ch+`<ellipse cx="19" cy="24" rx="6" ry="4.5" fill="#2a1d18"/><ellipse cx="29" cy="17" rx="3" ry="2.4" fill="#2a1d18"/>`,
+   ant:`<ellipse cx="23" cy="22" rx="10" ry="13" fill="#2a1d18"/><path d="M23 9 L23 35 M14 16 L32 16 M13 24 L33 24" stroke="#e07a2b" stroke-width="2.4"/><circle cx="18" cy="29" r="2" fill="#f2f2ee"/><circle cx="28" cy="29" r="2" fill="#f2f2ee"/>`,
+   borer:`<rect x="16" y="2" width="14" height="40" rx="3" fill="#7a5a3c"/><circle cx="23" cy="26" r="3" fill="var(--ink)"/><circle cx="21" cy="14" r="2" fill="var(--ink)"/><path d="M14 40 l4 -3 l4 3 l4 -3 l4 3" stroke="#d9c49a" stroke-width="2" fill="none"/>`}[k];
+  return `<svg width="46" height="44" viewBox="0 0 46 44" aria-hidden="true">${g}</svg>`}
+function radar(c,col){const cx=100,cy=80,RR=50,xy=(i,v)=>{const a=-Math.PI/2+i*Math.PI/3,r=clamp((v-6)/4,0,1)*RR;return [(cx+r*Math.cos(a)).toFixed(1),(cy+r*Math.sin(a)).toFixed(1)]};
+  const ring=v=>ATTR.map((_,i)=>xy(i,v).join(',')).join(' '), hi=ATTR.map((k,i)=>xy(i,c.attrs[k][1]).join(',')), lo=ATTR.map((k,i)=>xy(i,c.attrs[k][0]).join(','));
+  const lab=ATTR.map((k,i)=>{const a=-Math.PI/2+i*Math.PI/3;return `<text x="${(cx+(RR+20)*Math.cos(a)).toFixed(0)}" y="${(cy+(RR+13)*Math.sin(a)+3).toFixed(0)}" text-anchor="middle">${k}</text>`}).join('');
+  return `<svg class="radar" viewBox="0 0 200 160" role="img" aria-label="風味雷達圖">${[7,8,9,10].map(v=>`<polygon class="grid" points="${ring(v)}"/>`).join('')}
+  ${ATTR.map((_,i)=>{const p=xy(i,10);return `<line class="grid" x1="${cx}" y1="${cy}" x2="${p[0]}" y2="${p[1]}"/>`}).join('')}
+  <path d="M${hi.join(' L')} Z M${lo.join(' L')} Z" fill="${col}" fill-rule="evenodd" opacity=".5"/><polygon points="${hi.join(' ')}" fill="none" stroke="${col}" stroke-width="1.4"/>${lab}</svg>`}
+function cups(c,go){return `<svg class="cups ${go?'go':''}" viewBox="0 0 240 40" role="img" aria-label="五杯杯測${c.oddAt>=0?'，其中一杯異常':''}">${[0,1,2,3,4].map(i=>{const x=24+48*i,bad=c.oddAt===i;
+  return `<g style="--i:${i}"><circle cx="${x}" cy="20" r="15" fill="var(--card)" stroke="${bad?'var(--cherry)':'var(--ink)'}" stroke-width="${bad?3:1.3}"/><circle class="liq" cx="${x}" cy="20" r="11.5" fill="${bad?'var(--cherry)':'var(--coffee)'}"/><circle cx="${x-4}" cy="16" r="2" fill="#fff" opacity=".3"/></g>`}).join('')}</svg>`}
+function moist(m){return `<div class="attr"><span>含水率</span><div class="scale" style="height:10px"><i style="left:${pct(10,8,14)}%;width:${pct(12,8,14)-pct(10,8,14)}%;opacity:.3"></i><b style="left:${pct(m,8,14)}%"></b></div><span class="num ${m>12||m<9.5?'':'muted'}">${m}%</span></div>`}
+function avatar(id){const sk=['#e8c39e','#c9976b','#a8744d','#8a5a3a','#f0d2b0'][Math.floor(rnd(id,1)*5)], hat=['#2c6a4d','#b0252f','#a66a12','#3d5a80','#6b4a2a'][Math.floor(rnd(id,2)*5)], t=Math.floor(rnd(id,3)*3);
+  return `<svg width="40" height="40" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="19.5" fill="var(--land)"/><path d="M6 40 C6 30 13 27 20 27 C27 27 34 30 34 40 Z" fill="${hat}"/><circle cx="20" cy="18" r="9" fill="${sk}"/>
+  ${t===0?`<path d="M8 14 H32 L27 7 H13 Z" fill="${hat}"/><rect x="5" y="13" width="30" height="2.6" rx="1.3" fill="${hat}"/>`:t===1?`<path d="M11 16 C11 6 29 6 29 16 C25 12 15 12 11 16 Z" fill="#2a1d18"/>`:`<path d="M10 17 C9 4 31 4 30 17 L28 12 C24 10 16 10 12 12 Z" fill="${hat}"/>`}
+  <circle cx="16.5" cy="18.5" r="1.1" fill="#2a1d18"/><circle cx="23.5" cy="18.5" r="1.1" fill="#2a1d18"/><path d="M17 22.5 q3 2 6 0" stroke="#2a1d18" stroke-width="1" fill="none" stroke-linecap="round"/></svg>`}
+const say=(id,who,text)=>`<div class="say ${id==='me'?'me':''}"><div class="av">${avatar(id)}</div><div class="sb"><div class="who">${who}</div><div class="bub">${text}</div></div></div>`;
+const ship=()=>`<svg class="sea" viewBox="0 0 320 54" aria-hidden="true"><g class="ship"><polygon points="70,34 230,34 216,48 84,48" fill="var(--ink)"/>${[0,1,2,3,4,5].map(i=>`<rect x="${92+i*20}" y="22" width="18" height="12" fill="${['var(--leaf)','var(--amber)','var(--cherry)'][i%3]}"/>`).join('')}${[0,1,2,3].map(i=>`<rect x="${102+i*20}" y="10" width="18" height="12" fill="${['var(--cherry)','var(--leaf)','var(--amber)'][i%3]}"/>`).join('')}<rect x="198" y="8" width="14" height="26" fill="var(--muted)"/></g><path d="M0 48 q10 -5 20 0 t20 0 t20 0 t20 0 t20 0 t20 0 t20 0 t20 0 t20 0 t20 0 t20 0 t20 0 t20 0 t20 0 t20 0 t20 0 V54 H0 Z" fill="var(--leaf)" opacity=".35"/></svg>`;
+function xpBar(){const lv=level(),a=LV[lv-1],b=LV[lv];
+  return `<div class="stack" style="gap:4px"><div class="row between small"><b>Lv ${lv}　${LVN[lv-1]}</b><span class="num muted">${b?save.meta.xp+' / '+b+' 經驗':save.meta.xp+' 經驗'}</span></div><div class="daybar" style="margin:0;height:6px"><i style="width:${b?pct(save.meta.xp,a,b):100}%;background:var(--leaf)"></i></div></div>`}
+
+/* ---------- 畫面 ---------- */
+const CS=()=>({wait:'雲端存檔連線中…',ok:'進度會自動存到雲端。',off:'連不上雲端，進度只存在這台裝置。',err:'雲端存檔失敗，下次操作時會再試。'}[cloud.state]);
+function hud(){const bags=S.inv.reduce((s,l)=>s+l.bags,0);
+  return `<div class="hud"><div class="cells g4">
+  <div><div class="k">資金</div><div class="v">${$(S.cash)}</div></div>
+  <div><div class="k">剩餘天數</div><div class="v">${S.days} 天</div></div>
+  <div><div class="k">已購生豆</div><div class="v">${bags} 袋</div></div>
+  <button class="sm ghost" data-a="tut" aria-label="開啟教學">教學</button></div>
+  <div class="daybar"><i style="width:${clamp(S.days/DAYS*100,0,100)}%"></i></div></div>`}
+function ordersHtml(){return `<table><tr><th>客戶</th><th>需求</th><th class="r">數量</th><th class="r">收購價</th></tr>${
+  S.orders.map(o=>`<tr><td>${o.name}<br><span class="muted">${o.who}</span></td><td>${o.want}<br><span class="num">≥ ${o.min} 分</span>${o.rush?'<br><span class="tag late">趕件</span>':''}</td><td class="r num">${o.bags} 袋</td><td class="r num">$${o.pay}/kg</td></tr>`).join('')}</table>`}
+function invHtml(){if(!S.inv.length)return '<p class="muted small">還沒買任何豆子。</p>';
+  return `<table>${S.inv.map(l=>{const e=bestEst(l.f);return `<tr><td>${l.f.name}<br><span class="muted">${l.f.v}・${l.f.p}</span></td><td class="r num">${l.bags} 袋<br>$${l.price}/kg</td><td class="r num">${e?fl(e.lo)+'–'+cl(e.hi):'未杯測'}</td></tr>`}).join('')}</table>`}
+function titleScene(){const id='title';let stars='',leaves='',fb='';
+  for(let i=0;i<34;i++)stars+=`<circle class="tw" style="animation-delay:${(rnd(id,i)*4).toFixed(1)}s" cx="${(rnd(id,i+40)*400).toFixed(0)}" cy="${(rnd(id,i+80)*230).toFixed(0)}" r="${(.5+rnd(id,i+120)*1.1).toFixed(1)}" fill="#fdf6e3"/>`;
+  const L=[[352,520,-28,30],[318,548,-52,28],[372,470,-8,26],[300,590,-70,26],[388,560,20,24],[340,600,-110,24],[376,612,-150,22],[286,628,-60,22]];
+  L.forEach((l,i)=>leaves+=`<ellipse cx="${l[0]}" cy="${l[1]}" rx="${l[3]}" ry="${l[3]*.38}" transform="rotate(${l[2]} ${l[0]} ${l[1]})" fill="${i%2?'#1e5a40':'#2b7754'}"/><line x1="${l[0]-l[3]*.8}" y1="${l[1]}" x2="${l[0]+l[3]*.8}" y2="${l[1]}" transform="rotate(${l[2]} ${l[0]} ${l[1]})" stroke="#143d2b" stroke-width="1"/>`);
+  const C=[[330,566,7,1],[342,574,7.5,1],[326,580,6.5,1],[352,588,7,0],[338,590,6,1],[362,540,6.5,1],[372,548,6,0],[310,606,6.5,1],[320,614,6,1]];
+  const ch=C.map(c=>`<circle cx="${c[0]}" cy="${c[1]}" r="${c[2]}" fill="${c[3]?'#c8323c':'#7fae4f'}"/><circle cx="${c[0]-2}" cy="${c[1]-2}" r="${c[2]*.3}" fill="#fff" opacity=".35"/>`).join('');
+  for(let i=0;i<7;i++)fb+=`<g class="fb" style="animation-duration:${(10+rnd(id,i+200)*8).toFixed(1)}s;animation-delay:${(-rnd(id,i+210)*16).toFixed(1)}s"><g transform="translate(${(30+rnd(id,i+220)*250).toFixed(0)} 0) scale(${(.8+rnd(id,i+230)*.9).toFixed(2)})"><ellipse rx="10" ry="6.8" fill="${Object.values(PROC)[i%5]}" transform="rotate(${(rnd(id,i+240)*180).toFixed(0)})"/><path d="M-8 0 C-3 -4,3 4,8 0" fill="none" stroke="#14251f" stroke-width="1" transform="rotate(${(rnd(id,i+240)*180).toFixed(0)})"/></g></g>`;
+  return `<svg class="tscene" viewBox="0 0 400 640" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+  <defs><linearGradient id="tsky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0f1f1a"/><stop offset=".38" stop-color="#1f4a3c"/><stop offset=".56" stop-color="#b9763a"/><stop offset=".66" stop-color="#f1b85a"/><stop offset=".74" stop-color="#f8dc98"/></linearGradient>
+  <radialGradient id="tglow"><stop offset="0" stop-color="#fff3c4" stop-opacity=".95"/><stop offset=".35" stop-color="#ffd27a" stop-opacity=".55"/><stop offset="1" stop-color="#ffd27a" stop-opacity="0"/></radialGradient>
+  <linearGradient id="tfade" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0c1a14" stop-opacity="0"/><stop offset=".55" stop-color="#0c1a14" stop-opacity=".82"/><stop offset="1" stop-color="#0c1a14"/></linearGradient></defs>
+  <rect width="400" height="640" fill="url(#tsky)"/>${stars}
+  <g class="sun"><circle cx="248" cy="408" r="150" fill="url(#tglow)"/><circle cx="248" cy="408" r="40" fill="#fff0bf"/></g>
+  <g class="plane"><polygon points="-9,-5 10,0 -9,5 -4,0" fill="#fdf6e3"/><line x1="-70" y1="0" x2="-12" y2="0" stroke="#fdf6e3" stroke-width="1" stroke-dasharray="4 4" opacity=".7"/></g>
+  <polygon points="0,410 40,386 90,402 140,360 190,392 236,372 290,398 340,356 400,388 400,640 0,640" fill="#5d7f63"/>
+  <g class="mist"><ellipse cx="120" cy="414" rx="170" ry="9" fill="#fdf6e3" opacity=".28"/><ellipse cx="360" cy="402" rx="120" ry="7" fill="#fdf6e3" opacity=".22"/></g>
+  <polygon points="0,452 60,418 120,440 170,404 230,436 280,412 330,438 400,408 400,640 0,640" fill="#2f5a45"/>
+  <g class="mist m2"><ellipse cx="260" cy="456" rx="190" ry="10" fill="#fdf6e3" opacity=".2"/></g>
+  <polygon points="0,500 70,462 128,470 190,490 250,468 320,492 400,470 400,640 0,640" fill="#173428"/>
+  ${[0,1,2,3].map(k=>`<path d="M${10+k*6} ${520+k*16} Q130 ${488+k*16} 250 ${500+k*16} T400 ${498+k*16}" fill="none" stroke="#2f6b4c" stroke-width="5" stroke-dasharray="2 9" stroke-linecap="round" opacity="${.7-k*.12}"/>`).join('')}
+  <g transform="translate(96 468)" fill="#0b1712"><ellipse cx="0" cy="-41" rx="11" ry="2.6"/><path d="M-6 -41 Q0 -52 6 -41 Z"/><circle cx="0" cy="-36" r="4.6"/><path d="M-5 -31 H5 L6 -10 H-6 Z"/><rect x="-11" y="-30" width="6" height="15" rx="2"/><path d="M-5 -10 L-6 2 H-2 L0 -8 L2 2 H6 L5 -10 Z"/><line x1="9" y1="-24" x2="13" y2="2" stroke="#0b1712" stroke-width="1.6"/><path d="M5 -28 L10 -22" stroke="#0b1712" stroke-width="2.4"/></g>
+  ${fb}
+  <g class="branch"><path d="M400 640 Q360 600 330 560 T372 470" fill="none" stroke="#3b2a1c" stroke-width="5" stroke-linecap="round"/><path d="M344 580 Q318 600 286 628" fill="none" stroke="#3b2a1c" stroke-width="3.5" stroke-linecap="round"/>${leaves}${ch}</g>
+  <rect y="330" width="400" height="310" fill="url(#tfade)"/></svg>`}
+function vIntro(){let g=null;try{g=save.game&&JSON.parse(save.game)}catch(e){}
+  const lv=level(),a=LV[lv-1],b=LV[lv];
+  return `<div class="title">${titleScene()}
+  <div class="thead"><div class="teye">GREEN COFFEE BUYER</div>
+   <h1 aria-label="咖啡尋豆師">${[...'咖啡尋豆師'].map((c,i)=>`<span style="animation-delay:${.15+i*.12}s" aria-hidden="true">${c}</span>`).join('')}</h1>
+   <div class="trule"><i></i>${beanIcon('日曬',20)}<i></i></div>
+   <p class="ttag">一本舊筆記，三十天，三萬美金。<br>替半山烘焙所，把好豆子帶回來。</p></div>
+  <div class="tmenu">
+   ${g?`<button class="primary" data-a="resume">繼續旅程<span>剩 ${g.days} 天・${$(g.cash)}</span></button><button data-a="start">放棄進度，開新的一季</button>`:`<button class="primary" data-a="start">${save.seasons?'開始新的一季':'開始遊戲'}</button>`}
+   <div class="trow"><button data-a="meta">生涯・圖鑑・故事</button><button data-a="tut">新手教學</button></div>
+   <div class="tstat"><div class="row between"><b>Lv ${lv}　${LVN[lv-1]}</b><span class="num">${save.best!==null?'最佳 '+$(save.best)+'・':''}${save.seasons} 季</span></div>
+    <div class="tbar"><i style="width:${b?pct(save.meta.xp,a,b):100}%"></i></div><div class="tcloud">${CS()}</div></div></div></div>`}
+function vBrief(){const first=save.seasons===0, c=CH.find(x=>x[0]===S.ch);
+  return `<div class="hero stack" style="padding-top:24px"><div class="eyebrow">${S.month} 月・季前會議</div><h1>${first?STORY[0][0]:'新的一季'}</h1></div>
+  <div class="stack">${first?STORY[0][1].map(l=>say(l[0],l[1],l[2])).join('')+'<hr>':''}
+  ${say('chen','陳師傅',(TIP[S.month]||'')+' 這一季你手上有 '+$(S.cash)+'，三十天。')}
+  <h3>客戶的話</h3>${S.orders.map(o=>say('c-'+o.id,`${o.who}・${o.name}`,`${o.intro}<br><span class="small muted num">≥ ${o.min} 分・${o.bags} 袋・$${o.pay}/kg</span>`)).join('')}
+  <div class="msg" style="border-color:var(--leaf)">本季挑戰：${c[1]}（達成 +40 經驗）</div>
+  <button class="primary" data-a="depart">收好筆記，出發</button></div>`}
+function vWorld(){
+  if(S.fly)return hud()+`<div class="stack"><h2>飛往${S.fly.name}…</h2>${mapSvg('fly')}</div>`;
+  const cards=S.origins.map(o=>{const here=S.loc===o.id, td=here?0:o.td, c=here?0:o.cost, ok=S.days>=td+.5&&S.cash>=c, sv=SEASON[o.season];
+    return `<div class="card ${ok?'tap':'off'}" ${ok?`data-a="go" data-id="${o.id}" tabindex="0" role="button"`:''}>
+    <div class="row between"><h3>${o.name} <span class="muted small" style="font-family:var(--body);font-weight:400">${o.region}</span></h3><span class="tag ${sv[1]}">${sv[0]}</span></div>
+    <p class="small muted">${o.note}・產季 ${o.months.join('、')} 月</p>
+    <p class="small num">${here?'你人在這裡':`機票 ${$(c)}・路程 ${td} 天`}　行情 $${o.pLo}–${o.pHi}/kg${o.list.some(f=>f.auction&&!f.closed&&f.bags)?'　<span class="tag bad">有競標</span>':''}</p></div>`}).join('')
+    +ORIGINS.filter(o=>(o.lv||1)>level()).map(o=>`<div class="card off"><div class="row between"><h3>${o.name} <span class="muted small" style="font-family:var(--body);font-weight:400">${o.region}</span></h3><span class="tag out">Lv ${o.lv} 解鎖</span></div><p class="small muted">${o.note}</p></div>`).join('');
+  if(!S.sel||!S.origins.some(o=>o.id===S.sel))S.sel=S.loc||(S.origins.find(o=>o.season==='in')||S.origins[0]).id;
+  const o=S.origins.find(x=>x.id===S.sel),here=S.loc===o.id,td=here?0:o.td,c=here?0:o.cost,ok=S.days>=td+.5&&S.cash>=c,sv=SEASON[o.season],ch=CH.find(x=>x[0]===S.ch);
+  return hud()+`<div class="stack">
+  <div class="row between"><h2>${S.month} 月・選一個產地</h2><span class="small muted">Lv ${level()}</span></div>
+  ${S.days<1?'<div class="msg">時間快用完了，該帶著豆子回國了。</div>':''}
+  <div class="stack" style="gap:8px">${mapSvg()}
+   <div class="legend"><span><i class="dot" style="background:var(--leaf)"></i>當季</span><span><i class="dot" style="background:var(--amber)"></i>季末</span><span><i class="dot" style="border:1px dashed var(--muted)"></i>非產季</span><span><i class="dot" style="border:2px solid var(--cherry)"></i>你的位置</span></div>
+   <div class="card stack" style="gap:6px"><div class="row between"><h3>${o.name} <span class="muted small" style="font-family:var(--body);font-weight:400">${o.region}</span></h3><span class="tag ${sv[1]}">${sv[0]}</span></div>
+   <p class="small muted">${o.note}・產季 ${o.months.join('、')} 月・行情 <span class="num">$${o.pLo}–${o.pHi}/kg</span></p>
+   <div class="row">${[...new Set(o.tpl.map(t=>t.p))].map(p=>`<span class="tag" style="display:inline-flex;align-items:center;gap:4px">${beanIcon(p,16)}${p}</span>`).join('')}</div>
+   <button class="primary" data-a="go" data-id="${o.id}" ${ok?'':'disabled'}>${here?'回到'+o.name+'的莊園':ok?`飛往${o.name}（${$(c)}・${td} 天）`:'時間或資金不夠'}</button></div></div>
+  <div class="msg" style="border-color:var(--leaf)">本季挑戰：${ch[1]}</div>
+  <div class="card stack"><h3>這一季的訂單</h3>${ordersHtml()}</div>
+  <h3>所有產地</h3>${cards}
+  <details class="card"><summary>已購生豆（${S.inv.length} 批）</summary><div style="margin-top:8px">${invHtml()}</div></details>
+  <button class="primary" data-a="finish">結束產季，回國交貨</button>
+  <p class="small muted">${CS()}</p></div>`}
+function dialogHtml(){const d=S.dialog;if(!d)return '';
+  return `<div class="card stack" style="border-color:var(--cherry)"><h3>來電</h3>${say('c-'+d.oid,d.who,d.text)}<div class="tnav"><button data-a="dno">${d.no}</button><button class="primary" data-a="dyes">${d.yes}</button></div></div>`}
+function vOrigin(){const o=curO(), sv=SEASON[o.season];
+  return hud()+`<div class="stack"><div class="row between"><h2>${o.name}・${o.region}</h2><span class="tag ${sv[1]}">${sv[0]}</span></div>
+  ${S.event?`<div class="msg"><b>產地快報</b><br>${S.event}</div>`:''}${dialogHtml()}
+  ${o.season!=='in'?`<div class="msg">現在${o.season==='out'?'不是產季，願意賣的莊園不多，':'已到季末，'}要特別留意過季老豆。</div>`:''}
+  ${o.list.map(f=>{const e=bestEst(f), mine=S.inv.filter(l=>l.f===f).reduce((s,l)=>s+l.bags,0);
+    return `<div class="card tap stack" style="gap:6px" data-a="farm" data-id="${f.id}" tabindex="0" role="button">
+    <div class="row between"><h3 class="ttl">${beanIcon(f.p)}${f.name}</h3><span class="num">$${f.auction?f.auction.cur:f.price}/kg</span></div>
+    <p class="small muted">${f.v}・${f.p}・海拔 ${f.alt} m・${f.closed?(f.auction?'已退出':'不願再談'):f.bags?(f.auction?'整批 ':'可售 ')+f.bags+' 袋':'已售完'}</p>
+    <div class="row small">${f.auction?'<span class="tag bad">競標</span>':''}${hearts(f.rel)}${f.visited?'<span class="tag in">已參訪</span>':''}${e?`<span class="tag num">估 ${fl(e.lo)}–${cl(e.hi)}</span>`:'<span class="tag out">未杯測</span>'}${f.inspected?'<span class="tag">已驗豆</span>':''}${f.seen&&f.issue?`<span class="tag bad">${ISSUE[f.issue].name}</span>`:''}${mine?`<span class="tag hit">已買 ${mine} 袋</span>`:''}</div></div>`}).join('')}
+  <button data-a="world">離開，看其他產地</button></div>`}
+function cupBlock(key,label,c){if(!c)return '';const col=key==='sample'?'var(--amber)':'var(--leaf)';
+  return `<div class="stack" style="gap:6px"><div class="row between"><b>${label}・第 ${c.n}/3 輪</b><span class="big" style="font-size:22px">${fl(c.lo)}–${cl(c.hi)}</span></div>
+  ${cups(c,S.anim===key)}${c.odd?`<p class="small" style="color:var(--cherry)">累計 ${c.odd} 輪喝到瑕疵杯，這批豆子可能不穩定。</p>`:''}
+  <div class="scale">${bar(c.lo,c.hi,78,94,key==='sample'?'s':'')}${S.orders.map(o=>`<b style="left:${pct(o.min,78,94)}%" title="${o.name}"></b>`).join('')}</div>
+  <div class="row between small muted num"><span>78</span><span>紅線＝各訂單門檻</span><span>94</span></div>
+  ${radar(c,col)}<p class="small muted" style="text-align:center">色帶越窄，代表你對這一項越有把握。</p></div>`}
+function greet(f){const p=persOf(f.id);return f.auction?'各位買家，這是今年評分最高的批次，整批競標，價高者得。':(f.rel>=2?LINE.hiFriend:f.rel<0?LINE.hiCold:LINE.hi)[p]}
+function vFarm(){const o=curO(), f=curF(), key=f.visited?'bulk':'sample', c=f.cup[key], canCup=(!c||c.n<3)&&S.days>=.5, a=f.auction;
+  const maxQ=Math.min(f.bags,Math.floor(S.cash/(KG*(f.price+SHIP)))); S.qty=Math.max(1,Math.min(S.qty,Math.max(1,maxQ)));
+  const cost=S.qty*KG*(f.price+SHIP), Q=[['harvest','今年收成怎麼樣？'],['story','說說你和這座莊園的故事'],['gossip','附近誰家的豆子最好？']];
+  const bidBtn=d=>{const b=r1(a.cur*(1+d)),tot=f.bags*KG*(b+SHIP);return `<button data-a="raise" data-d="${d}" ${tot>S.cash?'disabled':''}>出 $${b}/kg<span>共 ${$(tot)}</span></button>`};
+  return hud()+`<div class="stack">
+  <div><h2>${f.name}</h2><p class="small muted">${o.name}・${f.v}・${f.p}・海拔 ${f.alt} m　${hearts(f.rel)}</p></div>
+  ${scene(f)}
+  ${S.msg?`<div class="msg">${S.msg}</div>`:''}
+  <div class="card stack">${S.say?say(f.id,S.say[0],S.say[1]):say(f.id,`${f.who}${a?'':'・'+persOf(f.id)}`,greet(f)+(a?'':` 我們的豆子有${f.flav[0]}和${f.flav[1]}的味道，調性是${CAT[f.cat]}。`))}
+   ${a?'':`<div class="row">${Q.filter(q=>!f.asked[q[0]]).map(q=>`<button class="sm" data-a="ask" data-q="${q[0]}">${q[1]}</button>`).join('')||'<span class="small muted">該問的都問過了。</span>'}</div>`}
+   <div class="row">${fitTags(f)}</div></div>
+  <div class="acts">
+   <button data-a="visit" ${f.visited||S.days<1?'disabled':''}>參訪莊園<span>${f.visited?'已完成':'1 天'}</span></button>
+   <button data-a="cup" ${canCup?'':'disabled'}>杯測${f.visited?'大貨':'樣品'}<span>${c&&c.n>=3?'已測 3 輪':'半天'}</span></button>
+   <button data-a="inspect" ${f.inspected||S.days<.5?'disabled':''}>檢驗生豆<span>${f.inspected?'已完成':'半天'}</span></button>
+  </div>
+  ${f.cup.sample||f.cup.bulk?`<div class="card stack">${cupBlock('bulk','倉庫大貨',f.cup.bulk)}${f.cup.sample&&f.cup.bulk?'<hr>':''}${cupBlock('sample','寄送樣品',f.cup.sample)}
+   ${!f.visited?'<p class="small muted">這是莊園準備的樣品。參訪後才能從倉庫抽大貨來測。</p>':''}</div>`:''}
+  ${f.seen&&f.issue?`<div class="card stack" style="gap:6px;border-color:var(--cherry)"><div class="ttl">${pestIcon(f.issue)}<div><h3>${ISSUE[f.issue].name}</h3><span class="small muted">${ISSUE[f.issue].en}</span></div></div><p class="small">${ISSUE[f.issue].fx}</p><p class="small"><b>對這批豆子的影響：</b>${ISSUE[f.issue].buy}</p></div>`:''}
+  <div class="card stack" style="gap:8px"><div class="row between"><h3>${f.inspected?'生豆檢驗':'生豆外觀'}</h3><span class="small muted">${f.inspected?(f.past?'過季老豆，顏色偏白':'當季新豆')+'・瑕疵 '+f.defects+' 顆':'桌上的樣品，還沒檢驗'}</span></div>
+   ${tray(f,f.inspected)}${f.inspected?moist(f.moisture)+'<p class="small muted">綠色區段是理想含水率 10–12%。深色豆和有蟲孔的豆是瑕疵豆（示意）。</p>':''}</div>
+  ${f.notes.length?`<div class="card stack"><h3>尋豆筆記</h3><ul class="notes">${f.notes.map(n=>`<li>${n}</li>`).join('')}</ul></div>`:''}
+  ${f.closed?`<div class="card"><p>${a?'你已退出這場競標。':f.who+'不願意再跟你談了。'}</p></div>`:f.bags<1?`<div class="card"><p>${a&&a.won?'你標下了這一批。':'這批豆子已經賣完。'}</p></div>`:a?`
+  <div class="card stack" style="border-color:var(--cherry)"><div class="row between"><h3>競標</h3><span class="small">整批 <b class="num">${f.bags}</b> 袋</span></div>
+   <div class="row between"><span>目前最高出價<br><span class="small muted">${a.rival}</span></span><span class="big">$${a.cur}<span class="small muted">/kg</span></span></div>
+   <div class="acts">${bidBtn(.05)}${bidBtn(.12)}${bidBtn(.25)}</div>
+   <p class="small muted">出價超過對手心裡的上限就得標，並立刻付款。對手也可能出得比這批豆子值的還多。</p>
+   <button data-a="fold">退出競標</button></div>`:`
+  <div class="card stack"><div class="row between"><h3>議價</h3><span class="small">耐心 <span class="num">${'●'.repeat(clamp(f.mood,0,5))+'○'.repeat(clamp(5-f.mood,0,5))}</span></span></div>
+   <div class="row between"><span>${f.dealt?'成交價':'目前開價'}</span><span class="big">$${f.price}<span class="small muted">/kg</span></span></div>
+   ${f.dealt?'<p class="small muted">價格已談定。</p>':`<div class="row between"><span>你的出價 <b class="num">$${S.offer}</b></span>
+    <span class="row"><button class="sm" data-a="off" data-d="-.1">−10%</button><button class="sm" data-a="off" data-d="-.03">−3%</button><button class="sm" data-a="off" data-d=".03">+3%</button></span></div>
+   <button data-a="bid" ${S.offer>=f.price?'disabled':''}>提出這個價格</button>`}</div>
+  <div class="card stack"><h3>下單</h3>
+   <div class="row between"><span>數量 <b class="num">${S.qty}</b> 袋（每袋 60 kg，共 ${f.bags} 袋）</span>
+    <span class="row"><button class="sm" data-a="qty" data-d="-5">−5</button><button class="sm" data-a="qty" data-d="-1">−1</button><button class="sm" data-a="qty" data-d="1">+1</button><button class="sm" data-a="qty" data-d="5">+5</button></span></div>
+   <p class="small muted num">豆款 ${$(S.qty*KG*f.price)}＋海運 ${$(S.qty*KG*SHIP)}＝${$(cost)}</p>
+   <button class="primary" data-a="buy" ${maxQ<1?'disabled':''}>${maxQ<1?'資金不足':'以 $'+f.price+'/kg 買下 '+S.qty+' 袋'}</button></div>`}
+  <details class="card"><summary>這一季的訂單</summary><div style="margin-top:8px">${ordersHtml()}</div></details>
+  <button data-a="back">回到${o.name}的莊園列表</button></div>`}
+
+/* ---------- 結算 ---------- */
+function settle(){
+  const lots=S.inv.map(l=>({f:l.f,bags:l.bags,price:l.price,arr:arrival(l.f),left:l.bags,sales:[],hit:false,spot:false}));
+  const ods=[...S.orders].sort((a,b)=>b.pay-a.pay).map(o=>{let pay=o.pay,note='';if(o.rush){if(S.days>=o.rush){pay=r1(pay*1.12);note='趕上了，加價 12%'}else{pay=r1(pay*.95);note='沒趕上，減價 5%'}}return {...o,pay,note,got:0}});
+  let rev=0;
+  for(const od of ods){for(const l of lots.filter(l=>matches(od,l.f)&&l.arr>=od.min).sort((a,b)=>a.arr-b.arr)){
+    const n=Math.min(l.left,od.bags-od.got);if(n<1)continue;l.left-=n;od.got+=n;const m=n*KG*od.pay;rev+=m;l.hit=true;l.sales.push(`${od.name} ${n} 袋，${$(m)}`)}}
+  const spot=s=>s<80?2.5:s<82?4:s<84?5.5:s<86?7.5:s<88?10:s<90?14:22;
+  for(const l of lots)if(l.left){const m=l.left*KG*spot(l.arr);rev+=m;l.spot=true;l.sales.push(`現貨市場 ${l.left} 袋，$${spot(l.arr)}/kg，${$(m)}`)}
+  const profit=S.cash+rev-S.start, full=ods.filter(o=>o.got>=o.bags).length, m=save.meta, lv0=level();
+  const title=!lots.length?'空手而回':profit<0?'繳了學費的一季':profit<4000?'小有收穫':profit<10000?'滿載而歸':profit<18000?'大豐收':'傳奇的一季';
+  const r={lots,ods,rev,profit,full,title,open:0,fresh:-1};
+  for(const f of allFarms()){if(f.auction)continue;const bought=S.inv.some(l=>l.f===f),d=f.closed?-2:bought?(f.dealt?1:2):f.hag?-1:0;if(d)m.rel[f.id]=clamp((m.rel[f.id]||0)+d,-2,5)}
+  r.newDex=[];for(const l of lots){const k=`${l.f.o}|${l.f.v}|${l.f.p}`;if(!(k in m.dex))r.newDex.push(k);m.dex[k]=Math.max(m.dex[k]||0,Math.round(l.arr*10)/10)}
+  r.newAch=ACH.filter(a=>!m.ach[a[0]]&&a[3](r));r.newAch.forEach(a=>m.ach[a[0]]=1);
+  const ch=CH.find(x=>x[0]===S.ch);r.ch=ch[1];r.chOk=!!ch[2](r);
+  r.parts=[['淨利',Math.max(0,Math.round(profit/100))],[`完成訂單 ×${full}`,25*full],['本季挑戰',r.chOk?40:0],[`新成就 ×${r.newAch.length}`,30*r.newAch.length],[`圖鑑新發現 ×${r.newDex.length}`,10*r.newDex.length]].filter(p=>p[1]>0);
+  r.gain=r.parts.reduce((s,p)=>s+p[1],0);m.xp+=r.gain;r.lv0=lv0;r.lv1=level();
+  save.seasons++;if(lots.length&&(save.best===null||profit>save.best))save.best=Math.round(profit);
+  S.res=r;
+}
+function lotCard(l,fresh){const f=l.f,e=bestEst(f),pen=penalty(f),tot=pen.reduce((s,x)=>s+x[0],0),from=e?(e.lo+e.hi)/2:f.score;
+  const stamps=(l.hit?'<span class="stamp ok">命中訂單</span>':'')+(l.spot?'<span class="stamp warn">流入現貨</span>':'')+(tot?`<span class="stamp bad">掉分 −${tot}</span>`:'<span class="stamp ok">品質如實</span>');
+  return `<div class="card stack ${fresh?'pop':''}" style="gap:6px"><div class="row between"><h3 class="ttl">${beanIcon(f.p)}${f.name}</h3><span class="big" style="font-size:24px" ${fresh?`data-cnt="${l.arr.toFixed(1)}" data-from="${from.toFixed(1)}"`:''}>${l.arr.toFixed(1)}</span></div>
+  <div class="swap">${tray(f,true)}${fresh?`<div class="old">${tray(f,false)}</div>`:''}</div><div class="row">${stamps}</div>
+  <p class="small muted">${f.v}・${f.p}・${l.bags} 袋・買價 $${l.price}/kg</p>
+  <p class="small">你的估分：<span class="num">${e?fl(e.lo)+'–'+cl(e.hi)+(f.cup.bulk?'（大貨）':'（只測了樣品）'):'沒杯測就買了'}</span>　產地實際 <span class="num">${f.score.toFixed(1)}</span></p>
+  <ul class="notes">${f.boost&&!f.cup.bulk?`<li>樣品是特別挑過的，比大貨高了 ${f.boost.toFixed(1)} 分。</li>`:''}${penBase(f).map(p=>`<li>${p[1]}，扣 <span class="num">${p[0]}</span> 分${f.inspected?'':'（沒驗豆所以沒發現）'}</li>`).join('')}${f.unstable?`<li>批次不穩定，到港杯測出現瑕疵杯，扣 <span class="num">1.5</span> 分${Object.values(f.cup).some(c=>c.odd)?'':'（產地杯測時沒碰上）'}</li>`:''}${!pen.length&&!(f.boost&&!f.cup.bulk)?'<li>品質和產地時一致，漂亮。</li>':''}${l.sales.map(s=>`<li>賣給 ${s}</li>`).join('')}</ul></div>`}
+function shareCard(r){const best=[...r.lots].sort((a,b)=>b.arr-a.arr)[0];
+  return `<div class="share stack"><div class="row between small"><span>咖啡尋豆師・${S.month} 月產季</span><span class="num">Lv ${level()} ${LVN[level()-1]}</span></div><h2>${r.title}</h2><div class="big">${$(r.profit)}</div>${mapSvg('card')}
+  <div class="cells3"><div><div class="k">完成訂單</div><div class="v">${r.full}/${r.ods.length}</div></div><div><div class="k">走訪產地</div><div class="v">${new Set(S.trail).size}</div></div><div><div class="k">最佳批次</div><div class="v">${best?best.arr.toFixed(1):'—'}</div></div></div>
+  ${best?`<p class="small">${best.f.name}・${best.f.v}・${best.f.p}</p>`:''}</div>`}
+function vResult(){const r=S.res,N=r.lots.length;
+  if(r.open<N)return `<div class="hero stack" style="padding-top:20px"><div class="eyebrow">SEASON REPORT・${S.month} 月產季</div>${ship()}<h1>貨櫃到港</h1><p>共 ${N} 批生豆，一箱一箱開驗。</p></div>
+   <div class="stack"><div class="tnav"><button data-a="openall">全部打開</button><button class="primary" data-a="open">開第 ${r.open+1} 箱（共 ${N} 箱）</button></div>${r.lots.slice(0,r.open).map((l,i)=>lotCard(l,i===r.fresh)).reverse().join('')}</div>`;
+  return `<div class="hero stack" style="padding-top:20px"><div class="eyebrow">SEASON REPORT・${S.month} 月產季</div><h1>${r.title}</h1>
+  <p>淨利 <span class="big" style="color:${r.profit<0?'var(--cherry)':'var(--leaf)'}">${$(r.profit)}</span></p>
+  <p class="small muted num">採購與差旅 ${$(S.start-S.cash)}・銷售收入 ${$(r.rev)}・完成訂單 ${r.full}/${r.ods.length}</p></div>
+  <div class="stack">
+  <div class="card stack"><div class="row between"><h3>經驗 +${r.gain}</h3>${r.lv1>r.lv0?'<span class="stamp ok">升級</span>':''}</div>${xpBar()}
+   <p class="small muted">${r.parts.map(p=>`${p[0]} +${p[1]}`).join('・')||'這一季沒有拿到經驗。'}</p>
+   ${r.lv1>r.lv0?`<p class="small"><b>升上 Lv ${r.lv1}：</b>${Array.from({length:r.lv1-r.lv0},(_,i)=>PERK[r.lv0+1+i]).join('；')}</p>`:''}
+   <p class="small">本季挑戰「${r.ch}」：${r.chOk?'<span class="tag hit">達成</span>':'<span class="tag out">未達成</span>'}</p>
+   ${r.newAch.length?`<div class="row">${r.newAch.map(a=>`<span class="tag hit">成就：${a[1]}</span>`).join('')}</div>`:''}</div>
+  ${r.lv1>r.lv0?`<div class="card stack"><h3>${STORY[r.lv1-1][0]}</h3>${STORY[r.lv1-1][1].map(l=>say(l[0],l[1],l[2])).join('')}</div>`:''}
+  <div class="card stack"><h3>客戶怎麼說</h3>${r.ods.map(o=>say('c-'+o.id,`${o.who}・${o.name}`,`${o.got>=o.bags?o.ok:o.got?o.part:o.fail}<br><span class="small muted num">${o.got}/${o.bags} 袋・$${o.pay}/kg${o.note?'・'+o.note:''}</span> ${o.got>=o.bags?'<span class="tag hit">完成</span>':o.got?'<span class="tag late">部分</span>':'<span class="tag bad">落空</span>'}`)).join('')}
+   ${say('chen','陳師傅',r.profit<0?'賠錢的一季，我也有過。把原因寫進筆記最後一頁，下一季別再犯。':r.full===r.ods.length?'每一張單都交了。客人不會說謝謝，但他們會再打電話來。':r.profit>=10000?'帳很漂亮。不過有幾張單沒交齊，客人記得的是這個。':'還行。哪一批看走眼了，自己心裡要有數。')}</div>
+  ${shareCard(r)}<p class="small muted" style="text-align:center">這張成績卡可以截圖分享。</p>
+  <h2>到港開箱明細</h2>
+  ${N?r.lots.map(l=>lotCard(l,false)).join(''):'<div class="card"><p>你一袋豆子都沒帶回來。</p></div>'}
+  <button class="primary" data-a="start">再尋一季</button><button data-a="meta">生涯、圖鑑與故事</button></div>`}
+
+/* ---------- 生涯頁 ---------- */
+let M={on:false};
+function vMeta(){const m=save.meta,lv=level(),farmName=id=>{const o=ORIGINS.find(o=>id.startsWith(o.id)),i=+id.slice(3);return o?`${o.name}・${o.farms[i]}（${o.people[i]}）`:id};
+  const rels=Object.entries(m.rel).filter(e=>e[1]).sort((a,b)=>b[1]-a[1]);
+  return `<div class="stack" style="padding-top:20px"><div class="row between"><h2>尋豆師生涯</h2><button class="sm ghost" data-a="mclose">關閉</button></div>
+  <div class="card stack">${xpBar()}<table>${[2,3,4,5,6].map(n=>`<tr><td class="num">Lv ${n}</td><td>${PERK[n]}</td><td class="r">${lv>=n?'<span class="tag hit">已解鎖</span>':`<span class="num muted">${LV[n-1]} 經驗</span>`}</td></tr>`).join('')}</table></div>
+  <h3>故事（${Math.min(lv,STORY.length)}/${STORY.length}）</h3>
+  ${STORY.map((s,i)=>i<lv?`<details class="card"><summary>${s[0]}</summary><div class="stack" style="margin-top:10px">${s[1].map(l=>say(l[0],l[1],l[2])).join('')}</div></details>`:`<div class="card off"><b>？？？</b>　<span class="small muted">Lv ${i+1} 解鎖</span></div>`).join('')}
+  <h3>成就（${Object.keys(m.ach).length}/${ACH.length}）</h3>
+  <div class="grid2">${ACH.map(a=>`<div class="card ${m.ach[a[0]]?'':'off'}" style="padding:10px"><b>${m.ach[a[0]]?a[1]:'？？？'}</b><p class="small muted">${a[2]}</p></div>`).join('')}</div>
+  <h3>生豆圖鑑（${Object.keys(m.dex).length}/${DEX.length}）</h3>
+  <div class="grid2">${DEX.map(d=>{const s=m.dex[d.k];return `<div class="card ${s?'':'off'}" style="padding:10px"><div class="ttl">${s?beanIcon(d.p,26):'<span class="big" style="font-size:20px">？</span>'}<div><b>${d.o.name}</b>${s>=90?' <span style="color:var(--cherry)">★</span>':''}<p class="small muted">${s?d.v+'・'+d.p:(d.o.lv||1)>lv?'Lv '+d.o.lv+' 解鎖':'尚未帶回'}</p></div></div>${s?`<p class="small num">最佳到港 ${s.toFixed(1)}</p>`:''}</div>`}).join('')}</div>
+  <h3>病蟲害筆記（${Object.keys(m.pest).length}/${Object.keys(ISSUE).length}）</h3>
+  ${Object.entries(ISSUE).map(([k,v])=>m.pest[k]?`<div class="card stack" style="gap:6px"><div class="ttl">${pestIcon(k)}<div><b>${v.name}</b><br><span class="small muted">${v.en}</span></div></div><p class="small">${v.fx}</p><p class="small muted">買豆時：${v.buy}</p></div>`:`<div class="card off"><b>？？？</b>　<span class="small muted">在產地遇到後記錄</span></div>`).join('')}
+  <h3>莊園交情</h3>
+  ${rels.length?`<div class="card"><table>${rels.map(e=>`<tr><td>${farmName(e[0])}</td><td class="r">${hearts(e[1])}</td></tr>`).join('')}</table></div>`:'<p class="small muted">還沒有和任何莊園建立交情。向同一座莊園買豆會累積交情；把人惹毛了也會被記住。</p>'}
+  <button class="primary" data-a="mclose">關閉</button></div>`}
+
+/* ---------- 存檔 ---------- */
+const LS='beanhunter-save';
+const pack=()=>S&&S.view!=='result'?JSON.stringify({view:S.view,month:S.month,cash:S.cash,start:S.start,days:S.days,loc:S.loc,orders:S.orders,trail:S.trail,event:S.event,evn:S.evn,calls:S.calls,dialog:S.dialog,ch:S.ch,
+  origins:S.origins.map(o=>({id:o.id,season:o.season,list:o.list})),inv:S.inv.map(l=>({f:l.f.id,bags:l.bags,price:l.price}))}):null;
+function unpack(j){const g=JSON.parse(j),origins=g.origins.map(x=>({...ORIGINS.find(o=>o.id===x.id),season:x.season,list:x.list.map(f=>({rel:0,asked:{},notes:[],...f}))})),all=origins.flatMap(o=>o.list);
+  return {view:g.view==='brief'?'brief':g.loc&&g.view!=='world'?'origin':'world',month:g.month,cash:g.cash,start:g.start||START,days:g.days,loc:g.loc,farm:null,msg:'',say:null,offer:0,qty:1,sel:null,origins,
+    trail:g.trail||[],event:g.event||'',evn:g.evn||0,calls:g.calls||0,dialog:g.dialog||null,ch:CH.some(c=>c[0]===g.ch)?g.ch:CH[0][0],fly:null,res:null,anim:null,
+    orders:g.orders.map(o=>typeof o==='string'?{...ORDERS.find(x=>x.id===o)}:o),inv:g.inv.map(l=>({f:all.find(f=>f.id===l.f),bags:l.bags,price:l.price}))}}
+const keyOf=()=>JSON.stringify([save.best,save.seasons,save.game,save.meta]);
+function flush(){if(!cloud.ref)return;if(cloud.busy){cloud.dirty=true;return}cloud.busy=true;
+  cloud.ref.set({v:2,best:save.best,seasons:save.seasons,game:save.game,at:save.at,meta:JSON.parse(JSON.stringify(save.meta))})
+   .then(()=>{if(cloud.state!=='ok'){cloud.state='ok';if(!S)render()}},()=>{cloud.state='err'})
+   .then(()=>{cloud.busy=false;if(cloud.dirty){cloud.dirty=false;flush()}})}
+function persist(){if(S)save.game=pack();const k=keyOf();if(k===lastKey)return;lastKey=k;save.at=Date.now();
+  try{localStorage.setItem(LS,JSON.stringify(save))}catch(e){}
+  clearTimeout(cloud.timer);cloud.timer=setTimeout(flush,900)}
+try{const d=JSON.parse(localStorage.getItem(LS)||'null');if(d&&typeof d==='object')save={best:d.best??null,seasons:d.seasons||0,game:d.game||null,at:d.at||0,meta:metaOf(d.meta)};
+  else{const b=localStorage.getItem('beanhunter-best');if(b!==null)save.best=+b}}catch(e){}
+lastKey=keyOf();
+(async()=>{await null;const t=setTimeout(()=>{if(cloud.state==='wait'){cloud.state='off';render()}},10000);
+  try{if(!window.claude)throw 0;const [db,user]=await Promise.all([claude.use('db'),claude.use('user')]);const id=user&&await user.id();if(!db||!id)throw 0;
+    cloud.ref=db.doc('data/users/'+id+'/save');const snap=await cloud.ref.get();
+    if(snap.exists){const d=JSON.parse(JSON.stringify(snap.data())),localNewer=save.at>(d.at||0);
+      const best=[save.best,d.best].filter(x=>typeof x==='number');save.best=best.length?Math.max(...best):null;
+      save.seasons=Math.max(save.seasons,d.seasons||0);
+      if(d.meta&&(+d.meta.xp||0)>=save.meta.xp&&!(S&&S.res))save.meta=metaOf(d.meta);
+      if(!S&&!localNewer){save.game=typeof d.game==='string'?d.game:null;save.at=d.at||0}
+      const k=keyOf();if(k!==lastKey||localNewer){lastKey=k;try{localStorage.setItem(LS,JSON.stringify(save))}catch(e){}if(localNewer||S)flush()}
+    }else if(save.at)flush();
+    cloud.state='ok'}catch(e){cloud.state='off'}
+  clearTimeout(t);if(!S||S.view==='world')render()})();
+
+/* ---------- 教學 ---------- */
+let T={on:false,step:0,cup:null};
+const TUT=[
+ ['你的任務',()=>`<p>你是替烘豆商找生豆的尋豆師。每一季拿到 <b class="num">${$(START)}</b> 資金、<b class="num">${DAYS}</b> 天時間，還有 4 張客戶訂單。</p>
+  <p>目標是讓<b>淨利</b>越高越好：</p><p class="num">淨利＝賣豆收入 −（豆款＋海運＋機票）</p>
+  <p>一批豆子的標準流程：</p>
+  <div class="flow"><span>選產地</span><em>→</em><span>參訪莊園</span><em>→</em><span>杯測</span><em>→</em><span>檢驗生豆</span><em>→</em><span>議價</span><em>→</em><span>下單</span><em>→</em><span>回國結算</span></div>
+  <p class="small muted">每個步驟都要花時間，30 天不夠把每座莊園都查透。哪裡省、哪裡不能省，就是這個遊戲。</p>`],
+ ['先看訂單，再看產季',()=>`<p>訂單寫明客戶要的<b>處理法、風味調性、最低分數、袋數、收購價</b>。先想好要找哪種豆，再決定飛哪裡。</p>
+  <p>每局的月份不同，產地旁的標籤告訴你現在的狀況：</p>
+  <table><tr><td><span class="tag in">當季</span></td><td>4 座莊園可談，幾乎都是新豆</td></tr>
+  <tr><td><span class="tag late">季末</span></td><td>3 座莊園，約三成是過季老豆</td></tr>
+  <tr><td><span class="tag out">非產季</span></td><td>只剩 2 座，多半是老豆</td></tr></table>
+  <p>換產地要付機票和路程天數（多數是 2–3 天，台灣只要 1 天）。離開後再回來要重新付一次。</p>`],
+ ['杯測：把分數範圍縮小',()=>{const c=T.cup||(T.cup={n:0,lo:78,hi:94});const tag=c.n===0?'<span class="tag">待杯測</span>':c.lo>=85?'<span class="tag hit">達標</span>':c.hi>=85?'<span class="tag late">可能達標</span>':'<span class="tag bad">分數不足</span>';
+  return `<p>豆子的真實分數是藏起來的。每杯測一次花<b>半天</b>，估分範圍會縮小，最多測 3 次：</p>
+  <p class="num small">第 1 次約 6 分寬 → 第 2 次約 3 分 → 第 3 次約 1 分</p>
+  <div class="card stack" style="gap:6px"><div class="row between"><b>試試看（門檻 85 分的訂單）</b><span class="big" style="font-size:22px">${c.n?fl(c.lo)+'–'+cl(c.hi):'？'}</span></div>
+  <div class="scale">${c.n?bar(c.lo,c.hi,78,94):''}<b style="left:${pct(85,78,94)}%"></b></div>
+  <div class="row between small muted num"><span>78</span><span>紅線＝訂單門檻</span><span>94</span></div>
+  <div class="row between">${tag}<span class="row"><button class="sm" data-a="tcup" ${c.n>=3?'disabled':''}>杯測第 ${Math.min(3,c.n+1)} 次</button><button class="sm ghost" data-a="treset">換一支豆</button></span></div></div>
+  <p>整條綠色都在紅線右邊才是<b>達標</b>。跨在紅線上代表有風險，可以再測一次，或是賭一把。</p>
+  <p class="small muted">下方六項（香氣、酸質、甜度、醇厚、乾淨度、餘韻）同樣會越測越準。乾淨度低的豆子會喝到雜味。</p>`}],
+ ['樣品不等於大貨',()=>`<p>一到莊園，桌上擺的是莊園主準備的<b>寄送樣品</b>。大約每 5 到 6 座莊園就有 1 座的樣品是特別挑過的，比倉庫裡的大貨高 2–3 分。</p>
+  <p>花 <b>1 天參訪莊園</b>可以換到：</p>
+  <ul class="notes"><li>從倉庫親手抽<b>大貨</b>杯測，測到的才是你真正會收到的豆子</li><li>尋豆筆記：採收、曬場、倉庫的觀察，會暗示品質高低、老豆、受潮</li><li>交情變好：耐心 +1，底價也會鬆一點</li></ul>
+  <div class="card stack" style="gap:6px"><div class="row between small"><b>倉庫大貨</b><span class="num">84–85</span></div><div class="scale">${bar(84,85,78,94)}</div>
+  <div class="row between small"><b>寄送樣品</b><span class="num">86.5–87.5</span></div><div class="scale">${bar(86.5,87.5,78,94,'s')}</div></div>
+  <p class="small muted">橘色是樣品、綠色是大貨。兩條差這麼多，就是樣品灌水了。</p>`],
+ ['檢驗生豆：會不會撐過海運',()=>`<p>花<b>半天</b>驗豆，可以知道豆子到港後會掉多少分。沒驗的話，結算時才會發現。</p>
+  <table><tr><th>檢驗結果</th><th class="r">到港扣分</th></tr>
+  <tr><td>含水率超過 12%</td><td class="r num">每多 0.5% 扣 1 分</td></tr>
+  <tr><td>含水率低於 9.5%</td><td class="r num">1 分</td></tr>
+  <tr><td>過季老豆</td><td class="r num">2.5 分</td></tr>
+  <tr><td>瑕疵豆超過 8 顆／350 g</td><td class="r num">1 分</td></tr></table>
+  <p>訂單看的是<b>到港分數</b>。產地 86 分、含水率 13% 的豆子，到港只剩 84 分，85 分的訂單就交不出去。</p>`],
+ ['議價與下單',()=>`<p>每位莊園主心裡有一個<b>底價</b>，大約是開價的 75–92%，你看不到。</p>
+  <ul class="notes"><li>出價<b>高於底價</b>：直接成交，價格就此談定</li><li>出價<b>略低於底價</b>：耐心 −1，對方把開價往下讓一半</li><li>出價<b>遠低於底價</b>：耐心 −2</li><li>耐心歸零：對方不賣了，這座莊園就此關門</li></ul>
+  <p>耐心一開始是 <span class="num">●●●○</span>，參訪過是 <span class="num">●●●●</span>。穩健的做法是先砍 10% 試水溫，被拒絕後接受對方的新開價。</p>
+  <p>下單以袋計算，每袋 60 kg，另加海運 $1/kg。開價不議價也能直接買。</p>`],
+ ['回國結算',()=>`<p>按「結束產季，回國交貨」後，系統會自動替你配貨：收購價高的訂單優先，並用剛好達標的豆子去交，把高分豆留給更貴的訂單。</p>
+  <p>交不出去的豆子賣到現貨市場，價格通常比買價低：</p>
+  <table><tr><th>到港分數</th><th class="r">現貨價</th></tr>
+  <tr><td class="num">90 以上</td><td class="r num">$22/kg</td></tr><tr><td class="num">88–89.9</td><td class="r num">$14/kg</td></tr>
+  <tr><td class="num">86–87.9</td><td class="r num">$10/kg</td></tr><tr><td class="num">84–85.9</td><td class="r num">$7.5/kg</td></tr>
+  <tr><td class="num">82–83.9</td><td class="r num">$5.5/kg</td></tr><tr><td class="num">低於 82</td><td class="r num">$4 以下</td></tr></table>
+  <p>稱號依淨利決定：</p>
+  <p class="small num">見習尋豆師 $0 起・產地獵人 $4,000・首席尋豆師 $10,000・傳奇尋豆師 $18,000</p>`]
+];
+
+TUT.push(['和人說話、看懂病蟲害',()=>`<p>每座莊園的主人個性不同：<b>直爽、精明、寡言、熱情</b>。進莊園後可以免費問三個問題：</p>
+  <ul class="notes"><li><b>今年收成怎麼樣？</b>直爽和熱情的人會老實說出病蟲害或下雨的事；精明的人只會說「非常好」。</li><li><b>莊園的故事</b>：聽完對方的耐心 +1。</li><li><b>附近誰家的豆子最好？</b>多數人會指給你看，精明的人只會說自己。</li></ul>
+  <p>大約三成的莊園今年有病蟲害，參訪時會看到，山形圖上的樹也會變色：</p>
+  <table><tr><td>葉鏽病、天牛</td><td>袋數變少、開價變高</td></tr><tr><td>咖啡果小蠹</td><td>蟲孔豆多，驗豆會抓到</td></tr><tr><td>漿果病、椿象</td><td>批次不穩定，杯測可能喝到瑕疵杯</td></tr><tr><td>褐眼病</td><td>分數偏低、帶澀感</td></tr></table>
+  <p class="small muted">每輪杯測是五杯。其中一杯變紅，就是瑕疵杯；這種批次到港會再扣 1.5 分。遇過的病蟲害會記在生涯頁的筆記裡。</p>`]);
+TUT.push(['事件、競標與生涯',()=>`<ul class="notes"><li><b>產地快報</b>：抵達產地時可能碰上暴雨、罷工、豐收、霜害，或是有買家搶先一步。</li><li><b>客戶來電</b>：客戶可能臨時加量或要求趕件，你可以答應或婉拒。</li><li><b>競標批次</b>：每季有一兩支明星豆，要和對手喊價。出價超過對手的上限就得標；覺得太貴就退出。</li><li><b>莊園交情</b>：向同一座莊園買豆會累積愛心，下一季底價更低、耐心更多，三格以上還會替你留好批次。把人惹毛則會被記住。</li><li><b>生涯</b>：每季的淨利、完成的訂單、挑戰和成就都會換成經驗。升級可以解鎖巴西、葉門、更多資金、高價訂單和新的故事章節。</li></ul>`]);
+function vTut(){const [title,body]=TUT[T.step],last=T.step===TUT.length-1;
+  return `<div class="stack" style="padding-top:20px"><div class="row between"><span class="num small muted">教學 ${T.step+1} / ${TUT.length}</span><button class="sm ghost" data-a="tclose">關閉</button></div>
+  <div class="steps">${TUT.map((_,i)=>`<i class="${i<=T.step?'on':''}"></i>`).join('')}</div>
+  <h2>${title}</h2><div class="stack">${body()}</div>
+  <div class="tnav"><button data-a="tprev" ${T.step?'':'disabled'}>上一頁</button>${last?`<button class="primary" data-a="tclose">${S?'回到遊戲':'我懂了'}</button>`:'<button class="primary" data-a="tnext">下一頁</button>'}</div></div>`}
+function fx(){if(typeof document.querySelector!=='function')return;
+  const still=window.matchMedia&&window.matchMedia('(prefers-reduced-motion:reduce)').matches, pl=document.querySelector('#plane');
+  if(pl&&S&&S.fly&&!still){const {a,b}=S.fly,c=[(a[0]+b[0])/2,Math.min(a[1],b[1])-34],t0=performance.now();
+    const step=t=>{const u=clamp((t-t0)/1500,0,1),e=u<.5?2*u*u:1-2*(1-u)*(1-u),x=(1-e)*(1-e)*a[0]+2*(1-e)*e*c[0]+e*e*b[0],y=(1-e)*(1-e)*a[1]+2*(1-e)*e*c[1]+e*e*b[1],
+      dx=2*(1-e)*(c[0]-a[0])+2*e*(b[0]-c[0]),dy=2*(1-e)*(c[1]-a[1])+2*e*(b[1]-c[1]);
+      pl.setAttribute('transform',`translate(${x.toFixed(1)} ${y.toFixed(1)}) rotate(${(Math.atan2(dy,dx)*180/Math.PI).toFixed(0)})`);if(u<1&&pl.isConnected)requestAnimationFrame(step)};step(t0)}
+  if(!still)document.querySelectorAll('[data-cnt]').forEach(el=>{const a=+el.dataset.from,b=+el.dataset.cnt,t0=performance.now();
+    const st=t=>{const u=clamp((t-t0-500)/900,0,1);el.textContent=(a+(b-a)*u).toFixed(1);if(u<1&&el.isConnected)requestAnimationFrame(st)};st(t0)})}
+function render(){document.getElementById('app').innerHTML=T.on?vTut():M.on?vMeta():!S?vIntro():({brief:vBrief,world:vWorld,origin:vOrigin,farm:vFarm,result:vResult})[S.view]();
+  fx();if(S&&S.res)S.res.fresh=-1}
+
+/* ---------- 行動 ---------- */
+function narrow(c,key,t,w){let lo=t-Math.random()*w,hi=lo+w;if(key==='score'){c.lo=Math.max(c.lo,lo);c.hi=Math.min(c.hi,hi)}
+  else{const p=c.attrs[key]||[-99,99];c.attrs[key]=[Math.max(p[0],lo),Math.min(p[1],hi)]}}
+function doCup(f,key){const c=f.cup[key]||(f.cup[key]={n:0,lo:-99,hi:199,attrs:{},odd:0,oddAt:-1}),b=key==='sample'?f.boost:0;
+  narrow(c,'score',f.score+b,[6,3,1.2][c.n]);ATTR.forEach(k=>narrow(c,k,f.attrs[k]+b/6,[1.6,.8,.3][c.n]));
+  c.oddAt=f.unstable&&Math.random()<.5?RI(0,4):-1;if(c.oddAt>=0)c.odd=(c.odd||0)+1;c.n++;return c}
+function meet(k){if(!save.meta.pest[k])save.meta.pest[k]=1}
+function arrive(o){S.event='';S.dialog=null;const fs=o.list.filter(f=>!f.auction),sc=m=>fs.forEach(f=>{f.ask=r1(f.ask*m);f.price=r1(f.price*m);f.floor*=m});
+  if(Math.random()<.5){S.evn++;let k=pick(['rain','strike','fxg','fxb','rival','harvest','short','tip','intro','rust']);
+    const free=fs.filter(f=>f.bags>0&&!S.inv.some(l=>l.f===f));if(k==='rival'&&!free.length)k='intro';
+    if(k==='rain'){fs.forEach(f=>{f.moisture=r1(f.moisture+.7);if(f.inspected){f.inspected=false;f.notes.push('暴雨過後，之前的驗豆結果不準了，需要重驗。')}});S.event='抵達時正逢連日暴雨。這裡所有生豆的含水率都上升了，買之前最好驗一下。'}
+    if(k==='strike'){S.days-=1;S.event='機場地勤罷工，你在轉機的城市多困了 1 天。'}
+    if(k==='fxg'){S.cash+=400;S.event='當地貨幣貶值，這趟差旅省下了 $400。'}
+    if(k==='fxb'){S.cash=Math.max(0,S.cash-400);S.event='美元走弱，換匯和差旅多花了 $400。'}
+    if(k==='rival'){const f=pick(free);f.bags=0;f.notes.push('整批豆子已經被林曜包走。');S.event=`林曜早你一步，把${f.name}的豆子全包了。`}
+    if(k==='harvest'){sc(.92);S.event='今年大豐收，全產地的開價下修了 8%。'}
+    if(k==='short'){sc(1.1);S.event='高地霜害造成減產，全產地的開價上漲了 10%。'}
+    if(k==='tip'){const f=[...fs].sort((a,b)=>b.score-a.score)[0];doCup(f,'sample');f.notes.push('出口商的杯測室裡，你免費試了一輪這支樣品。');S.event=`同行透露，${f.name}今年的批次很受矚目。你在出口商那裡免費試了一輪樣品。`}
+    if(k==='intro'){fs.forEach(f=>f.mood++);S.event='出口商親自替你引薦，這裡的莊園主對你多了一分耐心。'}
+    if(k==='rust'){fs.forEach(f=>{f.bags=Math.max(f.bags?1:0,Math.round(f.bags*.75))});sc(1.06);meet('rust');S.event='葉鏽病疫情在這個產區擴散。各莊園可售的袋數減少，開價上漲 6%。'}
+  }else if(S.calls<2&&Math.random()<.5){S.calls++;const od=pick(S.orders);
+    if(od.id==='chain'&&!od.rush)S.dialog={k:'rush',oid:od.id,who:`${od.who}・${od.name}`,text:'總公司要提前上架。你要是能在剩 8 天以上回國，整張單我加 12%；答應了卻趕不上，就要扣 5%。',yes:'答應趕件',no:'照原訂時間'};
+    else if(od.id!=='chain'){const n=Math.max(1,Math.ceil(od.bags*.3));S.dialog={k:'more',oid:od.id,n,who:`${od.who}・${od.name}`,text:`是我。這一季的需求比預期多，你要是能多帶 ${n} 袋，整張單每公斤我加 8%。但要全部到齊才算完成。`,yes:`答應，多帶 ${n} 袋`,no:'維持原本的量'}}
+  }}
+const A={
+ start(){newGame();M.on=false;window.scrollTo(0,0)},
+ depart(){S.view='world';window.scrollTo(0,0)},
+ resume(){try{S=unpack(save.game)}catch(e){save.game=null}window.scrollTo(0,0)},
+ go(d){const o=S.origins.find(x=>x.id===d.id);S.msg='';S.say=null;if(S.loc===o.id){S.view='origin';window.scrollTo(0,0);return}
+  const a=XY(S.loc||'twn'),b=XY(o.id);S.cash-=o.cost;S.days-=o.td;S.loc=o.id;S.sel=o.id;S.trail.push(o.id);arrive(o);S.view='world';
+  S.fly={a,b,name:o.name};window.scrollTo(0,0);
+  setTimeout(()=>{if(!S||!S.fly)return;S.fly=null;S.view=S.days>0?'origin':'world';render();persist()},a[0]===b[0]?60:1750)},
+ world(){S.view='world';S.sel=S.loc;window.scrollTo(0,0)},
+ sel(d){S.sel=d.id},
+ back(){S.view='origin';S.msg='';S.say=null;window.scrollTo(0,0)},
+ farm(d){S.farm=d.id;S.view='farm';S.msg='';S.say=null;const f=curF();S.offer=r1(f.price*.9);S.qty=Math.min(5,f.bags);window.scrollTo(0,0)},
+ ask(d){const f=curF(),p=persOf(f.id),honest=p!=='精明';let t='';f.asked[d.q]=1;
+  if(d.q==='harvest'){if(f.issue&&honest){t=ISSUE[f.issue].talk;f.seen=true;meet(f.issue);f.notes.push(`${f.who}承認今年有${ISSUE[f.issue].name}。`)}
+   else if(f.issue)t=LINE.lie[p];else if(f.moisture>12&&honest)t='收成不錯，就是最後幾天一直下雨，豆子曬得有點趕。';else t=LINE.good[p]}
+  if(d.q==='story'){t=ORIGINS.find(o=>o.id===f.o).bio[+f.id.slice(3)]||'……';f.mood=Math.min(5,f.mood+1)}
+  if(d.q==='gossip'){const os=curO().list.filter(x=>x!==f&&!x.auction).sort((a,b)=>arrival(b)-arrival(a));
+   if(!honest||!os.length)t='這一帶最好的當然是我們家，還用問嗎？';else{const b=os[0],w=os[os.length-1];t=`要我說，${b.name}今年的豆子真的不錯。`+(os.length>1&&arrival(w)<arrival(b)-2?`${w.name}嘛……你自己去看看就知道。`:'');f.notes.push(`${f.who}說${b.name}今年的豆子最好。`)}}
+  S.say=[`${f.who}・${p}`,t]},
+ visit(){const f=curF();f.visited=true;S.days-=1;f.mood=Math.min(5,f.mood+1);f.floor*=.96;S.say=null;
+  f.notes.push(f.q>.6?'只摘全紅果，棚架上鋪得很薄，工人每小時翻動一次。':f.q>.3?'採收還算仔細，曬場乾淨，偶爾看到幾顆未熟果。':'紅果綠果混著採，曬場堆得很厚，角落有悶住的發酵味。');
+  if(f.boost)f.notes.push('倉庫麻袋裡的豆子，顏色和桌上的樣品不太一樣，對方急著帶你離開。');
+  if(f.past)f.notes.push('倉庫深處有幾疊麻袋積了灰，像是上一季留下的。');
+  if(f.moisture>12)f.notes.push('這幾天午後都下雨，曬場上的豆子摸起來偏軟。');
+  if(f.issue){f.seen=true;meet(f.issue);f.notes.push(ISSUE[f.issue].see)}
+  S.msg=`你跟著${f.who}走了一圈莊園，交情變好了。現在可以從倉庫抽大貨杯測。`+(f.issue?`你注意到園子裡有${ISSUE[f.issue].name}。`:'')},
+ cup(){const f=curF(),key=f.visited?'bulk':'sample',c=doCup(f,key),b=key==='sample'?f.boost:0;S.days-=.5;S.anim=key;
+  S.msg=`第 ${c.n} 輪杯測：估分 ${fl(c.lo)}–${cl(c.hi)}。喝到${f.flav.slice(0,c.n>1?3:2).join('、')}${f.attrs['乾淨度']+b/6<7.4?'，尾段有點雜味':''}。`+(c.oddAt>=0?`第 ${c.oddAt+1} 杯的味道明顯不對，是瑕疵杯。`:'')},
+ inspect(){const f=curF();f.inspected=true;S.days-=.5;const pen=penBase(f).reduce((s,x)=>s+x[0],0);
+  f.notes.push(`含水率 ${f.moisture}%（理想 10–12%）・瑕疵豆 ${f.defects} 顆／350 g・${f.past?'過季老豆，顏色偏白':'當季新豆，顏色青綠'}`);
+  if(f.issue==='cbb'){f.seen=true;meet('cbb');f.notes.push('不少豆子上有細小的蛀孔，是咖啡果小蠹留下的。')}
+  S.msg=pen?`驗豆結果有疑慮，預估到港會掉 ${pen} 分。`:'驗豆結果良好，這批豆子耐得住海運。'},
+ off(d){const f=curF();S.offer=Math.max(.5,Math.min(f.price,r1(S.offer*(1+ +d.d))))},
+ bid(){const f=curF(),p=persOf(f.id),who=`${f.who}・${p}`;S.msg='';
+  if(S.offer>=f.floor){f.price=S.offer;f.dealt=true;S.say=[who,LINE.ok[p]+`（成交價 $${f.price}/kg）`];return}
+  f.hag=true;f.mood-=S.offer<f.floor*.85?2:1;
+  if(f.mood<=0){f.closed=true;S.say=[who,LINE.mad[p]];return}
+  f.price=Math.max(r1(f.floor*1.04),r1(f.price-(f.price-f.floor)*.5));S.offer=Math.min(S.offer,f.price);
+  if(S.offer>=f.price)S.offer=r1(f.price*.97);
+  S.say=[who,LINE.no[p]+`最多讓到 $${f.price}。`];S.msg='對方的耐心少了一些。'},
+ qty(d){S.qty=Math.max(1,S.qty+ +d.d)},
+ buy(){const f=curF(),n=S.qty,cost=n*KG*(f.price+SHIP),p=persOf(f.id);if(cost>S.cash||n>f.bags)return;S.cash-=cost;f.bags-=n;
+  const ex=S.inv.find(l=>l.f===f&&l.price===f.price);if(ex)ex.bags+=n;else S.inv.push({f,bags:n,price:f.price});
+  S.say=[`${f.who}・${p}`,LINE.buy[p]];S.msg=`買下 ${n} 袋，共 ${$(cost)}。豆子會在產季結束後裝櫃出海。`;S.qty=1},
+ raise(d){const f=curF(),a=f.auction,b=r1(a.cur*(1+ +d.d)),tot=f.bags*KG*(b+SHIP);if(tot>S.cash)return;
+  if(b>=a.max){S.cash-=tot;S.inv.push({f,bags:f.bags,price:b});f.price=b;f.bags=0;a.won=true;S.say=['拍賣官',`$${b} 一次，$${b} 兩次……成交！`];S.msg=`${a.rival}放下了號碼牌。你以 $${b}/kg 標下整批，共 ${$(tot)}。`;return}
+  a.cur=Math.min(a.max,r1(b*R(1.03,1.1)));S.say=['拍賣官',`這位出 $${b}。還有沒有更高的？`];S.msg=`${a.rival}立刻加到 $${a.cur}。`},
+ fold(){const f=curF();f.closed=true;S.say=['拍賣官',`$${f.auction.cur}，成交給${f.auction.rival}。`];S.msg='你退出了競標。有時候不買才是對的決定。'},
+ dyes(){const d=S.dialog,od=S.orders.find(o=>o.id===d.oid);if(d.k==='more'){od.bags+=d.n;od.pay=r1(od.pay*1.08)}else od.rush=8;S.dialog=null;S.msg='';S.event=`你答應了${od.who}。訂單內容已更新。`},
+ dno(){S.dialog=null},
+ finish(){settle();S.view='result';window.scrollTo(0,0)},
+ open(){const r=S.res;r.fresh=r.open;r.open++;window.scrollTo(0,0)},
+ openall(){S.res.open=S.res.lots.length;window.scrollTo(0,0)},
+ meta(){M.on=true;M.y=window.scrollY||0;window.scrollTo(0,0)},
+ mclose(){M.on=false;setTimeout(()=>window.scrollTo(0,M.y||0),0)},
+ tut(){T.on=true;T.step=0;T.cup=null;T.y=window.scrollY||0;window.scrollTo(0,0)},
+ tnext(){T.step++;window.scrollTo(0,0)},
+ tprev(){T.step--;window.scrollTo(0,0)},
+ tclose(){T.on=false;setTimeout(()=>window.scrollTo(0,T.y||0),0)},
+ tcup(){const c=T.cup;if(c.n===0)c.t=Math.round(R(82,89)*4)/4;const w=[6,3,1.2][c.n];let lo=c.t-Math.random()*w;c.lo=Math.max(c.lo,lo);c.hi=Math.min(c.hi,lo+w);c.n++},
+ treset(){T.cup=null}
+};
+function act(el){const fn=A[el.dataset.a];if(!fn||el.disabled||(S&&S.fly))return;if(S)S.anim=null;fn(el.dataset);
+  if(S&&S.view!=='result'&&S.view!=='brief'&&S.days<=0&&S.view!=='world'&&!S.fly){S.view='world';S.msg=''}
+  render();persist()}
+document.addEventListener('click',e=>{const el=e.target.closest('[data-a]');if(el)act(el)});
+document.addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&e.target.matches('.card[data-a],g[data-a]')){e.preventDefault();act(e.target)}});
+render();
+
+</script>
+</body>
+</html>

@@ -16,6 +16,7 @@
 | `coffee-lab-plan/` | 咖啡實驗室商業化路線圖 |
 | `brew-notes/` | 沖煮筆記（紀錄＋養豆＋甜蜜點分析） |
 | `cupping/` | 杯測教室 |
+| `bean-hunter/` | 咖啡尋豆師（尋豆師模擬遊戲） |
 | `smell-training/` | 嗅覺練習日誌 |
 | `yoshi-combos/` | 耀西連招手冊 |
 | `mtx-sim/` | 小台指期模擬器 |
