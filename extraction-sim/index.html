@@ -566,6 +566,13 @@ h1,h2,h3{letter-spacing:.02em}
 .modes .app{display:block!important;margin-right:auto;font-size:17px}
 .homebtn{background:transparent;border:1px solid var(--line);color:var(--ink);border-radius:999px;font:inherit;font-size:13px;font-weight:700;padding:5px 12px;cursor:pointer;white-space:nowrap}
 .whochip{font-family:var(--f-mono);font-size:13px;color:var(--accent);border:1px solid var(--line);border-radius:999px;padding:4px 10px;white-space:nowrap;max-width:52vw;overflow:hidden;text-overflow:ellipsis}
+.cloudchip{position:relative;display:grid;place-items:center;width:32px;height:28px;padding:0;background:transparent;border:1px solid var(--line);border-radius:999px;color:var(--muted);cursor:pointer;flex:0 0 auto}
+.cloudchip i{position:absolute;right:3px;top:3px;width:6px;height:6px;border-radius:50%;background:transparent}
+.cloudchip[data-st="ok"]{color:var(--accent)}.cloudchip[data-st="ok"] i{background:var(--want)}
+.cloudchip[data-st="busy"]{color:var(--accent)}.cloudchip[data-st="busy"] i{background:var(--gold);animation:tBlink 1.2s ease-in-out infinite}
+.cloudchip[data-st="wait"] i,.cloudchip[data-st="err"] i{background:var(--fail)}
+.modes .app{flex:1 1 0;min-width:0;overflow:hidden;text-overflow:ellipsis}
+.modes .in{gap:6px 7px}
 .labtabs{flex:1 0 100%;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
 .labtabs::-webkit-scrollbar{display:none}
 .labtabs button{flex:0 0 auto;background:var(--panel);border:1px solid var(--line);color:var(--muted);border-radius:999px;font:inherit;font-size:13px;font-weight:700;padding:6px 14px;cursor:pointer;white-space:nowrap}
@@ -676,12 +683,13 @@ h1,h2,h3{letter-spacing:.02em}
     <div class="newrow"><input id="tName" type="text" maxlength="12" placeholder="你的名字" autocomplete="off" enterkeyhint="go"><button class="go" id="tGo" type="button">開始</button></div>
     <div class="err" id="tErr"></div>
   </div>
-  <div class="t-foot">© 2026 Roke　ver. 6.1</div>
+  <div class="t-foot">© 2026 Roke　ver. 6.2</div>
 </div>
 <nav class="modes" aria-label="導覽"><div class="in">
   <button class="homebtn" id="homeBtn" type="button" hidden>‹ 主選單</button>
   <span class="app" id="navTitle">手沖咖啡實驗室</span>
   <span class="whochip" id="navWho" hidden></span>
+  <button class="cloudchip" id="navCloud" type="button" data-st="off" aria-label="雲端存檔：尚未連結 Google" title="雲端存檔"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 18a4 4 0 0 1-.6-7.96A5.5 5.5 0 0 1 17 9.2 4.4 4.4 0 0 1 17.5 18z"/></svg><i></i></button>
   <div class="labtabs" id="labTabs" role="group" aria-label="咖啡實驗室分頁" hidden data-noswipe>
     <button id="mSim" aria-pressed="true">模擬器</button><span class="sep"></span>
     <button class="teach" id="mLearn" aria-pressed="false">4:6 沖法</button><button class="teach" id="mMicro" aria-pressed="false">顯微鏡</button><button class="teach" id="mBed" aria-pressed="false">粉層</button><button class="teach" id="mNose" aria-pressed="false">嗅覺斷水</button>
@@ -698,7 +706,7 @@ h1,h2,h3{letter-spacing:.02em}
     <button class="hub-card" id="hubComp" style="--hc:var(--you)"><svg class="ic" viewBox="0 0 32 32" width="34" height="34" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 5h12v7a6 6 0 0 1-12 0z"/><path d="M10 7H5v2a5 5 0 0 0 5 5M22 7h5v2a5 5 0 0 1-5 5"/><path d="M16 18v5M11 27h10M12.5 23h7"/></svg><b>咖啡比賽</b><span>用指定豆和其他選手同場較量，從社區咖啡節一路打上去。</span><em id="hubCompS"></em></button>
     <button class="hub-card" id="hubLab" style="--hc:var(--want)"><svg class="ic" viewBox="0 0 32 32" width="34" height="34" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8h20l-7 9h-6z"/><path d="M13 17v2h6v-2"/><path d="M10 21h12v4a3 3 0 0 1-3 3h-6a3 3 0 0 1-3-3z"/><path d="M16 3v2"/></svg><b>咖啡實驗室</b><span>萃取模擬器，加上 4:6 沖法、顯微鏡、粉層、嗅覺斷水四堂教學。</span><em>自由練習，不花錢</em></button>
   </div>
-  <div class="cloudbar"><button id="gBtn" type="button"><span id="gBtnT">☁️ 用 Google 帳號同步紀錄</span></button><span id="syncNote">沖煮紀錄、闖關進度和咖啡店存檔都會存到你的 Google 雲端，換手機也接得上</span></div>
+  <div class="cloudbar"><button id="gBtn" type="button"><span id="gBtnT">☁️ 開啟自動雲端存檔（Google）</span></button><span id="syncNote">只要連結一次 Google 帳號，之後沖煮紀錄、闖關進度和咖啡店存檔都會自動存到你的 Google 雲端，換手機也接得上</span></div>
   <div class="hub-foot"><button id="hubSwitch" type="button">切換玩家</button><button id="hubTitle" type="button">回到開場畫面</button></div>
 </div>
 </section>
@@ -4083,6 +4091,12 @@ const raw=Storage.prototype.setItem;
 const ls={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{raw.call(localStorage,k,v)}catch(e){}}};
 const note=t=>{const el=$('syncNote');if(el)el.textContent=t};
 const btn=t=>{const el=$('gBtnT');if(el)el.textContent=t};
+const CHIP={off:'尚未連結 Google，點一下開始自動存檔',ok:'已自動存到 Google 雲端',busy:'正在和 Google 雲端同步',wait:'等待連回 Google，點一下畫面就會自動連線',err:'雲端同步失敗，紀錄先存在這台'};
+const chip=(st,extra)=>{const el=$('navCloud');if(!el)return;el.dataset.st=st;el.setAttribute('aria-label','雲端存檔：'+CHIP[st]+(extra||''));el.title=CHIP[st]+(extra||'')};
+/* 自動連回：連結過 Google 之後，連線過期或重新打開時，下一次點畫面就自動連回去，不用再按同步按鈕 */
+let autoWant=false,autoAt=0;
+function armAuto(){if(ls.get(GFLAG)==='1'){autoWant=true;chip('wait')}}
+addEventListener('click',()=>{if(!autoWant)return;if(gTok&&Date.now()<gTokExp){autoWant=false;return}if(Date.now()-autoAt<120000)return;autoWant=false;autoAt=Date.now();chip('busy');note('正在自動連回 Google 雲端…');login()},true);
 try{const t=JSON.parse(sessionStorage.getItem(TOKK)||'null');if(t&&t.exp>Date.now()){gTok=t.tok;gTokExp=t.exp}}catch(e){}
 /* 每次紀錄真的有變動就蓋時間戳，之後才分得出哪一份比較新 */
 Storage.prototype.setItem=function(k,v){
@@ -4101,7 +4115,7 @@ async function gf(url,opt={}){
   if(!r.ok)throw new Error('http '+r.status);
   return r;
 }
-function expired(){btn('☁️ 點這裡連回 Google');note('Google 連線已過期，點一下就會繼續同步（紀錄先存在這台）')}
+function expired(){btn('☁️ 點這裡連回 Google');note('Google 連線過期了，下次點畫面時會自動連回去（紀錄先存在這台）');armAuto()}
 async function push(){
   if(!gOn)return;
   if(!gTok||Date.now()>gTokExp){expired();return}
@@ -4114,8 +4128,8 @@ async function push(){
       const r=await gf(GAPI+'/upload/drive/v3/files?uploadType=multipart&fields=id',{method:'POST',headers:{'Content-Type':'multipart/related; boundary='+b},body:mp});
       gFileId=(await r.json()).id;
     }
-    btn('☁️ 已連上 Google 同步');note('已同步到 Google 雲端硬碟 '+new Date().toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'}));
-  }catch(e){if(e.message==='auth')expired();else note('⚠️ 雲端同步失敗，紀錄先存在這台')}
+    const hm=new Date().toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'});btn('☁️ 自動雲端存檔已開啟');note('已自動存到 Google 雲端硬碟 '+hm+'。之後每次有新紀錄都會自動存，不用再按');chip('ok','（'+hm+'）');
+  }catch(e){if(e.message==='auth')expired();else{note('⚠️ 雲端同步失敗，紀錄先存在這台');chip('err')}}
 }
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&pushT){clearTimeout(pushT);pushT=null;push()}});
 /* 合併：沖煮紀錄兩邊都留、闖關取最高分、比賽取最好名次，其他設定用較新的那份 */
@@ -4134,11 +4148,17 @@ function merge(loc,rem){
     q.hist=Object.assign({},qo.hist||{},qn.hist||{});
     out[Q]=q;
   }
+  /* 咖啡店存檔：每位玩家分開合併，同名的留進度比較多的那份（天數多的；一樣就看累計營收） */
+  const K='brewCareer.v1',ka=loc[K],kb=rem[K];
+  if(ka&&kb&&ka.players&&kb.players){const P={},prog=x=>(+x.day||0)*1e9+(+x.earned||0);
+    Object.keys(Object.assign({},kb.players,ka.players)).forEach(n=>{const a=ka.players[n],b=kb.players[n];
+      P[n]=JSON.parse(JSON.stringify(!a?b:!b?a:prog(a)>prog(b)?a:prog(b)>prog(a)?b:(remNewer?b:a)))});
+    out[K]={players:P};}
   out.savedAt=Math.max(+loc.savedAt||0,+rem.savedAt||0);
   return out;
 }
 async function afterLogin(){
-  note('正在讀取 Google 雲端的紀錄…');
+  note('正在讀取 Google 雲端的紀錄…');chip('busy');
   try{
     const q=encodeURIComponent("name='"+GFILE+"'");
     const j=await (await gf(GAPI+'/drive/v3/files?spaces=appDataFolder&fields=files(id)&q='+q)).json();
@@ -4149,23 +4169,24 @@ async function afterLogin(){
       const m=merge(snapshot(),rem);let changed=false;
       SYNC_KEYS.forEach(k=>{if(k in m){const v=typeof m[k]==='string'?m[k]:JSON.stringify(m[k]);if(ls.get(k)!==v){ls.set(k,v);changed=true}}});
       ls.set(STAMP,String(m.savedAt));
-      if(changed){await push();try{sessionStorage.setItem(TOKK,JSON.stringify({tok:gTok,exp:gTokExp}))}catch(e){}location.reload();return}
+      if(changed){await push();try{sessionStorage.setItem(TOKK,JSON.stringify({tok:gTok,exp:gTokExp}));sessionStorage.setItem('brewLab.skipTitle','1')}catch(e){}location.reload();return}
     }
     await push();
-  }catch(e){note(e.message==='auth'?'Google 連線已過期，再點一次':'⚠️ 讀取 Google 雲端失敗')}
+  }catch(e){note(e.message==='auth'?'Google 連線已過期，再點一次':'⚠️ 讀取 Google 雲端失敗');chip(e.message==='auth'?'wait':'err')}
 }
 function login(){
   const go=()=>{
     if(!gClient)gClient=google.accounts.oauth2.initTokenClient({client_id:GCLIENT,scope:'https://www.googleapis.com/auth/drive.appdata',
-      callback:t=>{if(t&&t.access_token){gTok=t.access_token;gTokExp=Date.now()+((+t.expires_in||3600)-120)*1000;try{sessionStorage.setItem(TOKK,JSON.stringify({tok:gTok,exp:gTokExp}))}catch(e){}afterLogin()}else note('⚠️ Google 登入沒有完成')},
-      error_callback:()=>note('⚠️ Google 登入被取消或被擋（請允許彈出視窗）')});
+      callback:t=>{if(t&&t.access_token){gTok=t.access_token;gTokExp=Date.now()+((+t.expires_in||3600)-120)*1000;try{sessionStorage.setItem(TOKK,JSON.stringify({tok:gTok,exp:gTokExp}))}catch(e){}afterLogin()}else{note('⚠️ Google 登入沒有完成');chip(ls.get(GFLAG)==='1'?'wait':'off')}},
+      error_callback:()=>{note('⚠️ Google 登入被取消或被擋（請允許彈出視窗，或按這顆按鈕再連一次）');chip(ls.get(GFLAG)==='1'?'wait':'off')}});
     gClient.requestAccessToken({prompt:ls.get(GFLAG)==='1'?'':'consent'});
   };
   if(window.google&&google.accounts&&google.accounts.oauth2)go();else libLoad().then(go,()=>note('⚠️ 無法載入 Google 登入，請確認網路'));
 }
-$('gBtn').onclick=()=>{if(gOn&&gTok&&Date.now()<gTokExp){push();return}login()};
+$('gBtn').onclick=()=>{if(gOn&&gTok&&Date.now()<gTokExp){push();return}if(Date.now()-autoAt<3000)return;login()};
+$('navCloud').onclick=()=>{if(Date.now()-autoAt<3000)return;$('gBtn').click()};
 if(gTok&&ls.get(GFLAG)==='1')afterLogin();
-else if(ls.get(GFLAG)==='1')btn('☁️ 點這裡連回 Google 同步');
+else if(ls.get(GFLAG)==='1'){btn('☁️ 點這裡連回 Google 同步');note('連結過 Google 了：點一下畫面就會自動連回雲端，之後自動存檔');armAuto()}
 })();
 </script>
 <script>
@@ -4397,8 +4418,9 @@ $('shopBox').addEventListener('input',e=>{const el=e.target,k=el.dataset&&el.dat
   if(k==='ratio')$('kRatioO').textContent='1 : '+o.ratio;if(k==='steep')$('kSteepO').textContent=Math.floor(o.steep/60)+':'+String(o.steep%60).padStart(2,'0');});
 $('shopBox').addEventListener('change',e=>{if(e.target.dataset&&e.target.dataset.k)persist();});
 /* ---------- 啟動 ---------- */
-const h=location.hash||'';
-if(!me||h===''||h==='#title'){window.appShow('hub');startTitle();}else{ov.hidden=true;}
+const h=location.hash||'';let skip=false;try{skip=sessionStorage.getItem('brewLab.skipTitle')==='1';sessionStorage.removeItem('brewLab.skipTitle');}catch(e){}
+if(me&&skip){ov.hidden=true;}
+else if(!me||h===''||h==='#title'){window.appShow('hub');startTitle();}else{ov.hidden=true;}
 window.hubRender();if(me)navWho();
 window.showTitle=startTitle;
 })();
