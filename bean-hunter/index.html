@@ -203,6 +203,16 @@ input:focus-visible{outline:3px solid var(--cherry);outline-offset:2px}
 #snd{position:fixed;right:12px;bottom:calc(12px + env(safe-area-inset-bottom));z-index:30;display:flex;gap:6px;padding:4px;border-radius:999px;background:color-mix(in srgb,var(--card) 88%,transparent);border:1.5px solid var(--line);box-shadow:0 2px 10px rgba(0,0,0,.18);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
 #snd button{width:38px;height:38px;min-height:0;padding:0;border-radius:50%;border:0;display:grid;place-items:center;background:transparent;color:var(--muted)}
 #snd button.on{color:var(--cherry)}
+.ofab{position:fixed;left:12px;bottom:calc(12px + env(safe-area-inset-bottom));z-index:30;display:flex;align-items:center;gap:6px;border-radius:999px;padding:8px 16px 8px 13px;min-height:44px;font-weight:700;background:color-mix(in srgb,var(--card) 90%,transparent);box-shadow:0 2px 10px rgba(0,0,0,.18);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.osheet{position:fixed;inset:0;z-index:40;display:flex;flex-direction:column;justify-content:flex-end}
+.oback{position:absolute;inset:0;background:rgba(0,0,0,.45);animation:ofade .2s}
+.opanel{position:relative;background:var(--paper);border-top:2px solid var(--ink);border-radius:14px 14px 0 0;max-height:86vh;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px 16px calc(20px + env(safe-area-inset-bottom));animation:oup .25s ease-out;max-width:640px;width:100%;margin:0 auto;box-sizing:border-box}
+@keyframes oup{from{transform:translateY(40px);opacity:0}}@keyframes ofade{from{opacity:0}}
+.oprog{display:flex;flex-direction:column;gap:4px;margin-top:4px}
+.obar{display:flex;height:8px;border-radius:4px;background:var(--line);overflow:hidden}.obar i{display:block;height:100%;background:var(--amber)}.obar i.ok{background:var(--leaf)}
+#swb{position:fixed;left:0;top:50%;z-index:50;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:var(--card);color:var(--ink);border:1.5px solid var(--ink);opacity:0;transform:translate(-30px,-50%);pointer-events:none;transition:opacity .1s,background .15s}
+#swb.go{background:var(--cherry);color:var(--on-cherry);border-color:var(--cherry)}
+@media (prefers-reduced-motion:reduce){.opanel,.oback{animation:none}}
 </style>
 </head>
 <body>
@@ -886,8 +896,8 @@ function fx(){if(typeof document.querySelector!=='function')return;
       pl.setAttribute('transform',`translate(${x.toFixed(1)} ${y.toFixed(1)}) rotate(${(Math.atan2(dy,dx)*180/Math.PI).toFixed(0)})`);if(u<1&&pl.isConnected)requestAnimationFrame(step)};step(t0)}
   if(!still)document.querySelectorAll('[data-cnt]').forEach(el=>{const a=+el.dataset.from,b=+el.dataset.cnt,t0=performance.now();
     const st=t=>{const u=clamp((t-t0-500)/900,0,1);el.textContent=(a+(b-a)*u).toFixed(1);if(u<1&&el.isConnected)requestAnimationFrame(st)};st(t0)})}
-function render(){document.getElementById('app').innerHTML=T.on?vTut():PV.on?vPlayers():M.on?vMeta():!S?vIntro():({brief:vBrief,world:vWorld,origin:vOrigin,farm:vFarm,result:vResult})[S.view]();
-  fx();if(S&&S.res)S.res.fresh=-1;SND.scene()}
+function render(){if(!S)OV.on=false;document.getElementById('app').innerHTML=(T.on?vTut():PV.on?vPlayers():M.on?vMeta():!S?vIntro():({brief:vBrief,world:vWorld,origin:vOrigin,farm:vFarm,result:vResult})[S.view]())+(S?(OV.on?ordersSheet():orderFab()):'');
+  fx();if(S&&S.res)S.res.fresh=-1;SND.scene();syncHist()}
 
 /* ---------- 音樂與音效（Web Audio 即時合成，不需外部音檔） ---------- */
 const SND=(()=>{
@@ -1051,6 +1061,43 @@ const SND=(()=>{
   return {unlock,scene,after,fx,ui}
 })();
 
+/* ---------- 隨時查看訂單 ---------- */
+let OV={on:false};
+function orderProg(od){let bought=0,ok=0,wait=0;S.inv.forEach(l=>{if(!matches(od,l.f))return;bought+=l.bags;const e=bestEst(l.f);if(!e)wait+=l.bags;else if(e.lo>=od.min)ok+=l.bags});
+  const st=ok>=od.bags?['hit','可交貨']:bought>=od.bags?['late','數量夠，品質待確認']:bought?['late','還差 '+(od.bags-bought)+' 袋']:['','尚未採購'];
+  return `<div class="oprog"><div class="obar"><i class="ok" style="width:${clamp(ok/od.bags*100,0,100)}%"></i><i style="width:${clamp((bought-ok)/od.bags*100,0,100-clamp(ok/od.bags*100,0,100))}%"></i></div>
+   <div class="row between small"><span class="num">符合 ${bought} / ${od.bags} 袋${ok?`・達標 ${ok}`:''}${wait?`・未杯測 ${wait}`:''}</span><span class="tag ${st[0]}">${st[1]}</span></div></div>`}
+function ordersSheet(){const bags=S.inv.reduce((s,l)=>s+l.bags,0);
+  return `<div class="osheet" role="dialog" aria-modal="true" aria-label="這一季的訂單"><div class="oback" data-a="oclose"></div><div class="opanel stack">
+  <div class="row between"><h2 style="margin:0">這一季的訂單</h2><button class="sm ghost" data-a="oclose">關閉</button></div>
+  <p class="small muted num">資金 ${$(S.cash)}・剩 ${S.days} 天・已購 ${bags} 袋</p>
+  ${S.orders.map(o=>`<div class="card stack" style="gap:4px"><div class="row between"><b>${o.name}</b><span class="num">$${o.pay}/kg</span></div>
+   <div class="small muted">${o.who}・${o.want}・<span class="num">≥ ${o.min} 分・${o.bags} 袋</span>${o.rush?` <span class="tag late">趕件：剩 ${o.rush} 天以上回國</span>`:''}</div>${orderProg(o)}</div>`).join('')}
+  <h3>已購生豆</h3>${invHtml()}
+  <p class="small muted">「符合」是類型對得上的已購袋數，同一批豆子可能同時符合好幾張單，結算時每袋只會賣給一位客戶。「達標」是用你目前最好的杯測估分下限來判斷；到港後還可能因含水率、瑕疵、過季扣分。</p></div></div>`}
+function orderFab(){if(!S||OV.on)return '';
+  return `<button class="ofab" data-a="orders" aria-label="查看訂單"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9 8h6M9 12h6M9 16h4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>訂單</button>`}
+
+/* ---------- 由左向右滑：上一頁 ---------- */
+function backTarget(){if(OV.on)return 'oclose';if(T.on)return T.step?'tprev':'tclose';if(M.on)return 'mclose';if(PV.on)return PV.busy?null:'pclose';
+  if(!S||S.fly)return null;if(S.view==='farm')return 'back';if(S.view==='origin')return 'world';return null}
+function goBack(){const a=backTarget();if(!a)return false;act({dataset:{a}});return true}
+const HG={guard:false,skip:0};
+function syncHist(){if(!history.pushState)return;const can=!!backTarget();
+  if(can&&!HG.guard){try{history.pushState({bh:1},'');HG.guard=true}catch(e){}}
+  else if(!can&&HG.guard&&history.state&&history.state.bh){HG.guard=false;HG.skip++;history.back()}}
+addEventListener('popstate',()=>{if(HG.skip){HG.skip--;return}HG.guard=false;if(!goBack())syncHist()});
+(()=>{let x0=0,y0=0,t0=0,on=false,dx=0;const ind=document.createElement('div');ind.id='swb';ind.innerHTML='<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';document.body.appendChild(ind);
+  const hscroll=el=>{for(;el&&el!==document.body;el=el.parentElement){if(el.scrollWidth>el.clientWidth+4&&/(auto|scroll)/.test(getComputedStyle(el).overflowX))return true}return false};
+  const show=v=>{ind.style.opacity=v?Math.min(1,(dx-15)/55):0;ind.style.transform=`translate(${Math.min(dx,90)*.5-30}px,-50%)`;ind.classList.toggle('go',dx>70)};
+  document.addEventListener('touchstart',e=>{on=false;dx=0;if(e.touches.length!==1)return;const t=e.touches[0],el=e.target;
+    if(el.closest&&el.closest('input,textarea,select'))return;if(t.clientX<24&&!navigator.standalone)return; // 螢幕邊緣交給瀏覽器的返回手勢（會走 popstate）
+    if(hscroll(el)||!backTarget())return;x0=t.clientX;y0=t.clientY;t0=Date.now();on=true},{passive:true});
+  document.addEventListener('touchmove',e=>{if(!on)return;const t=e.touches[0];dx=t.clientX-x0;const dy=Math.abs(t.clientY-y0);if(dy>Math.max(30,dx*.7)){on=false;dx=0;show(0);return}show(dx>15)},{passive:true});
+  document.addEventListener('touchend',e=>{if(!on)return;on=false;const t=e.changedTouches[0],DX=t.clientX-x0,dy=Math.abs(t.clientY-y0);dx=0;show(0);
+    if(DX>70&&dy<DX*.6&&Date.now()-t0<900)goBack()},{passive:true});
+  document.addEventListener('touchcancel',()=>{on=false;dx=0;show(0)},{passive:true})})();
+
 /* ---------- 行動 ---------- */
 function narrow(c,key,t,w){let lo=t-Math.random()*w,hi=lo+w;if(key==='score'){c.lo=Math.max(c.lo,lo);c.hi=Math.min(c.hi,hi)}
   else{const p=c.attrs[key]||[-99,99];c.attrs[key]=[Math.max(p[0],lo),Math.min(p[1],hi)]}}
@@ -1146,9 +1193,11 @@ const A={
  tprev(){T.step--;window.scrollTo(0,0)},
  tclose(){T.on=false;setTimeout(()=>window.scrollTo(0,T.y||0),0)},
  tcup(){const c=T.cup;if(c.n===0)c.t=Math.round(R(82,89)*4)/4;const w=[6,3,1.2][c.n];let lo=c.t-Math.random()*w;c.lo=Math.max(c.lo,lo);c.hi=Math.min(c.hi,lo+w);c.n++},
- treset(){T.cup=null}
+ treset(){T.cup=null},
+ orders(){OV.on=true},
+ oclose(){OV.on=false}
 };
-function act(el){const a=el.dataset.a,fn=A[a];if(!fn||el.disabled||(S&&S.fly))return;SND.unlock();if(S)S.anim=null;fn(el.dataset);
+function act(el){const a=el.dataset.a,fn=A[a];if(!fn||el.disabled||(S&&S.fly&&a!=='orders'&&a!=='oclose'))return;SND.unlock();if(S)S.anim=null;fn(el.dataset);
   if(S&&S.view!=='result'&&S.view!=='brief'&&S.days<=0&&S.view!=='world'&&!S.fly){S.view='world';S.msg=''}
   try{SND.after(a,el.dataset)}catch(e){}render();persist()}
 document.addEventListener('click',e=>{const el=e.target.closest('[data-a]');if(el)act(el)});
