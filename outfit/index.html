@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="穿搭試衣間">
 <meta name="theme-color" content="#2f3a4a">
-<meta name="app-version" content="1.2">
+<meta name="app-version" content="1.3">
 <title>穿搭試衣間</title>
 <style>
 :root{--bg:#f4f1ec;--card:#fff;--ink:#23201d;--mute:#857b70;--line:#e5ddd2;--accent:#2f3a4a;--hot:#c8553d;--soft:#ece6dc;--ok:#2f8f5b}
@@ -87,6 +87,7 @@ label.f{display:block;font-size:12.5px;color:var(--mute);margin:10px 0 4px}
 .toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--accent);color:#fff;font-size:14px;padding:9px 16px;border-radius:20px;z-index:30;max-width:90vw;text-align:center}
 .pal i{display:inline-block;width:18px;height:18px;border-radius:50%;border:1px solid rgba(0,0,0,.12);margin-right:3px;vertical-align:middle}
 .look svg{width:100%;height:190px;background:linear-gradient(#ece7df,#f7f4ef);border-radius:10px;display:block}
+.facebox{display:flex;justify-content:center;margin:8px 0}.facebox svg{width:190px;height:190px;border-radius:50%;background:linear-gradient(#e9e4dc,#f7f4ef);border:1px solid var(--line)}
 .kv{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:13.5px}
 .kv b{font-weight:600}
 </style>
@@ -161,7 +162,39 @@ function geom(b){
     return{x:L[4][1],w:L[4][2]};};
   g.ftW=b.foot*.4*K;return g;}
 
-function drawBody(g,skin,face=true){
+const HS={oval:[1,.96,.62],round:[1.04,1.04,.78],square:[1,1,.88],heart:[1.03,.9,.5],long:[.93,.9,.6]};
+function headPath(g,shape){const t=g.top,w=g.headW/2,h=g.headH,S=HS[shape]||HS.oval;
+  return sp(mir([[0,t],[w*S[0]*.8,t+h*.07],[w*S[0],t+h*.34],[w*S[1],t+h*.62],[w*S[2],t+h*.88],[0,t+h]]));}
+function drawFace(g,p,skin){
+  const t=g.top,w=g.headW,h=g.headH,o=[],ey=t+h*.52,ex=w*.215,hc=p.hairColor||'#2b2420',ec=p.eyeColor||'#3a2f2a',ink='#2e2622',S=HS[p.faceShape]||HS.oval;
+  const eye=p.eye||'round',big=eye==='big',R=w*(big?.105:.085),my=t+h*.79,mw=w*.15,bd=p.beard||'none';
+  const must=`<path d="M${f1(-w*.17)},${f1(my-h*.03)} Q0,${f1(my-h*.085)} ${f1(w*.17)},${f1(my-h*.03)} Q0,${f1(my-h*.045)} ${f1(-w*.17)},${f1(my-h*.03)}Z" fill="${hc}"/>`;
+  if(bd==='stubble'||bd==='full')o.push(`<path d="${sp(mir([[0,t+h*1.0],[w*.5*S[2],t+h*.88],[w*.5*S[1]*.99,t+h*.6,1],[w*.36,t+h*.72],[w*.2,t+h*.7],[0,t+h*.7]]))}" fill="${hc}" opacity="${bd==='full'?.92:.2}"/>`);
+  if(bd==='goatee')o.push(`<path d="${sp(mir([[0,my+h*.035],[w*.1,my+h*.05],[w*.09,t+h*.96],[0,t+h*.995]]))}" fill="${hc}"/>`);
+  if(bd==='mustache'||bd==='goatee'||bd==='full')o.push(must);
+  if(p.blush)for(const s of[1,-1])o.push(`<ellipse cx="${f1(s*w*.3)}" cy="${f1(t+h*.67)}" rx="${f1(w*.1)}" ry="${f1(w*.06)}" fill="#f07f86" opacity=".38"/>`);
+  if(p.freckle)for(const[a,b]of[[.2,.63],[.27,.66],[.33,.63],[.24,.69]])for(const s of[1,-1])o.push(`<circle cx="${f1(s*w*a)}" cy="${f1(t+h*b)}" r=".55" fill="#9a6a4a" opacity=".7"/>`);
+  for(const s of[1,-1]){const cx=s*ex;
+    if(eye==='dot')o.push(`<circle cx="${f1(cx)}" cy="${f1(ey)}" r="${f1(w*.04)}" fill="${ec}"/>`);
+    else if(eye==='smile')o.push(`<path d="M${f1(cx-R)},${f1(ey+R*.25)} Q${f1(cx)},${f1(ey-R*.95)} ${f1(cx+R)},${f1(ey+R*.25)}" fill="none" stroke="${ink}" stroke-width="1.4" stroke-linecap="round"/>`);
+    else{const lid=eye==='almond'?`M${f1(cx-R*1.2)},${f1(ey+R*.1)} Q${f1(cx)},${f1(ey-R*1.15)} ${f1(cx+R*1.2)},${f1(ey+R*.1)}`:`M${f1(cx-R)},${f1(ey-R*.15)} Q${f1(cx)},${f1(ey-R*1.25)} ${f1(cx+R)},${f1(ey-R*.15)}`;
+      o.push(eye==='almond'?`<path d="${lid} Q${f1(cx)},${f1(ey+R*.85)} ${f1(cx-R*1.2)},${f1(ey+R*.1)}Z" fill="#fff"/>`:`<ellipse cx="${f1(cx)}" cy="${f1(ey)}" rx="${f1(R)}" ry="${f1(R*.86)}" fill="#fff"/>`);
+      const ir=R*(eye==='almond'?.52:.64);o.push(`<circle cx="${f1(cx)}" cy="${f1(ey+(eye==='almond'?-R*.05:0))}" r="${f1(ir)}" fill="${ec}"/><circle cx="${f1(cx)}" cy="${f1(ey)}" r="${f1(ir*.5)}" fill="#17110e"/><circle cx="${f1(cx-R*.22)}" cy="${f1(ey-R*.28)}" r="${f1(R*(big?.24:.17))}" fill="#fff"/>`);
+      o.push(`<path d="${lid}" fill="none" stroke="${ink}" stroke-width="${p.lash?1.5:1}" stroke-linecap="round"/>`);
+      if(p.lash)o.push(`<path d="M${f1(cx+s*R*1.02)},${f1(ey-R*.2)} l${f1(s*R*.5)},${f1(-R*.5)} M${f1(cx+s*R*.7)},${f1(ey-R*.7)} l${f1(s*R*.3)},${f1(-R*.45)}" stroke="${ink}" stroke-width=".9" stroke-linecap="round" fill="none"/>`);}
+    const br=p.brow||'soft';if(br!=='none'){const by=ey-w*(big?.2:.165),L=w*.115,k={soft:w*.03,thick:w*.03,thin:w*.025,arch:w*.075,flat:0}[br]||0,sw={soft:1.4,thick:2.5,thin:.8,arch:1.4,flat:1.6}[br]||1.4;
+      o.push(`<path d="M${f1(cx-s*L)},${f1(by+w*.012)} Q${f1(cx+s*L*.2)},${f1(by-k)} ${f1(cx+s*L)},${f1(by+(br==='arch'?w*.02:0))}" fill="none" stroke="${shade(hc,-.15)}" stroke-width="${sw}" stroke-linecap="round"/>`);}}
+  const ny=t+h*.665,nc=shade(skin,-.32),nz=p.nose||'dot';
+  if(nz==='dot')o.push(`<path d="M${f1(-w*.035)},${f1(ny)} q${f1(w*.035)},${f1(w*.035)} ${f1(w*.07)},0" fill="none" stroke="${nc}" stroke-width="1" stroke-linecap="round"/>`);
+  if(nz==='line')o.push(`<path d="M${f1(w*.012)},${f1(ny-h*.1)} l${f1(-w*.04)},${f1(h*.1)} l${f1(w*.06)},0" fill="none" stroke="${nc}" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>`);
+  const lp=p.lip||'none',lc={none:'#a0584e',nude:'#b9806e',pink:'#d9707e',red:'#c2383b'}[lp]||'#a0584e',lw=lp==='none'?1.3:2,mo=p.mouth||'smile';
+  if(mo==='smile')o.push(`<path d="M${f1(-mw)},${f1(my-1)} Q0,${f1(my+mw*.75)} ${f1(mw)},${f1(my-1)}" fill="none" stroke="${lc}" stroke-width="${lw}" stroke-linecap="round"/>`);
+  if(mo==='grin')o.push(`<path d="M${f1(-mw)},${f1(my-1.2)} Q0,${f1(my+mw*1.25)} ${f1(mw)},${f1(my-1.2)}Z" fill="#fff" stroke="${lc}" stroke-width="${Math.max(1.1,lw*.7)}" stroke-linejoin="round"/>`);
+  if(mo==='flat')o.push(LN(-mw*.8,my,mw*.8,my,lc,lw));
+  if(mo==='small')o.push(`<path d="M${f1(-mw*.5)},${f1(my-.5)} Q0,${f1(my+mw*.45)} ${f1(mw*.5)},${f1(my-.5)}" fill="none" stroke="${lc}" stroke-width="${lw}" stroke-linecap="round"/>`);
+  if(mo==='open')o.push(`<ellipse cx="0" cy="${f1(my)}" rx="${f1(mw*.5)}" ry="${f1(mw*.55)}" fill="#7a3136" stroke="${lc}" stroke-width="${Math.max(1,lw*.6)}"/>`);
+  return o.join('');}
+function drawBody(g,skin,p){
   const st=shade(skin,-.14),o=[];
   for(const s of[1,-1]){const L=[],R=[];g.LS.forEach(([y,x,w])=>{L.push([s*x-w/2,y]);R.push([s*x+w/2,y]);});
     {const dd=sp([...L,...R.reverse()]);o.push(P(dd,skin,st,.8),SH(dd));}
@@ -173,21 +206,29 @@ function drawBody(g,skin,face=true){
     o.push(`<ellipse cx="${f1(s*(hx+1))}" cy="${f1(hy+g.hand*.42)}" rx="${f1(g.wr*.62)}" ry="${f1(g.hand*.5)}" fill="${skin}" stroke="${st}" stroke-width=".8"/>`);
     {const dd=sp([[s*g.arm(0)[0],g.armY-g.ua*.42],...R,...L.reverse()]);o.push(P(dd,skin,st,.8),SH(dd));}}
   o.push(`<rect x="${f1(-g.neckW/2)}" y="${f1(g.chin-6)}" width="${f1(g.neckW)}" height="${f1(g.shY-g.chin+9)}" fill="${skin}"/><rect x="${f1(-g.neckW/2)}" y="${f1(g.chin-6)}" width="${f1(g.neckW)}" height="${f1(g.shY-g.chin+9)}" fill="url(#sh-h)"/><rect x="${f1(-g.neckW/2)}" y="${f1(g.chin-2)}" width="${f1(g.neckW)}" height="${f1(g.shY-g.chin+4)}" fill="url(#sh-v)"/>`);
-  const cy=g.top+g.headH/2;
+  const cy=g.top+g.headH/2,fp=p||{};
   for(const s of[1,-1])o.push(`<ellipse cx="${f1(s*g.headW/2)}" cy="${f1(cy+2)}" rx="2.4" ry="4.5" fill="${skin}" stroke="${st}" stroke-width=".8"/>`);
-  o.push(`<ellipse cx="0" cy="${f1(cy)}" rx="${f1(g.headW/2)}" ry="${f1(g.headH/2)}" fill="${skin}" stroke="${st}" stroke-width=".8"/><ellipse cx="0" cy="${f1(cy)}" rx="${f1(g.headW/2)}" ry="${f1(g.headH/2)}" fill="url(#sh-h)" opacity=".7"/>`);
-  if(face){const ey=g.top+g.headH*.52,ex=g.headW*.2;
-    o.push(`<circle cx="${f1(-ex)}" cy="${f1(ey)}" r="1.5" fill="#3a2f2a"/><circle cx="${f1(ex)}" cy="${f1(ey)}" r="1.5" fill="#3a2f2a"/>`);
-    o.push(`<path d="M${f1(-ex*.7)},${f1(g.top+g.headH*.76)} Q0,${f1(g.top+g.headH*.82)} ${f1(ex*.7)},${f1(g.top+g.headH*.76)}" fill="none" stroke="#a0584e" stroke-width="1.3" stroke-linecap="round"/>`);}
+  const hd=headPath(g,fp.faceShape);o.push(P(hd,skin,st,.8),`<path d="${hd}" fill="url(#sh-h)" opacity=".6"/>`);
+  if(p)o.push(drawFace(g,p,skin));
   return o.join('');}
 
-function drawHair(g,style,c,hat){
-  const t=g.top,w=g.headW,h=g.headH,st=shade(c,-.25),back=[],front=[];
+function drawHair(g,p,hat){
+  const style=p.hair||'short',bang=p.bang||'std',c=p.hairColor||'#2b2420';
+  const t=g.top,w=g.headW,h=g.headH,st=shade(c,-.25),back=[],front=[],hi=shade(c,.16);
   if(style==='bald')return{back:'',front:''};
   if(style==='long')back.push(P(sp(mir([[0,t-1.5*K],[w*.5+1.6*K,t+h*.25],[w*.5+2.4*K,g.chin],[w*.5+2.2*K,g.chestY-1*K,1]])),c,st,.8));
+  if(style==='wavy'){const R=[[0,t-1.5*K],[w*.5+1.8*K,t+h*.25]];for(let i=0;i<5;i++)R.push([w*.5+(i%2?1.4:3)*K,lerp(g.chin-h*.2,g.chestY,i/4),i===4?1:0]);back.push(P(sp(mir(R)),c,st,.8));}
   if(style==='bob')back.push(P(sp(mir([[0,t-1.5*K],[w*.5+1.8*K,t+h*.3],[w*.5+2*K,g.chin-1*K],[w*.5+.6*K,g.chin+1.4*K,1]])),c,st,.8));
-  const buzz=style==='buzz';
-  front.push(P(sp(mir([[0,t-(buzz?.5:1.6)*K],[w*.5+(buzz?.2:1)*K,t+h*.2],[w*.5+(buzz?.1:.7)*K,t+h*(buzz?.34:.46),1],[w*.38,t+h*.28],[w*.18,t+h*(buzz?.2:.25)],[0,t+h*(buzz?.19:.28)]])),c,st,.8,buzz?'opacity=".8"':''));
+  if(style==='pony')back.push(`<path d="${sp([[w*.3,t+h*.1],[w*.5+3.4*K,t+h*.3],[w*.5+3*K,g.chin+2*K],[w*.5+1.2*K,g.shY+3*K,1],[w*.5+.6*K,g.chin]])}" fill="${c}" stroke="${st}" stroke-width=".8"/>`);
+  const buzz=style==='buzz',sd=buzz?.1:.7,tp=buzz?.5:1.6;let F;
+  if(buzz||bang==='std')F=mir([[0,t-tp*K],[w*.5+(buzz?.2:1)*K,t+h*.2],[w*.5+sd*K,t+h*(buzz?.34:.46),1],[w*.38,t+h*.28],[w*.18,t+h*(buzz?.2:.25)],[0,t+h*(buzz?.19:.28)]]);
+  else if(bang==='full')F=mir([[0,t-tp*K],[w*.5+1*K,t+h*.2],[w*.5+sd*K,t+h*.5,1],[w*.44,t+h*.4,1],[0,t+h*.405]]);
+  else if(bang==='mid')F=mir([[0,t-1.4*K],[w*.5+1.1*K,t+h*.2],[w*.5+sd*K,t+h*.5,1],[w*.37,t+h*.33],[w*.15,t+h*.19],[0,t+h*.09,1]]);
+  else if(bang==='up')F=mir([[0,t-2.6*K],[w*.34,t-2.2*K],[w*.5+.9*K,t+h*.16],[w*.5+sd*K,t+h*.42,1],[w*.42,t+h*.22],[w*.2,t+h*.13],[0,t+h*.12]]);
+  else F=[[-(w*.5+sd*K),t+h*.46,1],[-(w*.5+1*K),t+h*.18],[-w*.22,t-1.8*K],[w*.26,t-1.7*K],[w*.5+1*K,t+h*.16],[w*.5+sd*K,t+h*.46,1],[w*.42,t+h*.3],[w*.3,t+h*.15],[-w*.08,t+h*.2],[-w*.36,t+h*.33]];
+  front.push(P(sp(F),c,st,.8,buzz?'opacity=".8"':''));
+  if(!buzz)front.push(`<path d="M${f1(-w*.2)},${f1(t+h*.02)} Q${f1(w*.05)},${f1(t-.4*K)} ${f1(w*.3)},${f1(t+h*.07)}" fill="none" stroke="${hi}" stroke-width="1.3" stroke-linecap="round" opacity=".7"/>`);
+  if(style==='curly'&&!hat)for(let a=0;a<=7;a++){const an=Math.PI*a/7;front.push(`<circle cx="${f1(Math.cos(an)*(w*.5+.5*K))}" cy="${f1(t+h*.26-Math.sin(an)*(h*.26+1.2*K))}" r="${f1(2.5*K)}" fill="${c}" stroke="${st}" stroke-width=".6"/>`);}
   if(style==='bun'&&!hat)front.push(`<circle cx="0" cy="${f1(t-3.4*K)}" r="${f1(3.2*K)}" fill="${c}" stroke="${st}" stroke-width=".8"/>`);
   return{back:back.join(''),front:front.join('')};}
 
@@ -362,8 +403,8 @@ function drawAcc(g,it,c,ctx){
 /* 整體人形：p=身形資料，o=穿搭 */
 function figure(p,of,opt={}){
   const g=opt.g||geom(p),L=[],T=id=>ITEM[id];
-  const hair=drawHair(g,p.hair||'short',p.hairColor||'#2b2420',!!(of.hat&&T(of.hat.t)));
-  L.push(hair.back,drawBody(g,p.skin||'#f0cdb0'));
+  const hair=drawHair(g,p,!!(of.hat&&T(of.hat.t)));
+  L.push(hair.back,drawBody(g,p.skin||'#f0cdb0',p));
   L.push(drawTop(g,{neck:'crew',slv:'none',fit:'slim',len:'regular'},'#eceae5'),drawBottom(g,{kind:'pants',fit:'slim',len:.1},'#eceae5').svg);
   const acc=(of.acc||[]).filter(a=>T(a.t)),has=k=>acc.find(a=>T(a.t).kind===k);
   const sk=has('socks');if(sk)L.push(drawSocks(g,col(sk.c),T(sk.t).h||12));
@@ -400,7 +441,7 @@ function thumb(it,c,g){
   else if(v==='waist'){y0=g.waistY-34;y1=g.hipY+26;mw=2*(g.hi+22);}
   else{y0=g.top-10;y1=FLOOR+6;}
   const hgt=y1-y0,wd=Math.max(mw,hgt*.78);
-  return`<svg viewBox="${f1(150-wd/2)} ${f1(y0)} ${f1(wd)} ${f1(hgt)}" preserveAspectRatio="xMidYMid meet"><g transform="translate(150,0)"><g opacity=".5">${drawBody(g,'#ddd3c6',false)}</g>${s}</g></svg>`;}
+  return`<svg viewBox="${f1(150-wd/2)} ${f1(y0)} ${f1(wd)} ${f1(hgt)}" preserveAspectRatio="xMidYMid meet"><g transform="translate(150,0)"><g opacity=".5">${drawBody(g,'#ddd3c6',null)}</g>${s}</g></svg>`;}
 /* ===== 資料：顏色、款式圖鑑、風格、商店 ===== */
 const COL={白:'#f5f3ee',米:'#e6dcc8',奶茶:'#d6bfa5',卡其:'#c8b08a',駝:'#b88a5a',棕:'#6b4a35',黑:'#26262a',炭灰:'#4a4d52',灰:'#9aa0a6',淺灰:'#d5d7da',海軍藍:'#27364f',藍:'#3f6fb0',淺藍:'#a9c8e8',丹寧:'#4f6f96',淺丹寧:'#8fb0d0',軍綠:'#5d6b45',綠:'#3f7d5a',鼠尾草:'#a9b89a',酒紅:'#7a2f3a',紅:'#c8413b',粉:'#f1c3c8',黃:'#e9c14f',橘:'#e07b39',紫:'#8a6bb0',金:'#c9a84c',銀:'#b8bcc2'};
 const col=c=>COL[c]||c||'#999';
@@ -521,7 +562,7 @@ const LOOKM={甜美:{top:E('t_oxford','粉'),outer:E('o_cardigan','米'),bottom:
 const INFOM={甜美:{d:'柔和色系與針織，溫柔乾淨的印象。',k:['粉、米、淺藍','開襟針織衫疊襯衫','淺色褲配小白鞋']}};
 /* 商店：市面上買得到的商品與台灣售價（2026/11 查詢；特價前的定價，實際以官網為準） */
 const SHOPDATE='2026/11';
-const S=(id,brand,name,price,t,c,src)=>({id,brand,name,price,t,c,src});
+const S=(id,brand,name,price,t,c,src,g)=>({id,brand,name,price,t,c,src,g0:g});
 const SHOP=[
 S('u1','UNIQLO','男裝 圓領T恤(短袖) Uniqlo U',390,'t_tee','白'),
 S('u2','UNIQLO','AIRism 棉質寬版圓領T恤(五分袖)',390,'t_over','黑'),
@@ -557,6 +598,28 @@ S('l4','lativ','棉質無袖短洋裝-女',690,'d_lbd','黑'),
 S('l5','lativ','牛仔襯衫洋裝-女',790,'d_shirt','丹寧'),
 S('l6','lativ','細褶雪紡長裙-女',590,'b_maxi','黑'),
 S('l7','lativ','格紋百褶連褲短裙-女',590,'b_pleat','棕'),
+S('k1','COEN','台灣限定 coen bear 口袋刺繡短袖T恤 男款',890,'t_tee','白','','m'),
+S('k2','COEN','coen熊插畫T恤 印花T恤（女款）',990,'t_tee','白','','f'),
+S('k3','COEN','學院動物印花T恤',990,'t_over','白'),
+S('k4','COEN','小熊刺繡鹿子織POLO衫',1290,'t_polo','海軍藍'),
+S('k5','COEN','小熊刺繡點綴扣領牛津布襯衫',1690,'t_oxford','白'),
+S('k6','COEN','拼色格紋法蘭絨襯衫 抗菌防臭',1190,'t_flannel','藍'),
+S('k7','COEN','【抗靜電】柔軟彈力羅紋圓領針織衫',1190,'t_knit','米'),
+S('k8','COEN','Toughweigh印花圓領衛衣',1490,'t_sweat','灰'),
+S('k9','COEN','Q彈柔軟 天竺高領針織衫',1390,'t_turtle','黑'),
+S('k10','COEN','柔軟觸感毛線針織開襟衫',1890,'o_cardigan','米'),
+S('k11','COEN','彈性多機能尼龍工裝外套',2790,'o_coach','軍綠'),
+S('k12','COEN','無領牛仔外套',3090,'o_denim','丹寧'),
+S('k13','COEN','台灣限定 尼龍絎縫外套',3290,'o_puffer','軍綠'),
+S('k14','COEN','台灣限定 登山連帽外套',2990,'o_shell','橘'),
+S('k15','COEN','仿亞麻雙排釦西裝外套',2390,'o_blazer','米'),
+S('k16','COEN','輕便美腿寬褲',1590,'b_wide','黑','','f'),
+S('k17','COEN','條紋打摺寬褲',1690,'b_wide','炭灰'),
+S('k18','COEN','【SOTA(R)】吸水速乾修身錐形褲',1290,'b_chino','海軍藍'),
+S('k19','COEN','條紋緹花窄裙',1690,'b_pencil','炭灰'),
+S('k20','COEN','PENNEYS特別訂製 鹿子織傘狀洋裝',1490,'d_lbd','海軍藍'),
+S('k21','COEN','台灣限定 側口袋吊帶洋裝',1590,'d_lbd','黑'),
+S('k22','COEN','台灣限定 coen BEAR 刺繡小熊襪',290,'a_socks','白'),
 S('n1','Nike',"Air Force 1 '07",3600,'s_white','白'),
 S('v1',"Levi's",'501 Original 中腰直筒牛仔褲',4390,'b_jeans','丹寧'),
 S('d1','Dr. Martens','1460 Crazy Horse 8孔靴',7220,'s_work','棕'),
@@ -564,7 +627,7 @@ S('d2','Dr. Martens','1460 Rain 防水靴',4960,'s_work','黑'),
 S('c1','Converse','Chuck 70 高筒',2999,'s_hi','黑','END. 售價'),
 S('a1','adidas','Samba OG',3139,'s_white','白','END. 售價')
 ];
-SHOP.forEach(s=>s.g=/女裝|-女/.test(s.name)?'f':/男裝|-男/.test(s.name)?'m':ITEM[s.t].g);
+SHOP.forEach(s=>s.g=s.g0||(/女裝|-女/.test(s.name)?'f':/男裝|-男/.test(s.name)?'m':ITEM[s.t].g));
 const SHOPMAP=Object.fromEntries(SHOP.map(s=>[s.id,s]));
 /* ===== App：帳號、雲端同步、畫面 ===== */
 const FB='https://molecule-match-default-rtdb.asia-southeast1.firebasedatabase.app/trips/outfit-app';
@@ -587,7 +650,7 @@ function sheet(html){$('#sheet').innerHTML=html?`<div class="sheet" data-act="sh
 /* --- 身形 --- */
 function est(sex,h,w){const bmi=w/Math.pow(h/100,2),m=sex==='m',r=v=>Math.round(v*2)/2;
   return{head:r(m?56+(h-170)*.06:55+(h-160)*.06),shoulder:r(h*(m?.255:.235)+(bmi-22)*.35),chest:r(m?h*.53+(bmi-22)*2.3:h*.52+(bmi-21)*2.2),waist:r(m?h*.45+(bmi-22)*2.6:h*.41+(bmi-21)*2.4),hip:r(m?h*.54+(bmi-22)*2:h*.57+(bmi-21)*2.1),arm:r(h*.335),leg:r(h*.455),foot:r(h*(m?.152:.147))};}
-function newUser(name,sex){sex=sex==='f'?'f':'m';const h=sex==='f'?160:172,w=sex==='f'?52:68;return{name,up:0,body:Object.assign({sex,h,w,skin:'#f0cdb0',hair:sex==='f'?'long':'short',hairColor:'#2b2420'},est(sex,h,w)),
+function newUser(name,sex){sex=sex==='f'?'f':'m';const h=sex==='f'?160:172,w=sex==='f'?52:68;return{name,up:0,body:Object.assign({sex,h,w,skin:'#f0cdb0',hair:sex==='f'?'long':'short',hairColor:'#2b2420',bang:sex==='f'?'side':'std',lash:sex==='f',blush:sex==='f',lip:sex==='f'?'pink':'none'},est(sex,h,w)),
   outfit:{top:{t:'t_tee',c:'白',k:'t:t_tee'},bottom:{t:'b_jeans',c:'丹寧',k:'t:b_jeans'},shoes:{t:'s_white',c:'白',k:'t:s_white'},acc:[]},saved:[],closet:[],budget:0,ui:{slot:'top',src:'cat',style:'全部'}};}
 function fix(u){u.outfit=u.outfit||{};u.outfit.acc=u.outfit.acc||[];u.saved=u.saved||[];u.closet=u.closet||[];u.ui=u.ui||{slot:'top',src:'cat',style:'全部'};return u;}
 
@@ -722,15 +785,35 @@ function sizeBox(){const b=U.body,bmi=b.w/Math.pow(b.h/100,2),m=b.sex==='m';
   if(b.h<165)tips.push('想顯高：全身同色系、九分褲露腳踝、避免過長外套。');
   return`<div class="kv"><b>上衣參考</b><span>${top}（胸圍 ${b.chest} cm）</span><b>褲子腰圍</b><span>約 ${Math.round(b.waist/2.54)} 吋</span><b>鞋子</b><span>${jp.toFixed(1)} cm（約 EU ${eu}）</span><b>帽圍</b><span>${hat}（${b.head} cm）</span><b>比例</b><span>約 ${hr.toFixed(1)} 頭身，腿長佔身高 ${(lr*100).toFixed(0)}%</span><b>BMI</b><span>${bmi.toFixed(1)}</span></div>
   <div class="muted" style="margin-top:8px">${tips.map(t=>'・'+t).join('<br>')||'・比例均衡，大部分版型都適合。'}<br>尺碼各品牌不同，僅供參考。</div>`;}
+const FACE=[['臉型','faceShape','oval',[['oval','鵝蛋臉'],['round','圓臉'],['square','方臉'],['heart','瓜子臉'],['long','長臉']]],
+ ['眼睛','eye','round',[['round','圓眼'],['big','大眼'],['almond','杏眼'],['smile','笑眼'],['dot','豆豆眼']]],
+ ['眉毛','brow','soft',[['soft','自然'],['thick','濃眉'],['thin','細眉'],['arch','挑眉'],['flat','平眉'],['none','無']]],
+ ['鼻子','nose','dot',[['dot','小巧'],['line','立體'],['none','不畫']]],
+ ['嘴巴','mouth','smile',[['smile','微笑'],['grin','露齒笑'],['small','抿嘴'],['flat','一字'],['open','張嘴']]],
+ ['唇色','lip','none',[['none','自然'],['nude','裸色'],['pink','粉色'],['red','紅色']]],
+ ['鬍子','beard','none',[['none','無'],['stubble','鬍渣'],['mustache','八字鬍'],['goatee','山羊鬍'],['full','落腮鬍']]],
+ ['瀏海','bang','std',[['std','短瀏海'],['side','側分'],['full','齊瀏海'],['mid','中分'],['up','往上梳']]],
+ ['髮型','hair','short',[['short','短髮'],['buzz','平頭'],['bob','鮑伯'],['long','長直髮'],['wavy','長捲髮'],['pony','馬尾'],['bun','丸子頭'],['curly','捲髮'],['bald','光頭']]]];
+const SWS=(k,cur,list)=>`<div class="sw">${list.map(c=>`<button data-act="fset" data-k="${k}" data-v="${c}" class="${cur===c?'on':''}" style="background:${c}"></button>`).join('')}</div>`;
+function faceCard(){const b=U.body,g=G(),s=g.headH+60;
+  return`<div class="card"><div class="bar"><b>捏臉</b><button class="btn sm r" data-act="frand">🎲 隨機</button></div>
+  <div class="facebox">${figure(b,Object.assign({},U.outfit,{hat:null}),{g,cls:'face',vb:`${f1(150-s/2)} ${f1(g.top-32)} ${f1(s)} ${f1(s)}`})}</div>
+  ${FACE.map(([n,k,df,opts])=>`<label class="f">${n}</label><div class="chips" style="flex-wrap:wrap">${opts.map(([v,t])=>`<button class="chip ${(b[k]||df)===v?'on':''}" data-act="fset" data-k="${k}" data-v="${v}">${t}</button>`).join('')}</div>`).join('')}
+  <label class="f">細節</label><div class="chips">${[['lash','睫毛'],['blush','腮紅'],['freckle','雀斑']].map(([k,t])=>`<button class="chip s2 ${b[k]?'on':''}" data-act="ftog" data-k="${k}">${t}</button>`).join('')}</div>
+  <label class="f">眼珠顏色</label>${SWS('eyeColor',b.eyeColor||'#3a2f2a',['#3a2f2a','#5b3a22','#8a5a2b','#3d5a80','#4a6b4a','#7b7f86'])}
+  <label class="f">髮色</label>${SWS('hairColor',b.hairColor,['#2b2420','#4a362a','#7a5236','#b8894f','#d9c49a','#8f8f93','#a13b32','#e39ab0','#5b7fb5'])}
+  <label class="f">膚色</label>${SWS('skin',b.skin,['#fae3d0','#f7dcc4','#f0cdb0','#e2b48f','#c9966b','#a06f4a','#6f4a32'])}</div>`;}
+function randFace(){const b=U.body,f=b.sex==='f',pk=l=>l[Math.floor(Math.random()*l.length)];
+  FACE.forEach(([n,k,df,opts])=>{let l=opts.map(o=>o[0]);if(k==='beard')l=f?['none']:['none','none','none','stubble','mustache','goatee','full'];if(k==='lip')l=f?['none','nude','pink','red']:['none'];
+    if(k==='hair')l=f?['bob','long','wavy','pony','bun','short']:['short','short','buzz','curly','short'];if(k==='brow')l=l.filter(x=>x!=='none');if(k==='mouth')l=l.filter(x=>x!=='open');b[k]=pk(l);});
+  b.lash=f&&Math.random()<.7;b.blush=Math.random()<(f?.6:.15);b.freckle=Math.random()<.15;b.eyeColor=pk(['#3a2f2a','#3a2f2a','#5b3a22','#8a5a2b']);b.hairColor=pk(['#2b2420','#2b2420','#4a362a','#7a5236','#b8894f']);}
 function vMe(){const b=U.body,kn=DB.known[UK]||{};
   return stage(true)+`<div class="card"><div class="bar"><b>性別</b><div class="chips r" style="padding:0"><button class="chip s2 ${b.sex==='m'?'on':''}" data-act="sex" data-v="m">男性</button><button class="chip s2 ${b.sex==='f'?'on':''}" data-act="sex" data-v="f">女性</button></div></div>
   <div class="muted" style="margin-bottom:6px">目前推薦${b.sex==='f'?'女裝':'男裝'}：款式圖鑑、商店、隨機搭配與風格示範都會跟著性別走。</div><b>身形設定</b>
   ${FIELDS.map(([k,n,mn,mx,u])=>`<div class="fld"><span>${n}</span><input type="range" min="${mn}" max="${mx}" step=".5" value="${b[k]}" data-body="${k}"><input type="number" min="${mn}" max="${mx}" step=".5" value="${b[k]}" data-body="${k}" inputmode="decimal"></div>`).join('')}
   <div class="muted">手長＝肩膀到手腕；腿長＝胯下到地面；腳長＝腳跟到最長腳趾。</div>
   <button class="btn" style="margin-top:8px" data-act="est">依身高體重估算其他數據</button></div>
-  <div class="card"><b>外觀</b><label class="f">膚色</label><div class="sw">${['#f7dcc4','#f0cdb0','#e2b48f','#c9966b','#a06f4a','#6f4a32'].map(c=>`<button data-act="skin" data-c="${c}" class="${b.skin===c?'on':''}" style="background:${c}"></button>`).join('')}</div>
-  <label class="f">髮型</label><div class="chips">${[['short','短髮'],['buzz','平頭'],['bob','鮑伯'],['long','長髮'],['bun','丸子頭'],['bald','光頭']].map(([k,n])=>`<button class="chip ${b.hair===k?'on':''}" data-act="hair" data-v="${k}">${n}</button>`).join('')}</div>
-  <label class="f">髮色</label><div class="sw">${['#2b2420','#4a362a','#7a5236','#b8894f','#d9c49a','#8f8f93','#a13b32'].map(c=>`<button data-act="hairc" data-c="${c}" class="${b.hairColor===c?'on':''}" style="background:${c}"></button>`).join('')}</div></div>
+  ${faceCard()}
   <div class="card"><b>參考尺碼與穿搭建議</b><div id="sizeBox" style="margin-top:8px">${sizeBox()}</div></div>
   <div class="card"><b>帳號：${esc(U.name)}</b><div class="muted" id="cloudSt" style="margin:4px 0 8px">${cloud}</div>
   <div class="bar"><input type="password" id="newPin" inputmode="numeric" maxlength="4" placeholder="${kn.pin?'新的四碼密碼':'設定四碼密碼'}" style="width:150px"><button class="btn" data-act="setpin">${kn.pin?'更改密碼':'設定密碼'}</button>${kn.pin?'<button class="btn" data-act="nopin">取消密碼</button>':''}</div>
@@ -801,12 +884,12 @@ document.addEventListener('click',async ev=>{
   else if(a==='dellook'){U.saved.splice(+d.i,1);save();}
   else if(a==='preset'){U.outfit=presetLook(d.s);save();return go('try');}
   else if(a==='browse'){U.ui.style=d.s;U.ui.src='cat';save();return go('try');}
-  else if(a==='sex'){if(U.body.sex!==d.v){const f=d.v==='f',b=U.body,dh=f?172:160,dw=f?68:52,e0=est(b.sex,dh,dw),untouched=b.h===dh&&b.w===dw&&Object.keys(e0).every(k=>b[k]===e0[k]);b.sex=d.v;if(untouched){b.h=f?160:172;b.w=f?52:68;Object.assign(b,est(d.v,b.h,b.w));}if(f&&U.body.hair==='short')U.body.hair='long';if(!f&&(U.body.hair==='long'||U.body.hair==='bob'||U.body.hair==='bun'))U.body.hair='short';U.ui.allG=false;save();toast('已改為'+(f?'女性，推薦女裝':'男性，推薦男裝')+(untouched?'':'；身形數據保留不變'));}}
+  else if(a==='sex'){if(U.body.sex!==d.v){const f=d.v==='f',b=U.body,dh=f?172:160,dw=f?68:52,e0=est(b.sex,dh,dw),untouched=b.h===dh&&b.w===dw&&Object.keys(e0).every(k=>b[k]===e0[k]);b.sex=d.v;if(untouched){b.h=f?160:172;b.w=f?52:68;Object.assign(b,est(d.v,b.h,b.w));}if(untouched){b.hair=f?'long':'short';b.bang=f?'side':'std';b.lash=f;b.blush=f;b.lip=f?'pink':'none';if(f)b.beard='none';}U.ui.allG=false;save();toast('已改為'+(f?'女性，推薦女裝':'男性，推薦男裝')+(untouched?'':'；身形數據保留不變'));}}
   else if(a==='allg'){U.ui.allG=d.v==='1';save();}
   else if(a==='est'){Object.assign(U.body,est(U.body.sex,U.body.h,U.body.w));save();toast('已依身高體重估算');}
-  else if(a==='skin'){U.body.skin=d.c;save();}
-  else if(a==='hair'){U.body.hair=d.v;save();}
-  else if(a==='hairc'){U.body.hairColor=d.c;save();}
+  else if(a==='fset'){U.body[d.k]=d.v;save();}
+  else if(a==='ftog'){U.body[d.k]=!U.body[d.k];save();}
+  else if(a==='frand'){randFace();save();}
   else if(a==='setpin'||a==='nopin'){const v=a==='nopin'?'':$('#newPin').value.trim();if(a==='setpin'&&!/^\d{4}$/.test(v))return toast('請輸入四個數字');
     DB.known[UK]={name:U.name,pin:v?hash(UK+':'+v):''};saveLocal();
     try{await fetch(FB+'/names/'+UK+'.json',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:U.name,pin:DB.known[UK].pin,up:Date.now()})});toast(v?'密碼已設定':'已取消密碼');}catch(e){toast('離線中，密碼只存在這台裝置');}}
