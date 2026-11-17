@@ -4,6 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>三朝聽音 — 康雍乾宮廷文字遊戲</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;600;900&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;height:100%;background:#120c0c;color:#f3e6c8;font-family:"Noto Serif TC","PMingLiU","Songti TC","Source Han Serif TC",serif}
@@ -15,9 +17,11 @@ img,canvas{image-rendering:pixelated;image-rendering:crisp-edges}
 .topdeco{position:absolute;top:var(--sat);left:0;right:0;height:var(--deco);z-index:25;pointer-events:none;background:#6e4e14}
 .topdeco canvas{position:absolute;inset:0;width:100%;height:100%}
 .topcap{position:absolute;top:0;left:0;right:0;height:var(--sat);background:#6e4e14;z-index:30;pointer-events:none}
-.px{border:4px solid #e0b64a;box-shadow:0 0 0 4px #5a1616,inset 0 0 0 2px #5a1616;background:#2a1414}
+.px{position:relative;border:2px solid #e0b64a;outline:1px solid #7a5a1a;outline-offset:2px;box-shadow:0 0 0 5px #3a0f0f,0 0 0 6px #7a5a1a,inset 0 0 0 1px #5a1616,inset 0 0 0 3px #2a1414,inset 0 0 0 4px #7a5a1a66,0 6px 14px #000a;background:linear-gradient(#2e1616,#231010)}
+.px::before,.px::after{content:"";position:absolute;width:9px;height:9px;border:2px solid #f6cf5a;background:#5a1616;pointer-events:none;box-shadow:inset 0 0 0 1px #2a1414,inset 0 0 0 2px #e0b64a}
+.px::before{left:-5px;top:-5px}.px::after{right:-5px;top:-5px}
 button{font-family:inherit;color:inherit;cursor:pointer}
-.btn{display:block;width:100%;padding:12px 10px;margin:8px 0;font-size:16px;text-align:left;line-height:1.5;background:#3a1a1a;border:3px solid #e0b64a;box-shadow:3px 3px 0 #000}
+.btn{display:block;width:100%;padding:12px 12px;margin:9px 0;font-size:16px;text-align:left;line-height:1.5;background:linear-gradient(#40201e,#321616);border:1px solid #e0b64a;outline:1px solid #7a5a1a;outline-offset:1px;box-shadow:inset 0 1px 0 #ffffff14,inset 0 0 0 2px #2a1212,2px 3px 0 #000}
 .btn:active{transform:translate(2px,2px);box-shadow:1px 1px 0 #000}
 .btn.c{text-align:center;font-weight:bold;letter-spacing:2px}
 .btn[disabled]{opacity:.4}
@@ -30,26 +34,28 @@ input{display:block;width:100%;margin:4px 0 12px;padding:10px;font-size:17px;fon
 #sTitle{position:relative;justify-content:flex-end}
 #titleBg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 35%}
 .titleBox{position:relative;padding:28px 18px 18px;text-align:center;background:linear-gradient(transparent,#120c0cd8 22%,#120c0cf2)}
-.logo{font-size:44px;letter-spacing:8px;color:#f6cf5a;text-shadow:3px 3px 0 #7a1616,6px 6px 0 #000}
+.logo{font-size:46px;font-weight:900;letter-spacing:10px;color:#f6cf5a;text-shadow:0 1px 0 #fff3a8,2px 2px 0 #a8281e,3px 3px 0 #7a1616,5px 5px 0 #000,0 0 18px #f6cf5a55}
 .sub{font-size:14px;letter-spacing:3px;margin:8px 0 18px;color:#e8d5a8}
 .sig{font-size:11px;opacity:.6;margin-top:10px;letter-spacing:1px}
 /* top bar */
-.bar{display:flex;align-items:center;gap:8px;padding:8px 10px;background:#5a1616;border-bottom:4px solid #e0b64a;font-size:14px}
+.bar{display:flex;align-items:center;gap:8px;padding:9px 12px;background:linear-gradient(#641a1a,#4c1414);border-bottom:2px solid #e0b64a;box-shadow:0 1px 0 #7a5a1a,0 3px 0 #2a0c0c,0 4px 0 #7a5a1a;font-size:14px;margin-bottom:4px}
 .bar b{flex:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
-.bar button{background:#2a1414;border:2px solid #e0b64a;padding:4px 8px;font-size:13px}
+.bar button{background:#2a1414;border:1px solid #e0b64a;outline:1px solid #7a5a1a;outline-offset:1px;padding:4px 9px;font-size:13px;box-shadow:inset 0 1px 0 #ffffff14}
 /* chapters */
 .vol{margin:14px 0 6px;color:#f6cf5a;font-size:18px;letter-spacing:4px;border-bottom:2px dashed #e0b64a55;padding-bottom:4px}
 .chap{display:flex;gap:10px;align-items:center}
-.chap .g{width:34px;height:34px;flex:none;display:flex;align-items:center;justify-content:center;font-weight:bold;border:2px solid #e0b64a;background:#120c0c;color:#f6cf5a}
+.chap .g{width:34px;height:34px;flex:none;display:flex;align-items:center;justify-content:center;font-weight:900;border:1px solid #e0b64a;outline:1px solid #7a5a1a;outline-offset:1px;background:#120c0c;color:#f6cf5a;box-shadow:inset 0 0 0 2px #2a1414}
 .chap small{display:block;opacity:.7;font-size:12px}
 /* game */
 #stage{position:relative;flex:1;min-height:150px;overflow:hidden;background:#000}
 #bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-#port{position:absolute;left:50%;bottom:0;width:160px;height:190px;margin-left:-80px;display:none;filter:drop-shadow(0 0 0 #000)}
+#port{position:absolute;left:50%;bottom:0;width:176px;height:209px;margin-left:-88px;display:none;filter:drop-shadow(0 3px 0 #0008) drop-shadow(0 0 10px #0009)}
+#stage::after{content:"";position:absolute;left:0;right:0;bottom:0;height:34%;background:linear-gradient(transparent,#0b0707d0);pointer-events:none}
+#stage{border-bottom:1px solid #7a5a1a}
 .stats{position:absolute;top:6px;left:6px;right:6px;display:flex;gap:6px;font-size:12px}
-.stats span{background:#000a;border:2px solid #e0b64a;padding:2px 6px}
+.stats span{background:#120a0ad0;border:1px solid #e0b64a;outline:1px solid #00000080;padding:2px 7px;letter-spacing:.5px}
 #dlg{min-height:170px;padding:12px 14px 16px;margin:6px;position:relative;cursor:pointer}
-#who{display:inline-block;background:#e0b64a;color:#2a1414;font-weight:bold;padding:1px 10px;margin-bottom:6px;font-size:15px}
+#who{display:inline-block;background:linear-gradient(#f6d46a,#d9a83a);color:#2a1414;font-weight:900;padding:1px 12px;margin-bottom:7px;font-size:15px;letter-spacing:2px;border:1px solid #7a5a1a;box-shadow:inset 0 1px 0 #fff6,1px 2px 0 #000}
 #txt{font-size:17px;line-height:1.75;min-height:90px}
 #txt.nar{color:#d8c9a6;font-style:normal}
 #nextTip{position:absolute;right:12px;bottom:6px;font-size:12px;animation:bl 1s steps(2) infinite}
@@ -86,8 +92,8 @@ u[data-g]{text-decoration:underline dotted #f6cf5a;text-underline-offset:5px;cur
 .tabs{display:flex}
 .tabs button{flex:1;padding:10px 0;background:#2a1414;border:0;border-bottom:4px solid #5a1616;font-size:15px}
 .tabs button.on{border-bottom-color:#e0b64a;color:#f6cf5a;font-weight:bold}
-.card{display:flex;gap:10px;padding:10px;margin-bottom:10px;background:#2a1414;border:2px solid #e0b64a88}
-.card img{width:64px;height:76px;flex:none;background:#120c0c}
+.card{display:flex;gap:10px;padding:10px;margin-bottom:10px;background:linear-gradient(#2e1616,#241010);border:1px solid #e0b64a99;outline:1px solid #7a5a1a66;outline-offset:1px;box-shadow:inset 0 1px 0 #ffffff10}
+.card img{width:64px;height:76px;border:1px solid #7a5a1a;flex:none;background:#120c0c}
 .card h3{font-size:16px;color:#f6cf5a}
 .card small{opacity:.75}
 .card p{margin:4px 0 0;font-size:14px;line-height:1.65}
@@ -655,6 +661,36 @@ function drawTitle(x){const W=180,H=320;const R=(c,a,b,w,h)=>{x.fillStyle=c;x.fi
  // 飄雪
  for(let i=0;i<150;i++){const a=rnd()*W|0,b=rnd()*H|0,k=rnd();x.fillStyle=k>.7?'#ffffffcc':'#dfe6ff77';x.fillRect(a,b,k>.9?2:1,k>.9?2:1)}
 }
+// ===== 細緻化：Scale2x 放大（斜線變圓滑）＋光影、質感 =====
+function scale2x(s,W,H){const d=new Uint8ClampedArray(W*H*16),u=new Uint32Array(s.buffer,s.byteOffset,W*H),o=new Uint32Array(d.buffer),W2=W*2;
+ for(let y=0;y<H;y++)for(let x=0;x<W;x++){const E=u[y*W+x],B=y>0?u[(y-1)*W+x]:E,D=x>0?u[y*W+x-1]:E,F=x<W-1?u[y*W+x+1]:E,Hh=y<H-1?u[(y+1)*W+x]:E;let e0=E,e1=E,e2=E,e3=E;
+  if(B!==Hh&&D!==F){e0=D===B?D:E;e1=B===F?F:E;e2=D===Hh?D:E;e3=Hh===F?F:E}
+  const p=y*2*W2+x*2;o[p]=e0;o[p+1]=e1;o[p+W2]=e2;o[p+W2+1]=e3}
+ return d}
+const BGL={ // 光源（放大後座標）：[x,y,半徑,r,g,b,強度]
+ hall:[[96,44,54,255,170,80,.5],[222,44,54,255,170,80,.5],[160,84,80,255,210,110,.28]],
+ study:[[208,84,74,255,200,110,.6],[160,40,50,150,180,255,.22]],
+ night:[[256,30,70,190,205,255,.35],[124,120,36,255,160,70,.55],[196,120,36,255,160,70,.55],[160,116,90,255,170,90,.18]],
+ camp:[[154,150,70,255,170,70,.6],[80,66,60,255,230,150,.35]],
+ garden:[[30,10,150,255,250,220,.22]]};
+function enhanceBg(d,W,H,k){const L=BGL[k]||[],dark=k==='night'||k==='study'?0.34:0.2;
+ for(let y=0;y<H;y++)for(let x=0;x<W;x++){const p=(y*W+x)*4;let r=d[p],g=d[p+1],b=d[p+2];
+  let h=(x*374761393+y*668265263)^(x*y);h=(h^(h>>13))*1274126177;const n=((h>>>16)&255)/255-.5; // 細顆粒質感
+  const dx=(x-W/2)/(W/2),dy=(y-H/2)/(H/2),v=1-dark*Math.min(1,(dx*dx*.8+dy*dy*.9)); // 暗角
+  let m=v*(1+n*.07);r*=m;g*=m;b*=m;
+  for(const l of L){const ex=x-l[0],ey=y-l[1],q=1-Math.sqrt(ex*ex+ey*ey)/l[2];if(q>0){const a=q*q*l[6];r+=(l[3]-r)*a*.6+l[3]*a*.18;g+=(l[4]-g)*a*.6+l[4]*a*.18;b+=(l[5]-b)*a*.6+l[5]*a*.18}}
+  d[p]=r;d[p+1]=g;d[p+2]=b}}
+function enhancePortrait(d,W,H){for(let y=0;y<H;y++)for(let x=0;x<W;x++){const p=(y*W+x)*4;if(!d[p+3])continue;
+  const m=1.07-.16*(x/W)+(y<H*.45?.03:-.02);let h=(x*374761393+y*668265263)^(x+y*31);h=(h^(h>>13))*1274126177;const n=(((h>>>16)&255)/255-.5)*.035;
+  // 外緣柔邊：貼著透明處的像素略暗，輪廓更俐落
+  const edge=(x>0&&!d[p-1])||(x<W-1&&!d[p+7])||(y>0&&!d[p-W*4+3])?.82:1;
+  for(let k=0;k<3;k++)d[p+k]=d[p+k]*(m+n)*edge}
+ const dot=(x,y,r,g,b,a)=>{const p=(y*W+x)*4;if(!d[p+3])return;d[p]+=(r-d[p])*a;d[p+1]+=(g-d[p+1])*a;d[p+2]+=(b-d[p+2])*a};
+ [[25,34],[37,34]].forEach(([x,y])=>{dot(x,y,255,255,255,.95);dot(x+2,y+2,255,255,255,.35)}); // 眼神光
+ for(let x=22;x<=42;x+=1)dot(x,26+((x-32)*(x-32)/60|0),255,240,210,.10); // 額頭受光
+ dot(30,43,255,220,200,.35);dot(31,46,255,210,200,.3); // 鼻尖、唇光
+ for(let y=60;y<H;y++)for(let x=8;x<W-8;x++)if(((x*3+y*5)%17)===0)dot(x,y,255,225,150,.16); // 衣料織紋
+}
 
 // ===== 難字難詞（自動比對每句台詞）=====  詞: [讀音提示, 解釋]
 const GLOSS={
@@ -1159,8 +1195,10 @@ async function login(name,pin){name=String(name||'').replace(/\s+/g,' ').trim().
  await usePlayer(k);if(!row){SV.at=SV.at||Date.now();writeLocal();push()}return ''}
 // ---------- pixel art ----------
 const pc={},bc={};
-function portrait(id){if(pc[id])return pc[id];const cv=document.createElement('canvas');cv.width=32;cv.height=38;drawPortrait(cv.getContext('2d'),id);return pc[id]=cv.toDataURL()}
-function bgImg(k){if(bc[k])return bc[k];const cv=document.createElement('canvas');cv.width=160;cv.height=90;drawBg(cv.getContext('2d'),k);return bc[k]=cv.toDataURL()}
+function hi(draw,W,H,after){const c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d');draw(x);
+ try{const src=x.getImageData(0,0,W,H),d=scale2x(src.data,W,H);after(d,W*2,H*2);const o=document.createElement('canvas');o.width=W*2;o.height=H*2;o.getContext('2d').putImageData(new ImageData(d,W*2,H*2),0,0);return o.toDataURL()}catch(e){return c.toDataURL()}}
+function portrait(id){return pc[id]||(pc[id]=hi(x=>drawPortrait(x,id),32,38,enhancePortrait))}
+function bgImg(k){return bc[k]||(bc[k]=hi(x=>drawBg(x,k),160,90,(d,W,H)=>enhanceBg(d,W,H,k)))}
 // ---------- 字詞與解析 ----------
 const GK=[...Object.keys(PKEY),...Object.keys(GLOSS).filter(k=>!PKEY[k])].sort((a,b)=>b.length-a.length);const REIGN={康熙:1,雍正:1,乾隆:1,嘉慶:1};
 function findTerms(t){const hit=[],used=new Array(t.length).fill(0);GK.forEach(k=>{let p=t.indexOf(k);while(p>=0){if(REIGN[k]&&/[元一二三四五六七八九十初末朝年間]/.test(t[p+2]||'')){p=t.indexOf(k,p+1);continue}if(!used.slice(p,p+k.length).some(Boolean)){for(let i=p;i<p+k.length;i++)used[i]=1;hit.push([p,k])}p=t.indexOf(k,p+1)}});hit.sort((a,b)=>a[0]-b[0]);return hit}
