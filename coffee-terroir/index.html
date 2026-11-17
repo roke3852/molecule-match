@@ -114,7 +114,7 @@ canvas{width:100%;height:230px;display:block}
 </head>
 <body>
 <header><h1>咖啡<span>風土</span>圖鑑</h1><p>產地 · 品種 · 莊園 · 處理法 · 烘焙 · 消消樂</p>
-<div class="cloudbar"><button id="gBtn" type="button"><span id="gBtnT">☁️ 用 Google 帳號同步進度</span></button><span id="syncNote">消消樂星星與烘焙紀錄存到你的 Google 雲端，換手機也接得上</span></div></header>
+<div class="cloudbar"><button id="gBtn" type="button"><span id="gBtnT">☁️ 用 Google 帳號同步進度</span></button><span id="syncNote">消消樂、配方挑戰的星星與烘焙紀錄存到你的 Google 雲端，換手機也接得上</span></div></header>
 <main>
 <section class="view" id="v-origins">
   <h2 class="vt">產地與風味成因</h2><p class="vs">點開產地看風味特色、為什麼會有這種味道，以及地圖連結</p>
@@ -174,6 +174,8 @@ canvas{width:100%;height:230px;display:block}
   <div id="rInfo"></div>
 </section>
 <section class="view" id="v-blends">
+  <div class="chips" id="bMode" style="padding-top:6px"><button class="chip on" data-m="learn">配方圖解與調配</button><button class="chip" data-m="chal">配方挑戰關卡</button></div>
+<div id="bLearn">
   <h2 class="vt">配方豆組與風味圖解</h2><p class="vs">配方豆是把不同產地的豆子混在一起，讓各自的優點互補</p>
   <div class="note">為什麼要做配方？單一產地像獨奏，配方像合奏：用<b>巴西</b>打底給醇厚與堅果巧克力，<b>哥倫比亞／中美洲</b>補甜感與平衡，<b>衣索比亞／肯亞</b>點綴花果香與酸質，<b>曼特寧</b>或<b>羅布斯塔</b>加厚度與苦韻。下面的比例是常見範例，各家烘豆商的實際配方不同。</div>
   <div class="chips" id="bChips"></div>
@@ -184,6 +186,22 @@ canvas{width:100%;height:230px;display:block}
     <label style="font-size:13px;display:block;margin-top:8px">焙度 <b id="mRoastV"></b></label><input type="range" id="mRoast" min="0" max="100" value="45">
     <div class="row" style="margin-top:8px"><button class="btn sec" id="mReset">清空</button><span id="mHint" style="font-size:12.5px;color:var(--mut)"></span></div>
   </div>
+</div>
+<div id="bChal" style="display:none">
+  <h2 class="vt">配方挑戰關卡</h2><p class="vs">客人點單，你來調：用比例與焙度，讓你的配方貼近目標風味</p>
+  <div id="cMenu"><div class="lvgrid" id="cLv"></div>
+    <div class="note">虛線是客人要的風味，實線是你的配方。相似度 70 分過關、80 分兩星、90 分三星。前 7 關可以即時看到自己的雷達圖；第 8 關起是<b>盲調</b>：送出後才看得到結果，而且次數有限。過關後會公布參考配方。</div></div>
+  <div id="cPlay" style="display:none">
+    <div class="hud"><button class="btn sec" id="cBack">← 選關</button><span id="cHud"></span></div>
+    <div class="rpanel"><h3 id="cName"></h3><div id="cStory" style="font-size:14px;margin:4px 0"></div><div class="tags" id="cRules"></div>
+      <div id="cRadar"></div><div id="cInfo" style="font-size:13px;text-align:center;color:var(--mut)"></div>
+      <div id="cSliders" style="margin-top:8px"></div>
+      <label style="font-size:13px;display:block;margin-top:8px">焙度 <b id="cRoastV"></b></label><input type="range" id="cRoast" min="0" max="100" step="5" value="50">
+      <div class="row" style="margin-top:10px"><button class="btn red" id="cSubmit">送出配方</button><span id="cMsg" style="font-size:13px;color:var(--cherry)"></span></div>
+    </div>
+    <div class="rpanel result" id="cRes" style="display:none"></div>
+  </div>
+</div>
 </section>
 <section class="view" id="v-game">
   <h2 class="vt">咖啡知識消消樂</h2><p class="vs">點兩張互相對應的牌（名詞 ↔ 說明）就能消除</p>
@@ -638,6 +656,78 @@ $('#mSliders').oninput=e=>{if(e.target.dataset.k){MIX[e.target.dataset.k]=+e.tar
 $('#mRoast').oninput=drawMix;
 $('#mReset').onclick=()=>{Object.keys(MIX).forEach(k=>MIX[k]=0);drawMix()};
 drawBlend();drawMix();
+/* ---------- BLEND CHALLENGES ---------- */
+const BCOST={'巴西':300,'哥倫比亞':400,'瓜地馬拉':450,'哥斯大黎加':550,'衣索比亞水洗':600,'衣索比亞日曬':650,'肯亞':750,'曼特寧':450,'葉門':1200,'羅布斯塔':200};
+const CH=[
+ {n:'第一支綜合豆',story:'老闆：「先從最經典的曼巴開始。厚實、堅果、低酸，客人每天都在點。」',ref:{mix:{'曼特寧':50,'巴西':50},roast:65},beans:['巴西','曼特寧']},
+ {n:'義式濃縮基底',story:'咖啡師：「我要一支做濃縮的配方：巧克力焦糖為主，帶一點點莓果香。」',ref:{mix:{'巴西':60,'哥倫比亞':25,'衣索比亞日曬':15},roast:65},beans:['巴西','哥倫比亞','衣索比亞日曬']},
+ {n:'北歐風淺焙',story:'客人：「我喜歡花香、柑橘、明亮的酸，但不要單薄。」',ref:{mix:{'衣索比亞水洗':50,'肯亞':30,'哥倫比亞':20},roast:15},beans:['衣索比亞水洗','肯亞','哥倫比亞']},
+ {n:'每天喝的早餐配方',story:'上班族：「順口、甜甜的、不要太酸也不要太苦，每天早上喝。」架上有 5 支豆子，最多用 3 支。',ref:{mix:{'哥倫比亞':40,'哥斯大黎加':30,'巴西':30},roast:40},beans:['巴西','哥倫比亞','哥斯大黎加','瓜地馬拉','衣索比亞水洗'],max:3},
+ {n:'拿鐵專用',story:'咖啡店：「加了牛奶還喝得到巧克力、堅果和一點莓果甜。」所有豆子都能用，最多 3 支。',ref:{mix:{'巴西':50,'瓜地馬拉':30,'衣索比亞日曬':20},roast:60},max:3},
+ {n:'南義老派濃縮',story:'義大利老闆：「Crema 要厚、苦韻要夠、要有勁！」配方一定要有羅布斯塔。',ref:{mix:{'巴西':60,'羅布斯塔':20,'瓜地馬拉':20},roast:85},need:'羅布斯塔',max:3},
+ {n:'預算內的摩卡爪哇',story:'客人：「我想要摩卡爪哇那種酒香、果乾配上厚實的感覺，但葉門豆太貴了……」每公斤成本不能超過 650 元。',ref:{mix:{'葉門':15,'衣索比亞日曬':35,'曼特寧':50},roast:55},budget:650,max:3},
+ {n:'盲調：冷萃配方',story:'夏天到了，要一支做冷萃的配方：甜、巧克力、帶莓果香。這一關開始盲調，你有 3 次機會。',ref:{mix:{'巴西':50,'衣索比亞日曬':30,'哥倫比亞':20},roast:50},blind:1,tries:3,max:3},
+ {n:'盲調：巴西缺貨',story:'巴西豆船期延誤！但客人還是要那支厚實、可可感的招牌配方。不能用巴西，3 次機會。',ref:{mix:{'瓜地馬拉':50,'曼特寧':30,'哥倫比亞':20},roast:60},ban:['巴西'],blind:1,tries:3,max:3},
+ {n:'盲調：低酸深焙',story:'長輩客人：「我怕酸，要濃、要香、要回甘，但不要羅布斯塔的橡膠味。」3 次機會。',ref:{mix:{'巴西':60,'曼特寧':40},roast:75},ban:['羅布斯塔'],blind:1,tries:3,max:3},
+ {n:'盲調：精品店季節配方',story:'精品咖啡店要一支中淺焙季節配方：甜感、花果香與乾淨度都要，成本每公斤 500 元以內。最多 4 支，3 次機會。',ref:{mix:{'哥倫比亞':40,'哥斯大黎加':20,'衣索比亞水洗':25,'巴西':15},roast:30},budget:500,blind:1,tries:3,max:4},
+ {n:'冠軍賽：競賽配方',story:'配方大賽決賽！評審要花香、明亮酸質，還要有酒香般的層次。成本每公斤 750 元以內、最多 4 支，只有 2 次機會。',ref:{mix:{'衣索比亞水洗':35,'肯亞':20,'哥斯大黎加':25,'葉門':20},roast:20},budget:750,blind:1,tries:2,max:4},
+];
+const C={lv:0,mix:{},left:0,done:false,prog:store.get('ct-blend',{})};
+function radar2(tg,mine){const R=95,cx=130,cy=120,n=6,pt=(i,val)=>{const a=-Math.PI/2+i*2*Math.PI/n;return[cx+Math.cos(a)*R*val/5,cy+Math.sin(a)*R*val/5]};
+  const poly=v=>v.map((x,i)=>pt(i,x).join(',')).join(' ');let g='';
+  for(let l=1;l<=5;l++)g+=`<polygon points="${poly([l,l,l,l,l,l])}" fill="none" stroke="#e2d5c3"/>`;
+  BDIM.forEach((d,i)=>{const[x,y]=pt(i,5);g+=`<line x1="${cx}" y1="${cy}" x2="${x}" y2="${y}" stroke="#e2d5c3"/>`;const[lx,ly]=pt(i,6.15);g+=`<text x="${lx}" y="${ly+4}" text-anchor="middle" font-size="11.5" fill="#7a6656">${d}</text>`});
+  g+=`<polygon points="${poly(tg)}" fill="#3e6f8e22" stroke="#3e6f8e" stroke-width="2" stroke-dasharray="6 4"/>`;
+  if(mine)g+=`<polygon points="${poly(mine)}" fill="#b3382c44" stroke="#b3382c" stroke-width="2"/>`;
+  return `<svg class="radar" viewBox="0 -12 260 262">${g}</svg>`}
+const cTot=()=>Object.values(C.mix).reduce((a,b)=>a+b,0);
+const cCost=()=>{const t=cTot();return t?Math.round(Object.entries(C.mix).reduce((a,[k,w])=>a+BCOST[k]*w,0)/t):0};
+const cCount=()=>Object.values(C.mix).filter(x=>x>0).length;
+const cScore=(v,t)=>Math.max(0,Math.round(100-v.reduce((a,x,i)=>a+Math.abs(x-t[i]),0)/6*40));
+function drawCMenu(){$('#cLv').innerHTML=CH.map((c,i)=>{const open=i===0||C.prog[i];const st=C.prog[i+1]||0;return `<button class="lv" data-n="${i}" ${open?'':'disabled'}><span><b>${i+1}</b><br><small>${'★'.repeat(st)}${'☆'.repeat(3-st)}</small></span></button>`}).join('')}
+function startC(i){const c=CH[i];C.lv=i;C.mix={};C.done=false;C.left=c.tries||Infinity;C.target=blendVec(c.ref.mix,c.ref.roast);
+  const beans=(c.beans||Object.keys(BCOMP)).filter(k=>!(c.ban||[]).includes(k));beans.forEach(k=>C.mix[k]=0);
+  $('#cName').textContent=`第 ${i+1} 關　${c.n}`;$('#cStory').textContent=c.story;
+  const r=[];if(c.blind)r.push('盲調');if(c.max)r.push(`最多 ${c.max} 支豆`);if(c.need)r.push(`必須含${c.need}`);if(c.ban)r.push(`不可用${c.ban.join('、')}`);if(c.budget)r.push(`成本 ≤ ${c.budget} 元/公斤`);
+  $('#cRules').innerHTML=r.map(t=>`<span class="tag r">${t}</span>`).join('');
+  $('#cSliders').innerHTML=beans.map(k=>`<div class="msl"><span><i style="display:inline-block;width:9px;height:9px;border-radius:2px;background:${BCOMP[k].c};margin-right:4px"></i>${k}</span><input type="range" min="0" max="100" step="5" value="0" data-k="${k}"><b data-v="${k}"></b></div>`).join('');
+  $('#cRoast').value=50;$('#cRes').style.display='none';$('#cMsg').textContent='';$('#cSubmit').disabled=false;
+  $('#cMenu').style.display='none';$('#cPlay').style.display='block';drawC();window.scrollTo(0,0)}
+function drawC(){const c=CH[C.lv],t=cTot(),r=+$('#cRoast').value;
+  document.querySelectorAll('#cSliders b').forEach(x=>x.textContent=t?Math.round(C.mix[x.dataset.v]/t*100)+'%':'0%');
+  $('#cRoastV').textContent=roastName(r);
+  const show=t&&(!c.blind||C.shown);$('#cRadar').innerHTML=radar2(C.target,show?(c.blind?C.shown:blendVec(C.mix,r)):null);
+  const cost=cCost(),n=cCount();
+  $('#cInfo').innerHTML=`<span style="color:#3e6f8e">┅ 目標</span>　<span style="color:#b3382c">━ 你的配方${c.blind?'（上次送出）':''}</span><br>豆數 <b style="color:${c.max&&n>c.max?'#b3382c':'inherit'}">${n}</b>${c.max?' / '+c.max:''}　成本 <b style="color:${c.budget&&cost>c.budget?'#b3382c':'inherit'}">${cost}</b> 元/公斤${c.budget?' / '+c.budget:''}`;
+  $('#cHud').textContent=c.tries?`剩 ${C.left} 次機會`:'不限次數'}
+$('#cSliders').oninput=e=>{if(e.target.dataset.k){C.mix[e.target.dataset.k]=+e.target.value;drawC()}};
+$('#cRoast').oninput=drawC;
+$('#cSubmit').onclick=()=>{const c=CH[C.lv],msg=$('#cMsg');
+  if(!cTot()){msg.textContent='至少加入一支豆子';return}
+  if(c.max&&cCount()>c.max){msg.textContent=`最多只能用 ${c.max} 支豆子`;return}
+  if(c.need&&!C.mix[c.need]){msg.textContent=`配方必須含${c.need}`;return}
+  if(c.budget&&cCost()>c.budget){msg.textContent=`成本超過預算（${cCost()} > ${c.budget}）`;return}
+  msg.textContent='';const v=blendVec(C.mix,+$('#cRoast').value),sc=cScore(v,C.target),st=sc>=90?3:sc>=80?2:sc>=70?1:0;
+  if(c.tries)C.left--;C.shown=v;C.best=Math.max(C.best||0,sc);
+  if(st){C.prog[C.lv+1]=Math.max(C.prog[C.lv+1]||0,st);store.set('ct-blend',C.prog)}
+  const over=st===3||(c.tries&&C.left<=0),passed=(C.prog[C.lv+1]||0)>0;
+  const fb=v.map((x,i)=>[BDIM[i],x-C.target[i]]).filter(([,d])=>Math.abs(d)>=0.4).sort((a,b)=>Math.abs(b[1])-Math.abs(a[1])).slice(0,3)
+    .map(([n,d])=>`${n}${d>0?'太高':'不夠'}`);
+  const tip=fb.length?'還差一點：'+fb.join('、')+'。':'六個面向都很接近！';
+  const refTxt=Object.entries(c.ref.mix).map(([k,w])=>`${k} ${w}%`).join('＋')+'，'+roastName(c.ref.roast);
+  let h=`<h3>${st?'★'.repeat(st)+'☆'.repeat(3-st)+'　過關！':'還沒過關'}　相似度 ${sc} 分</h3><div style="font-size:14px;margin:4px 0">${tip}</div>`;
+  if(over||(!c.tries&&st))h+=`<div class="note" style="margin:8px 0">參考配方：${refTxt}。配方沒有唯一解，風味接近就是好配方。</div>`;
+  if(c.tries&&C.left<=0&&!st)h+=`<div style="font-size:14px">機會用完了，再挑戰一次吧。</div>`;
+  h+=`<div class="row" style="margin-top:6px">${over?'<button class="btn sec" id="cAgain">重新挑戰</button>':''}${passed&&C.lv<CH.length-1?'<button class="btn" id="cNext">下一關</button>':''}</div>`;
+  $('#cRes').innerHTML=h;$('#cRes').style.display='block';if(over)$('#cSubmit').disabled=true;
+  const a=$('#cAgain');if(a)a.onclick=()=>{C.shown=null;C.best=0;startC(C.lv)};const nx=$('#cNext');if(nx)nx.onclick=()=>{C.shown=null;C.best=0;startC(C.lv+1)};
+  drawC();$('#cRes').scrollIntoView({behavior:'smooth',block:'nearest'})};
+$('#cLv').onclick=e=>{const b=e.target.closest('.lv');if(b&&!b.disabled){C.shown=null;C.best=0;startC(+b.dataset.n)}};
+$('#cBack').onclick=()=>{$('#cPlay').style.display='none';$('#cMenu').style.display='block';drawCMenu()};
+$('#bMode').onclick=e=>{const m=e.target.dataset.m;if(!m)return;document.querySelectorAll('#bMode .chip').forEach(c=>c.classList.toggle('on',c===e.target));
+  $('#bLearn').style.display=m==='learn'?'block':'none';$('#bChal').style.display=m==='chal'?'block':'none';if(m==='chal')drawCMenu()};
+drawCMenu();
+
 drawMenu();route();
 </script>
 <script>
@@ -646,7 +736,7 @@ drawMenu();route();
 const $=id=>document.getElementById(id);
 const GCLIENT='267421312122-l2ggo7t35tqpf8ej5osqttt08ke30lr1.apps.googleusercontent.com';
 const GFILE='coffee-terroir.json',GAPI='https://www.googleapis.com';
-const SYNC_KEYS=['ct-game','ct-roasts'];
+const SYNC_KEYS=['ct-game','ct-roasts','ct-blend'];
 const STAMP='ct.savedAt',GFLAG='ct.g',TOKK='ct.gtok';
 let gTok=null,gTokExp=0,gFileId=null,gClient=null,gOn=false,pushT=null;
 const raw=Storage.prototype.setItem;
@@ -694,6 +784,7 @@ function merge(loc,rem){
   new Set([...Object.keys(a),...Object.keys(b)]).forEach(th=>{const x=a[th]||{},y=b[th]||{};g[th]={};
     new Set([...Object.keys(x),...Object.keys(y)]).forEach(lv=>g[th][lv]=Math.max(+x[lv]||0,+y[lv]||0))});
   out['ct-game']=g;
+  const ba=loc['ct-blend']||{},bb=rem['ct-blend']||{},bl={};new Set([...Object.keys(ba),...Object.keys(bb)]).forEach(k=>bl[k]=Math.max(+ba[k]||0,+bb[k]||0));out['ct-blend']=bl;
   const seen=new Set(),all=[];
   [...(Array.isArray(rem['ct-roasts'])?rem['ct-roasts']:[]),...(Array.isArray(loc['ct-roasts'])?loc['ct-roasts']:[])].forEach(r=>{const id=r.at+'|'+r.T;if(!seen.has(id)){seen.add(id);all.push(r)}});
   all.sort((p,q)=>(p.at||0)-(q.at||0));out['ct-roasts']=all.slice(-30);
