@@ -135,6 +135,7 @@ u[data-g]{text-decoration:underline dotted #f6cf5a;text-underline-offset:5px;cur
   <div class="bar"><b>遞牌子（登入）</b><button data-go="sTitle">返回</button></div>
   <div class="scroll">
     <div id="plist"></div>
+    <div id="clist"></div>
     <div class="vol">用名字登入</div>
     <p style="font-size:14px;line-height:1.7;opacity:.85">輸入名字就會自動建立線上存檔，換手機或換瀏覽器時用同一個名字即可接續。密碼可不填；填了之後，別的裝置要用這個名字就得輸入密碼。</p>
     <label style="font-size:14px">名字</label><input id="pname" maxlength="12" autocomplete="off" placeholder="最多 12 個字">
@@ -1198,11 +1199,14 @@ async function pull(){const pl=curP();if(!pl)return;const k=pl.k;setCloud('wait'
  if(typeof renderTitle==='function')renderTitle()}
 function save(){SV.at=Date.now();writeLocal();clearTimeout(cloud.timer);cloud.timer=setTimeout(push,1200)}
 function usePlayer(k){P.cur=k;saveP();SV=readLocal(k);return pull()}
+async function cloudPlayers(){try{const r=await fetch(`${FB}/saves.json`);if(!r.ok)throw 0;const d=await r.json()||{};return Object.keys(d).map(k=>({k,n:d[k].n||k,ph:d[k].ph||'',done:Object.keys((d[k].sv||{}).ch||{}).length,at:d[k].at||0})).sort((a,b)=>b.at-a.at)}catch(e){return null}}
 async function login(name,pin){name=String(name||'').replace(/\s+/g,' ').trim().slice(0,12);pin=String(pin||'').trim();
  if(!name)return '請輸入名字。';if(pin&&!/^\d{4}$/.test(pin))return '密碼要剛好 4 個數字，或是留空不設密碼。';
- const k=nameKey(name),ph=pinHash(k,pin);
- if(P.list.some(p=>p.k===k)){usePlayer(k);return ''}
+ let k=nameKey(name);const low=name.toLowerCase(),lp=P.list.find(p=>p.k===k)||P.list.find(p=>p.n.toLowerCase()===low);
+ if(lp){usePlayer(lp.k);return ''}
  let row=null;try{const r=await fetch(`${FB}/saves/${k}.json`);if(r.ok)row=await r.json()}catch(e){}
+ if(!row){const cl=await cloudPlayers(),m=cl&&cl.find(p=>p.n.toLowerCase()===low);if(m){k=m.k;try{const r=await fetch(`${FB}/saves/${k}.json`);if(r.ok)row=await r.json()}catch(e){}}} // 大小寫不同也視為同一人
+ const ph=pinHash(k,pin);
  if(row&&row.ph&&row.ph!==ph)return pin?'密碼不對，請再試一次。':'這個名字已經有人使用，而且設了密碼。請輸入密碼，或換一個名字。';
  const first=!P.list.length;P.list.push({k,n:(row&&row.n)||name,ph:(row&&row.ph)||ph});
  if(first){try{const old=localStorage.getItem('sanchao');if(old){localStorage.setItem('sanchao-save:'+k,old);localStorage.removeItem('sanchao')}}catch(e){}}
@@ -1265,9 +1269,15 @@ let prev='sTitle',cur='sTitle';
 function go(id){if(id==='sBook'){prev=cur;renderBook('c')}cur=id;$$('.screen').forEach(s=>s.classList.toggle('on',s.id===id));if(id==='sChap')renderChaps();if(id==='sTitle')renderTitle()}
 $$('[data-go]').forEach(b=>b.onclick=()=>go(b.dataset.go));
 $('#bkBack').onclick=()=>go(prev==='sBook'?'sTitle':prev);
-function renderTitle(){const pl=curP();$('#who2').textContent=pl?('當值：'+pl.n+(pl.ph?'（有密碼）':'')):'尚未登入';$('#bSwitch').style.display=pl?'block':'none';setCloud(cloud.state)}
+function renderTitle(){const pl=curP();$('#who2').textContent=pl?('當值：'+pl.n+(pl.ph?'（有密碼）':'')):'這台裝置尚未登入——按「入宮」選名字，即可接續其他裝置的進度';$('#bSwitch').style.display=pl?'block':'none';setCloud(cloud.state)}
 function renderPlayers(){$('#pmsg').textContent='';$('#plist').innerHTML=P.list.length?'<div class="vol">這台裝置登入過的玩家</div>'+P.list.map(p=>{const v=p.k===P.cur?SV:readLocal(p.k);return `<button class="btn" data-k="${p.k}"><b>${esc(p.n)}</b>${p.k===P.cur?'　◀ 目前':''}<br><small style="opacity:.75">已完成 ${Object.keys(v.ch).length}/${CHAPTERS.length} 回・人物 ${v.chars.length}・名句 ${v.quotes.length}${p.ph?'・有密碼':''}</small></button>`}).join(''):'';
- $$('#plist .btn').forEach(b=>b.onclick=()=>{usePlayer(b.dataset.k);renderTitle();go('sChap')})}
+ $$('#plist .btn').forEach(b=>b.onclick=()=>{usePlayer(b.dataset.k);renderTitle();go('sChap')});
+ const cb=$('#clist');cb.innerHTML='<div class="vol">雲端上的存檔</div><p style="font-size:14px;opacity:.7">讀取中…</p>';
+ cloudPlayers().then(cl=>{if(!cl){cb.innerHTML='<div class="vol">雲端上的存檔</div><p style="font-size:14px;opacity:.75">目前連不上雲端。連上網路後再打開這一頁，就能看到其他裝置的存檔。</p>';return}
+  cl=cl.filter(p=>!P.list.some(q=>q.k===p.k));if(!cl.length){cb.innerHTML='';return}
+  cb.innerHTML='<div class="vol">雲端上的存檔</div><p style="font-size:14px;line-height:1.7;opacity:.85">在別的裝置玩過？點你的名字，就能在這台裝置接續進度。</p>'+cl.map((p,i)=>`<button class="btn" data-i="${i}"><b>${esc(p.n)}</b><br><small style="opacity:.75">已完成 ${p.done}/${CHAPTERS.length} 回${p.ph?'・需要密碼':''}</small></button>`).join('');
+  cb.querySelectorAll('.btn').forEach(b=>b.onclick=async()=>{const p=cl[+b.dataset.i];if(p.ph){$('#pname').value=p.n;$('#pmsg').textContent='「'+p.n+'」設了密碼，請在下方輸入 4 碼密碼後按登入。';$('#ppin').focus();$('#ppin').scrollIntoView({block:'center'});return}
+   $('#pmsg').textContent='登入中…';const m=await login(p.n,'');$('#pmsg').textContent=m;if(!m){renderTitle();go('sChap')}})})}
 $('#bStart').onclick=()=>{if(curP())go('sChap');else{renderPlayers();go('sPlayer')}};
 $('#bSwitch').onclick=()=>{renderPlayers();go('sPlayer')};
 $('#bLogin').onclick=async()=>{const b=$('#bLogin');b.disabled=true;$('#pmsg').textContent='登入中…';const m=await login($('#pname').value,$('#ppin').value);b.disabled=false;$('#pmsg').textContent=m;if(!m){$('#pname').value='';$('#ppin').value='';renderTitle();go('sChap')}};
