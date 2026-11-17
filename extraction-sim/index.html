@@ -826,6 +826,7 @@ u.rest,.bd.rest{background:#5a8aa0}u.peak,.bd.peak{background:#c9a66b}u.fade,.bd
 .ttl{font-size:13px;color:var(--gold);margin-top:2px}
 .achs{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:8px}.ach{display:grid;grid-template-columns:28px 1fr;gap:8px;align-items:center;text-align:left;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px;color:var(--ink);font:inherit;cursor:pointer}
 .ach:disabled{opacity:.45;cursor:default}.ach.got{border-color:color-mix(in srgb,var(--gold) 50%,var(--line))}.ach.on{border-color:var(--gold);box-shadow:inset 0 0 0 1px var(--gold);background:color-mix(in srgb,var(--gold) 10%,var(--panel))}.ach small{display:block;font-size:12px;color:var(--muted)}.ach span{font-size:20px}
+.scene{margin:-4px -4px 10px;border-radius:8px;overflow:hidden;border:1px solid var(--line);line-height:0}.scene svg{display:block;image-rendering:pixelated}.cust{display:flex;flex-direction:column;gap:4px}
 .brew-anim .smoke{opacity:0}.brew-anim.go .smoke{animation:baSteam 1.2s ease-out 2s 3}
 </style>
 <script>
@@ -5652,9 +5653,38 @@ function ctlHTML(){snapGrind();const o=S().last,Gd=GRINDERS.find(g=>g.id===o.gri
    (imm?'<div class="param"><div class="row"><label for="kSteep" class="label">'+(o.brewer==='switch'?'關閥浸泡時間':'浸泡時間')+'</label><output id="kSteepO">'+Math.floor(o.steep/60)+':'+String(o.steep%60).padStart(2,'0')+'</output></div><input id="kSteep" data-k="steep" type="range" min="60" max="600" step="15" value="'+o.steep+'"></div>':
     '<div class="param"><span class="label">注水方式</span><div class="seg">'+[['three','三段式'],['cont','一刀流'],['multi','少量多次']].map(([k,n])=>'<button data-set="pour:'+k+'" aria-pressed="'+(o.pour===k)+'">'+n+'</button>').join('')+'</div></div>')+
    '<div class="param"><span class="label">攪拌</span><div class="seg">'+[['none','不攪拌'],['bloom',imm?'攪拌一次':'悶蒸時攪']].map(([k,n])=>'<button data-set="stir:'+k+'" aria-pressed="'+(o.stir===k)+'">'+n+'</button>').join('')+'</div></div></div></div>';}
+/* 吧台場景：客人坐在吧台前 */
+function barScene(X){const s=S(),t=s.today,C=X.C,f=FACES[C.id],w=t.w.t,R=(x,y,ww,h,c,o)=>'<rect x="'+x+'" y="'+y+'" width="'+ww+'" height="'+h+'" fill="'+c+'"'+(o?' opacity="'+o+'"':'')+'/>';
+  const sky={'晴天':'#8fc7e8','陰天':'#9aa3ad','下雨':'#4f6f8f','寒流':'#c3d2df','市集日':'#f0c98a'}[w]||'#8fc7e8',left=Math.min(3,t.q.length-t.idx-1);
+  let h='<svg viewBox="0 0 96 56" width="100%" shape-rendering="crispEdges" role="img" aria-label="'+esc(C.name)+'坐在吧台前">'+R(0,0,96,56,'#2e241d')+R(0,30,96,26,'#251c17')+R(0,29,96,1,'#3d2f25');
+  // 窗戶與天氣
+  h+=R(67,5,24,22,'#5a3a22')+R(69,7,20,18,sky)+R(78,7,2,18,'#5a3a22')+R(69,15,20,2,'#5a3a22');
+  if(w==='下雨')for(let i=0;i<9;i++)h+=R(70+i*2+(i%2),8+(i*5)%14,1,3,'#cfe6ee',.8);
+  if(w==='寒流')for(let i=0;i<8;i++)h+=R(70+(i*7)%18,8+(i*5)%15,1,1,'#fff');
+  if(w==='晴天')h+=R(83,9,4,4,'#ffe9a0');if(w==='市集日')for(let i=0;i<5;i++)h+=R(70+i*4,8+(i%2),3,3,['#c0503a','#3aa6a0','#e8c14a'][i%3]);
+  if(w==='陰天')h+=R(71,10,8,3,'#d5dbe0')+R(81,18,6,2,'#d5dbe0');
+  // 層架、豆罐、器材
+  h+=R(4,15,26,2,'#6b4a2e')+R(4,26,26,2,'#6b4a2e');
+  Object.keys(s.beans).slice(0,5).forEach((id,i)=>{const B=beanOf(id);h+=R(6+i*5,8,4,7,'#bfe0ea',.35)+R(6+i*5,7,4,1,'#9a7a55')+R(6+i*5,11,4,4,roastCol(B?B.roast:3));});
+  h+=R(7,20,5,1,'#f4efe6')+R(8,21,3,3,'#f4efe6')+R(9,24,1,2,'#f4efe6')+R(15,19,4,7,'#c9ced4')+R(16,18,2,1,'#8a5a34')+R(22,21,6,5,'#aab4bf')+R(28,22,2,1,'#aab4bf');
+  // 吊燈
+  h+=R(34,0,1,3,'#6b5a45')+R(31,3,7,1,'#d9bd86')+R(30,4,9,2,'#d9bd86')+R(33,6,3,1,'#fff3c4')+R(61,0,1,3,'#6b5a45')+R(58,3,7,1,'#d9bd86')+R(57,4,9,2,'#d9bd86')+R(60,6,3,1,'#fff3c4')+'<circle cx="48" cy="14" r="20" fill="#ffe9a0" opacity=".06"/>';
+  // 排隊的客人
+  for(let i=0;i<left;i++)h+=R(4+i*8,33,5,5,'#17110d')+R(3+i*8,38,7,3,'#17110d');
+  // 客人
+  if(f){const pal=Object.assign({},PB,{S:SKT[f[0]],T:SKS[f[0]],H:f[2],U:f[3],X:f[7]||f[3],M:'#8a3a2a',p:'#f0a0a8'});h+='<g transform="translate(32 10) scale(2)">'+sprG(faceRows(f),pal)+'</g>'+R(38,38,5,3,SKT[f[0]])+R(54,38,5,3,SKT[f[0]]);}
+  else h+=R(40,16,16,24,C.color||'#777');
+  // 吧台
+  h+=R(0,40,96,2,'#9a6a3e')+R(0,42,96,14,'#5a3a22')+R(0,43,96,1,'#3f2718');for(let x=10;x<96;x+=22)h+=R(x,44,1,12,'#4a2e1a');
+  // 杯子
+  if(res&&!res.bean)h+=R(45,35,7,5,'#f4efe6')+R(46,35,5,1,'#4a2a16')+R(52,36,2,3,'#f4efe6')+R(44,40,9,1,'#d5dbe0')+R(47,31,1,3,'#fff',.5)+R(49,30,1,3,'#fff',.5);
+  else h+=R(62,36,4,4,'#bfe0ea',.6)+R(62,37,4,3,'#8fc7e8',.6);
+  if(X.c.ev==='beans')h+=R(24,33,9,7,'#b89468')+R(24,31,9,2,'#96764e')+R(26,35,5,3,'#f3e9d6');
+  if(res){const e=res.bean?(res.sold?'♥':'…'):res.pass?'♥':res.near?'…':'💧';h+='<text x="68" y="20" font-size="9" fill="'+(e==='♥'?'#e0569b':'#f3e9d6')+'">'+e+'</text>';}
+  return h+'</svg>';}
 function custHead(X,extra){const t=S().today,R=X.R;
-  return '<div class="panel"><div class="c-cust">'+av(X.C)+'<div><div class="c-row"><h2>'+esc(X.C.name)+'</h2><span class="label">第 '+(t.idx+1)+' / '+t.q.length+' 位・'+esc(X.C.role)+'</span></div>'+
-   (R.v>1?'<div class="rl"><span>好感</span>'+hearts(R.a)+'<span>忠誠</span><span class="lbar"><i style="width:'+R.l+'%"></i></span></div>':'<span class="label">第一次來店</span>')+extra+'</div></div></div>';}
+  return '<div class="panel cust"><div class="scene">'+barScene(X)+'</div><div class="c-row"><h2>'+esc(X.C.name)+'</h2><span class="label">第 '+(t.idx+1)+' / '+t.q.length+' 位・'+esc(X.C.role)+'</span></div>'+
+   (R.v>1?'<div class="rl"><span>好感</span>'+hearts(R.a)+'<span>忠誠</span><span class="lbar"><i style="width:'+R.l+'%"></i></span></div>':'<span class="label">第一次來店</span>')+extra+'</div>';}
 function serveHTML(){const s=S(),X=curCust(),o=s.last;fixSel();
   if(X.c.ev==='beans')return beansHTML(X);
   const sigAsk=X.c.ev==='sig',sg=s.sig&&beanOf(s.sig);
