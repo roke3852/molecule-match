@@ -769,6 +769,14 @@ h1,h2,h3{letter-spacing:.02em}
 @keyframes baRoastC{0%{fill:#8a9a5a}30%{fill:#d9c27a}60%{fill:#b07a42}100%{fill:var(--c)}}
 .brew-anim.go .flame{animation:baFlame .25s ease-in-out infinite alternate}
 @keyframes baFlame{from{opacity:.7;transform:translateY(1px)}to{opacity:1;transform:translateY(-1px)}}
+.brew-anim .ba-prog{width:70%;height:6px;border-radius:3px;background:rgba(255,255,255,.12);overflow:hidden}.brew-anim .ba-prog i{display:block;height:100%;width:0;background:#c9a66b}
+.brew-anim .ba-tip{font-size:14px;color:#d9bd86;min-height:1.4em;text-align:center}
+.brew-anim .ba-skip{background:transparent;border:1px solid #6b5a45;border-radius:999px;color:#a59887;font:inherit;font-size:12px;padding:5px 14px;cursor:pointer}
+.brew-anim{touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+.brew-anim.beans-in .bn{animation:baDrop .55s cubic-bezier(.5,0,.8,.6) forwards}
+.brew-anim .gd{opacity:0}.brew-anim.grinding .gd{animation:baFall .45s linear infinite}
+.brew-anim .dr{opacity:0}.brew-anim.dripping .dr{animation:baDrip .6s linear infinite}.brew-anim.dripping .d2{animation-delay:.3s}
+#baKt{transition:transform .25s ease-out}
 .brew-anim .smoke{opacity:0}.brew-anim.go .smoke{animation:baSteam 1.2s ease-out 2s 3}
 </style>
 <script>
@@ -4996,32 +5004,54 @@ function playMain(m){busy=true;SFX.p('story');const s=S();dlg({t:'主線・'+m.t
 /* ---------- 動畫：倒豆、磨豆、沖煮 ---------- */
 const AN=document.createElement('div');AN.className='brew-anim';AN.hidden=true;document.body.appendChild(AN);
 function brewAnim(beanId,brewer,done){const B=beanOf(beanId)||{roast:3},col=roastCol(B.roast),imm=brewer==='press'||brewer==='switch';
-  if(matchMedia('(prefers-reduced-motion:reduce)').matches)return done();
+  const RM=matchMedia('(prefers-reduced-motion:reduce)').matches;
   const beans=Array.from({length:14},(_,i)=>'<ellipse class="bn" cx="'+(72+(i%5)*6-12)+'" cy="18" rx="3.4" ry="2.3" fill="'+col+'" style="animation-delay:'+(i*.05)+'s"/>').join('');
-  const drops=Array.from({length:8},(_,i)=>'<circle class="gd" cx="'+(68+(i%4)*3)+'" cy="150" r="1.2" fill="'+col+'" style="animation-delay:'+(1.15+i*.12)+'s"/>').join('');
+  const drops=Array.from({length:8},(_,i)=>'<circle class="gd" cx="'+(68+(i%4)*3)+'" cy="150" r="1.2" fill="'+col+'" style="animation-delay:'+(i*.07)+'s"/>').join('');
   AN.innerHTML='<div class="ba-box"><svg viewBox="0 0 300 230" width="100%" aria-hidden="true">'+
    '<rect x="0" y="206" width="300" height="24" fill="#2a1c14"/><rect x="0" y="204" width="300" height="3" fill="#8a5a34"/>'+
-   // grinder
-   '<g class="gr"><path d="M54 40h36l-5 22H59z" fill="#3a3f47" stroke="#9aa3ad" stroke-width="1.5"/>'+beans+
+   // 手搖磨豆機
+   '<g id="baGr" class="tapme"><path d="M54 40h36l-5 22H59z" fill="#3a3f47" stroke="#9aa3ad" stroke-width="1.5"/>'+beans+
    '<rect x="56" y="62" width="32" height="70" rx="6" fill="#c9ced4" stroke="#7d868f" stroke-width="1.5"/><rect x="56" y="98" width="32" height="5" fill="#9aa3ad"/>'+
-   '<g class="crank"><path d="M72 40V30h28" stroke="#7d868f" stroke-width="3" fill="none" stroke-linecap="round"/><circle cx="100" cy="30" r="5" fill="#6b4024"/></g>'+
-   '<path d="M62 132h20l-3 14h-14z" fill="#9aa3ad"/>'+drops+'<path d="M56 186h32v20H56z" fill="none" stroke="#cfe6ee" stroke-width="1.5"/><rect class="gp" x="57" y="196" width="30" height="9" fill="'+col+'"/></g>'+
-   // kettle
-   '<g class="kt"><path d="M150 58h36v26h-36z" fill="#aab4bf"/><path d="M186 62c8 0 10 14 0 18" stroke="#3a2a22" stroke-width="4" fill="none"/><path d="M150 66l-16-10-8 2" stroke="#aab4bf" stroke-width="4" fill="none" stroke-linecap="round"/><path d="M156 54h24v4h-24z" fill="#8a95a1"/></g>'+
-   '<path class="stream" d="M126 60 Q122 90 214 112" fill="none"/>'+
-   // dripper & server
-   '<path d="M196 110h40l-14 26h-12z" fill="#f1ece0" stroke="#c9c0ad" stroke-width="1.5"/><path class="bed" d="M201 114h30l-3 6h-24z" fill="'+col+'"/>'+
+   '<g id="baCrank"><path d="M72 40V30h28" stroke="#7d868f" stroke-width="3" fill="none" stroke-linecap="round"/><circle cx="100" cy="30" r="5" fill="#6b4024"/></g>'+
+   '<path d="M62 132h20l-3 14h-14z" fill="#9aa3ad"/><g id="baGd">'+drops+'</g><path d="M56 186h32v20H56z" fill="none" stroke="#cfe6ee" stroke-width="1.5"/><rect id="baGp" x="57" y="186" width="30" height="19" fill="'+col+'"/></g>'+
+   // 手沖壺：壺嘴朝右、對準濾杯
+   '<g id="baKt" class="tapme"><path d="M118 60c-9 0-11 16 0 20" stroke="#3a2a22" stroke-width="4" fill="none"/><path d="M120 54h36v28h-36z" fill="#aab4bf"/><path d="M123 57h4v22h-4z" fill="#e6edf2"/><path d="M126 50h24v4h-24z" fill="#8a95a1"/><path d="M136 46h4v4h-4z" fill="#e6edf2"/>'+
+   '<path d="M155 76c10 0 14-6 18-14s8-12 18-10" stroke="#aab4bf" stroke-width="4" fill="none" stroke-linecap="round"/><path d="M190 52l6 2" stroke="#e6edf2" stroke-width="3" stroke-linecap="round"/></g>'+
+   '<path id="baStream" d="M202 82 Q210 96 215 113" fill="none" stroke="#bfe6ff" stroke-width="2.2" stroke-dasharray="4 3"/>'+
+   // 濾杯與下壺
+   '<path d="M196 110h40l-14 26h-12z" fill="#f1ece0" stroke="#c9c0ad" stroke-width="1.5"/><path id="baBed" d="M201 114h30l-3 6h-24z" fill="'+col+'"/>'+
    '<circle class="dr" cx="216" cy="140" r="1.6" fill="#5a2f14"/><circle class="dr d2" cx="216" cy="140" r="1.6" fill="#5a2f14"/>'+
-   '<path d="M198 138h36v66h-36z" fill="rgba(190,225,238,.12)" stroke="#cfe6ee" stroke-width="1.5"/><rect class="cup" x="199" y="169" width="34" height="34" fill="#3a1c0c"/>'+
-   '<g class="steam"><path d="M208 104c-4-8 4-10 0-18M218 104c-4-8 4-10 0-18M228 104c-4-8 4-10 0-18" stroke="#fff" stroke-width="1.5" fill="none" opacity=".6"/></g>'+
-   '</svg><div class="ba-cap">把豆子倒進磨豆機…</div><div class="ba-skip">點一下跳過</div></div>';
-  AN.hidden=false;void AN.offsetWidth;AN.classList.add('go');SFX.p('beans');
-  const cap=AN.querySelector('.ba-cap'),T=[];
-  T.push(setTimeout(()=>{cap.textContent='喀啦喀啦，磨豆中…';SFX.p('crank');},1000));
-  T.push(setTimeout(()=>{cap.textContent=imm?'注水，蓋上蓋子浸泡…':'悶蒸，然後一圈一圈注水…';SFX.p('pour');SFX.p('drip',0,.8);},2300));
-  T.push(setTimeout(()=>{cap.textContent='完成，端給客人！';},3900));
-  const fin=()=>{T.forEach(clearTimeout);AN.onclick=null;AN.classList.remove('go');AN.hidden=true;done();};
-  T.push(setTimeout(fin,4500));AN.onclick=fin;}
+   '<path d="M198 138h36v66h-36z" fill="rgba(190,225,238,.12)" stroke="#cfe6ee" stroke-width="1.5"/><rect id="baCup" x="199" y="169" width="34" height="34" fill="#3a1c0c"/>'+
+   '<g id="baSteam"><path d="M208 104c-4-8 4-10 0-18M218 104c-4-8 4-10 0-18M228 104c-4-8 4-10 0-18" stroke="#fff" stroke-width="1.5" fill="none" opacity=".6"/></g>'+
+   '</svg><div class="ba-cap">把豆子倒進磨豆機…</div><div class="ba-prog"><i></i></div><div class="ba-tip"></div><button class="ba-skip" type="button">自動完成 ›</button></div>';
+  AN.hidden=false;AN.className='brew-anim';void AN.offsetWidth;AN.classList.add('beans-in');SFX.p('beans');
+  const $q=id=>AN.querySelector('#'+id),cap=AN.querySelector('.ba-cap'),tip=AN.querySelector('.ba-tip'),bar=AN.querySelector('.ba-prog i');
+  const crank=$q('baCrank'),gp=$q('baGp'),kt=$q('baKt'),st=$q('baStream'),bed=$q('baBed'),cup=$q('baCup'),steam=$q('baSteam');
+  [gp,cup].forEach(e=>{e.style.transformBox='fill-box';e.style.transformOrigin='50% 100%';e.style.transform='scaleY(0)';});
+  kt.style.transformBox='fill-box';kt.style.transformOrigin='35% 60%';bed.style.transformBox='fill-box';bed.style.transformOrigin='50% 50%';
+  st.style.opacity=0;steam.style.opacity=0;
+  let stage='beans',prog=0,hold=false,ang=0,last=performance.now(),raf=0,lastG=0,lastP=0,bloomed=false,ended=false;
+  const setBar=()=>{bar.style.width=Math.min(100,prog*100)+'%';};
+  function toGrind(){stage='grind';prog=0;setBar();cap.textContent='磨豆';tip.textContent='按住或連點畫面轉動把手';AN.classList.add('grinding-ready');}
+  function toPour(){stage='pour';prog=0;setBar();AN.classList.remove('grinding');cap.textContent=imm?'注水，準備浸泡':'注水';tip.textContent=imm?'按住注水，把熱水倒滿':'按住注水，放開就停；先注一點點悶蒸';}
+  function finish(){if(ended)return;ended=true;stage='done';cancelAnimationFrame(raf);hold=false;cap.textContent='完成，端給客人！';tip.textContent='';st.style.opacity=0;kt.style.transform='';
+    cup.style.transform='scaleY(1)';steam.style.transition='opacity .4s';steam.style.opacity=.8;SFX.p('pass',0,0);setTimeout(close,650);}
+  function close(){cancelAnimationFrame(raf);AN.onpointerdown=AN.onpointerup=AN.onpointercancel=null;removeEventListener('pointerup',up);AN.className='brew-anim';AN.hidden=true;done();}
+  function loop(now){const dt=Math.min(.05,(now-last)/1000);last=now;
+    if(stage==='grind'){if(hold){ang+=dt*600;prog+=dt/1.8;if(now-lastG>70){SFX.p('grind');lastG=now;}}crank.setAttribute('transform','rotate('+ang.toFixed(1)+' 72 40)');
+      AN.classList.toggle('grinding',hold);gp.style.transform='scaleY('+Math.min(1,prog).toFixed(3)+')';setBar();if(prog>=1){toPour();}}
+    else if(stage==='pour'){kt.style.transform=hold?'translate(4px,6px) rotate(24deg)':'';st.style.opacity=hold?.9:0;st.style.strokeDashoffset=(-now/12).toFixed(0);
+      if(hold){prog+=dt/2.6;if(now-lastP>1600){SFX.p('pour');lastP=now;}
+        if(!bloomed&&prog>.12){bloomed=true;tip.textContent=imm?'繼續注水':'悶蒸中，粉床膨脹起來了，繼續注水';}}
+      bed.style.transform='scaleY('+(1+Math.min(.8,prog*3)).toFixed(2)+')';AN.classList.toggle('dripping',prog>.15);
+      cup.style.transform='scaleY('+Math.max(0,Math.min(1,(prog-.1)/.9)).toFixed(3)+')';setBar();if(prog>=1){finish();return;}}
+    raf=requestAnimationFrame(loop);}
+  const up=()=>{hold=false;};
+  AN.onpointerdown=e=>{if(e.target.closest('.ba-skip'))return;e.preventDefault();if(stage==='grind'){hold=true;prog+=.04;ang+=40;SFX.p('grind');}else if(stage==='pour'){hold=true;lastP=0;}};
+  AN.onpointerup=up;AN.onpointercancel=up;addEventListener('pointerup',up);
+  AN.querySelector('.ba-skip').onclick=e=>{e.stopPropagation();finish();};
+  if(RM){finish();return;}
+  setTimeout(()=>{if(!ended){toGrind();last=performance.now();raf=requestAnimationFrame(loop);}},900);}
 /* ---------- 共用：頁首、分頁 ---------- */
 function head(label,title){const s=S();return '<div class="c-head"><div><div class="label">'+label+'</div><h1>'+title+'</h1></div><div class="c-money">'+NT(s.money)+'</div></div>';}
 function nav(){const s=S(),tabs=[['lobby','店面'],['regs','熟客'],['buy','採購']];if(s.flags.h_jie)tabs.push(['roast','烘豆室'+(s.green.some(l=>l.g>0)?' •':'')]);
