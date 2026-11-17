@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="穿搭試衣間">
 <meta name="theme-color" content="#2f3a4a">
-<meta name="app-version" content="1.9">
+<meta name="app-version" content="1.10">
 <title>穿搭試衣間</title>
 <style>
 :root{--bg:#f4f1ec;--card:#fff;--ink:#23201d;--mute:#857b70;--line:#e5ddd2;--accent:#2f3a4a;--hot:#c8553d;--soft:#ece6dc;--ok:#2f8f5b}
@@ -102,6 +102,9 @@ label.f{display:block;font-size:12.5px;color:var(--mute);margin:10px 0 4px}
 .runway .rw{position:absolute;inset:0;display:flex;align-items:flex-end;justify-content:center;gap:2px;padding:0 6px 4px}
 .runway .pose{flex:1;height:96%;animation:bob 2.2s ease-in-out infinite}
 .runway .pose svg{width:100%;height:100%}
+.runway .pose.pl{background:none;border:0;padding:0;font:inherit;cursor:pointer;position:relative;height:90%;margin-bottom:26px}
+.runway .pn{position:absolute;left:50%;bottom:-24px;transform:translateX(-50%);white-space:nowrap;font-size:13px;font-weight:800;color:#fff;background:rgba(0,0,0,.35);border-radius:10px;padding:2px 9px}
+.runway .rwcap{position:absolute;top:8px;left:0;right:0;text-align:center;font-size:12px;color:rgba(255,255,255,.8);letter-spacing:1px}
 .runway .pose.pop svg{animation:pop .45s ease}
 @keyframes bob{50%{transform:translateY(-6px)}}
 @keyframes pop{0%{transform:scale(.86);opacity:.2}100%{transform:scale(1);opacity:1}}
@@ -805,12 +808,17 @@ function demoFig(t,n){const b=tBody(t),st=STYLES[(n+TYPES.findIndex(x=>x[0]===t)
 function loginView(msg){U=null;UK=null;$('#nav').style.display='none';$('#userBtn').style.display='none';clearInterval(lgTimer);
   const ks=Object.keys(DB.known).sort((a,b)=>(b===DB.last)-(a===DB.last)||DB.known[a].name.localeCompare(DB.known[b].name,'zh-Hant'));
   const deco=`<div class="deco">${['👕','👗','👟','🧢','🧥','👖','👓','🎒','🧣','👒'].map((e,i)=>`<span style="left:${(i*10+4)}%;animation-delay:${-(i*1.3)}s;animation-duration:${9+i%4*2}s">${e}</span>`).join('')}</div>`;
+  const pl=ks,real=pl.length>0,NS=4;
+  const slot=(i,n)=>{if(!real)return`<div class="pose" style="animation-delay:${-i*.5}s">${demoFig(['f','m','kf'][i],n)}</div>`;
+    const k=pl[(n+i)%pl.length],kn=DB.known[k];let sv;try{sv=figure(kn.av.b,kn.av.o,{cls:'av',vb:'45 -22 210 618'});}catch(e){sv=figure(tBody('m'),presetLook('休閒','m',false),{cls:'av',vb:'45 -22 210 618'});}
+    return`<button class="pose pl" data-act="pick" data-k="${k}" style="animation-delay:${-i*.5}s">${sv}<span class="pn">${kn.pin?'🔒 ':''}${esc(kn.name)}</span></button>`;};
+  const nShow=real?Math.min(NS,pl.length):3,row=n=>Array.from({length:nShow},(_,i)=>slot(i,n)).join('');
   if(lgStep==='title'){
     app.innerHTML=`<div class="game">${deco}<div class="logo">${'穿搭試衣間'.split('').map((c,i)=>`<b style="animation-delay:${i*.12}s">${c}</b>`).join('')}</div><div class="tag">DRESS-UP STUDIO</div>
-    <div class="runway"><div class="spot"></div><div class="rw" id="rw">${['f','m','kf'].map((t,i)=>`<div class="pose" style="animation-delay:${-i*.5}s">${demoFig(t,lgTick)}</div>`).join('')}</div></div>
+    <div class="runway"><div class="spot"></div><div class="rw" id="rw">${row(lgTick)}</div>${real?'<div class="rwcap">大家現在的穿搭・點人物直接登入</div>':''}</div>
     <button class="start" data-act="lgstart">▶ 開始遊戲</button>
-    <div class="muted" id="lgMsg" style="text-align:center;margin-top:10px">${esc(msg||(ks.length?`已有 ${ks.length} 位玩家`:'建立你的角色，開始搭配'))}</div></div>`;
-    lgTimer=setInterval(()=>{const r=$('#rw');if(!r||U){clearInterval(lgTimer);return;}lgTick++;r.querySelectorAll('.pose').forEach((p,i)=>{p.innerHTML=demoFig(['f','m','kf'][i],lgTick);p.classList.remove('pop');void p.offsetWidth;p.classList.add('pop');});},2200);
+    <div class="muted" id="lgMsg" style="text-align:center;margin-top:10px">${esc(msg||(ks.length?`已有 ${ks.length} 位玩家`+(pl.length>NS?'，伸展台會輪流展示':''):'建立你的角色，開始搭配'))}</div></div>`;
+    lgTimer=setInterval(()=>{const r=$('#rw');if(!r||U){clearInterval(lgTimer);return;}if(real&&pl.length<=NS)return;lgTick++;r.innerHTML=row(lgTick);r.querySelectorAll('.pose').forEach(p=>p.classList.add('pop'));},real?3200:2200);
   }else if(lgStep==='select'){
     app.innerHTML=`<div class="game">${deco}<div class="h">選擇你的角色</div><div class="muted" style="text-align:center">點自己的名字直接登入</div>
     <div class="chars">${ks.map((k,i)=>`<button class="char" data-act="pick" data-k="${k}" style="animation-delay:${i*.07}s">${avSvg(DB.known[k].av||{b:tBody('m'),o:presetLook('休閒','m',false)})}<span class="nm">${esc(DB.known[k].name)}</span><span class="lk">${DB.known[k].pin?'🔒':'▶'}</span>${k===DB.last?'<span class="last">上次</span>':''}</button>`).join('')}
