@@ -818,6 +818,11 @@ u.rest,.bd.rest{background:#5a8aa0}u.peak,.bd.peak{background:#c9a66b}u.fade,.bd
 .pref{display:block;font-size:12px!important;color:var(--muted);line-height:1.5}.pref.warn{color:#e0965a!important}.pref.okc{color:#7fd39a!important}
 .tdy{display:flex;flex-direction:column;gap:10px}.tdr{display:grid;grid-template-columns:34px 1fr;gap:10px;align-items:start}.tdr b{font-size:14px}
 .news p{margin:6px 0 0;font-size:13px;line-height:1.6;color:var(--ink)}.news{background:color-mix(in srgb,var(--gold) 6%,var(--panel))}
+.board-ov{position:fixed;inset:0;z-index:80;background:rgba(10,8,6,.8);display:flex;align-items:center;justify-content:center;padding:14px}.board-ov[hidden]{display:none}
+.board-box{width:min(560px,100%);max-height:86vh;overflow:auto;background:var(--panel);border:1px solid var(--gold);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:10px}
+.board-list{display:flex;flex-direction:column;gap:8px}.brow{display:grid;grid-template-columns:34px 1fr;gap:10px;align-items:start;border:1px solid var(--line);border-radius:10px;padding:10px}.brow.you{border-color:var(--accent);background:var(--accent-soft)}
+.brow .rk{font-family:var(--f-mono);font-size:18px;text-align:center;color:var(--gold)}.brow b{display:flex;justify-content:space-between;gap:8px;align-items:baseline}.brow em{font-style:normal;font-size:12px;font-weight:400;color:var(--gold)}.brow small{display:block;font-size:12px;color:var(--muted);line-height:1.5}
+.bprog{position:relative;height:16px;border-radius:8px;background:var(--line);overflow:hidden;margin:5px 0 3px}.bprog i{display:block;height:100%;background:color-mix(in srgb,var(--gold) 60%,transparent)}.bprog span{position:absolute;left:8px;top:0;line-height:16px;font-size:11px;color:var(--ink)}
 .brew-anim .smoke{opacity:0}.brew-anim.go .smoke{animation:baSteam 1.2s ease-out 2s 3}
 </style>
 <script>
@@ -4592,7 +4597,7 @@ $('tName').addEventListener('keydown',e=>{if(e.key==='Enter')enter($('tName').va
 /* ---------- 主選單 ---------- */
 function tierOf(rep){return rep>=80?4:rep>=60?3:rep>=40?2:rep>=20?1:0;}
 const TIERS=['路邊小攤','巷口小店','人氣咖啡館','排隊名店','傳奇咖啡館'];
-window.hubRender=function(){if(!me)return;const s=S();
+window.hubRender=function(){if(!me)return;const s=S();try{boardPush();const e=$('hubBoardS');if(e)e.textContent='冠軍之路 '+CC.filter(X=>s.cw&&s.cw[X.ci]).length+' / '+CC.length;}catch(e){}
   $('hubHello').textContent='咖啡師 '+me+'，歡迎回來';
   $('hubShopS').textContent='第 '+s.day+' 天・'+NT(s.money)+'・'+TIERS[tierOf(s.rep)];
   $('hubCompS').textContent='已晉級 '+G.compDone()+' / '+G.COMPS.length+' 站';navWho();};
@@ -5809,7 +5814,7 @@ $('shopBox').addEventListener('click',e=>{const b=e.target.closest('button');if(
   else if(a==='accept'){settle();if(res.pay>0)SFX.p('cash');render();}
   else if(a==='nosell'){const X=curCust();bump(X.C.id,0,-1,true);res={bean:1,sold:false,dA:0,dL:-1,say:'好吧，那我下次再來看看。'};X.c.done=1;t.served+=1;persist();render();}
   else if(a==='next'){t.idx+=1;res=null;hintOn=false;persist();render();scrollTo(0,0);if(t.idx<t.q.length)arrive();}
-  else if(a==='nextday'){SFX.p('day');closeCalc();const net=t.income-t.cost-rentOf(s);s.money-=rentOf(s);s.bestDay=Math.max(s.bestDay||0,net);s.day+=1;s.today=null;view='lobby';persist();render();scrollTo(0,0);toast('第 '+s.day+' 天開始');}
+  else if(a==='nextday'){SFX.p('day');closeCalc();const net=t.income-t.cost-rentOf(s);s.money-=rentOf(s);s.bestDay=Math.max(s.bestDay||0,net);s.day+=1;s.today=null;view='lobby';persist();boardPush();render();scrollTo(0,0);toast('第 '+s.day+' 天開始');}
   else if(a==='bnew'){draft={parts:{},name:''};render();}
   else if(a==='bcancel'){draft=null;render();}
   else if(a==='bsave'){const nm=($('blName')&&$('blName').value.trim())||('配方 '+(s.blends.length+1));const parts=Object.entries(draft.parts);const bl={id:'bl'+Date.now().toString(36),name:nm.slice(0,12),parts};
@@ -5832,6 +5837,28 @@ $('shopBox').addEventListener('input',e=>{const el=e.target;if(el.id==='blName'&
   if(k==='ratio')$('kRatioO').textContent='1 : '+o.ratio;if(k==='steep')$('kSteepO').textContent=Math.floor(o.steep/60)+':'+String(o.steep%60).padStart(2,'0');});
 $('shopBox').addEventListener('change',e=>{if(e.target.dataset&&e.target.dataset.k)persist();});
 
+/* ---------- 排行榜：每位玩家只上傳名字和進度數字（公開） ---------- */
+const FBB='https://molecule-match-default-rtdb.asia-southeast1.firebasedatabase.app/trips/brewlab-board/players';
+const fbKey=n=>Array.from(n).map(c=>c.codePointAt(0).toString(36)).join('-');
+const rowOf=(n,s)=>({n,d:s.day||1,m:Math.round(s.money||0),r:s.rep||0,lv:lvOf(s.xp||0),ch:s.charm||0,cp:CC.filter(X=>s.cw&&s.cw[X.ci]).length,st:Object.values(s.rel||{}).reduce((a,R)=>a+(R.ch||0),0),cu:s.cups||0,kg:+((s.sold||0)/1000).toFixed(1),u:Date.now()});
+const scoreOf=p=>p.cp*100000+p.r*1000+p.lv*50+p.st*10+Math.min(999,p.d);
+let boardLast='';
+function boardPush(){if(!me||!S())return;const row=rowOf(me,S()),sig=JSON.stringify(Object.assign({},row,{u:0}));if(sig===boardLast)return;boardLast=sig;
+  try{fetch(FBB+'/'+fbKey(me)+'.json',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(row),keepalive:true}).catch(()=>{});}catch(e){}}
+const BO=document.createElement('div');BO.className='board-ov';BO.hidden=true;document.body.appendChild(BO);
+function boardDraw(remote,note){const all={};Object.values(remote||{}).forEach(p=>{if(p&&p.n)all[p.n]=p;});Object.keys(DB.players).forEach(n=>{all[n]=Object.assign(rowOf(n,DB.players[n]),{local:1});});
+  const list=Object.values(all).sort((a,b)=>scoreOf(b)-scoreOf(a)),TS=CAST.reduce((a,c)=>a+c.story.length,0);
+  BO.innerHTML='<div class="board-box" role="dialog" aria-label="排行榜"><div class="c-row"><h2>🏆 排行榜</h2><button class="c-pill" data-x="1">關閉</button></div><p class="label">'+note+'</p><div class="board-list">'+
+   list.map((p,i)=>'<div class="brow'+(p.n===me?' you':'')+'"><span class="rk">'+(i<3?['🥇','🥈','🥉'][i]:i+1)+'</span><div><b>'+esc(p.n)+(p.n===me?'（你）':'')+'<em>'+TIERS[tierOf(p.r)]+'</em></b>'+
+    '<div class="bprog"><i style="width:'+p.cp/CC.length*100+'%"></i><span>冠軍之路 '+p.cp+' / '+CC.length+(p.cp>=CC.length?'・世界冠軍':'')+'</span></div>'+
+    '<small>'+dateTxt(p.d).replace(/（.*/,'')+'・第 '+p.d+' 天・Lv '+p.lv+'・名聲 '+p.r+'・魅力 '+p.ch+'</small><small>熟客故事 '+p.st+' / '+TS+'・賣出 '+p.cu+' 杯、豆子 '+p.kg+' kg・資產 '+NT(p.m)+'</small></div></div>').join('')+'</div></div>';}
+async function openBoard(){BO.hidden=false;boardDraw(null,'讀取線上排行榜中…');SFX.p('select');boardPush();
+  try{const r=await fetch(FBB+'.json');if(!r.ok)throw 0;const j=await r.json();boardDraw(j,'所有玩家的進度總覽，依冠軍之路、名聲、等級排名。這個榜是公開的，只會上傳名字和進度數字。');}
+  catch(e){boardDraw(null,'連不到線上排行榜，先顯示這台裝置上的玩家。');}}
+BO.addEventListener('click',e=>{if(e.target===BO||e.target.closest('[data-x]'))BO.hidden=true;});
+{const b=document.createElement('button');b.className='hub-card';b.id='hubBoard';b.style.setProperty('--hc','var(--gold)');
+  b.innerHTML='<svg class="ic" viewBox="0 0 32 32" width="34" height="34" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 5h12v8a6 6 0 0 1-12 0z"/><path d="M10 7H5v3a5 5 0 0 0 5 5M22 7h5v3a5 5 0 0 1-5 5M16 19v5M11 27h10M13 24h6"/></svg><b>排行榜</b><span>看每位玩家的進度總覽：冠軍之路、名聲、等級、熟客故事。</span><em id="hubBoardS"></em>';
+  $('hubLab').after(b);b.onclick=openBoard;}
 /* ---------- 啟動 ---------- */
 const h=location.hash||'';let skip=false;try{skip=sessionStorage.getItem('brewLab.skipTitle')==='1';sessionStorage.removeItem('brewLab.skipTitle');}catch(e){}
 if(me&&skip){ov.hidden=true;}
