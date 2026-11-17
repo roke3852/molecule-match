@@ -50,6 +50,13 @@ h2{font-size:15px;color:var(--mute);margin:18px 2px 8px;font-weight:600}
 .mv button{flex:1;height:38px;border:1px solid var(--line);background:#faf6f0;color:var(--ink);border-radius:10px;font:inherit;font-size:13px;cursor:pointer}
 .mv button:active{background:#efe6da}
 .mv button:disabled{opacity:.3}
+.ce{display:none;width:100%;align-items:center;gap:8px;font-size:13px;color:var(--mute)}
+.editing .ce{display:flex}
+.ce select{flex:1;min-width:0}
+.app{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
+.app a.cover{-webkit-touch-callout:none}
+.app.drag-src{opacity:.3;border-style:dashed}
+.app.ghost{position:fixed;z-index:20;margin:0;pointer-events:none;box-shadow:0 12px 28px rgba(59,42,32,.28);transform:scale(1.03);transition:none}
 .head{display:flex;align-items:flex-start;gap:10px}
 .head>div{flex:1;min-width:0}
 .refresh{flex:none;margin-top:6px;font:inherit;font-size:14px;font-weight:600;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:20px;padding:7px 13px;cursor:pointer;display:flex;align-items:center;gap:5px}
@@ -76,7 +83,7 @@ footer{margin-top:28px;font-size:12px;color:var(--mute);text-align:center;line-h
   <div class="head">
     <div>
       <h1>Roke 的 App</h1>
-      <div class="sub">點一下就能打開・點 ☆ 加入我的最愛分頁</div>
+      <div class="sub">點一下打開・點 ☆ 加入最愛・長按卡片可拖曳排序</div>
     </div>
     <button class="refresh" id="refreshBtn" aria-label="重新整理"><span class="r">↻</span>更新</button>
   </div>
@@ -98,16 +105,16 @@ footer{margin-top:28px;font-size:12px;color:var(--mute);text-align:center;line-h
       <option value="name">名稱</option>
       <option value="custom">自訂順序</option>
     </select>
-    <button class="btn" id="editBtn">調整順序</button>
+    <button class="btn" id="editBtn">編輯</button>
   </div>
 
   <div id="notice"></div>
   <div id="list"></div>
 
-  <footer>按右上角「↻ 更新」會重新抓這頁和所有 App 的最新版。<br>新增或更新 App：在這頁的 APPS 清單加一行或改 ver / updated（日期＋時間）/ note。<br>版本號一變，首頁就會在那個 App 上顯示「新版」。<br><span id="hubVer"></span></footer>
+  <footer>按右上角「↻ 更新」會重新抓這頁和所有 App 的最新版。<br>長按卡片可拖曳排序；按「編輯」可換分類（只記在這台裝置）。<br>新增或更新 App：在這頁的 APPS 清單加一行或改 ver / updated（日期＋時間）/ note。<br>版本號一變，首頁就會在那個 App 上顯示「新版」。<br><span id="hubVer"></span></footer>
 </main>
 <script>
-const HUB_VER = "2.2";
+const HUB_VER = "2.3";
 /* 分類：App 的 cat 填這裡的 id；順序就是分類標籤與分組的順序 */
 const CATS = [
   { id:"coffee", name:"咖啡", icon:"☕" },
@@ -161,7 +168,7 @@ if(!S){ /* 第一次打開：把目前版本都當成看過，不要整頁都是
 }
 ["fav","order"].forEach(k => S[k] = S[k] || []);
 S.cat = S.cat || "all";
-["seen","opens","last"].forEach(k => S[k] = S[k] || {});
+["seen","opens","last","cats"].forEach(k => S[k] = S[k] || {});
 /* 新加入目錄的 App 也直接視為已看過 */
 APPS.forEach(a => { if(!(a.path in S.seen)) S.seen[a.path] = a.ver; });
 save();
@@ -197,7 +204,7 @@ function sorted(list){
 function card(a, i, n){
   const nw = isNew(a);
   return `<div class="app" data-p="${a.path}">
-    <a class="cover" href="${a.path}?v=${encodeURIComponent(a.ver||"")}" aria-label="${a.name}"></a>
+    <a class="cover" draggable="false" href="${a.path}?v=${encodeURIComponent(a.ver||"")}" aria-label="${a.name}"></a>
     <div class="ic" style="background:${a.color}">${a.icon}${nw?`<span class="dot">新</span>`:""}</div>
     <div class="bd">
       <div class="nm">${a.name}</div>
@@ -209,6 +216,7 @@ function card(a, i, n){
       ${nw && a.note ? `<div class="note">${a.updated?`<b>${fmtFull(a.updated)}</b> 更新：`:"更新："}${a.note}</div>` : ""}
     </div>
     <button class="star${isFav(a)?" on":""}" data-fav="${a.path}" aria-label="我的最愛">${isFav(a)?"★":"☆"}</button>
+    <div class="ce"><span>分類</span><select data-catset="${a.path}" aria-label="分類">${[...CATS.map(c=>c.id),"other"].map(id=>`<option value="${id}"${catOf(a)===id?" selected":""}>${catName(id)}</option>`).join("")}</select></div>
     <div class="mv">
       <button data-mv="top" data-p="${a.path}" ${i===0?"disabled":""}>⤒ 置頂</button>
       <button data-mv="up" data-p="${a.path}" ${i===0?"disabled":""}>▲ 上移</button>
@@ -218,7 +226,9 @@ function card(a, i, n){
   </div>`;
 }
 
-const catOf = a => CATS.some(c=>c.id===a.cat) ? a.cat : "other";
+/* 分類可在「編輯」時改，改過的記在 S.cats（只存在這台裝置） */
+const baseCat = a => CATS.some(c=>c.id===a.cat) ? a.cat : "other";
+const catOf = a => { const c = (S.cats||{})[a.path]; return c && (c==="other" || CATS.some(x=>x.id===c)) ? c : baseCat(a); };
 const catName = id => { const c = CATS.find(c=>c.id===id); return c ? `${c.icon} ${c.name}` : "其他"; };
 const inTab = a => S.tab !== "fav" || isFav(a);
 const visible = () => sorted(APPS).filter(a => inTab(a) && (S.cat === "all" || catOf(a) === S.cat));
@@ -234,7 +244,7 @@ function blocks(){
 function render(){
   document.getElementById("sort").value = S.sort;
   const eb = document.getElementById("editBtn");
-  eb.textContent = editing ? "完成" : "調整順序";
+  eb.textContent = editing ? "完成" : "編輯";
   eb.classList.toggle("on", editing);
 
   /* 版本提示 */
@@ -287,7 +297,7 @@ function move(path, how){
     const t = order.indexOf(target);
     order.splice(how==="top" ? t : t+1, 0, path);
   }
-  S.order = order; save(); render();
+  S.order = order; S.sort = "custom"; save(); render();
   const c = document.querySelector(`.app[data-p="${CSS.escape(path)}"]`);
   if(c) c.scrollIntoView({block:"nearest", behavior:"smooth"});
 }
@@ -329,21 +339,115 @@ document.getElementById("cats").addEventListener("click", e=>{
 document.getElementById("sort").addEventListener("change", e=>{
   S.sort = e.target.value;
   if(S.sort === "custom" && !S.order.length) S.order = APPS.map(a=>a.path);
-  if(S.sort !== "custom") editing = false;
   save(); render();
 });
 document.getElementById("tabs").addEventListener("click", e=>{
   const b = e.target.closest("[data-tab]"); if(!b) return;
   S.tab = b.dataset.tab; save(); render(); window.scrollTo(0,0);
 });
-/* 按「調整順序」會自動切到自訂順序，從目前看到的順序開始調 */
-document.getElementById("editBtn").addEventListener("click", ()=>{
-  if(!editing && S.sort !== "custom"){
-    S.order = sorted(APPS).map(a=>a.path);
-    S.sort = "custom"; save();
-  }
-  editing = !editing; render();
+/* 編輯：可換分類、用按鈕移動；一移動就會切到自訂順序 */
+document.getElementById("editBtn").addEventListener("click", ()=>{ editing = !editing; render(); });
+document.getElementById("list").addEventListener("change", e=>{
+  const s = e.target.closest("[data-catset]"); if(!s) return;
+  const a = APPS.find(x=>x.path===s.dataset.catset); if(!a) return;
+  if(s.value === baseCat(a)) delete S.cats[a.path]; else S.cats[a.path] = s.value;
+  save(); render(); toast(`「${a.name}」已移到 ${catName(s.value)}`);
 });
+
+/* ---------- 長按拖曳排序（同一區塊內） ---------- */
+let press = null, D = null, swapAt = 0, swallowClick = false;
+function cancelPress(){ if(press){ clearTimeout(press.timer); press = null; } }
+function pressStart(x, y, target){
+  cancelPress();
+  if(D || !target.closest) return;
+  const el = target.closest(".app");
+  if(!el || target.closest("button,select,.mv,.ce")) return;
+  press = { x, y, el, timer:setTimeout(beginDrag, 380) };
+}
+function beginDrag(){
+  const { el, x, y } = press; press = null;
+  if(!el.isConnected) return;
+  const r = el.getBoundingClientRect();
+  const ghost = el.cloneNode(true);
+  ghost.classList.add("ghost");
+  Object.assign(ghost.style, { left:r.left+"px", top:r.top+"px", width:r.width+"px", height:r.height+"px" });
+  el.parentNode.parentNode.appendChild(ghost);
+  el.classList.add("drag-src");
+  D = { el, ghost, grid:el.parentNode, ox:x-r.left, oy:y-r.top, x, y };
+  if(navigator.vibrate) navigator.vibrate(12);
+  D.raf = requestAnimationFrame(autoScroll);
+}
+function place(){
+  const { el, ghost, grid, x, y } = D;
+  ghost.style.left = (x - D.ox) + "px"; ghost.style.top = (y - D.oy) + "px";
+  if(Date.now() - swapAt < 130) return;
+  const under = document.elementFromPoint(x, y);
+  const t = under && under.closest ? under.closest(".app") : null;
+  if(!t || t === el || t.parentNode !== grid) return;
+  const kids = [...grid.children], from = kids.indexOf(el), to = kids.indexOf(t);
+  const tr = t.getBoundingClientRect(), er = el.getBoundingClientRect();
+  const sameRow = Math.abs(tr.top - er.top) < 10;
+  const pos = sameRow ? x : y, mid = sameRow ? tr.left + tr.width/2 : tr.top + tr.height/2;
+  if(from < to ? pos < mid : pos > mid) return;
+  const before = new Map(kids.map(k => [k, k.getBoundingClientRect()]));
+  grid.insertBefore(el, from < to ? t.nextSibling : t);
+  swapAt = Date.now();
+  kids.forEach(k => {
+    if(k === el) return;
+    const a = k.getBoundingClientRect(), b = before.get(k), dx = b.left - a.left, dy = b.top - a.top;
+    if(!dx && !dy) return;
+    k.style.transition = "none"; k.style.transform = `translate(${dx}px,${dy}px)`;
+    k.getBoundingClientRect();
+    k.style.transition = "transform .15s"; k.style.transform = "";
+  });
+}
+function autoScroll(){
+  if(!D) return;
+  const m = 80, h = window.innerHeight; let v = 0;
+  if(D.y < m) v = -(m - D.y) / 4; else if(D.y > h - m) v = (D.y - (h - m)) / 4;
+  if(v){ window.scrollBy(0, v); place(); }
+  D.raf = requestAnimationFrame(autoScroll);
+}
+function endDrag(){
+  if(!D) return;
+  const { el, ghost, grid } = D;
+  cancelAnimationFrame(D.raf); ghost.remove(); el.classList.remove("drag-src"); D = null;
+  const seq = [...grid.children].filter(k => k.classList.contains("app")).map(k => k.dataset.p);
+  /* 把這一區的新順序放回整體順序裡原本的位置 */
+  const order = sorted(APPS).map(a => a.path), set = new Set(seq); let i = 0;
+  const next = order.map(p => set.has(p) ? seq[i++] : p);
+  if(next.every((p,k) => p === order[k])){ render(); return; }
+  const was = S.sort;
+  S.order = next; S.sort = "custom"; save(); render();
+  if(was !== "custom") toast("已改用「自訂順序」排序");
+}
+const listEl = document.getElementById("list");
+listEl.addEventListener("touchstart", e=>{
+  if(e.touches.length !== 1){ cancelPress(); return; }
+  pressStart(e.touches[0].clientX, e.touches[0].clientY, e.target);
+}, {passive:true});
+document.addEventListener("touchmove", e=>{
+  const t = e.touches[0];
+  if(D){ e.preventDefault(); D.x = t.clientX; D.y = t.clientY; place(); }
+  else if(press && (Math.abs(t.clientX-press.x) > 8 || Math.abs(t.clientY-press.y) > 8)) cancelPress();
+}, {passive:false});
+["touchend","touchcancel"].forEach(ev => document.addEventListener(ev, e=>{
+  cancelPress();
+  if(D){ if(e.cancelable) e.preventDefault(); endDrag(); }
+}, {passive:false}));
+listEl.addEventListener("mousedown", e=>{ if(e.button === 0) pressStart(e.clientX, e.clientY, e.target); });
+document.addEventListener("mousemove", e=>{
+  if(D){ D.x = e.clientX; D.y = e.clientY; place(); }
+  else if(press && (Math.abs(e.clientX-press.x) > 8 || Math.abs(e.clientY-press.y) > 8)) cancelPress();
+});
+document.addEventListener("mouseup", ()=>{
+  cancelPress();
+  if(D){ endDrag(); swallowClick = true; setTimeout(()=>swallowClick = false, 60); }
+});
+document.addEventListener("click", e=>{ if(swallowClick){ swallowClick = false; e.preventDefault(); e.stopPropagation(); } }, true);
+window.addEventListener("scroll", ()=>{ if(!D) cancelPress(); }, {passive:true});
+listEl.addEventListener("dragstart", e=>e.preventDefault());
+listEl.addEventListener("contextmenu", e=>{ if(D) e.preventDefault(); });
 
 document.getElementById("list").addEventListener("click", e=>{
   const f = e.target.closest("[data-fav]");
@@ -370,6 +474,7 @@ let lastTap = 0, tapX = 0, tapY = 0;
 document.addEventListener("touchstart", e=>{ tapX = e.touches[0].clientX; tapY = e.touches[0].clientY; }, {passive:true});
 document.addEventListener("touchend", e=>{
   const t = e.changedTouches[0], now = Date.now();
+  if(e.defaultPrevented) return;
   const still = Math.abs(t.clientX - tapX) < 10 && Math.abs(t.clientY - tapY) < 10;
   if(still && e.touches.length === 0){
     if(now - lastTap < 350 && !e.target.closest("input,textarea,select")){ e.preventDefault(); e.target.click(); }
