@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="穿搭試衣間">
 <meta name="theme-color" content="#2f3a4a">
-<meta name="app-version" content="1.7">
+<meta name="app-version" content="1.8">
 <title>穿搭試衣間</title>
 <style>
 :root{--bg:#f4f1ec;--card:#fff;--ink:#23201d;--mute:#857b70;--line:#e5ddd2;--accent:#2f3a4a;--hot:#c8553d;--soft:#ece6dc;--ok:#2f8f5b}
@@ -416,18 +416,26 @@ function drawHat(g,it,c){
   if(it.kind==='beret'){o.push(`<ellipse cx="${f1(1.6*K)}" cy="${f1(t+h*.1)}" rx="${f1(w*.66)}" ry="${f1(h*.21)}" transform="rotate(-10 0 ${f1(t+h*.1)})" fill="${c}" stroke="${st}"/>`);o.push(LN(1.6*K,t-h*.11,2*K,t-h*.17,st,1.6));}
   return o.join('');}
 
-function drawGlasses(g,style,c){
+const GLS={round:[.95,.95,1.3,'ell'],square:[1,.74,1.4,'rect',.42],thin:[1,.62,.9,'rect',.6],thick:[1,.74,2.4,'rect',.42],half:[1,.7,1.6,'half'],cat:[1,.75,1.6,'cat'],sun:[1.05,.8,1.4,'rect',.42],
+  bigthin:[1.27,1.04,.9,'rect',.5],bigthick:[1.27,1.02,2.7,'rect',.46],biground:[1.24,1.24,1,'ell'],boston:[1.14,1.02,1.6,'boston'],welly:[1.17,.9,2.3,'welly'],poly:[1.14,1.04,1,'poly'],aviator:[1.24,1.06,1,'avi'],oval:[1.02,.56,2.5,'ell']};
+function drawGlasses(g,style,c,tint){
   if(g.back||!style||style==='none')return'';
-  const ey=g.top+g.headH*.525,ex=g.headW*.215,r=g.headW*.175,o=[],sun=style==='sun',sw={thin:.9,round:1.3,square:1.4,thick:2.4,cat:1.6,half:1.6,sun:1.4}[style]||1.4;
-  const lens=sun?'rgba(25,22,20,.88)':'rgba(255,255,255,.22)',fc=sun?shade(c,-.1):c;
-  for(const s of[1,-1]){const cx=s*ex;
-    if(style==='round')o.push(`<circle cx="${f1(cx)}" cy="${f1(ey)}" r="${f1(r*.95)}" fill="${lens}" stroke="${fc}" stroke-width="${sw}"/>`);
-    else if(style==='cat')o.push(`<path d="M${f1(cx-s*r)},${f1(ey-r*.45)} Q${f1(cx)},${f1(ey-r*.75)} ${f1(cx+s*r*1.25)},${f1(ey-r*.95)} Q${f1(cx+s*r*1.1)},${f1(ey+r*.7)} ${f1(cx)},${f1(ey+r*.75)} Q${f1(cx-s*r*1.05)},${f1(ey+r*.7)} ${f1(cx-s*r)},${f1(ey-r*.45)}Z" fill="${lens}" stroke="${fc}" stroke-width="${sw}" stroke-linejoin="round"/>`);
-    else if(style==='half')o.push(`<rect x="${f1(cx-r)}" y="${f1(ey-r*.7)}" width="${f1(2*r)}" height="${f1(r*1.4)}" rx="${f1(r*.45)}" fill="${lens}" stroke="${fc}" stroke-width=".5" opacity=".9"/><path d="M${f1(cx-r)},${f1(ey-r*.1)} v${f1(-r*.25)} q0,${f1(-r*.38)} ${f1(r*.4)},${f1(-r*.38)} h${f1(r*1.2)} q${f1(r*.4)},0 ${f1(r*.4)},${f1(r*.38)} v${f1(r*.25)}" fill="none" stroke="${fc}" stroke-width="${sw+.6}" stroke-linecap="round"/>`);
-    else{const rx=style==='thin'?r*.6:r*.42,hh=style==='thin'?r*.62:r*.74;o.push(`<rect x="${f1(cx-r)}" y="${f1(ey-hh)}" width="${f1(2*r)}" height="${f1(2*hh)}" rx="${f1(rx)}" fill="${lens}" stroke="${fc}" stroke-width="${sw}"/>`);}
-    if(!sun)o.push(`<path d="M${f1(cx-r*.5)},${f1(ey-r*.35)} l${f1(r*.35)},${f1(-r*.25)}" stroke="#fff" stroke-width=".9" stroke-linecap="round" opacity=".8"/>`);
-    o.push(LN(cx+s*r*.98,ey-r*.2,s*(g.headW/2+.5),ey-r*.05,fc,sw*.8));}
-  o.push(`<path d="M${f1(-ex+r*.95)},${f1(ey-r*.15)} Q0,${f1(ey-r*.55)} ${f1(ex-r*.95)},${f1(ey-r*.15)}" fill="none" stroke="${fc}" stroke-width="${sw}"/>`);
+  const S=GLS[style]||GLS.square,w=g.headW,r=w*.175,a=r*S[0],b=r*S[1],sw=S[2],kind=S[3],ex=Math.max(w*.215,a+w*.022),ey=g.top+g.headH*.525+(b>r*.9?b*.1:0),o=[];
+  const tn=style==='sun'?'dark':tint,lens=tn==='dark'?'rgba(25,22,20,.88)':tn==='light'?'rgba(70,60,50,.36)':tn==='blue'?'rgba(70,120,170,.34)':'rgba(255,255,255,.2)',fc=c;
+  const at=`fill="${lens}" stroke="${fc}" stroke-width="${sw}" stroke-linejoin="round"`;
+  for(const s of[1,-1]){const cx=s*ex,X=u=>f1(cx+s*u),Y=v=>f1(ey+v);
+    if(kind==='ell')o.push(`<ellipse cx="${f1(cx)}" cy="${f1(ey)}" rx="${f1(a)}" ry="${f1(b)}" ${at}/>`);
+    else if(kind==='rect')o.push(`<rect x="${f1(cx-a)}" y="${f1(ey-b)}" width="${f1(2*a)}" height="${f1(2*b)}" rx="${f1(Math.min(a,b)*S[4])}" ${at}/>`);
+    else if(kind==='boston')o.push(`<path d="${sp([[cx-a,ey-b*.5],[cx-a*.6,ey-b],[cx+a*.6,ey-b],[cx+a,ey-b*.5],[cx+a*.82,ey+b*.5],[cx,ey+b],[cx-a*.82,ey+b*.5]])}" ${at}/>`);
+    else if(kind==='welly')o.push(`<path d="M${X(-a*.86)},${Y(-b)} L${X(a)},${Y(-b)} L${X(a*.8)},${Y(b)} L${X(-a*.74)},${Y(b)} Z" ${at} stroke-width="${sw}"/>`);
+    else if(kind==='poly')o.push(`<path d="M${X(-a*.5)},${Y(-b)} L${X(a*.5)},${Y(-b)} L${X(a)},${Y(-b*.4)} L${X(a)},${Y(b*.35)} L${X(a*.5)},${Y(b)} L${X(-a*.5)},${Y(b)} L${X(-a)},${Y(b*.35)} L${X(-a)},${Y(-b*.4)} Z" ${at}/>`);
+    else if(kind==='avi')o.push(`<path d="${sp([[cx-s*a*.88,ey-b*.78],[cx+s*a*.9,ey-b*.9],[cx+s*a,ey-b*.05],[cx+s*a*.6,ey+b*.95],[cx-s*a*.45,ey+b*.9],[cx-s*a*.98,ey]])}" ${at}/>`);
+    else if(kind==='cat')o.push(`<path d="M${X(-a)},${Y(-b*.6)} Q${X(0)},${Y(-b)} ${X(a*1.25)},${Y(-b*1.27)} Q${X(a*1.1)},${Y(b*.93)} ${X(0)},${Y(b)} Q${X(-a*1.05)},${Y(b*.93)} ${X(-a)},${Y(-b*.6)}Z" ${at}/>`);
+    else if(kind==='half')o.push(`<rect x="${f1(cx-a)}" y="${f1(ey-b)}" width="${f1(2*a)}" height="${f1(2*b)}" rx="${f1(b*.64)}" fill="${lens}" stroke="${fc}" stroke-width=".5" opacity=".9"/><path d="M${f1(cx-a)},${f1(ey-b*.14)} v${f1(-b*.36)} q0,${f1(-b*.54)} ${f1(a*.4)},${f1(-b*.54)} h${f1(a*1.2)} q${f1(a*.4)},0 ${f1(a*.4)},${f1(b*.54)} v${f1(b*.36)}" fill="none" stroke="${fc}" stroke-width="${sw+.6}" stroke-linecap="round"/>`);
+    if(tn!=='dark')o.push(`<path d="M${f1(cx-a*.5)},${f1(ey-b*.45)} l${f1(a*.35)},${f1(-b*.3)}" stroke="#fff" stroke-width=".9" stroke-linecap="round" opacity=".8"/>`);
+    o.push(LN(cx+s*a*.98,ey-b*.3,s*(w/2+.5),ey-b*.1,fc,Math.max(.8,sw*.8)));}
+  const bx=ex-a*.96;if(bx>0.4){o.push(`<path d="M${f1(-bx)},${f1(ey-b*.2)} Q0,${f1(ey-b*.2-r*.4)} ${f1(bx)},${f1(ey-b*.2)}" fill="none" stroke="${fc}" stroke-width="${Math.min(sw,1.8)}"/>`);
+    if(kind==='avi')o.push(LN(-bx-a*.1,ey-b*.82,bx+a*.1,ey-b*.82,fc,sw));}
   return o.join('');}
 function drawAcc(g,it,c,ctx){
   const st=strokeOf(c),o=[],k=it.kind,ny=g.shY-1.3*K,B=g.back;
@@ -468,7 +476,7 @@ function figure(p,of,opt={}){
   for(const k of['backpack','scarf','cross','tote','watch']){const a=has(k);if(a)L.push(FL(drawAcc(g,T(a.t),col(a.c),ctx)));}
   L.push(hair.front);
   if(of.hat&&T(of.hat.t))L.push(FL(drawHat(g,T(of.hat.t),col(of.hat.c))));
-  if(!has('glasses')&&!has('sun')&&p.glasses&&p.glasses!=='none')L.push(drawGlasses(g,p.glasses,p.glassColor||'#26262a'));
+  if(!has('glasses')&&!has('sun')&&p.glasses&&p.glasses!=='none')L.push(drawGlasses(g,p.glasses,p.glassColor||'#26262a',p.glassTint));
   for(const k of['glasses','sun']){const a=has(k);if(a)L.push(drawAcc(g,T(a.t),col(a.c),ctx));}
   let ruler='';
   if(opt.ruler){for(let cm=0;cm<=210;cm+=10){const y=FLOOR-cm*K,big=cm%50===0;ruler+=`<line x1="-150" x2="${big?-136:-143}" y1="${f1(y)}" y2="${f1(y)}" stroke="#b9ad9d" stroke-width="${big?1.2:.7}"/>`+(big&&cm?`<text x="-133" y="${f1(y+3.5)}" font-size="9" fill="#9a8d7c">${cm}</text>`:'');}
@@ -888,7 +896,7 @@ const FACE=[['臉型','faceShape','oval',[['oval','鵝蛋臉'],['round','圓臉'
  ['鼻子','nose','dot',[['dot','小巧'],['line','立體'],['none','不畫']]],
  ['嘴巴','mouth','smile',[['smile','微笑'],['grin','露齒笑'],['small','抿嘴'],['flat','一字'],['open','張嘴']]],
  ['唇色','lip','none',[['none','自然'],['nude','裸色'],['pink','粉色'],['red','紅色']]],
- ['眼鏡','glasses','none',[['none','不戴'],['round','圓框'],['square','方框'],['thin','細框'],['thick','粗框'],['half','半框'],['cat','貓眼框'],['sun','墨鏡']]],
+ ['眼鏡','glasses','none',[['none','不戴'],['bigthin','大細方框'],['bigthick','大粗框'],['biground','大圓細框'],['boston','波士頓'],['welly','威靈頓'],['poly','多邊形'],['aviator','飛行員雙橋'],['half','眉框'],['oval','窄橢圓粗框'],['round','圓框'],['square','方框'],['thin','細框'],['thick','粗框'],['cat','貓眼框'],['sun','墨鏡']]],
  ['鬍子','beard','none',[['none','無'],['stubble','鬍渣'],['mustache','八字鬍'],['goatee','山羊鬍'],['full','落腮鬍']]],
  ['瀏海','bang','std',[['std','短瀏海'],['side','側分'],['full','齊瀏海'],['mid','中分'],['up','往上梳']]],
  ['髮型','hair','short',[['short','短髮'],['buzz','平頭'],['bob','鮑伯'],['long','長直髮'],['wavy','長捲髮'],['pony','馬尾'],['bun','丸子頭'],['curly','捲髮'],['bald','光頭']]]];
@@ -903,13 +911,13 @@ function faceCard(){const b=U.body,g=G(),s=g.headH+60;
   <label class="f">一鍵套用</label><div class="chips" style="flex-wrap:wrap">${FPRE.map((p,i)=>`<button class="chip" data-act="fpre" data-i="${i}">${p[0]}</button>`).join('')}</div>
   ${FACE.map(([n,k,df,opts])=>`<label class="f">${n}</label><div class="chips" style="flex-wrap:wrap">${opts.map(([v,t])=>`<button class="chip ${(b[k]||df)===v?'on':''}" data-act="fset" data-k="${k}" data-v="${v}">${t}</button>`).join('')}</div>`).join('')}
   <label class="f">細節</label><div class="chips">${[['lash','睫毛'],['blush','腮紅'],['freckle','雀斑']].map(([k,t])=>`<button class="chip s2 ${b[k]?'on':''}" data-act="ftog" data-k="${k}">${t}</button>`).join('')}</div>
-  ${b.glasses&&b.glasses!=='none'?`<label class="f">鏡框顏色</label>${SWS('glassColor',b.glassColor||'#26262a',['#26262a','#6b4a35','#c9a84c','#b8bcc2','#27364f','#7a2f3a','#e9e4d8'])}`:''}
+  ${b.glasses&&b.glasses!=='none'?`<label class="f">鏡框顏色</label>${SWS('glassColor',b.glassColor||'#26262a',['#26262a','#3a3a3d','#7a4a25','#6b4a35','#c9a84c','#b8bcc2','#c9ced4','#27364f','#7a2f3a','#e9e4d8'])}<label class="f">鏡片</label><div class="chips" style="flex-wrap:wrap">${[['','透明'],['light','淺灰'],['blue','淺藍'],['dark','深色']].map(([v,t])=>`<button class="chip ${(b.glassTint||'')===v?'on':''}" data-act="fset" data-k="glassTint" data-v="${v}">${t}</button>`).join('')}</div>`:''}
   <label class="f">眼珠顏色</label>${SWS('eyeColor',b.eyeColor||'#3a2f2a',['#3a2f2a','#5b3a22','#8a5a2b','#3d5a80','#4a6b4a','#7b7f86'])}
   <label class="f">髮色</label>${SWS('hairColor',b.hairColor,['#2b2420','#4a362a','#7a5236','#b8894f','#d9c49a','#8f8f93','#a13b32','#e39ab0','#5b7fb5'])}
   <label class="f">膚色</label>${SWS('skin',b.skin,['#fae3d0','#f7dcc4','#f0cdb0','#e2b48f','#c9966b','#a06f4a','#6f4a32'])}</div>`;}
 function randFace(){const b=U.body,f=b.sex==='f',kd=b.kid,pk=l=>l[Math.floor(Math.random()*l.length)];
   FACE.forEach(([n,k,df,opts])=>{let l=opts.map(o=>o[0]);if(k==='beard')l=f||kd?['none']:['none','none','none','stubble','mustache','goatee','full'];if(k==='lip')l=f&&!kd?['none','nude','pink','red']:['none'];if(k==='faceShape'&&kd)l=['round','round','oval'];
-    if(k==='hair')l=f?['bob','long','wavy','pony','bun','short']:['short','short','buzz','curly','short'];if(k==='brow')l=l.filter(x=>x!=='none');if(k==='glasses')l=['none','none','none','round','square','thin','thick'];if(k==='mouth')l=l.filter(x=>x!=='open');b[k]=pk(l);});
+    if(k==='hair')l=f?['bob','long','wavy','pony','bun','short']:['short','short','buzz','curly','short'];if(k==='brow')l=l.filter(x=>x!=='none');if(k==='glasses')l=['none','none','none','bigthin','bigthick','boston','welly','poly','round'];if(k==='mouth')l=l.filter(x=>x!=='open');b[k]=pk(l);});
   b.lash=f&&!kd&&Math.random()<.7;b.blush=Math.random()<(f?.6:.15);b.freckle=Math.random()<.15;b.eyeColor=pk(['#3a2f2a','#3a2f2a','#5b3a22','#8a5a2b']);b.hairColor=pk(['#2b2420','#2b2420','#4a362a','#7a5236','#b8894f']);}
 function vMe(){const b=U.body,kn=DB.known[UK]||{};
   return`<div>`+stage(true)+`<div class="card"><div class="bar"><b>性別</b><div class="chips r" style="padding:0"><button class="chip s2 ${b.sex==='m'?'on':''}" data-act="sex" data-v="m">${b.kid?'男孩':'男性'}</button><button class="chip s2 ${b.sex==='f'?'on':''}" data-act="sex" data-v="f">${b.kid?'女孩':'女性'}</button></div></div>
