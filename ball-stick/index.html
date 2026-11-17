@@ -110,6 +110,7 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-acti
 .me .nums{font-family:var(--f-num);font-size:18px;font-weight:500;font-variant-numeric:tabular-nums;display:flex;gap:16px;flex-wrap:wrap}
 .me .nums span b{font-size:24px;font-weight:600;color:var(--mark);margin-right:4px}
 .me .acts{display:flex;gap:8px;flex-wrap:wrap}
+.syncnote{margin:0;font-size:12.5px;color:var(--paper);opacity:.8;min-height:1.2em}
 .me .acts .tool{background:var(--ink);min-height:38px;flex:1 1 40%}
 .rowp .tagx{display:inline-block;margin-left:6px;padding:0 6px;border-radius:6px;border:1px solid var(--line);font-size:11px;color:var(--mute);font-weight:400;vertical-align:middle}
 .whosec{margin:14px 0 2px;font-size:12.5px;color:var(--mute);letter-spacing:.06em}
@@ -261,8 +262,8 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-acti
     </div>
     <div id="levelList"></div>
     <div class="cloud" id="cloud" hidden style="margin-top:22px">
-      <button class="tool go" id="gBtn" type="button">用 Google 帳號備份紀錄</button>
-      <p id="gNote" aria-live="polite">這台裝置上所有玩家的紀錄，會存進你自己的 Google 雲端硬碟，換手機、清瀏覽器都接得回來。</p>
+      <button class="tool" id="gBtn" type="button">另外備份到 Google 雲端硬碟（選用）</button>
+      <p id="gNote" aria-live="polite">紀錄平常就會自動存到雲端。想在自己的 Google 雲端硬碟多留一份備份，再按這個按鈕。</p>
     </div>
   </section>
 
@@ -559,7 +560,7 @@ function mergePlayers(into,from){
   for(const f of from||[]){
     if(!f||typeof f.name!=='string'||!f.best)continue;
     let p=into.find(x=>x.name===f.name);
-    if(!p){into.push({name:f.name,best:Object.assign({},f.best),made:f.made||Date.now(),up:f.up||0,ph:f.ph||null});continue;}
+    if(!p){into.push({name:f.name,best:Object.assign({},f.best),made:f.made||Date.now(),up:f.up||0,ph:f.ph||null,d:f.d?1:0});continue;}
     if(!p.ph&&f.ph)p.ph=f.ph;
     for(const id in f.best){
       const a=p.best[id],b=f.best[id];
@@ -1307,9 +1308,11 @@ $('btnCloseLevels').addEventListener('click',()=>{$('levels').hidden=true;});
 let tab='basic';
 function renderMe(){
   const p=player();if(!p){$('me').innerHTML='';return;}
+  setTimeout(renderSync,0);
   const s=stats(p);
   $('me').innerHTML=`<div class="who"><b>${esc(p.name)}</b><span class="badge">${TITLES[titleIdx(p)].n}</span></div>
     <div class="nums"><span><b>${s.s}</b>分</span><span><b>${s.st}</b>顆星</span><span><b>${s.n}</b>/ ${LEVELS.length} 關</span></div>
+    <p class="syncnote" data-sync></p>
     <div class="acts"><button class="tool" type="button" data-open="board">排行榜</button><button class="tool" type="button" data-open="titles">稱號</button><button class="tool" type="button" data-open="who">切換玩家</button><button class="tool" type="button" data-open="setpin">${p.ph?'更改密碼':'設定密碼'}</button></div>`;
 }
 const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -1429,22 +1432,61 @@ const FBS=FB.replace(/players$/,'saves');
 async function savePull(name){
   try{const r=await fetch(FBS+'/'+fbKey(name)+'.json');return r.ok?await r.json():null;}catch(e){return null;}
 }
-/* 上傳目前玩家：完整紀錄（讓別台裝置能接回）＋排行榜的一列。別人鎖了密碼的同名紀錄不會被蓋掉 */
-function boardPush(force){
-  clearTimeout(boardT);
-  boardT=setTimeout(async()=>{
-    const p=player();if(!p)return;
-    try{
-      const key=fbKey(p.name),old=await savePull(p.name);
-      if(old&&old.ph&&old.ph!==p.ph&&!force)return;
-      if(old&&old.best){mergePlayers([p],[{name:p.name,best:old.best,up:old.up}]);save();}
-      const row=boardRow(p);if(!row.s&&!p.ph&&!old)return;
-      const put=(u,d)=>fetch(u,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(d),keepalive:true});
+/* 自動雲端紀錄：開啟遊戲、過關、換人、回到前景、恢復連線時都會自己同步，不用按任何按鈕。
+   每位玩家一份完整紀錄＋排行榜一列；雙向合併，每關取最好的成績。別人鎖了密碼的同名紀錄不會被蓋掉 */
+let syncState='idle',syncAt=0,syncBusy=false,syncAgain=false;
+function renderSync(){
+  const t={idle:'',busy:'雲端同步中…',ok:'雲端紀錄已同步　'+new Date(syncAt||Date.now()).toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'}),
+    off:'連不到雲端，紀錄先存在這台，連上後會自動同步',locked:'線上有同名且上鎖的紀錄，這份只存在這台裝置'}[syncState];
+  document.querySelectorAll('[data-sync]').forEach(e=>{e.textContent=t;});
+}
+function setSync(v){syncState=v;if(v==='ok')syncAt=Date.now();renderSync();}
+async function syncOne(p,force){
+  const key=fbKey(p.name),r=await fetch(FBS+'/'+key+'.json');
+  if(!r.ok)throw new Error('http '+r.status);
+  const old=await r.json();
+  if(old&&old.ph&&old.ph!==p.ph&&!force)return 'locked';
+  const before=JSON.stringify(p.best);
+  if(old&&old.best)mergePlayers([p],[{name:p.name,best:old.best,up:old.up}]);
+  const now=JSON.stringify(p.best),pulled=now!==before;
+  if(p.d||force||!old||JSON.stringify(old.best||{})!==now||(old.ph||null)!==(p.ph||null)){
+    const put=async(u,d)=>{const x=await fetch(u,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(d),keepalive:true});if(!x.ok)throw new Error('http '+x.status);};
+    const row=boardRow(p);
+    if(row.s||p.ph||old){
       await put(FBS+'/'+key+'.json',{n:p.name,best:p.best,ph:p.ph||null,up:Date.now()});
       if(row.s)await put(FB+'/'+key+'.json',row);
-    }catch(e){}
-  },force?50:900);
+    }
+  }
+  p.d=0;
+  return pulled?'pulled':'ok';
 }
+async function syncAll(force){
+  if(!store.players.length)return;
+  if(syncBusy){syncAgain=true;return;}
+  syncBusy=true;setSync('busy');
+  try{
+    const cur=player();let pulled=false,locked=false;
+    for(const p of store.players){
+      if(p!==cur&&!p.d)continue;
+      const r=await syncOne(p,force&&p===cur);
+      if(r==='pulled')pulled=true;
+      if(r==='locked'&&p===cur)locked=true;
+    }
+    save();
+    if(pulled){if(!$('levels').hidden)openLevels(true);titleWho();}
+    setSync(locked?'locked':'ok');
+  }catch(e){save();setSync('off');}
+  syncBusy=false;
+  if(syncAgain){syncAgain=false;syncAll();}
+}
+function boardPush(force){
+  clearTimeout(boardT);
+  const p=player();if(p){p.d=1;save();}
+  boardT=setTimeout(()=>syncAll(force),force?50:900);
+}
+addEventListener('online',()=>syncAll());
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&Date.now()-syncAt>30000)syncAll();});
+setInterval(()=>{if(!document.hidden&&(syncState==='off'||store.players.some(p=>p.d)))syncAll();},60000);
 function renderBoard(){
   const m=new Map();
   for(const k in boardRemote||{}){const r=boardRemote[k];if(r&&typeof r.n==='string'&&r.s>0)m.set(r.n,{n:r.n.slice(0,12),s:+r.s||0,st:+r.st||0,lv:+r.lv||0,ti:Math.max(0,Math.min(TITLES.length-1,+r.ti||0))});}
@@ -1626,7 +1668,7 @@ function titleFrame(now){
 }
 function titleWho(){
   const p=player(),el=$('tWho');
-  if(p){const s=stats(p);el.innerHTML=`<b>${esc(p.name)}</b><span class="badge">${TITLES[titleIdx(p)].n}</span><span>${s.s} 分</span><button type="button" id="tSwitch">換人</button>`;}
+  if(p){const s=stats(p);el.innerHTML=`<b>${esc(p.name)}</b><span class="badge">${TITLES[titleIdx(p)].n}</span><span>${s.s} 分</span><button type="button" id="tSwitch">換人</button><span data-sync style="flex:1 1 100%;font-size:12px"></span>`;renderSync();}
   else el.textContent='第一次玩會先請你取個名字。';
   $('tStart').textContent=p&&stats(p).n?'繼續遊戲':'開始遊戲';
 }
@@ -1673,6 +1715,7 @@ function start(data){
     if(st.lvl===0&&!best('h2')){newAtom('H',W*.38,H*.45);newAtom('H',W*.62,H*.5);changed();}
   }
   if(data&&data.tut)setTut(true);
+  setTimeout(()=>syncAll(),400);
   if(data&&Array.isArray(data.atoms)){titleOn=false;$('title').hidden=true;if(!player())openWho(true);}
   else showTitle();
   if(document.fonts&&document.fonts.ready)document.fonts.ready.then(()=>kick());
