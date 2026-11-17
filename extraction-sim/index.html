@@ -795,6 +795,9 @@ u.rest,.bd.rest{background:#5a8aa0}u.peak,.bd.peak{background:#c9a66b}u.fade,.bd
 .lot-st{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:4px}.bd{font-style:normal;font-size:12px;font-weight:700;color:#1a1512;border-radius:999px;padding:1px 9px}.bd.stale,.bd.rest{color:#fff}
 .ageplot{display:block;max-width:420px}
 .tb u{position:absolute;top:-3px;width:2px;height:14px;background:#f3e9d6;margin-left:-1px}.tb em{font-style:normal;font-size:10px;margin-left:3px}.tb em.up{color:#7fd39a}.tb em.dn{color:#d9705f}
+.nsc{font-family:var(--f-mono);font-size:20px;color:var(--accent)}.nsc.bad{color:var(--fail)}
+.nplan{display:flex;flex-direction:column;gap:2px;font-family:var(--f-mono);font-size:12px;color:var(--muted);margin-top:6px}
+.nmemo{width:100%;margin-top:8px;background:transparent;border:1px solid var(--line);border-radius:6px;color:var(--ink);font:inherit;font-size:14px;padding:8px}
 .brew-anim .smoke{opacity:0}.brew-anim.go .smoke{animation:baSteam 1.2s ease-out 2s 3}
 </style>
 <script>
@@ -4887,7 +4890,7 @@ let view='lobby',buyTab='store',gearTab='use',res=null,hintOn=false,curPerson=nu
 function mig(s){
   s.rel=s.rel||{};s.flags=s.flags||{};s.blends=s.blends||[];s.trust=s.trust||{};s.orders=s.orders||[];s.lots=s.lots||{};s.mk=s.mk||1.6;
   s.home=s.home||{brewers:[],grinders:[]};s.paid=s.paid||{};s.cw=s.cw||{};s.sigs=s.sigs||[];s.mseen=s.mseen||{};s.hch=s.hch||{};s.sold=s.sold||0;
-  s.green=s.green||[];s.skins=s.skins||{};s.skin=s.skin||{};s.roasters=s.roasters||['pan'];if(!s.roaster||!s.roasters.includes(s.roaster))s.roaster=s.roasters[s.roasters.length-1];s.xp=s.xp||0;s.charm=s.charm||0;s.deal=s.deal||{};s.cupd=s.cupd||{};
+  s.green=s.green||[];s.notes=s.notes||[];s.skins=s.skins||{};s.skin=s.skin||{};s.roasters=s.roasters||['pan'];if(!s.roaster||!s.roasters.includes(s.roaster))s.roaster=s.roasters[s.roasters.length-1];s.xp=s.xp||0;s.charm=s.charm||0;s.deal=s.deal||{};s.cupd=s.cupd||{};
   if(s.today&&!s.today.v7)s.today=null;
   s.bat=s.bat||{};s.blends.forEach(bl=>{bl.parts.forEach(p=>ensureBean(p[0]));regBlend(bl);});
   Object.keys(s.beans).forEach(k=>{if(!/^L\d/.test(k)){const g=s.beans[k];delete s.beans[k];ensureBean(k);if(g>0&&beanOf(k))addBatch(k,g,7);}});Object.keys(s.bat).forEach(k=>{if(!(s.beans[k]>0)){delete s.bat[k];delete s.beans[k];}});Object.keys(s.beans).forEach(ensureBean);Object.values(s.rel).forEach(R=>{if(R.fav)ensureBean(R.fav);});}
@@ -5190,7 +5193,7 @@ function brewAnim(opt,done){const B=beanOf(opt.bean)||{roast:3},col=roastCol(B.r
 /* ---------- 共用：頁首、分頁 ---------- */
 function head(label,title){const s=S();return '<div class="c-head"><div><div class="label">'+label+'</div><h1>'+title+'</h1></div><div class="c-money">'+NT(s.money)+'</div></div>';}
 function nav(){const s=S(),tabs=[['lobby','店面'],['regs','熟客'],['buy','採購'],['cellar','儲豆櫃']];if(s.flags.h_jie)tabs.push(['roast','烘豆室'+(s.green.some(l=>l.g>0)?' •':'')]);
-  if(s.flags.blend)tabs.push(['blend','配方豆']);if(s.flags.retail)tabs.push(['shelf','零售架']);tabs.push(['gear','器材庫']);if(s.flags.comp)tabs.push(['comp','比賽']);
+  if(s.flags.blend)tabs.push(['blend','配方豆']);if(s.flags.retail)tabs.push(['shelf','零售架']);tabs.push(['gear','器材庫']);tabs.push(['notes','筆記本']);if(s.flags.comp)tabs.push(['comp','比賽']);
   const v=view==='person'?'regs':view==='comprun'?'comp':view==='store'?'buy':view;
   return '<div class="c-nav" role="tablist">'+tabs.map(([k,n])=>'<button data-go="'+k+'" aria-pressed="'+(v===k)+'">'+n+(k==='regs'&&storyReady()?'<i class="dot"></i>':'')+(k==='buy'&&hunterReady()?'<i class="dot"></i>':'')+'</button>').join('')+'</div>';}
 const storyReady=()=>{const s=S();return unlockedCast(s).some(c=>{const R=rel(c.id),st=c.story[R.ch];return st&&R.a>=st.at;});};
@@ -5364,7 +5367,7 @@ function compRunHTML(){const s=S(),X=CC[curComp],C=G.COMPS[X.ci],B=beanOf(C.bean
   let h='<button class="c-back" data-go="comp">‹ 所有比賽</button><div class="panel"><div class="c-cust">'+av({name:C.name,color:C.color})+'<div><h2>'+C.name+'</h2><span class="label">'+C.role+'・指定豆 '+B.name+'</span><p class="c-quote" style="font-size:16px">'+esc(C.quote)+'</p><p class="c-hint">'+esc(C.hint)+'</p></div></div></div>';
   if(res&&res.comp){const r=res;h+='<section class="panel c-res"><div class="c-score"><div class="big" style="color:var(--accent)">'+Math.round(r.sc)+'</div><div><div class="v">'+(r.sub?'第 '+r.rank+' 名':'評審試喝')+'</div><div class="label">濃度 '+r.r.tds.toFixed(2)+'%・萃取率 '+r.r.ey.toFixed(1)+'%</div></div></div>'+
     '<div class="tb">'+r.J.parts.map(p=>'<div><span>'+p.k+'</span><i><b style="width:'+Math.round(p.s*100)+'%"></b></i></div>').join('')+'</div><p class="label">'+esc(r.J.diag.slice(-1)[0]||'')+'</p>';
-    if(r.sub){h+='<div class="c-list">'+r.board.map((x,i)=>'<div'+(x.me?' style="color:var(--accent);font-weight:700"':'')+'><span>'+(i+1)+'. '+esc(x.name)+'</span><small>'+Math.round(x.s)+' 分</small></div>').join('')+'</div><p class="c-pay"><span class="tot">'+(r.pass?'晉級！獎金 +'+NT(r.prize)+'・名聲 +'+r.dRep:'沒有晉級（需要前 '+C.need+' 名）'+(r.prize?'・安慰獎 +'+NT(r.prize):''))+'</span></p><div class="c-acts"><button class="pri" data-go="comp">回比賽列表</button></div>';}
+    h+=noteBtn();if(r.sub){h+='<div class="c-list">'+r.board.map((x,i)=>'<div'+(x.me?' style="color:var(--accent);font-weight:700"':'')+'><span>'+(i+1)+'. '+esc(x.name)+'</span><small>'+Math.round(x.s)+' 分</small></div>').join('')+'</div><p class="c-pay"><span class="tot">'+(r.pass?'晉級！獎金 +'+NT(r.prize)+'・名聲 +'+r.dRep:'沒有晉級（需要前 '+C.need+' 名）'+(r.prize?'・安慰獎 +'+NT(r.prize):''))+'</span></p><div class="c-acts"><button class="pri" data-go="comp">回比賽列表</button></div>';}
     else h+='<div class="c-acts"><button data-a="cretry"'+(o.cbean&&(s.beans[o.cbean]||0)>=DOSE?'':' disabled')+'>再沖一杯</button><button class="pri" data-a="csubmit">就交這杯參賽</button></div>';
     return h+'</section>';}
   h+='<div class="panel"><h3 class="c-h3"><span class="n">1</span>選一批指定豆</h3><div class="c-cards">'+(elig.map(id=>{const b=beanOf(id);return '<button class="c-card bean" data-set="cbean:'+id+'" aria-pressed="'+(o.cbean===id)+'"><span class="mini-jar"><i style="height:'+Math.min(100,s.beans[id]/5)+'%;background:'+roastCol(b.roast)+'"></i></span><b>'+esc(b.name)+'</b><small>'+esc(b.sub||'')+'</small><span class="pr">品質 '+qOf(id)+'・剩 '+s.beans[id]+' g</span></button>';}).join('')||'<p class="label">沒有合格的豆子了。</p>')+'</div></div>'+
@@ -5388,7 +5391,7 @@ function custHead(X,extra){const t=S().today,R=X.R;
 function serveHTML(){const s=S(),X=curCust(),o=s.last;fixSel();
   if(X.c.ev==='beans')return beansHTML(X);
   const sigAsk=X.c.ev==='sig',sg=s.sig&&beanOf(s.sig);
-  let h='<button class="c-back" data-a="lobby">‹ 回店面</button>'+custHead(X,'<p class="c-quote">「'+esc(sigAsk?'聽說你們有招牌咖啡？我要那個，用'+sg.name+'沖！':X.C.quote)+'」</p><div class="c-tags"><span>願意付 <b>'+NT(X.c.budget*(sigAsk?1.4:1))+'</b></span><span>期待 <b>'+X.target+' 分</b></span>'+(hintOn?'':'<button class="c-pill" data-a="hint">看提示</button>')+(res?'':'<button class="c-pill" data-a="skip">婉拒這位客人</button>')+'</div>'+(hintOn?'<p class="c-hint">'+esc(X.C.hint)+'</p>':''));
+  let h='<button class="c-back" data-a="lobby">‹ 回店面</button>'+custHead(X,'<p class="c-quote">「'+esc(sigAsk?'聽說你們有招牌咖啡？我要那個，用'+sg.name+'沖！':X.C.quote)+'」</p><div class="c-tags"><span>願意付 <b>'+NT(X.c.budget*(sigAsk?1.4:1))+'</b></span><span>期待 <b>'+X.target+' 分</b></span>'+(hintOn?'':'<button class="c-pill" data-a="hint">看提示</button>')+(res?'':'<button class="c-pill" data-go="notes">📓 筆記本</button><button class="c-pill" data-a="skip">婉拒這位客人</button>')+'</div>'+(hintOn?'<p class="c-hint">'+esc(X.C.hint)+'</p>':''));
   if(res)return h+resHTML();
   h+='<div class="panel"><h3 class="c-h3"><span class="n">1</span>從豆櫃挑豆子<span class="label">每杯用 '+DOSE+' g</span></h3><div class="c-cards">'+
     (Object.keys(s.beans).filter(id=>s.beans[id]>0&&beanOf(id)).map(id=>{const B=beanOf(id);return '<button class="c-card bean" data-set="bean:'+id+'" aria-pressed="'+(o.bean===id)+'"'+(beanOK(id)?'':' disabled')+'><span class="mini-jar"><i style="height:'+Math.min(100,s.beans[id]/5)+'%;background:'+roastCol(B.roast)+'"></i></span><b>'+(B.sig?'★ ':B.blend?'◆ ':'')+B.name+'</b><small>'+(B.blend?'自家配方':B.sub)+'・'+ROAST_NAME(B.roast)+'</small><small>'+B.tags.join('・')+'</small><span class="pr">剩 '+s.beans[id]+' g</span></button>';}).join('')||'<p class="label">倉庫沒有豆子了。</p>')+'</div></div>'+
@@ -5403,7 +5406,7 @@ function resHTML(){const X=curCust(),L=X.C,r=res,last=r.final;
      '<span class="relchg">'+(r.dA?'<b class="'+(r.dA>0?'up':'dn')+'">♥ 好感 '+(r.dA>0?'+':'')+r.dA+'</b>':'')+(r.dL?'<b class="'+(r.dL>0?'up':'dn')+'">忠誠 '+(r.dL>0?'+':'')+r.dL+'</b>':'')+'</span></div>':
     '<p class="c-hint">客人願意再等一杯。重沖會再用掉 '+DOSE+' g 豆子，而且第二杯只收八折。</p>')+
    '<div class="label" style="display:flex;gap:14px;flex-wrap:wrap"><span><i style="display:inline-block;width:3px;height:12px;background:var(--want);vertical-align:-1px"></i> 客人想要</span><span><i style="display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--you)"></i> 你這杯</span><span>右側：你 / 客人（滿分 5）</span></div>'+dims+
-   '<div class="c-acts">'+(last?'<button class="pri" data-a="next">'+(S().today.idx+1<S().today.q.length?'下一位客人':'打烊結帳')+'</button>':'<button data-a="accept">就這杯，直接收錢</button><button class="pri" data-a="retry">調整後重沖一杯</button>')+'</div></section>';}
+   noteBtn()+'<div class="c-acts">'+(last?'<button class="pri" data-a="next">'+(S().today.idx+1<S().today.q.length?'下一位客人':'打烊結帳')+'</button>':'<button data-a="accept">就這杯，直接收錢</button><button class="pri" data-a="retry">調整後重沖一杯</button>')+'</div></section>';}
 function beansHTML(X){const s=S(),C=X.C,R=X.R,g=C.bg||200,know=R.a>=30;
   let h='<button class="c-back" data-a="lobby">‹ 回店面</button>'+custHead(X,'<p class="c-quote">「'+esc(C.ask)+'」</p><div class="c-tags"><span>想買 <b>'+g+' g</b></span>'+(know?'<span>偏好：'+tasteTxt(C.tw)+'</span>':'<span>你跟他還不夠熟，只能憑他說的話猜</span>')+'</div>');
   if(res&&res.bean){return h+'<section class="panel c-res"><p class="c-quote">「'+esc(res.say)+'」</p>'+(res.sold?'<div class="c-pay"><span>賣出 '+g+' g '+esc(beanOf(res.id).name)+'</span><span class="tot">+'+NT(res.rev)+'（成本 '+NT(res.cost)+'）</span></div>':'')+
@@ -5454,11 +5457,11 @@ function closeHTML(){const s=S(),t=s.today,cz=closeCalc(),rent=rentOf(s),net=t.i
 /* ---------- 畫面切換 ---------- */
 function render(){if(!me)return;ensureDay();const s=S(),t=s.today;
   if(view==='serve'&&t.idx>=t.q.length)view='close';
-  const V={cellar:cellarHTML,roast:roastHTML,store:buyHTML,buy:buyHTML,serve:serveHTML,close:closeHTML,regs:regsHTML,person:personHTML,blend:blendHTML,shelf:shelfHTML,gear:gearHTML,comp:compHTML,comprun:compRunHTML}[view]||lobbyHTML;
+  const V={notes:notesHTML,cellar:cellarHTML,roast:roastHTML,store:buyHTML,buy:buyHTML,serve:serveHTML,close:closeHTML,regs:regsHTML,person:personHTML,blend:blendHTML,shelf:shelfHTML,gear:gearHTML,comp:compHTML,comprun:compRunHTML}[view]||lobbyHTML;
   $('shopBox').innerHTML=V();initDial();navWho();if(DL.hidden)BGM.set(view==='roast'?'roast':view==='comprun'?'comp':'cafe');
   if(view==='lobby'&&!busy){const m=mainPending();if(m)setTimeout(()=>{if(!busy&&view==='lobby'&&DL.hidden)playMain(m);},350);}}
 window.shopRender=render;
-window.shopBack=()=>{if(!DL.hidden)return true;if(view==='lobby')return false;view=view==='person'?'regs':view==='comprun'?'comp':'lobby';res=null;hintOn=false;render();scrollTo(0,0);return true;};
+window.shopBack=()=>{if(!DL.hidden)return true;if(view==='lobby')return false;view=view==='person'?'regs':view==='comprun'?'comp':view==='notes'&&(notesFrom==='serve'||notesFrom==='comprun')?notesFrom:'lobby';res=null;hintOn=false;render();scrollTo(0,0);return true;};
 function settle(){const s=S(),t=s.today,X=curCust(),r=res,R=X.R;r.final=true;const sigAsk=X.c.ev==='sig',isSig=!!s.sig&&baseOf(s.last.bean)===s.sig;
   const mult=X.c.tries>1?.8:1;let pay=0,tip=0,dRep=0,dA=0,dL=0;const bud=X.c.budget*(sigAsk?1.4:1);
   if(r.pass){const ex=r.sc>=X.target+(100-X.target)*.55;tip=Math.round((r.sc-X.target)/Math.max(1,100-X.target)*.5*bud/5*(1+R.a/150))*5;pay=Math.round(bud*mult*(isSig&&!sigAsk?1.15:1))+tip;dRep=ex?3:2;dA=ex?5:3;dL=2;
@@ -5468,7 +5471,25 @@ function settle(){const s=S(),t=s.today,X=curCust(),r=res,R=X.R;r.final=true;con
   if(sigAsk&&!isSig){dA-=2;r.say='這……不是你們的招牌吧？';}
   r.pay=pay;r.tip=tip;r.dRep=dRep;r.used=X.c.tries;r.cost=X.c.cost;r.dA=dA;r.dL=dL;bump(X.C.id,dA,dL,true);
   s.money+=pay;s.earned+=pay;s.cups+=1;t.income+=pay;t.served+=1;s.rep=Math.max(0,Math.min(100,s.rep+dRep));persist();}
-function runBrew(base,ex){const r=G.brew(Object.assign(base,ex&&ex.pro||{}));if(ex)setTimeout(()=>toast(ex.txt+(r.R>=1.3?'｜塞水了！排水只剩 '+Math.round(100/r.R)+'%，苦澀變重':'')),900);return r;}
+let LASTX=null,notesFrom='lobby';
+const POURN={three:'三段式',cont:'一刀流',multi:'少量多次'};
+function noteBtn(){return '<div class="buyrow"><button data-a="note"'+(res&&res.noted?' disabled':'')+'>'+(res&&res.noted?'✓ 已記在筆記本':'📓 把這杯的參數和結果記到筆記本')+'</button></div>';}
+function saveNote(){const s=S(),L=LASTX;if(!L||!res||res.noted)return;const comp=!!res.comp;
+  s.notes.unshift(Object.assign({day:s.day,who:comp?G.COMPS[CC[curComp].ci].name:curCust().C.name,comp,sc:Math.round(res.sc),tds:+res.r.tds.toFixed(2),ey:+res.r.ey.toFixed(1),R:+(res.r.R||1).toFixed(2),ok:comp?null:!!res.pass,memo:''},L));
+  s.notes=s.notes.slice(0,60);res.noted=true;persist();toast('記到筆記本了');SFX.p('save');render();}
+function notesHTML(){const s=S(),bk=notesFrom==='serve'||notesFrom==='comprun';
+  return (bk?'<button class="c-back" data-go="'+notesFrom+'">‹ 回去沖煮</button>':nav())+head('筆記本','我的沖煮配方')+'<p class="label">沖完一杯後按「記到筆記本」，參數、手法和結果就會留在這裡。之後可以翻出來參考，或直接套用同一組參數。</p>'+
+   (s.notes.length?'':'<p class="c-hint">筆記本還是空的。</p>')+s.notes.map((n,i)=>{const Gd=GRINDERS.find(g=>g.id===n.grinder)||GRINDERS[0],Bw=G.BREWERS.find(b=>b.id===n.brewer)||{name:n.brewer},imm=n.brewer==='press'||n.brewer==='switch';
+    return '<div class="panel note"><div class="c-row"><b class="bname">'+esc(n.bean)+'</b><span class="nsc '+(n.ok===false?'bad':'')+'">'+n.sc+' 分</span></div><span class="label">第 '+n.day+' 天・'+(n.comp?'比賽：':'給 ')+esc(n.who)+(n.ok===true?'・客人滿意':n.ok===false?'・客人不滿意':'')+'・'+esc(n.state||'')+'</span>'+
+     '<div class="c-list"><div><span>器具</span><small>'+esc(Bw.name)+'</small></div><div><span>磨豆機</span><small>'+esc(Gd.name)+'</small></div><div><span>研磨</span><small>'+esc(fmtGrind(Gd,n.grind))+'</small></div><div><span>水溫</span><small>'+n.temp+' °C</small></div>'+
+     '<div><span>粉水比（設定）</span><small>1 : '+n.ratio+'</small></div>'+(imm?'<div><span>浸泡時間（設定）</span><small>'+Math.floor(n.steep/60)+':'+String(n.steep%60).padStart(2,'0')+'</small></div>':'<div><span>注水方式（設定）</span><small>'+POURN[n.pour]+'</small></div>')+'<div><span>攪拌</span><small>'+(n.stir==='bloom'?'有':'不攪拌')+'</small></div>'+
+     '<div><span>濃度／萃取率</span><small>'+n.tds+'%／'+n.ey+'%'+(n.R>=1.3?'・塞水':'')+'</small></div></div>'+
+     (n.tech?'<p class="c-hint">'+esc(n.tech)+'</p>'+(n.plan?'<div class="nplan">'+n.plan.map((x,k)=>'<span>'+Math.floor(x[0]/60)+':'+String(x[0]%60).padStart(2,'0')+'　第 '+(k+1)+' 注 '+x[1]+' g（'+x[2]+' 秒，'+(x[1]/x[2]>=6.5?'大':x[1]/x[2]>=4?'中':'小')+'水流）</span>').join('')+'</div>':''):'<p class="label">這杯是自動完成的，沒有手法紀錄。</p>')+
+     '<input class="nmemo" data-memo="'+i+'" maxlength="60" placeholder="寫點心得…" value="'+esc(n.memo||'')+'">'+
+     '<div class="buyrow"><button data-napply="'+i+'">套用這組參數</button><button data-ndel="'+i+'">刪除</button></div></div>';}).join('');}
+function runBrew(base,ex){const r=G.brew(Object.assign(base,ex&&ex.pro||{}));const B0=beanOf(base.bean)||{};
+  LASTX={bean:B0.name||'',src:B0.src||base.bean,state:B0.st?'烘焙後第 '+B0.age+' 天（'+B0.st+'）':'',brewer:base.brewer,grinder:S().last.grinder,temp:base.temp,grind:base.grind,ratio:S().last.ratio,pour:S().last.pour,stir:S().last.stir,steep:S().last.steep,
+    tech:ex?ex.txt:null,plan:ex&&ex.pro?ex.pro.plan.map((ml,i)=>[ex.pro.planT[i],ml,ex.pro.planD[i]]):null};if(ex)setTimeout(()=>toast(ex.txt+(r.R>=1.3?'｜塞水了！排水只剩 '+Math.round(100/r.R)+'%，苦澀變重':'')),900);return r;}
 function brewNow(ex){const s=S(),o=s.last,Gr=GRINDERS.find(g=>g.id===o.grinder);
   return runBrew({mode:'simple',bean:o.bean,brewer:o.brewer,temp:o.temp,grind:o.grind,ratio:o.ratio,pour:o.pour,stir:o.stir,steep:o.steep,forceFines:Gr.fines},ex);}
 function doBrew(){const s=S(),t=s.today,X=curCust(),L=X.C,o=s.last;if(!o.bean||!beanOK(o.bean)||busy)return;busy=true;
@@ -5497,7 +5518,7 @@ function compSubmit(){const s=S(),X=CC[curComp],C=G.COMPS[X.ci],r=res;const riv=
   r.sub=1;r.rank=rank;r.board=board;r.pass=pass;r.prize=prize;r.dRep=dRep;persist();SFX.p(rank===1?'champ':pass?'pass':'fail');render();
   if(X.final&&rank===1)setTimeout(()=>{const m=MAIN.find(m=>m.id==='m13');if(m&&!s.mseen.m13)playMain(m);},900);}
 $('shopBox').addEventListener('click',e=>{const b=e.target.closest('button');if(!b||b.disabled||busy)return;const s=S(),t=s.today,a=b.dataset.a,d=b.dataset;
-  if(d.go){view=d.go;res=null;hintOn=false;draft=view==='blend'?draft:null;SFX.p('select');render();scrollTo(0,0);return;}
+  if(d.go){if(d.go==='notes')notesFrom=view;view=d.go;res=null;hintOn=false;draft=view==='blend'?draft:null;SFX.p('select');render();scrollTo(0,0);return;}
   if(d.btab){buyTab=d.btab;render();if(buyTab==='gear'&&G.BREWERS.concat(GRINDERS,ROASTERS).some(it=>market(s.day,it.id,1).off))SFX.p('sale');return;}if(d.gtab){gearTab=d.gtab;render();return;}
   if(d.p){curPerson=d.p;if(!rel(d.p).v)return;view='person';render();scrollTo(0,0);return;}
   if(d.replay){const C=CM[curPerson],st=C.story[+d.replay];dlg({t:'回顧・'+st.t,who:C.id,l:st.l});return;}
@@ -5519,6 +5540,10 @@ $('shopBox').addEventListener('click',e=>{const b=e.target.closest('button');if(
   if(d.gs){const [id,i,pp]=d.gs.split(':');if(s.money<+pp)return;s.money-=+pp;(s.skins[id]=s.skins[id]||[0]).push(+i);s.skin[id]=+i;toast('買到新配色：'+SK[id][+i][0]);SFX.p('cash');persist();render();return;}
   if(d.sk){const [id,i]=d.sk.split(':');s.skin[id]=+i;SFX.p('tick');persist();render();return;}
   if(d.gstep){const o=s.last,Gd=GRINDERS.find(g=>g.id===o.grinder);o.grind+=(+d.gstep)*(Gd.um||10);snapGrind();SFX.p('grind');persist();render();return;}
+  if(d.napply){const n=s.notes[+d.napply],o=s.last,miss=[];['temp','grind','ratio','pour','stir','steep'].forEach(k=>{if(n[k]!=null)o[k]=n[k];});
+    if(s.brewers.includes(n.brewer))o.brewer=n.brewer;else miss.push('濾杯');if(s.grinders.includes(n.grinder))o.grinder=n.grinder;else miss.push('磨豆機');snapGrind();persist();
+    toast(miss.length?'參數套用了，但店裡沒有那個'+miss.join('和'):'參數套用好了');SFX.p('save');if(notesFrom==='serve'||notesFrom==='comprun'){view=notesFrom;render();scrollTo(0,0);}return;}
+  if(d.ndel){s.notes.splice(+d.ndel,1);SFX.p('trash');persist();render();return;}
   if(d.dump){const B=beanOf(d.dump);delete s.beans[d.dump];toast('倒掉了 '+B.name);SFX.p('trash');persist();render();return;}
   if(d.mv){const [k,id]=d.mv.split(':'),shop=k==='brewer'?s.brewers:s.grinders,home=s.home[k+'s'],cap=k==='brewer'?capB(s):capG(s);
     if(shop.includes(id)){if(shop.length<=1){toast('店裡至少要留一個'+(k==='brewer'?'濾杯':'磨豆機'));return;}shop.splice(shop.indexOf(id),1);home.push(id);toast('收回家了');}
@@ -5549,11 +5574,13 @@ $('shopBox').addEventListener('click',e=>{const b=e.target.closest('button');if(
   else if(a==='bsave'){const nm=($('blName')&&$('blName').value.trim())||('配方 '+(s.blends.length+1));const parts=Object.entries(draft.parts);const bl={id:'bl'+Date.now().toString(36),name:nm.slice(0,12),parts};
     s.blends.push(bl);regBlend(bl);draft=null;persist();toast('存好配方「'+bl.name+'」，可以開始拼豆了');SFX.p('save');render();}
   else if(a==='cbrew')compBrew();
+  else if(a==='note')saveNote();
   else if(a==='doroast')doRoast();
   else if(a==='cretry'){res=null;render();scrollTo(0,0);}
   else if(a==='csubmit')compSubmit();
 });
 $('shopBox').addEventListener('input',e=>{const el=e.target;if(el.id==='blName'&&draft){draft.name=el.value;return;}
+  if(el.dataset&&el.dataset.memo!=null){const n=S().notes[+el.dataset.memo];if(n){n.memo=el.value;persist();}return;}
   if(el.id==='mkR'){S().mk=+el.value;persist();render();return;}
   if(el.id==='rG'&&rsel){rsel.g=+el.value;$('rGO').textContent=rsel.g+' g → 熟豆約 '+Math.round(rsel.g*.85)+' g';return;}
   if(el.id==='rR'&&rsel){rsel.roast=+el.value;render();return;}
