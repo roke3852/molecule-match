@@ -490,6 +490,15 @@ nav a.on{color:var(--maple);font-weight:700;background:var(--maple-soft)}
       </div>
     </div>
     <div class="sec">
+      <h3>🛍️ 福岡百元商店</h3>
+      <div class="hint">想去的點一下打勾。DAISO、Standard Products、THREEPPY 是同一家公司（大創），兩個大店都是三個牌子在同一層一起逛。營業時間可能調整，出發前按「地圖」確認。</div>
+      <div id="shops"></div>
+      <div class="hint" style="margin:10px 0 0">
+        <b>排進行程</b>：11/21 晚上逛博多站 AMU PLAZA 時，博多巴士總站 5 樓營業到 21:00，可以順路；11/22 在天神，Can★Do 在新天町地下、Seria 在 Mina 天神 6 樓。<br>
+        <b>免稅</b>：百元商店多半買不到免稅門檻（同一店同一天含稅 5,000 日圓以上），不用特別準備護照。
+      </div>
+    </div>
+    <div class="sec">
       <h3>🛃 帶回台灣要注意</h3>
       <div class="hint" style="margin-bottom:0">
         <b>肉類一律不行</b>：肉乾、香腸、含肉的調理包（門司港燒咖哩、牛腸鍋組合）、含肉的麵包飯糰都不能帶進台灣，違規罰款很重。<br>
@@ -1275,6 +1284,26 @@ $('#cafes').addEventListener('click',e=>{
  if(e.target.closest('a'))return;
  const r=e.target.closest('.cafe-h');if(!r)return;const id=r.parentNode.dataset.id,done=S.get('cafes',{});done[id]=!done[id];S.set('cafes',done);drawCafes()});
 drawCafes();
+const SHOPS=[
+ {id:'hbt',n:'DAISO・Standard Products・THREEPPY 博多巴士總站店',jp:'ダイソー 博多バスターミナル店',a:'博多站',b:['DAISO','Standard Products','THREEPPY'],h:'9:00–21:00・無休',d:'博多站旁、博多巴士總站 5 樓，九州最大的大創旗艦店，三個牌子在同一層。DAISO 是 100 日圓起的日用品；Standard Products 是簡約設計風的生活雜貨（多為 300 日圓起）；THREEPPY 是 300 日圓為主、粉嫩可愛的少女系雜貨和文具。',tip:'博多站走路 1 分鐘，抵達那晚或回程前都方便。'},
+ {id:'rashic',n:'DAISO・Standard Products・THREEPPY 天神（Rashic 9 樓）',jp:'ダイソー ラシック福岡天神',a:'天神',b:['DAISO','Standard Products','THREEPPY'],h:'約 10:00–20:00',d:'福岡三越旁的 Rashic 9 樓，也是三個牌子一起的大型店，跟天神百貨、地下街一起逛最順。',tip:'這間的樓層和營業時間是從在地部落格查到的，出發前請按地圖再確認。'},
+ {id:'seria',n:'Seria Mina 天神店',jp:'セリア ミーナ天神',a:'天神',b:['Seria'],h:'依 Mina 天神營業時間',d:'Mina 天神 6 樓，開幕時號稱九州最大規模的 Seria。Seria 以收納小物、廚房用品、手作材料出名，設計比較簡約好看。同棟有 UNIQLO、GU、LOFT。',tip:'Mina 天神在地鐵天神站北邊，走路約 3 分鐘。'},
+ {id:'cando',n:'Can★Do 天神店',jp:'キャンドゥ 天神店',a:'天神',b:['Can★Do'],h:'10:00–20:00',d:'新天町商店街地下的「Fabo（ファーボ）」裡面，地鐵天神站一出來就到。店不算大但品項齊，人比較少，逛起來不擠。',tip:'找「新天町地下ファーボ」的入口。'}
+];
+function drawShops(){
+ const done=S.get('shops',{});
+ $('#shops').innerHTML=SHOPS.map(c=>`<div class="cafe${done[c.id]?' on':''}" data-id="${c.id}">
+  <div class="cafe-h"><span class="box"></span><b>${esc(c.n)}</b></div>
+  <div class="cafe-m"><span class="tag">${esc(c.a)}</span>${c.b.map(x=>`<span class="tag" style="background:#eef3f8;color:#2c6e8f">${esc(x)}</span>`).join('')}<span class="cafe-t">🕒 ${esc(c.h)}</span></div>
+  <div class="cafe-d">${esc(c.d)}${c.tip?`<div class="tip">💡 ${esc(c.tip)}</div>`:''}</div>
+  <div class="cafe-b"><a class="btn" href="${mapUrl(c.jp)}" target="_blank" rel="noopener">🗺️ 地圖</a><button class="btn ghost" data-staxi="${c.id}">🚕 給司機看</button></div>
+ </div>`).join('');
+}
+$('#shops').addEventListener('click',e=>{
+ const tx=e.target.closest('[data-staxi]');if(tx){const c=SHOPS.find(x=>x.id===tx.dataset.staxi);big(c.jp+'までお願いします。','請載我們到：'+c.n);$('#ovJp').style.whiteSpace='normal';return}
+ if(e.target.closest('a'))return;
+ const r=e.target.closest('.cafe-h');if(!r)return;const id=r.parentNode.dataset.id,done=S.get('shops',{});done[id]=!done[id];S.set('shops',done);drawShops()});
+drawShops();
 
 /* ---------- 吃喝買 ↔ 行程 連結 ---------- */
 const SPOTS={
@@ -1684,7 +1713,7 @@ window.addEventListener('hashchange',route);
 /* ---------- family sync (Firebase Realtime Database, REST + 串流) ---------- */
 const FB_URL='https://molecule-match-default-rtdb.asia-southeast1.firebasedatabase.app';
 const FS=(function(){
- const KEYS=['done','cafes','gifts','foods','gphoto','memo','savedNotes','edits','todo','pack','tax','xtabs','xlists'];
+ const KEYS=['done','cafes','shops','gifts','foods','gphoto','memo','savedNotes','edits','todo','pack','tax','xtabs','xlists'];
  const raw={get(k){try{return localStorage.getItem('fuk26_'+k)}catch(e){return null}},set(k,v){try{localStorage.setItem('fuk26_'+k,v)}catch(e){}},del(k){try{localStorage.removeItem('fuk26_'+k)}catch(e){}}};
  const okCode=c=>/^[A-Za-z0-9_-]{8,40}$/.test(c||'');
  const enc=k=>encodeURIComponent(k).replace(/\./g,'%2E'),dec=k=>{try{return decodeURIComponent(k)}catch(e){return k}};
@@ -1694,7 +1723,7 @@ const FS=(function(){
  try{const u=new URLSearchParams(location.search).get('fam');if(okCode(u))raw.set('fam',u)}catch(e){}
  code=raw.get('fam');if(!okCode(code))code=null;
  function leaves(key,v){const o={};if(v==null)return o;
-  if(key==='done'||key==='cafes'||key==='gifts'||key==='foods'){for(const k in v)if(v[k])o[key+'/'+enc(k)]=true}
+  if(key==='done'||key==='cafes'||key==='shops'||key==='gifts'||key==='foods'){for(const k in v)if(v[k])o[key+'/'+enc(k)]=true}
   else if(key==='memo'){for(const k in v)if(v[k])o['memo/m'+k]=String(v[k])}
   else if(key==='savedNotes'){for(const k in v)if(v[k])o['notes/'+enc(k)]=String(v[k])}
   else if(key==='gphoto'){for(const k in v)if(v[k]&&v[k].h)o['gp/'+k]=v[k].h}
@@ -1705,7 +1734,7 @@ const FS=(function(){
   return o}
  function fromLeaves(key,E){
   const sub=pre=>{const o={};for(const p in E)if(p.startsWith(pre))o[p.slice(pre.length)]=E[p];return o};
-  if(key==='done'||key==='cafes'||key==='gifts'||key==='foods'){const o={},x=sub(key+'/');for(const k in x)if(x[k])o[dec(k)]=true;return o}
+  if(key==='done'||key==='cafes'||key==='shops'||key==='gifts'||key==='foods'){const o={},x=sub(key+'/');for(const k in x)if(x[k])o[dec(k)]=true;return o}
   if(key==='memo'){const o={},x=sub('memo/m');for(const k in x)o[k]=String(x[k]);return o}
   if(key==='savedNotes'){const o={},x=sub('notes/');for(const k in x)o[dec(k)]=String(x[k]);return o}
   if(key==='gphoto'){const o={},x=sub('gp/');for(const k in x)o[k]={h:String(x[k]),u:null};return o}
@@ -1727,7 +1756,7 @@ const FS=(function(){
   dirty=false;sig=ns;
   KEYS.forEach(k=>{const v=fromLeaves(k,E);if(k==='gphoto'){let loc=null;try{loc=JSON.parse(raw.get(k))}catch(e){}const bh={};for(const i in loc||{})if(loc[i]&&loc[i].u)bh[loc[i].h]=loc[i].u;for(const i in v)v[i].u=bh[v[i].h]||null}if(k==='xtabs'||k==='xlists'){let loc=null;try{loc=JSON.parse(raw.get(k))}catch(e){}for(const i in loc||{})if(loc[i]&&loc[i].p)v[i]=loc[i]}if(v==null)raw.del(k);else raw.set(k,JSON.stringify(v));cache[k]=leaves(k,v)});
   done=S.get('done',{});memos=S.get('memo',{});ed=S.get('edits',null);
-  renderChips();renderDay(true);drawCafes();reloaders.forEach(f=>{try{f()}catch(e){}});
+  renderChips();renderDay(true);drawCafes();drawShops();reloaders.forEach(f=>{try{f()}catch(e){}});
   photoSync();
  }
  function beat(force){if(!code)return;if(!force&&Date.now()-lastBeat<240000)return;lastBeat=Date.now();
