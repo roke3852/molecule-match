@@ -35,9 +35,9 @@ sub{font-size:.68em;line-height:0}
 
 /* 上方：關卡資訊 */
 header{padding:10px 16px 10px;display:flex;flex-direction:column;gap:6px;background:var(--ink)}
-.bar{display:flex;align-items:center;gap:10px}
+.bar{display:flex;align-items:center;gap:7px}
 .crumb{flex:1;min-width:0;color:var(--mute);font-size:12.5px;letter-spacing:.04em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.pill{min-height:36px;padding:0 14px;border-radius:999px;border:1px solid var(--line);background:var(--ink-2);font-size:13.5px;font-weight:500}
+.pill{min-height:36px;padding:0 11px;flex:0 0 auto;border-radius:999px;border:1px solid var(--line);background:var(--ink-2);font-size:13.5px;font-weight:500}
 .pill[aria-pressed="true"]{background:var(--mark);color:var(--ink);border-color:var(--mark)}
 .target{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
 .target h1{margin:0;font-size:26px;font-weight:900;letter-spacing:.02em;line-height:1.2;text-wrap:balance}
@@ -124,6 +124,7 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-acti
     <div class="bar">
       <button class="pill" id="btnLevels" type="button">關卡</button>
       <span class="crumb" id="crumb"></span>
+      <button class="pill" id="btn3d" type="button" aria-pressed="false">立體</button>
       <button class="pill" id="btnTut" type="button" aria-pressed="false">教學</button>
       <button class="pill" id="btnHint" type="button" aria-pressed="false">提示</button>
     </div>
@@ -184,9 +185,10 @@ const EL={
   C:{name:'碳',v:4,r:22,c1:'#8a8e96',c2:'#1b1d21',ink:'#ffffff'},
   N:{name:'氮',v:3,r:21,c1:'#a3c2ff',c2:'#2450c8',ink:'#ffffff'},
   O:{name:'氧',v:2,r:21,c1:'#ffa797',c2:'#c7281c',ink:'#ffffff'},
+  S:{name:'硫',v:2,r:24,c1:'#fff6b0',c2:'#d2a50c',ink:'#3a2c00'},
   Cl:{name:'氯',v:1,r:23,c1:'#dcff9a',c2:'#62ad22',ink:'#17300a'}
 };
-const ORDER=['C','H','N','O','Cl'];
+const ORDER=['C','H','N','O','S','Cl'];
 const CHAPTERS=[
  {title:'第一次組裝',levels:[
   {id:'h2',n:'氫氣',f:'H2',a:'H H',b:'0-1',hint:'H–H',
@@ -194,14 +196,17 @@ const CHAPTERS=[
    fact:'最輕的分子。氫原子只有 1 隻手，兩顆互牽就滿了。'},
   {id:'h2o',n:'水',f:'H2O',a:'O',hint:'H–O–H',
    tip:'先放一顆 O 並點選它（出現黃圈），再點下方的 H，新的球會直接接上去。',
-   fact:'氧有 2 隻手，各牽一個氫。真實的水分子不是一直線，夾角約 104.5°。'},
+   fact:'氧有 2 隻手，各牽一個氫。真實的水分子不是一直線，夾角約 104.5°。按「立體」可以看到它是彎的。'},
   {id:'nh3',n:'氨',f:'NH3',a:'N',hint:'N 在中間，接 3 個 H',
    tip:'球上突出的小短棒，就是還沒接上的手。全部接滿才算完成。',
    fact:'氮有 3 隻手。氨帶刺鼻氣味，也是製造肥料的重要原料。'},
   {id:'ch4',n:'甲烷',f:'CH4',a:'C',hint:'C 在中間，接 4 個 H',
+   tip:'組好後按右上的「立體」看看：4 個氫其實朝著正四面體的四個角。',
    fact:'碳有 4 隻手，是有機分子的骨架。甲烷是天然氣的主要成分。'},
   {id:'hcl',n:'氯化氫',f:'HCl',a:'Cl',hint:'H–Cl',
-   fact:'氯和氫一樣只有 1 隻手。氯化氫溶進水裡就是鹽酸。'}
+   fact:'氯和氫一樣只有 1 隻手。氯化氫溶進水裡就是鹽酸。'},
+  {id:'h2s',n:'硫化氫',f:'H2S',a:'S',hint:'H–S–H',
+   fact:'硫和氧一樣有 2 隻手。硫化氫是臭雞蛋味的來源，含硫的分子氣味通常都很強。'}
  ]},
  {title:'雙鍵與三鍵',levels:[
   {id:'o2',n:'氧氣',f:'O2',a:'O O',b:'0=1',hint:'O=O',
@@ -215,18 +220,28 @@ const CHAPTERS=[
   {id:'hcn',n:'氰化氫',f:'HCN',a:'C N',b:'0#1',hint:'H–C≡N',
    fact:'碳用 1 隻手牽氫，剩下 3 隻手全部牽住氮。'},
   {id:'c2h4',n:'乙烯',f:'C2H4',a:'C C',b:'0=1',hint:'H₂C=CH₂',
-   fact:'植物的催熟氣體。水果放在一起熟得快，就是乙烯的作用。'},
+   fact:'植物的催熟氣體。水果放在一起熟得快，就是乙烯的作用。雙鍵讓整個分子躺在同一個平面上。'},
   {id:'c2h2',n:'乙炔',f:'C2H2',a:'C C',b:'0#1',hint:'H–C≡C–H',
-   fact:'燃燒溫度極高，常用來焊接和切割金屬。'}
+   fact:'燃燒溫度極高，常用來焊接和切割金屬。四顆原子排成一直線。'},
+  {id:'c3h6',n:'丙烯',f:'C3H6',a:'C C C',b:'0=1 1-2',hint:'CH₂=CH–CH₃',
+   fact:'同一條碳鏈上可以同時有單鍵和雙鍵。丙烯是製造塑膠（聚丙烯）的原料。'}
  ]},
- {title:'碳鏈與官能基',autoH:true,levels:[
+ {title:'碳鏈與醇',autoH:true,levels:[
   {id:'c2h6',n:'乙烷',f:'C2H6',a:'C C',b:'0-1',hint:'CH₃–CH₃',
    tip:'這一章起可以用「補氫」：先接好 C、O、N 的骨架，再一次補滿所有的氫。',
    fact:'最短的碳鏈。碳和碳可以一直接下去，這是有機化學的起點。'},
+  {id:'c3h8',n:'丙烷',f:'C3H8',a:'C C C',b:'0-1 1-2',hint:'CH₃–CH₂–CH₃',
+   fact:'桶裝瓦斯的主要成分之一。立體看時，碳鏈其實是鋸齒狀的。'},
   {id:'ch4o',n:'甲醇',f:'CH4O',a:'C O',b:'0-1',hint:'CH₃–OH',
    fact:'–OH 叫羥基，帶羥基的碳鏈就是「醇」。甲醇有毒，不能喝。'},
   {id:'c2h6o',n:'乙醇',f:'C2H6O',a:'C C O',b:'0-1 1-2',hint:'CH₃–CH₂–OH',
-   fact:'酒精。同樣的 C₂H₆O 如果接成 C–O–C，就變成另一種分子：二甲醚。'},
+   fact:'酒精。下一關會用一模一樣的零件，組出完全不同的分子。'},
+  {id:'dme',n:'二甲醚',f:'C2H6O',a:'C O C',b:'0-1 1-2',hint:'CH₃–O–CH₃',
+   fact:'和乙醇同樣是 C₂H₆O，只是氧夾在兩個碳中間。零件相同、接法不同，叫做同分異構物。'},
+  {id:'ipa',n:'異丙醇',f:'C3H8O',a:'C C C O',b:'0-1 1-2 1-3',hint:'CH₃–CH(OH)–CH₃',
+   fact:'羥基接在中間那個碳上。常見的消毒用酒精之一。'}
+ ]},
+ {title:'官能基',autoH:true,levels:[
   {id:'ch2o',n:'甲醛',f:'CH2O',a:'C O',b:'0=1',hint:'H₂C=O',
    fact:'C=O 叫羰基。羰基在碳鏈末端的分子就是「醛」。'},
   {id:'ch2o2',n:'甲酸',f:'CH2O2',a:'C O O',b:'0=1 0-2',hint:'H–C(=O)–OH',
@@ -236,23 +251,75 @@ const CHAPTERS=[
   {id:'c3h6o',n:'丙酮',f:'C3H6O',a:'C C C O',b:'0-1 1-2 1=3',hint:'CH₃–C(=O)–CH₃',
    fact:'羰基夾在兩個碳中間就是「酮」。丙酮是去光水的主要成分。'},
   {id:'ch5n',n:'甲胺',f:'CH5N',a:'C N',b:'0-1',hint:'CH₃–NH₂',
-   fact:'–NH₂ 叫胺基，胺基酸和蛋白質都少不了它。'}
+   fact:'–NH₂ 叫胺基，胺基酸和蛋白質都少不了它。'},
+  {id:'urea',n:'尿素',f:'CH4N2O',a:'C O N N',b:'0=1 0-2 0-3',hint:'H₂N–C(=O)–NH₂',
+   fact:'一個羰基兩邊各接一個胺基。它是第一個在實驗室裡由無機物合成出來的有機分子。'},
+  {id:'gly',n:'甘胺酸',f:'C2H5NO2',a:'N C C O O',b:'0-1 1-2 2=3 2-4',hint:'H₂N–CH₂–C(=O)–OH',
+   fact:'最簡單的胺基酸，一頭是胺基、一頭是羧基。烘焙時胺基酸和糖發生梅納反應，產生香氣和褐色。'},
+  {id:'c6h6',n:'苯',f:'C6H6',a:'C C C C C C',b:'0=1 1-2 2=3 3-4 4=5 5-0',hint:'六個 C 圍成環，單鍵和雙鍵交替',
+   tip:'把碳鏈頭尾兩顆球接起來，就圍成環。複雜的分子可以按「立體」，用手指拖著轉來看。',
+   fact:'六個碳圍成正六邊形，整個分子是平的。許多香氣分子都帶著這個環。'}
  ]},
- {title:'咖啡杯裡的分子',autoH:true,levels:[
+ {title:'咖啡的酸與甜',autoH:true,levels:[
+  {id:'lactic',n:'乳酸',f:'C3H6O3',a:'C C C O O O',b:'0-1 1-2 1-3 2=4 2-5',hint:'CH₃–CH(OH)–C(=O)–OH',
+   fact:'優格般圓潤的酸。厭氧、乳酸發酵處理的咖啡，乳酸會比較多。'},
+  {id:'malic',n:'蘋果酸',f:'C4H6O5',a:'C C C C O O O O O',b:'0-1 1-2 2-3 0=4 0-5 2-6 3=7 3-8',hint:'HOOC–CH₂–CH(OH)–COOH',
+   fact:'青蘋果那種清脆的酸。兩頭各有一個羧基。'},
+  {id:'citric',n:'檸檬酸',f:'C6H8O7',a:'C C C C C C O O O O O O O',b:'0-1 1-2 2-3 3-4 2-5 0=6 0-7 2-8 5=9 5-10 4=11 4-12',hint:'HOOC–CH₂–C(OH)(COOH)–CH₂–COOH',
+   fact:'柑橘般明亮的酸，有三個羧基。它在烘焙中會逐漸分解，所以淺焙的咖啡比較喝得到。'},
+  {id:'quinic',n:'奎寧酸',f:'C7H12O6',a:'C C C C C C C O O O O O O',b:'0-1 1-2 2-3 3-4 4-5 5-0 0-6 0-7 6=8 6-9 2-10 3-11 4-12',
+   hint:'六個 C 的環（全是單鍵）：一個 C 同時接 –OH 和 –COOH；隔一個 C 之後，連續三個 C 各接一個 –OH',
+   fact:'綠原酸在烘焙時會分解出奎寧酸。全是單鍵的環不是平的，立體看是皺起來的。'},
+  {id:'glucose',n:'葡萄糖',f:'C6H12O6',a:'O C C C C C C O O O O O',b:'0-1 1-2 2-3 3-4 4-5 5-0 5-6 1-7 2-8 3-9 4-10 6-11',
+   hint:'六員環：1 個 O 加 5 個 C。O 旁邊的一個 C 接 –CH₂OH，其餘 4 個 C 各接一個 –OH',
+   fact:'生豆裡的蔗糖由葡萄糖和果糖組成。烘焙時糖會焦糖化、參與梅納反應，變成香氣和顏色。'}
+ ]},
+ {title:'咖啡的香氣',autoH:true,levels:[
   {id:'c2h4o',n:'乙醛',f:'C2H4O',a:'C C O',b:'0-1 1=2',hint:'CH₃–CH=O',
    fact:'帶青蘋果般果香的揮發性分子，烘焙後的咖啡裡找得到。'},
   {id:'c4h8o2',n:'乙酸乙酯',f:'C4H8O2',a:'C C O O C C',b:'0-1 1=2 1-3 3-4 4-5',hint:'CH₃–C(=O)–O–CH₂–CH₃',
    fact:'酸和醇接在一起就成了「酯」，多半帶水果香。發酵處理的咖啡常有這類香氣。'},
   {id:'c4h6o2',n:'2,3-丁二酮',f:'C4H6O2',a:'C C C C O O',b:'0-1 1-2 2-3 1=4 2=5',hint:'CH₃–C(=O)–C(=O)–CH₃',
    fact:'奶油香的代表分子，也是咖啡香氣的一員。'},
+  {id:'ch4s',n:'甲硫醇',f:'CH4S',a:'C S',b:'0-1',hint:'CH₃–SH',
+   fact:'把甲醇的氧換成硫。含硫分子的氣味極強，極少量就聞得到，是咖啡香氣裡很關鍵的一群。'},
   {id:'c4h4o',n:'呋喃',f:'C4H4O',a:'O C C C C',b:'0-1 1=2 2-3 3=4 4-0',hint:'五員環：1 個 O 加 4 個 C，環上有兩組 C=C',
    fact:'糖在烘焙時焦糖化、發生梅納反應，會生成許多呋喃類分子，帶來焦糖和烘烤香。'},
+  {id:'furfural',n:'糠醛',f:'C5H4O2',a:'O C C C C C O',b:'0-1 1=2 2-3 3=4 4-0 1-5 5=6',hint:'呋喃環上，O 旁邊的 C 接一個 –CH=O',
+   fact:'呋喃環加上一個醛基，帶杏仁、麵包般的甜香。糖受熱脫水就會產生。'},
+  {id:'fft',n:'2-糠基硫醇',f:'C5H6OS',a:'O C C C C C S',b:'0-1 1=2 2-3 3=4 4-0 1-5 5-6',hint:'呋喃環上，O 旁邊的 C 接 –CH₂–SH',
+   fact:'公認最有「咖啡味」的香氣分子之一。濃度極低時，聞起來就是現煮咖啡。'},
   {id:'c5h5n',n:'吡啶',f:'C5H5N',a:'N C C C C C',b:'0=1 1-2 2=3 3-4 4=5 5-0',hint:'六員環：1 個 N 加 5 個 C，單鍵和雙鍵交替',
    fact:'生豆裡的葫蘆巴鹼在烘焙時分解會產生吡啶，深焙的焦苦氣息有它一份。'},
+  {id:'mepyz',n:'2-甲基吡嗪',f:'C5H6N2',a:'N C C N C C C',b:'0=1 1-2 2=3 3-4 4=5 5-0 1-6',alt:['0-1 1=2 2-3 3=4 4-5 5=0 1-6'],
+   hint:'六員環：2 個 N 隔著環相對，單鍵和雙鍵交替；其中一個 C 接 –CH₃',
+   fact:'吡嗪類是梅納反應的產物，帶堅果、烘烤、可可般的香氣。'},
+  {id:'maltol',n:'麥芽酚',f:'C6H6O3',a:'O C C C C C C O O',b:'0-1 1=2 2-3 3-4 4=5 5-0 1-6 2-7 3=8',
+   hint:'六員環：1 個 O 加 5 個 C。從 O 開始依序是 C(–CH₃)=C(–OH)–C(=O)–CH=CH',
+   fact:'焦糖、棉花糖般的甜香，糖受熱時產生。'},
+  {id:'guaiacol',n:'愈創木酚',f:'C7H8O2',a:'C C C C C C O O C',b:'0=1 1-2 2=3 3-4 4=5 5-0 0-6 1-7 7-8',alt:['0-1 1=2 2-3 3=4 4-5 5=0 0-6 1-7 7-8'],
+   hint:'苯環上相鄰的兩個 C，一個接 –OH，一個接 –O–CH₃',
+   fact:'煙燻、丁香般的氣味，深焙咖啡比較明顯。來自綠原酸類分子的熱分解。'},
+  {id:'vanillin',n:'香草醛',f:'C8H8O3',a:'C C C C C C C O O C O',b:'0=1 1-2 2=3 3-4 4=5 5-0 0-6 6=7 2-8 8-9 3-10',alt:['0-1 1=2 2-3 3=4 4-5 5=0 0-6 6=7 2-8 8-9 3-10'],
+   hint:'苯環接 –CH=O；隔一個 C 接 –O–CH₃，再下一個 C 接 –OH',
+   fact:'香草的主要香氣。它就是愈創木酚再多一個醛基，烘焙咖啡裡也有微量。'}
+ ]},
+ {title:'咖啡因家族',autoH:true,levels:[
+  {id:'niacin',n:'菸鹼酸',f:'C6H5NO2',a:'N C C C C C C O O',b:'0=1 1-2 2=3 3-4 4=5 5-0 2-6 6=7 6-8',alt:['0-1 1=2 2-3 3=4 4-5 5=0 2-6 6=7 6-8'],
+   hint:'吡啶環上，和 N 隔一個 C 的位置接 –COOH',
+   fact:'也就是維生素 B3。葫蘆巴鹼在烘焙時分解，一部分會變成它。'},
   {id:'caffeine',n:'咖啡因',f:'C8H10N4O2',a:'C N C N C C C O N C C O N C',
    b:'0-1 1-2 2=3 3-4 4=5 5-1 5-6 6=7 6-8 8-9 8-10 10=11 10-12 12-4 12-13',
    hint:'六員環依序是 N–C(=O)–N–C=C–C(=O)，兩個 N 各接一個 CH₃。五員環共用那組 C=C，另外三個位置是 N(–CH₃)–CH=N',
-   fact:'24 顆原子、兩個併在一起的環。咖啡的提神效果和一部分苦味都來自它。'}
+   fact:'24 顆原子、兩個併在一起的環。咖啡的提神效果和一部分苦味都來自它。'},
+  {id:'theophylline',n:'茶鹼',f:'C7H8N4O2',a:'N C N C C C O N C C O N C',
+   b:'0-1 1=2 2-3 3=4 4-0 4-5 5=6 5-7 7-8 7-9 9=10 9-11 11-3 11-12',
+   hint:'和咖啡因一樣的雙環，只是五員環上的 N 不接 CH₃，改接 H',
+   fact:'茶葉裡有，人體代謝咖啡因時也會產生。比咖啡因少一個甲基。'},
+  {id:'theobromine',n:'可可鹼',f:'C7H8N4O2',a:'C N C N C C C O N C O N C',
+   b:'0-1 1-2 2=3 3-4 4=5 5-1 5-6 6=7 6-8 8-9 9=10 9-11 11-4 11-12',
+   hint:'和咖啡因一樣的雙環，只是六員環上夾在兩個 C=O 中間的 N 不接 CH₃，改接 H',
+   fact:'巧克力裡的主要生物鹼。和茶鹼是同分異構物，只差甲基接在哪個氮上。'}
  ]}
 ];
 const BO={'-':1,'=':2,'#':3};
@@ -309,8 +376,10 @@ function iso(A,B,noH){
 }
 const LEVELS=[];
 CHAPTERS.forEach((ch,ci)=>ch.levels.forEach((lv,li)=>{
-  const t=buildTarget(lv);
-  LEVELS.push(Object.assign(lv,{ci,li,autoH:!!ch.autoH,target:t,tsig:sig(t.atoms,t.bonds),need:countEl(t.atoms)}));
+  const t=buildTarget(lv),tsigs=[sig(t.atoms,t.bonds)];
+  for(const b of lv.alt||[]){const u=buildTarget({a:lv.a,b});tsigs.push(sig(u.atoms,u.bonds));}
+  const hv=t.atoms.filter(a=>a.e!=='H').length;
+  LEVELS.push(Object.assign(lv,{ci,li,autoH:!!ch.autoH,target:t,tsig:tsigs[0],tsigs,need:countEl(t.atoms),d3:t.bonds.length>=t.atoms.length||hv>=6}));
 }));
 /* 教學模式：把目標分子拆成一步一步的組裝順序 */
 function buildSteps(lv){
@@ -363,6 +432,8 @@ let st={lvl:0,atoms:[],bonds:[],sel:null,won:false,nid:1};
 let done=new Set(),drag=null,raf=0,awake=0,fx=[],flash=null,flashT=0,hintOn=false,bottomPad=0;
 let tut={on:false,steps:[],i:0,A:null,B:null,map:null,good:null,off:false,hl:{atoms:[],bond:null}};
 const EMPTY=sig([],[]);
+let view3=false,rot={x:-.35,y:.5},fit=1,spinHold=0,topPad=0;
+const F3=700;
 
 const R=e=>EL[e].r*S;
 const restLen=(a,b,o)=>R(a.e)+R(b.e)+(18-(o-1)*4)*S;
@@ -380,11 +451,11 @@ let gQueue=()=>{};
 function setScale(){
   const n=level().target.atoms.length;
   const base=Math.max(.8,Math.min(1.2,Math.min(W,H)/400));
-  S=base*(n>14?.74:n>9?.88:1);
+  S=base*(n>20?.64:n>14?.74:n>9?.88:1);
 }
 function renderHead(){
   const lv=level(),ch=CHAPTERS[lv.ci];
-  $('crumb').textContent=`第 ${lv.ci+1} 章 ${ch.title}　${lv.li+1} / ${ch.levels.length}`;
+  $('crumb').textContent=`${lv.ci+1}-${lv.li+1}　${ch.title}`;
   $('name').textContent=lv.n;
   $('formula').innerHTML=fHtml(lv.f);
   $('hint').innerHTML='接法　<b>'+lv.hint+'</b>';
@@ -407,7 +478,8 @@ function renderMeta(msg){
   const el=$('status');
   let text,warn=false;
   if(msg){text=msg;warn=true;}
-  else if(st.won)text='完成了。拖拖看，模型會跟著晃。';
+  else if(st.won)text=view3?'完成了。用手指拖曳，可以轉動立體模型。':'完成了。拖拖看，模型會跟著晃。';
+  else if(view3&&st.atoms.length)text='立體檢視：拖曳旋轉，點球和棍子一樣可以組裝';
   else if(!st.atoms.length)text='點下方的球，放上桌面';
   else{
     const lack=[],extra=[];
@@ -424,6 +496,7 @@ function renderMeta(msg){
   $('tip').hidden=!lvTip||tut.on||st.won||st.atoms.length>3&&level().target.atoms.length>4;
   if(lvTip)$('tip').textContent=lvTip;
   renderCoach();
+  topPad=$('hint').hidden?0:$('hint').offsetHeight+18;
 }
 function toast(m){clearTimeout(flashT);renderMeta(m);flashT=setTimeout(()=>renderMeta(),2200);}
 
@@ -435,10 +508,10 @@ function components(){
   for(const a of st.atoms)a.comp=find(a.id);
 }
 function changed(){
-  components();
+  components();syncPh();
   if(!st.won){
     const lv=level();
-    if(st.atoms.length===lv.target.atoms.length&&iso(sig(st.atoms,st.bonds),lv.tsig))win();
+    if(st.atoms.length===lv.target.atoms.length){const B=sig(st.atoms,st.bonds);if(lv.tsigs.some(t=>iso(B,t)))win();}
   }
   tutSync();
   clearTimeout(flashT);renderMeta();kick();
@@ -553,12 +626,13 @@ function win(){
   }
   $('winName').textContent=lv.n;$('winFormula').innerHTML=fHtml(lv.f);$('winFact').textContent=lv.fact;
   $('btnNext').textContent=st.lvl+1<LEVELS.length?(tut.on?'下一關教學':'下一關'):'全部完成，回關卡表';
-  setTimeout(()=>{if(st.won)$('win').hidden=false;},reduced?0:650);
+  setTimeout(()=>{if(st.won){$('win').hidden=false;if(lv.d3&&!view3)setView3(true);renderCoach();kick();}},reduced?0:650);
 }
 function goLevel(i,keep){
   st.lvl=Math.max(0,Math.min(LEVELS.length-1,i));
   if(!keep){st.atoms=[];st.bonds=[];st.sel=null;st.won=false;st.nid=1;}
   hintOn=tut.on;$('win').hidden=true;$('levels').hidden=true;
+  if(view3)setView3(false);
   if(tut.on){tut.steps=buildSteps(level());tut.i=0;tut.off=false;}
   setScale();renderHead();save();changed();
 }
@@ -588,7 +662,7 @@ function renderCoach(){
   tut.hl={atoms:[],bond:null};
   const s=tut.on&&!st.won?tut.steps[tut.i]:null;
   c.hidden=!s;
-  if(!s){bottomPad=0;return;}
+  if(!s){bottomPad=$('win').hidden?0:Math.max(0,$('win').offsetHeight-$('stage').parentNode.querySelector('.tray').offsetHeight);return;}
   const n=tut.steps.length;
   $('coachStep').textContent=`步驟 ${tut.i+1} / ${n}`;
   $('btnBack').hidden=!tut.off;
@@ -657,7 +731,7 @@ function step(){
   }
   let mx=0;
   for(const a of A){
-    if(drag&&drag.moved&&drag.id===a.id){a.vx=a.vy=0;continue;}
+    if(!view3&&drag&&drag.moved&&drag.id===a.id){a.vx=a.vy=0;continue;}
     a.vx=(a.vx+a.fx)*.72;a.vy=(a.vy+a.fy)*.72;
     a.x+=a.vx;a.y+=a.vy;clampAtom(a);
     mx=Math.max(mx,Math.abs(a.vx)+Math.abs(a.vy));
@@ -682,68 +756,212 @@ function drawMat(){
   for(let x=g*5,i=5;x<W-10;x+=g*5,i+=5)ctx.fillText(i,x+3,3);
   for(let y=g*5,i=5;y<H-10;y+=g*5,i+=5)ctx.fillText(i,3,y+3);
 }
+/* ---------- 立體檢視：棍子是彈簧，每顆球身邊的鄰居、空手和孤對電子互相推開（VSEPR） ---------- */
+function lonePairs(a){
+  const dbl=id=>st.bonds.some(q=>(q.a===id||q.b===id)&&q.o>1);
+  if(a.e==='O'||a.e==='S'){
+    let n=0,sp=0;
+    for(const k of st.bonds){
+      if(k.a!==a.id&&k.b!==a.id)continue;
+      if(k.o>1)return 0;
+      n++;if(dbl(k.a===a.id?k.b:k.a))sp++;
+    }
+    return n===2&&sp===2?1:2;   /* 夾在兩個 sp2 碳中間的 O（呋喃環）：孤對電子躺在環的平面上 */
+  }
+  if(a.e==='N'){
+    let mx=1,sp2=false;
+    for(const k of st.bonds){
+      if(k.a!==a.id&&k.b!==a.id)continue;
+      mx=Math.max(mx,k.o);
+      const o=k.a===a.id?k.b:k.a;
+      for(const q of st.bonds)if((q.a===o||q.b===o)&&q.o>1)sp2=true;
+    }
+    return mx===3?0:mx===2?1:sp2?0:1;
+  }
+  return 0;
+}
+/* 平面型的原子：有雙鍵，或是接在雙鍵旁邊、沒有立體孤對的 N、O */
+function isFlat(a){
+  if(st.bonds.some(q=>(q.a===a.id||q.b===a.id)&&q.o===2))return true;
+  const n=st.bonds.filter(q=>q.a===a.id||q.b===a.id).length;
+  if(a.e==='N')return n===3&&lonePairs(a)===0;
+  if(a.e==='O'||a.e==='S')return n===2&&lonePairs(a)===1;
+  return false;
+}
+function rnd3(){let x,y,z,d;do{x=Math.random()*2-1;y=Math.random()*2-1;z=Math.random()*2-1;d=Math.hypot(x,y,z);}while(d<.2||d>1);return{x:x/d,y:y/d,z:z/d};}
+function syncPh(){
+  for(const a of st.atoms){
+    const nf=Math.max(0,free(a)),n=nf+lonePairs(a);
+    if(!a.ph)a.ph=[];
+    while(a.ph.length>n)a.ph.pop();
+    while(a.ph.length<n)a.ph.push(rnd3());
+    a.ph.forEach((p,i)=>{p.free=i<nf;});
+    a.flat=isFlat(a);
+  }
+}
+function flat3(a){a.p3={x:(a.x-W/2)*.85,y:(a.y-(H-bottomPad)/2)*.85,z:(Math.random()-.5)*150};a.v3={x:0,y:0,z:0};}
+function init3(m){
+  for(const a of st.atoms){
+    if(a.p3)continue;
+    let par=null;
+    for(const k of st.bonds){const o=k.a===a.id?m.get(k.b):k.b===a.id?m.get(k.a):null;if(o&&o.p3){par=o;break;}}
+    if(par){const u=rnd3(),L=restLen(a,par,1);a.p3={x:par.p3.x+u.x*L,y:par.p3.y+u.y*L,z:par.p3.z+u.z*L};a.v3={x:0,y:0,z:0};}
+    else flat3(a);
+  }
+}
+function step3(){
+  const A=st.atoms,m=new Map(A.map(a=>[a.id,a]));
+  init3(m);
+  for(const a of A){a.g={x:0,y:0,z:0};a.nb=[];for(const p of a.ph||[]){p.gx=p.gy=p.gz=0;}}
+  const pull=(a,b,dx,dy,dz,d,f)=>{const x=dx/d*f,y=dy/d*f,z=dz/d*f;a.g.x+=x;a.g.y+=y;a.g.z+=z;b.g.x-=x;b.g.y-=y;b.g.z-=z;};
+  for(const k of st.bonds){
+    const a=m.get(k.a),b=m.get(k.b);a.nb.push(b);b.nb.push(a);
+    const dx=b.p3.x-a.p3.x,dy=b.p3.y-a.p3.y,dz=b.p3.z-a.p3.z,d=Math.hypot(dx,dy,dz)||.01;
+    pull(a,b,dx,dy,dz,d,(d-restLen(a,b,k.o))*.12);
+  }
+  for(let i=0;i<A.length;i++)for(let j=i+1;j<A.length;j++){
+    const a=A[i],b=A[j];if(a.nb.includes(b))continue;
+    let dx=b.p3.x-a.p3.x,dy=b.p3.y-a.p3.y,dz=b.p3.z-a.p3.z,d=Math.hypot(dx,dy,dz);
+    if(d<.01){dx=Math.random()-.5;dy=Math.random()-.5;dz=Math.random()-.5;d=Math.hypot(dx,dy,dz);}
+    let f=0;
+    if(a.comp===b.comp&&d<260*S)f-=Math.min(1,300*S*S/(d*d));
+    const mm=R(a.e)+R(b.e)+8*S;if(d<mm)f-=(mm-d)*.25;
+    if(f)pull(a,b,dx,dy,dz,d,f);
+  }
+  const add=(u,x,y,z,c)=>{
+    if(u.at){const r=x*u.x+y*u.y+z*u.z;x-=r*u.x;y-=r*u.y;z-=r*u.z;   /* 只留切線方向的力，才不會把棍子拉長 */
+      u.at.g.x+=x;u.at.g.y+=y;u.at.g.z+=z;c.g.x-=x;c.g.y-=y;c.g.z-=z;}
+    else{u.ph.gx+=x;u.ph.gy+=y;u.ph.gz+=z;}
+  };
+  for(const a of A){
+    const L=[];
+    for(const b of a.nb){const dx=b.p3.x-a.p3.x,dy=b.p3.y-a.p3.y,dz=b.p3.z-a.p3.z,d=Math.hypot(dx,dy,dz)||.01;L.push({x:dx/d,y:dy/d,z:dz/d,at:b});}
+    for(const p of a.ph||[])L.push({x:p.x,y:p.y,z:p.z,ph:p});
+    for(let i=0;i<L.length;i++)for(let j=i+1;j<L.length;j++){
+      const u=L[i],v=L[j];let dx=u.x-v.x,dy=u.y-v.y,dz=u.z-v.z,d=Math.hypot(dx,dy,dz);
+      if(d<.05){dx=Math.random()-.5;dy=Math.random()-.5;dz=Math.random()-.5;d=Math.hypot(dx,dy,dz);}
+      const f=Math.min(3.5,1.2/(d*d))/d;
+      add(u,dx*f,dy*f,dz*f,a);add(v,-dx*f,-dy*f,-dz*f,a);
+    }
+    a.L=L;
+  }
+  /* 雙鍵兩端的原子要躺在同一個平面上 */
+  const flat=(a,b)=>{
+    const d0=b.L.find(u=>u.at===a),d1=b.L.find(u=>u.at&&u.at!==a)||b.L.find(u=>u.at!==a);if(!d0||!d1)return;
+    let nx=d0.y*d1.z-d0.z*d1.y,ny=d0.z*d1.x-d0.x*d1.z,nz=d0.x*d1.y-d0.y*d1.x;const l=Math.hypot(nx,ny,nz);
+    if(l<.15)return;nx/=l;ny/=l;nz/=l;
+    for(const u of a.L){
+      if(u.at===b)continue;
+      const h=-(u.x*nx+u.y*ny+u.z*nz)*3.2;
+      add(u,nx*h,ny*h,nz*h,a);
+    }
+  };
+  for(const k of st.bonds){const a=m.get(k.a),b=m.get(k.b);if(k.o===2||(a.flat&&b.flat)){flat(a,b);flat(b,a);}}
+  let mx=0,cx=0,cy=0,cz=0;
+  for(const a of A){
+    const v=a.v3;v.x=(v.x+a.g.x)*.68;v.y=(v.y+a.g.y)*.68;v.z=(v.z+a.g.z)*.68;
+    const sp=Math.hypot(v.x,v.y,v.z);if(sp>9){v.x*=9/sp;v.y*=9/sp;v.z*=9/sp;}
+    a.p3.x+=v.x;a.p3.y+=v.y;a.p3.z+=v.z;mx=Math.max(mx,sp);
+    cx+=a.p3.x;cy+=a.p3.y;cz+=a.p3.z;
+    for(const p of a.ph||[]){
+      p.x+=p.gx*.22;p.y+=p.gy*.22;p.z+=p.gz*.22;
+      const d=Math.hypot(p.x,p.y,p.z)||1;p.x/=d;p.y/=d;p.z/=d;
+    }
+  }
+  if(A.length){cx/=A.length;cy/=A.length;cz/=A.length;for(const a of A){a.p3.x-=cx*.2;a.p3.y-=cy*.2;a.p3.z-=cz*.2;}}
+  return mx;
+}
+function scr(p){
+  const cy=Math.cos(rot.y),sy=Math.sin(rot.y),cx=Math.cos(rot.x),sx=Math.sin(rot.x);
+  const x1=p.x*cy+p.z*sy,z1=-p.x*sy+p.z*cy,y2=p.y*cx-z1*sx,z2=p.y*sx+z1*cx;
+  const s=fit*F3/(F3-z2*fit);
+  return{x:W/2+x1*s,y:topPad+(H-topPad-bottomPad)/2+y2*s,s,z:z2};
+}
+function project(){
+  const P=new Map();
+  for(const a of st.atoms)P.set(a.id,view3&&a.p3?scr(a.p3):{x:a.x,y:a.y,s:1,z:0});
+  return P;
+}
+function setView3(on){
+  view3=on;$('btn3d').setAttribute('aria-pressed',on);
+  if(on){for(const a of st.atoms)if(!a.p3)flat3(a);syncPh();spinHold=performance.now()+900;}
+  $('stage').classList.toggle('v3',on);
+  renderMeta();kick(120);
+}
 function draw(now){
   ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,W,H);
   drawMat();
-  ctx.lineCap='round';
-  // 棍子
-  for(const k of st.bonds){
-    const a=atomBy(k.a),b=atomBy(k.b);
-    const dx=b.x-a.x,dy=b.y-a.y,d=Math.hypot(dx,dy)||1,nx=-dy/d,ny=dx/d;
-    const offs=k.o===1?[0]:k.o===2?[-5.5,5.5]:[-9,0,9],w=(k.o===1?8:6)*S;
-    for(const pass of [0,1])for(const o of offs){
-      ctx.strokeStyle=pass?'#dfe7e3':'rgba(6,24,21,.55)';ctx.lineWidth=pass?w:w+3;
-      ctx.beginPath();ctx.moveTo(a.x+nx*o*S,a.y+ny*o*S);ctx.lineTo(b.x+nx*o*S,b.y+ny*o*S);ctx.stroke();
-    }
+  if(view3){
+    let ext=40;for(const a of st.atoms)if(a.p3)ext=Math.max(ext,Math.hypot(a.p3.x,a.p3.y,a.p3.z)+R(a.e)+14*S);
+    const tg=Math.max(.4,Math.min(1.4,(Math.min(W,H-topPad-bottomPad)/2-6)/ext));
+    fit+=(tg-fit)*.12;
   }
+  const P=project();
+  ctx.lineCap='round';
+  for(const a of st.atoms)if(a.shake){const t=now-a.shake;if(t<350)P.get(a.id).x+=Math.sin(t/22)*5*(1-t/350);else a.shake=0;}
   // 教學：發亮的棍子
   if(tut.hl.bond){
-    const a=atomBy(tut.hl.bond[0]),b=atomBy(tut.hl.bond[1]);
+    const a=P.get(tut.hl.bond[0]),b=P.get(tut.hl.bond[1]);
     if(a&&b){
-      const p=reduced?.6:.45+.3*Math.sin(now/220);
-      ctx.strokeStyle=`rgba(255,210,74,${p})`;ctx.lineWidth=30*S;
+      ctx.strokeStyle=`rgba(255,210,74,${reduced?.6:.45+.3*Math.sin(now/220)})`;ctx.lineWidth=30*S*(a.s+b.s)/2;
       ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();
-      for(const k of st.bonds)if((k.a===a.id&&k.b===b.id)||(k.a===b.id&&k.b===a.id)){
-        const dx=b.x-a.x,dy=b.y-a.y,d=Math.hypot(dx,dy)||1,nx=-dy/d,ny=dx/d;
-        const offs=k.o===1?[0]:k.o===2?[-5.5,5.5]:[-9,0,9];
-        ctx.strokeStyle='#dfe7e3';ctx.lineWidth=(k.o===1?8:6)*S;
-        for(const o of offs){ctx.beginPath();ctx.moveTo(a.x+nx*o*S,a.y+ny*o*S);ctx.lineTo(b.x+nx*o*S,b.y+ny*o*S);ctx.stroke();}
-      }
     }
   }
-  // 還沒接上的手
+  const items=[];
+  for(const k of st.bonds){const a=P.get(k.a),b=P.get(k.b);items.push({t:0,z:(a.z+b.z)/2,k,a,b});}
   if(!st.won)for(const a of st.atoms){
-    const r=R(a.e);
-    for(const ang of pegAngles(a)){
+    const pa=P.get(a.id),r=R(a.e);
+    if(view3&&a.p3){
+      for(const p of a.ph||[]){
+        if(!p.free)continue;
+        const q0=scr({x:a.p3.x+p.x*r*.55,y:a.p3.y+p.y*r*.55,z:a.p3.z+p.z*r*.55}),q=scr({x:a.p3.x+p.x*(r+10*S),y:a.p3.y+p.y*(r+10*S),z:a.p3.z+p.z*(r+10*S)});
+        items.push({t:1,z:q.z+.001,x1:q0.x,y1:q0.y,x2:q.x,y2:q.y,s:q.s});
+      }
+    }else for(const ang of pegAngles(a)){
       const c=Math.cos(ang),s=Math.sin(ang);
-      ctx.strokeStyle='rgba(6,24,21,.5)';ctx.lineWidth=7*S;
-      ctx.beginPath();ctx.moveTo(a.x+c*(r-2),a.y+s*(r-2));ctx.lineTo(a.x+c*(r+9*S),a.y+s*(r+9*S));ctx.stroke();
-      ctx.strokeStyle='#ffd24a';ctx.lineWidth=4*S;
-      ctx.beginPath();ctx.moveTo(a.x+c*(r-2),a.y+s*(r-2));ctx.lineTo(a.x+c*(r+9*S),a.y+s*(r+9*S));ctx.stroke();
+      items.push({t:1,z:.001,x1:pa.x+c*(r-2),y1:pa.y+s*(r-2),x2:pa.x+c*(r+9*S),y2:pa.y+s*(r+9*S),s:1});
     }
   }
-  // 球
-  for(const a of st.atoms){
-    const d=EL[a.e],r=R(a.e);let x=a.x,y=a.y;
-    if(a.shake){const t=now-a.shake;if(t<350)x+=Math.sin(t/22)*5*(1-t/350);else a.shake=0;}
-    ctx.fillStyle='rgba(4,18,16,.3)';ctx.beginPath();ctx.arc(x+2.5,y+4,r,0,7);ctx.fill();
-    const g=ctx.createRadialGradient(x-r*.35,y-r*.4,r*.08,x,y,r);
-    g.addColorStop(0,d.c1);g.addColorStop(1,d.c2);
-    ctx.fillStyle=g;ctx.beginPath();ctx.arc(x,y,r,0,7);ctx.fill();
-    ctx.fillStyle=d.ink;ctx.font=`600 ${Math.round(r*.95)}px "Barlow Condensed",sans-serif`;
-    ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(a.e,x,y+1);
-    if(st.sel===a.id){
-      ctx.strokeStyle='#ffd24a';ctx.lineWidth=3;ctx.setLineDash([7,6]);
-      ctx.lineDashOffset=reduced?0:-now/45;
-      ctx.beginPath();ctx.arc(x,y,r+6,0,7);ctx.stroke();ctx.setLineDash([]);
+  for(const a of st.atoms){const p=P.get(a.id);items.push({t:2,z:p.z+.002,a,p});}
+  items.sort((u,v)=>u.z-v.z);
+  for(const it of items){
+    if(it.t===0){
+      const k=it.k;let a=it.a,b=it.b,ea=atomBy(k.a).e,eb=atomBy(k.b).e;
+      if(a.z>b.z){const t=a;a=b;b=t;const e=ea;ea=eb;eb=e;}
+      let ax=a.x,ay=a.y;const dx=b.x-ax,dy=b.y-ay,d=Math.hypot(dx,dy)||1,nx=-dy/d,ny=dx/d,sc=(a.s+b.s)/2*S;
+      if(view3){const tr=Math.min(R(ea)*a.s*.9,d*.45);ax+=dx/d*tr;ay+=dy/d*tr;}
+      const offs=k.o===1?[0]:k.o===2?[-5.5,5.5]:[-9,0,9],w=(k.o===1?8:6)*sc;
+      for(const pass of [0,1])for(const o of offs){
+        ctx.strokeStyle=pass?'#dfe7e3':'rgba(6,24,21,.55)';ctx.lineWidth=pass?w:w+3;
+        ctx.beginPath();ctx.moveTo(ax+nx*o*sc,ay+ny*o*sc);ctx.lineTo(b.x+nx*o*sc,b.y+ny*o*sc);ctx.stroke();
+      }
+    }else if(it.t===1){
+      ctx.strokeStyle='rgba(6,24,21,.5)';ctx.lineWidth=7*S*it.s;
+      ctx.beginPath();ctx.moveTo(it.x1,it.y1);ctx.lineTo(it.x2,it.y2);ctx.stroke();
+      ctx.strokeStyle='#ffd24a';ctx.lineWidth=4*S*it.s;
+      ctx.beginPath();ctx.moveTo(it.x1,it.y1);ctx.lineTo(it.x2,it.y2);ctx.stroke();
+    }else{
+      const a=it.a,p=it.p,d=EL[a.e],r=R(a.e)*p.s,x=p.x,y=p.y;
+      ctx.fillStyle='rgba(4,18,16,.3)';ctx.beginPath();ctx.arc(x+2.5,y+4,r,0,7);ctx.fill();
+      const g=ctx.createRadialGradient(x-r*.35,y-r*.4,r*.08,x,y,r);
+      g.addColorStop(0,d.c1);g.addColorStop(1,d.c2);
+      ctx.fillStyle=g;ctx.beginPath();ctx.arc(x,y,r,0,7);ctx.fill();
+      ctx.fillStyle=d.ink;ctx.font=`600 ${Math.round(r*.95)}px "Barlow Condensed",sans-serif`;
+      ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(a.e,x,y+1);
+      if(view3&&p.z<0){ctx.fillStyle=`rgba(10,36,31,${Math.min(.42,-p.z/380)})`;ctx.beginPath();ctx.arc(x,y,r+.5,0,7);ctx.fill();}
+      if(st.sel===a.id){
+        ctx.strokeStyle='#ffd24a';ctx.lineWidth=3;ctx.setLineDash([7,6]);
+        ctx.lineDashOffset=reduced?0:-now/45;
+        ctx.beginPath();ctx.arc(x,y,r+6,0,7);ctx.stroke();ctx.setLineDash([]);
+      }
     }
   }
   // 教學：亮起來的球
   for(const id of tut.hl.atoms){
-    const a=atomBy(id);if(!a||st.sel===id)continue;
-    const r=R(a.e)+8+(reduced?0:2.5*Math.sin(now/220));
-    ctx.strokeStyle='#ffd24a';ctx.lineWidth=3.5;ctx.beginPath();ctx.arc(a.x,a.y,r,0,7);ctx.stroke();
-    ctx.strokeStyle='rgba(255,210,74,.35)';ctx.lineWidth=7;ctx.beginPath();ctx.arc(a.x,a.y,r+5,0,7);ctx.stroke();
+    const a=atomBy(id),p=P.get(id);if(!a||!p||st.sel===id)continue;
+    const r=R(a.e)*p.s+8+(reduced?0:2.5*Math.sin(now/220));
+    ctx.strokeStyle='#ffd24a';ctx.lineWidth=3.5;ctx.beginPath();ctx.arc(p.x,p.y,r,0,7);ctx.stroke();
+    ctx.strokeStyle='rgba(255,210,74,.35)';ctx.lineWidth=7;ctx.beginPath();ctx.arc(p.x,p.y,r+5,0,7);ctx.stroke();
   }
   // 完成時的光圈
   fx=fx.filter(f=>now-f.t<900);
@@ -755,21 +973,25 @@ function draw(now){
 }
 function tick(now){
   raf=0;
-  const e=step();draw(now);
+  const e=view3?step3():step();
+  if(view3&&!reduced&&!drag&&st.sel==null&&now>spinHold)rot.y+=.007;
+  draw(now);
   if(awake>0)awake--;
-  if(e>.02||awake>0||drag||fx.length||(st.sel!=null&&!reduced)||(!reduced&&(tut.hl.atoms.length||tut.hl.bond))||st.atoms.some(a=>a.shake))raf=requestAnimationFrame(tick);
+  if(e>.02||awake>0||drag||fx.length||(view3&&!reduced)||(st.sel!=null&&!reduced)||(!reduced&&(tut.hl.atoms.length||tut.hl.bond))||st.atoms.some(a=>a.shake))raf=requestAnimationFrame(tick);
 }
 function kick(n){awake=Math.max(awake,n||60);if(!raf)raf=requestAnimationFrame(tick);}
 
 /* ---------- 觸控 ---------- */
 function pos(ev){const r=cv.getBoundingClientRect();return{x:ev.clientX-r.left,y:ev.clientY-r.top};}
 function hitAtom(p){
-  for(let i=st.atoms.length-1;i>=0;i--){const a=st.atoms[i];if(Math.hypot(a.x-p.x,a.y-p.y)<R(a.e)+9)return a;}
+  const P=project(),L=st.atoms.map((a,i)=>({a,q:P.get(a.id),i})).sort((u,v)=>(v.q.z-u.q.z)||(v.i-u.i));
+  for(const {a,q} of L)if(Math.hypot(q.x-p.x,q.y-p.y)<R(a.e)*q.s+9)return a;
   return null;
 }
 function hitBond(p){
+  const P=project();
   for(const k of st.bonds){
-    const a=atomBy(k.a),b=atomBy(k.b),dx=b.x-a.x,dy=b.y-a.y,l2=dx*dx+dy*dy||1;
+    const a=P.get(k.a),b=P.get(k.b),dx=b.x-a.x,dy=b.y-a.y,l2=dx*dx+dy*dy||1;
     const t=Math.max(0,Math.min(1,((p.x-a.x)*dx+(p.y-a.y)*dy)/l2));
     if(Math.hypot(a.x+dx*t-p.x,a.y+dy*t-p.y)<14)return k;
   }
@@ -778,18 +1000,22 @@ function hitBond(p){
 cv.addEventListener('pointerdown',ev=>{
   const p=pos(ev),a=hitAtom(p);
   try{cv.setPointerCapture(ev.pointerId);}catch(e){}
-  if(a)drag={id:a.id,sx:p.x,sy:p.y,ox:a.x-p.x,oy:a.y-p.y,moved:false};
-  else drag={id:null,bond:hitBond(p),sx:p.x,sy:p.y,moved:false};
+  if(a)drag={id:a.id,sx:p.x,sy:p.y,lx:p.x,ly:p.y,ox:a.x-p.x,oy:a.y-p.y,moved:false};
+  else drag={id:null,bond:hitBond(p),sx:p.x,sy:p.y,lx:p.x,ly:p.y,moved:false};
   kick();
 });
 cv.addEventListener('pointermove',ev=>{
   if(!drag)return;
   const p=pos(ev);
   if(!drag.moved&&Math.hypot(p.x-drag.sx,p.y-drag.sy)>8)drag.moved=true;
-  if(drag.moved&&drag.id!=null){
+  if(drag.moved&&view3){
+    rot.y+=(p.x-drag.lx)*.011;rot.x=Math.max(-1.5,Math.min(1.5,rot.x-(p.y-drag.ly)*.011));
+    spinHold=performance.now()+2500;kick();
+  }else if(drag.moved&&drag.id!=null){
     const a=atomBy(drag.id);
     if(a){a.x=p.x+drag.ox;a.y=p.y+drag.oy;clampAtom(a);kick();}
   }
+  drag.lx=p.x;drag.ly=p.y;
 });
 function endDrag(ev,cancel){
   if(!drag)return;
@@ -809,12 +1035,13 @@ $('parts').addEventListener('click',ev=>{const b=ev.target.closest('.part');if(b
 $('btnDel').addEventListener('click',removeSel);
 $('btnClear').addEventListener('click',clearAll);
 $('btnH').addEventListener('click',autoH);
-$('btnHint').addEventListener('click',()=>{hintOn=!hintOn;$('hint').hidden=!hintOn;$('btnHint').setAttribute('aria-pressed',hintOn);});
+$('btnHint').addEventListener('click',()=>{hintOn=!hintOn;$('hint').hidden=!hintOn;$('btnHint').setAttribute('aria-pressed',hintOn);renderMeta();kick();});
 $('btnStay').addEventListener('click',()=>{
   if(tut.on){tut.on=false;$('btnTut').setAttribute('aria-pressed',false);hintOn=false;$('hint').hidden=true;$('btnHint').setAttribute('aria-pressed',false);clearAll();}
-  else $('win').hidden=true;
+  else{$('win').hidden=true;renderCoach();kick();}
 });
 $('btnTut').addEventListener('click',()=>setTut(!tut.on));
+$('btn3d').addEventListener('click',()=>setView3(!view3));
 $('btnBack').addEventListener('click',tutBack);
 $('btnNext').addEventListener('click',()=>{if(st.lvl+1<LEVELS.length)goLevel(st.lvl+1);else{$('win').hidden=true;openLevels();}});
 $('btnLevels').addEventListener('click',openLevels);
