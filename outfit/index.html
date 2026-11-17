@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="穿搭試衣間">
+<meta name="theme-color" content="#2f3a4a">
+<meta name="app-version" content="1.0">
+<title>穿搭試衣間</title>
+<style>
+:root{--bg:#f4f1ec;--card:#fff;--ink:#23201d;--mute:#857b70;--line:#e5ddd2;--accent:#2f3a4a;--hot:#c8553d;--soft:#ece6dc;--ok:#2f8f5b}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;font-size:15px;padding-bottom:calc(70px + env(safe-area-inset-bottom))}
+header{position:sticky;top:0;z-index:8;background:var(--accent);color:#fff;padding:calc(9px + env(safe-area-inset-top)) 14px 9px;display:flex;align-items:center;gap:10px}
+header a{color:#fff;text-decoration:none;font-size:22px;opacity:.85;line-height:1}
+header h1{font-size:17px;margin:0;flex:1}
+header button{font:inherit;font-size:13px;background:rgba(255,255,255,.16);color:#fff;border:0;border-radius:16px;padding:5px 11px;cursor:pointer}
+main{max-width:720px;margin:0 auto;padding:10px 12px}
+nav{position:fixed;bottom:0;left:0;right:0;z-index:9;background:#fff;border-top:1px solid var(--line);display:flex;padding-bottom:env(safe-area-inset-bottom)}
+nav button{flex:1;border:0;background:none;font:inherit;font-size:11px;color:var(--mute);padding:7px 0 6px;display:flex;flex-direction:column;align-items:center;gap:1px;cursor:pointer}
+nav button .i{font-size:21px}
+nav button.on{color:var(--hot);font-weight:700}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:10px}
+h2{font-size:14px;margin:16px 2px 8px;color:var(--mute);font-weight:600}
+.btn{font:inherit;font-size:14px;border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:10px;padding:8px 12px;cursor:pointer;text-decoration:none;display:inline-block}
+.btn.pri{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
+.btn.hot{background:var(--hot);border-color:var(--hot);color:#fff;font-weight:600}
+.btn.sm{padding:5px 9px;font-size:12.5px;border-radius:9px}
+.btn.big{width:100%;padding:12px;font-size:16px}
+.btn.del{color:#b91c1c;border-color:#f3c9c9}
+.muted{color:var(--mute);font-size:12.5px;line-height:1.5}
+.chips{display:flex;gap:6px;overflow-x:auto;padding:2px 0 8px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;font:inherit;font-size:13px;border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:16px;padding:5px 11px;cursor:pointer;white-space:nowrap}
+.chip.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+.chip.s2.on{background:var(--hot);border-color:var(--hot)}
+.stage{position:sticky;top:calc(44px + env(safe-area-inset-top));z-index:5;background:linear-gradient(#e9e4dc,#f7f4ef 70%,#e2dbd0);border:1px solid var(--line);border-radius:16px;overflow:hidden;margin-bottom:8px}
+.stage svg.fig{display:block;width:100%;height:46vh;min-height:300px}
+.stage .side{position:absolute;right:8px;top:8px;display:flex;flex-direction:column;gap:6px}
+.stage .side button{font:inherit;font-size:12px;border:1px solid var(--line);background:rgba(255,255,255,.92);border-radius:10px;padding:6px 8px;cursor:pointer;min-width:54px}
+.stage .side button.on{background:var(--accent);color:#fff}
+.stage .who{position:absolute;left:10px;top:8px;font-size:12px;color:var(--mute);background:rgba(255,255,255,.8);border-radius:10px;padding:3px 8px}
+.rail{display:flex;gap:8px;overflow-x:auto;padding:2px 0 8px}
+.it{flex:none;width:92px;background:#fff;border:2px solid var(--line);border-radius:12px;padding:4px;cursor:pointer;text-align:center;position:relative}
+.it.on{border-color:var(--hot)}
+.it svg,.it img{width:100%;height:84px;display:block;border-radius:8px;background:#f6f3ee;object-fit:cover}
+.it .n{font-size:11.5px;line-height:1.25;margin-top:3px;height:29px;overflow:hidden}
+.it .p{font-size:11px;color:var(--hot);font-weight:700}
+.it .bd{position:absolute;left:6px;top:6px;font-size:9.5px;background:var(--accent);color:#fff;border-radius:6px;padding:0 4px}
+.sw{display:flex;gap:7px;flex-wrap:wrap;align-items:center}
+.sw button{width:28px;height:28px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px #cfc6b9;cursor:pointer;padding:0}
+.sw button.on{box-shadow:0 0 0 2.5px var(--hot)}
+.sw input[type=color]{width:34px;height:30px;border:0;background:none;padding:0}
+.worn{display:flex;flex-wrap:wrap;gap:6px}
+.worn span{font-size:12.5px;background:var(--soft);border-radius:14px;padding:4px 6px 4px 10px;display:inline-flex;align-items:center;gap:4px}
+.worn span i{font-style:normal;width:12px;height:12px;border-radius:50%;display:inline-block;border:1px solid rgba(0,0,0,.15)}
+.worn span button{border:0;background:none;font-size:14px;color:var(--mute);cursor:pointer;padding:0 3px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.g{background:#fff;border:1px solid var(--line);border-radius:14px;padding:8px;display:flex;flex-direction:column;gap:5px}
+.g svg,.g img.ph{width:100%;height:120px;border-radius:10px;background:#f6f3ee;object-fit:cover;display:block}
+.g .two{display:grid;grid-template-columns:1fr 1fr;gap:4px}
+.g .two svg,.g .two img.ph{height:104px}
+.g .nm{font-size:13.5px;font-weight:700;line-height:1.3}
+.g .br{font-size:11.5px;color:var(--mute)}
+.g .pr{font-size:14px;color:var(--hot);font-weight:700}
+.g .row{display:flex;gap:5px;flex-wrap:wrap;margin-top:auto}
+.tag{display:inline-block;font-size:10.5px;padding:1px 6px;border-radius:7px;background:var(--soft);color:#6b5d4f;margin-right:3px}
+.bar{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.bar .r{margin-left:auto}
+.sum{background:#fff7ed;border:1px solid #f1d9b5;border-radius:12px;padding:9px 12px;font-size:13.5px;line-height:1.6;margin-bottom:10px}
+.sum b{color:var(--hot)}
+.fld{display:grid;grid-template-columns:64px 1fr 78px;gap:8px;align-items:center;margin:7px 0;font-size:13.5px}
+.fld input[type=range]{width:100%}
+.fld input[type=number]{width:78px;padding:7px 6px}
+input[type=text],input[type=number],input[type=url],input[type=password],select{font:inherit;font-size:15px;border:1px solid var(--line);border-radius:9px;padding:7px 9px;background:#fff;color:var(--ink);min-width:0}
+label.f{display:block;font-size:12.5px;color:var(--mute);margin:10px 0 4px}
+.sheet{position:fixed;inset:0;z-index:20;background:rgba(30,25,20,.45);display:flex;align-items:flex-end;justify-content:center}
+.sheet .in{background:var(--bg);width:100%;max-width:560px;max-height:92vh;overflow:auto;border-radius:18px 18px 0 0;padding:14px 14px calc(18px + env(safe-area-inset-bottom))}
+.sheet h3{margin:0 0 6px;font-size:17px;display:flex;align-items:center}
+.sheet h3 button{margin-left:auto;border:0;background:none;font-size:22px;color:var(--mute);cursor:pointer}
+.login{max-width:440px;margin:0 auto;padding:26px 16px}
+.login h2{font-size:24px;color:var(--ink);margin:0 0 4px}
+.names{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;margin:14px 0}
+.names button{font:inherit;font-size:16px;font-weight:700;background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px 8px;cursor:pointer}
+.names button small{display:block;font-weight:400;font-size:11px;color:var(--mute);margin-top:3px}
+.toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--accent);color:#fff;font-size:14px;padding:9px 16px;border-radius:20px;z-index:30;max-width:90vw;text-align:center}
+.pal i{display:inline-block;width:18px;height:18px;border-radius:50%;border:1px solid rgba(0,0,0,.12);margin-right:3px;vertical-align:middle}
+.look svg{width:100%;height:190px;background:linear-gradient(#ece7df,#f7f4ef);border-radius:10px;display:block}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:13.5px}
+.kv b{font-weight:600}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute"><defs>
+<pattern id="p-stripe-d" width="10" height="9" patternUnits="userSpaceOnUse"><rect width="10" height="3.4" fill="#1f2a44" opacity=".88"/></pattern>
+<pattern id="p-stripe-l" width="10" height="9" patternUnits="userSpaceOnUse"><rect width="10" height="3.4" fill="#fff" opacity=".85"/></pattern>
+<pattern id="p-plaid" width="16" height="16" patternUnits="userSpaceOnUse"><rect width="5" height="16" fill="#000" opacity=".22"/><rect width="16" height="5" fill="#000" opacity=".22"/><rect x="10" width="1.2" height="16" fill="#fff" opacity=".5"/><rect y="10" width="16" height="1.2" fill="#fff" opacity=".5"/></pattern>
+<pattern id="p-knit" width="4.5" height="6" patternUnits="userSpaceOnUse"><rect width="1" height="6" fill="#000" opacity=".1"/></pattern>
+<pattern id="p-quilt" width="20" height="16" patternUnits="userSpaceOnUse"><rect width="20" height="1.3" fill="#000" opacity=".22"/></pattern>
+<pattern id="p-floral" width="18" height="18" patternUnits="userSpaceOnUse"><circle cx="4" cy="5" r="2.3" fill="#fff" opacity=".85"/><circle cx="13" cy="13" r="2.3" fill="#f6d55c" opacity=".9"/><circle cx="13" cy="4" r="1.2" fill="#fff" opacity=".6"/><circle cx="5" cy="14" r="1.2" fill="#2f6b4a" opacity=".7"/></pattern>
+</defs></svg>
+<header><a href="../" aria-label="回目錄">‹</a><h1>穿搭試衣間</h1><button id="userBtn" style="display:none"></button></header>
+<main id="app"></main>
+<nav id="nav" style="display:none">
+<button data-tab="try"><span class="i">🧍</span>試穿</button>
+<button data-tab="closet"><span class="i">👕</span>衣櫃</button>
+<button data-tab="shop"><span class="i">🛍️</span>商店</button>
+<button data-tab="idea"><span class="i">✨</span>靈感</button>
+<button data-tab="me"><span class="i">📏</span>我</button>
+</nav>
+<div id="sheet"></div><div id="toast"></div>
+<script>
+/* ===== 繪圖引擎：依身形數據畫人形與衣服 ===== */
+const K=2.7,FLOOR=585;
+const lerp=(a,b,t)=>a+(b-a)*t,clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const f1=n=>Math.round(n*10)/10;
+function sp(pts,closed=true){const n=pts.length;let d='M'+f1(pts[0][0])+','+f1(pts[0][1]);const m=closed?n:n-1;
+  for(let i=0;i<m;i++){let p0=pts[(i-1+n)%n],p1=pts[i],p2=pts[(i+1)%n],p3=pts[(i+2)%n];
+    if(!closed){if(i===0)p0=p1;if(i+2>=n)p3=p2;}
+    let c1=[p1[0]+(p2[0]-p0[0])/6,p1[1]+(p2[1]-p0[1])/6],c2=[p2[0]-(p3[0]-p1[0])/6,p2[1]-(p3[1]-p1[1])/6];
+    if(p1[2])c1=p1;if(p2[2])c2=p2;
+    d+='C'+f1(c1[0])+','+f1(c1[1])+' '+f1(c2[0])+','+f1(c2[1])+' '+f1(p2[0])+','+f1(p2[1]);}
+  return d+(closed?'Z':'');}
+function mir(pts){const r=pts.slice();for(let i=pts.length-1;i>=0;i--)if(Math.abs(pts[i][0])>1e-6)r.push([-pts[i][0],pts[i][1],pts[i][2]]);return r;}
+function hex2rgb(h){h=h.replace('#','');if(h.length===3)h=h.split('').map(c=>c+c).join('');return[0,2,4].map(i=>parseInt(h.substr(i,2),16));}
+function shade(h,a){const c=hex2rgb(h).map(v=>Math.round(a<0?v*(1+a):v+(255-v)*a));return'#'+c.map(v=>clamp(v,0,255).toString(16).padStart(2,'0')).join('');}
+function lum(h){const[r,g,b]=hex2rgb(h);return(.299*r+.587*g+.114*b)/255;}
+const strokeOf=c=>lum(c)<.22?shade(c,.3):shade(c,-.26);
+function hsl(h){let[r,g,b]=hex2rgb(h).map(v=>v/255);const mx=Math.max(r,g,b),mn=Math.min(r,g,b),l=(mx+mn)/2,d=mx-mn;let hh=0,s=0;
+  if(d){s=d/(1-Math.abs(2*l-1));hh=mx===r?((g-b)/d)%6:mx===g?(b-r)/d+2:(r-g)/d+4;hh=(hh*60+360)%360;}return[hh,s,l];}
+const P=(d,fill,st,sw=1.1,extra='')=>`<path d="${d}" fill="${fill}" stroke="${st||'none'}" stroke-width="${sw}" stroke-linejoin="round" ${extra}/>`;
+const LN=(x1,y1,x2,y2,st,sw=1,extra='')=>`<line x1="${f1(x1)}" y1="${f1(y1)}" x2="${f1(x2)}" y2="${f1(y2)}" stroke="${st}" stroke-width="${sw}" stroke-linecap="round" ${extra}/>`;
+
+function geom(b){
+  const bmi=b.w/Math.pow(b.h/100,2),f=clamp((bmi-22)/22,-.3,.9),s=clamp(b.h/170,.55,1.2),g={b,bmi,f};
+  g.top=FLOOR-b.h*K;g.headW=b.head*.27*K;g.headH=b.head*.40*K;g.chin=g.top+g.headH;
+  g.neckW=g.headW*.5*(1+f*.3);g.shY=g.chin+b.h*.03*K;
+  g.crotch=Math.max(FLOOR-b.leg*K,g.shY+b.h*.2*K);
+  const T=g.crotch-g.shY;g.chestY=g.shY+T*.28;g.waistY=g.shY+T*.62;g.hipY=g.shY+T*.9;
+  g.sh=b.shoulder/2*K;g.ch=b.chest*.165*K;g.wa=b.waist*.168*K;g.hi=b.hip*.172*K;
+  g.ua=(8.5+6*f)*K*s;g.fa=(7+4*f)*K*s;g.wr=(5+2*f)*K*s;
+  g.armX=g.sh-g.ua/2;g.armY=g.shY+g.ua*.45;g.AL=b.arm*K;
+  const a=7*Math.PI/180,dx=Math.sin(a),dy=Math.cos(a);
+  g.arm=t=>[g.armX+dx*g.AL*t,g.armY+dy*g.AL*t];
+  g.armW=t=>t<.47?lerp(g.ua,g.fa*1.03,t/.47):lerp(g.fa,g.wr,(t-.47)/.53);
+  g.hand=b.h*.1*K;
+  g.kneeY=FLOOR-(FLOOR-g.crotch)*.6;g.ankY=FLOOR-b.h*.04*K;g.cfY=g.kneeY+(g.ankY-g.kneeY)*.3;
+  g.thW=g.hi-.6*K;g.thX=g.hi/2+.3*K;
+  g.knW=(10.5+5.5*f)*K*s;g.cfW=(11+5.5*f)*K*s;g.anW=(6.5+2.5*f)*K*s;
+  g.knX=Math.max(g.hi*.5,g.knW/2+.8*K);g.anX=Math.max(g.hi*.42,g.anW/2+1.5*K);
+  g.LS=[[g.hipY,g.thX,g.thW],[g.crotch,g.thX,g.thW*.97],[g.kneeY,g.knX,g.knW],[g.cfY,lerp(g.knX,g.anX,.35),g.cfW],[g.ankY,g.anX,g.anW]];
+  g.legAt=y=>{const L=g.LS;if(y<=L[0][0])return{x:L[0][1],w:L[0][2]};for(let i=1;i<L.length;i++)if(y<=L[i][0]){const t=(y-L[i-1][0])/(L[i][0]-L[i-1][0]);return{x:lerp(L[i-1][1],L[i][1],t),w:lerp(L[i-1][2],L[i][2],t)};}
+    return{x:L[4][1],w:L[4][2]};};
+  g.ftW=b.foot*.4*K;return g;}
+
+function drawBody(g,skin,face=true){
+  const st=shade(skin,-.14),o=[];
+  for(const s of[1,-1]){const L=[],R=[];g.LS.forEach(([y,x,w])=>{L.push([s*x-w/2,y]);R.push([s*x+w/2,y]);});
+    o.push(P(sp([...L,...R.reverse()]),skin,st,.8));
+    const X=u=>s*(g.anX+g.ftW*.06+u),a=g.anW,W=g.ftW;
+    o.push(P(sp([[X(-a/2),g.ankY-3],[X(a/2),g.ankY-3],[X(W*.58),FLOOR-4],[X(W*.54),FLOOR,1],[X(-W*.44),FLOOR,1],[X(-W*.46),FLOOR-4]]),skin,st,.8));}
+  o.push(P(sp(mir([[0,g.shY-1.6*K],[g.neckW/2+.5*K,g.shY-1.2*K],[g.sh*.72,g.shY+.3*K],[g.sh-g.ua*.3,g.shY+g.ua*.3],[g.ch,g.chestY],[g.wa,g.waistY],[g.hi,g.hipY],[g.hi-.3*K,g.crotch,1]])),skin,st,.8));
+  for(const s of[1,-1]){const ts=[0,.47,.55,1],L=[],R=[];ts.forEach(t=>{const[x,y]=g.arm(t),w=g.armW(t);L.push([s*x-w/2,y]);R.push([s*x+w/2,y]);});
+    const[hx,hy]=g.arm(1);
+    o.push(`<ellipse cx="${f1(s*(hx+1))}" cy="${f1(hy+g.hand*.42)}" rx="${f1(g.wr*.62)}" ry="${f1(g.hand*.5)}" fill="${skin}" stroke="${st}" stroke-width=".8"/>`);
+    o.push(P(sp([[s*g.arm(0)[0],g.armY-g.ua*.42],...R,...L.reverse()]),skin,st,.8));}
+  o.push(`<rect x="${f1(-g.neckW/2)}" y="${f1(g.chin-6)}" width="${f1(g.neckW)}" height="${f1(g.shY-g.chin+9)}" fill="${skin}"/>`);
+  const cy=g.top+g.headH/2;
+  for(const s of[1,-1])o.push(`<ellipse cx="${f1(s*g.headW/2)}" cy="${f1(cy+2)}" rx="2.4" ry="4.5" fill="${skin}" stroke="${st}" stroke-width=".8"/>`);
+  o.push(`<ellipse cx="0" cy="${f1(cy)}" rx="${f1(g.headW/2)}" ry="${f1(g.headH/2)}" fill="${skin}" stroke="${st}" stroke-width=".8"/>`);
+  if(face){const ey=g.top+g.headH*.52,ex=g.headW*.2;
+    o.push(`<circle cx="${f1(-ex)}" cy="${f1(ey)}" r="1.5" fill="#3a2f2a"/><circle cx="${f1(ex)}" cy="${f1(ey)}" r="1.5" fill="#3a2f2a"/>`);
+    o.push(`<path d="M${f1(-ex*.7)},${f1(g.top+g.headH*.76)} Q0,${f1(g.top+g.headH*.82)} ${f1(ex*.7)},${f1(g.top+g.headH*.76)}" fill="none" stroke="#a0584e" stroke-width="1.3" stroke-linecap="round"/>`);}
+  return o.join('');}
+
+function drawHair(g,style,c,hat){
+  const t=g.top,w=g.headW,h=g.headH,st=shade(c,-.25),back=[],front=[];
+  if(style==='bald')return{back:'',front:''};
+  if(style==='long')back.push(P(sp(mir([[0,t-1.5*K],[w*.5+1.6*K,t+h*.25],[w*.5+2.4*K,g.chin],[w*.5+2.2*K,g.chestY-1*K,1]])),c,st,.8));
+  if(style==='bob')back.push(P(sp(mir([[0,t-1.5*K],[w*.5+1.8*K,t+h*.3],[w*.5+2*K,g.chin-1*K],[w*.5+.6*K,g.chin+1.4*K,1]])),c,st,.8));
+  const buzz=style==='buzz';
+  front.push(P(sp(mir([[0,t-(buzz?.5:1.6)*K],[w*.5+(buzz?.2:1)*K,t+h*.2],[w*.5+(buzz?.1:.7)*K,t+h*(buzz?.34:.46),1],[w*.38,t+h*.28],[w*.18,t+h*(buzz?.2:.25)],[0,t+h*(buzz?.19:.28)]])),c,st,.8,buzz?'opacity=".8"':''));
+  if(style==='bun'&&!hat)front.push(`<circle cx="0" cy="${f1(t-3.4*K)}" r="${f1(3.2*K)}" fill="${c}" stroke="${st}" stroke-width=".8"/>`);
+  return{back:back.join(''),front:front.join('')};}
+
+function sleevePath(g,s,len,extra,drop){
+  const ts=[0,.25,.47,.62,.82].filter(t=>t<len-.04).concat([len]),L=[],R=[];
+  ts.forEach((t,i)=>{const[x,y]=g.arm(Math.min(t,1.03)),hw=g.armW(Math.min(t,1))/2+extra*.55*(1-.3*t),xx=x+drop*.3*(1-t),e=i===ts.length-1?1:0;
+    L.push([s*(xx-hw),y,e]);R.push([s*(xx+hw),y,e]);});
+  const[x0,y0]=g.arm(0);
+  return sp([[s*(x0+drop*.3),y0-(g.ua/2+extra*.55)*.85],...R,...L.reverse()]);}
+
+function drawTop(g,it,c,outer){
+  const st=strokeOf(c),o=[],det=it.det||[],neck=it.neck||'crew',sl=it.slv||'none';
+  const fit={slim:.8,regular:2.2,over:5}[it.fit||'regular']*K*(outer?1.25:1)+(outer?1*K:0);
+  const drop=(it.fit==='over'?2.6*K:0)+(outer?.8*K:.2*K);
+  let nw=g.neckW/2+({crew:1.3,v:1.3,boat:4.2,collar:.7,camp:1.4,turtle:.3,hood:1.6,lapel:1.2,stand:.8}[neck]||1.3)*K;
+  const ny=g.shY-1.3*K;
+  let sx=g.sh+drop*.6,sy=g.shY+.7*K+drop*.3;
+  if(sl==='none'){sx=g.sh-g.ua*.55+(outer?K:0);sy=g.shY+.5*K;}
+  nw=Math.min(nw,sx-2*K);
+  const apx=Math.max(g.ch,g.wa*.9)+fit,apy=g.chestY-1.2*K+drop*.4;
+  let hemY={crop:g.waistY+1*K,regular:g.hipY+2.5*K,long:g.crotch+5*K,knee:g.kneeY-3*K,midi:g.cfY+2*K}[it.len||'regular'];
+  if(it.dlen)hemY=g.waistY+(g.ankY-g.waistY)*it.dlen;
+  const base=Math.max(g.hi,g.wa,g.ch*.95);
+  const waW=it.waisted?g.wa+fit*.6:(g.wa+base)/2+fit*.9,hipW=Math.max(g.hi,g.wa)+fit;
+  let hemW=hemY<=g.hipY?lerp(waW,hipW,clamp((hemY-g.waistY)/(g.hipY-g.waistY),0,1)):hipW+(hemY-g.hipY)*(it.flare||.03);
+  if(it.rib)hemW-=fit*.45;
+  const side=[[sx,sy,1]];
+  if(sl==='none')side.push([apx-fit*.3-1.4*K,(sy+apy)/2]);
+  side.push([apx,apy]);
+  if(hemY>g.waistY+2.5*K)side.push([waW,g.waistY]);
+  if(hemY>g.hipY+3*K)side.push([hipW,g.hipY]);
+  side.push([hemW,hemY,1]);
+  const bodies=[],sleeves=[];
+  const slen={none:0,cap:.14,short:.3,elbow:.5,three:.75,long:1.02}[sl];
+  if(slen)for(const s of[1,-1])sleeves.push(sleevePath(g,s,slen,fit,drop));
+  let vY=0,gap=0;
+  if(it.open){gap=(it.gap==null?2.2:it.gap)*K;vY=ny+(g.waistY-ny)*(it.vy||.15);
+    for(const s of[1,-1])bodies.push(sp([[s*nw,ny,1],...side.map(p=>[s*p[0],p[1],p[2]]),[s*gap*1.15,hemY,1],[s*gap,vY,1]]));}
+  else{const dep={crew:2.4,v:it.vdeep||9,boat:1.1,collar:2,camp:5,turtle:1.5,hood:3.2,stand:1.4,lapel:6}[neck]*K;
+    bodies.push(sp(mir([[0,ny+dep,neck==='v'||neck==='camp'?1:0],[nw,ny,1],...side])));}
+  sleeves.forEach(d=>o.push(P(d,c,st)));bodies.forEach(d=>o.push(P(d,c,st)));
+  const pat=det.includes('stripe')?(lum(c)>.5?'p-stripe-d':'p-stripe-l'):det.includes('plaid')?'p-plaid':det.includes('knit')?'p-knit':det.includes('quilt')?'p-quilt':det.includes('floral')?'p-floral':'';
+  if(pat)[...sleeves,...bodies].forEach(d=>o.push(P(d,`url(#${pat})`,'none')));
+  const dk=shade(c,lum(c)<.22?.22:-.14),lt=lum(c)>.8?shade(c,-.3):'#fff';
+  if(slen>=.7&&(det.includes('cuff')||it.rib))for(const s of[1,-1]){const[x,y]=g.arm(slen-.07),hw=g.armW(1)/2+fit*.4;o.push(LN(s*(x-hw),y,s*(x+hw),y,st,1));}
+  if(it.rib)o.push(LN(-hemW+1,hemY-2.2*K,hemW-1,hemY-2.2*K,st,1));
+  if(neck==='collar'||neck==='camp'){const cl=neck==='camp'?5.5:4;for(const s of[1,-1])o.push(P(sp([[s*(nw-.2*K),ny-1*K,1],[s*(it.open?Math.max(gap,.3*K):.3*K),ny+(neck==='camp'?4.5:1.9)*K,1],[s*(nw+1.6*K),ny+cl*K,1]]),shade(c,lum(c)<.22?.12:.06),st));}
+  if(neck==='turtle'){const x=g.neckW/2+.9*K,y0=g.chin+.6*K;o.push(`<rect x="${f1(-x)}" y="${f1(y0)}" width="${f1(2*x)}" height="${f1(ny+1.8*K-y0)}" rx="3" fill="${c}" stroke="${st}"/>`);}
+  if(neck==='stand'){const x=nw+.2*K,y0=ny-2.4*K;o.push(`<rect x="${f1(-x)}" y="${f1(y0)}" width="${f1(2*x)}" height="${f1(3.4*K)}" rx="3" fill="${dk}" stroke="${st}"/>`);}
+  if(neck==='hood'){o.push(P(sp(mir([[0,ny+3.6*K],[nw+.8*K,ny+1.2*K],[nw+2.2*K,ny-1.6*K],[nw+.4*K,ny-3.2*K,1],[nw-1.2*K,ny-.6*K],[0,ny+1.6*K]])),dk,st));
+    if(!det.includes('zip'))for(const s of[1,-1])o.push(LN(s*1.1*K,ny+3.4*K,s*1.3*K,ny+9*K,lt,1.3));}
+  if(neck==='lapel'&&it.open)for(const s of[1,-1])o.push(P(sp([[s*nw,ny,1],[s*Math.min(sx*.8,nw+4.6*K),lerp(ny,vY,.42),1],[s*(gap+.2*K),vY,1],[s*(gap+.1*K),lerp(ny,vY,.45)]]),dk,st));
+  const cy0=it.open?vY+1.5*K:ny+(neck==='collar'?3:4)*K;
+  if(det.includes('buttons')){const x=it.open?gap+1.2*K:0;if(!it.open)o.push(LN(0,ny+2*K,0,hemY,st,.9));for(let y=cy0;y<hemY-1.5*K;y+=5.5*K)o.push(`<circle cx="${f1(x)}" cy="${f1(y)}" r="1.5" fill="${lt}" stroke="${st}" stroke-width=".6"/>`);}
+  if(det.includes('double'))for(let y=vY+2*K;y<Math.min(hemY,g.hipY)-1*K;y+=6*K)for(const s of[1,-1])o.push(`<circle cx="${f1(s*3.2*K)}" cy="${f1(y)}" r="1.7" fill="${dk}" stroke="${st}" stroke-width=".6"/>`);
+  if(det.includes('placket')){o.push(LN(0,ny+2*K,0,ny+9*K,st,.9));for(let i=0;i<3;i++)o.push(`<circle cx="0" cy="${f1(ny+(3.2+i*2.4)*K)}" r="1.2" fill="${lt}" stroke="${st}" stroke-width=".5"/>`);}
+  if(det.includes('zip')){o.push(LN(0,ny+(neck==='stand'?-2:1.5)*K,0,hemY,lt==='#fff'?'#d9d9d9':lt,1.6));o.push(`<rect x="-1.6" y="${f1(ny+2.2*K)}" width="3.2" height="6" rx="1" fill="#b9b9b9"/>`);}
+  if(det.includes('zipdiag'))o.push(LN(gap+3*K,vY-1*K,gap+.6*K,hemY-1*K,'#c9c9c9',1.6));
+  if(det.includes('pocket'))o.push(`<rect x="${f1(apx*.3)}" y="${f1(g.chestY-.5*K)}" width="${f1(apx*.38)}" height="${f1(apx*.42)}" rx="1.5" fill="none" stroke="${st}"/>`);
+  if(det.includes('chestpocket'))o.push(`<rect x="${f1(-apx*.72)}" y="${f1(g.chestY-.5*K)}" width="${f1(apx*.42)}" height="${f1(apx*.4)}" rx="1.5" fill="${dk}" stroke="${st}"/>`);
+  if(det.includes('pocket2'))for(const s of[1,-1])o.push(`<rect x="${f1(s>0?apx*.35:-apx*.35-apx*.36)}" y="${f1(g.chestY-.5*K)}" width="${f1(apx*.36)}" height="${f1(apx*.34)}" rx="1.5" fill="none" stroke="${st}"/>`);
+  if(det.includes('kangaroo'))o.push(P(sp([[-waW*.55,hemY-3.5*K,1],[-waW*.4,g.waistY-.5*K,1],[waW*.4,g.waistY-.5*K,1],[waW*.55,hemY-3.5*K,1]]),'none',st));
+  if(det.includes('print'))o.push(`<rect x="${f1(-apx*.34)}" y="${f1(g.chestY-.8*K)}" width="${f1(apx*.68)}" height="${f1(apx*.3)}" rx="2" fill="${lt}" opacity=".85"/>`);
+  if(det.includes('sideline'))for(const s of[1,-1])o.push(LN(s*(apx-1.5*K),apy+1*K,s*(hemW-1.5*K),hemY-1,lt,1.6));
+  if(det.includes('belt')){o.push(`<rect x="${f1(-waW-.5)}" y="${f1(g.waistY-.9*K)}" width="${f1(2*waW+1)}" height="${f1(1.9*K)}" fill="${dk}" stroke="${st}"/>`);o.push(`<rect x="${f1(-1.4*K)}" y="${f1(g.waistY-1.2*K)}" width="${f1(2.8*K)}" height="${f1(2.5*K)}" rx="1" fill="none" stroke="${lum(c)<.3?'#ddd':'#5a4a3a'}" stroke-width="1.3"/>`);}
+  if(det.includes('snaps'))for(let y=ny+4*K;y<hemY-1.5*K;y+=5*K)o.push(`<circle cx="0" cy="${f1(y)}" r="1.4" fill="#d5d5d5"/>`);
+  return o.join('');}
+
+function drawBottom(g,it,c){
+  const st=strokeOf(c),o=[],det=it.det||[],fit=it.fit||'regular';
+  const wy=g.waistY-(it.high?3*K:0),e={slim:.5,regular:1.6,tapered:1.8,wide:3.6,flare:1}[fit]*K||1.6*K;
+  const waW=g.wa+e*.5,lt=lum(c)>.8?shade(c,-.3):'#fff';
+  if(it.kind==='skirt'){
+    const hemY=wy+(g.ankY-wy)*it.len;
+    let hemW=fit==='pencil'?Math.max(g.hi*.93,g.legAt(hemY).x+g.legAt(hemY).w/2+.8*K):g.hi+e+Math.max(0,hemY-g.hipY)*(it.flare==null?.3:it.flare);
+    const d=sp(mir([[0,wy],[waW,wy,1],[g.hi+e*.8,g.hipY],[hemW,hemY,1]]));o.push(P(d,c,st));
+    if(det.includes('floral'))o.push(P(d,'url(#p-floral)','none'));if(det.includes('plaid'))o.push(P(d,'url(#p-plaid)','none'));
+    if(det.includes('pleat'))for(let i=-4;i<=4;i++)if(i)o.push(LN(waW*i/5,wy+2*K,hemW*i/5,hemY-1,st,.8,'opacity=".7"'));
+    if(det.includes('slit'))o.push(LN(hemW*.35,hemY-7*K,hemW*.35,hemY,st,1));
+  }else{
+    const endY=g.crotch+(g.ankY+1*K-g.crotch)*it.len,thWd=g.thW+e*1.3;
+    const wAt=y=>{const t=clamp((y-g.crotch)/(g.ankY-g.crotch),0,1),b=g.legAt(y);
+      if(fit==='slim')return b.w+e*2+.6*K;if(fit==='tapered')return lerp(thWd,g.anW+3.6*K,t);if(fit==='wide')return lerp(thWd*1.05,thWd*1.12,t);
+      if(fit==='flare')return t<.5?lerp(thWd,g.knW+2.5*K,t/.5):lerp(g.knW+2.5*K,g.knW*2,(t-.5)/.5);
+      return lerp(thWd,g.knW+4*K,Math.min(1,t/.55));};
+    const edge=y=>{const b=g.legAt(y),w=wAt(y);let inn=Math.max(b.x-w/2,.35*K);return[inn,Math.max(inn+w,b.x+b.w/2+.4*K)];};
+    const ys=[g.crotch,g.kneeY,g.cfY,g.ankY].filter(y=>y<endY-5).concat([endY]),n=ys.length;
+    for(const s of[1,-1]){const pts=[[0,wy,1],[s*waW,wy,1],[s*(g.hi+e*.8),g.hipY]];
+      ys.forEach((y,i)=>pts.push([s*edge(y)[1],y,i===n-1?1:0]));
+      for(let i=n-1;i>=0;i--)pts.push([s*edge(ys[i])[0],ys[i],i===n-1||i===0?1:0]);
+      pts.push([0,g.crotch-1.5*K,1]);
+      const d=sp(pts);o.push(P(d,c,st));if(det.includes('plaid'))o.push(P(d,'url(#p-plaid)','none'));
+      const mid=y=>{const[a,b]=edge(y);return s*(a+b)/2;};
+      if(det.includes('crease'))o.push(LN(mid(g.crotch),g.hipY+2*K,mid(endY),endY-1,st,.8,'opacity=".6"'));
+      if(det.includes('cargo')&&endY>g.kneeY){const y=lerp(g.crotch,g.kneeY,.35),x=edge(y+3*K)[1];o.push(`<rect x="${f1(s>0?x-5.2*K:-x+.4*K)}" y="${f1(y)}" width="${f1(4.8*K)}" height="${f1(6*K)}" rx="1.5" fill="${shade(c,-.07)}" stroke="${st}"/>`);}
+      if(det.includes('sidestripe'))o.push(`<path d="${sp(ys.map(y=>[s*(edge(y)[1]-1.4*K),y]),false)}" fill="none" stroke="${lt}" stroke-width="2"/>`);
+      if(det.includes('cuff')){const[a,b]=edge(endY);o.push(`<rect x="${f1(s>0?a:-b)}" y="${f1(endY-2.2*K)}" width="${f1(b-a)}" height="${f1(2.2*K)}" fill="${shade(c,-.1)}" stroke="${st}"/>`);}
+      if(det.includes('denim'))o.push(`<path d="M${f1(s*waW*.5)},${f1(wy+2.2*K)} Q${f1(s*g.hi*.82)},${f1(wy+3*K)} ${f1(s*(g.hi+e*.5))},${f1(g.hipY-1.5*K)}" fill="none" stroke="${lum(c)<.3?'#888':'#c9a15a'}" stroke-width=".9"/>`);
+      if(det.includes('kneeseam')&&endY>g.kneeY)o.push(LN(s*edge(g.kneeY)[0],g.kneeY-2*K,s*edge(g.kneeY)[1],g.kneeY-2*K,st,.8));
+    }
+    if(det.includes('drawstring'))for(const s of[1,-1])o.push(LN(s*.8*K,wy+1.6*K,s*1.4*K,wy+6*K,lt,1.3));
+  }
+  o.push(`<rect x="${f1(-waW)}" y="${f1(wy)}" width="${f1(2*waW)}" height="${f1(2*K)}" rx="1.5" fill="${shade(c,lum(c)<.22?.1:-.06)}" stroke="${st}"/>`);
+  return{svg:o.join(''),wy};}
+
+function drawShoes(g,it,c){
+  const st=strokeOf(c),o=[],sole=(it.sole||1.1)*K,W=g.ftW+(it.kind==='chunky'?2.6:1.3)*K,aw=g.anW,by=FLOOR-sole;
+  const sc=it.dark?shade(c,-.45):'#f3f0e9',lt=lum(c)>.75?shade(c,-.35):'#fff';
+  for(const s of[1,-1]){const X=u=>s*(g.anX+g.ftW*.06+u);
+    if(it.kind==='sandal'){o.push(P(sp([[X(-W*.47),by,1],[X(W*.6),by,1],[X(W*.6),FLOOR,1],[X(-W*.47),FLOOR,1]]),c,st));
+      o.push(`<path d="M${f1(X(-W*.42))},${f1(by)} Q${f1(X(0))},${f1(by-4.6*K)} ${f1(X(W*.5))},${f1(by)}" fill="none" stroke="${c}" stroke-width="${f1(1.7*K)}"/>`);
+      o.push(LN(X(-aw/2-1),g.ankY,X(aw/2+1),g.ankY,c,1.2*K));continue;}
+    if(it.kind==='pump'){o.push(P(sp([[X(-W*.42),by-3.4*K,1],[X(0),by-2*K],[X(W*.5),by-3.4*K,1],[X(W*.54),by,1],[X(-W*.44),by,1]]),c,st));
+      o.push(`<rect x="${f1(Math.min(X(-W*.44),X(W*.54)))}" y="${f1(by)}" width="${f1(W*.98)}" height="${f1(sole)}" fill="${shade(c,-.3)}"/>`);continue;}
+    const shaft=(it.shaft||0)*K,topY=shaft?g.ankY-shaft:g.ankY+.4*K;
+    const pts=[[X(-aw/2-.7*K),topY,1],[X(aw/2+.7*K),topY,1]];
+    if(shaft)pts.push([X(aw/2+1.1*K),g.ankY+.5*K]);
+    pts.push([X(W*.6),by-2.2*K],[X(W*.6),by,1],[X(-W*.46),by,1],[X(-W*.46),by-2.2*K]);
+    if(shaft)pts.push([X(-aw/2-1.1*K),g.ankY+.5*K]);
+    o.push(P(sp(pts),c,st));
+    o.push(`<rect x="${f1(Math.min(X(-W*.48),X(W*.62)))}" y="${f1(by)}" width="${f1(W*1.1)}" height="${f1(sole)}" rx="2" fill="${sc}" stroke="${st}" stroke-width=".8"/>`);
+    const det=it.det||[];
+    if(det.includes('toecap'))o.push(`<path d="M${f1(X(-W*.4))},${f1(by)} Q${f1(X(W*.08))},${f1(by-4.4*K)} ${f1(X(W*.55))},${f1(by)} Z" fill="#f3f0e9" stroke="${st}" stroke-width=".7"/>`);
+    if(det.includes('laces'))for(let y=topY+1.2*K,i=0;y<by-2.6*K&&i<6;y+=1.7*K,i++)o.push(LN(X(-1.3*K),y,X(1.6*K),y,lt,1.1));
+    if(det.includes('stripe'))o.push(LN(X(W*.1),by-3.6*K,X(W*.45),by-.6*K,lt,1.8));
+    if(det.includes('gore')&&shaft)o.push(`<rect x="${f1(Math.min(X(aw/2-.6*K),X(aw/2+.6*K)))}" y="${f1(topY+1)}" width="${f1(1.2*K)}" height="${f1(shaft*.75)}" fill="${shade(c,.25)}"/>`);
+    if(det.includes('strap'))o.push(LN(X(-W*.35),by-3.2*K,X(W*.5),by-3.2*K,shade(c,-.3),1.6));
+    if(det.includes('penny'))o.push(LN(X(-W*.2),by-3*K,X(W*.36),by-3*K,shade(c,lum(c)<.22?.3:-.3),2));
+  }
+  return o.join('');}
+
+function drawSocks(g,c,h){const st=strokeOf(c),o=[],y0=g.ankY-h*K;
+  for(const s of[1,-1]){const L=[],R=[];[y0,(y0+g.ankY)/2,g.ankY+.5*K].forEach((y,i)=>{const b=g.legAt(y);L.push([s*b.x-b.w/2-.5*K,y,i===0?1:0]);R.push([s*b.x+b.w/2+.5*K,y,i===0?1:0]);});
+    const X=u=>s*(g.anX+g.ftW*.06+u),W=g.ftW;
+    o.push(P(sp([...L,[X(-W*.47),FLOOR-4],[X(-W*.45),FLOOR,1],[X(W*.56),FLOOR,1],[X(W*.6),FLOOR-4],...R.reverse()].map(p=>p)),c,st,.9));}
+  return o.join('');}
+
+function drawHat(g,it,c){
+  const t=g.top,w=g.headW,h=g.headH,st=strokeOf(c),dk=shade(c,lum(c)<.22?.2:-.15),o=[],hw=w*.5+1.2*K;
+  if(it.kind==='cap'){o.push(P(sp(mir([[0,t-2*K],[hw,t+h*.2],[hw+.2*K,t+h*.36,1]])),c,st));o.push(`<ellipse cx="0" cy="${f1(t+h*.37)}" rx="${f1(w*.6)}" ry="${f1(h*.065)}" fill="${dk}" stroke="${st}"/>`);o.push(`<circle cx="0" cy="${f1(t-2*K)}" r="1.6" fill="${dk}"/>`);}
+  if(it.kind==='beanie'){o.push(P(sp(mir([[0,t-3.4*K],[hw+.3*K,t+h*.14],[hw+.3*K,t+h*.34,1]])),c,st));o.push(`<rect x="${f1(-hw-.8*K)}" y="${f1(t+h*.26)}" width="${f1(2*hw+1.6*K)}" height="${f1(h*.18)}" rx="4" fill="${dk}" stroke="${st}"/><rect x="${f1(-hw-.8*K)}" y="${f1(t+h*.26)}" width="${f1(2*hw+1.6*K)}" height="${f1(h*.18)}" rx="4" fill="url(#p-knit)"/>`);}
+  if(it.kind==='bucket'){o.push(P(sp(mir([[0,t+h*.5],[hw+5*K,t+h*.47,1],[hw+.2*K,t+h*.27,1]])),dk,st));o.push(P(sp(mir([[0,t-2*K],[hw-.2*K,t+h*.02],[hw+.3*K,t+h*.3,1]])),c,st));}
+  if(it.kind==='fedora'||it.kind==='straw'){const bw=it.kind==='straw'?9:5.5;o.push(`<ellipse cx="0" cy="${f1(t+h*.3)}" rx="${f1(hw+bw*K)}" ry="${f1((it.kind==='straw'?2.6:2)*K)}" fill="${dk}" stroke="${st}"/>`);
+    o.push(P(sp(mir([[0,t-2.6*K],[w*.22,t-3.4*K],[hw-.3*K,t-1.4*K],[hw+.2*K,t+h*.3,1]])),c,st));o.push(`<rect x="${f1(-hw-.2*K)}" y="${f1(t+h*.2)}" width="${f1(2*hw+.4*K)}" height="${f1(h*.1)}" fill="${it.kind==='straw'?'#3a2f2a':shade(c,-.45)}"/>`);}
+  if(it.kind==='beret'){o.push(`<ellipse cx="${f1(1.6*K)}" cy="${f1(t+h*.1)}" rx="${f1(w*.66)}" ry="${f1(h*.21)}" transform="rotate(-10 0 ${f1(t+h*.1)})" fill="${c}" stroke="${st}"/>`);o.push(LN(1.6*K,t-h*.11,2*K,t-h*.17,st,1.6));}
+  return o.join('');}
+
+function drawAcc(g,it,c,ctx){
+  const st=strokeOf(c),o=[],k=it.kind,ny=g.shY-1.3*K;
+  if(k==='glasses'||k==='sun'){const ey=g.top+g.headH*.52,ex=g.headW*.21,r=g.headW*.17;
+    for(const s of[1,-1])o.push(`<rect x="${f1(s*ex-r)}" y="${f1(ey-r*.75)}" width="${f1(2*r)}" height="${f1(r*1.5)}" rx="${f1(r*.5)}" fill="${k==='sun'?c:'rgba(255,255,255,.25)'}" stroke="${k==='sun'?st:c}" stroke-width="1.4"/>`);
+    o.push(LN(-ex+r,ey,ex-r,ey,k==='sun'?st:c,1.3));}
+  if(k==='scarf'){const x=g.neckW/2+2.4*K;o.push(`<rect x="${f1(-x-2.6*K)}" y="${f1(g.shY+1*K)}" width="${f1(4.6*K)}" height="${f1(g.chestY-g.shY+7*K)}" rx="2" fill="${shade(c,-.08)}" stroke="${st}"/>`);
+    o.push(`<rect x="${f1(-x)}" y="${f1(g.chin+.3*K)}" width="${f1(2*x)}" height="${f1(g.shY-g.chin+2.2*K)}" rx="${f1(2.4*K)}" fill="${c}" stroke="${st}"/><rect x="${f1(-x)}" y="${f1(g.chin+.3*K)}" width="${f1(2*x)}" height="${f1(g.shY-g.chin+2.2*K)}" rx="${f1(2.4*K)}" fill="url(#p-knit)"/>`);}
+  if(k==='tie'){o.push(P(sp([[-1*K,ny+1.6*K,1],[1*K,ny+1.6*K,1],[.7*K,ny+3.4*K,1],[1.7*K,g.waistY-5*K,1],[0,g.waistY-2.4*K,1],[-1.7*K,g.waistY-5*K,1],[-.7*K,ny+3.4*K,1]]),c,st));}
+  if(k==='necklace'){o.push(`<path d="M${f1(-g.neckW/2-.6*K)},${f1(ny+.2*K)} Q0,${f1(ny+9*K)} ${f1(g.neckW/2+.6*K)},${f1(ny+.2*K)}" fill="none" stroke="${c}" stroke-width="1.2"/><circle cx="0" cy="${f1(ny+4.8*K)}" r="2" fill="${c}" stroke="${st}" stroke-width=".6"/>`);}
+  if(k==='cross'){const bx=-(g.hi+1.5*K),byy=g.hipY-3*K;o.push(LN(g.sh*.62,g.shY,bx+3*K,byy,shade(c,-.2),1.3*K));o.push(`<rect x="${f1(bx-3.5*K)}" y="${f1(byy-1*K)}" width="${f1(9.5*K)}" height="${f1(7*K)}" rx="4" fill="${c}" stroke="${st}"/>`);o.push(LN(bx-3.5*K,byy+1.6*K,bx+6*K,byy+1.6*K,st,.9));}
+  if(k==='tote'){const[hx,hy]=g.arm(1.08);o.push(`<path d="M${f1(hx-3*K)},${f1(hy+7*K)} Q${f1(hx)},${f1(hy-3*K)} ${f1(hx+3*K)},${f1(hy+7*K)}" fill="none" stroke="${shade(c,-.25)}" stroke-width="2"/>`);o.push(`<rect x="${f1(hx-5.5*K)}" y="${f1(hy+6*K)}" width="${f1(11*K)}" height="${f1(12*K)}" rx="2" fill="${c}" stroke="${st}"/>`);}
+  if(k==='backpack')for(const s of[1,-1])o.push(`<path d="M${f1(s*(g.neckW/2+2.4*K))},${f1(ny+.3*K)} Q${f1(s*(g.ch*.72))},${f1(g.chestY)} ${f1(s*(g.ch-.6*K))},${f1(g.chestY+7*K)}" fill="none" stroke="${c}" stroke-width="${f1(1.9*K)}" stroke-linecap="round"/>`);
+  if(k==='belt'&&ctx.wy!=null){const w=g.wa+1.2*K;o.push(`<rect x="${f1(-w)}" y="${f1(ctx.wy+.2*K)}" width="${f1(2*w)}" height="${f1(1.6*K)}" fill="${c}" stroke="${st}"/><rect x="${f1(-1.3*K)}" y="${f1(ctx.wy-.1*K)}" width="${f1(2.6*K)}" height="${f1(2.2*K)}" rx="1" fill="none" stroke="#c9b27a" stroke-width="1.4"/>`);}
+  if(k==='watch'){const[x,y]=g.arm(.97),w=g.wr/2+.5*K;o.push(`<rect x="${f1(-x-w)}" y="${f1(y-.8*K)}" width="${f1(2*w)}" height="${f1(1.6*K)}" rx="1" fill="${c}" stroke="${st}"/><circle cx="${f1(-x)}" cy="${f1(y)}" r="${f1(1.1*K)}" fill="#f4f1ea" stroke="${st}"/>`);}
+  return o.join('');}
+
+/* 整體人形：p=身形資料，o=穿搭 */
+function figure(p,of,opt={}){
+  const g=opt.g||geom(p),L=[],T=id=>ITEM[id];
+  const hair=drawHair(g,p.hair||'short',p.hairColor||'#2b2420',!!(of.hat&&T(of.hat.t)));
+  L.push(hair.back,drawBody(g,p.skin||'#f0cdb0'));
+  L.push(drawTop(g,{neck:'crew',slv:'none',fit:'slim',len:'regular'},'#eceae5'),drawBottom(g,{kind:'pants',fit:'slim',len:.1},'#eceae5').svg);
+  const acc=(of.acc||[]).filter(a=>T(a.t)),has=k=>acc.find(a=>T(a.t).kind===k);
+  const sk=has('socks');if(sk)L.push(drawSocks(g,col(sk.c),T(sk.t).h||12));
+  if(of.shoes&&T(of.shoes.t))L.push(drawShoes(g,T(of.shoes.t),col(of.shoes.c)));
+  const ctx={};let topS='',botS='';
+  if(of.dress&&T(of.dress.t))topS=drawTop(g,T(of.dress.t),col(of.dress.c));
+  else{if(of.top&&T(of.top.t))topS=drawTop(g,T(of.top.t),col(of.top.c));
+    if(of.bottom&&T(of.bottom.t)){const r=drawBottom(g,T(of.bottom.t),col(of.bottom.c));botS=r.svg;ctx.wy=r.wy;}}
+  const belt=has('belt'),beltS=belt?drawAcc(g,T(belt.t),col(belt.c),ctx):'';
+  if(of.tuck&&!of.dress)L.push(topS,botS,beltS);else L.push(botS,beltS,topS);
+  for(const k of['tie','necklace']){const a=has(k);if(a)L.push(drawAcc(g,T(a.t),col(a.c),ctx));}
+  if(of.outer&&T(of.outer.t))L.push(drawTop(g,T(of.outer.t),col(of.outer.c),true));
+  for(const k of['backpack','scarf','cross','tote','watch']){const a=has(k);if(a)L.push(drawAcc(g,T(a.t),col(a.c),ctx));}
+  L.push(hair.front);
+  if(of.hat&&T(of.hat.t))L.push(drawHat(g,T(of.hat.t),col(of.hat.c)));
+  for(const k of['glasses','sun']){const a=has(k);if(a)L.push(drawAcc(g,T(a.t),col(a.c),ctx));}
+  let ruler='';
+  if(opt.ruler){for(let cm=0;cm<=210;cm+=10){const y=FLOOR-cm*K,big=cm%50===0;ruler+=`<line x1="-150" x2="${big?-136:-143}" y1="${f1(y)}" y2="${f1(y)}" stroke="#b9ad9d" stroke-width="${big?1.2:.7}"/>`+(big&&cm?`<text x="-133" y="${f1(y+3.5)}" font-size="9" fill="#9a8d7c">${cm}</text>`:'');}
+    ruler+=`<line x1="-150" x2="${f1(-g.headW/2-6)}" y1="${f1(g.top)}" y2="${f1(g.top)}" stroke="#c8553d" stroke-width=".8" stroke-dasharray="3 3"/><text x="-148" y="${f1(g.top-4)}" font-size="10" fill="#c8553d" font-weight="700">${p.h} cm</text>`;}
+  return`<svg class="${opt.cls||'fig'}" viewBox="${opt.vb||'0 -30 300 625'}" preserveAspectRatio="xMidYMid meet"><g transform="translate(150,0)"><ellipse cx="0" cy="${FLOOR+1}" rx="${f1(g.hi+34)}" ry="6" fill="#000" opacity=".1"/>${ruler}${L.join('')}</g></svg>`;}
+
+/* 單品縮圖 */
+function thumb(it,c,g){
+  c=col(c);let s='';const ctx={wy:g.waistY};
+  if(it.slot==='top'||it.slot==='dress')s=drawTop(g,it,c);else if(it.slot==='outer')s=drawTop(g,it,c,true);
+  else if(it.slot==='bottom')s=drawBottom(g,it,c).svg;else if(it.slot==='shoes')s=drawShoes(g,it,c);
+  else if(it.slot==='hat')s=drawHat(g,it,c);else if(it.kind==='socks')s=drawSocks(g,c,it.h||12);else s=drawAcc(g,it,c,ctx);
+  let y0,y1,mw=0;const longTop=it.dlen||it.len==='knee'||it.len==='midi'||it.len==='long';
+  const v=it.view||(it.slot==='acc'?'torso':it.slot);
+  if(v==='top'||v==='outer'||v==='dress'||v==='torso'){y0=g.shY-26;y1=longTop?(it.dlen?g.waistY+(g.ankY-g.waistY)*it.dlen:g.kneeY)+22:g.crotch+34;mw=2*(g.sh+34);}
+  else if(v==='bottom'){y0=g.waistY-22;y1=FLOOR+6;mw=2*(g.hi+26);}
+  else if(v==='shoes'||v==='feet'){y0=g.ankY-52;y1=FLOOR+8;mw=2*(g.anX+g.ftW)+10;}
+  else if(v==='hat'||v==='head'){y0=g.top-26;y1=g.chin+10;mw=g.headW+70;}
+  else if(v==='waist'){y0=g.waistY-34;y1=g.hipY+26;mw=2*(g.hi+22);}
+  else{y0=g.top-10;y1=FLOOR+6;}
+  const hgt=y1-y0,wd=Math.max(mw,hgt*.78);
+  return`<svg viewBox="${f1(150-wd/2)} ${f1(y0)} ${f1(wd)} ${f1(hgt)}" preserveAspectRatio="xMidYMid meet"><g transform="translate(150,0)"><g opacity=".5">${drawBody(g,'#ddd3c6',false)}</g>${s}</g></svg>`;}
+/* ===== 資料：顏色、款式圖鑑、風格、商店 ===== */
+const COL={白:'#f5f3ee',米:'#e6dcc8',奶茶:'#d6bfa5',卡其:'#c8b08a',駝:'#b88a5a',棕:'#6b4a35',黑:'#26262a',炭灰:'#4a4d52',灰:'#9aa0a6',淺灰:'#d5d7da',海軍藍:'#27364f',藍:'#3f6fb0',淺藍:'#a9c8e8',丹寧:'#4f6f96',淺丹寧:'#8fb0d0',軍綠:'#5d6b45',綠:'#3f7d5a',鼠尾草:'#a9b89a',酒紅:'#7a2f3a',紅:'#c8413b',粉:'#f1c3c8',黃:'#e9c14f',橘:'#e07b39',紫:'#8a6bb0',金:'#c9a84c',銀:'#b8bcc2'};
+const col=c=>COL[c]||c||'#999';
+const colName=c=>COL[c]?c:'自訂色';
+const SLOTS=[['top','上衣'],['outer','外套'],['bottom','下身'],['dress','連身'],['shoes','鞋子'],['hat','帽子'],['acc','配件']];
+const SLOTN=Object.fromEntries(SLOTS);
+const STYLES=['休閒','街頭','商務','日系','韓系','運動','復古','戶外','極簡','學院','甜美'];
+const A=(slot,id,name,st,cl,spec,tip)=>Object.assign({slot,id,name,st,col:cl,tip},spec);
+const CATALOG=[
+A('top','t_tee','圓領素T',['休閒','極簡','日系','街頭'],['白','黑','灰','海軍藍','米'],{neck:'crew',slv:'short',fit:'regular'},'百搭基本款，單穿或內搭都行'),
+A('top','t_over','寬版落肩T',['街頭','韓系'],['黑','白','灰','軍綠'],{neck:'crew',slv:'elbow',fit:'over',det:['print']},'五分袖落肩，下身配窄或直筒平衡比例'),
+A('top','t_stripe','條紋長袖',['日系','休閒'],['白','米','海軍藍'],{neck:'boat',slv:'long',fit:'regular',det:['stripe']},'海軍條紋，配卡其褲或牛仔褲'),
+A('top','t_oxford','牛津襯衫',['商務','學院','日系'],['白','淺藍','粉'],{neck:'collar',slv:'long',fit:'regular',det:['buttons','pocket','cuff']},'可正式可休閒，紮進去更俐落'),
+A('top','t_flannel','法蘭絨格紋襯衫',['復古','戶外'],['紅','軍綠','藍'],{neck:'collar',slv:'long',fit:'regular',det:['buttons','plaid','cuff']},'美式復古感，也可當薄外套'),
+A('top','t_polo','Polo 衫',['休閒','學院','運動'],['海軍藍','白','綠','酒紅'],{neck:'collar',slv:'short',fit:'regular',det:['placket']},'比 T 恤正式一點的夏天選擇'),
+A('top','t_turtle','高領針織',['極簡','韓系','商務'],['黑','米','炭灰','駝'],{neck:'turtle',slv:'long',fit:'slim',det:['knit']},'配大衣或西裝外套很有質感'),
+A('top','t_knit','圓領毛衣',['日系','學院'],['米','灰','綠','酒紅','海軍藍'],{neck:'crew',slv:'long',fit:'regular',rib:1,det:['knit','cuff']},'內搭襯衫露出領子更有層次'),
+A('top','t_hoodie','連帽衛衣',['街頭','運動'],['灰','黑','軍綠','奶茶'],{neck:'hood',slv:'long',fit:'over',rib:1,det:['kangaroo','cuff']},'外面再加教練外套或大衣'),
+A('top','t_sweat','大學T',['街頭','韓系','休閒'],['灰','海軍藍','奶茶','綠'],{neck:'crew',slv:'long',fit:'over',rib:1,det:['print','cuff']},'寬版配寬褲是韓系定番'),
+A('top','t_tank','背心',['運動','街頭'],['白','黑','灰'],{neck:'crew',slv:'none',fit:'slim'},'夏天單穿或當內搭'),
+A('top','t_crop','短版T',['韓系','甜美'],['白','粉','黑','淺藍'],{neck:'crew',slv:'short',fit:'slim',len:'crop'},'配高腰下身拉長腿部比例'),
+A('top','t_tech','機能排汗衫',['運動','戶外'],['藍','黑','橘','黃'],{neck:'crew',slv:'short',fit:'slim',det:['sideline']},'運動、登山用'),
+A('top','t_aloha','花襯衫',['復古','休閒'],['藍','紅','綠','黑'],{neck:'camp',slv:'short',fit:'regular',det:['buttons','floral']},'開領度假風，下身選素色'),
+A('top','t_blouse','V領雪紡襯衫',['甜美','商務'],['白','粉','米'],{neck:'v',slv:'long',fit:'regular',waisted:1,vdeep:7,det:['cuff']},'柔軟垂墜，配西裝褲或裙'),
+A('outer','o_denim','牛仔外套',['復古','街頭','休閒'],['丹寧','淺丹寧','黑'],{neck:'collar',slv:'long',fit:'regular',open:1,gap:2.4,vy:.12,det:['pocket2','cuff']},'避免上下同色丹寧，或刻意做成套裝'),
+A('outer','o_blazer','西裝外套',['商務','韓系','極簡'],['海軍藍','黑','炭灰','米','駝'],{neck:'lapel',slv:'long',fit:'regular',open:1,gap:.8,vy:.82,det:['buttons']},'內搭 T 恤就能休閒化'),
+A('outer','o_trench','風衣',['商務','極簡','韓系'],['卡其','米','黑','海軍藍'],{neck:'lapel',slv:'long',fit:'regular',len:'knee',open:1,gap:0,vy:.42,det:['belt','double']},'長版外套讓身形更修長'),
+A('outer','o_bomber','飛行夾克',['街頭','復古'],['軍綠','黑','海軍藍'],{neck:'stand',slv:'long',fit:'regular',rib:1,det:['zip','cuff']},'短版外套配直筒褲'),
+A('outer','o_cardigan','開襟針織衫',['日系','學院','甜美'],['米','灰','綠','粉','海軍藍'],{neck:'v',slv:'long',fit:'regular',open:1,gap:0,vy:.55,det:['buttons','knit','cuff']},'溫柔感單品，內搭 T 或襯衫'),
+A('outer','o_shell','機能防風外套',['戶外','運動'],['橘','黑','藍','黃','軍綠'],{neck:'hood',slv:'long',fit:'regular',det:['zip','cuff']},'山系穿搭核心，亮色更有戶外感'),
+A('outer','o_puffer','羽絨外套',['街頭','戶外'],['黑','米','軍綠','紅'],{neck:'stand',slv:'long',fit:'over',det:['quilt','zip']},'上寬下窄，下身選合身款'),
+A('outer','o_coat','長大衣',['極簡','韓系','商務'],['駝','黑','炭灰','米'],{neck:'lapel',slv:'long',fit:'regular',len:'midi',open:1,gap:0,vy:.5,det:['buttons']},'同色系內搭最顯高'),
+A('outer','o_vest','針織背心',['學院','日系'],['米','海軍藍','灰','酒紅','綠'],{neck:'v',slv:'none',fit:'regular',vdeep:10,rib:1,det:['knit']},'疊在襯衫或 T 恤外'),
+A('outer','o_coach','教練外套',['街頭'],['黑','海軍藍','綠'],{neck:'collar',slv:'long',fit:'regular',det:['snaps','cuff']},'輕薄防風，配連帽衛衣'),
+A('outer','o_biker','皮衣',['街頭','復古'],['黑','棕'],{neck:'lapel',slv:'long',fit:'slim',len:'crop',open:1,gap:1.6,vy:.55,det:['zipdiag']},'帥氣單品，配窄管褲與靴子'),
+A('outer','o_fleece','抓絨外套',['戶外','日系'],['米','軍綠','海軍藍','棕'],{neck:'stand',slv:'long',fit:'regular',det:['zip','chestpocket','cuff']},'保暖又有 city boy 感'),
+A('bottom','b_jeans','直筒牛仔褲',['休閒','復古','街頭','日系'],['丹寧','淺丹寧','黑'],{kind:'pants',fit:'regular',len:1,det:['denim']},'最不挑人的褲型'),
+A('bottom','b_skinny','窄管褲',['韓系','街頭'],['黑','炭灰','丹寧'],{kind:'pants',fit:'slim',len:1},'配寬鬆上身或靴子'),
+A('bottom','b_wide','高腰寬褲',['韓系','極簡','日系'],['黑','米','炭灰','卡其','奶茶','丹寧'],{kind:'pants',fit:'wide',len:1,high:1,det:['crease']},'高腰拉長腿，上衣紮進去'),
+A('bottom','b_chino','卡其褲',['休閒','學院','日系','商務'],['卡其','海軍藍','軍綠','米'],{kind:'pants',fit:'tapered',len:1},'介於牛仔褲與西裝褲之間'),
+A('bottom','b_slacks','西裝褲',['商務','極簡'],['炭灰','黑','海軍藍'],{kind:'pants',fit:'regular',len:1,det:['crease']},'褲長剛好蓋到鞋面'),
+A('bottom','b_cargo','工作褲',['街頭','戶外'],['軍綠','黑','卡其'],{kind:'pants',fit:'wide',len:1,det:['cargo']},'口袋多、份量感重，上身選簡單'),
+A('bottom','b_jogger','束口棉褲',['運動','街頭'],['灰','黑','海軍藍'],{kind:'pants',fit:'tapered',len:.97,det:['cuff','drawstring']},'配球鞋露出腳踝'),
+A('bottom','b_trek','登山機能褲',['戶外'],['炭灰','軍綠','卡其'],{kind:'pants',fit:'tapered',len:1,det:['kneeseam']},'彈性快乾，配登山鞋'),
+A('bottom','b_shorts','休閒短褲',['休閒','日系','戶外'],['卡其','海軍藍','米','軍綠'],{kind:'pants',fit:'regular',len:.3},'膝上 5–8 公分最顯腿長'),
+A('bottom','b_gym','運動短褲',['運動'],['黑','藍','灰'],{kind:'pants',fit:'regular',len:.22,det:['sidestripe','drawstring']},'運動用'),
+A('bottom','b_dshorts','牛仔短褲',['休閒','甜美','復古'],['淺丹寧','丹寧'],{kind:'pants',fit:'regular',len:.18,high:1,det:['denim']},'夏天配寬鬆上衣'),
+A('bottom','b_mini','A字短裙',['甜美','韓系'],['黑','丹寧','粉','米'],{kind:'skirt',fit:'aline',len:.34,high:1,flare:.35},'高腰短裙配短版上衣'),
+A('bottom','b_pleat','百褶裙',['學院','日系','甜美'],['海軍藍','灰','米','酒紅'],{kind:'skirt',fit:'aline',len:.55,high:1,flare:.32,det:['pleat']},'配毛衣、樂福鞋就是學院風'),
+A('bottom','b_maxi','長裙',['日系','極簡'],['米','黑','鼠尾草','棕','丹寧'],{kind:'skirt',fit:'aline',len:.9,flare:.15},'上身選短或合身款'),
+A('bottom','b_pencil','鉛筆裙',['商務','極簡'],['黑','炭灰','海軍藍','駝'],{kind:'skirt',fit:'pencil',len:.52,high:1,det:['slit']},'通勤正式感'),
+A('dress','d_lbd','無袖洋裝',['極簡','商務'],['黑','海軍藍','酒紅'],{neck:'crew',slv:'none',fit:'slim',waisted:1,dlen:.45,flare:.12},'小黑裙，加西裝外套可上班'),
+A('dress','d_floral','碎花洋裝',['甜美','復古'],['粉','淺藍','黃','綠'],{neck:'v',slv:'short',fit:'regular',waisted:1,vdeep:7,dlen:.68,flare:.3,det:['floral']},'配開襟針織衫或牛仔外套'),
+A('dress','d_shirt','襯衫洋裝',['日系','極簡'],['米','淺藍','卡其','白','丹寧'],{neck:'collar',slv:'long',fit:'regular',dlen:.6,flare:.12,det:['buttons','belt','cuff']},'繫腰帶做出腰線'),
+A('dress','d_knit','針織長洋裝',['韓系','極簡'],['米','炭灰','黑','駝'],{neck:'turtle',slv:'long',fit:'slim',dlen:.8,flare:.03,det:['knit']},'配長大衣與靴子'),
+A('shoes','s_white','小白鞋',['休閒','極簡','日系','韓系','學院'],['白','黑'],{kind:'sneaker',det:['laces']},'什麼都能配'),
+A('shoes','s_hi','高筒帆布鞋',['街頭','復古','休閒'],['黑','白','紅','海軍藍'],{kind:'sneaker',shaft:6,det:['laces','toecap']},'配直筒褲或反摺褲管'),
+A('shoes','s_chunky','老爹鞋',['街頭','韓系','運動'],['白','灰','黑'],{kind:'chunky',sole:2.3,det:['laces','stripe']},'厚底增高，配寬褲'),
+A('shoes','s_run','慢跑鞋',['運動','休閒'],['灰','黑','藍','白'],{kind:'sneaker',sole:1.5,det:['laces','stripe']},'運動與日常都行'),
+A('shoes','s_loafer','樂福鞋',['學院','商務','日系'],['棕','黑','酒紅'],{kind:'loafer',sole:.8,dark:1,det:['penny']},'配白襪就是學院風'),
+A('shoes','s_derby','德比皮鞋',['商務','極簡'],['黑','棕'],{kind:'derby',sole:.9,dark:1,det:['laces']},'正式場合'),
+A('shoes','s_chelsea','切爾西靴',['極簡','韓系','商務'],['黑','棕'],{kind:'boot',shaft:9,sole:1,dark:1,det:['gore']},'配窄管或九分褲'),
+A('shoes','s_work','工裝靴',['復古','戶外','街頭'],['棕','黑','卡其'],{kind:'boot',shaft:11,sole:1.8,dark:1,det:['laces']},'耐看的靴款，褲管可反摺'),
+A('shoes','s_hike','登山鞋',['戶外'],['棕','炭灰','軍綠'],{kind:'boot',shaft:7,sole:2,dark:1,det:['laces','stripe']},'山系穿搭'),
+A('shoes','s_sandal','涼鞋',['休閒','戶外','日系'],['黑','棕','米'],{kind:'sandal',sole:1.4},'夏天，也可配襪子'),
+A('shoes','s_pump','跟鞋',['商務','甜美','極簡'],['黑','駝','紅'],{kind:'pump',sole:.7},'配裙裝或西裝褲'),
+A('shoes','s_mary','瑪莉珍鞋',['甜美','學院'],['黑','酒紅','白'],{kind:'loafer',sole:.8,dark:1,det:['strap']},'配短襪與裙子'),
+A('hat','h_cap','棒球帽',['街頭','運動','休閒'],['黑','海軍藍','米','綠'],{kind:'cap'},'最容易上手的帽子'),
+A('hat','h_beanie','毛帽',['街頭','戶外','日系'],['黑','灰','酒紅','黃','軍綠'],{kind:'beanie'},'冬天、山系'),
+A('hat','h_bucket','漁夫帽',['日系','街頭','戶外'],['米','黑','卡其','軍綠'],{kind:'bucket'},'修飾臉型'),
+A('hat','h_fedora','紳士帽',['復古','商務'],['駝','黑','炭灰'],{kind:'fedora'},'配大衣'),
+A('hat','h_beret','貝雷帽',['甜美','學院','復古'],['黑','酒紅','米','海軍藍'],{kind:'beret'},'法式感'),
+A('hat','h_straw','草帽',['休閒','甜美'],['米','卡其'],{kind:'straw'},'夏天度假'),
+A('acc','a_glasses','眼鏡',['學院','日系','極簡'],['黑','棕','金'],{kind:'glasses',view:'head'},''),
+A('acc','a_sun','墨鏡',['街頭','復古','休閒'],['黑','棕'],{kind:'sun',view:'head'},''),
+A('acc','a_scarf','圍巾',['日系','學院','極簡'],['灰','紅','米','海軍藍','駝'],{kind:'scarf'},''),
+A('acc','a_tie','領帶',['商務','學院'],['海軍藍','酒紅','黑'],{kind:'tie'},''),
+A('acc','a_necklace','項鍊',['甜美','極簡','韓系'],['金','銀'],{kind:'necklace'},''),
+A('acc','a_cross','斜背包',['街頭','休閒','日系','戶外'],['黑','棕','軍綠','米'],{kind:'cross',view:'torso'},''),
+A('acc','a_tote','托特包',['日系','極簡','休閒'],['米','黑','棕'],{kind:'tote',view:'full'},''),
+A('acc','a_backpack','後背包',['戶外','運動','學院'],['黑','橘','海軍藍'],{kind:'backpack'},''),
+A('acc','a_belt','皮帶',['商務','復古','學院'],['棕','黑'],{kind:'belt',view:'waist'},'上衣紮進去才看得到'),
+A('acc','a_watch','手錶',['商務','極簡'],['黑','棕','銀'],{kind:'watch',view:'full'},''),
+A('acc','a_socks','長襪',['學院','日系','運動'],['白','灰','黑','紅'],{kind:'socks',h:12,view:'feet'},'')
+];
+const ITEM=Object.fromEntries(CATALOG.map(i=>[i.id,i]));
+const E=(t,c)=>({t,c});
+const STYLEINFO={
+休閒:{d:'舒適、不費力的日常穿著。基本款加上乾淨的配色。',k:['素T、牛仔褲、小白鞋','全身不超過三色','合身但不緊'],pal:['白','丹寧','卡其','海軍藍'],look:{top:E('t_tee','白'),bottom:E('b_jeans','丹寧'),shoes:E('s_white','白'),outer:E('o_denim','淺丹寧'),acc:[E('a_cross','黑')]}},
+街頭:{d:'寬鬆輪廓、圖案與球鞋，重點在份量感與層次。',k:['寬版上衣配寬或工作褲','球鞋是主角','帽子、斜背包點綴'],pal:['黑','灰','軍綠','白'],look:{top:E('t_hoodie','灰'),outer:E('o_coach','黑'),bottom:E('b_cargo','軍綠'),shoes:E('s_chunky','白'),hat:E('h_cap','黑')}},
+商務:{d:'俐落、合身、低彩度。襯衫、西裝外套與皮鞋。',k:['肩線合身最重要','深色外套配淺色襯衫','皮帶與鞋同色'],pal:['海軍藍','炭灰','白','棕'],look:{top:E('t_oxford','白'),outer:E('o_blazer','海軍藍'),bottom:E('b_slacks','炭灰'),shoes:E('s_derby','棕'),acc:[E('a_tie','酒紅'),E('a_belt','棕'),E('a_watch','銀')],tuck:1}},
+日系:{d:'寬鬆層次、自然色調，city boy 的隨性感。',k:['大地色與米白','層次：T＋襯衫＋外套','寬褲配九分長度'],pal:['米','卡其','鼠尾草','海軍藍'],look:{top:E('t_stripe','白'),outer:E('o_cardigan','米'),bottom:E('b_wide','卡其'),shoes:E('s_white','白'),hat:E('h_bucket','米'),acc:[E('a_tote','米')]}},
+韓系:{d:'上寬下寬或上短下長，乾淨的黑白灰與奶茶色。',k:['高腰＋短上衣拉比例','同色系穿搭','寬版西裝外套'],pal:['黑','奶茶','米','灰'],look:{top:E('t_turtle','米'),outer:E('o_coat','駝'),bottom:E('b_wide','黑'),shoes:E('s_chelsea','黑'),tuck:1}},
+運動:{d:'機能布料與運動鞋，Athleisure 把運動單品穿進日常。',k:['束口褲露腳踝','一個亮色就好','材質要挺不要垮'],pal:['黑','灰','藍','橘'],look:{top:E('t_tech','藍'),bottom:E('b_jogger','黑'),shoes:E('s_run','灰'),hat:E('h_cap','黑'),acc:[E('a_backpack','黑')]}},
+復古:{d:'美式復古：丹寧、格紋、皮革與靴子。',k:['格紋襯衫、牛仔外套','棕色皮件','褲管反摺露出靴子'],pal:['丹寧','紅','棕','卡其'],look:{top:E('t_flannel','紅'),outer:E('o_denim','丹寧'),bottom:E('b_chino','卡其'),shoes:E('s_work','棕'),acc:[E('a_belt','棕')]}},
+戶外:{d:'山系 Gorpcore：機能外套、抓絨、登山鞋，亮色點綴。',k:['防風外套是核心','大地色配一個亮色','毛帽、後背包'],pal:['軍綠','橘','卡其','炭灰'],look:{top:E('t_tech','黑'),outer:E('o_shell','橘'),bottom:E('b_trek','炭灰'),shoes:E('s_hike','棕'),hat:E('h_beanie','軍綠'),acc:[E('a_backpack','黑')]}},
+極簡:{d:'少即是多：黑白灰與駝色，靠剪裁與材質取勝。',k:['無圖案','全身兩到三色','線條乾淨的鞋'],pal:['黑','白','炭灰','駝'],look:{top:E('t_tee','白'),outer:E('o_blazer','黑'),bottom:E('b_slacks','黑'),shoes:E('s_white','白'),tuck:1}},
+學院:{d:'Preppy：襯衫、針織背心、百褶裙或卡其褲、樂福鞋。',k:['襯衫＋針織疊穿','海軍藍、酒紅、米色','樂福鞋配白襪'],pal:['海軍藍','酒紅','米','卡其'],look:{top:E('t_oxford','白'),outer:E('o_vest','海軍藍'),bottom:E('b_chino','卡其'),shoes:E('s_loafer','棕'),acc:[E('a_glasses','黑'),E('a_socks','白')],tuck:1}},
+甜美:{d:'柔和色、裙裝與小細節。',k:['粉、米、淺藍','A字或碎花','貝雷帽、項鍊'],pal:['粉','米','淺藍','白'],look:{dress:E('d_floral','粉'),outer:E('o_cardigan','米'),shoes:E('s_mary','黑'),hat:E('h_beret','酒紅'),acc:[E('a_necklace','金')]}}
+};
+/* 商店：市面上買得到的商品與台灣售價（2026/11 查詢；特價前的定價，實際以官網為準） */
+const SHOPDATE='2026/11';
+const S=(id,brand,name,price,t,c,src)=>({id,brand,name,price,t,c,src});
+const SHOP=[
+S('u1','UNIQLO','男裝 圓領T恤(短袖) Uniqlo U',390,'t_tee','白'),
+S('u2','UNIQLO','AIRism 棉質寬版圓領T恤(五分袖)',390,'t_over','黑'),
+S('u3','UNIQLO','男裝 SUPIMA COTTON 圓領T恤(短袖)',590,'t_tee','海軍藍'),
+S('u4','UNIQLO','男裝 牛津條紋襯衫(長袖)',990,'t_oxford','淺藍'),
+S('u5','UNIQLO','JWA 法蘭絨格紋寬版襯衫(長袖)',990,'t_flannel','紅'),
+S('u6','UNIQLO','男裝 休閒連帽上衣(長袖)',1290,'t_hoodie','灰'),
+S('u7','UNIQLO','100% 喀什米爾圓領長袖毛衣',2990,'t_knit','米'),
+S('u8','UNIQLO','JWA 羊毛混紡喀什米爾圓領背心',1290,'o_vest','海軍藍'),
+S('u9','UNIQLO','PUFFTECH 輕暖科技連帽外套',1990,'o_puffer','黑'),
+S('u10','UNIQLO','JWA PADDED 短版外套',2490,'o_bomber','軍綠'),
+S('u11','UNIQLO','女裝 雙面羽絨短版外套',2990,'o_puffer','米'),
+S('u12','UNIQLO','UNIQLO : C 寬版休閒連帽外套',1290,'o_shell','黑'),
+S('u13','UNIQLO','男裝 彈性赤耳 Slim Fit 牛仔褲',1290,'b_skinny','丹寧'),
+S('u14','UNIQLO','女裝 繭型牛仔褲',1290,'b_wide','丹寧'),
+S('u15','UNIQLO','女裝 牛仔長裙',990,'b_maxi','丹寧'),
+S('u16','UNIQLO','JWA 百褶裙',1490,'b_pleat','海軍藍'),
+S('u17','UNIQLO','JWA 襯衫式洋裝(長袖)',1290,'d_shirt','米'),
+S('u18','UNIQLO','UNIQLO : C 棉質立領洋裝',1490,'d_shirt','白'),
+S('u19','UNIQLO','UNIQLO : C 皮帶',890,'a_belt','黑'),
+S('u20','UNIQLO','素面單色襪',100,'a_socks','白'),
+S('u21','UNIQLO','抽繩肩背包 Uniqlo U',990,'a_cross','黑'),
+S('g1','GU','女裝 寬版西裝外套',1790,'o_blazer','黑'),
+S('g2','GU','男裝 輕型防風連帽外套',790,'o_shell','軍綠'),
+S('g3','GU','3D Barrel Leg 錐形牛仔褲',990,'b_jeans','淺丹寧'),
+S('g4','GU','男裝 超寬版牛仔褲',990,'b_wide','丹寧'),
+S('g5','GU','女裝 仿皮寬版騎士外套',990,'o_biker','黑','特價'),
+S('g6','GU','男裝 雙面 MA-1 外套',790,'o_bomber','黑','特價'),
+S('l1','lativ','商務彈性修身長袖襯衫-男',690,'t_oxford','白'),
+S('l2','lativ','柔棉長袖襯衫-男',499,'t_oxford','淺藍'),
+S('l3','lativ','嫘縈長袖襯衫-女',590,'t_blouse','白'),
+S('l4','lativ','棉質無袖短洋裝-女',690,'d_lbd','黑'),
+S('l5','lativ','牛仔襯衫洋裝-女',790,'d_shirt','丹寧'),
+S('l6','lativ','細褶雪紡長裙-女',590,'b_maxi','黑'),
+S('l7','lativ','格紋百褶連褲短裙-女',590,'b_pleat','棕'),
+S('n1','Nike',"Air Force 1 '07",3600,'s_white','白'),
+S('v1',"Levi's",'501 Original 中腰直筒牛仔褲',4390,'b_jeans','丹寧'),
+S('d1','Dr. Martens','1460 Crazy Horse 8孔靴',7220,'s_work','棕'),
+S('d2','Dr. Martens','1460 Rain 防水靴',4960,'s_work','黑'),
+S('c1','Converse','Chuck 70 高筒',2999,'s_hi','黑','END. 售價'),
+S('a1','adidas','Samba OG',3139,'s_white','白','END. 售價')
+];
+const SHOPMAP=Object.fromEntries(SHOP.map(s=>[s.id,s]));
+/* ===== App：帳號、雲端同步、畫面 ===== */
+const FB='https://molecule-match-default-rtdb.asia-southeast1.firebasedatabase.app/trips/outfit-app';
+const LSK='outfit-v1',$=s=>document.querySelector(s),app=$('#app');
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const nt=n=>'NT$'+Number(n||0).toLocaleString('en-US');
+let DB={users:{},known:{},cur:null};
+try{const d=JSON.parse(localStorage.getItem(LSK)||'null');if(d&&d.users)DB=d;}catch(e){}
+let U=null,UK=null,tab='try',cloud='',accSel=0,closetView='own',shopBrand='全部',shopSlot='all',addSlot='top',online=false;
+function saveLocal(){try{localStorage.setItem(LSK,JSON.stringify(DB));}catch(e){toast('這台裝置的儲存空間滿了，照片可能沒存到');}}
+let pushT=null;
+function save(){if(!U)return;U.up=Date.now();DB.users[UK]=U;saveLocal();clearTimeout(pushT);cloud='待同步';pushT=setTimeout(push,1500);}
+async function push(){if(!U)return;try{const r=await fetch(FB+'/data/'+UK+'.json',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(U),keepalive:JSON.stringify(U).length<60000});
+  cloud=r.ok?'已同步到雲端':'雲端同步失敗（'+r.status+'）';}catch(e){cloud='離線中，已存在這台裝置';}const el=$('#cloudSt');if(el)el.textContent=cloud;}
+const keyOf=n=>'n'+Array.from(n.trim().toLowerCase()).map(c=>c.codePointAt(0).toString(36)).join('_');
+function hash(s){let a=2166136261,b=5381;for(let i=0;i<s.length;i++){const c=s.charCodeAt(i);a=Math.imul(a^c,16777619);b=(Math.imul(b,33)+c)|0;}return(a>>>0).toString(16).padStart(8,'0')+(b>>>0).toString(16).padStart(8,'0');}
+function toast(m){const t=$('#toast');t.innerHTML=`<div class="toast">${esc(m)}</div>`;clearTimeout(toast.t);toast.t=setTimeout(()=>t.innerHTML='',2400);}
+function sheet(html){$('#sheet').innerHTML=html?`<div class="sheet" data-act="sheetbg"><div class="in">${html}</div></div>`:'';}
+
+/* --- 身形 --- */
+function est(sex,h,w){const bmi=w/Math.pow(h/100,2),m=sex==='m',r=v=>Math.round(v*2)/2;
+  return{head:r(m?56+(h-170)*.06:55+(h-160)*.06),shoulder:r(h*(m?.255:.235)+(bmi-22)*.35),chest:r(m?h*.53+(bmi-22)*2.3:h*.52+(bmi-21)*2.2),waist:r(m?h*.45+(bmi-22)*2.6:h*.41+(bmi-21)*2.4),hip:r(m?h*.54+(bmi-22)*2:h*.57+(bmi-21)*2.1),arm:r(h*.335),leg:r(h*.455),foot:r(h*(m?.152:.147))};}
+function newUser(name){const sex='m',h=172,w=68;return{name,up:0,body:Object.assign({sex,h,w,skin:'#f0cdb0',hair:'short',hairColor:'#2b2420'},est(sex,h,w)),
+  outfit:{top:{t:'t_tee',c:'白',k:'t:t_tee'},bottom:{t:'b_jeans',c:'丹寧',k:'t:b_jeans'},shoes:{t:'s_white',c:'白',k:'t:s_white'},acc:[]},saved:[],closet:[],budget:0,ui:{slot:'top',src:'cat',style:'全部'}};}
+function fix(u){u.outfit=u.outfit||{};u.outfit.acc=u.outfit.acc||[];u.saved=u.saved||[];u.closet=u.closet||[];u.ui=u.ui||{slot:'top',src:'cat',style:'全部'};return u;}
+
+/* --- 登入 --- */
+async function fetchNames(){try{const r=await fetch(FB+'/names.json');if(!r.ok)throw 0;const d=await r.json()||{};online=true;
+  Object.keys(d).forEach(k=>{if(d[k]&&d[k].name)DB.known[k]={name:d[k].name,pin:d[k].pin||''};});saveLocal();}catch(e){online=false;}}
+function loginView(msg){U=null;UK=null;$('#nav').style.display='none';$('#userBtn').style.display='none';
+  const ks=Object.keys(DB.known).sort((a,b)=>DB.known[a].name.localeCompare(DB.known[b].name,'zh-Hant'));
+  app.innerHTML=`<div class="login"><h2>穿搭試衣間</h2><div class="muted">設定身形、收錄衣櫃、試穿搭配、逛商店估預算。每個人有自己的衣櫃。</div>
+  ${ks.length?`<h2 style="margin-top:20px">點名字直接登入</h2><div class="names">${ks.map(k=>`<button data-act="pick" data-k="${k}">${esc(DB.known[k].name)}<small>${DB.known[k].pin?'🔒 有密碼':'免密碼'}</small></button>`).join('')}</div>`:''}
+  <h2 style="margin-top:20px">新增使用者</h2><div class="card">
+  <label class="f">名字</label><input type="text" id="nName" maxlength="12" placeholder="例如：Roke" style="width:100%">
+  <label class="f">四碼密碼（可不設）</label><input type="password" id="nPin" inputmode="numeric" maxlength="4" placeholder="留空＝不設密碼" style="width:100%">
+  <button class="btn pri big" style="margin-top:12px" data-act="register">建立並登入</button></div>
+  <div class="muted" id="lgMsg">${esc(msg||(online?'名單已從雲端載入，換裝置也看得到。':'正在連線雲端名單…'))}</div></div>`;}
+async function enter(k){const kn=DB.known[k];let local=DB.users[k]||null,remote=null;
+  try{const r=await fetch(FB+'/data/'+k+'.json');if(r.ok)remote=await r.json();}catch(e){}
+  let u=remote&&(!local||(remote.up||0)>=(local.up||0))?remote:local;
+  if(!u)u=newUser(kn?kn.name:'我');U=fix(u);UK=k;DB.users[k]=U;DB.cur=k;saveLocal();
+  cloud=remote?'已同步到雲端':(online?'已同步到雲端':'離線中，已存在這台裝置');
+  if(!remote&&online)push();
+  $('#nav').style.display='flex';const ub=$('#userBtn');ub.style.display='';ub.textContent='👤 '+U.name;
+  if(!U.closet.length&&U.ui.src==='closet')U.ui.src='cat';tab='try';render();}
+function askPin(k){sheet(`<h3>${esc(DB.known[k].name)} 的密碼<button data-act="close">×</button></h3>
+  <input type="password" id="pinIn" inputmode="numeric" maxlength="4" placeholder="四碼密碼" style="width:100%;font-size:22px;text-align:center;letter-spacing:8px">
+  <button class="btn pri big" style="margin-top:12px" data-act="pinok" data-k="${k}">登入</button>`);setTimeout(()=>{const i=$('#pinIn');if(i)i.focus();},50);}
+async function register(){const name=$('#nName').value.trim(),pin=$('#nPin').value.trim();
+  if(!name)return toast('請輸入名字');if(pin&&!/^\d{4}$/.test(pin))return toast('密碼要四個數字，或留空');
+  const k=keyOf(name);await fetchNames();
+  if(DB.known[k]){if(DB.known[k].pin)return askPin(k);return enter(k);}
+  DB.known[k]={name,pin:pin?hash(k+':'+pin):''};saveLocal();
+  try{await fetch(FB+'/names/'+k+'.json',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,pin:DB.known[k].pin,up:Date.now()})});}catch(e){}
+  enter(k);}
+
+/* --- 穿搭工具 --- */
+const body=()=>U.body;
+let _g=null,_gk='';function G(){const k=JSON.stringify(U.body);if(k!==_gk){_g=geom(U.body);_gk=k;}return _g;}
+const DG=geom(Object.assign({h:172,w:66},est('m',172,66)));
+function entries(slot,src){const st=U.ui.style;
+  if(src==='cat')return CATALOG.filter(i=>i.slot===slot&&(st==='全部'||i.st.includes(st))).map(i=>({k:'t:'+i.id,t:i.id,c:i.col[0],name:i.name}));
+  if(src==='shop')return SHOP.filter(s=>ITEM[s.t].slot===slot).map(s=>({k:'s:'+s.id,t:s.t,c:s.c,name:s.brand+' '+s.name,price:s.price,badge:s.brand}));
+  return U.closet.filter(c=>ITEM[c.base]&&ITEM[c.base].slot===slot&&c.status===(src==='wish'?'wish':'own')).map(c=>({k:'c:'+c.id,t:c.base,c:c.color,name:c.name,price:c.price,img:c.img,badge:c.brand}));}
+function wornList(){const o=U.outfit,r=[];for(const[s]of SLOTS){if(s==='acc')o.acc.forEach((a,i)=>r.push({slot:s,i,e:a}));else if(o[s])r.push({slot:s,e:o[s]});}return r.filter(x=>ITEM[x.e.t]);}
+function entryInfo(e){const k=e.k||'';if(k[0]==='c'){const c=U.closet.find(x=>'c:'+x.id===k);if(c)return{name:c.name,price:c.price,own:c.status==='own',wish:c.status==='wish'};}
+  if(k[0]==='s'){const s=SHOPMAP[k.slice(2)];if(s){const inC=U.closet.find(x=>x.shop===s.id);return{name:s.brand+' '+s.name,price:s.price,own:inC&&inC.status==='own',wish:!inC||inC.status==='wish',shop:s.id,inC:!!inC};}}
+  return{name:ITEM[e.t].name,cat:true};}
+function wear(slot,en){const o=U.outfit,e={t:en.t,c:en.c,k:en.k};
+  if(slot==='acc'){const i=o.acc.findIndex(a=>a.k===en.k||ITEM[a.t].kind===ITEM[en.t].kind);
+    if(i>=0&&o.acc[i].k===en.k){o.acc.splice(i,1);accSel=0;}else{if(i>=0)o.acc.splice(i,1);o.acc.push(e);accSel=o.acc.length-1;}}
+  else if(o[slot]&&o[slot].k===en.k)delete o[slot];
+  else{o[slot]=e;if(slot==='dress'){delete o.top;delete o.bottom;}if(slot==='top'||slot==='bottom')delete o.dress;}
+  save();}
+function analysis(){const w=wornList();if(!w.length)return'還沒穿任何單品，從下面挑一件開始。';
+  const sc={};w.forEach(x=>ITEM[x.e.t].st.forEach(s=>sc[s]=(sc[s]||0)+(x.slot==='acc'||x.slot==='hat'?.5:1)));
+  const top=Object.entries(sc).sort((a,b)=>b[1]-a[1]).slice(0,2),tot=Object.values(sc).reduce((a,b)=>a+b,0);
+  const hues=new Set();let n=0;w.filter(x=>x.slot!=='acc').forEach(x=>{const[h,s,l]=hsl(col(x.e.c));if(s>.22&&l>.18&&l<.88&&!(h>195&&h<235&&l<.42)){hues.add(Math.round(h/40));n++;}});
+  const ct=hues.size===0?'全身中性色，耐看安全；可以加一個亮色配件點綴。':hues.size===1?'一個重點色，主次分明。':hues.size===2?'兩個彩色，留意哪個是主角。':'彩色偏多，建議全身控制在三色以內。';
+  return`風格偏 <b>${top.map(t=>t[0]+' '+Math.round(t[1]/tot*100)+'%').join('、')}</b>。${ct}`;}
+function costLine(){let own=0,buy=0,sum=0,cat=0,add=[];wornList().forEach(x=>{const i=entryInfo(x.e);if(i.cat)cat++;else if(i.own)own++;else{buy++;sum+=i.price||0;if(i.shop&&!i.inC)add.push(i.shop);}});
+  if(!own&&!buy)return'';return`這套：已有 <b>${own}</b> 件`+(buy?`，要買 <b>${buy}</b> 件 <b>${nt(sum)}</b>`:'')+(cat?`，另有 ${cat} 件是款式示意`:'')+(add.length?` <button class="btn sm hot" data-act="wishall" data-ids="${add.join(',')}">全部加入想買</button>`:'');}
+function randomLook(){const st=U.ui.style==='全部'?STYLES[Math.floor(Math.random()*STYLES.length)]:U.ui.style;
+  const pick=s=>{const a=CATALOG.filter(i=>i.slot===s&&i.st.includes(st));const l=a.length?a:CATALOG.filter(i=>i.slot===s);const i=l[Math.floor(Math.random()*l.length)];return{t:i.id,c:i.col[Math.floor(Math.random()*i.col.length)],k:'t:'+i.id};};
+  const o={acc:[],tuck:Math.random()<.3};const hasD=CATALOG.some(i=>i.slot==='dress'&&i.st.includes(st));
+  if(hasD&&Math.random()<.35)o.dress=pick('dress');else{o.top=pick('top');o.bottom=pick('bottom');}
+  o.shoes=pick('shoes');if(Math.random()<.55)o.outer=pick('outer');if(Math.random()<.35)o.hat=pick('hat');if(Math.random()<.6)o.acc.push(pick('acc'));
+  U.outfit=o;save();toast('隨機：'+st+'風');}
+function addCloset(d){const c=Object.assign({id:Date.now().toString(36)+Math.floor(Math.random()*1e3).toString(36),status:'own',brand:'',price:0,img:''},d);U.closet.unshift(c);save();return c;}
+function addFromShop(sid,status){const s=SHOPMAP[sid];let c=U.closet.find(x=>x.shop===sid);if(c){c.status=status;save();return c;}
+  return addCloset({base:s.t,name:s.name,color:s.c,brand:s.brand,price:s.price,status,shop:sid});}
+const wishSum=()=>U.closet.filter(c=>c.status==='wish').reduce((a,c)=>a+(+c.price||0),0);
+const gUrl=(q,img)=>'https://www.google.com/search?'+(img?'tbm=isch&':'')+'q='+encodeURIComponent(q);
+
+/* --- 畫面 --- */
+function stage(ruler){return`<div class="stage">${figure(U.body,U.outfit,{g:G(),ruler})}<div class="who">${esc(U.name)}｜${U.body.h} cm · ${U.body.w} kg</div>
+  <div class="side"><button data-act="random">🎲 隨機</button><button data-act="tuck" class="${U.outfit.tuck?'on':''}">${U.outfit.tuck?'紮進去':'放外面'}</button><button data-act="savelook">💾 收藏</button><button data-act="clear">清空</button></div></div>`;}
+function swatches(cur,act,cols){const all=[...new Set([...(cols||[]),...Object.keys(COL)])];
+  return`<div class="sw">${all.map(n=>`<button title="${n}" data-act="${act}" data-c="${n}" class="${cur===n?'on':''}" style="background:${COL[n]}"></button>`).join('')}<input type="color" data-chg="${act}" value="${/^#/.test(cur||'')?cur:'#888888'}" title="自訂顏色"></div>`;}
+function card(en,on,g){return`<div class="it ${on?'on':''}" data-act="wear" data-k="${en.k}">${en.badge?`<span class="bd">${esc(en.badge)}</span>`:''}${en.img?`<img src="${esc(en.img)}" alt="" loading="lazy">`:thumb(ITEM[en.t],en.c,g)}<div class="n">${esc(en.name)}</div>${en.price?`<div class="p">${nt(en.price)}</div>`:''}</div>`;}
+function vTry(){const ui=U.ui,o=U.outfit,slot=ui.slot,src=ui.src,list=entries(slot,src);
+  const nOwn=U.closet.filter(c=>c.status==='own').length,nWish=U.closet.length-nOwn;
+  const cur=slot==='acc'?o.acc[Math.min(accSel,o.acc.length-1)]:o[slot];
+  const isOn=en=>slot==='acc'?o.acc.some(a=>a.k===en.k):(o[slot]&&o[slot].k===en.k);
+  const cl=costLine();
+  return stage(true)+`<div class="sum">${analysis()}${cl?'<br>'+cl:''}</div>
+  <div class="chips">${[['closet','我的衣櫃 '+nOwn],['wish','想買 '+nWish],['cat','款式圖鑑'],['shop','商店']].map(([k,n])=>`<button class="chip s2 ${src===k?'on':''}" data-act="src" data-v="${k}">${n}</button>`).join('')}</div>
+  <div class="chips">${SLOTS.map(([k,n])=>`<button class="chip ${slot===k?'on':''}" data-act="slot" data-v="${k}">${n}${k==='acc'?(o.acc.length?' ●':''):(o[k]?' ●':'')}</button>`).join('')}</div>
+  ${src==='cat'?`<div class="chips">${['全部',...STYLES].map(s=>`<button class="chip ${ui.style===s?'on':''}" data-act="style" data-v="${s}">${s}</button>`).join('')}</div>`:''}
+  <div class="rail">${list.length?list.map(en=>card(en,isOn(en),DG)).join(''):`<div class="muted" style="padding:14px 4px">${src==='closet'?'衣櫃裡還沒有這類衣服。到「衣櫃」分頁新增，或先用「款式圖鑑」試穿。':src==='wish'?'想買清單裡沒有這類單品。到「商店」逛逛。':'這個風格沒有這類單品，換一個風格看看。'}</div>`}</div>
+  ${cur&&ITEM[cur.t]?`<div class="card"><div class="muted" style="margin-bottom:6px">${esc(entryInfo(cur).name)} 的顏色：${colName(cur.c)}${ITEM[cur.t].tip?'｜'+ITEM[cur.t].tip:''}</div>${swatches(cur.c,'color',ITEM[cur.t].col)}</div>`:''}
+  <h2>目前穿著</h2><div class="worn">${wornList().map(x=>`<span><i style="background:${col(x.e.c)}"></i>${esc(entryInfo(x.e).name)}<button data-act="off" data-s="${x.slot}" data-i="${x.i==null?'':x.i}">✕</button></span>`).join('')||'<span class="muted">（沒有）</span>'}</div>`;}
+function closetCard(c){const it=ITEM[c.base];if(!it)return'';const th=thumb(it,c.color,DG);
+  return`<div class="g">${c.img?`<div class="two"><img class="ph" src="${esc(c.img)}" alt="" loading="lazy">${th}</div>`:th}
+  <div class="nm">${esc(c.name)}</div><div class="br">${esc(c.brand||'')}${c.brand?' · ':''}${SLOTN[it.slot]} · ${colName(c.color)}</div>${c.price?`<div class="pr">${nt(c.price)}</div>`:''}
+  <div class="row"><button class="btn sm pri" data-act="tryc" data-id="${c.id}">試穿</button><button class="btn sm" data-act="edit" data-id="${c.id}">編輯</button>${c.status==='wish'?`<button class="btn sm" data-act="bought" data-id="${c.id}">已買 ✓</button>`:''}</div></div>`;}
+function vCloset(){const own=U.closet.filter(c=>c.status==='own'),wish=U.closet.filter(c=>c.status==='wish'),list=closetView==='own'?own:wish,ws=wishSum();
+  return`<div class="bar"><div class="chips" style="padding-bottom:0"><button class="chip s2 ${closetView==='own'?'on':''}" data-act="cview" data-v="own">我有的 ${own.length}</button><button class="chip s2 ${closetView==='wish'?'on':''}" data-act="cview" data-v="wish">想買 ${wish.length}</button></div><button class="btn hot r" data-act="add">＋ 新增衣服</button></div>
+  ${closetView==='wish'?budgetBox():`<div class="muted" style="margin:8px 2px">${esc(U.name)} 的衣櫃。衣櫃總值 ${nt(own.reduce((a,c)=>a+(+c.price||0),0))}（有填價格的）。</div>`}
+  <div class="grid" style="margin-top:8px">${list.map(closetCard).join('')}</div>
+  ${list.length?'':`<div class="card muted">${closetView==='own'?'還沒有衣服。按「＋ 新增衣服」自己建立，或從下面的款式點一下快速加入。':'想買清單是空的。到「商店」分頁把想買的加進來。'}</div>`}
+  ${closetView==='own'?`<h2>快速加入：點一下就把這款放進我的衣櫃</h2><div class="chips">${SLOTS.map(([k,n])=>`<button class="chip ${addSlot===k?'on':''}" data-act="aslot" data-v="${k}">${n}</button>`).join('')}</div>
+  <div class="rail" style="flex-wrap:wrap">${CATALOG.filter(i=>i.slot===addSlot).map(i=>`<div class="it" data-act="quick" data-t="${i.id}"><span class="bd">＋</span>${thumb(i,i.col[0],DG)}<div class="n">${i.name}</div></div>`).join('')}</div>
+  <div class="muted">加入後按「編輯」可改名稱、顏色、品牌、價格，並加上照片。</div>`:''}`;}
+function budgetBox(){const ws=wishSum(),b=+U.budget||0;
+  return`<div class="sum">想買清單合計 <b>${nt(ws)}</b>${b?`｜預算 ${nt(b)}，${ws<=b?`還剩 <b style="color:var(--ok)">${nt(b-ws)}</b>`:`超出 <b>${nt(ws-b)}</b>`}`:''}
+  <div class="bar" style="margin-top:6px"><span class="muted">購買預算</span><input type="number" id="budget" inputmode="numeric" value="${b||''}" placeholder="例如 5000" style="width:120px" data-chg="budget"></div></div>`;}
+function vShop(){const brands=['全部',...new Set(SHOP.map(s=>s.brand))];
+  const list=SHOP.filter(s=>(shopBrand==='全部'||s.brand===shopBrand)&&(shopSlot==='all'||ITEM[s.t].slot===shopSlot));
+  return budgetBox()+`<div class="chips">${brands.map(b=>`<button class="chip s2 ${shopBrand===b?'on':''}" data-act="sbrand" data-v="${esc(b)}">${esc(b)}</button>`).join('')}</div>
+  <div class="chips">${[['all','全部'],...SLOTS].map(([k,n])=>`<button class="chip ${shopSlot===k?'on':''}" data-act="sslot" data-v="${k}">${n}</button>`).join('')}</div>
+  <div class="grid">${list.map(s=>{const c=U.closet.find(x=>x.shop===s.id);
+    return`<div class="g">${thumb(ITEM[s.t],s.c,DG)}<div class="br">${esc(s.brand)}</div><div class="nm">${esc(s.name)}</div><div class="pr">${nt(s.price)}${s.src?` <span class="tag">${s.src}</span>`:''}</div>
+    <div class="row"><button class="btn sm pri" data-act="trys" data-id="${s.id}">試穿</button>${c?`<span class="tag" style="align-self:center">${c.status==='own'?'已在衣櫃':'已在想買'}</span>`:`<button class="btn sm hot" data-act="wish" data-id="${s.id}">＋想買</button><button class="btn sm" data-act="have" data-id="${s.id}">我有</button>`}
+    <a class="btn sm" target="_blank" rel="noopener" href="${gUrl(s.brand+' '+s.name+' 台灣')}">查官網</a></div></div>`;}).join('')}</div>
+  <div class="muted" style="margin-top:10px">價格是 ${SHOPDATE} 查到的台灣售價（未含限時特價；標「END. 售價」的是 END. 台灣站的價格、「特價」是當時的特價）。顏色與庫存會變動，下單前請按「查官網」確認。圖是依款式畫的示意圖，不是商品照。</div>`;}
+function vIdea(){const g=G();
+  return`<h2>我收藏的穿搭</h2>${U.saved.length?`<div class="grid">${U.saved.map((s,i)=>`<div class="g look">${figure(U.body,s.o,{g,cls:'lk'})}<input type="text" value="${esc(s.name)}" data-chg="lname" data-i="${i}" style="font-size:13.5px;padding:5px 7px"><div class="row"><button class="btn sm pri" data-act="load" data-i="${i}">穿上</button><button class="btn sm del" data-act="dellook" data-i="${i}">刪除</button></div></div>`).join('')}</div>`:'<div class="card muted">在「試穿」按 💾 收藏，就會出現在這裡。</div>'}
+  <h2>風格圖鑑</h2><div class="grid">${STYLES.map(s=>{const f=STYLEINFO[s];return`<div class="g look">${figure(U.body,presetLook(s),{g,cls:'lk'})}<div class="nm">${s}</div><div class="muted">${f.d}</div><div class="muted">${f.k.map(k=>'・'+k).join('<br>')}</div><div class="pal">${f.pal.map(c=>`<i style="background:${COL[c]}" title="${c}"></i>`).join('')}</div>
+  <div class="row"><button class="btn sm pri" data-act="preset" data-s="${s}">試穿這套</button><button class="btn sm" data-act="browse" data-s="${s}">看單品</button></div></div>`;}).join('')}</div>`;}
+function presetLook(s){const l=STYLEINFO[s].look,o={acc:[],tuck:!!l.tuck};for(const k of['top','outer','bottom','dress','shoes','hat'])if(l[k])o[k]={t:l[k].t,c:l[k].c,k:'t:'+l[k].t};(l.acc||[]).forEach(a=>o.acc.push({t:a.t,c:a.c,k:'t:'+a.t}));return o;}
+const FIELDS=[['h','身高',90,210,'cm'],['w','體重',12,150,'kg'],['head','頭圍',44,66,'cm'],['shoulder','肩寬',24,60,'cm'],['chest','胸圍',50,150,'cm'],['waist','腰圍',40,150,'cm'],['hip','臀圍',50,160,'cm'],['arm','手長',28,80,'cm'],['leg','腿長',35,115,'cm'],['foot','腳長',13,33,'cm']];
+function sizeBox(){const b=U.body,bmi=b.w/Math.pow(b.h/100,2),m=b.sex==='m';
+  const ts=m?[[84,'XS'],[90,'S'],[96,'M'],[104,'L'],[112,'XL'],[999,'XXL']]:[[78,'XS'],[84,'S'],[90,'M'],[97,'L'],[104,'XL'],[999,'XXL']];
+  const top=ts.find(t=>b.chest<t[0])[1],jp=Math.ceil((b.foot+.3)*2)/2,eu=Math.round((jp+1.5)*1.5),hat=b.head<56?'S':b.head<58?'M':b.head<60?'L':'XL',lr=b.leg/b.h,hr=b.h/(b.head*.4);
+  const tips=[];if(lr<.445)tips.push('腿長比例偏短：高腰下身、短版上衣、鞋褲同色可以拉長腿部線條。');else if(lr>.47)tips.push('腿長比例好：長版上衣、低腰或寬褲都撐得起來。');
+  const sr=b.shoulder/(b.hip*.344);if(sr>1.42)tips.push('肩比臀寬：下身可選寬褲、工作褲增加份量，上身選落肩或深色。');else if(sr<1.15)tips.push('臀比肩寬：上身選有肩線的外套、亮色或橫條紋，下身選深色直筒或 A 字。');
+  if(b.waist/b.hip>.9)tips.push('腰線不明顯：直筒輪廓、開襟外套做出直線條，避免緊身腰帶。');else if(b.waist/b.hip<.75)tips.push('腰線明顯：紮衣、繫腰帶、收腰洋裝都很適合。');
+  if(b.h<165)tips.push('想顯高：全身同色系、九分褲露腳踝、避免過長外套。');
+  return`<div class="kv"><b>上衣參考</b><span>${top}（胸圍 ${b.chest} cm）</span><b>褲子腰圍</b><span>約 ${Math.round(b.waist/2.54)} 吋</span><b>鞋子</b><span>${jp.toFixed(1)} cm（約 EU ${eu}）</span><b>帽圍</b><span>${hat}（${b.head} cm）</span><b>比例</b><span>約 ${hr.toFixed(1)} 頭身，腿長佔身高 ${(lr*100).toFixed(0)}%</span><b>BMI</b><span>${bmi.toFixed(1)}</span></div>
+  <div class="muted" style="margin-top:8px">${tips.map(t=>'・'+t).join('<br>')||'・比例均衡，大部分版型都適合。'}<br>尺碼各品牌不同，僅供參考。</div>`;}
+function vMe(){const b=U.body,kn=DB.known[UK]||{};
+  return stage(true)+`<div class="card"><div class="bar"><b>身形設定</b><div class="chips r" style="padding:0"><button class="chip ${b.sex==='m'?'on':''}" data-act="sex" data-v="m">男版</button><button class="chip ${b.sex==='f'?'on':''}" data-act="sex" data-v="f">女版</button></div></div>
+  ${FIELDS.map(([k,n,mn,mx,u])=>`<div class="fld"><span>${n}</span><input type="range" min="${mn}" max="${mx}" step=".5" value="${b[k]}" data-body="${k}"><input type="number" min="${mn}" max="${mx}" step=".5" value="${b[k]}" data-body="${k}" inputmode="decimal"></div>`).join('')}
+  <div class="muted">手長＝肩膀到手腕；腿長＝胯下到地面；腳長＝腳跟到最長腳趾。</div>
+  <button class="btn" style="margin-top:8px" data-act="est">依身高體重估算其他數據</button></div>
+  <div class="card"><b>外觀</b><label class="f">膚色</label><div class="sw">${['#f7dcc4','#f0cdb0','#e2b48f','#c9966b','#a06f4a','#6f4a32'].map(c=>`<button data-act="skin" data-c="${c}" class="${b.skin===c?'on':''}" style="background:${c}"></button>`).join('')}</div>
+  <label class="f">髮型</label><div class="chips">${[['short','短髮'],['buzz','平頭'],['bob','鮑伯'],['long','長髮'],['bun','丸子頭'],['bald','光頭']].map(([k,n])=>`<button class="chip ${b.hair===k?'on':''}" data-act="hair" data-v="${k}">${n}</button>`).join('')}</div>
+  <label class="f">髮色</label><div class="sw">${['#2b2420','#4a362a','#7a5236','#b8894f','#d9c49a','#8f8f93','#a13b32'].map(c=>`<button data-act="hairc" data-c="${c}" class="${b.hairColor===c?'on':''}" style="background:${c}"></button>`).join('')}</div></div>
+  <div class="card"><b>參考尺碼與穿搭建議</b><div id="sizeBox" style="margin-top:8px">${sizeBox()}</div></div>
+  <div class="card"><b>帳號：${esc(U.name)}</b><div class="muted" id="cloudSt" style="margin:4px 0 8px">${cloud}</div>
+  <div class="bar"><input type="password" id="newPin" inputmode="numeric" maxlength="4" placeholder="${kn.pin?'新的四碼密碼':'設定四碼密碼'}" style="width:150px"><button class="btn" data-act="setpin">${kn.pin?'更改密碼':'設定密碼'}</button>${kn.pin?'<button class="btn" data-act="nopin">取消密碼</button>':''}</div>
+  <div class="muted" style="margin:8px 0">目前${kn.pin?'有':'沒有'}設密碼。密碼只是防止家人點錯名字的簡單鎖，資料存在共用的雲端空間，請不要放敏感資料。</div>
+  <button class="btn" data-act="logout">切換使用者</button></div>`;}
+function render(){const keep=[...app.querySelectorAll('.rail,.chips')].map(e=>e.scrollLeft);
+  app.innerHTML=tab==='try'?vTry():tab==='closet'?vCloset():tab==='shop'?vShop():tab==='idea'?vIdea():vMe();
+  app.querySelectorAll('.rail,.chips').forEach((e,i)=>{if(keep[i])e.scrollLeft=keep[i];});
+  document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.tab===tab));}
+function go(t){tab=t;render();window.scrollTo(0,0);}
+
+/* --- 新增／編輯衣服 --- */
+let ED=null;
+function editSheet(c){ED=c?Object.assign({},c):{id:'',base:CATALOG.find(i=>i.slot===addSlot).id,name:'',color:'',brand:'',price:'',img:'',status:closetView==='wish'?'wish':'own'};
+  if(!ED.color)ED.color=ITEM[ED.base].col[0];drawEdit();}
+function drawEdit(){const it=ITEM[ED.base],q=[ED.brand,ED.name||it.name,COL[ED.color]?ED.color+'色':''].filter(Boolean).join(' ');
+  sheet(`<h3>${ED.id?'編輯衣服':'新增衣服'}<button data-act="close">×</button></h3>
+  <div style="display:grid;grid-template-columns:${ED.img?'1fr 1fr':'1fr'};gap:8px">${ED.img?`<img src="${esc(ED.img)}" alt="" style="width:100%;height:150px;object-fit:cover;border-radius:12px;background:#fff">`:''}<div style="background:#fff;border-radius:12px;height:150px">${thumb(it,ED.color,DG).replace('<svg','<svg style="width:100%;height:150px"')}</div></div>
+  <label class="f">類別／款式（決定試穿時畫出來的樣子）</label><div class="bar"><select data-ed="slot">${SLOTS.map(([k,n])=>`<option value="${k}" ${it.slot===k?'selected':''}>${n}</option>`).join('')}</select><select data-ed="base" style="flex:1">${CATALOG.filter(i=>i.slot===it.slot).map(i=>`<option value="${i.id}" ${i.id===ED.base?'selected':''}>${i.name}</option>`).join('')}</select></div>
+  <label class="f">名稱</label><input type="text" data-ed="name" value="${esc(ED.name)}" placeholder="${it.name}" style="width:100%">
+  <label class="f">顏色：${colName(ED.color)}</label>${swatches(ED.color,'edcolor',it.col)}
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><div><label class="f">品牌</label><input type="text" data-ed="brand" value="${esc(ED.brand)}" placeholder="可不填" style="width:100%"></div><div><label class="f">價格 NT$</label><input type="number" data-ed="price" value="${ED.price||''}" inputmode="numeric" placeholder="可不填" style="width:100%"></div></div>
+  <label class="f">狀態</label><div class="chips"><button class="chip s2 ${ED.status==='own'?'on':''}" data-act="edst" data-v="own">我有這件</button><button class="chip s2 ${ED.status==='wish'?'on':''}" data-act="edst" data-v="wish">想買</button></div>
+  <label class="f">照片（三種方式擇一）</label>
+  <div class="bar"><a class="btn sm" target="_blank" rel="noopener" id="imgSearch" href="${gUrl(q,true)}">🔍 上網找圖</a><label class="btn sm">📷 拍照／選照片<input type="file" accept="image/*" data-ed="file" style="display:none"></label>${ED.img?'<button class="btn sm del" data-act="noimg">移除照片</button>':''}</div>
+  <input type="url" data-ed="url" placeholder="貼上圖片網址（在找到的圖上長按 → 複製圖片網址）" style="width:100%;margin-top:8px" value="${/^https?:/.test(ED.img)?esc(ED.img):''}">
+  <div class="muted" style="margin-top:4px">「上網找圖」會用名稱開 Google 圖片搜尋；找到後複製圖片網址貼回來，或存到相簿再選照片。電腦上也可以直接在這個視窗按貼上。</div>
+  <div class="bar" style="margin-top:14px"><button class="btn pri" style="flex:1" data-act="edsave">儲存</button>${ED.id?'<button class="btn del" data-act="eddel">刪除</button>':''}</div>`);}
+function readEd(){document.querySelectorAll('#sheet [data-ed]').forEach(e=>{const k=e.dataset.ed;if(k==='name'||k==='brand')ED[k]=e.value.trim();if(k==='price')ED.price=+e.value||0;});}
+function setImgFile(f){if(!f)return;const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{const s=Math.min(1,360/Math.max(im.width,im.height)),cv=document.createElement('canvas');cv.width=Math.round(im.width*s);cv.height=Math.round(im.height*s);
+  const x=cv.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,cv.width,cv.height);x.drawImage(im,0,0,cv.width,cv.height);readEd();ED.img=cv.toDataURL('image/jpeg',.72);drawEdit();};im.src=r.result;};r.readAsDataURL(f);}
+
+/* --- 事件 --- */
+document.addEventListener('click',async ev=>{
+  const nb=ev.target.closest('#nav button');if(nb)return go(nb.dataset.tab);
+  if(ev.target.id==='userBtn')return go('me');
+  const el=ev.target.closest('[data-act]');if(!el)return;const a=el.dataset.act,d=el.dataset,o=U&&U.outfit;
+  if(a==='sheetbg'){if(ev.target===el)sheet('');return;}
+  if(a==='close')return sheet('');
+  if(a==='pick'){const k=d.k;if(DB.known[k].pin)return askPin(k);return enter(k);}
+  if(a==='pinok'){const k=d.k,v=$('#pinIn').value;if(hash(k+':'+v)!==DB.known[k].pin)return toast('密碼不對');sheet('');return enter(k);}
+  if(a==='register')return register();
+  if(!U)return;
+  if(a==='src'){U.ui.src=d.v;save();}
+  else if(a==='slot'){U.ui.slot=d.v;save();}
+  else if(a==='style'){U.ui.style=d.v;save();}
+  else if(a==='wear'){const en=entries(U.ui.slot,U.ui.src).find(e=>e.k===d.k);if(en)wear(U.ui.slot,en);}
+  else if(a==='color'){const s=U.ui.slot,e=s==='acc'?o.acc[Math.min(accSel,o.acc.length-1)]:o[s];if(e){e.c=d.c;save();}}
+  else if(a==='off'){if(d.s==='acc')o.acc.splice(+d.i,1);else delete o[d.s];save();}
+  else if(a==='random')randomLook();
+  else if(a==='tuck'){o.tuck=!o.tuck;save();}
+  else if(a==='clear'){U.outfit={acc:[]};save();}
+  else if(a==='savelook'){U.saved.unshift({name:'穿搭 '+(U.saved.length+1),o:JSON.parse(JSON.stringify(o))});save();toast('已收藏，在「靈感」分頁可以找到');}
+  else if(a==='wishall'){d.ids.split(',').forEach(id=>addFromShop(id,'wish'));toast('已加入想買清單');}
+  else if(a==='cview')closetView=d.v;
+  else if(a==='aslot')addSlot=d.v;
+  else if(a==='quick'){const it=ITEM[d.t];addCloset({base:it.id,name:it.name,color:it.col[0]});toast('已加入衣櫃：'+it.name);}
+  else if(a==='add')return editSheet(null);
+  else if(a==='edit')return editSheet(U.closet.find(c=>c.id===d.id));
+  else if(a==='bought'){const c=U.closet.find(c=>c.id===d.id);c.status='own';save();toast('已移到「我有的」');}
+  else if(a==='tryc'){const c=U.closet.find(c=>c.id===d.id),s=ITEM[c.base].slot,en={k:'c:'+c.id,t:c.base,c:c.color};const on=s==='acc'?o.acc.some(x=>x.k===en.k):o[s]&&o[s].k===en.k;if(!on)wear(s,en);U.ui.slot=s;U.ui.src=c.status==='wish'?'wish':'closet';save();return go('try');}
+  else if(a==='trys'){const s=SHOPMAP[d.id],sl=ITEM[s.t].slot,en={k:'s:'+s.id,t:s.t,c:s.c};const on=sl==='acc'?o.acc.some(x=>x.k===en.k):o[sl]&&o[sl].k===en.k;if(!on)wear(sl,en);U.ui.slot=sl;U.ui.src='shop';save();return go('try');}
+  else if(a==='wish'){addFromShop(d.id,'wish');toast('已加入想買清單');}
+  else if(a==='have'){addFromShop(d.id,'own');toast('已加入我的衣櫃');}
+  else if(a==='sbrand')shopBrand=d.v;
+  else if(a==='sslot')shopSlot=d.v;
+  else if(a==='load'){U.outfit=JSON.parse(JSON.stringify(U.saved[+d.i].o));save();return go('try');}
+  else if(a==='dellook'){U.saved.splice(+d.i,1);save();}
+  else if(a==='preset'){U.outfit=presetLook(d.s);save();return go('try');}
+  else if(a==='browse'){U.ui.style=d.s;U.ui.src='cat';save();return go('try');}
+  else if(a==='sex'){U.body.sex=d.v;Object.assign(U.body,est(d.v,U.body.h,U.body.w));save();}
+  else if(a==='est'){Object.assign(U.body,est(U.body.sex,U.body.h,U.body.w));save();toast('已依身高體重估算');}
+  else if(a==='skin'){U.body.skin=d.c;save();}
+  else if(a==='hair'){U.body.hair=d.v;save();}
+  else if(a==='hairc'){U.body.hairColor=d.c;save();}
+  else if(a==='setpin'||a==='nopin'){const v=a==='nopin'?'':$('#newPin').value.trim();if(a==='setpin'&&!/^\d{4}$/.test(v))return toast('請輸入四個數字');
+    DB.known[UK]={name:U.name,pin:v?hash(UK+':'+v):''};saveLocal();
+    try{await fetch(FB+'/names/'+UK+'.json',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:U.name,pin:DB.known[UK].pin,up:Date.now()})});toast(v?'密碼已設定':'已取消密碼');}catch(e){toast('離線中，密碼只存在這台裝置');}}
+  else if(a==='logout'){await push();DB.cur=null;saveLocal();await fetchNames();return loginView();}
+  else if(a==='edcolor'){readEd();ED.color=d.c;return drawEdit();}
+  else if(a==='edst'){readEd();ED.status=d.v;return drawEdit();}
+  else if(a==='noimg'){readEd();ED.img='';return drawEdit();}
+  else if(a==='edsave'){readEd();if(!ED.name)ED.name=ITEM[ED.base].name;if(ED.id){const i=U.closet.findIndex(c=>c.id===ED.id);U.closet[i]=ED;save();}else{delete ED.id;addCloset(ED);}closetView=ED.status;sheet('');toast('已儲存');}
+  else if(a==='eddel'){U.closet=U.closet.filter(c=>c.id!==ED.id);for(const[s]of SLOTS){if(s==='acc')o.acc=o.acc.filter(x=>x.k!=='c:'+ED.id);else if(o[s]&&o[s].k==='c:'+ED.id)delete o[s];}save();sheet('');}
+  render();});
+document.addEventListener('input',ev=>{const e=ev.target;if(!U)return;
+  if(e.dataset.body){const k=e.dataset.body,v=+e.value;if(!v)return;U.body[k]=v;document.querySelectorAll(`[data-body="${k}"]`).forEach(x=>{if(x!==e)x.value=v;});
+    const st=app.querySelector('.stage');if(st)st.outerHTML=stage(true);const sb=$('#sizeBox');if(sb)sb.innerHTML=sizeBox();save();}
+  if(e.dataset.chg==='color'){const s=U.ui.slot,o=U.outfit,x=s==='acc'?o.acc[Math.min(accSel,o.acc.length-1)]:o[s];if(x){x.c=e.value;const st=app.querySelector('.stage');if(st)st.outerHTML=stage(true);save();}}});
+document.addEventListener('change',ev=>{const e=ev.target;if(!U)return;
+  if(e.dataset.chg==='budget'){U.budget=+e.value||0;save();render();}
+  if(e.dataset.chg==='lname'){U.saved[+e.dataset.i].name=e.value.trim()||'穿搭';save();}
+  if(e.dataset.chg==='edcolor'){readEd();ED.color=e.value;drawEdit();}
+  if(e.dataset.chg==='color')render();
+  if(e.dataset.body){const k=e.dataset.body,f=FIELDS.find(x=>x[0]===k);U.body[k]=clamp(+e.value||f[2],f[2],f[3]);save();render();}
+  const k=e.dataset.ed;if(!k)return;
+  if(k==='slot'){readEd();ED.base=CATALOG.find(i=>i.slot===e.value).id;ED.color=ITEM[ED.base].col[0];drawEdit();}
+  if(k==='base'){readEd();ED.base=e.value;drawEdit();}
+  if(k==='file')setImgFile(e.files[0]);
+  if(k==='url'){const v=e.value.trim();readEd();if(!v){return;}if(!/^https?:\/\//.test(v))return toast('請貼上 http 開頭的圖片網址');const im=new Image();im.onload=()=>{ED.img=v;drawEdit();};im.onerror=()=>toast('這個網址讀不到圖片，請改用「複製圖片網址」或存圖後上傳');im.src=v;}
+  if(k==='name'||k==='brand'){readEd();const it=ITEM[ED.base],l=$('#imgSearch');if(l)l.href=gUrl([ED.brand,ED.name||it.name,COL[ED.color]?ED.color+'色':''].filter(Boolean).join(' '),true);}});
+document.addEventListener('paste',ev=>{if(!ED||!$('#sheet .sheet'))return;const it=[...(ev.clipboardData||{}).items||[]].find(i=>i.type.startsWith('image/'));if(it){ev.preventDefault();setImgFile(it.getAsFile());}});
+window.addEventListener('pagehide',()=>{if(U&&cloud==='待同步')push();});
+
+(async function init(){
+  if(DB.cur&&DB.users[DB.cur]){fetchNames();await enter(DB.cur);}
+  else{loginView();await fetchNames();if(!U)loginView();}
+})();
+</script>
+</body>
+</html>
