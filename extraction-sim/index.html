@@ -827,6 +827,7 @@ u.rest,.bd.rest{background:#5a8aa0}u.peak,.bd.peak{background:#c9a66b}u.fade,.bd
 .achs{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:8px}.ach{display:grid;grid-template-columns:28px 1fr;gap:8px;align-items:center;text-align:left;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px;color:var(--ink);font:inherit;cursor:pointer}
 .ach:disabled{opacity:.45;cursor:default}.ach.got{border-color:color-mix(in srgb,var(--gold) 50%,var(--line))}.ach.on{border-color:var(--gold);box-shadow:inset 0 0 0 1px var(--gold);background:color-mix(in srgb,var(--gold) 10%,var(--panel))}.ach small{display:block;font-size:12px;color:var(--muted)}.ach span{font-size:20px}
 .scene{margin:-4px -4px 10px;border-radius:8px;overflow:hidden;border:1px solid var(--line);line-height:0}.scene svg{display:block;image-rendering:pixelated}.cust{display:flex;flex-direction:column;gap:4px}
+.ftags{display:flex;gap:4px;flex-wrap:wrap;margin-top:3px}.ftags em{font-style:normal;font-size:11px;border:1px solid var(--line);border-radius:999px;padding:0 7px;color:var(--gold)}.ftl{margin-bottom:2px}.c-h3.grp{margin:8px 0 0;color:var(--gold)}
 .brew-anim .smoke{opacity:0}.brew-anim.go .smoke{animation:baSteam 1.2s ease-out 2s 3}
 </style>
 <script>
@@ -5021,11 +5022,20 @@ function bag(id,seller,green){const B=beanOf(id),rg=REGX[id]||B.region,C=REGC[rg
     '<rect x="5" y="68" width="50.5" height="7" fill="'+roastCol(B.roast)+'"/><rect x="5" y="68" width="50.5" height="1" fill="#f3e9d6" opacity=".5"/></svg>';}
 const sellerTag=w=>'<span class="seller"><svg viewBox="-9 -9 18 18" width="18" height="18" aria-hidden="true">'+logoG(w,0,0,'currentColor')+'</svg>'+SELLER[w]+'</span>';
 const cellOpen=new Set();
-function cellarHTML(){const s=S(),ids=Object.keys(s.beans).filter(id=>s.beans[id]>0&&beanOf(id)).sort((a,b)=>beanOf(a).no-beanOf(b).no),all=ids.length&&ids.every(id=>cellOpen.has(id)),tot=ids.reduce((a,id)=>a+s.beans[id],0);
+const FLT=[['花果香',t=>t.fruity>=6.5],['明亮酸質',t=>t.acid>=6.5],['甜感',t=>t.sweet>=6.5],['堅果烘焙香',t=>t.roasty>=6.5],['厚實',t=>t.body>=6.5],['苦韻',t=>t.bitter>=6]];
+function flTags(B){const t=taste(B),a=FLT.filter(f=>f[1](t)).map(f=>f[0]);if(B.blend)a.push('配方');if(B.sig)a.push('招牌');if(!a.length)a.push('均衡');return a;}
+const flMain=B=>{const t=taste(B),o=[['花果香',t.fruity],['堅果烘焙香',t.roasty],['甜感',t.sweet-.8],['明亮酸質',t.acid-.8]].sort((a,b)=>b[1]-a[1])[0];return FLT.some(f=>f[1](t))&&o[1]>=5.5?o[0]:'均衡';};
+let cellTag='',cellGrp=false;
+function cellarHTML(){const s=S(),allIds=Object.keys(s.beans).filter(id=>s.beans[id]>0&&beanOf(id)).sort((a,b)=>beanOf(a).no-beanOf(b).no),tot=allIds.reduce((a,id)=>a+s.beans[id],0);
+  const tags=['花果香','明亮酸質','甜感','堅果烘焙香','厚實','苦韻','均衡','配方','招牌','養豆中','最佳賞味','開始走味','走味'].filter(x=>allIds.some(id=>flTags(beanOf(id)).includes(x)||beanOf(id).st===x));
+  if(cellTag&&!tags.includes(cellTag))cellTag='';
+  const ids=allIds.filter(id=>!cellTag||flTags(beanOf(id)).includes(cellTag)||beanOf(id).st===cellTag),all=ids.length&&ids.every(id=>cellOpen.has(id));
+  const card=id=>{const B=beanOf(id),A=ageInfo(B.roast,B.age),op=cellOpen.has(id),g=s.beans[id];return '<div class="panel lotc '+A.cls+'"><button class="lot-h" data-cell="'+id+'" aria-expanded="'+op+'">'+jar(id,g)+'<div><b>'+esc(B.name)+'<span class="lot-g">'+g+' g</span></b><small>'+esc((beanOf(B.src)||B).sub||'')+(/^r\./.test(B.src)?'':'・'+ROAST_NAME(B.roast))+'・可沖 '+Math.floor(g/DOSE)+' 杯</small><div class="ftags">'+flTags(B).map(x=>'<em>'+x+'</em>').join('')+'</div><div class="lot-st"><em class="bd '+A.cls+'">'+A.st+'</em><span>烘焙後第 '+B.age+' 天・'+A.note+'</span></div></div><i class="chev">'+(op?'▲':'▼')+'</i></button>'+
+     (op?agePlot(B)+ageBars(B)+'<p class="label">粉紅線是今天；橫條是現在的風味，白色刻度是這支豆子狀態最好時的樣子。</p><div class="buyrow"><button data-dump="'+id+'">倒掉這一批</button></div>':'')+'</div>';;};
+  let body;if(cellGrp){const gs={};ids.forEach(id=>{(gs[flMain(beanOf(id))]=gs[flMain(beanOf(id))]||[]).push(id);});body=['花果香','明亮酸質','甜感','堅果烘焙香','均衡'].filter(k=>gs[k]).map(k=>'<h3 class="c-h3 grp">'+k+'<span class="label">'+gs[k].length+' 批・'+gs[k].reduce((a,id)=>a+s.beans[id],0)+' g</span></h3>'+gs[k].map(card).join('')).join('');}else body=ids.map(card).join('');
   return nav()+head('儲豆櫃','每一批豆子的狀態')+'<p class="label">每批豆子有自己的編號，不會混在同一罐。剛烘好要先養豆（排氣），之後進入賞味期；放太久香氣和甜感會流失、苦味變明顯。淺焙要養久一點，但也放得久；深焙很快能喝，也比較快走味。量販店的豆子買來時已經烘好一陣子了。</p>'+
-   (ids.length?'<div class="c-row"><span class="label">共 '+ids.length+' 批・'+tot+' g</span><button class="c-pill" data-a="cellall">'+(all?'全部收合':'全部展開')+'</button></div>':'<p class="c-hint">儲豆櫃是空的。</p>')+'<div class="cellar">'+ids.map(id=>{const B=beanOf(id),A=ageInfo(B.roast,B.age),op=cellOpen.has(id),g=s.beans[id];
-    return '<div class="panel lotc '+A.cls+'"><button class="lot-h" data-cell="'+id+'" aria-expanded="'+op+'">'+jar(id,g)+'<div><b>'+esc(B.name)+'<span class="lot-g">'+g+' g</span></b><small>'+esc((beanOf(B.src)||B).sub||'')+(/^r\./.test(B.src)?'':'・'+ROAST_NAME(B.roast))+'・可沖 '+Math.floor(g/DOSE)+' 杯</small><div class="lot-st"><em class="bd '+A.cls+'">'+A.st+'</em><span>烘焙後第 '+B.age+' 天・'+A.note+'</span></div></div><i class="chev">'+(op?'▲':'▼')+'</i></button>'+
-     (op?agePlot(B)+ageBars(B)+'<p class="label">粉紅線是今天；橫條是現在的風味，白色刻度是這支豆子狀態最好時的樣子。</p><div class="buyrow"><button data-dump="'+id+'">倒掉這一批</button></div>':'')+'</div>';}).join('')+'</div>';}
+   (allIds.length?'<div class="chips ftl"><button data-ctag="" aria-pressed="'+(!cellTag)+'">全部</button>'+tags.map(x=>'<button data-ctag="'+x+'" aria-pressed="'+(cellTag===x)+'">'+x+'</button>').join('')+'</div>'+
+    '<div class="c-row"><span class="label">'+(cellTag?'「'+cellTag+'」':'共')+' '+ids.length+' 批・'+ids.reduce((a,id)=>a+s.beans[id],0)+' g'+(cellTag?'（全部 '+allIds.length+' 批・'+tot+' g）':'')+'</span></div><div style="display:flex;gap:6px;flex-wrap:wrap"><button class="c-pill" data-a="cellgrp">'+(cellGrp?'依編號排列':'依風味分組')+'</button><button class="c-pill" data-a="cellall">'+(all?'全部收合':'全部展開')+'</button></div>':'<p class="c-hint">儲豆櫃是空的。</p>')+'<div class="cellar">'+body+'</div>';}
 const rid=(base,roast,q)=>'r.'+base+'.'+Math.round(roast*10)+'.'+q;
 /* 尋豆師今天這批的真實品質：宣稱分數上下浮動，信任越高越不會被唬 */
 function offerQ(h,id,day){const s=S(),tr=s.trust[h]||0,r=hsh(day*313+idn(h+id));return Math.round(((CLAIM[id]||84)-4+5*r+Math.min(1.5,tr/50))*2)/2;}
@@ -5886,6 +5896,7 @@ $('shopBox').addEventListener('click',e=>{const b=e.target.closest('button');if(
     if(s.brewers.includes(n.brewer))o.brewer=n.brewer;else miss.push('濾杯');if(s.grinders.includes(n.grinder))o.grinder=n.grinder;else miss.push('磨豆機');snapGrind();persist();
     toast(miss.length?'參數套用了，但店裡沒有那個'+miss.join('和'):'參數套用好了');SFX.p('save');if(notesFrom==='serve'||notesFrom==='comprun'){view=notesFrom;render();scrollTo(0,0);}return;}
   if(d.ndel){s.notes.splice(+d.ndel,1);SFX.p('trash');persist();render();return;}
+  if(d.ctag!=null){cellTag=d.ctag;SFX.p('tick');render();return;}
   if(d.cell){if(cellOpen.has(d.cell))cellOpen.delete(d.cell);else cellOpen.add(d.cell);SFX.p('tick');render();return;}
   if(d.dump){const B=beanOf(d.dump);delete s.beans[d.dump];toast('倒掉了 '+B.name);SFX.p('trash');persist();render();return;}
   if(d.mv){const [k,id]=d.mv.split(':'),shop=k==='brewer'?s.brewers:s.grinders,home=s.home[k+'s'],cap=k==='brewer'?capB(s):capG(s);
@@ -5919,7 +5930,8 @@ $('shopBox').addEventListener('click',e=>{const b=e.target.closest('button');if(
   else if(a==='cbrew')compBrew();
   else if(a==='note')saveNote();
   else if(a==='buywater'){if(s.money<120)return;s.money-=120;s.minml=(s.minml||0)+6000;if(!s.last.water||s.last.water==='tap')s.last.water='mineral';toast('買了一箱礦泉水，沖煮時會優先用它');SFX.p('coins');persist();render();}
-  else if(a==='cellall'){const ids=Object.keys(s.beans).filter(id=>s.beans[id]>0&&beanOf(id));if(ids.every(id=>cellOpen.has(id)))cellOpen.clear();else ids.forEach(id=>cellOpen.add(id));render();}
+  else if(a==='cellgrp'){cellGrp=!cellGrp;render();}
+  else if(a==='cellall'){const ids=Object.keys(s.beans).filter(id=>s.beans[id]>0&&beanOf(id)&&(!cellTag||flTags(beanOf(id)).includes(cellTag)||beanOf(id).st===cellTag));if(ids.every(id=>cellOpen.has(id)))cellOpen.clear();else ids.forEach(id=>cellOpen.add(id));render();}
   else if(a==='doroast')doRoast();
   else if(a==='cretry'){res=null;render();scrollTo(0,0);}
   else if(a==='csubmit')compSubmit();
