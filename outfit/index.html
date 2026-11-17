@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="穿搭試衣間">
 <meta name="theme-color" content="#2f3a4a">
-<meta name="app-version" content="1.8">
+<meta name="app-version" content="1.9">
 <title>穿搭試衣間</title>
 <style>
 :root{--bg:#f4f1ec;--card:#fff;--ink:#23201d;--mute:#857b70;--line:#e5ddd2;--accent:#2f3a4a;--hot:#c8553d;--soft:#ece6dc;--ok:#2f8f5b}
@@ -87,6 +87,38 @@ label.f{display:block;font-size:12.5px;color:var(--mute);margin:10px 0 4px}
 .names{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;margin:14px 0}
 .names button{font:inherit;font-size:16px;font-weight:700;background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px 8px;cursor:pointer}
 .names button small{display:block;font-weight:400;font-size:11px;color:var(--mute);margin-top:3px}
+.game{position:relative;max-width:520px;margin:0 auto;padding:14px 8px 30px;min-height:calc(100vh - 60px);overflow:hidden}
+.game .deco{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.game .deco span{position:absolute;bottom:-40px;font-size:26px;opacity:.28;animation:rise 10s linear infinite}
+@keyframes rise{0%{transform:translateY(0) rotate(-12deg)}100%{transform:translateY(-105vh) rotate(18deg)}}
+.game .logo{position:relative;text-align:center;font-size:44px;font-weight:900;letter-spacing:2px;margin-top:10px}
+.game .logo b{display:inline-block;background:linear-gradient(#c8553d,#e59a3c);-webkit-background-clip:text;background-clip:text;color:transparent;animation:hop 1.6s ease-in-out infinite}
+@keyframes hop{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-9px)}}
+.game .tag{text-align:center;font-size:12px;letter-spacing:5px;color:var(--mute);margin-top:2px}
+.game .h{position:relative;text-align:center;font-size:26px;font-weight:900;margin:8px 0 2px}
+.runway{position:relative;margin:14px auto 6px;height:46vh;min-height:280px;max-width:420px;border-radius:22px;background:linear-gradient(#2f3a4a,#465469 60%,#6d5a4e);overflow:hidden;box-shadow:0 10px 30px rgba(47,58,74,.25)}
+.runway .spot{position:absolute;left:50%;top:-30%;width:150%;height:130%;transform:translateX(-50%);background:radial-gradient(ellipse at 50% 100%,rgba(255,240,200,.38),rgba(255,240,200,0) 62%);animation:glow 3s ease-in-out infinite}
+@keyframes glow{50%{opacity:.6}}
+.runway .rw{position:absolute;inset:0;display:flex;align-items:flex-end;justify-content:center;gap:2px;padding:0 6px 4px}
+.runway .pose{flex:1;height:96%;animation:bob 2.2s ease-in-out infinite}
+.runway .pose svg{width:100%;height:100%}
+.runway .pose.pop svg{animation:pop .45s ease}
+@keyframes bob{50%{transform:translateY(-6px)}}
+@keyframes pop{0%{transform:scale(.86);opacity:.2}100%{transform:scale(1);opacity:1}}
+.start{position:relative;display:block;width:100%;max-width:340px;margin:16px auto 0;font:inherit;font-size:20px;font-weight:900;color:#fff;background:linear-gradient(#e0694f,#c8553d);border:0;border-radius:18px;padding:14px;box-shadow:0 6px 0 #9c3d2a;cursor:pointer;animation:pulse 1.4s ease-in-out infinite}
+.start:active{transform:translateY(4px);box-shadow:0 2px 0 #9c3d2a}
+@keyframes pulse{50%{filter:brightness(1.12)}}
+.chars,.types{position:relative;display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:10px;margin-top:14px}
+.types{grid-template-columns:repeat(4,1fr);gap:6px}
+.char,.type{font:inherit;background:#fff;border:2px solid var(--line);border-radius:16px;padding:6px 4px 8px;cursor:pointer;display:flex;flex-direction:column;align-items:center;position:relative;animation:drop .4s ease backwards;box-shadow:0 4px 0 var(--line)}
+.char:active,.type:active{transform:translateY(3px);box-shadow:0 1px 0 var(--line)}
+.char svg{width:100%;height:150px}.type svg{width:100%;height:110px}
+.char .nm,.type .nm{font-weight:800;font-size:15px;margin-top:2px}
+.char .lk{position:absolute;top:6px;right:8px;font-size:13px;color:var(--hot)}
+.char .last{position:absolute;top:6px;left:8px;font-size:10.5px;background:var(--hot);color:#fff;border-radius:8px;padding:1px 6px;font-weight:700}
+.char.new{justify-content:center;border-style:dashed;min-height:186px}.char.new .plus{font-size:44px;color:var(--hot);line-height:1}
+.type.on{border-color:var(--hot);box-shadow:0 4px 0 var(--hot);background:#fff6f1}
+@keyframes drop{0%{transform:translateY(-18px);opacity:0}}
 .toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--accent);color:#fff;font-size:14px;padding:9px 16px;border-radius:20px;z-index:30;max-width:90vw;text-align:center}
 .pal i{display:inline-block;width:18px;height:18px;border-radius:50%;border:1px solid rgba(0,0,0,.12);margin-right:3px;vertical-align:middle}
 .look svg{width:100%;height:190px;background:linear-gradient(#ece7df,#f7f4ef);border-radius:10px;display:block}
@@ -740,8 +772,11 @@ let viewBack=false,flipNow=false,U=null,UK=null,tab='try',cloud='',accSel=0,clos
 function saveLocal(){try{localStorage.setItem(LSK,JSON.stringify(DB));}catch(e){toast('這台裝置的儲存空間滿了，照片可能沒存到');}}
 let pushT=null;
 function save(){if(!U)return;U.up=Date.now();DB.users[UK]=U;saveLocal();clearTimeout(pushT);cloud='待同步';pushT=setTimeout(push,1500);}
-async function push(){if(!U)return;try{const r=await fetch(FB+'/data/'+UK+'.json',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(U),keepalive:JSON.stringify(U).length<60000});
+async function push(){if(!U)return;pushAv();try{const r=await fetch(FB+'/data/'+UK+'.json',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(U),keepalive:JSON.stringify(U).length<60000});
   cloud=r.ok?'已同步到雲端':'雲端同步失敗（'+r.status+'）';}catch(e){cloud='離線中，已存在這台裝置';}const el=$('#cloudSt');if(el)el.textContent=cloud;}
+let lastAv='';
+function pushAv(){if(!U)return;const kn=DB.known[UK]||{name:U.name,pin:''},av={b:U.body,o:U.outfit},s=JSON.stringify(av);kn.av=av;DB.known[UK]=kn;saveLocal();if(s===lastAv)return;lastAv=s;
+  fetch(FB+'/names/'+UK+'.json',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:kn.name,pin:kn.pin||'',up:Date.now(),av})}).catch(()=>{});}
 const keyOf=n=>'n'+Array.from(n.trim().toLowerCase()).map(c=>c.codePointAt(0).toString(36)).join('_');
 function hash(s){let a=2166136261,b=5381;for(let i=0;i<s.length;i++){const c=s.charCodeAt(i);a=Math.imul(a^c,16777619);b=(Math.imul(b,33)+c)|0;}return(a>>>0).toString(16).padStart(8,'0')+(b>>>0).toString(16).padStart(8,'0');}
 function toast(m){const t=$('#toast');t.innerHTML=`<div class="toast">${esc(m)}</div>`;clearTimeout(toast.t);toast.t=setTimeout(()=>t.innerHTML='',2400);}
@@ -759,33 +794,52 @@ function fix(u){u.outfit=u.outfit||{};u.outfit.acc=u.outfit.acc||[];u.saved=u.sa
 
 /* --- 登入 --- */
 async function fetchNames(){try{const r=await fetch(FB+'/names.json');if(!r.ok)throw 0;const d=await r.json()||{};online=true;
-  Object.keys(d).forEach(k=>{if(d[k]&&d[k].name)DB.known[k]={name:d[k].name,pin:d[k].pin||''};});saveLocal();}catch(e){online=false;}}
-function loginView(msg){U=null;UK=null;$('#nav').style.display='none';$('#userBtn').style.display='none';
-  const ks=Object.keys(DB.known).sort((a,b)=>DB.known[a].name.localeCompare(DB.known[b].name,'zh-Hant'));
-  app.innerHTML=`<div class="login"><h2>穿搭試衣間</h2><div class="muted">設定身形、收錄衣櫃、試穿搭配、逛商店估預算。每個人有自己的衣櫃。</div>
-  ${ks.length?`<h2 style="margin-top:20px">點名字直接登入</h2><div class="names">${ks.map(k=>`<button data-act="pick" data-k="${k}">${esc(DB.known[k].name)}<small>${DB.known[k].pin?'🔒 有密碼':'免密碼'}</small></button>`).join('')}</div>`:''}
-  <h2 style="margin-top:20px">新增使用者</h2><div class="card">
-  <label class="f">名字</label><input type="text" id="nName" maxlength="12" placeholder="例如：Roke" style="width:100%">
-  <label class="f">性別／大人小孩（決定推薦哪一類衣服，之後可改）</label><div class="bar"><label class="btn"><input type="radio" name="nSex" value="m" checked> 男性</label><label class="btn"><input type="radio" name="nSex" value="f"> 女性</label><label class="btn"><input type="radio" name="nSex" value="km"> 男孩</label><label class="btn"><input type="radio" name="nSex" value="kf"> 女孩</label></div>
-  <label class="f">四碼密碼（可不設）</label><input type="password" id="nPin" inputmode="numeric" maxlength="4" placeholder="留空＝不設密碼" style="width:100%">
-  <button class="btn pri big" style="margin-top:12px" data-act="register">建立並登入</button></div>
-  <div class="muted" id="lgMsg">${esc(msg||(online?'名單已從雲端載入，換裝置也看得到。':'正在連線雲端名單…'))}</div></div>`;}
+  Object.keys(d).forEach(k=>{if(d[k]&&d[k].name)DB.known[k]={name:d[k].name,pin:d[k].pin||'',av:d[k].av||null};});saveLocal();}catch(e){online=false;}}
+let lgStep='title',lgTimer=null,lgType='m',lgTick=0;
+const TYPES=[['m','男生'],['f','女生'],['km','男孩'],['kf','女孩']];
+const tBody=t=>defBody(t.replace('k','')==='f'?'f':'m',/^k/.test(t));
+function tight(b,o){const g=geom(b),h=FLOOR+14-(g.top-36),w=h*.52;return figure(b,o,{g,cls:'av',vb:`${f1(150-w/2)} ${f1(g.top-36)} ${f1(w)} ${f1(h)}`});}
+function avSvg(av){try{return tight(av.b,av.o);}catch(e){return tight(tBody('m'),presetLook('休閒','m',false));}}
+function demoFig(t,n){const b=tBody(t),st=STYLES[(n+TYPES.findIndex(x=>x[0]===t)*3)%STYLES.length];if(t==='f')b.hair=['long','pony','bob','wavy'][n%4];if(t==='m')b.glasses=n%3===1?'bigthin':'none';
+  return figure(b,presetLook(st,b.sex,b.kid),{cls:'av',vb:'45 -22 210 618'});}
+function loginView(msg){U=null;UK=null;$('#nav').style.display='none';$('#userBtn').style.display='none';clearInterval(lgTimer);
+  const ks=Object.keys(DB.known).sort((a,b)=>(b===DB.last)-(a===DB.last)||DB.known[a].name.localeCompare(DB.known[b].name,'zh-Hant'));
+  const deco=`<div class="deco">${['👕','👗','👟','🧢','🧥','👖','👓','🎒','🧣','👒'].map((e,i)=>`<span style="left:${(i*10+4)}%;animation-delay:${-(i*1.3)}s;animation-duration:${9+i%4*2}s">${e}</span>`).join('')}</div>`;
+  if(lgStep==='title'){
+    app.innerHTML=`<div class="game">${deco}<div class="logo">${'穿搭試衣間'.split('').map((c,i)=>`<b style="animation-delay:${i*.12}s">${c}</b>`).join('')}</div><div class="tag">DRESS-UP STUDIO</div>
+    <div class="runway"><div class="spot"></div><div class="rw" id="rw">${['f','m','kf'].map((t,i)=>`<div class="pose" style="animation-delay:${-i*.5}s">${demoFig(t,lgTick)}</div>`).join('')}</div></div>
+    <button class="start" data-act="lgstart">▶ 開始遊戲</button>
+    <div class="muted" id="lgMsg" style="text-align:center;margin-top:10px">${esc(msg||(ks.length?`已有 ${ks.length} 位玩家`:'建立你的角色，開始搭配'))}</div></div>`;
+    lgTimer=setInterval(()=>{const r=$('#rw');if(!r||U){clearInterval(lgTimer);return;}lgTick++;r.querySelectorAll('.pose').forEach((p,i)=>{p.innerHTML=demoFig(['f','m','kf'][i],lgTick);p.classList.remove('pop');void p.offsetWidth;p.classList.add('pop');});},2200);
+  }else if(lgStep==='select'){
+    app.innerHTML=`<div class="game">${deco}<div class="h">選擇你的角色</div><div class="muted" style="text-align:center">點自己的名字直接登入</div>
+    <div class="chars">${ks.map((k,i)=>`<button class="char" data-act="pick" data-k="${k}" style="animation-delay:${i*.07}s">${avSvg(DB.known[k].av||{b:tBody('m'),o:presetLook('休閒','m',false)})}<span class="nm">${esc(DB.known[k].name)}</span><span class="lk">${DB.known[k].pin?'🔒':'▶'}</span>${k===DB.last?'<span class="last">上次</span>':''}</button>`).join('')}
+    <button class="char new" data-act="lgnew" style="animation-delay:${ks.length*.07}s"><span class="plus">＋</span><span class="nm">新角色</span></button></div>
+    <div class="muted" id="lgMsg" style="text-align:center;margin-top:12px">${esc(msg||(online?'玩家名單來自雲端，換裝置也看得到。':'離線中，只顯示這台裝置登入過的玩家。'))}</div></div>`;
+  }else{
+    app.innerHTML=`<div class="game">${deco}<div class="h">建立新角色</div>
+    <div class="types">${TYPES.map(([t,n])=>`<button class="type ${lgType===t?'on':''}" data-act="lgtype" data-v="${t}">${tight(tBody(t),presetLook('休閒',tBody(t).sex,tBody(t).kid))}<span class="nm">${n}</span></button>`).join('')}</div>
+    <div class="card" style="margin-top:12px"><label class="f">名字</label><input type="text" id="nName" maxlength="12" placeholder="例如：Roke" style="width:100%">
+    <label class="f">四碼密碼（可不設）</label><input type="password" id="nPin" inputmode="numeric" maxlength="4" placeholder="留空＝不設密碼" style="width:100%">
+    <button class="start" style="margin-top:14px" data-act="register">▶ 建立並開始</button></div>
+    ${ks.length?'<div style="text-align:center"><button class="btn sm" data-act="lgback">‹ 回到角色選擇</button></div>':''}<div class="muted" id="lgMsg" style="text-align:center;margin-top:8px">${esc(msg||'角色類型決定推薦男裝、女裝或童裝，之後在「我」可以改。')}</div></div>`;
+  }}
 async function enter(k,sex){const kn=DB.known[k];let local=DB.users[k]||null,remote=null;
   try{const r=await fetch(FB+'/data/'+k+'.json');if(r.ok)remote=await r.json();}catch(e){}
   let u=remote&&(!local||(remote.up||0)>=(local.up||0))?remote:local;
-  if(!u)u=newUser(kn?kn.name:'我',(sex||'m').replace('k',''),/^k/.test(sex||''));U=fix(u);UK=k;DB.users[k]=U;DB.cur=k;saveLocal();
+  if(!u){u=newUser(kn?kn.name:'我',(sex||'m').replace('k',''),/^k/.test(sex||''));if(!sex&&kn&&kn.av&&kn.av.b){u.body=kn.av.b;u.outfit=kn.av.o||u.outfit;}}U=fix(u);UK=k;DB.users[k]=U;DB.cur=k;DB.last=k;saveLocal();
   cloud=remote?'已同步到雲端':(online?'已同步到雲端':'離線中，已存在這台裝置');
-  if(!remote&&online)push();
+  if(!remote&&online)push();else pushAv();
   $('#nav').style.display='flex';const ub=$('#userBtn');ub.style.display='';ub.textContent='👤 '+U.name;
   if(!U.closet.length&&U.ui.src==='closet')U.ui.src='cat';tab='try';render();}
 function askPin(k){sheet(`<h3>${esc(DB.known[k].name)} 的密碼<button data-act="close">×</button></h3>
   <input type="password" id="pinIn" inputmode="numeric" maxlength="4" placeholder="四碼密碼" style="width:100%;font-size:22px;text-align:center;letter-spacing:8px">
   <button class="btn pri big" style="margin-top:12px" data-act="pinok" data-k="${k}">登入</button>`);setTimeout(()=>{const i=$('#pinIn');if(i)i.focus();},50);}
-async function register(){const name=$('#nName').value.trim(),pin=$('#nPin').value.trim(),sex=(document.querySelector('input[name=nSex]:checked')||{}).value||'m';
+async function register(){const name=$('#nName').value.trim(),pin=$('#nPin').value.trim(),sex=lgType;
   if(!name)return toast('請輸入名字');if(pin&&!/^\d{4}$/.test(pin))return toast('密碼要四個數字，或留空');
   const k=keyOf(name);await fetchNames();
   if(DB.known[k]){if(DB.known[k].pin)return askPin(k);return enter(k);}
-  DB.known[k]={name,pin:pin?hash(k+':'+pin):''};saveLocal();
+  DB.known[k]={name,pin:pin?hash(k+':'+pin):'',av:null};saveLocal();
   try{await fetch(FB+'/names/'+k+'.json',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,pin:DB.known[k].pin,up:Date.now()})});}catch(e){}
   enter(k,sex);}
 
@@ -969,6 +1023,10 @@ document.addEventListener('click',async ev=>{
   if(a==='pick'){const k=d.k;if(DB.known[k].pin)return askPin(k);return enter(k);}
   if(a==='pinok'){const k=d.k,v=$('#pinIn').value;if(hash(k+':'+v)!==DB.known[k].pin)return toast('密碼不對');sheet('');return enter(k);}
   if(a==='register')return register();
+  if(a==='lgstart'){lgStep=Object.keys(DB.known).length?'select':'new';return loginView();}
+  if(a==='lgnew'){lgStep='new';return loginView();}
+  if(a==='lgback'){lgStep='select';return loginView();}
+  if(a==='lgtype'){const n=$('#nName').value,p=$('#nPin').value;lgType=d.v;loginView();$('#nName').value=n;$('#nPin').value=p;return;}
   if(!U)return;
   if(a==='src'){U.ui.src=d.v;save();}
   else if(a==='slot'){U.ui.slot=d.v;save();}
@@ -1009,9 +1067,9 @@ document.addEventListener('click',async ev=>{
   else if(a==='frand'){randFace();save();}
   else if(a==='fpre'){Object.assign(U.body,FPRE[+d.i][1]);save();toast('已套用：'+FPRE[+d.i][0]);}
   else if(a==='setpin'||a==='nopin'){const v=a==='nopin'?'':$('#newPin').value.trim();if(a==='setpin'&&!/^\d{4}$/.test(v))return toast('請輸入四個數字');
-    DB.known[UK]={name:U.name,pin:v?hash(UK+':'+v):''};saveLocal();
-    try{await fetch(FB+'/names/'+UK+'.json',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:U.name,pin:DB.known[UK].pin,up:Date.now()})});toast(v?'密碼已設定':'已取消密碼');}catch(e){toast('離線中，密碼只存在這台裝置');}}
-  else if(a==='logout'){await push();DB.cur=null;saveLocal();await fetchNames();return loginView();}
+    DB.known[UK]={name:U.name,pin:v?hash(UK+':'+v):'',av:{b:U.body,o:U.outfit}};saveLocal();
+    try{await fetch(FB+'/names/'+UK+'.json',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:U.name,pin:DB.known[UK].pin,up:Date.now(),av:DB.known[UK].av})});toast(v?'密碼已設定':'已取消密碼');}catch(e){toast('離線中，密碼只存在這台裝置');}}
+  else if(a==='logout'){await push();DB.cur=null;saveLocal();lgStep='select';loginView();fetchNames().then(()=>{if(!U)loginView();});return;}
   else if(a==='edcolor'){readEd();ED.color=d.c;return drawEdit();}
   else if(a==='edst'){readEd();ED.status=d.v;return drawEdit();}
   else if(a==='noimg'){readEd();ED.img='';return drawEdit();}
@@ -1038,8 +1096,7 @@ document.addEventListener('paste',ev=>{if(!ED||!$('#sheet .sheet'))return;const 
 window.addEventListener('pagehide',()=>{if(U&&cloud==='待同步')push();});
 
 (async function init(){
-  if(DB.cur&&DB.users[DB.cur]){fetchNames();await enter(DB.cur);}
-  else{loginView();await fetchNames();if(!U)loginView();}
+  loginView();await fetchNames();if(!U&&lgStep!=='new')loginView();
 })();
 </script>
 </body>
