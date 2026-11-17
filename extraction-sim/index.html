@@ -788,6 +788,13 @@ h1,h2,h3{letter-spacing:.02em}
 .ba-btns{display:flex;gap:8px}.ba-btns button{flex:1;border-radius:10px;border:1px solid #6b5a45;background:transparent;color:#f3e9d6;font:inherit;font-weight:700;font-size:15px;padding:13px 6px;cursor:pointer}
 .ba-btns .pri{flex:1.6;background:#c9a66b;border-color:#c9a66b;color:#1a1512}.ba-btns .stop{background:#d9705f;border-color:#d9705f;color:#fff}
 .brew-anim{touch-action:manipulation}
+.jar .glass u{position:absolute;right:2px;top:2px;width:8px;height:8px;border-radius:50%;border:1px solid rgba(0,0,0,.4)}
+u.rest,.bd.rest{background:#5a8aa0}u.peak,.bd.peak{background:#c9a66b}u.fade,.bd.fade{background:#b07a42}u.stale,.bd.stale{background:#777}
+.cellar{display:flex;flex-direction:column;gap:12px}.lotc{display:flex;flex-direction:column;gap:8px}.lotc.stale{opacity:.8}
+.lot-h{display:grid;grid-template-columns:62px 1fr;gap:12px;align-items:center}.lot-h small{display:block;font-size:12px;color:var(--muted)}.lot-h .jar span,.lot-h .jar small{display:none}
+.lot-st{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:4px}.bd{font-style:normal;font-size:12px;font-weight:700;color:#1a1512;border-radius:999px;padding:1px 9px}.bd.stale,.bd.rest{color:#fff}
+.ageplot{display:block;max-width:420px}
+.tb u{position:absolute;top:-3px;width:2px;height:14px;background:#f3e9d6;margin-left:-1px}.tb em{font-style:normal;font-size:10px;margin-left:3px}.tb em.up{color:#7fd39a}.tb em.dn{color:#d9705f}
 .brew-anim .smoke{opacity:0}.brew-anim.go .smoke{animation:baSteam 1.2s ease-out 2s 3}
 </style>
 <script>
@@ -4882,7 +4889,8 @@ function mig(s){
   s.home=s.home||{brewers:[],grinders:[]};s.paid=s.paid||{};s.cw=s.cw||{};s.sigs=s.sigs||[];s.mseen=s.mseen||{};s.hch=s.hch||{};s.sold=s.sold||0;
   s.green=s.green||[];s.skins=s.skins||{};s.skin=s.skin||{};s.roasters=s.roasters||['pan'];if(!s.roaster||!s.roasters.includes(s.roaster))s.roaster=s.roasters[s.roasters.length-1];s.xp=s.xp||0;s.charm=s.charm||0;s.deal=s.deal||{};s.cupd=s.cupd||{};
   if(s.today&&!s.today.v7)s.today=null;
-  Object.keys(s.beans).forEach(ensureBean);s.blends.forEach(bl=>{bl.parts.forEach(p=>ensureBean(p[0]));regBlend(bl);});Object.values(s.rel).forEach(R=>{if(R.fav)ensureBean(R.fav);});}
+  s.bat=s.bat||{};s.blends.forEach(bl=>{bl.parts.forEach(p=>ensureBean(p[0]));regBlend(bl);});
+  Object.keys(s.beans).forEach(k=>{if(!/^L\d/.test(k)){const g=s.beans[k];delete s.beans[k];ensureBean(k);if(g>0&&beanOf(k))addBatch(k,g,7);}});Object.keys(s.bat).forEach(k=>{if(!(s.beans[k]>0)){delete s.bat[k];delete s.beans[k];}});Object.keys(s.beans).forEach(ensureBean);Object.values(s.rel).forEach(R=>{if(R.fav)ensureBean(R.fav);});}
 /* ---------- 經驗、魅力 ---------- */
 const lvOf=xp=>1+Math.floor(Math.sqrt((xp||0)/30));
 const xpFor=lv=>30*(lv-1)*(lv-1);
@@ -4892,12 +4900,38 @@ const qOf=id=>{const B=beanOf(id);return B?(B.q||80):80;};
 const baseOf=id=>{const B=beanOf(id);return B?(B.base||B.id):id;};
 const rqOf=s=>(ROASTERS.find(r=>r.id===s.roaster)||ROASTERS[0]).rq;
 function effQ(q,base,roast,rq){const B=beanOf(base);return Math.round((q-(1-rq)*10-Math.max(0,Math.abs(roast-B.roast)-.5)*1.6)*2)/2;}
-function ensureBean(id){if(!/^r\./.test(id)||beanOf(id))return beanOf(id);const [,base,r10,q]=id.split('.');const B0=beanOf(base);if(!B0)return null;
+function ensureBean(id){if(/^L\d/.test(id))return mkBatch(id);if(!/^r\./.test(id)||beanOf(id))return beanOf(id);const [,base,r10,q]=id.split('.');const B0=beanOf(base);if(!B0)return null;
   const roast=+r10/10,Q=+q,dR=roast-B0.roast,dq=Q-84,f=B0.f.slice();
   f[0]*=Math.max(.3,1-.15*dR);f[5]*=Math.max(.2,1-.2*dR);f[6]*=Math.max(.3,1+.22*dR);f[4]*=Math.max(.5,1+.1*dR);f[2]*=Math.max(.6,1+.05*dR-.04*dR*dR);
   f[5]*=1+.035*dq;f[2]*=1+.015*dq;f[4]*=1-.012*dq;f[3]*=1-.012*dq;
   const o={id,base,q:Q,hidden:true,region:'自家烘焙',sig:B0.sig,name:B0.name,sub:'自烘・'+ROAST_NAME(roast)+'・'+Q+' 分',roast,f:f.map(v=>+v.toFixed(3)),clar:+((B0.clar||0)+.3*dq).toFixed(2),price:Math.round(B0.price*.55/.85),tags:B0.tags};
   BEANS.push(o);return o;}
+
+/* ---------- 豆子批次：每一批有編號和烘焙日，養豆與走味會改變風味 ---------- */
+function ageInfo(roast,d){const rest=Math.max(2,Math.round(12-2*roast)),stale=Math.round(35-4*roast),k=d>stale?Math.min(1,(d-stale)/30):0;
+  return {rest,stale,k,r:d<rest?d/rest:1,st:d<rest?'養豆中':!k?'最佳賞味':k<.5?'開始走味':'走味',cls:d<rest?'rest':!k?'peak':k<.5?'fade':'stale',
+    note:d<rest?'再 '+(rest-d)+' 天進入賞味期':!k?'賞味期還有 '+(stale-d)+' 天':k<1?'香氣正在流失':'香氣幾乎散光了'};}
+const freshF=(roast,d)=>{const A=ageInfo(roast,d);return d<A.rest?.55+.45*A.r:1-.55*A.k;};
+function mkBatch(id){const s=S(),m=s.bat&&s.bat[id];if(!m)return null;const src=ensureBean(m.src)||beanOf(m.src);if(!src)return null;const d=Math.max(0,s.day-m.day),old=beanOf(id);if(old&&old.age===d)return old;
+  const A=ageInfo(src.roast,d),u=1-A.r,k=A.k,f=src.f.slice();
+  f[5]*=(1-.22*u)*(1-.5*k);f[2]*=(1-.1*u)*(1-.22*k);f[0]*=(1+.08*u)*(1-.18*k);f[4]*=(1+.1*u)*(1+.18*k);f[3]*=1+.12*u+.15*k;f[6]*=1-.12*k;
+  const o=Object.assign({},src,{id,src:m.src,no:m.no,age:d,st:A.st,stc:A.cls,base:src.base||src.id,q:src.q||80,hidden:true,name:src.name+' #'+m.no,sub:(src.blend?'自家配方':src.sub)+'｜第 '+d+' 天・'+A.st,f:f.map(v=>+v.toFixed(3)),clar:+((src.clar||0)-1.6*u-2.2*k).toFixed(2)});
+  const i=BEANS.findIndex(b=>b.id===id);if(i>=0)BEANS[i]=o;else BEANS.push(o);return o;}
+function addBatch(src,g,age){const s=S();s.bat=s.bat||{};s.batN=(s.batN||0)+1;const id='L'+s.batN;s.bat[id]={src,day:s.day-(age||0),no:s.batN};s.beans[id]=g;mkBatch(id);return id;}
+const srcOf=id=>{const B=beanOf(id);return B&&B.src||id;};
+const batchesOf=src=>{const s=S();return Object.keys(s.beans).filter(id=>s.beans[id]>0&&s.bat[id]&&s.bat[id].src===src).sort((a,b)=>s.bat[a].day-s.bat[b].day);};
+const stockOf=src=>batchesOf(src).reduce((a,id)=>a+S().beans[id],0);
+function takeSrc(src,g){const s=S();let age=0;batchesOf(src).forEach(id=>{if(g<=0)return;const t=Math.min(g,s.beans[id]);s.beans[id]-=t;g-=t;age=Math.max(age,s.day-s.bat[id].day);if(s.beans[id]<=0)delete s.beans[id];});return age;}
+function agePlot(B){const W=210,H=46,A=ageInfo(B.roast,B.age),X=d=>Math.min(60,d)/60*W,Y=v=>H-4-(v-.4)/.6*(H-10);let p='';for(let d=0;d<=60;d+=2)p+=(d?'L':'M')+X(d).toFixed(1)+' '+Y(freshF(B.roast,d)).toFixed(1);
+  return '<svg class="ageplot" viewBox="0 0 '+W+' '+(H+12)+'" width="100%" role="img" aria-label="風味隨時間變化：'+A.st+'"><rect x="0" y="0" width="'+X(A.rest)+'" height="'+H+'" fill="#5a8aa0" opacity=".18"/><rect x="'+X(A.rest)+'" y="0" width="'+(X(A.stale)-X(A.rest))+'" height="'+H+'" fill="#c9a66b" opacity=".22"/><rect x="'+X(A.stale)+'" y="0" width="'+(W-X(A.stale))+'" height="'+H+'" fill="#777" opacity=".16"/>'+
+   '<path d="'+p+'" fill="none" stroke="#f3e9d6" stroke-width="2"/><line x1="'+X(B.age)+'" x2="'+X(B.age)+'" y1="0" y2="'+H+'" stroke="#e0569b" stroke-width="1.5"/><circle cx="'+X(B.age)+'" cy="'+Y(freshF(B.roast,B.age))+'" r="4" fill="#e0569b"/>'+
+   '<text x="2" y="'+(H+10)+'" font-size="9" fill="#9fb7c4">養豆</text><text x="'+(X(A.rest)+2)+'" y="'+(H+10)+'" font-size="9" fill="#d9bd86">賞味期</text><text x="'+(X(A.stale)+2)+'" y="'+(H+10)+'" font-size="9" fill="#999">走味</text></svg>';}
+function ageBars(B){const t=taste(B),t0=taste(beanOf(B.src)||B);return '<div class="tb">'+Object.keys(TD).map(k=>{const dv=t[k]-t0[k];return '<div><span>'+TD[k]+(Math.abs(dv)>=.4?'<em class="'+(dv>0?'up':'dn')+'">'+(dv>0?'▲':'▼')+'</em>':'')+'</span><i style="position:relative;overflow:visible"><b style="width:'+t[k]*10+'%;border-radius:4px"></b><u style="left:'+t0[k]*10+'%"></u></i></div>';}).join('')+'</div>';}
+function cellarHTML(){const s=S(),ids=Object.keys(s.beans).filter(id=>s.beans[id]>0&&beanOf(id)).sort((a,b)=>beanOf(a).no-beanOf(b).no);
+  return nav()+head('儲豆櫃','每一批豆子的狀態')+'<p class="label">每批豆子有自己的編號，不會混在同一罐。剛烘好要先養豆（排氣），之後進入賞味期；放太久香氣和甜感會流失、苦味變明顯。淺焙要養久一點，但也放得久；深焙很快能喝，也比較快走味。量販店的豆子買來時已經烘好一陣子了。</p>'+
+   (ids.length?'':'<p class="c-hint">儲豆櫃是空的。</p>')+'<div class="cellar">'+ids.map(id=>{const B=beanOf(id),A=ageInfo(B.roast,B.age);
+    return '<div class="panel lotc '+A.cls+'"><div class="lot-h">'+jar(id,s.beans[id])+'<div><b>'+esc(B.name)+'</b><small>'+esc((beanOf(B.src)||B).sub||'')+(/^r\./.test(B.src)?'':'・'+ROAST_NAME(B.roast))+'</small><div class="lot-st"><em class="bd '+A.cls+'">'+A.st+'</em><span>烘焙後第 '+B.age+' 天・'+A.note+'</span></div></div></div>'+
+     agePlot(B)+ageBars(B)+'<p class="label">粉紅線是今天；橫條是現在的風味，白色刻度是這支豆子狀態最好時的樣子。</p><div class="buyrow"><button data-dump="'+id+'">倒掉這一批</button></div></div>';}).join('')+'</div>';}
 const rid=(base,roast,q)=>'r.'+base+'.'+Math.round(roast*10)+'.'+q;
 /* 尋豆師今天這批的真實品質：宣稱分數上下浮動，信任越高越不會被唬 */
 function offerQ(h,id,day){const s=S(),tr=s.trust[h]||0,r=hsh(day*313+idn(h+id));return Math.round(((CLAIM[id]||84)-4+5*r+Math.min(1.5,tr/50))*2)/2;}
@@ -5023,10 +5057,10 @@ function initDial(){const cv=$('gDial');if(!cv)return;const o=S().last,Gd=GRINDE
   cv.onpointerup=cv.onpointercancel=()=>{if(!drag)return;drag=null;pos=cur;draw();persist();};
   draw();}
 function jar(id,g){const B=beanOf(id);if(!B)return '';const h=Math.max(6,Math.min(100,g/5));
-  return '<div class="jar'+(B.blend?' bl':B.sig?' sg':'')+'" title="'+esc(B.name)+' '+g+' g"><div class="glass"><i style="height:'+h+'%;background:'+roastCol(B.roast)+'"></i>'+(B.blend||B.sig?'<em>'+(B.sig?'招':'配')+'</em>':'')+'</div><span>'+esc(B.name)+'</span><small>'+(B.base?ROAST_NAME(B.roast)+'・'+B.q+'分・':'')+g+' g</small></div>';}
+  return '<div class="jar'+(B.blend?' bl':B.sig?' sg':'')+'" title="'+esc(B.name)+' '+g+' g"><div class="glass"><i style="height:'+h+'%;background:'+roastCol(B.roast)+'"></i>'+(B.blend||B.sig?'<em>'+(B.sig?'招':'配')+'</em>':'')+(B.stc?'<u class="'+B.stc+'"></u>':'')+'</div><span>'+esc(B.name)+'</span><small>'+(B.st?B.st+'・':'')+g+' g</small></div>';}
 function cabinet(opt){const s=S(),ids=Object.keys(s.beans).filter(id=>s.beans[id]>0&&beanOf(id));
   const gl=s.green.filter(l=>l.g>0);
-  return '<div class="cab"><div class="cab-top"><span>豆櫃</span><small>'+ids.length+' 種</small></div><div class="cab-shelf jars">'+(ids.map(id=>jar(id,s.beans[id])).join('')||'<p class="label" style="margin:auto">空空的，先去採購豆子</p>')+'</div>'+
+  return '<div class="cab"><div class="cab-top"><span>儲豆櫃</span><small>'+ids.length+' 批</small></div><div class="cab-shelf jars">'+(ids.map(id=>jar(id,s.beans[id])).join('')||'<p class="label" style="margin:auto">空空的，先去採購豆子</p>')+'</div>'+
    (gl.length?'<div class="cab-top"><span>生豆麻袋</span><small>'+gl.length+' 批，到烘豆室烘</small></div><div class="cab-shelf jars">'+gl.map(l=>{const B=beanOf(l.id);return '<div class="sack" title="'+esc(B.name)+'"><div class="bag"><b>'+esc(B.name.slice(0,4))+'</b><em>'+(l.known?l.q:'?')+'</em></div><small>'+l.g+' g</small></div>';}).join('')+'</div>':'')+
    (opt&&opt.gear===false?'':'<div class="cab-top"><span>器材架</span><small>店裡 '+s.brewers.length+'/'+capB(s)+' 濾杯・'+s.grinders.length+'/'+capG(s)+' 磨豆機</small></div><div class="cab-shelf tools">'+
    s.brewers.map(id=>'<div class="tool">'+icoBrewer(id)+'<span>'+esc(G.BREWERS.find(b=>b.id===id).name)+'</span></div>').join('')+
@@ -5062,7 +5096,7 @@ function bump(id,a,l,silent){if(HM[id]){const s=S();s.trust[id]=Math.max(0,Math.
   if(a||l)SFX.p((a||0)+(l||0)>0?'heart':'heartDn',0,silent?.5:0);
   if(!silent&&(a||l))toast(CM[id].name+(a?'　好感 '+(a>0?'+':'')+a:'')+(l?'　忠誠 '+(l>0?'+':'')+l:''));}
 function reward(r,id){if(!r)return;const s=S();if(r.money){s.money+=r.money;s.earned+=0;}if(r.rep)s.rep=Math.min(100,s.rep+r.rep);if(r.flag)s.flags[r.flag]=1;
-  if(r.loy&&id)bump(id,0,r.loy,true);if(r.bean)s.beans[r.bean[0]]=(s.beans[r.bean[0]]||0)+r.bean[1];
+  if(r.loy&&id)bump(id,0,r.loy,true);if(r.bean)addBatch(r.bean[0],r.bean[1],3);
   if(r.sig&&!s.sigs.includes(r.sig)){s.sigs.push(r.sig);if(!s.sig)s.sig=r.sig;addGreen(r.sig,300,CLAIM[r.sig]||91,true,null);}
   persist();if(r.txt)setTimeout(()=>toast(r.txt),300);}
 function playStory(id,done){const C=CM[id],R=rel(id),st=C.story[R.ch];SFX.p('page');
@@ -5108,16 +5142,18 @@ function brewAnim(opt,done){const B=beanOf(opt.bean)||{roast:3},col=roastCol(B.r
   if(cup){cup.style.transformBox='fill-box';cup.style.transformOrigin='50% 100%';cup.style.transform='scaleY(0)';}
   kt.style.transformBox='fill-box';kt.style.transformOrigin='35% 60%';st.style.opacity=0;
   let stage='beans',prog=0,hold=false,ang=0,last=performance.now(),raf=0,lastS=0,ended=false;
-  let pouring=false,flow=5,t=0,started=false,poured=0,Wd=0,cupG=0,segs=0,lastStop=-99,open=true,closedT=0,lastPS=0;
+  let pouring=false,flow=5,t=0,started=false,poured=0,Wd=0,cupG=0,segs=0,lastStop=-99,open=true,closedT=0,lastPS=0,clog=0,warned=false;const PLG=[],VW=[];
   const fm=x=>Math.floor(x/60)+':'+String(Math.floor(x%60)).padStart(2,'0');
   function toGrind(){stage='grind';cap.textContent='磨豆・'+fmtGrind(Gd,grind).split('・')[0];tip.textContent=kind==='hand'?'按住或連點畫面，轉動把手':kind==='blade'?'按住畫面，按下砍豆機':'按住畫面，啟動磨豆機';}
   function toPour(){stage='pour';hold=false;grG.removeAttribute('transform');bar.parentNode.hidden=true;pbox.hidden=false;cap.textContent='注水・目標 '+target+' g（1 : '+opt.ratio+'）';
-    tip.textContent=press?'注水後等咖啡浸泡，時間到了再壓下濾網':sw?'關上閥門可以浸泡，打開閥門才會滴濾':'先注一點點水悶蒸，再分段注水';}
+    tip.textContent=press?'注水後等咖啡浸泡，時間到了再壓下濾網':sw?'關上閥門可以浸泡，打開閥門才會滴濾':'小水流擾動少、杯子乾淨；大水流翻動粉床、萃得多，但細粉容易堵住濾紙';}
   function setPour(v){if(v&&poured>=maxPour)return;if(v&&Wd>=CAPW-4){tip.textContent='快滿出來了！等水位降下來再注水';return;}pouring=v;bPour.textContent=v?'停止注水':(started?'繼續注水':'開始注水');bPour.classList.toggle('stop',v);
-    if(v){started=true;if(t-lastStop>3||!segs){segs++;}SFX.p('pour');lastPS=performance.now();}else lastStop=t;}
-  function result(){const ratio=Math.max(12,Math.min(18,Math.round(poured/dose*2)/2)),ex={ratio,pour:segs<=1?'cont':segs<=4?'three':'multi'};
-    if(sw)ex.steep=Math.max(60,Math.min(600,Math.round(closedT/15)*15));if(press)ex.steep=Math.max(60,Math.min(600,Math.round(t/15)*15));
-    ex.txt='你的手法：注水 '+segs+' 段・'+Math.round(poured)+' g（1 : '+ratio+'）・'+fm(t)+(sw?'・浸泡 '+fm(closedT):'');return ex;}
+    if(v){started=true;if(t-lastStop>3||!segs){segs++;}const L=PLG[PLG.length-1];if(!L||t-L.e>2)PLG.push({s:t,ml:0,e:t});SFX.p('pour');lastPS=performance.now();}else{lastStop=t;PLG[PLG.length-1].e=t;}}
+  function result(){const segsL=PLG.filter(x=>x.ml>=1),plan=segsL.map(x=>Math.round(x.ml)),tot=plan.reduce((a,b)=>a+b,0),st=S().last.stir==='bloom';
+    VW.forEach(w=>{if(w[1]==null)w[1]=Math.round(t);});
+    const pro={mode:'pro',dose,ratio:tot/dose,dpat:'pulse',plan,planT:segsL.map(x=>Math.round(x.s)),planD:segsL.map(x=>Math.max(1,Math.round(x.e-x.s))),planTemp:null,stirP:st?'bloom':'none',stirI:st?'once':'none',
+      steep:press?Math.max(60,Math.min(600,Math.round(t))):240,swMode:'closeFirst',swOpen:120,swClose:30,valveWins:sw?(VW.length?VW:[[0,1]]):null};
+    return {pro,txt:'你的手法：'+plan.length+' 段・'+tot+' g（1 : '+(tot/dose).toFixed(1)+'）・'+fm(t)+(sw?'・浸泡 '+fm(closedT):'')};}
   function finish(auto){if(ended)return;ended=true;stage='done';cancelAnimationFrame(raf);pouring=false;st.style.opacity=0;kt.style.transform='';cap.textContent='完成，端給客人！';tip.textContent='';
     if(cup)cup.style.transform='scaleY('+(auto?.85:Math.min(1,cupG/270)).toFixed(2)+')';if(pl)pl.style.transform='translateY(90px)';
     const ex=auto||!started||poured<dose*6?null:result();SFX.p('pass');setTimeout(()=>close(ex),700);}
@@ -5131,8 +5167,9 @@ function brewAnim(opt,done){const B=beanOf(opt.bean)||{roast:3},col=roastCol(B.r
       if(arm){const x=82+32*Math.cos(ang);arm.setAttribute('x2',x.toFixed(1));knob.setAttribute('x',(x-6).toFixed(1));knob.setAttribute('height',(18-4*Math.sin(ang)).toFixed(1));}
       bar.style.width=Math.min(100,prog*100)+'%';if(prog>=1)toPour();}
     else if(stage==='pour'){const sc=(!pouring&&poured>=target-2)||(press&&!pouring&&started)?30:12,g=dt*sc;
-      if(pouring){const a=flow*g;poured+=a;Wd+=a;if(now-lastPS>1650){SFX.p('pour');lastPS=now;}if(poured>=maxPour){setPour(false);tip.textContent='水加太多了，已經到上限';}else if(Wd>=CAPW){setPour(false);tip.textContent='快滿出來了！等水位降下來再注水';}}
-      const dr=Math.max(0,Wd-2*dose);if(!press&&open&&dr>0){const d=Math.min(dr,rate*Math.min(1,dr/25+.15)*g);Wd-=d;cupG+=d;}
+      if(pouring){const a=flow*g;poured+=a;Wd+=a;const L=PLG[PLG.length-1];L.ml+=a;L.e=t;clog+=(flow>=8?1:flow>=5?.35:.1)*Gd.fines*Math.pow(700/grind,1.5)*a/60;
+        if(!warned&&clog>.8&&!press){warned=true;tip.textContent='細粉被沖到濾紙上堵住了，水下得很慢（塞水）';}if(now-lastPS>1650){SFX.p('pour');lastPS=now;}if(poured>=maxPour){setPour(false);tip.textContent='水加太多了，已經到上限';}else if(Wd>=CAPW){setPour(false);tip.textContent='快滿出來了！等水位降下來再注水';}}
+      const dr=Math.max(0,Wd-2*dose);if(!press&&open&&dr>0){const d=Math.min(dr,rate/(1+1.6*clog)*Math.min(1,dr/25+.15)*g);Wd-=d;cupG+=d;}
       if(started)t+=g;if(sw&&!open&&Wd>2*dose)closedT+=g;
       kt.style.transform=pouring?'translate(4px,6px) rotate(24deg)':'';st.style.opacity=pouring?.95:0;st.style.strokeWidth=flow<4?1.6:flow<6?2.6:4.2;st.style.strokeDashoffset=(-now/10).toFixed(0);
       const L=Math.min(1,Wd/CAPW);if(press){water.setAttribute('y',(204-104*L).toFixed(1));water.setAttribute('height',(104*L).toFixed(1));}
@@ -5146,13 +5183,13 @@ function brewAnim(opt,done){const B=beanOf(opt.bean)||{roast:3},col=roastCol(B.r
   addEventListener('pointerup',up);addEventListener('pointercancel',up);
   bPour.onclick=()=>{if(stage==='pour')setPour(!pouring);};
   AN.querySelectorAll('[data-fl]').forEach(b=>b.onclick=()=>{flow=+b.dataset.fl;AN.querySelectorAll('[data-fl]').forEach(x=>x.setAttribute('aria-pressed',x===b));});
-  if(bValve)bValve.onclick=()=>{open=!open;bValve.textContent=open?'關上閥門':'打開閥門';bValve.classList.toggle('stop',!open);vi.setAttribute('fill',open?'#5fbf7a':'#d9705f');vi.setAttribute('x',open?228:222);SFX.p('tick');};
+  if(bValve)bValve.onclick=()=>{open=!open;if(!open)VW.push([Math.round(t),null]);else if(VW.length)VW[VW.length-1][1]=Math.round(t);bValve.textContent=open?'關上閥門':'打開閥門';bValve.classList.toggle('stop',!open);vi.setAttribute('fill',open?'#5fbf7a':'#d9705f');vi.setAttribute('x',open?228:222);SFX.p('tick');};
   bEnd.onclick=()=>{if(stage!=='pour')return;if(!started){tip.textContent='還沒注水呢';return;}finish();};
   AN.querySelector('.ba-skip').onclick=()=>finish(true);
   setTimeout(()=>{if(!ended){toGrind();last=performance.now();raf=requestAnimationFrame(loop);}},900);}
 /* ---------- 共用：頁首、分頁 ---------- */
 function head(label,title){const s=S();return '<div class="c-head"><div><div class="label">'+label+'</div><h1>'+title+'</h1></div><div class="c-money">'+NT(s.money)+'</div></div>';}
-function nav(){const s=S(),tabs=[['lobby','店面'],['regs','熟客'],['buy','採購']];if(s.flags.h_jie)tabs.push(['roast','烘豆室'+(s.green.some(l=>l.g>0)?' •':'')]);
+function nav(){const s=S(),tabs=[['lobby','店面'],['regs','熟客'],['buy','採購'],['cellar','儲豆櫃']];if(s.flags.h_jie)tabs.push(['roast','烘豆室'+(s.green.some(l=>l.g>0)?' •':'')]);
   if(s.flags.blend)tabs.push(['blend','配方豆']);if(s.flags.retail)tabs.push(['shelf','零售架']);tabs.push(['gear','器材庫']);if(s.flags.comp)tabs.push(['comp','比賽']);
   const v=view==='person'?'regs':view==='comprun'?'comp':view==='store'?'buy':view;
   return '<div class="c-nav" role="tablist">'+tabs.map(([k,n])=>'<button data-go="'+k+'" aria-pressed="'+(v===k)+'">'+n+(k==='regs'&&storyReady()?'<i class="dot"></i>':'')+(k==='buy'&&hunterReady()?'<i class="dot"></i>':'')+'</button>').join('')+'</div>';}
@@ -5225,9 +5262,9 @@ function fans(B){const s=S();return unlockedCast(s).filter(c=>c.tw&&rel(c.id).v)
 function blendHTML(){const s=S();let h=nav()+head('配方豆實驗室','調出熟客心裡的味道');
   h+='<p class="label">把倉庫裡的豆子按比例拼在一起。配方的風味是各支豆子的加權平均，成本也一樣。配得剛好，愛配方的熟客會一直回來買。</p>';
   if(draft){const parts=Object.entries(draft.parts),tot=parts.reduce((a,p)=>a+p[1],0);
-    const own=Object.keys(s.beans).filter(id=>s.beans[id]>0&&!isBlend(id)&&beanOf(id));
+    const own=[...new Set(Object.keys(s.beans).filter(id=>s.beans[id]>0&&beanOf(id)).map(srcOf))].filter(id=>!isBlend(id)&&beanOf(id));
     h+='<div class="panel"><h3 class="c-h3">新配方</h3><p class="label">點豆子加入配方（最多 4 支），用 ＋／− 調整比例，總和要 100%。</p><div class="chips">'+own.map(id=>'<button data-bp="'+id+'" aria-pressed="'+(id in draft.parts)+'">'+esc(beanOf(id).name)+'</button>').join('')+'</div>'+
-     parts.map(([id,p])=>'<div class="bpart"><span>'+esc(beanOf(id).name)+'</span><button data-bd="'+id+':-10">−</button><b>'+p+'%</b><button data-bd="'+id+':10">＋</button><small>'+(s.beans[id]||0)+' g</small></div>').join('')+
+     parts.map(([id,p])=>'<div class="bpart"><span>'+esc(beanOf(id).name)+'</span><button data-bd="'+id+':-10">−</button><b>'+p+'%</b><button data-bd="'+id+':10">＋</button><small>'+stockOf(id)+' g</small></div>').join('')+
      '<div class="c-row" style="margin-top:6px"><span class="label">總和 <b style="color:'+(tot===100?'var(--accent)':'var(--fail)')+'">'+tot+'%</b></span></div>';
     if(parts.length&&tot===100){const B=regBlend({id:'bl_draft',name:draft.name||'試配',parts});h+=tasteBars(B)+'<p class="label">成本 '+NT(B.price)+'／100 g・'+ROAST_NAME(B.roast)+'</p>'+
       '<h3 class="c-h3" style="margin-top:10px">熟客會喜歡嗎？</h3><div class="c-list">'+(fans(B).map(f=>'<div><span>'+esc(f.c.name)+(f.c.bl?'（愛配方）':'')+'</span><small>'+(f.k?f.m+'%'+(f.m>=80?' 💛':''):'？好感 30 才看得出')+'</small></div>').join('')||'<span class="label">還沒有會買豆的熟客</span>')+'</div>'+
@@ -5236,8 +5273,8 @@ function blendHTML(){const s=S();let h=nav()+head('配方豆實驗室','調出�
     else h+='<div class="c-acts" style="margin-top:10px"><button data-a="bcancel">取消</button></div>';
     h+='</div>';}
   else h+='<button class="c-open" data-a="bnew">＋ 調一支新配方</button>';
-  h+=s.blends.map(bl=>{const B=beanOf(bl.id);const can=g=>bl.parts.every(([id,p])=>(s.beans[id]||0)>=Math.ceil(g*p/100));
-    return '<div class="panel"><div class="c-row"><b class="bname">'+esc(bl.name)+'</b><span class="label">庫存 '+(s.beans[bl.id]||0)+' g・成本 '+NT(B.price)+'／100 g</span></div><p class="label">'+esc(B.sub.replace('自家配方・',''))+'</p>'+tasteBars(B)+
+  h+=s.blends.map(bl=>{const B=beanOf(bl.id);const can=g=>bl.parts.every(([id,p])=>stockOf(id)>=Math.ceil(g*p/100));
+    return '<div class="panel"><div class="c-row"><b class="bname">'+esc(bl.name)+'</b><span class="label">庫存 '+stockOf(bl.id)+' g・成本 '+NT(B.price)+'／100 g</span></div><p class="label">'+esc(B.sub.replace('自家配方・',''))+'</p>'+tasteBars(B)+
      '<div class="buyrow" style="margin-top:8px">'+[100,200,500].map(g=>'<button data-bb="'+bl.id+':'+g+'"'+(can(g)?'':' disabled')+'>拼 '+g+' g</button>').join('')+'</div></div>';}).join('');
   return h;}
 /* ---------- 零售架 ---------- */
@@ -5298,9 +5335,9 @@ function roastAnim(roast,done){if(matchMedia('(prefers-reduced-motion:reduce)').
   T.push(setTimeout(()=>{cap.textContent=roast>4?'二爆了，深焙下豆！':'下豆，冷卻盤攪拌…';SFX.p(roast>4?'crack2':'stir');},3300));
   const fin=()=>{T.forEach(clearTimeout);AN.onclick=null;AN.classList.remove('go');AN.hidden=true;done();};T.push(setTimeout(fin,4300));AN.onclick=fin;}
 function doRoast(){const s=S(),R0=ROASTERS.find(r=>r.id===s.roaster)||ROASTERS[0],L=rsel&&s.green.find(l=>l.k===rsel.k);if(!L||busy)return;const g=Math.min(rsel.g,L.g,R0.batch),roast=rsel.roast;busy=true;
-  roastAnim(roast,()=>{busy=false;const q=effQ(L.q,L.id,roast,R0.rq),id=rid(L.id,roast,q);ensureBean(id);L.g-=g;const out=Math.round(g*.85);s.beans[id]=(s.beans[id]||0)+out;
+  roastAnim(roast,()=>{busy=false;const q=effQ(L.q,L.id,roast,R0.rq),id=rid(L.id,roast,q);ensureBean(id);L.g-=g;const out=Math.round(g*.85);addBatch(id,out,0);
     s.green=s.green.filter(l=>l.g>0);if(!s.green.find(l=>l.k===rsel.k))rsel=null;gain(3,0);persist();render();
-    toast('烘好 '+out+' g '+beanOf(L.id).name+'・'+ROAST_NAME(roast)+'・'+q+' 分，放進豆櫃了');SFX.p('save');});}
+    toast('烘好 '+out+' g '+beanOf(L.id).name+'・'+q+' 分，放進儲豆櫃養豆');SFX.p('save');});}
 function bargain(h,id){const s=S(),H=HM[h],B=beanOf(id),tr=s.trust[h]||0,ch=s.charm||0,key=h+'/'+id;
   const mk=(t,rate)=>[t,0,0,'',rate];const opts=[mk('能算便宜一點嗎？（9 折）',.9),mk('我一次多訂，8 折可以嗎？',.8),mk('原價就好，謝謝你',1)];
   dlg({t:'議價・'+H.name,who:h,l:['c|這批 '+B.name+' 生豆，一百克 '+NT(Math.round(B.price*.55))+'。宣稱 '+(CLAIM[id]||84)+' 分。'],ch:opts,onCh:o=>{const rate=o[4];
@@ -5383,7 +5420,7 @@ function sellBeans(id){const s=S(),X=curCust(),C=X.C,R=X.R,B=beanOf(id),g=C.bg||
   else{o.sold=true;o.rev=Math.round(p*g/100);o.cost=Math.round(B.price*g/100);s.beans[id]-=g;if(s.beans[id]<=0)delete s.beans[id];s.money+=o.rev;s.earned+=o.rev;s.today.income+=o.rev;s.today.beanInc+=o.rev;s.sold+=g;
     o.dA=m>=80?5:m>=60?2:0;o.dL=m>=80?5:m>=60?2:1;
     o.say=m>=85?'就是這個！你怎麼知道我要什麼？':m>=70?'很不錯，我就帶這包。':C.bl&&!B.blend?'好吧，先帶這包。不過我比較想要配方豆耶。':'還可以，先帶回去試試。';
-    if(m>=75&&(!C.bl||B.blend)){o.fav=R.fav!==id;R.fav=id;R.m=m;}SFX.p('cash');gain(2,m>=85?1:0);}
+    if(m>=75&&(!C.bl||B.blend)){o.fav=R.fav!==srcOf(id);R.fav=srcOf(id);R.m=m;}SFX.p('cash');gain(2,m>=85?1:0);}
   bump(C.id,o.dA,o.dL,true);X.c.done=1;s.today.served+=1;res=o;persist();render();}
 /* 客人上門：先打招呼，有劇情就演，有問題就問，然後點單 */
 function arrive(){const s=S(),X=curCust();if(!X||X.c.ev)return;const C=X.C,R=X.R,st=C.story[R.ch];
@@ -5402,9 +5439,9 @@ function arrive(){const s=S(),X=curCust();if(!X||X.c.ev)return;const C=X.C,R=X.R
 function closeCalc(){const s=S(),t=s.today;if(t.close)return t.close;const lines=[];let inc=0;const came=new Set(t.q.map(c=>c.id));
   unlockedCast(s).forEach(C=>{const R=rel(C.id);if(!R.fav||came.has(C.id)||R.l<35||!C.tw)return;const B=beanOf(R.fav);if(!B)return;
     let p=(R.l-25)/110+(['ming','meiling','feng','grace','laochen','xiaole'].includes(C.id)&&R.ch>=3?.15:0);if(Math.random()>p)return;
-    const g=Math.max(100,Math.round((C.bg||200)/2/100)*100);if((s.beans[R.fav]||0)<g){lines.push(C.name+' 想回購 '+B.name+'，可是缺貨了（忠誠 −2）');R.l=Math.max(0,R.l-2);return;}
-    const will=C.bp*(.7+.6*R.m/100)*(B.sig?1.25:1)*(1+(qOf(R.fav)-80)*.02);if(price100(R.fav)>will){lines.push(C.name+' 覺得 '+B.name+' 漲價了，這次沒買');return;}
-    const rev=Math.round(price100(R.fav)*g/100);s.beans[R.fav]-=g;if(s.beans[R.fav]<=0)delete s.beans[R.fav];inc+=rev;s.sold+=g;R.l=Math.min(100,R.l+1);lines.push('熟客 '+C.name+' 回購 '+B.name+' '+g+' g　+'+NT(rev));});
+    const g=Math.max(100,Math.round((C.bg||200)/2/100)*100),fid=batchesOf(R.fav).filter(id=>s.beans[id]>=g&&beanOf(id).stc!=='stale').pop();if(!fid){lines.push(C.name+' 想回購 '+B.name+'，可是缺貨了（忠誠 −2）');R.l=Math.max(0,R.l-2);return;}
+    const will=C.bp*(.7+.6*R.m/100)*(B.sig?1.25:1)*(1+(qOf(R.fav)-80)*.02);if(price100(fid)>will){lines.push(C.name+' 覺得 '+B.name+' 漲價了，這次沒買');return;}
+    const rev=Math.round(price100(fid)*g/100);s.beans[fid]-=g;if(s.beans[fid]<=0)delete s.beans[fid];inc+=rev;s.sold+=g;R.l=Math.min(100,R.l+1);lines.push('熟客 '+C.name+' 回購 '+B.name+' '+g+' g　+'+NT(rev));});
   if(s.sig&&s.flags.retail){const k=Math.floor(s.rep/25);for(let i=0;i<k;i++){const sid=Object.keys(s.beans).find(id=>baseOf(id)===s.sig&&s.beans[id]>=100);if(sid&&Math.random()<.5&&price100(sid)<=beanOf(sid).price*2.4){const rev=price100(sid);s.beans[sid]-=100;if(s.beans[sid]<=0)delete s.beans[sid];inc+=rev;s.sold+=100;lines.push('路過的客人買了一包招牌豆 100 g　+'+NT(rev));}}}
   s.money+=inc;s.earned+=inc;t.income+=inc;t.beanInc+=inc;t.close={lines,inc};persist();return t.close;}
 function closeHTML(){const s=S(),t=s.today,cz=closeCalc(),rent=rentOf(s),net=t.income-t.cost-rent;
@@ -5417,7 +5454,7 @@ function closeHTML(){const s=S(),t=s.today,cz=closeCalc(),rent=rentOf(s),net=t.i
 /* ---------- 畫面切換 ---------- */
 function render(){if(!me)return;ensureDay();const s=S(),t=s.today;
   if(view==='serve'&&t.idx>=t.q.length)view='close';
-  const V={roast:roastHTML,store:buyHTML,buy:buyHTML,serve:serveHTML,close:closeHTML,regs:regsHTML,person:personHTML,blend:blendHTML,shelf:shelfHTML,gear:gearHTML,comp:compHTML,comprun:compRunHTML}[view]||lobbyHTML;
+  const V={cellar:cellarHTML,roast:roastHTML,store:buyHTML,buy:buyHTML,serve:serveHTML,close:closeHTML,regs:regsHTML,person:personHTML,blend:blendHTML,shelf:shelfHTML,gear:gearHTML,comp:compHTML,comprun:compRunHTML}[view]||lobbyHTML;
   $('shopBox').innerHTML=V();initDial();navWho();if(DL.hidden)BGM.set(view==='roast'?'roast':view==='comprun'?'comp':'cafe');
   if(view==='lobby'&&!busy){const m=mainPending();if(m)setTimeout(()=>{if(!busy&&view==='lobby'&&DL.hidden)playMain(m);},350);}}
 window.shopRender=render;
@@ -5431,10 +5468,11 @@ function settle(){const s=S(),t=s.today,X=curCust(),r=res,R=X.R;r.final=true;con
   if(sigAsk&&!isSig){dA-=2;r.say='這……不是你們的招牌吧？';}
   r.pay=pay;r.tip=tip;r.dRep=dRep;r.used=X.c.tries;r.cost=X.c.cost;r.dA=dA;r.dL=dL;bump(X.C.id,dA,dL,true);
   s.money+=pay;s.earned+=pay;s.cups+=1;t.income+=pay;t.served+=1;s.rep=Math.max(0,Math.min(100,s.rep+dRep));persist();}
-function brewNow(ex){const s=S(),o=Object.assign({},s.last,ex||{}),Gr=GRINDERS.find(g=>g.id===o.grinder);
-  return G.brew({mode:'simple',bean:o.bean,brewer:o.brewer,temp:o.temp,grind:o.grind,ratio:o.ratio,pour:o.pour,stir:o.stir,steep:o.steep,forceFines:Gr.fines});}
+function runBrew(base,ex){const r=G.brew(Object.assign(base,ex&&ex.pro||{}));if(ex)setTimeout(()=>toast(ex.txt+(r.R>=1.3?'｜塞水了！排水只剩 '+Math.round(100/r.R)+'%，苦澀變重':'')),900);return r;}
+function brewNow(ex){const s=S(),o=s.last,Gr=GRINDERS.find(g=>g.id===o.grinder);
+  return runBrew({mode:'simple',bean:o.bean,brewer:o.brewer,temp:o.temp,grind:o.grind,ratio:o.ratio,pour:o.pour,stir:o.stir,steep:o.steep,forceFines:Gr.fines},ex);}
 function doBrew(){const s=S(),t=s.today,X=curCust(),L=X.C,o=s.last;if(!o.bean||!beanOK(o.bean)||busy)return;busy=true;
-  brewAnim({bean:o.bean,brewer:o.brewer,grinder:o.grinder,ratio:o.ratio},ex=>{busy=false;if(ex)setTimeout(()=>toast(ex.txt),900);
+  brewAnim({bean:o.bean,brewer:o.brewer,grinder:o.grinder,ratio:o.ratio},ex=>{busy=false;
   const B=beanOf(o.bean),r=brewNow(ex),pf=G.profile(r),sc=G.score(pf,L.want,L.tol);
   const c=Math.round(B.price*DOSE/100)+CUP_COST;s.beans[o.bean]-=DOSE;if(s.beans[o.bean]<=0)delete s.beans[o.bean];
   s.money-=CUP_COST;t.cost+=c;X.c.tries+=1;X.c.cost=(X.c.cost||0)+c;
@@ -5445,8 +5483,8 @@ function doBrew(){const s=S(),t=s.today,X=curCust(),L=X.C,o=s.last;if(!o.bean||!
   SFX.p(pass?'pass':near?'near':'fail');if(res.final&&res.pay>0)SFX.p('cash',0,.6);
   render();const el=document.querySelector('#shopBox .c-res');if(el)el.scrollIntoView({behavior:'smooth',block:'start'});});}
 function compBrew(){const s=S(),X=CC[curComp],C=G.COMPS[X.ci],id=s.last.cbean;if(!id||(s.beans[id]||0)<DOSE||busy)return;busy=true;
-  brewAnim({bean:id,brewer:s.last.brewer,grinder:s.last.grinder,ratio:s.last.ratio},ex=>{busy=false;if(ex)setTimeout(()=>toast(ex.txt),900);const o=Object.assign({},s.last,ex||{}),Gr=GRINDERS.find(g=>g.id===o.grinder);
-    const r=G.brew({mode:'simple',bean:id,brewer:o.brewer,temp:o.temp,grind:o.grind,ratio:o.ratio,pour:o.pour,stir:o.stir,steep:o.steep,forceFines:Gr.fines});
+  brewAnim({bean:id,brewer:s.last.brewer,grinder:s.last.grinder,ratio:s.last.ratio},ex=>{busy=false;const o=s.last,Gr=GRINDERS.find(g=>g.id===o.grinder);
+    const r=runBrew({mode:'simple',bean:id,brewer:o.brewer,temp:o.temp,grind:o.grind,ratio:o.ratio,pour:o.pour,stir:o.stir,steep:o.steep,forceFines:Gr.fines},ex);
     const J=G.judge(r,C);s.beans[id]-=DOSE;if(s.beans[id]<=0)delete s.beans[id];s.money-=CUP_COST;res={comp:1,r,J,sc:J.total};persist();render();
     const el=document.querySelector('#shopBox .c-res');if(el)el.scrollIntoView({behavior:'smooth',block:'start'});});}
 function compSubmit(){const s=S(),X=CC[curComp],C=G.COMPS[X.ci],r=res;const riv=G.rivalScores(X.ci);
@@ -5464,7 +5502,7 @@ $('shopBox').addEventListener('click',e=>{const b=e.target.closest('button');if(
   if(d.p){curPerson=d.p;if(!rel(d.p).v)return;view='person';render();scrollTo(0,0);return;}
   if(d.replay){const C=CM[curPerson],st=C.story[+d.replay];dlg({t:'回顧・'+st.t,who:C.id,l:st.l});return;}
   if(d.set){const [k,v]=d.set.split(':');s.last[k]=v;persist();render();return;}
-  if(d.sb){const [id,g]=d.sb.split(':'),B=beanOf(id),p=+g===500?Math.round(B.price*5*.85/10)*10:B.price;if(s.money<p)return;s.money-=p;s.beans[id]=(s.beans[id]||0)+(+g);toast('買了 '+g+' g '+B.name);SFX.p('coins');persist();render();return;}
+  if(d.sb){const [id,g]=d.sb.split(':'),B=beanOf(id),p=+g===500?Math.round(B.price*5*.85/10)*10:B.price;if(s.money<p)return;s.money-=p;const nb=addBatch(id,+g,5+Math.floor(Math.random()*8));toast('買了 '+g+' g '+beanOf(nb).name+'（已烘好 '+beanOf(nb).age+' 天）');SFX.p('coins');persist();render();return;}
   if(d.ho){const [h,id,g]=d.ho.split(':'),B=beanOf(id),p=Math.round(greenPrice(id,h)*g/100),H=HM[h];if(s.money<p)return;s.money-=p;s.orders.push({h,id,g:+g,at:s.day+H.lead,q:offerQ(h,id,s.day),known:cupd(h,id)!=null});bump(h,2+Math.round(g/100*1.5),0);
     toast('向 '+H.name+' 訂了 '+g+' g '+B.name+' 生豆，第 '+(s.day+H.lead)+' 天到貨');SFX.p('coins');persist();render();return;}
   if(d.hs){playHunter(HM[d.hs]);return;}
@@ -5481,6 +5519,7 @@ $('shopBox').addEventListener('click',e=>{const b=e.target.closest('button');if(
   if(d.gs){const [id,i,pp]=d.gs.split(':');if(s.money<+pp)return;s.money-=+pp;(s.skins[id]=s.skins[id]||[0]).push(+i);s.skin[id]=+i;toast('買到新配色：'+SK[id][+i][0]);SFX.p('cash');persist();render();return;}
   if(d.sk){const [id,i]=d.sk.split(':');s.skin[id]=+i;SFX.p('tick');persist();render();return;}
   if(d.gstep){const o=s.last,Gd=GRINDERS.find(g=>g.id===o.grinder);o.grind+=(+d.gstep)*(Gd.um||10);snapGrind();SFX.p('grind');persist();render();return;}
+  if(d.dump){const B=beanOf(d.dump);delete s.beans[d.dump];toast('倒掉了 '+B.name);SFX.p('trash');persist();render();return;}
   if(d.mv){const [k,id]=d.mv.split(':'),shop=k==='brewer'?s.brewers:s.grinders,home=s.home[k+'s'],cap=k==='brewer'?capB(s):capG(s);
     if(shop.includes(id)){if(shop.length<=1){toast('店裡至少要留一個'+(k==='brewer'?'濾杯':'磨豆機'));return;}shop.splice(shop.indexOf(id),1);home.push(id);toast('收回家了');}
     else{if(shop.length>=cap){toast('店裡放滿了，先收一件回家');return;}home.splice(home.indexOf(id),1);shop.push(id);toast('帶去店裡了');}
@@ -5488,8 +5527,8 @@ $('shopBox').addEventListener('click',e=>{const b=e.target.closest('button');if(
   if(d.bp){if(d.bp in draft.parts)delete draft.parts[d.bp];else if(Object.keys(draft.parts).length<4)draft.parts[d.bp]=0;else{toast('配方最多 4 支豆子');return;}
     const ks=Object.keys(draft.parts),n=ks.length,e=Math.floor(100/n/10)*10;ks.forEach((k,i)=>draft.parts[k]=i===0?100-e*(n-1):e);render();return;}
   if(d.bd){const [id,v]=d.bd.split(':');draft.parts[id]=Math.max(10,Math.min(90,draft.parts[id]+(+v)));render();return;}
-  if(d.bb){const [id,g]=d.bb.split(':'),bl=s.blends.find(x=>x.id===id);if(!bl.parts.every(([b,p])=>(s.beans[b]||0)>=Math.ceil(g*p/100)))return;
-    bl.parts.forEach(([b,p])=>{s.beans[b]-=Math.ceil(g*p/100);if(s.beans[b]<=0)delete s.beans[b];});s.beans[id]=(s.beans[id]||0)+(+g);toast('拼好 '+g+' g「'+bl.name+'」');SFX.p('stir');persist();render();return;}
+  if(d.bb){const [id,g]=d.bb.split(':'),bl=s.blends.find(x=>x.id===id);if(!bl.parts.every(([b,p])=>stockOf(b)>=Math.ceil(g*p/100)))return;
+    let ag=0;bl.parts.forEach(([b,p])=>{ag=Math.max(ag,takeSrc(b,Math.ceil(g*p/100)));});addBatch(id,+g,ag);toast('拼好 '+g+' g「'+bl.name+'」');SFX.p('stir');persist();render();return;}
   if(d.sig){s.sig=d.sig;persist();render();toast('招牌換成 '+beanOf(d.sig).name);return;}
   if(d.sell){sellBeans(d.sell);return;}
   if(d.enter){curComp=+d.enter;res=null;view='comprun';SFX.p('door');render();scrollTo(0,0);return;}
