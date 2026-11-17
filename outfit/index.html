@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="穿搭試衣間">
 <meta name="theme-color" content="#2f3a4a">
-<meta name="app-version" content="1.1">
+<meta name="app-version" content="1.2">
 <title>穿搭試衣間</title>
 <style>
 :root{--bg:#f4f1ec;--card:#fff;--ink:#23201d;--mute:#857b70;--line:#e5ddd2;--accent:#2f3a4a;--hot:#c8553d;--soft:#ece6dc;--ok:#2f8f5b}
@@ -99,6 +99,10 @@ label.f{display:block;font-size:12.5px;color:var(--mute);margin:10px 0 4px}
 <pattern id="p-knit" width="4.5" height="6" patternUnits="userSpaceOnUse"><rect width="1" height="6" fill="#000" opacity=".1"/></pattern>
 <pattern id="p-quilt" width="20" height="16" patternUnits="userSpaceOnUse"><rect width="20" height="1.3" fill="#000" opacity=".22"/></pattern>
 <pattern id="p-floral" width="18" height="18" patternUnits="userSpaceOnUse"><circle cx="4" cy="5" r="2.3" fill="#fff" opacity=".85"/><circle cx="13" cy="13" r="2.3" fill="#f6d55c" opacity=".9"/><circle cx="13" cy="4" r="1.2" fill="#fff" opacity=".6"/><circle cx="5" cy="14" r="1.2" fill="#2f6b4a" opacity=".7"/></pattern>
+<linearGradient id="sh-h"><stop offset="0" stop-color="#000" stop-opacity=".26"/><stop offset=".2" stop-color="#000" stop-opacity=".04"/><stop offset=".42" stop-color="#fff" stop-opacity=".1"/><stop offset=".78" stop-color="#000" stop-opacity=".03"/><stop offset="1" stop-color="#000" stop-opacity=".28"/></linearGradient>
+<linearGradient id="sh-r"><stop offset="0" stop-color="#000" stop-opacity=".05"/><stop offset=".45" stop-color="#fff" stop-opacity=".07"/><stop offset=".8" stop-color="#000" stop-opacity=".04"/><stop offset="1" stop-color="#000" stop-opacity=".28"/></linearGradient>
+<linearGradient id="sh-l"><stop offset="0" stop-color="#000" stop-opacity=".28"/><stop offset=".2" stop-color="#000" stop-opacity=".04"/><stop offset=".55" stop-color="#fff" stop-opacity=".07"/><stop offset="1" stop-color="#000" stop-opacity=".05"/></linearGradient>
+<linearGradient id="sh-v" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#000" stop-opacity=".2"/><stop offset=".35" stop-color="#000" stop-opacity="0"/></linearGradient>
 </defs></svg>
 <header><a href="../" aria-label="回目錄">‹</a><h1>穿搭試衣間</h1><button id="userBtn" style="display:none"></button></header>
 <main id="app"></main>
@@ -130,6 +134,9 @@ const strokeOf=c=>lum(c)<.22?shade(c,.3):shade(c,-.26);
 function hsl(h){let[r,g,b]=hex2rgb(h).map(v=>v/255);const mx=Math.max(r,g,b),mn=Math.min(r,g,b),l=(mx+mn)/2,d=mx-mn;let hh=0,s=0;
   if(d){s=d/(1-Math.abs(2*l-1));hh=mx===r?((g-b)/d)%6:mx===g?(b-r)/d+2:(r-g)/d+4;hh=(hh*60+360)%360;}return[hh,s,l];}
 const P=(d,fill,st,sw=1.1,extra='')=>`<path d="${d}" fill="${fill}" stroke="${st||'none'}" stroke-width="${sw}" stroke-linejoin="round" ${extra}/>`;
+const SH=(d,g='sh-h')=>`<path d="${d}" fill="url(#${g})"/>`;
+const DS=d=>`<path d="${d}" transform="translate(0,2.6)" fill="#000" opacity=".16"/>`;
+const FD=(d,st,op=.5)=>`<path d="${d}" fill="none" stroke="${st}" stroke-width=".9" stroke-linecap="round" opacity="${op}"/>`;
 const LN=(x1,y1,x2,y2,st,sw=1,extra='')=>`<line x1="${f1(x1)}" y1="${f1(y1)}" x2="${f1(x2)}" y2="${f1(y2)}" stroke="${st}" stroke-width="${sw}" stroke-linecap="round" ${extra}/>`;
 
 function geom(b){
@@ -140,7 +147,7 @@ function geom(b){
   const T=g.crotch-g.shY;g.chestY=g.shY+T*.28;g.waistY=g.shY+T*.62;g.hipY=g.shY+T*.9;
   g.sh=b.shoulder/2*K;g.ch=b.chest*.165*K;g.wa=b.waist*.168*K;g.hi=b.hip*.172*K;
   g.ua=(8.5+6*f)*K*s;g.fa=(7+4*f)*K*s;g.wr=(5+2*f)*K*s;
-  g.armX=g.sh-g.ua/2;g.armY=g.shY+g.ua*.45;g.AL=b.arm*K;
+  g.slope=5.2*K*s;g.armX=g.sh-g.ua/2;g.armY=g.shY+g.slope+g.ua*.3;g.AL=b.arm*K;
   const a=7*Math.PI/180,dx=Math.sin(a),dy=Math.cos(a);
   g.arm=t=>[g.armX+dx*g.AL*t,g.armY+dy*g.AL*t];
   g.armW=t=>t<.47?lerp(g.ua,g.fa*1.03,t/.47):lerp(g.fa,g.wr,(t-.47)/.53);
@@ -157,18 +164,18 @@ function geom(b){
 function drawBody(g,skin,face=true){
   const st=shade(skin,-.14),o=[];
   for(const s of[1,-1]){const L=[],R=[];g.LS.forEach(([y,x,w])=>{L.push([s*x-w/2,y]);R.push([s*x+w/2,y]);});
-    o.push(P(sp([...L,...R.reverse()]),skin,st,.8));
+    {const dd=sp([...L,...R.reverse()]);o.push(P(dd,skin,st,.8),SH(dd));}
     const X=u=>s*(g.anX+g.ftW*.06+u),a=g.anW,W=g.ftW;
     o.push(P(sp([[X(-a/2),g.ankY-3],[X(a/2),g.ankY-3],[X(W*.58),FLOOR-4],[X(W*.54),FLOOR,1],[X(-W*.44),FLOOR,1],[X(-W*.46),FLOOR-4]]),skin,st,.8));}
-  o.push(P(sp(mir([[0,g.shY-1.6*K],[g.neckW/2+.5*K,g.shY-1.2*K],[g.sh*.72,g.shY+.3*K],[g.sh-g.ua*.3,g.shY+g.ua*.3],[g.ch,g.chestY],[g.wa,g.waistY],[g.hi,g.hipY],[g.hi-.3*K,g.crotch,1]])),skin,st,.8));
+  {const dd=sp(mir([[0,g.shY-1.6*K],[g.neckW/2+.5*K,g.shY-1.2*K],[g.sh*.55,g.shY+g.slope*.42],[g.sh-g.ua*.35,g.shY+g.slope+g.ua*.1],[g.ch,g.chestY],[g.wa,g.waistY],[g.hi,g.hipY],[g.hi-.3*K,g.crotch,1]]));o.push(P(dd,skin,st,.8),SH(dd));}
   for(const s of[1,-1]){const ts=[0,.47,.55,1],L=[],R=[];ts.forEach(t=>{const[x,y]=g.arm(t),w=g.armW(t);L.push([s*x-w/2,y]);R.push([s*x+w/2,y]);});
     const[hx,hy]=g.arm(1);
     o.push(`<ellipse cx="${f1(s*(hx+1))}" cy="${f1(hy+g.hand*.42)}" rx="${f1(g.wr*.62)}" ry="${f1(g.hand*.5)}" fill="${skin}" stroke="${st}" stroke-width=".8"/>`);
-    o.push(P(sp([[s*g.arm(0)[0],g.armY-g.ua*.42],...R,...L.reverse()]),skin,st,.8));}
-  o.push(`<rect x="${f1(-g.neckW/2)}" y="${f1(g.chin-6)}" width="${f1(g.neckW)}" height="${f1(g.shY-g.chin+9)}" fill="${skin}"/>`);
+    {const dd=sp([[s*g.arm(0)[0],g.armY-g.ua*.42],...R,...L.reverse()]);o.push(P(dd,skin,st,.8),SH(dd));}}
+  o.push(`<rect x="${f1(-g.neckW/2)}" y="${f1(g.chin-6)}" width="${f1(g.neckW)}" height="${f1(g.shY-g.chin+9)}" fill="${skin}"/><rect x="${f1(-g.neckW/2)}" y="${f1(g.chin-6)}" width="${f1(g.neckW)}" height="${f1(g.shY-g.chin+9)}" fill="url(#sh-h)"/><rect x="${f1(-g.neckW/2)}" y="${f1(g.chin-2)}" width="${f1(g.neckW)}" height="${f1(g.shY-g.chin+4)}" fill="url(#sh-v)"/>`);
   const cy=g.top+g.headH/2;
   for(const s of[1,-1])o.push(`<ellipse cx="${f1(s*g.headW/2)}" cy="${f1(cy+2)}" rx="2.4" ry="4.5" fill="${skin}" stroke="${st}" stroke-width=".8"/>`);
-  o.push(`<ellipse cx="0" cy="${f1(cy)}" rx="${f1(g.headW/2)}" ry="${f1(g.headH/2)}" fill="${skin}" stroke="${st}" stroke-width=".8"/>`);
+  o.push(`<ellipse cx="0" cy="${f1(cy)}" rx="${f1(g.headW/2)}" ry="${f1(g.headH/2)}" fill="${skin}" stroke="${st}" stroke-width=".8"/><ellipse cx="0" cy="${f1(cy)}" rx="${f1(g.headW/2)}" ry="${f1(g.headH/2)}" fill="url(#sh-h)" opacity=".7"/>`);
   if(face){const ey=g.top+g.headH*.52,ex=g.headW*.2;
     o.push(`<circle cx="${f1(-ex)}" cy="${f1(ey)}" r="1.5" fill="#3a2f2a"/><circle cx="${f1(ex)}" cy="${f1(ey)}" r="1.5" fill="#3a2f2a"/>`);
     o.push(`<path d="M${f1(-ex*.7)},${f1(g.top+g.headH*.76)} Q0,${f1(g.top+g.headH*.82)} ${f1(ex*.7)},${f1(g.top+g.headH*.76)}" fill="none" stroke="#a0584e" stroke-width="1.3" stroke-linecap="round"/>`);}
@@ -186,28 +193,28 @@ function drawHair(g,style,c,hat){
 
 function sleevePath(g,s,len,extra,drop){
   const ts=[0,.25,.47,.62,.82].filter(t=>t<len-.04).concat([len]),L=[],R=[];
-  ts.forEach((t,i)=>{const[x,y]=g.arm(Math.min(t,1.03)),hw=g.armW(Math.min(t,1))/2+extra*.55*(1-.3*t),xx=x+drop*.3*(1-t),e=i===ts.length-1?1:0;
+  ts.forEach((t,i)=>{const[x,y]=g.arm(Math.min(t,1.03)),hw=g.armW(Math.min(t,1))/2+extra*.5*(1-.25*t)+.35*K,xx=x+drop*.3*(1-t),e=i===ts.length-1?1:0;
     L.push([s*(xx-hw),y,e]);R.push([s*(xx+hw),y,e]);});
   const[x0,y0]=g.arm(0);
-  return sp([[s*(x0+drop*.3),y0-(g.ua/2+extra*.55)*.85],...R,...L.reverse()]);}
+  return sp([[s*(x0+drop*.3-g.ua*.1),y0-(g.ua/2+extra*.5)*.6],...R,...L.reverse()]);}
 
 function drawTop(g,it,c,outer){
   const st=strokeOf(c),o=[],det=it.det||[],neck=it.neck||'crew',sl=it.slv||'none';
-  const fit={slim:.8,regular:2.2,over:5}[it.fit||'regular']*K*(outer?1.25:1)+(outer?1*K:0);
-  const drop=(it.fit==='over'?2.6*K:0)+(outer?.8*K:.2*K);
+  const fit={slim:.35,regular:1.1,over:3.2}[it.fit||'regular']*K*(outer?1.15:1)+(outer?.7*K:0);
+  const drop=(it.fit==='over'?2*K:0)+(outer?.5*K:.1*K);
   let nw=g.neckW/2+({crew:1.3,v:1.3,boat:4.2,collar:.7,camp:1.4,turtle:.3,hood:1.6,lapel:1.2,stand:.8}[neck]||1.3)*K;
   const ny=g.shY-1.3*K;
-  let sx=g.sh+drop*.6,sy=g.shY+.7*K+drop*.3;
-  if(sl==='none'){sx=g.sh-g.ua*.55+(outer?K:0);sy=g.shY+.5*K;}
+  let sx=g.sh+drop*.6,sy=g.shY+g.slope*.92+drop*.3-(outer?.5*K:0);
+  if(sl==='none'){sx=g.sh-g.ua*.55+(outer?K:0);sy=g.shY+g.slope*.62;}
   nw=Math.min(nw,sx-2*K);
   const apx=Math.max(g.ch,g.wa*.9)+fit,apy=g.chestY-1.2*K+drop*.4;
   let hemY={crop:g.waistY+1*K,regular:g.hipY+2.5*K,long:g.crotch+5*K,knee:g.kneeY-3*K,midi:g.cfY+2*K}[it.len||'regular'];
   if(it.dlen)hemY=g.waistY+(g.ankY-g.waistY)*it.dlen;
   const base=Math.max(g.hi,g.wa,g.ch*.95);
-  const waW=it.waisted?g.wa+fit*.6:(g.wa+base)/2+fit*.9,hipW=Math.max(g.hi,g.wa)+fit;
+  const waW=it.waisted||it.fit==='slim'?g.wa+fit*.8+.3*K:it.fit==='over'?(g.wa+base)/2+fit*.9:g.wa*.7+base*.3+fit,hipW=Math.max(g.hi,g.wa)+fit;
   let hemW=hemY<=g.hipY?lerp(waW,hipW,clamp((hemY-g.waistY)/(g.hipY-g.waistY),0,1)):hipW+(hemY-g.hipY)*(it.flare||.03);
   if(it.rib)hemW-=fit*.45;
-  const side=[[sx,sy,1]];
+  const side=[[(nw+sx)*.5,ny+(sy-ny)*.42],[sx,sy,sl==='none'?1:0]];
   if(sl==='none')side.push([apx-fit*.3-1.4*K,(sy+apy)/2]);
   side.push([apx,apy]);
   if(hemY>g.waistY+2.5*K)side.push([waW,g.waistY]);
@@ -221,9 +228,13 @@ function drawTop(g,it,c,outer){
     for(const s of[1,-1])bodies.push(sp([[s*nw,ny,1],...side.map(p=>[s*p[0],p[1],p[2]]),[s*gap*1.15,hemY,1],[s*gap,vY,1]]));}
   else{const dep={crew:2.4,v:it.vdeep||9,boat:1.1,collar:2,camp:5,turtle:1.5,hood:3.2,stand:1.4,lapel:6}[neck]*K;
     bodies.push(sp(mir([[0,ny+dep,neck==='v'||neck==='camp'?1:0],[nw,ny,1],...side])));}
-  sleeves.forEach(d=>o.push(P(d,c,st)));bodies.forEach(d=>o.push(P(d,c,st)));
+  sleeves.forEach(d=>o.push(P(d,c,st)));bodies.forEach(d=>o.push(DS(d)));bodies.forEach(d=>o.push(P(d,c,st)));
   const pat=det.includes('stripe')?(lum(c)>.5?'p-stripe-d':'p-stripe-l'):det.includes('plaid')?'p-plaid':det.includes('knit')?'p-knit':det.includes('quilt')?'p-quilt':det.includes('floral')?'p-floral':'';
   if(pat)[...sleeves,...bodies].forEach(d=>o.push(P(d,`url(#${pat})`,'none')));
+  sleeves.forEach(d=>o.push(SH(d)));bodies.forEach((d,i)=>o.push(SH(d,it.open?(i?'sh-l':'sh-r'):'sh-h')));
+  if(slen>=.5)for(const s of[1,-1]){const[x,y]=g.arm(.47),w=g.armW(.47)/2+fit*.3;o.push(FD(`M${f1(s*(x-w))},${f1(y-3)} q${f1(s*w*.9)},${f1(4)} ${f1(s*w*1.5)},${f1(-1)}`,st),FD(`M${f1(s*(x-w))},${f1(y+3.5)} q${f1(s*w*.7)},${f1(3)} ${f1(s*w*1.1)},${f1(0)}`,st,.35));}
+  if(slen)for(const s of[1,-1])o.push(FD(`M${f1(s*(apx-.3*K))},${f1(apy+1.5*K)} q${f1(-s*2.2*K)},${f1(1.6*K)} ${f1(-s*3.6*K)},${f1(.6*K)}`,st,.4));
+  if(hemY>g.waistY+2.5*K&&it.fit!=='slim'&&!det.includes('quilt'))for(const s of[1,-1])o.push(FD(`M${f1(s*(waW-.4*K))},${f1(g.waistY-1.5*K)} q${f1(-s*2.6*K)},${f1(2.2*K)} ${f1(-s*3*K)},${f1(5*K)}`,st,.35));
   const dk=shade(c,lum(c)<.22?.22:-.14),lt=lum(c)>.8?shade(c,-.3):'#fff';
   if(slen>=.7&&(det.includes('cuff')||it.rib))for(const s of[1,-1]){const[x,y]=g.arm(slen-.07),hw=g.armW(1)/2+fit*.4;o.push(LN(s*(x-hw),y,s*(x+hw),y,st,1));}
   if(it.rib)o.push(LN(-hemW+1,hemY-2.2*K,hemW-1,hemY-2.2*K,st,1));
@@ -251,28 +262,32 @@ function drawTop(g,it,c,outer){
 
 function drawBottom(g,it,c){
   const st=strokeOf(c),o=[],det=it.det||[],fit=it.fit||'regular';
-  const wy=g.waistY-(it.high?3*K:0),e={slim:.5,regular:1.6,tapered:1.8,wide:3.6,flare:1}[fit]*K||1.6*K;
+  const wy=g.waistY-(it.high?3*K:0),e={slim:.3,regular:.9,tapered:1.1,wide:2.6,flare:.7}[fit]*K||.9*K;
   const waW=g.wa+e*.5,lt=lum(c)>.8?shade(c,-.3):'#fff';
   if(it.kind==='skirt'){
     const hemY=wy+(g.ankY-wy)*it.len;
     let hemW=fit==='pencil'?Math.max(g.hi*.93,g.legAt(hemY).x+g.legAt(hemY).w/2+.8*K):g.hi+e+Math.max(0,hemY-g.hipY)*(it.flare==null?.3:it.flare);
-    const d=sp(mir([[0,wy],[waW,wy,1],[g.hi+e*.8,g.hipY],[hemW,hemY,1]]));o.push(P(d,c,st));
+    const d=sp(mir([[0,wy],[waW,wy,1],[g.hi+e*.8,g.hipY],[hemW,hemY,1]]));o.push(P(d,c,st),SH(d));if(fit!=='pencil'&&!det.includes('pleat'))for(const q of[-.55,.2,.6])o.push(FD(`M${f1(waW*q)},${f1(g.hipY)} L${f1(hemW*q*1.05)},${f1(hemY-1)}`,st,.3));
     if(det.includes('floral'))o.push(P(d,'url(#p-floral)','none'));if(det.includes('plaid'))o.push(P(d,'url(#p-plaid)','none'));
     if(det.includes('pleat'))for(let i=-4;i<=4;i++)if(i)o.push(LN(waW*i/5,wy+2*K,hemW*i/5,hemY-1,st,.8,'opacity=".7"'));
     if(det.includes('slit'))o.push(LN(hemW*.35,hemY-7*K,hemW*.35,hemY,st,1));
   }else{
     const endY=g.crotch+(g.ankY+1*K-g.crotch)*it.len,thWd=g.thW+e*1.3;
     const wAt=y=>{const t=clamp((y-g.crotch)/(g.ankY-g.crotch),0,1),b=g.legAt(y);
-      if(fit==='slim')return b.w+e*2+.6*K;if(fit==='tapered')return lerp(thWd,g.anW+3.6*K,t);if(fit==='wide')return lerp(thWd*1.05,thWd*1.12,t);
+      if(fit==='slim')return b.w+e*2+.5*K;if(fit==='tapered')return lerp(thWd,g.anW+3*K,t);if(fit==='wide')return lerp(thWd*1.02,thWd*.9,t);
       if(fit==='flare')return t<.5?lerp(thWd,g.knW+2.5*K,t/.5):lerp(g.knW+2.5*K,g.knW*2,(t-.5)/.5);
-      return lerp(thWd,g.knW+4*K,Math.min(1,t/.55));};
-    const edge=y=>{const b=g.legAt(y),w=wAt(y);let inn=Math.max(b.x-w/2,.35*K);return[inn,Math.max(inn+w,b.x+b.w/2+.4*K)];};
+      return lerp(thWd,g.knW+3*K,Math.min(1,t/.55));};
+    const mi=fit==='wide'?2.2*K:fit==='slim'?.4*K:1.1*K;
+    const edge=y=>{const b=g.legAt(y),w=wAt(y);let inn=Math.max(b.x-b.w/2-Math.min((w-b.w)/2,mi),.35*K);return[inn,Math.max(inn+w,b.x+b.w/2+.4*K)];};
     const ys=[g.crotch,g.kneeY,g.cfY,g.ankY].filter(y=>y<endY-5).concat([endY]),n=ys.length;
     for(const s of[1,-1]){const pts=[[0,wy,1],[s*waW,wy,1],[s*(g.hi+e*.8),g.hipY]];
       ys.forEach((y,i)=>pts.push([s*edge(y)[1],y,i===n-1?1:0]));
       for(let i=n-1;i>=0;i--)pts.push([s*edge(ys[i])[0],ys[i],i===n-1||i===0?1:0]);
       pts.push([0,g.crotch-1.5*K,1]);
-      const d=sp(pts);o.push(P(d,c,st));if(det.includes('plaid'))o.push(P(d,'url(#p-plaid)','none'));
+      const d=sp(pts);o.push(P(d,c,st));if(det.includes('plaid'))o.push(P(d,'url(#p-plaid)','none'));o.push(SH(d,s>0?'sh-r':'sh-l'));
+      o.push(FD(`M${f1(s*.8*K)},${f1(g.crotch+.5*K)} q${f1(s*3*K)},${f1(-.6*K)} ${f1(s*5.5*K)},${f1(-2.6*K)}`,st,.4),FD(`M${f1(s*.9*K)},${f1(g.crotch+2*K)} q${f1(s*2.6*K)},${f1(0)} ${f1(s*4.6*K)},${f1(-1.2*K)}`,st,.3));
+      if(endY>g.kneeY+3*K&&fit!=='wide'){const[ka,kb]=edge(g.kneeY);o.push(FD(`M${f1(s*(ka+1))},${f1(g.kneeY-1.5*K)} q${f1(s*(kb-ka)*.4)},${f1(1.8*K)} ${f1(s*(kb-ka)*.75)},${f1(.4*K)}`,st,.35));}
+      if(endY>g.ankY-2*K&&fit!=='slim'){const[ha,hb]=edge(endY);o.push(FD(`M${f1(s*(ha+1))},${f1(endY-2.4*K)} q${f1(s*(hb-ha)*.5)},${f1(1.5*K)} ${f1(s*(hb-ha-2))},${f1(-.4*K)}`,st,.35));}
       const mid=y=>{const[a,b]=edge(y);return s*(a+b)/2;};
       if(det.includes('crease'))o.push(LN(mid(g.crotch),g.hipY+2*K,mid(endY),endY-1,st,.8,'opacity=".6"'));
       if(det.includes('cargo')&&endY>g.kneeY){const y=lerp(g.crotch,g.kneeY,.35),x=edge(y+3*K)[1];o.push(`<rect x="${f1(s>0?x-5.2*K:-x+.4*K)}" y="${f1(y)}" width="${f1(4.8*K)}" height="${f1(6*K)}" rx="1.5" fill="${shade(c,-.07)}" stroke="${st}"/>`);}
@@ -300,7 +315,7 @@ function drawShoes(g,it,c){
     if(shaft)pts.push([X(aw/2+1.1*K),g.ankY+.5*K]);
     pts.push([X(W*.6),by-2.2*K],[X(W*.6),by,1],[X(-W*.46),by,1],[X(-W*.46),by-2.2*K]);
     if(shaft)pts.push([X(-aw/2-1.1*K),g.ankY+.5*K]);
-    o.push(P(sp(pts),c,st));
+    {const dd=sp(pts);o.push(P(dd,c,st),SH(dd,s>0?'sh-r':'sh-l'));}
     o.push(`<rect x="${f1(Math.min(X(-W*.48),X(W*.62)))}" y="${f1(by)}" width="${f1(W*1.1)}" height="${f1(sole)}" rx="2" fill="${sc}" stroke="${st}" stroke-width=".8"/>`);
     const det=it.det||[];
     if(det.includes('toecap'))o.push(`<path d="M${f1(X(-W*.4))},${f1(by)} Q${f1(X(W*.08))},${f1(by-4.4*K)} ${f1(X(W*.55))},${f1(by)} Z" fill="#f3f0e9" stroke="${st}" stroke-width=".7"/>`);
