@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="穿搭試衣間">
 <meta name="theme-color" content="#2f3a4a">
-<meta name="app-version" content="1.0">
+<meta name="app-version" content="1.1">
 <title>穿搭試衣間</title>
 <style>
 :root{--bg:#f4f1ec;--card:#fff;--ink:#23201d;--mute:#857b70;--line:#e5ddd2;--accent:#2f3a4a;--hot:#c8553d;--soft:#ece6dc;--ok:#2f8f5b}
@@ -472,6 +472,10 @@ A('acc','a_watch','手錶',['商務','極簡'],['黑','棕','銀'],{kind:'watch'
 A('acc','a_socks','長襪',['學院','日系','運動'],['白','灰','黑','紅'],{kind:'socks',h:12,view:'feet'},'')
 ];
 const ITEM=Object.fromEntries(CATALOG.map(i=>[i.id,i]));
+/* 性別：f=女裝、m=男裝、u=男女皆可 */
+const GF=['t_crop','t_blouse','b_dshorts','b_mini','b_pleat','b_maxi','b_pencil','d_lbd','d_floral','d_shirt','d_knit','s_pump','s_mary','h_beret','a_necklace'],GM=['a_tie','s_derby'];
+CATALOG.forEach(i=>i.g=GF.includes(i.id)?'f':GM.includes(i.id)?'m':'u');
+const fitG=(x,sex)=>x.g==='u'||x.g===sex;
 const E=(t,c)=>({t,c});
 const STYLEINFO={
 休閒:{d:'舒適、不費力的日常穿著。基本款加上乾淨的配色。',k:['素T、牛仔褲、小白鞋','全身不超過三色','合身但不緊'],pal:['白','丹寧','卡其','海軍藍'],look:{top:E('t_tee','白'),bottom:E('b_jeans','丹寧'),shoes:E('s_white','白'),outer:E('o_denim','淺丹寧'),acc:[E('a_cross','黑')]}},
@@ -486,6 +490,20 @@ const STYLEINFO={
 學院:{d:'Preppy：襯衫、針織背心、百褶裙或卡其褲、樂福鞋。',k:['襯衫＋針織疊穿','海軍藍、酒紅、米色','樂福鞋配白襪'],pal:['海軍藍','酒紅','米','卡其'],look:{top:E('t_oxford','白'),outer:E('o_vest','海軍藍'),bottom:E('b_chino','卡其'),shoes:E('s_loafer','棕'),acc:[E('a_glasses','黑'),E('a_socks','白')],tuck:1}},
 甜美:{d:'柔和色、裙裝與小細節。',k:['粉、米、淺藍','A字或碎花','貝雷帽、項鍊'],pal:['粉','米','淺藍','白'],look:{dress:E('d_floral','粉'),outer:E('o_cardigan','米'),shoes:E('s_mary','黑'),hat:E('h_beret','酒紅'),acc:[E('a_necklace','金')]}}
 };
+/* 女生版的風格示範；甜美另有男生版 */
+const LOOKF={
+休閒:{top:E('t_stripe','白'),bottom:E('b_jeans','淺丹寧'),shoes:E('s_white','白'),acc:[E('a_tote','米')]},
+街頭:{top:E('t_crop','黑'),outer:E('o_bomber','軍綠'),bottom:E('b_cargo','黑'),shoes:E('s_chunky','白'),hat:E('h_cap','黑')},
+商務:{top:E('t_blouse','白'),outer:E('o_blazer','海軍藍'),bottom:E('b_pencil','炭灰'),shoes:E('s_pump','黑'),acc:[E('a_watch','銀')],tuck:1},
+日系:{top:E('t_stripe','白'),outer:E('o_cardigan','米'),bottom:E('b_maxi','鼠尾草'),shoes:E('s_white','白'),hat:E('h_bucket','米'),acc:[E('a_tote','米')]},
+韓系:{dress:E('d_knit','米'),outer:E('o_coat','駝'),shoes:E('s_chelsea','黑')},
+運動:{top:E('t_crop','白'),outer:E('o_shell','粉'),bottom:E('b_jogger','灰'),shoes:E('s_run','白'),hat:E('h_cap','黑')},
+復古:{top:E('t_tee','白'),outer:E('o_denim','丹寧'),bottom:E('b_pleat','酒紅'),shoes:E('s_hi','白'),hat:E('h_beret','黑'),tuck:1},
+極簡:{dress:E('d_lbd','黑'),outer:E('o_blazer','米'),shoes:E('s_pump','黑'),acc:[E('a_necklace','銀')]},
+學院:{top:E('t_oxford','白'),outer:E('o_vest','海軍藍'),bottom:E('b_pleat','灰'),shoes:E('s_loafer','棕'),acc:[E('a_socks','白')],tuck:1}
+};
+const LOOKM={甜美:{top:E('t_oxford','粉'),outer:E('o_cardigan','米'),bottom:E('b_chino','米'),shoes:E('s_white','白')}};
+const INFOM={甜美:{d:'柔和色系與針織，溫柔乾淨的印象。',k:['粉、米、淺藍','開襟針織衫疊襯衫','淺色褲配小白鞋']}};
 /* 商店：市面上買得到的商品與台灣售價（2026/11 查詢；特價前的定價，實際以官網為準） */
 const SHOPDATE='2026/11';
 const S=(id,brand,name,price,t,c,src)=>({id,brand,name,price,t,c,src});
@@ -531,6 +549,7 @@ S('d2','Dr. Martens','1460 Rain 防水靴',4960,'s_work','黑'),
 S('c1','Converse','Chuck 70 高筒',2999,'s_hi','黑','END. 售價'),
 S('a1','adidas','Samba OG',3139,'s_white','白','END. 售價')
 ];
+SHOP.forEach(s=>s.g=/女裝|-女/.test(s.name)?'f':/男裝|-男/.test(s.name)?'m':ITEM[s.t].g);
 const SHOPMAP=Object.fromEntries(SHOP.map(s=>[s.id,s]));
 /* ===== App：帳號、雲端同步、畫面 ===== */
 const FB='https://molecule-match-default-rtdb.asia-southeast1.firebasedatabase.app/trips/outfit-app';
@@ -553,7 +572,7 @@ function sheet(html){$('#sheet').innerHTML=html?`<div class="sheet" data-act="sh
 /* --- 身形 --- */
 function est(sex,h,w){const bmi=w/Math.pow(h/100,2),m=sex==='m',r=v=>Math.round(v*2)/2;
   return{head:r(m?56+(h-170)*.06:55+(h-160)*.06),shoulder:r(h*(m?.255:.235)+(bmi-22)*.35),chest:r(m?h*.53+(bmi-22)*2.3:h*.52+(bmi-21)*2.2),waist:r(m?h*.45+(bmi-22)*2.6:h*.41+(bmi-21)*2.4),hip:r(m?h*.54+(bmi-22)*2:h*.57+(bmi-21)*2.1),arm:r(h*.335),leg:r(h*.455),foot:r(h*(m?.152:.147))};}
-function newUser(name){const sex='m',h=172,w=68;return{name,up:0,body:Object.assign({sex,h,w,skin:'#f0cdb0',hair:'short',hairColor:'#2b2420'},est(sex,h,w)),
+function newUser(name,sex){sex=sex==='f'?'f':'m';const h=sex==='f'?160:172,w=sex==='f'?52:68;return{name,up:0,body:Object.assign({sex,h,w,skin:'#f0cdb0',hair:sex==='f'?'long':'short',hairColor:'#2b2420'},est(sex,h,w)),
   outfit:{top:{t:'t_tee',c:'白',k:'t:t_tee'},bottom:{t:'b_jeans',c:'丹寧',k:'t:b_jeans'},shoes:{t:'s_white',c:'白',k:'t:s_white'},acc:[]},saved:[],closet:[],budget:0,ui:{slot:'top',src:'cat',style:'全部'}};}
 function fix(u){u.outfit=u.outfit||{};u.outfit.acc=u.outfit.acc||[];u.saved=u.saved||[];u.closet=u.closet||[];u.ui=u.ui||{slot:'top',src:'cat',style:'全部'};return u;}
 
@@ -566,13 +585,14 @@ function loginView(msg){U=null;UK=null;$('#nav').style.display='none';$('#userBt
   ${ks.length?`<h2 style="margin-top:20px">點名字直接登入</h2><div class="names">${ks.map(k=>`<button data-act="pick" data-k="${k}">${esc(DB.known[k].name)}<small>${DB.known[k].pin?'🔒 有密碼':'免密碼'}</small></button>`).join('')}</div>`:''}
   <h2 style="margin-top:20px">新增使用者</h2><div class="card">
   <label class="f">名字</label><input type="text" id="nName" maxlength="12" placeholder="例如：Roke" style="width:100%">
+  <label class="f">性別（決定推薦男裝或女裝，之後可改）</label><div class="bar"><label class="btn"><input type="radio" name="nSex" value="m" checked> 男性</label><label class="btn"><input type="radio" name="nSex" value="f"> 女性</label></div>
   <label class="f">四碼密碼（可不設）</label><input type="password" id="nPin" inputmode="numeric" maxlength="4" placeholder="留空＝不設密碼" style="width:100%">
   <button class="btn pri big" style="margin-top:12px" data-act="register">建立並登入</button></div>
   <div class="muted" id="lgMsg">${esc(msg||(online?'名單已從雲端載入，換裝置也看得到。':'正在連線雲端名單…'))}</div></div>`;}
-async function enter(k){const kn=DB.known[k];let local=DB.users[k]||null,remote=null;
+async function enter(k,sex){const kn=DB.known[k];let local=DB.users[k]||null,remote=null;
   try{const r=await fetch(FB+'/data/'+k+'.json');if(r.ok)remote=await r.json();}catch(e){}
   let u=remote&&(!local||(remote.up||0)>=(local.up||0))?remote:local;
-  if(!u)u=newUser(kn?kn.name:'我');U=fix(u);UK=k;DB.users[k]=U;DB.cur=k;saveLocal();
+  if(!u)u=newUser(kn?kn.name:'我',sex);U=fix(u);UK=k;DB.users[k]=U;DB.cur=k;saveLocal();
   cloud=remote?'已同步到雲端':(online?'已同步到雲端':'離線中，已存在這台裝置');
   if(!remote&&online)push();
   $('#nav').style.display='flex';const ub=$('#userBtn');ub.style.display='';ub.textContent='👤 '+U.name;
@@ -580,21 +600,24 @@ async function enter(k){const kn=DB.known[k];let local=DB.users[k]||null,remote=
 function askPin(k){sheet(`<h3>${esc(DB.known[k].name)} 的密碼<button data-act="close">×</button></h3>
   <input type="password" id="pinIn" inputmode="numeric" maxlength="4" placeholder="四碼密碼" style="width:100%;font-size:22px;text-align:center;letter-spacing:8px">
   <button class="btn pri big" style="margin-top:12px" data-act="pinok" data-k="${k}">登入</button>`);setTimeout(()=>{const i=$('#pinIn');if(i)i.focus();},50);}
-async function register(){const name=$('#nName').value.trim(),pin=$('#nPin').value.trim();
+async function register(){const name=$('#nName').value.trim(),pin=$('#nPin').value.trim(),sex=(document.querySelector('input[name=nSex]:checked')||{}).value||'m';
   if(!name)return toast('請輸入名字');if(pin&&!/^\d{4}$/.test(pin))return toast('密碼要四個數字，或留空');
   const k=keyOf(name);await fetchNames();
   if(DB.known[k]){if(DB.known[k].pin)return askPin(k);return enter(k);}
   DB.known[k]={name,pin:pin?hash(k+':'+pin):''};saveLocal();
   try{await fetch(FB+'/names/'+k+'.json',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,pin:DB.known[k].pin,up:Date.now()})});}catch(e){}
-  enter(k);}
+  enter(k,sex);}
 
 /* --- 穿搭工具 --- */
 const body=()=>U.body;
 let _g=null,_gk='';function G(){const k=JSON.stringify(U.body);if(k!==_gk){_g=geom(U.body);_gk=k;}return _g;}
 const DG=geom(Object.assign({h:172,w:66},est('m',172,66)));
+const gOK=x=>U.ui.allG||fitG(x,U.body.sex);
+const gName=()=>U.body.sex==='f'?'女裝':'男裝';
+function gChips(){return`<div class="chips"><button class="chip ${U.ui.allG?'':'on'}" data-act="allg" data-v="0">${gName()}推薦</button><button class="chip ${U.ui.allG?'on':''}" data-act="allg" data-v="1">全部（含${U.body.sex==='f'?'男裝':'女裝'}）</button></div>`;}
 function entries(slot,src){const st=U.ui.style;
-  if(src==='cat')return CATALOG.filter(i=>i.slot===slot&&(st==='全部'||i.st.includes(st))).map(i=>({k:'t:'+i.id,t:i.id,c:i.col[0],name:i.name}));
-  if(src==='shop')return SHOP.filter(s=>ITEM[s.t].slot===slot).map(s=>({k:'s:'+s.id,t:s.t,c:s.c,name:s.brand+' '+s.name,price:s.price,badge:s.brand}));
+  if(src==='cat')return CATALOG.filter(i=>i.slot===slot&&gOK(i)&&(st==='全部'||i.st.includes(st))).map(i=>({k:'t:'+i.id,t:i.id,c:i.col[0],name:i.name}));
+  if(src==='shop')return SHOP.filter(s=>ITEM[s.t].slot===slot&&gOK(s)).map(s=>({k:'s:'+s.id,t:s.t,c:s.c,name:s.brand+' '+s.name,price:s.price,badge:s.brand}));
   return U.closet.filter(c=>ITEM[c.base]&&ITEM[c.base].slot===slot&&c.status===(src==='wish'?'wish':'own')).map(c=>({k:'c:'+c.id,t:c.base,c:c.color,name:c.name,price:c.price,img:c.img,badge:c.brand}));}
 function wornList(){const o=U.outfit,r=[];for(const[s]of SLOTS){if(s==='acc')o.acc.forEach((a,i)=>r.push({slot:s,i,e:a}));else if(o[s])r.push({slot:s,e:o[s]});}return r.filter(x=>ITEM[x.e.t]);}
 function entryInfo(e){const k=e.k||'';if(k[0]==='c'){const c=U.closet.find(x=>'c:'+x.id===k);if(c)return{name:c.name,price:c.price,own:c.status==='own',wish:c.status==='wish'};}
@@ -615,8 +638,8 @@ function analysis(){const w=wornList();if(!w.length)return'還沒穿任何單品
 function costLine(){let own=0,buy=0,sum=0,cat=0,add=[];wornList().forEach(x=>{const i=entryInfo(x.e);if(i.cat)cat++;else if(i.own)own++;else{buy++;sum+=i.price||0;if(i.shop&&!i.inC)add.push(i.shop);}});
   if(!own&&!buy)return'';return`這套：已有 <b>${own}</b> 件`+(buy?`，要買 <b>${buy}</b> 件 <b>${nt(sum)}</b>`:'')+(cat?`，另有 ${cat} 件是款式示意`:'')+(add.length?` <button class="btn sm hot" data-act="wishall" data-ids="${add.join(',')}">全部加入想買</button>`:'');}
 function randomLook(){const st=U.ui.style==='全部'?STYLES[Math.floor(Math.random()*STYLES.length)]:U.ui.style;
-  const pick=s=>{const a=CATALOG.filter(i=>i.slot===s&&i.st.includes(st));const l=a.length?a:CATALOG.filter(i=>i.slot===s);const i=l[Math.floor(Math.random()*l.length)];return{t:i.id,c:i.col[Math.floor(Math.random()*i.col.length)],k:'t:'+i.id};};
-  const o={acc:[],tuck:Math.random()<.3};const hasD=CATALOG.some(i=>i.slot==='dress'&&i.st.includes(st));
+  const sx=U.body.sex,pick=s=>{const a=CATALOG.filter(i=>i.slot===s&&fitG(i,sx)&&i.st.includes(st));const l=a.length?a:CATALOG.filter(i=>i.slot===s&&fitG(i,sx));const i=l[Math.floor(Math.random()*l.length)];return{t:i.id,c:i.col[Math.floor(Math.random()*i.col.length)],k:'t:'+i.id};};
+  const o={acc:[],tuck:Math.random()<.3};const hasD=CATALOG.some(i=>i.slot==='dress'&&fitG(i,sx)&&i.st.includes(st));
   if(hasD&&Math.random()<.35)o.dress=pick('dress');else{o.top=pick('top');o.bottom=pick('bottom');}
   o.shoes=pick('shoes');if(Math.random()<.55)o.outer=pick('outer');if(Math.random()<.35)o.hat=pick('hat');if(Math.random()<.6)o.acc.push(pick('acc'));
   U.outfit=o;save();toast('隨機：'+st+'風');}
@@ -640,8 +663,9 @@ function vTry(){const ui=U.ui,o=U.outfit,slot=ui.slot,src=ui.src,list=entries(sl
   return stage(true)+`<div class="sum">${analysis()}${cl?'<br>'+cl:''}</div>
   <div class="chips">${[['closet','我的衣櫃 '+nOwn],['wish','想買 '+nWish],['cat','款式圖鑑'],['shop','商店']].map(([k,n])=>`<button class="chip s2 ${src===k?'on':''}" data-act="src" data-v="${k}">${n}</button>`).join('')}</div>
   <div class="chips">${SLOTS.map(([k,n])=>`<button class="chip ${slot===k?'on':''}" data-act="slot" data-v="${k}">${n}${k==='acc'?(o.acc.length?' ●':''):(o[k]?' ●':'')}</button>`).join('')}</div>
+  ${src==='cat'||src==='shop'?gChips():''}
   ${src==='cat'?`<div class="chips">${['全部',...STYLES].map(s=>`<button class="chip ${ui.style===s?'on':''}" data-act="style" data-v="${s}">${s}</button>`).join('')}</div>`:''}
-  <div class="rail">${list.length?list.map(en=>card(en,isOn(en),DG)).join(''):`<div class="muted" style="padding:14px 4px">${src==='closet'?'衣櫃裡還沒有這類衣服。到「衣櫃」分頁新增，或先用「款式圖鑑」試穿。':src==='wish'?'想買清單裡沒有這類單品。到「商店」逛逛。':'這個風格沒有這類單品，換一個風格看看。'}</div>`}</div>
+  <div class="rail">${list.length?list.map(en=>card(en,isOn(en),DG)).join(''):`<div class="muted" style="padding:14px 4px">${src==='closet'?'衣櫃裡還沒有這類衣服。到「衣櫃」分頁新增，或先用「款式圖鑑」試穿。':src==='wish'?'想買清單裡沒有這類單品。到「商店」逛逛。':`這裡沒有符合的${gName()}單品，換一個風格或按「全部」看看。`}</div>`}</div>
   ${cur&&ITEM[cur.t]?`<div class="card"><div class="muted" style="margin-bottom:6px">${esc(entryInfo(cur).name)} 的顏色：${colName(cur.c)}${ITEM[cur.t].tip?'｜'+ITEM[cur.t].tip:''}</div>${swatches(cur.c,'color',ITEM[cur.t].col)}</div>`:''}
   <h2>目前穿著</h2><div class="worn">${wornList().map(x=>`<span><i style="background:${col(x.e.c)}"></i>${esc(entryInfo(x.e).name)}<button data-act="off" data-s="${x.slot}" data-i="${x.i==null?'':x.i}">✕</button></span>`).join('')||'<span class="muted">（沒有）</span>'}</div>`;}
 function closetCard(c){const it=ITEM[c.base];if(!it)return'';const th=thumb(it,c.color,DG);
@@ -653,26 +677,26 @@ function vCloset(){const own=U.closet.filter(c=>c.status==='own'),wish=U.closet.
   ${closetView==='wish'?budgetBox():`<div class="muted" style="margin:8px 2px">${esc(U.name)} 的衣櫃。衣櫃總值 ${nt(own.reduce((a,c)=>a+(+c.price||0),0))}（有填價格的）。</div>`}
   <div class="grid" style="margin-top:8px">${list.map(closetCard).join('')}</div>
   ${list.length?'':`<div class="card muted">${closetView==='own'?'還沒有衣服。按「＋ 新增衣服」自己建立，或從下面的款式點一下快速加入。':'想買清單是空的。到「商店」分頁把想買的加進來。'}</div>`}
-  ${closetView==='own'?`<h2>快速加入：點一下就把這款放進我的衣櫃</h2><div class="chips">${SLOTS.map(([k,n])=>`<button class="chip ${addSlot===k?'on':''}" data-act="aslot" data-v="${k}">${n}</button>`).join('')}</div>
-  <div class="rail" style="flex-wrap:wrap">${CATALOG.filter(i=>i.slot===addSlot).map(i=>`<div class="it" data-act="quick" data-t="${i.id}"><span class="bd">＋</span>${thumb(i,i.col[0],DG)}<div class="n">${i.name}</div></div>`).join('')}</div>
+  ${closetView==='own'?`<h2>快速加入：點一下就把這款放進我的衣櫃</h2>${gChips()}<div class="chips">${SLOTS.map(([k,n])=>`<button class="chip ${addSlot===k?'on':''}" data-act="aslot" data-v="${k}">${n}</button>`).join('')}</div>
+  <div class="rail" style="flex-wrap:wrap">${CATALOG.filter(i=>i.slot===addSlot&&gOK(i)).map(i=>`<div class="it" data-act="quick" data-t="${i.id}"><span class="bd">＋</span>${thumb(i,i.col[0],DG)}<div class="n">${i.name}</div></div>`).join('')}</div>
   <div class="muted">加入後按「編輯」可改名稱、顏色、品牌、價格，並加上照片。</div>`:''}`;}
 function budgetBox(){const ws=wishSum(),b=+U.budget||0;
   return`<div class="sum">想買清單合計 <b>${nt(ws)}</b>${b?`｜預算 ${nt(b)}，${ws<=b?`還剩 <b style="color:var(--ok)">${nt(b-ws)}</b>`:`超出 <b>${nt(ws-b)}</b>`}`:''}
   <div class="bar" style="margin-top:6px"><span class="muted">購買預算</span><input type="number" id="budget" inputmode="numeric" value="${b||''}" placeholder="例如 5000" style="width:120px" data-chg="budget"></div></div>`;}
 function vShop(){const brands=['全部',...new Set(SHOP.map(s=>s.brand))];
-  const list=SHOP.filter(s=>(shopBrand==='全部'||s.brand===shopBrand)&&(shopSlot==='all'||ITEM[s.t].slot===shopSlot));
-  return budgetBox()+`<div class="chips">${brands.map(b=>`<button class="chip s2 ${shopBrand===b?'on':''}" data-act="sbrand" data-v="${esc(b)}">${esc(b)}</button>`).join('')}</div>
+  const list=SHOP.filter(s=>gOK(s)&&(shopBrand==='全部'||s.brand===shopBrand)&&(shopSlot==='all'||ITEM[s.t].slot===shopSlot));
+  return budgetBox()+gChips()+`<div class="chips">${brands.map(b=>`<button class="chip s2 ${shopBrand===b?'on':''}" data-act="sbrand" data-v="${esc(b)}">${esc(b)}</button>`).join('')}</div>
   <div class="chips">${[['all','全部'],...SLOTS].map(([k,n])=>`<button class="chip ${shopSlot===k?'on':''}" data-act="sslot" data-v="${k}">${n}</button>`).join('')}</div>
   <div class="grid">${list.map(s=>{const c=U.closet.find(x=>x.shop===s.id);
     return`<div class="g">${thumb(ITEM[s.t],s.c,DG)}<div class="br">${esc(s.brand)}</div><div class="nm">${esc(s.name)}</div><div class="pr">${nt(s.price)}${s.src?` <span class="tag">${s.src}</span>`:''}</div>
     <div class="row"><button class="btn sm pri" data-act="trys" data-id="${s.id}">試穿</button>${c?`<span class="tag" style="align-self:center">${c.status==='own'?'已在衣櫃':'已在想買'}</span>`:`<button class="btn sm hot" data-act="wish" data-id="${s.id}">＋想買</button><button class="btn sm" data-act="have" data-id="${s.id}">我有</button>`}
-    <a class="btn sm" target="_blank" rel="noopener" href="${gUrl(s.brand+' '+s.name+' 台灣')}">查官網</a></div></div>`;}).join('')}</div>
+    <a class="btn sm" target="_blank" rel="noopener" href="${gUrl(s.brand+' '+s.name+' 台灣')}">查官網</a></div></div>`;}).join('')||`<div class="card muted">這個篩選下沒有${gName()}商品，換個品牌或按「全部」。</div>`}</div>
   <div class="muted" style="margin-top:10px">價格是 ${SHOPDATE} 查到的台灣售價（未含限時特價；標「END. 售價」的是 END. 台灣站的價格、「特價」是當時的特價）。顏色與庫存會變動，下單前請按「查官網」確認。圖是依款式畫的示意圖，不是商品照。</div>`;}
 function vIdea(){const g=G();
   return`<h2>我收藏的穿搭</h2>${U.saved.length?`<div class="grid">${U.saved.map((s,i)=>`<div class="g look">${figure(U.body,s.o,{g,cls:'lk'})}<input type="text" value="${esc(s.name)}" data-chg="lname" data-i="${i}" style="font-size:13.5px;padding:5px 7px"><div class="row"><button class="btn sm pri" data-act="load" data-i="${i}">穿上</button><button class="btn sm del" data-act="dellook" data-i="${i}">刪除</button></div></div>`).join('')}</div>`:'<div class="card muted">在「試穿」按 💾 收藏，就會出現在這裡。</div>'}
-  <h2>風格圖鑑</h2><div class="grid">${STYLES.map(s=>{const f=STYLEINFO[s];return`<div class="g look">${figure(U.body,presetLook(s),{g,cls:'lk'})}<div class="nm">${s}</div><div class="muted">${f.d}</div><div class="muted">${f.k.map(k=>'・'+k).join('<br>')}</div><div class="pal">${f.pal.map(c=>`<i style="background:${COL[c]}" title="${c}"></i>`).join('')}</div>
+  <h2>風格圖鑑（${U.body.sex==='f'?'女生':'男生'}版）</h2><div class="grid">${STYLES.map(s=>{const f=Object.assign({},STYLEINFO[s],U.body.sex==='m'?INFOM[s]:null);return`<div class="g look">${figure(U.body,presetLook(s),{g,cls:'lk'})}<div class="nm">${s}</div><div class="muted">${f.d}</div><div class="muted">${f.k.map(k=>'・'+k).join('<br>')}</div><div class="pal">${f.pal.map(c=>`<i style="background:${COL[c]}" title="${c}"></i>`).join('')}</div>
   <div class="row"><button class="btn sm pri" data-act="preset" data-s="${s}">試穿這套</button><button class="btn sm" data-act="browse" data-s="${s}">看單品</button></div></div>`;}).join('')}</div>`;}
-function presetLook(s){const l=STYLEINFO[s].look,o={acc:[],tuck:!!l.tuck};for(const k of['top','outer','bottom','dress','shoes','hat'])if(l[k])o[k]={t:l[k].t,c:l[k].c,k:'t:'+l[k].t};(l.acc||[]).forEach(a=>o.acc.push({t:a.t,c:a.c,k:'t:'+a.t}));return o;}
+function presetLook(s,sex){sex=sex||(U?U.body.sex:'m');const l=(sex==='f'?LOOKF[s]:LOOKM[s])||STYLEINFO[s].look,o={acc:[],tuck:!!l.tuck};for(const k of['top','outer','bottom','dress','shoes','hat'])if(l[k])o[k]={t:l[k].t,c:l[k].c,k:'t:'+l[k].t};(l.acc||[]).forEach(a=>o.acc.push({t:a.t,c:a.c,k:'t:'+a.t}));return o;}
 const FIELDS=[['h','身高',90,210,'cm'],['w','體重',12,150,'kg'],['head','頭圍',44,66,'cm'],['shoulder','肩寬',24,60,'cm'],['chest','胸圍',50,150,'cm'],['waist','腰圍',40,150,'cm'],['hip','臀圍',50,160,'cm'],['arm','手長',28,80,'cm'],['leg','腿長',35,115,'cm'],['foot','腳長',13,33,'cm']];
 function sizeBox(){const b=U.body,bmi=b.w/Math.pow(b.h/100,2),m=b.sex==='m';
   const ts=m?[[84,'XS'],[90,'S'],[96,'M'],[104,'L'],[112,'XL'],[999,'XXL']]:[[78,'XS'],[84,'S'],[90,'M'],[97,'L'],[104,'XL'],[999,'XXL']];
@@ -684,7 +708,8 @@ function sizeBox(){const b=U.body,bmi=b.w/Math.pow(b.h/100,2),m=b.sex==='m';
   return`<div class="kv"><b>上衣參考</b><span>${top}（胸圍 ${b.chest} cm）</span><b>褲子腰圍</b><span>約 ${Math.round(b.waist/2.54)} 吋</span><b>鞋子</b><span>${jp.toFixed(1)} cm（約 EU ${eu}）</span><b>帽圍</b><span>${hat}（${b.head} cm）</span><b>比例</b><span>約 ${hr.toFixed(1)} 頭身，腿長佔身高 ${(lr*100).toFixed(0)}%</span><b>BMI</b><span>${bmi.toFixed(1)}</span></div>
   <div class="muted" style="margin-top:8px">${tips.map(t=>'・'+t).join('<br>')||'・比例均衡，大部分版型都適合。'}<br>尺碼各品牌不同，僅供參考。</div>`;}
 function vMe(){const b=U.body,kn=DB.known[UK]||{};
-  return stage(true)+`<div class="card"><div class="bar"><b>身形設定</b><div class="chips r" style="padding:0"><button class="chip ${b.sex==='m'?'on':''}" data-act="sex" data-v="m">男版</button><button class="chip ${b.sex==='f'?'on':''}" data-act="sex" data-v="f">女版</button></div></div>
+  return stage(true)+`<div class="card"><div class="bar"><b>性別</b><div class="chips r" style="padding:0"><button class="chip s2 ${b.sex==='m'?'on':''}" data-act="sex" data-v="m">男性</button><button class="chip s2 ${b.sex==='f'?'on':''}" data-act="sex" data-v="f">女性</button></div></div>
+  <div class="muted" style="margin-bottom:6px">目前推薦${b.sex==='f'?'女裝':'男裝'}：款式圖鑑、商店、隨機搭配與風格示範都會跟著性別走。</div><b>身形設定</b>
   ${FIELDS.map(([k,n,mn,mx,u])=>`<div class="fld"><span>${n}</span><input type="range" min="${mn}" max="${mx}" step=".5" value="${b[k]}" data-body="${k}"><input type="number" min="${mn}" max="${mx}" step=".5" value="${b[k]}" data-body="${k}" inputmode="decimal"></div>`).join('')}
   <div class="muted">手長＝肩膀到手腕；腿長＝胯下到地面；腳長＝腳跟到最長腳趾。</div>
   <button class="btn" style="margin-top:8px" data-act="est">依身高體重估算其他數據</button></div>
@@ -761,7 +786,8 @@ document.addEventListener('click',async ev=>{
   else if(a==='dellook'){U.saved.splice(+d.i,1);save();}
   else if(a==='preset'){U.outfit=presetLook(d.s);save();return go('try');}
   else if(a==='browse'){U.ui.style=d.s;U.ui.src='cat';save();return go('try');}
-  else if(a==='sex'){U.body.sex=d.v;Object.assign(U.body,est(d.v,U.body.h,U.body.w));save();}
+  else if(a==='sex'){if(U.body.sex!==d.v){const f=d.v==='f',b=U.body,dh=f?172:160,dw=f?68:52,e0=est(b.sex,dh,dw),untouched=b.h===dh&&b.w===dw&&Object.keys(e0).every(k=>b[k]===e0[k]);b.sex=d.v;if(untouched){b.h=f?160:172;b.w=f?52:68;Object.assign(b,est(d.v,b.h,b.w));}if(f&&U.body.hair==='short')U.body.hair='long';if(!f&&(U.body.hair==='long'||U.body.hair==='bob'||U.body.hair==='bun'))U.body.hair='short';U.ui.allG=false;save();toast('已改為'+(f?'女性，推薦女裝':'男性，推薦男裝')+(untouched?'':'；身形數據保留不變'));}}
+  else if(a==='allg'){U.ui.allG=d.v==='1';save();}
   else if(a==='est'){Object.assign(U.body,est(U.body.sex,U.body.h,U.body.w));save();toast('已依身高體重估算');}
   else if(a==='skin'){U.body.skin=d.c;save();}
   else if(a==='hair'){U.body.hair=d.v;save();}
