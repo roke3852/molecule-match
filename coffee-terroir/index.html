@@ -109,6 +109,40 @@ canvas{width:100%;height:230px;display:block}
 .contrib{display:grid;grid-template-columns:auto 1fr;gap:4px 8px;font-size:13.5px;margin-top:6px}
 .contrib i{width:10px;height:10px;border-radius:3px;margin-top:6px;display:block}
 .msl{display:grid;grid-template-columns:7.4em 1fr 2.6em;gap:6px;align-items:center;font-size:13px}
+.ctop{display:grid;grid-template-columns:1fr 84px;gap:6px;align-items:center}
+.jarwrap{text-align:center;font-size:11.5px;color:var(--mut)}
+.jar{position:relative;height:170px;border:3px solid #b9a88f;border-top:0;border-radius:0 0 16px 16px;background:#fffdf8;overflow:hidden;margin-bottom:4px}
+.jar.shake{animation:jsh .25s}
+@keyframes jsh{30%{transform:translateY(2px) rotate(-1deg)}70%{transform:translateY(1px) rotate(1deg)}}
+.jarfill{position:absolute;left:0;right:0;bottom:0;display:flex;flex-direction:column-reverse;transition:height .25s}
+.jarfill i{display:block;flex:none;transition:height .25s;background-image:radial-gradient(ellipse at 30% 40%,#fff3 0 28%,transparent 30%),radial-gradient(ellipse at 75% 65%,#0002 0 26%,transparent 28%);background-size:13px 9px}
+.drop{position:absolute;top:-8px;width:9px;height:6px;border-radius:50%;animation:fall .45s ease-in forwards}
+@keyframes fall{to{transform:translateY(var(--d)) rotate(200deg);opacity:.9}}
+.shelf{display:grid;grid-template-columns:repeat(4,1fr);gap:8px 6px;padding:8px 6px 10px;background:linear-gradient(#e9dcc8,#e9dcc8) bottom/100% 6px no-repeat;border-radius:8px}
+@media(max-width:360px){.shelf{grid-template-columns:repeat(3,1fr)}}
+.bag{position:relative}
+.bag .pour{width:100%;border:1px solid #c9b48e;background:linear-gradient(#f3e6cc,#e6d3ae);border-radius:6px 6px 10px 10px;padding:13px 2px 5px;font:inherit;font-size:11.5px;line-height:1.25;color:var(--ink);cursor:pointer;touch-action:manipulation;user-select:none;-webkit-user-select:none;transition:transform .15s;transform-origin:bottom right}
+.bag .pour::before{content:"";position:absolute;left:0;right:0;top:0;height:9px;background:#d8c39a;border-radius:6px 6px 0 0;border-bottom:1px dashed #b39d74}
+.bag .pour b{display:block;height:22px;border-radius:4px;margin:2px 5px 3px;color:#fff;font-size:11px;line-height:22px}
+.bag .pour small{color:var(--mut);font-size:10.5px}
+.bag.tilt .pour{transform:rotate(18deg) translateY(-3px)}
+.bag.off .pour{opacity:.35}
+.bag .cnt{position:absolute;top:-6px;left:-4px;min-width:20px;height:20px;border-radius:10px;background:var(--cherry);color:#fff;font-size:11px;line-height:20px;text-align:center;padding:0 4px;z-index:1}
+.bag .back{position:absolute;top:-6px;right:-4px;width:22px;height:22px;border-radius:50%;border:0;background:var(--ink);color:#fff;font-size:15px;line-height:20px;cursor:pointer;z-index:1}
+.roaster{display:flex;flex-direction:column;align-items:center;margin:10px 0 4px}
+.drum{width:130px;height:130px;border-radius:50%;border:8px solid #5b5550;background:#2c2623;position:relative;overflow:hidden;box-shadow:inset 0 0 18px #000}
+.spin{position:absolute;inset:0}
+.spin.on{animation:spin 1.4s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.spin i{position:absolute;width:15px;height:10px;border-radius:50%;box-shadow:inset -2px -2px 3px #0004}
+.flames{height:18px;display:flex;gap:5px;margin-top:3px;visibility:hidden}
+.flames.on{visibility:visible}
+.flames i{width:9px;height:16px;background:linear-gradient(#ffd24a,#e2571e);border-radius:50% 50% 30% 30%;animation:fl .3s infinite alternate}
+.flames i:nth-child(2n){animation-delay:.12s}
+@keyframes fl{to{transform:scaleY(.55) translateY(3px);opacity:.75}}
+.rbar{position:relative;height:22px;border-radius:11px;margin:8px 0 0;background:linear-gradient(90deg,#8a9a5b 0%,#d9b25f 10%,#b0703e 17%,#6e4224 58%,#281a12 100%);overflow:hidden}
+.rbar i{position:absolute;top:0;bottom:0;left:0;width:0;border-right:3px solid #fff;box-shadow:2px 0 4px #0006;background:#fff2}
+.rbar span{position:absolute;top:3px;font-size:10.5px;color:#fff;transform:translateX(-50%);text-shadow:0 1px 2px #000}
 .win{text-align:center;padding:26px 14px}.win .st{font-size:38px;color:var(--honey);letter-spacing:4px}
 </style>
 </head>
@@ -188,16 +222,26 @@ canvas{width:100%;height:230px;display:block}
   </div>
 </div>
 <div id="bChal" style="display:none">
-  <h2 class="vt">配方挑戰關卡</h2><p class="vs">客人點單，你來調：用比例與焙度，讓你的配方貼近目標風味</p>
+  <h2 class="vt">配方挑戰關卡</h2><p class="vs">客人點單，你來配：從架上挑豆、倒進配豆桶，再拿去烘，自己決定何時下豆</p>
   <div id="cMenu"><div class="lvgrid" id="cLv"></div>
     <div class="note">虛線是客人要的風味，實線是你的配方。相似度 70 分過關、80 分兩星、90 分三星。前 7 關可以即時看到自己的雷達圖；第 8 關起是<b>盲調</b>：送出後才看得到結果，而且次數有限。過關後會公布參考配方。</div></div>
   <div id="cPlay" style="display:none">
     <div class="hud"><button class="btn sec" id="cBack">← 選關</button><span id="cHud"></span></div>
     <div class="rpanel"><h3 id="cName"></h3><div id="cStory" style="font-size:14px;margin:4px 0"></div><div class="tags" id="cRules"></div>
-      <div id="cRadar"></div><div id="cInfo" style="font-size:13px;text-align:center;color:var(--mut)"></div>
-      <div id="cSliders" style="margin-top:8px"></div>
-      <label style="font-size:13px;display:block;margin-top:8px">焙度 <b id="cRoastV"></b></label><input type="range" id="cRoast" min="0" max="100" step="5" value="50">
-      <div class="row" style="margin-top:10px"><button class="btn red" id="cSubmit">送出配方</button><span id="cMsg" style="font-size:13px;color:var(--cherry)"></span></div>
+      <div class="ctop"><div id="cRadar"></div>
+        <div class="jarwrap"><div class="jar" id="cJar"><div class="jarfill" id="cFill"></div><div id="cDrops"></div></div><div id="cJarTxt"></div></div></div>
+      <div id="cInfo" style="font-size:13px;text-align:center;color:var(--mut)"></div>
+      <div id="cStage1">
+        <div style="font-size:12.5px;color:var(--mut);margin:8px 0 4px">點豆袋倒一勺（50 克），按住可以連續倒；按「−」倒回一勺。裝滿 1 公斤就能拿去烘。</div>
+        <div class="shelf" id="cShelf"></div>
+        <div class="row" style="margin-top:10px"><button class="btn red" id="cToRoast">拿去烘 →</button><button class="btn sec" id="cEmpty">全部倒回</button><span id="cMsg" style="font-size:13px;color:var(--cherry)"></span></div>
+      </div>
+      <div id="cStage2" style="display:none">
+        <div class="roaster"><div class="drum"><div class="spin" id="cSpin"></div></div><div class="flames" id="cFlames"><i></i><i></i><i></i><i></i><i></i></div></div>
+        <div class="rbar"><i id="cRFill"></i><span style="left:20%">淺</span><span style="left:36%">中淺</span><span style="left:52%">中</span><span style="left:68%">中深</span><span style="left:88%">深</span></div>
+        <div id="cRTxt" style="text-align:center;font-family:'Noto Serif TC',serif;font-size:16px;font-weight:600;margin:6px 0"></div>
+        <div class="row" style="justify-content:center"><button class="btn" id="cFire">點火開烘</button><button class="btn red" id="cDrop" disabled>下豆！</button><button class="btn sec" id="cBackMix">← 重新配豆</button></div>
+      </div>
     </div>
     <div class="rpanel result" id="cRes" style="display:none"></div>
   </div>
@@ -672,58 +716,91 @@ const CH=[
  {n:'盲調：精品店季節配方',story:'精品咖啡店要一支中淺焙季節配方：甜感、花果香與乾淨度都要，成本每公斤 500 元以內。最多 4 支，3 次機會。',ref:{mix:{'哥倫比亞':40,'哥斯大黎加':20,'衣索比亞水洗':25,'巴西':15},roast:30},budget:500,blind:1,tries:3,max:4},
  {n:'冠軍賽：競賽配方',story:'配方大賽決賽！評審要花香、明亮酸質，還要有酒香般的層次。成本每公斤 750 元以內、最多 4 支，只有 2 次機會。',ref:{mix:{'衣索比亞水洗':35,'肯亞':20,'哥斯大黎加':25,'葉門':20},roast:20},budget:750,blind:1,tries:2,max:4},
 ];
-const C={lv:0,mix:{},left:0,done:false,prog:store.get('ct-blend',{})};
+const SCOOPS=20; // 20 勺 × 50 克 = 1 公斤
+const C={lv:0,mix:{},left:0,rt:-20,firing:false,prog:store.get('ct-blend',{})};
 function radar2(tg,mine){const R=95,cx=130,cy=120,n=6,pt=(i,val)=>{const a=-Math.PI/2+i*2*Math.PI/n;return[cx+Math.cos(a)*R*val/5,cy+Math.sin(a)*R*val/5]};
   const poly=v=>v.map((x,i)=>pt(i,x).join(',')).join(' ');let g='';
   for(let l=1;l<=5;l++)g+=`<polygon points="${poly([l,l,l,l,l,l])}" fill="none" stroke="#e2d5c3"/>`;
-  BDIM.forEach((d,i)=>{const[x,y]=pt(i,5);g+=`<line x1="${cx}" y1="${cy}" x2="${x}" y2="${y}" stroke="#e2d5c3"/>`;const[lx,ly]=pt(i,6.15);g+=`<text x="${lx}" y="${ly+4}" text-anchor="middle" font-size="11.5" fill="#7a6656">${d}</text>`});
+  BDIM.forEach((d,i)=>{const[x,y]=pt(i,5);g+=`<line x1="${cx}" y1="${cy}" x2="${x}" y2="${y}" stroke="#e2d5c3"/>`;const[lx,ly]=pt(i,6.15);g+=`<text x="${lx}" y="${ly+4}" text-anchor="middle" font-size="12.5" fill="#7a6656">${d}</text>`});
   g+=`<polygon points="${poly(tg)}" fill="#3e6f8e22" stroke="#3e6f8e" stroke-width="2" stroke-dasharray="6 4"/>`;
   if(mine)g+=`<polygon points="${poly(mine)}" fill="#b3382c44" stroke="#b3382c" stroke-width="2"/>`;
-  return `<svg class="radar" viewBox="0 -12 260 262">${g}</svg>`}
+  return `<svg class="radar" viewBox="-22 -12 304 262">${g}</svg>`}
 const cTot=()=>Object.values(C.mix).reduce((a,b)=>a+b,0);
 const cCost=()=>{const t=cTot();return t?Math.round(Object.entries(C.mix).reduce((a,[k,w])=>a+BCOST[k]*w,0)/t):0};
 const cCount=()=>Object.values(C.mix).filter(x=>x>0).length;
 const cScore=(v,t)=>Math.max(0,Math.round(100-v.reduce((a,x,i)=>a+Math.abs(x-t[i]),0)/6*40));
+function roastRGB(t){const st=[[-20,[138,154,91]],[-8,[217,178,95]],[0,[176,112,62]],[50,[110,66,36]],[100,[40,26,18]]];
+  for(let i=1;i<st.length;i++)if(t<=st[i][0]){const k=Math.max(0,(t-st[i-1][0])/(st[i][0]-st[i-1][0]));return 'rgb('+st[i][1].map((c,j)=>Math.round(lerp(st[i-1][1][j],c,k))).join(',')+')'}
+  return 'rgb(40,26,18)'}
 function drawCMenu(){$('#cLv').innerHTML=CH.map((c,i)=>{const open=i===0||C.prog[i];const st=C.prog[i+1]||0;return `<button class="lv" data-n="${i}" ${open?'':'disabled'}><span><b>${i+1}</b><br><small>${'★'.repeat(st)}${'☆'.repeat(3-st)}</small></span></button>`}).join('')}
-function startC(i){const c=CH[i];C.lv=i;C.mix={};C.done=false;C.left=c.tries||Infinity;C.target=blendVec(c.ref.mix,c.ref.roast);
+function startC(i){const c=CH[i];C.lv=i;C.mix={};C.shown=null;C.left=c.tries||Infinity;C.target=blendVec(c.ref.mix,c.ref.roast);
   const beans=(c.beans||Object.keys(BCOMP)).filter(k=>!(c.ban||[]).includes(k));beans.forEach(k=>C.mix[k]=0);
   $('#cName').textContent=`第 ${i+1} 關　${c.n}`;$('#cStory').textContent=c.story;
   const r=[];if(c.blind)r.push('盲調');if(c.max)r.push(`最多 ${c.max} 支豆`);if(c.need)r.push(`必須含${c.need}`);if(c.ban)r.push(`不可用${c.ban.join('、')}`);if(c.budget)r.push(`成本 ≤ ${c.budget} 元/公斤`);
   $('#cRules').innerHTML=r.map(t=>`<span class="tag r">${t}</span>`).join('');
-  $('#cSliders').innerHTML=beans.map(k=>`<div class="msl"><span><i style="display:inline-block;width:9px;height:9px;border-radius:2px;background:${BCOMP[k].c};margin-right:4px"></i>${k}</span><input type="range" min="0" max="100" step="5" value="0" data-k="${k}"><b data-v="${k}"></b></div>`).join('');
-  $('#cRoast').value=50;$('#cRes').style.display='none';$('#cMsg').textContent='';$('#cSubmit').disabled=false;
-  $('#cMenu').style.display='none';$('#cPlay').style.display='block';drawC();window.scrollTo(0,0)}
-function drawC(){const c=CH[C.lv],t=cTot(),r=+$('#cRoast').value;
-  document.querySelectorAll('#cSliders b').forEach(x=>x.textContent=t?Math.round(C.mix[x.dataset.v]/t*100)+'%':'0%');
-  $('#cRoastV').textContent=roastName(r);
-  const show=t&&(!c.blind||C.shown);$('#cRadar').innerHTML=radar2(C.target,show?(c.blind?C.shown:blendVec(C.mix,r)):null);
-  const cost=cCost(),n=cCount();
-  $('#cInfo').innerHTML=`<span style="color:#3e6f8e">┅ 目標</span>　<span style="color:#b3382c">━ 你的配方${c.blind?'（上次送出）':''}</span><br>豆數 <b style="color:${c.max&&n>c.max?'#b3382c':'inherit'}">${n}</b>${c.max?' / '+c.max:''}　成本 <b style="color:${c.budget&&cost>c.budget?'#b3382c':'inherit'}">${cost}</b> 元/公斤${c.budget?' / '+c.budget:''}`;
-  $('#cHud').textContent=c.tries?`剩 ${C.left} 次機會`:'不限次數'}
-$('#cSliders').oninput=e=>{if(e.target.dataset.k){C.mix[e.target.dataset.k]=+e.target.value;drawC()}};
-$('#cRoast').oninput=drawC;
-$('#cSubmit').onclick=()=>{const c=CH[C.lv],msg=$('#cMsg');
-  if(!cTot()){msg.textContent='至少加入一支豆子';return}
-  if(c.max&&cCount()>c.max){msg.textContent=`最多只能用 ${c.max} 支豆子`;return}
+  $('#cShelf').innerHTML=beans.map(k=>`<div class="bag" data-bag="${k}"><span class="cnt" style="display:none"></span><button class="back" data-back="${k}" style="display:none" aria-label="倒回一勺">−</button><button class="pour" data-k="${k}"><b style="background:${BCOMP[k].c}">${k.replace('衣索比亞','衣索')}</b><small>${BCOST[k]} 元/kg</small></button></div>`).join('');
+  $('#cRes').style.display='none';$('#cMenu').style.display='none';$('#cPlay').style.display='block';toStage(1);window.scrollTo(0,0)}
+function toStage(n){clearInterval(C.timer);C.firing=false;C.rt=-20;$('#cStage1').style.display=n===1?'block':'none';$('#cStage2').style.display=n===2?'block':'none';$('#cMsg').textContent='';
+  if(n===2){const sp=$('#cSpin');let h='';for(let i=0;i<26;i++){const a=Math.random()*6.28,r=8+Math.random()*42;h+=`<i style="left:${50+Math.cos(a)*r-6}%;top:${50+Math.sin(a)*r-4}%;transform:rotate(${Math.random()*180}deg)"></i>`}
+    sp.innerHTML=h;sp.classList.remove('on');$('#cFlames').classList.remove('on');$('#cFire').disabled=false;$('#cDrop').disabled=true;$('#cBackMix').disabled=false;drawRoastStage()}
+  drawC()}
+function drawC(){const c=CH[C.lv],t=cTot(),n=cCount(),cost=cCost(),roasting=$('#cStage2').style.display!=='none';
+  let mine=null;if(t){if(c.blind)mine=C.shown;else mine=blendVec(C.mix,roasting?Math.max(0,C.rt):50)}
+  $('#cRadar').innerHTML=radar2(C.target,mine);
+  $('#cFill').style.height=(t/SCOOPS*100)+'%';
+  $('#cFill').innerHTML=Object.entries(C.mix).filter(([,w])=>w>0).map(([k,w])=>`<i style="height:${w/t*100}%;background-color:${roasting?roastRGB(C.rt):BCOMP[k].c}"></i>`).join('');
+  $('#cJarTxt').innerHTML=`<b style="color:var(--ink)">${t*50}</b> / 1000 克`;
+  document.querySelectorAll('#cShelf .bag').forEach(b=>{const k=b.dataset.bag,w=C.mix[k];b.querySelector('.cnt').style.display=b.querySelector('.back').style.display=w?'block':'none';b.querySelector('.cnt').textContent=w*5+'%';
+    b.classList.toggle('off',!w&&(t>=SCOOPS||(c.max&&n>=c.max)))});
+  const who=c.blind?'你的配方（上次送出）':roasting?'你的配方':'你的配方（以中焙預覽）';
+  $('#cInfo').innerHTML=`<span style="color:#3e6f8e">┅ 目標</span>　<span style="color:#b3382c">━ ${who}</span><br>豆數 <b>${n}</b>${c.max?' / '+c.max:''}　成本 <b style="color:${c.budget&&cost>c.budget?'#b3382c':'inherit'}">${cost}</b> 元/公斤${c.budget?' / '+c.budget:''}`;
+  $('#cHud').textContent=c.tries?`剩 ${C.left} 次機會`:'不限次數';
+  $('#cToRoast').disabled=t<SCOOPS}
+function pour(k){const c=CH[C.lv],bag=document.querySelector(`#cShelf .bag[data-bag="${k}"]`);
+  if(cTot()>=SCOOPS){$('#cMsg').textContent='配豆桶滿了（1 公斤）';return false}
+  if(c.max&&!C.mix[k]&&cCount()>=c.max){$('#cMsg').textContent=`最多只能用 ${c.max} 支豆子`;return false}
+  $('#cMsg').textContent='';C.mix[k]++;
+  bag.classList.add('tilt');clearTimeout(bag._t);bag._t=setTimeout(()=>bag.classList.remove('tilt'),260);
+  const jar=$('#cJar'),dr=$('#cDrops'),dist=170*(1-cTot()/SCOOPS)+4;
+  for(let i=0;i<7;i++){const d=document.createElement('div');d.className='drop';d.style.cssText=`left:${12+Math.random()*66}%;background:${BCOMP[k].c};--d:${dist+Math.random()*10}px;animation-delay:${i*35}ms`;dr.appendChild(d);setTimeout(()=>d.remove(),800)}
+  jar.classList.remove('shake');void jar.offsetWidth;jar.classList.add('shake');
+  setTimeout(drawC,220);return true}
+let holdT=null,holdI=null;const stopHold=()=>{clearTimeout(holdT);clearInterval(holdI)};
+$('#cShelf').addEventListener('pointerdown',e=>{const b=e.target.closest('.pour');if(!b)return;e.preventDefault();const k=b.dataset.k;stopHold();if(pour(k))holdT=setTimeout(()=>{holdI=setInterval(()=>{if(!pour(k))stopHold()},170)},380)});
+['pointerup','pointercancel','pointerleave'].forEach(ev=>$('#cShelf').addEventListener(ev,stopHold));
+$('#cShelf').addEventListener('contextmenu',e=>e.preventDefault());
+$('#cShelf').addEventListener('click',e=>{const k=e.target.dataset.back;if(k&&C.mix[k]>0){C.mix[k]--;$('#cMsg').textContent='';drawC()}});
+$('#cEmpty').onclick=()=>{Object.keys(C.mix).forEach(k=>C.mix[k]=0);$('#cMsg').textContent='';drawC()};
+$('#cToRoast').onclick=()=>{const c=CH[C.lv],msg=$('#cMsg');
+  if(cTot()<SCOOPS){msg.textContent='還沒裝滿 1 公斤';return}
   if(c.need&&!C.mix[c.need]){msg.textContent=`配方必須含${c.need}`;return}
   if(c.budget&&cCost()>c.budget){msg.textContent=`成本超過預算（${cCost()} > ${c.budget}）`;return}
-  msg.textContent='';const v=blendVec(C.mix,+$('#cRoast').value),sc=cScore(v,C.target),st=sc>=90?3:sc>=80?2:sc>=70?1:0;
-  if(c.tries)C.left--;C.shown=v;C.best=Math.max(C.best||0,sc);
+  $('#cRes').style.display='none';toStage(2)};
+function drawRoastStage(){const t=C.rt;$('#cRFill').style.width=((t+20)/120*100)+'%';
+  document.querySelectorAll('#cSpin i').forEach(b=>b.style.background=roastRGB(t));
+  $('#cRTxt').textContent=!C.firing&&t<=-20?'生豆已入鍋，點火開始':t<-8?'脫水中…豆子由綠轉黃':t<0?'梅納反應…快到一爆了':t<4?'劈啪！一爆開始，可以下豆了':roastName(t)+(t>=90?'（快焦了！）':'')}
+$('#cFire').onclick=()=>{C.firing=true;$('#cFire').disabled=true;$('#cBackMix').disabled=true;$('#cSpin').classList.add('on');$('#cFlames').classList.add('on');
+  clearInterval(C.timer);C.timer=setInterval(()=>{C.rt+=1.1;if(C.rt>=0)$('#cDrop').disabled=false;drawRoastStage();drawC();if(C.rt>=100){C.rt=100;finishC()}},100)};
+$('#cDrop').onclick=()=>{if(C.firing&&C.rt>=0)finishC()};
+$('#cBackMix').onclick=()=>toStage(1);
+function finishC(){clearInterval(C.timer);C.firing=false;$('#cSpin').classList.remove('on');$('#cFlames').classList.remove('on');$('#cDrop').disabled=true;
+  const c=CH[C.lv],roast=Math.max(0,Math.min(100,C.rt)),v=blendVec(C.mix,roast),sc=cScore(v,C.target),st=sc>=90?3:sc>=80?2:sc>=70?1:0;
+  if(c.tries)C.left--;C.shown=v;
   if(st){C.prog[C.lv+1]=Math.max(C.prog[C.lv+1]||0,st);store.set('ct-blend',C.prog)}
   const over=st===3||(c.tries&&C.left<=0),passed=(C.prog[C.lv+1]||0)>0;
-  const fb=v.map((x,i)=>[BDIM[i],x-C.target[i]]).filter(([,d])=>Math.abs(d)>=0.4).sort((a,b)=>Math.abs(b[1])-Math.abs(a[1])).slice(0,3)
-    .map(([n,d])=>`${n}${d>0?'太高':'不夠'}`);
+  const fb=v.map((x,i)=>[BDIM[i],x-C.target[i]]).filter(([,d])=>Math.abs(d)>=0.4).sort((a,b)=>Math.abs(b[1])-Math.abs(a[1])).slice(0,3).map(([n,d])=>`${n}${d>0?'太高':'不夠'}`);
   const tip=fb.length?'還差一點：'+fb.join('、')+'。':'六個面向都很接近！';
   const refTxt=Object.entries(c.ref.mix).map(([k,w])=>`${k} ${w}%`).join('＋')+'，'+roastName(c.ref.roast);
-  let h=`<h3>${st?'★'.repeat(st)+'☆'.repeat(3-st)+'　過關！':'還沒過關'}　相似度 ${sc} 分</h3><div style="font-size:14px;margin:4px 0">${tip}</div>`;
+  let h=`<h3>${st?'★'.repeat(st)+'☆'.repeat(3-st)+'　過關！':'還沒過關'}　相似度 ${sc} 分</h3><div style="font-size:14px;margin:4px 0">你在「${roastName(roast)}」下豆。${tip}</div>`;
   if(over||(!c.tries&&st))h+=`<div class="note" style="margin:8px 0">參考配方：${refTxt}。配方沒有唯一解，風味接近就是好配方。</div>`;
   if(c.tries&&C.left<=0&&!st)h+=`<div style="font-size:14px">機會用完了，再挑戰一次吧。</div>`;
-  h+=`<div class="row" style="margin-top:6px">${over?'<button class="btn sec" id="cAgain">重新挑戰</button>':''}${passed&&C.lv<CH.length-1?'<button class="btn" id="cNext">下一關</button>':''}</div>`;
-  $('#cRes').innerHTML=h;$('#cRes').style.display='block';if(over)$('#cSubmit').disabled=true;
-  const a=$('#cAgain');if(a)a.onclick=()=>{C.shown=null;C.best=0;startC(C.lv)};const nx=$('#cNext');if(nx)nx.onclick=()=>{C.shown=null;C.best=0;startC(C.lv+1)};
-  drawC();$('#cRes').scrollIntoView({behavior:'smooth',block:'nearest'})};
-$('#cLv').onclick=e=>{const b=e.target.closest('.lv');if(b&&!b.disabled){C.shown=null;C.best=0;startC(+b.dataset.n)}};
-$('#cBack').onclick=()=>{$('#cPlay').style.display='none';$('#cMenu').style.display='block';drawCMenu()};
+  h+=`<div class="row" style="margin-top:6px">${over?'<button class="btn sec" id="cAgain">重新挑戰</button>':'<button class="btn sec" id="cRetry">再調一次</button>'}${passed&&C.lv<CH.length-1?'<button class="btn" id="cNext">下一關</button>':''}</div>`;
+  $('#cRes').innerHTML=h;$('#cRes').style.display='block';drawC();
+  const a=$('#cAgain');if(a)a.onclick=()=>startC(C.lv);const rt=$('#cRetry');if(rt)rt.onclick=()=>{$('#cRes').style.display='none';toStage(1)};
+  const nx=$('#cNext');if(nx)nx.onclick=()=>startC(C.lv+1);
+  $('#cRes').scrollIntoView({behavior:'smooth',block:'nearest'})}
+$('#cLv').onclick=e=>{const b=e.target.closest('.lv');if(b&&!b.disabled)startC(+b.dataset.n)};
+$('#cBack').onclick=()=>{clearInterval(C.timer);stopHold();$('#cPlay').style.display='none';$('#cMenu').style.display='block';drawCMenu()};
 $('#bMode').onclick=e=>{const m=e.target.dataset.m;if(!m)return;document.querySelectorAll('#bMode .chip').forEach(c=>c.classList.toggle('on',c===e.target));
   $('#bLearn').style.display=m==='learn'?'block':'none';$('#bChal').style.display=m==='chal'?'block':'none';if(m==='chal')drawCMenu()};
 drawCMenu();
