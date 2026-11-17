@@ -11,6 +11,7 @@
 | `fukuoka-trip/` | 福岡 5大2小 8天7夜 |
 | `spelling/` | 拼字消消樂 |
 | `molecule-reactions/` | 分子反應圖鑑 |
+| `ball-stick/` | 分子球棍組裝（球棍模型組裝遊戲＋教學模式） |
 | `extraction-sim/` | 手沖咖啡實驗室（萃取模擬器＋闖關遊戲） |
 | `coffee-lab-plan/` | 咖啡實驗室商業化路線圖 |
 | `brew-notes/` | 沖煮筆記（紀錄＋養豆＋甜蜜點分析） |

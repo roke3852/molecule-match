@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>分子球棍組裝</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+/* 版面想法：一張模型切割墊（深綠＋黃色刻度）當工作桌，上下是工具盒的深色邊條；黃色只留給「目前該注意的地方」。單一主題。 */
+:root{
+  color-scheme:dark;
+  --mat:#1d5a50;
+  --mat-deep:#143f38;
+  --ink:#0c2622;
+  --ink-2:#16362f;
+  --paper:#eef6f2;
+  --mute:#9fbfb6;
+  --mark:#ffd24a;
+  --bad:#ff9b85;
+  --line:rgba(238,246,242,.14);
+  --f-body:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
+  --f-num:"Barlow Condensed","Noto Sans TC","PingFang TC",sans-serif;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{height:100%;margin:0}
+body{background:var(--ink);color:var(--paper);font-family:var(--f-body);font-size:15px;line-height:1.5;-webkit-tap-highlight-color:transparent;overflow:hidden}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none;padding:0}
+button:focus-visible{outline:2px solid var(--mark);outline-offset:2px}
+sub{font-size:.68em;line-height:0}
+
+.app{height:100%;display:flex;flex-direction:column;max-width:760px;margin:0 auto;position:relative}
+
+/* 上方：關卡資訊 */
+header{padding:10px 16px 10px;display:flex;flex-direction:column;gap:6px;background:var(--ink)}
+.bar{display:flex;align-items:center;gap:10px}
+.crumb{flex:1;min-width:0;color:var(--mute);font-size:12.5px;letter-spacing:.04em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pill{min-height:36px;padding:0 14px;border-radius:999px;border:1px solid var(--line);background:var(--ink-2);font-size:13.5px;font-weight:500}
+.pill[aria-pressed="true"]{background:var(--mark);color:var(--ink);border-color:var(--mark)}
+.target{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+.target h1{margin:0;font-size:26px;font-weight:900;letter-spacing:.02em;line-height:1.2;text-wrap:balance}
+.formula{font-family:var(--f-num);font-size:30px;font-weight:600;color:var(--mark);line-height:1;white-space:nowrap}
+.meta{display:flex;align-items:center;gap:10px;flex-wrap:wrap;min-height:28px}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{display:inline-flex;align-items:center;gap:5px;padding:2px 9px 2px 6px;border-radius:999px;border:1px solid var(--line);font-family:var(--f-num);font-size:16px;font-weight:500;font-variant-numeric:tabular-nums;color:var(--mute)}
+.chip i{width:11px;height:11px;border-radius:50%;box-shadow:inset 0 0 0 1px rgba(0,0,0,.25)}
+.chip.ok{color:var(--ink);background:var(--mark);border-color:var(--mark)}
+.chip.over{color:var(--bad);border-color:var(--bad)}
+.status{margin:0;font-size:13px;color:var(--mute);flex:1;min-width:10em}
+.status.warn{color:var(--bad)}
+
+/* 工作桌 */
+.stage{flex:1;min-height:0;position:relative;background:radial-gradient(120% 90% at 50% 40%,var(--mat),var(--mat-deep));border-block:2px solid #0a1f1c;overflow:hidden}
+canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}
+.note{position:absolute;left:12px;right:12px;margin:0;padding:9px 12px;border-radius:10px;font-size:13.5px;pointer-events:none}
+.hint{top:12px;background:var(--mark);color:var(--ink);font-weight:500}
+.hint b{font-family:var(--f-num);font-size:17px;font-weight:600;letter-spacing:.02em}
+.coach{bottom:12px;background:var(--paper);color:var(--ink);display:grid;gap:2px;box-shadow:0 6px 20px rgba(0,0,0,.35)}
+.coach p{margin:0}
+.coach-top{display:flex;justify-content:space-between;align-items:center;min-height:24px}
+#coachStep{font-family:var(--f-num);font-size:15px;font-weight:600;letter-spacing:.08em;color:#1d5a50}
+#coachDo{font-weight:700;font-size:15px}
+#coachWhy{font-size:12.5px;color:#3d5a54}
+#btnBack{pointer-events:auto;min-height:32px;padding:0 13px;border-radius:999px;background:var(--ink);color:var(--paper);font-size:12.5px}
+.want{border-color:var(--mark)!important;box-shadow:0 0 0 2px var(--mark);animation:want .9s ease-in-out infinite alternate}
+@keyframes want{to{box-shadow:0 0 0 6px rgba(255,210,74,.3)}}
+.tip{bottom:12px;background:rgba(12,38,34,.82);color:var(--paper);border:1px solid var(--line)}
+
+/* 下方：零件盒 */
+.tray{background:var(--ink);padding:10px 16px calc(10px + env(safe-area-inset-bottom,0px));display:flex;gap:10px;align-items:stretch}
+.parts{display:flex;gap:8px;flex:1;min-width:0;overflow-x:auto;padding:2px}
+.part{flex:0 0 auto;width:58px;min-height:74px;border-radius:12px;background:var(--ink-2);border:1px solid var(--line);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px}
+.part:active{transform:translateY(1px);border-color:var(--mark)}
+.ball{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-family:var(--f-num);font-weight:600;font-size:18px;box-shadow:0 3px 0 rgba(0,0,0,.3)}
+.part small{font-size:11.5px;color:var(--mute);line-height:1;display:flex;gap:4px;align-items:center}
+.hands{display:inline-flex;gap:2px}
+.hands i{width:4px;height:4px;border-radius:50%;background:var(--mark)}
+.tools{display:grid;gap:6px;align-content:center}
+.tool{min-height:34px;min-width:64px;padding:0 10px;border-radius:9px;border:1px solid var(--line);background:var(--ink-2);font-size:13px}
+.tool:disabled{opacity:.35;cursor:default}
+.tool.go{background:var(--mark);color:var(--ink);border-color:var(--mark);font-weight:700}
+
+/* 完成卡片 */
+.sheet{position:absolute;left:0;right:0;bottom:0;background:var(--paper);color:var(--ink);border-radius:18px 18px 0 0;padding:18px 18px calc(16px + env(safe-area-inset-bottom,0px));box-shadow:0 -12px 40px rgba(0,0,0,.45);animation:up .35s cubic-bezier(.2,.9,.3,1)}
+@keyframes up{from{transform:translateY(100%)}to{transform:none}}
+.sheet .tag{font-size:12px;letter-spacing:.18em;font-weight:700;color:#1d5a50}
+.sheet h2{margin:2px 0 6px;font-size:22px;font-weight:900;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.sheet h2 span{font-family:var(--f-num);font-weight:600;font-size:24px;color:#1d5a50}
+.sheet p{margin:0 0 14px;font-size:14.5px;max-width:34em}
+.sheet .row{display:flex;gap:8px}
+.sheet button{min-height:46px;border-radius:12px;padding:0 18px;font-weight:700}
+.sheet .next{flex:1;background:var(--ink);color:var(--paper)}
+.sheet .stay{border:1px solid rgba(12,38,34,.25)}
+.sheet button:focus-visible{outline-color:#1d5a50}
+
+/* 關卡表 */
+.overlay{position:absolute;inset:0;background:var(--ink);overflow-y:auto;padding:14px 16px 28px;z-index:5}
+.overlay .top{display:flex;align-items:center;justify-content:space-between;position:sticky;top:-14px;background:var(--ink);padding:10px 0;z-index:1}
+.overlay h2{margin:0;font-size:20px;font-weight:900}
+.cloud{margin-top:6px;padding:12px;border-radius:12px;border:1px solid var(--line);background:var(--ink-2);display:grid;gap:8px}
+.cloud .tool{min-height:42px;font-size:14px}
+.cloud p{margin:0;font-size:12.5px;color:var(--mute)}
+.chap{margin-top:16px}
+.chap h3{margin:0 0 8px;font-size:13px;font-weight:500;color:var(--mute);letter-spacing:.06em;display:flex;justify-content:space-between}
+.chap h3 b{font-family:var(--f-num);font-size:15px;font-weight:500;color:var(--mark)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(98px,1fr));gap:8px}
+.lv{min-height:66px;border-radius:12px;border:1px solid var(--line);background:var(--ink-2);padding:8px 10px;text-align:left;display:flex;flex-direction:column;justify-content:space-between;gap:2px}
+.lv .f{font-family:var(--f-num);font-size:19px;font-weight:600;line-height:1.1}
+.lv .n{font-size:12.5px;color:var(--mute);line-height:1.25}
+.lv.done{background:var(--mat);border-color:transparent}
+.lv.done .f{color:var(--mark)}
+.lv.done .n{color:var(--paper)}
+.lv.cur{box-shadow:0 0 0 2px var(--mark)}
+
+@media (max-height:560px){.target h1{font-size:21px}.formula{font-size:24px}.part{min-height:62px}}
+@media (prefers-reduced-motion:reduce){.sheet,.want{animation:none}}
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="bar">
+      <button class="pill" id="btnLevels" type="button">關卡</button>
+      <span class="crumb" id="crumb"></span>
+      <button class="pill" id="btnTut" type="button" aria-pressed="false">教學</button>
+      <button class="pill" id="btnHint" type="button" aria-pressed="false">提示</button>
+    </div>
+    <div class="target">
+      <h1 id="name"></h1>
+      <div class="formula" id="formula"></div>
+    </div>
+    <div class="meta">
+      <div class="chips" id="chips"></div>
+      <p class="status" id="status" aria-live="polite"></p>
+    </div>
+  </header>
+
+  <main class="stage" id="stage">
+    <canvas id="cv" aria-label="組裝工作桌"></canvas>
+    <p class="note hint" id="hint" hidden></p>
+    <p class="note tip" id="tip" hidden></p>
+    <div class="note coach" id="coach" hidden>
+      <div class="coach-top"><span id="coachStep"></span><button id="btnBack" type="button" hidden>回上一步</button></div>
+      <p id="coachDo"></p>
+      <p id="coachWhy"></p>
+    </div>
+  </main>
+
+  <footer class="tray">
+    <div class="parts" id="parts"></div>
+    <div class="tools">
+      <button class="tool go" id="btnH" type="button" hidden>補氫</button>
+      <button class="tool" id="btnDel" type="button" disabled>移除</button>
+      <button class="tool" id="btnClear" type="button">清空</button>
+    </div>
+  </footer>
+
+  <section class="sheet" id="win" hidden>
+    <div class="tag" id="winTag">組裝完成</div>
+    <h2><b id="winName"></b><span id="winFormula"></span></h2>
+    <p id="winFact"></p>
+    <div class="row">
+      <button class="stay" id="btnStay" type="button">再看一下</button>
+      <button class="next" id="btnNext" type="button">下一關</button>
+    </div>
+  </section>
+
+  <section class="overlay" id="levels" hidden>
+    <div class="top"><h2>關卡表</h2><button class="pill" id="btnCloseLevels" type="button">回到工作桌</button></div>
+    <div class="cloud" id="cloud" hidden>
+      <button class="tool go" id="gBtn" type="button">用 Google 帳號同步進度</button>
+      <p id="gNote" aria-live="polite">過關紀錄會存進你自己的 Google 雲端硬碟，換手機、清瀏覽器都接得回來。</p>
+    </div>
+    <div id="levelList"></div>
+  </section>
+</div>
+
+<script>
+/*LOGIC*/
+const EL={
+  H:{name:'氫',v:1,r:15,c1:'#ffffff',c2:'#a9b8b4',ink:'#16302b'},
+  C:{name:'碳',v:4,r:22,c1:'#8a8e96',c2:'#1b1d21',ink:'#ffffff'},
+  N:{name:'氮',v:3,r:21,c1:'#a3c2ff',c2:'#2450c8',ink:'#ffffff'},
+  O:{name:'氧',v:2,r:21,c1:'#ffa797',c2:'#c7281c',ink:'#ffffff'},
+  Cl:{name:'氯',v:1,r:23,c1:'#dcff9a',c2:'#62ad22',ink:'#17300a'}
+};
+const ORDER=['C','H','N','O','Cl'];
+const CHAPTERS=[
+ {title:'第一次組裝',levels:[
+  {id:'h2',n:'氫氣',f:'H2',a:'H H',b:'0-1',hint:'H–H',
+   tip:'點下方的 H 兩次，把球放上桌面。再先後點這兩顆球，就會接上一根棍子。',
+   fact:'最輕的分子。氫原子只有 1 隻手，兩顆互牽就滿了。'},
+  {id:'h2o',n:'水',f:'H2O',a:'O',hint:'H–O–H',
+   tip:'先放一顆 O 並點選它（出現黃圈），再點下方的 H，新的球會直接接上去。',
+   fact:'氧有 2 隻手，各牽一個氫。真實的水分子不是一直線，夾角約 104.5°。'},
+  {id:'nh3',n:'氨',f:'NH3',a:'N',hint:'N 在中間，接 3 個 H',
+   tip:'球上突出的小短棒，就是還沒接上的手。全部接滿才算完成。',
+   fact:'氮有 3 隻手。氨帶刺鼻氣味，也是製造肥料的重要原料。'},
+  {id:'ch4',n:'甲烷',f:'CH4',a:'C',hint:'C 在中間，接 4 個 H',
+   fact:'碳有 4 隻手，是有機分子的骨架。甲烷是天然氣的主要成分。'},
+  {id:'hcl',n:'氯化氫',f:'HCl',a:'Cl',hint:'H–Cl',
+   fact:'氯和氫一樣只有 1 隻手。氯化氫溶進水裡就是鹽酸。'}
+ ]},
+ {title:'雙鍵與三鍵',levels:[
+  {id:'o2',n:'氧氣',f:'O2',a:'O O',b:'0=1',hint:'O=O',
+   tip:'兩顆 O 接上後各剩 1 隻手。再點一下那根棍子，單鍵會變成雙鍵。',
+   fact:'我們呼吸的氧氣，兩個氧原子用雙鍵相連。'},
+  {id:'co2',n:'二氧化碳',f:'CO2',a:'O C O',b:'0=1 1=2',hint:'O=C=O',
+   fact:'碳的 4 隻手分成兩組雙鍵。咖啡粉悶蒸時冒出的氣泡就是它。'},
+  {id:'n2',n:'氮氣',f:'N2',a:'N N',b:'0#1',hint:'N≡N',
+   tip:'雙鍵再點一次會變三鍵。手不夠用時，再點就會把棍子拆掉。',
+   fact:'空氣裡約 78% 是氮氣。三鍵非常牢固，所以氮氣很不活潑。'},
+  {id:'hcn',n:'氰化氫',f:'HCN',a:'C N',b:'0#1',hint:'H–C≡N',
+   fact:'碳用 1 隻手牽氫，剩下 3 隻手全部牽住氮。'},
+  {id:'c2h4',n:'乙烯',f:'C2H4',a:'C C',b:'0=1',hint:'H₂C=CH₂',
+   fact:'植物的催熟氣體。水果放在一起熟得快，就是乙烯的作用。'},
+  {id:'c2h2',n:'乙炔',f:'C2H2',a:'C C',b:'0#1',hint:'H–C≡C–H',
+   fact:'燃燒溫度極高，常用來焊接和切割金屬。'}
+ ]},
+ {title:'碳鏈與官能基',autoH:true,levels:[
+  {id:'c2h6',n:'乙烷',f:'C2H6',a:'C C',b:'0-1',hint:'CH₃–CH₃',
+   tip:'這一章起可以用「補氫」：先接好 C、O、N 的骨架，再一次補滿所有的氫。',
+   fact:'最短的碳鏈。碳和碳可以一直接下去，這是有機化學的起點。'},
+  {id:'ch4o',n:'甲醇',f:'CH4O',a:'C O',b:'0-1',hint:'CH₃–OH',
+   fact:'–OH 叫羥基，帶羥基的碳鏈就是「醇」。甲醇有毒，不能喝。'},
+  {id:'c2h6o',n:'乙醇',f:'C2H6O',a:'C C O',b:'0-1 1-2',hint:'CH₃–CH₂–OH',
+   fact:'酒精。同樣的 C₂H₆O 如果接成 C–O–C，就變成另一種分子：二甲醚。'},
+  {id:'ch2o',n:'甲醛',f:'CH2O',a:'C O',b:'0=1',hint:'H₂C=O',
+   fact:'C=O 叫羰基。羰基在碳鏈末端的分子就是「醛」。'},
+  {id:'ch2o2',n:'甲酸',f:'CH2O2',a:'C O O',b:'0=1 0-2',hint:'H–C(=O)–OH',
+   fact:'–COOH 叫羧基，是有機酸的標誌。螞蟻叮咬的刺痛就來自甲酸。'},
+  {id:'c2h4o2',n:'乙酸',f:'C2H4O2',a:'C C O O',b:'0-1 1=2 1-3',hint:'CH₃–C(=O)–OH',
+   fact:'醋的酸味來源。咖啡裡也有，少量時帶來明亮的酸質。'},
+  {id:'c3h6o',n:'丙酮',f:'C3H6O',a:'C C C O',b:'0-1 1-2 1=3',hint:'CH₃–C(=O)–CH₃',
+   fact:'羰基夾在兩個碳中間就是「酮」。丙酮是去光水的主要成分。'},
+  {id:'ch5n',n:'甲胺',f:'CH5N',a:'C N',b:'0-1',hint:'CH₃–NH₂',
+   fact:'–NH₂ 叫胺基，胺基酸和蛋白質都少不了它。'}
+ ]},
+ {title:'咖啡杯裡的分子',autoH:true,levels:[
+  {id:'c2h4o',n:'乙醛',f:'C2H4O',a:'C C O',b:'0-1 1=2',hint:'CH₃–CH=O',
+   fact:'帶青蘋果般果香的揮發性分子，烘焙後的咖啡裡找得到。'},
+  {id:'c4h8o2',n:'乙酸乙酯',f:'C4H8O2',a:'C C O O C C',b:'0-1 1=2 1-3 3-4 4-5',hint:'CH₃–C(=O)–O–CH₂–CH₃',
+   fact:'酸和醇接在一起就成了「酯」，多半帶水果香。發酵處理的咖啡常有這類香氣。'},
+  {id:'c4h6o2',n:'2,3-丁二酮',f:'C4H6O2',a:'C C C C O O',b:'0-1 1-2 2-3 1=4 2=5',hint:'CH₃–C(=O)–C(=O)–CH₃',
+   fact:'奶油香的代表分子，也是咖啡香氣的一員。'},
+  {id:'c4h4o',n:'呋喃',f:'C4H4O',a:'O C C C C',b:'0-1 1=2 2-3 3=4 4-0',hint:'五員環：1 個 O 加 4 個 C，環上有兩組 C=C',
+   fact:'糖在烘焙時焦糖化、發生梅納反應，會生成許多呋喃類分子，帶來焦糖和烘烤香。'},
+  {id:'c5h5n',n:'吡啶',f:'C5H5N',a:'N C C C C C',b:'0=1 1-2 2=3 3-4 4=5 5-0',hint:'六員環：1 個 N 加 5 個 C，單鍵和雙鍵交替',
+   fact:'生豆裡的葫蘆巴鹼在烘焙時分解會產生吡啶，深焙的焦苦氣息有它一份。'},
+  {id:'caffeine',n:'咖啡因',f:'C8H10N4O2',a:'C N C N C C C O N C C O N C',
+   b:'0-1 1-2 2=3 3-4 4=5 5-1 5-6 6=7 6-8 8-9 8-10 10=11 10-12 12-4 12-13',
+   hint:'六員環依序是 N–C(=O)–N–C=C–C(=O)，兩個 N 各接一個 CH₃。五員環共用那組 C=C，另外三個位置是 N(–CH₃)–CH=N',
+   fact:'24 顆原子、兩個併在一起的環。咖啡的提神效果和一部分苦味都來自它。'}
+ ]}
+];
+const BO={'-':1,'=':2,'#':3};
+function buildTarget(spec){
+  const atoms=spec.a.split(' ').map((e,i)=>({id:i,e}));
+  const bonds=[];
+  for(const t of (spec.b||'').split(' ').filter(Boolean)){
+    const m=t.match(/^(\d+)([-=#])(\d+)$/);
+    bonds.push({a:+m[1],b:+m[3],o:BO[m[2]]});
+  }
+  const heavy=atoms.filter(a=>a.e!=='H');
+  for(const a of heavy){
+    let u=0;for(const k of bonds)if(k.a===a.id||k.b===a.id)u+=k.o;
+    for(let i=u;i<EL[a.e].v;i++){const id=atoms.length;atoms.push({id,e:'H'});bonds.push({a:a.id,b:id,o:1});}
+  }
+  return {atoms,bonds};
+}
+function countEl(atoms){const c={};for(const a of atoms)c[a.e]=(c[a.e]||0)+1;return c;}
+function sig(atoms,bonds){
+  const heavy=atoms.filter(a=>a.e!=='H'),idx=new Map(),el=new Map(atoms.map(a=>[a.id,a.e]));
+  heavy.forEach((a,i)=>idx.set(a.id,i));
+  const nodes=heavy.map(a=>({id:a.id,e:a.e,h:0,adj:new Map()}));
+  let hh=0,att=0;
+  for(const k of bonds){
+    const ha=el.get(k.a)==='H',hb=el.get(k.b)==='H';
+    if(ha&&hb)hh++;
+    else if(ha){nodes[idx.get(k.b)].h++;att++;}
+    else if(hb){nodes[idx.get(k.a)].h++;att++;}
+    else{const i=idx.get(k.a),j=idx.get(k.b);nodes[i].adj.set(j,k.o);nodes[j].adj.set(i,k.o);}
+  }
+  return {nodes,nH:atoms.length-heavy.length,att,hh};
+}
+function iso(A,B,noH){
+  if(A.nodes.length!==B.nodes.length)return null;
+  if(!noH&&(A.nH!==B.nH||A.att!==B.att||A.hh!==B.hh))return null;
+  const n=A.nodes.length,map=new Array(n).fill(-1),taken=new Array(n).fill(false);
+  const ok=(i,j)=>{
+    const a=A.nodes[i],b=B.nodes[j];
+    if(a.e!==b.e||(!noH&&a.h!==b.h)||a.adj.size!==b.adj.size)return false;
+    for(const [p,o] of a.adj){if(p<i&&b.adj.get(map[p])!==o)return false;}
+    return true;
+  };
+  const go=i=>{
+    if(i===n)return true;
+    for(let j=0;j<n;j++){
+      if(taken[j]||!ok(i,j))continue;
+      taken[j]=true;map[i]=j;
+      if(go(i+1))return true;
+      taken[j]=false;map[i]=-1;
+    }
+    return false;
+  };
+  return go(0)?map:null;
+}
+const LEVELS=[];
+CHAPTERS.forEach((ch,ci)=>ch.levels.forEach((lv,li)=>{
+  const t=buildTarget(lv);
+  LEVELS.push(Object.assign(lv,{ci,li,autoH:!!ch.autoH,target:t,tsig:sig(t.atoms,t.bonds),need:countEl(t.atoms)}));
+}));
+/* 教學模式：把目標分子拆成一步一步的組裝順序 */
+function buildSteps(lv){
+  const T=lv.target,isH=id=>T.atoms[id].e==='H';
+  const heavy=T.atoms.filter(a=>a.e!=='H');
+  const cur={atoms:[],bonds:[]},steps=[];
+  const push=s=>{s.sig=sig(cur.atoms,cur.bonds);steps.push(s);};
+  if(!heavy.length){
+    cur.atoms.push(T.atoms[0]);push({k:'place',e:'H',first:true});
+    cur.atoms.push(T.atoms[1]);push({k:'place',e:'H'});
+    cur.bonds.push({a:0,b:1,o:1});push({k:'join',all:true});
+    return steps;
+  }
+  const hb=T.bonds.filter(k=>!isH(k.a)&&!isH(k.b));
+  const seen=new Set([heavy[0].id]),queue=[heavy[0].id],tree=new Set();
+  cur.atoms.push(heavy[0]);push({k:'place',e:heavy[0].e,first:true});
+  while(queue.length){
+    const p=queue.shift();
+    for(const k of hb){
+      const q=k.a===p?k.b:k.b===p?k.a:-1;
+      if(q<0||seen.has(q))continue;
+      seen.add(q);queue.push(q);tree.add(k);
+      cur.atoms.push(T.atoms[q]);cur.bonds.push({a:p,b:q,o:1});
+      push({k:'attach',e:T.atoms[q].e,p});
+    }
+  }
+  for(const k of hb)if(!tree.has(k)){cur.bonds.push({a:k.a,b:k.b,o:1});push({k:'join',a:k.a,b:k.b});}
+  for(const k of hb)for(let o=2;o<=k.o;o++){
+    cur.bonds.find(x=>(x.a===k.a&&x.b===k.b)||(x.a===k.b&&x.b===k.a)).o=o;
+    push({k:'up',a:k.a,b:k.b,to:o});
+  }
+  const hbonds=T.bonds.filter(k=>isH(k.a)||isH(k.b));
+  if(lv.autoH){
+    for(const k of hbonds){cur.atoms.push(T.atoms[isH(k.a)?k.a:k.b]);cur.bonds.push({a:k.a,b:k.b,o:1});}
+    push({k:'fillH'});
+  }else for(const k of hbonds){
+    const h=isH(k.a)?k.a:k.b,p=isH(k.a)?k.b:k.a;
+    cur.atoms.push(T.atoms[h]);cur.bonds.push({a:k.a,b:k.b,o:1});push({k:'attach',e:'H',p});
+  }
+  return steps;
+}
+/*END*/
+
+const $=id=>document.getElementById(id);
+const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const fHtml=f=>f.replace(/(\d+)/g,'<sub>$1</sub>');
+const cv=$('cv'),ctx=cv.getContext('2d');
+let W=300,H=300,S=1,dpr=1;
+let st={lvl:0,atoms:[],bonds:[],sel:null,won:false,nid:1};
+let done=new Set(),drag=null,raf=0,awake=0,fx=[],flash=null,flashT=0,hintOn=false,bottomPad=0;
+let tut={on:false,steps:[],i:0,A:null,B:null,map:null,good:null,off:false,hl:{atoms:[],bond:null}};
+const EMPTY=sig([],[]);
+
+const R=e=>EL[e].r*S;
+const restLen=(a,b,o)=>R(a.e)+R(b.e)+(18-(o-1)*4)*S;
+const atomBy=id=>st.atoms.find(a=>a.id===id);
+const bondOf=(a,b)=>st.bonds.find(k=>(k.a===a&&k.b===b)||(k.a===b&&k.b===a));
+function used(id){let s=0;for(const k of st.bonds)if(k.a===id||k.b===id)s+=k.o;return s;}
+const free=a=>EL[a.e].v-used(a.id);
+const level=()=>LEVELS[st.lvl];
+
+function load(){try{done=new Set(JSON.parse(localStorage.getItem('bskit-done')||'[]'));}catch(e){}}
+function save(){try{localStorage.setItem('bskit-done',JSON.stringify([...done]));localStorage.setItem('bskit-lvl',String(st.lvl));}catch(e){}}
+let gQueue=()=>{};
+
+/* ---------- 畫面資訊 ---------- */
+function setScale(){
+  const n=level().target.atoms.length;
+  const base=Math.max(.8,Math.min(1.2,Math.min(W,H)/400));
+  S=base*(n>14?.74:n>9?.88:1);
+}
+function renderHead(){
+  const lv=level(),ch=CHAPTERS[lv.ci];
+  $('crumb').textContent=`第 ${lv.ci+1} 章 ${ch.title}　${lv.li+1} / ${ch.levels.length}`;
+  $('name').textContent=lv.n;
+  $('formula').innerHTML=fHtml(lv.f);
+  $('hint').innerHTML='接法　<b>'+lv.hint+'</b>';
+  $('hint').hidden=!hintOn;
+  $('btnHint').setAttribute('aria-pressed',hintOn);
+  $('btnH').hidden=!lv.autoH;
+  $('parts').innerHTML=ORDER.filter(e=>lv.need[e]).map(e=>{
+    const d=EL[e];
+    return `<button class="part" type="button" data-e="${e}" aria-label="放一顆${d.name}，${d.v} 隻手">
+      <span class="ball" style="background:radial-gradient(circle at 35% 30%,${d.c1},${d.c2});color:${d.ink}">${e}</span>
+      <small>${d.name}<span class="hands">${'<i></i>'.repeat(d.v)}</span></small></button>`;
+  }).join('');
+}
+function renderMeta(msg){
+  const lv=level(),have=countEl(st.atoms);
+  $('chips').innerHTML=ORDER.filter(e=>lv.need[e]).map(e=>{
+    const h=have[e]||0,n=lv.need[e],c=h===n?'ok':h>n?'over':'';
+    return `<span class="chip ${c}"><i style="background:${EL[e].c2==='#1b1d21'?'#3a3d43':EL[e].c2};${e==='H'?'background:#fff':''}"></i>${e} ${h}/${n}</span>`;
+  }).join('');
+  const el=$('status');
+  let text,warn=false;
+  if(msg){text=msg;warn=true;}
+  else if(st.won)text='完成了。拖拖看，模型會跟著晃。';
+  else if(!st.atoms.length)text='點下方的球，放上桌面';
+  else{
+    const lack=[],extra=[];
+    for(const e of ORDER){const h=have[e]||0,n=lv.need[e]||0;if(h<n)lack.push(`${e}×${n-h}`);if(h>n)extra.push(`${e}×${h-n}`);}
+    const f=st.atoms.reduce((s,a)=>s+free(a),0);
+    if(extra.length){text='多了 '+extra.join('、');warn=true;}
+    else if(lack.length)text='還缺 '+lack.join('、');
+    else if(f>0)text=`還有 ${f} 隻手空著`;
+    else{text='零件都用上了，但接法不一樣。按「提示」看看';warn=true;}
+  }
+  el.textContent=text;el.classList.toggle('warn',warn);
+  $('btnDel').disabled=st.sel==null||st.won;
+  const lvTip=level().tip;
+  $('tip').hidden=!lvTip||tut.on||st.won||st.atoms.length>3&&level().target.atoms.length>4;
+  if(lvTip)$('tip').textContent=lvTip;
+  renderCoach();
+}
+function toast(m){clearTimeout(flashT);renderMeta(m);flashT=setTimeout(()=>renderMeta(),2200);}
+
+/* ---------- 結構操作 ---------- */
+function components(){
+  const p=new Map(st.atoms.map(a=>[a.id,a.id]));
+  const find=x=>{while(p.get(x)!==x)x=p.get(x);return x;};
+  for(const k of st.bonds)p.set(find(k.a),find(k.b));
+  for(const a of st.atoms)a.comp=find(a.id);
+}
+function changed(){
+  components();
+  if(!st.won){
+    const lv=level();
+    if(st.atoms.length===lv.target.atoms.length&&iso(sig(st.atoms,st.bonds),lv.tsig))win();
+  }
+  tutSync();
+  clearTimeout(flashT);renderMeta();kick();
+}
+function pegAngles(a){
+  const n=free(a);if(n<=0)return[];
+  const nb=[];
+  for(const k of st.bonds){
+    if(k.a!==a.id&&k.b!==a.id)continue;
+    const o=atomBy(k.a===a.id?k.b:k.a);nb.push(Math.atan2(o.y-a.y,o.x-a.x));
+  }
+  if(!nb.length)return Array.from({length:n},(_,i)=>-Math.PI/2+i*2*Math.PI/n);
+  nb.sort((x,y)=>x-y);
+  let best=0,start=nb[0];
+  for(let i=0;i<nb.length;i++){
+    const s=nb[i],e=i+1<nb.length?nb[i+1]:nb[0]+2*Math.PI;
+    if(e-s>best){best=e-s;start=s;}
+  }
+  return Array.from({length:n},(_,i)=>start+best*(i+1)/(n+1));
+}
+function clampAtom(a){
+  const r=R(a.e)+4;
+  a.x=Math.max(r,Math.min(W-r,a.x));a.y=Math.max(r,Math.min(Math.max(r+40,H-r-bottomPad),a.y));
+}
+function newAtom(e,x,y){
+  const a={id:st.nid++,e,x,y,vx:0,vy:0,comp:0};clampAtom(a);st.atoms.push(a);return a;
+}
+function freeSpot(){
+  let best=null,bd=-1;
+  for(let i=0;i<40;i++){
+    const x=W*(.2+Math.random()*.6),y=(H-bottomPad)*(.2+Math.random()*.6);
+    let d=1e9;for(const a of st.atoms)d=Math.min(d,Math.hypot(a.x-x,a.y-y));
+    if(d>70*S)return{x,y};
+    if(d>bd){bd=d;best={x,y};}
+  }
+  return best||{x:W/2,y:H/2};
+}
+function locked(){
+  if(st.won){toast('這關已完成。按「清空」可以重組一次');return true;}
+  return false;
+}
+function addPart(e){
+  if(locked())return;
+  if(st.atoms.length>=40){toast('桌面放滿了，先移除幾顆');return;}
+  const s=st.sel!=null?atomBy(st.sel):null;
+  if(s&&free(s)>0){
+    const ang=pegAngles(s)[0],tmp={e};
+    const L=restLen(s,tmp,1);
+    const a=newAtom(e,s.x+Math.cos(ang)*L,s.y+Math.sin(ang)*L);
+    st.bonds.push({a:s.id,b:a.id,o:1});
+    if(free(s)<=0)st.sel=null;
+  }else{
+    if(s){st.sel=null;}
+    const p=freeSpot();newAtom(e,p.x,p.y);
+  }
+  changed();
+}
+function shake(a){a.shake=performance.now();kick(30);}
+function connect(ida,idb){
+  const a=atomBy(ida),b=atomBy(idb),k=bondOf(ida,idb);
+  if(k){cycle(k);return;}
+  for(const x of [a,b]){
+    if(free(x)<=0){shake(x);toast(`${EL[x.e].name}的 ${EL[x.e].v} 隻手都接滿了`);return;}
+  }
+  st.bonds.push({a:ida,b:idb,o:1});changed();
+}
+function cycle(k){
+  if(locked())return;
+  const a=atomBy(k.a),b=atomBy(k.b);
+  if(k.o<3&&free(a)>0&&free(b)>0){k.o++;changed();toast(k.o===2?'單鍵 → 雙鍵':'雙鍵 → 三鍵');}
+  else{st.bonds.splice(st.bonds.indexOf(k),1);changed();toast('棍子拆掉了');}
+}
+function removeSel(){
+  if(st.sel==null||locked())return;
+  const id=st.sel;
+  st.bonds=st.bonds.filter(k=>k.a!==id&&k.b!==id);
+  st.atoms=st.atoms.filter(a=>a.id!==id);
+  st.sel=null;changed();
+}
+function clearAll(){st.atoms=[];st.bonds=[];st.sel=null;st.won=false;$('win').hidden=true;changed();}
+function autoH(){
+  if(locked())return;
+  const heavy=st.atoms.filter(a=>a.e!=='H'&&free(a)>0);
+  if(!heavy.length){toast(st.atoms.some(a=>a.e!=='H')?'沒有空著的手可以補':'先放上 C、O、N 接好骨架');return;}
+  for(const a of heavy){
+    for(const ang of pegAngles(a)){
+      if(st.atoms.length>=40)break;
+      const L=restLen(a,{e:'H'},1);
+      const h=newAtom('H',a.x+Math.cos(ang)*L,a.y+Math.sin(ang)*L);
+      st.bonds.push({a:a.id,b:h.id,o:1});
+    }
+  }
+  st.sel=null;changed();
+}
+function tapAtom(id){
+  if(st.won){return;}
+  if(st.sel==null)st.sel=id;
+  else if(st.sel===id)st.sel=null;
+  else{const s=st.sel;st.sel=null;connect(s,id);}
+  renderMeta();kick();
+}
+function win(){
+  st.won=true;st.sel=null;
+  const lv=level();
+  if(!tut.on){done.add(lv.id);save();gQueue();}
+  $('winTag').textContent=tut.on?'教學完成':'組裝完成';
+  $('btnStay').textContent=tut.on?'自己組一次':'再看一下';
+  if(!reduced){
+    let cx=0,cy=0;for(const a of st.atoms){cx+=a.x;cy+=a.y;}
+    cx/=st.atoms.length;cy/=st.atoms.length;
+    const t=performance.now();fx.push({x:cx,y:cy,t},{x:cx,y:cy,t:t+180},{x:cx,y:cy,t:t+360});
+  }
+  $('winName').textContent=lv.n;$('winFormula').innerHTML=fHtml(lv.f);$('winFact').textContent=lv.fact;
+  $('btnNext').textContent=st.lvl+1<LEVELS.length?(tut.on?'下一關教學':'下一關'):'全部完成，回關卡表';
+  setTimeout(()=>{if(st.won)$('win').hidden=false;},reduced?0:650);
+}
+function goLevel(i,keep){
+  st.lvl=Math.max(0,Math.min(LEVELS.length-1,i));
+  if(!keep){st.atoms=[];st.bonds=[];st.sel=null;st.won=false;st.nid=1;}
+  hintOn=tut.on;$('win').hidden=true;$('levels').hidden=true;
+  if(tut.on){tut.steps=buildSteps(level());tut.i=0;tut.off=false;}
+  setScale();renderHead();save();changed();
+}
+
+/* ---------- 教學模式 ---------- */
+function tutMatch(B){
+  for(let k=tut.steps.length;k>=0;k--){
+    const A=k?tut.steps[k-1].sig:EMPTY,m=iso(A,B);
+    if(m)return{k,A,m};
+  }
+  return null;
+}
+function tutSync(){
+  if(!tut.on)return;
+  const B=sig(st.atoms,st.bonds),r=tutMatch(B);
+  if(r){
+    tut.i=r.k;tut.A=r.A;tut.B=B;tut.map=r.m;tut.off=false;
+    tut.good={atoms:st.atoms.map(a=>({id:a.id,e:a.e,x:a.x,y:a.y})),bonds:st.bonds.map(k=>({a:k.a,b:k.b,o:k.o})),nid:st.nid};
+  }else{
+    const s=tut.steps[tut.i];
+    tut.off=!(s&&s.k==='fillH'&&iso(tut.steps[tut.steps.length-1].sig,B,true));
+  }
+}
+function renderCoach(){
+  const c=$('coach');
+  document.querySelectorAll('.want').forEach(e=>e.classList.remove('want'));
+  tut.hl={atoms:[],bond:null};
+  const s=tut.on&&!st.won?tut.steps[tut.i]:null;
+  c.hidden=!s;
+  if(!s){bottomPad=0;return;}
+  const n=tut.steps.length;
+  $('coachStep').textContent=`步驟 ${tut.i+1} / ${n}`;
+  $('btnBack').hidden=!tut.off;
+  let todo,why;
+  const bid=t=>tut.B.nodes[tut.map[tut.A.nodes.findIndex(x=>x.id===t)]].id;
+  const want=e=>{const b=document.querySelector(`.part[data-e="${e}"]`);if(b)b.classList.add('want');};
+  if(tut.off){
+    todo='這一步還沒對上';why='照著亮起來的地方操作，或按「回上一步」重做這一步。';
+  }else if(s.k==='place'){
+    const d=EL[s.e];want(s.e);
+    if(st.sel!=null){todo='先點一下桌面空白處，取消選取';why='有球被選取時，新的球會直接接上去。這一步要單獨放一顆。';}
+    else if(s.first){todo=`點下方的 ${s.e}（${d.name}），放一顆到桌面`;why=`${d.name}有 ${d.v} 隻手。球上的黃色短棒，就是還空著的手。`;}
+    else{todo=`再點一次下方的 ${s.e}，放第二顆`;why='放上桌面的球可以用手指拖著移動。';}
+  }else if(s.k==='attach'){
+    const pid=bid(s.p),pa=atomBy(pid),pd=EL[pa.e],d=EL[s.e];
+    tut.hl.atoms=[pid];want(s.e);
+    todo=st.sel===pid?`再點下方的 ${s.e}（${d.name}）`:`點一下亮起來的 ${pa.e}，再點下方的 ${s.e}`;
+    why=s.e==='H'?`${pd.name}還有 ${free(pa)} 隻手空著，接上一個氫。`:`先選一顆球，再點零件，新的球會直接接在它身上。${d.name}有 ${d.v} 隻手。`;
+  }else if(s.k==='join'){
+    if(s.all){tut.hl.atoms=st.atoms.map(a=>a.id);why='氫只有 1 隻手，兩顆互相牽住就都滿了。';}
+    else{tut.hl.atoms=[bid(s.a),bid(s.b)];why='把頭尾接起來，碳鏈就圍成一個環。';}
+    todo='先後點兩顆亮起來的球，接上一根棍子';
+  }else if(s.k==='up'){
+    tut.hl.bond=[bid(s.a),bid(s.b)];
+    todo=`點一下亮起來的棍子，${s.to===2?'單鍵變雙鍵':'雙鍵變三鍵'}`;
+    why='棍子兩端的球都還有空手，就可以再多接一根。';
+  }else{
+    $('btnH').classList.add('want');
+    todo='按右下角的「補氫」';why='骨架完成了。剩下每隻空著的手，都接上一個氫。';
+  }
+  $('coachDo').textContent=todo;$('coachWhy').textContent=why;
+  bottomPad=c.offsetHeight+20;
+}
+function setTut(on){
+  tut.on=on;$('btnTut').setAttribute('aria-pressed',on);
+  hintOn=on;$('hint').hidden=!on;$('btnHint').setAttribute('aria-pressed',on);
+  if(on){
+    tut.steps=buildSteps(level());tut.i=0;tut.off=false;
+    if(st.won||!tutMatch(sig(st.atoms,st.bonds))){st.atoms=[];st.bonds=[];st.sel=null;st.won=false;$('win').hidden=true;}
+  }
+  changed();
+}
+function tutBack(){
+  if(!tut.good)return;
+  st.atoms=tut.good.atoms.map(a=>({id:a.id,e:a.e,x:a.x,y:a.y,vx:0,vy:0,comp:0}));
+  st.bonds=tut.good.bonds.map(k=>({a:k.a,b:k.b,o:k.o}));st.nid=Math.max(st.nid,tut.good.nid);st.sel=null;
+  changed();
+}
+
+/* ---------- 物理：棍子是彈簧，同一個分子裡的球互相推開 ---------- */
+function step(){
+  const A=st.atoms,n=A.length;
+  for(const a of A){a.fx=0;a.fy=0;}
+  for(let i=0;i<n;i++)for(let j=i+1;j<n;j++){
+    const a=A[i],b=A[j];
+    let dx=b.x-a.x,dy=b.y-a.y,d=Math.hypot(dx,dy);
+    if(d<.01){dx=Math.random()-.5;dy=Math.random()-.5;d=Math.hypot(dx,dy);}
+    const ux=dx/d,uy=dy/d;let f=0;
+    const k=bondOf(a.id,b.id);
+    if(k)f=(d-restLen(a,b,k.o))*.12;
+    else{
+      if(a.comp===b.comp&&d<220*S)f-=Math.min(1.6,700*S*S/(d*d));
+      const m=R(a.e)+R(b.e)+8*S;if(d<m)f-=(m-d)*.25;
+    }
+    a.fx+=ux*f;a.fy+=uy*f;b.fx-=ux*f;b.fy-=uy*f;
+  }
+  let mx=0;
+  for(const a of A){
+    if(drag&&drag.moved&&drag.id===a.id){a.vx=a.vy=0;continue;}
+    a.vx=(a.vx+a.fx)*.72;a.vy=(a.vy+a.fy)*.72;
+    a.x+=a.vx;a.y+=a.vy;clampAtom(a);
+    mx=Math.max(mx,Math.abs(a.vx)+Math.abs(a.vy));
+  }
+  return mx;
+}
+
+/* ---------- 繪圖 ---------- */
+function drawMat(){
+  const g=24;
+  ctx.lineWidth=1;
+  for(let x=0,i=0;x<=W;x+=g,i++){
+    ctx.strokeStyle=i%5?'rgba(255,210,74,.07)':'rgba(255,210,74,.2)';
+    ctx.beginPath();ctx.moveTo(x+.5,0);ctx.lineTo(x+.5,H);ctx.stroke();
+  }
+  for(let y=0,i=0;y<=H;y+=g,i++){
+    ctx.strokeStyle=i%5?'rgba(255,210,74,.07)':'rgba(255,210,74,.2)';
+    ctx.beginPath();ctx.moveTo(0,y+.5);ctx.lineTo(W,y+.5);ctx.stroke();
+  }
+  ctx.fillStyle='rgba(255,210,74,.45)';ctx.font='500 11px "Barlow Condensed",sans-serif';
+  ctx.textAlign='left';ctx.textBaseline='top';
+  for(let x=g*5,i=5;x<W-10;x+=g*5,i+=5)ctx.fillText(i,x+3,3);
+  for(let y=g*5,i=5;y<H-10;y+=g*5,i+=5)ctx.fillText(i,3,y+3);
+}
+function draw(now){
+  ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,W,H);
+  drawMat();
+  ctx.lineCap='round';
+  // 棍子
+  for(const k of st.bonds){
+    const a=atomBy(k.a),b=atomBy(k.b);
+    const dx=b.x-a.x,dy=b.y-a.y,d=Math.hypot(dx,dy)||1,nx=-dy/d,ny=dx/d;
+    const offs=k.o===1?[0]:k.o===2?[-5.5,5.5]:[-9,0,9],w=(k.o===1?8:6)*S;
+    for(const pass of [0,1])for(const o of offs){
+      ctx.strokeStyle=pass?'#dfe7e3':'rgba(6,24,21,.55)';ctx.lineWidth=pass?w:w+3;
+      ctx.beginPath();ctx.moveTo(a.x+nx*o*S,a.y+ny*o*S);ctx.lineTo(b.x+nx*o*S,b.y+ny*o*S);ctx.stroke();
+    }
+  }
+  // 教學：發亮的棍子
+  if(tut.hl.bond){
+    const a=atomBy(tut.hl.bond[0]),b=atomBy(tut.hl.bond[1]);
+    if(a&&b){
+      const p=reduced?.6:.45+.3*Math.sin(now/220);
+      ctx.strokeStyle=`rgba(255,210,74,${p})`;ctx.lineWidth=30*S;
+      ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();
+      for(const k of st.bonds)if((k.a===a.id&&k.b===b.id)||(k.a===b.id&&k.b===a.id)){
+        const dx=b.x-a.x,dy=b.y-a.y,d=Math.hypot(dx,dy)||1,nx=-dy/d,ny=dx/d;
+        const offs=k.o===1?[0]:k.o===2?[-5.5,5.5]:[-9,0,9];
+        ctx.strokeStyle='#dfe7e3';ctx.lineWidth=(k.o===1?8:6)*S;
+        for(const o of offs){ctx.beginPath();ctx.moveTo(a.x+nx*o*S,a.y+ny*o*S);ctx.lineTo(b.x+nx*o*S,b.y+ny*o*S);ctx.stroke();}
+      }
+    }
+  }
+  // 還沒接上的手
+  if(!st.won)for(const a of st.atoms){
+    const r=R(a.e);
+    for(const ang of pegAngles(a)){
+      const c=Math.cos(ang),s=Math.sin(ang);
+      ctx.strokeStyle='rgba(6,24,21,.5)';ctx.lineWidth=7*S;
+      ctx.beginPath();ctx.moveTo(a.x+c*(r-2),a.y+s*(r-2));ctx.lineTo(a.x+c*(r+9*S),a.y+s*(r+9*S));ctx.stroke();
+      ctx.strokeStyle='#ffd24a';ctx.lineWidth=4*S;
+      ctx.beginPath();ctx.moveTo(a.x+c*(r-2),a.y+s*(r-2));ctx.lineTo(a.x+c*(r+9*S),a.y+s*(r+9*S));ctx.stroke();
+    }
+  }
+  // 球
+  for(const a of st.atoms){
+    const d=EL[a.e],r=R(a.e);let x=a.x,y=a.y;
+    if(a.shake){const t=now-a.shake;if(t<350)x+=Math.sin(t/22)*5*(1-t/350);else a.shake=0;}
+    ctx.fillStyle='rgba(4,18,16,.3)';ctx.beginPath();ctx.arc(x+2.5,y+4,r,0,7);ctx.fill();
+    const g=ctx.createRadialGradient(x-r*.35,y-r*.4,r*.08,x,y,r);
+    g.addColorStop(0,d.c1);g.addColorStop(1,d.c2);
+    ctx.fillStyle=g;ctx.beginPath();ctx.arc(x,y,r,0,7);ctx.fill();
+    ctx.fillStyle=d.ink;ctx.font=`600 ${Math.round(r*.95)}px "Barlow Condensed",sans-serif`;
+    ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(a.e,x,y+1);
+    if(st.sel===a.id){
+      ctx.strokeStyle='#ffd24a';ctx.lineWidth=3;ctx.setLineDash([7,6]);
+      ctx.lineDashOffset=reduced?0:-now/45;
+      ctx.beginPath();ctx.arc(x,y,r+6,0,7);ctx.stroke();ctx.setLineDash([]);
+    }
+  }
+  // 教學：亮起來的球
+  for(const id of tut.hl.atoms){
+    const a=atomBy(id);if(!a||st.sel===id)continue;
+    const r=R(a.e)+8+(reduced?0:2.5*Math.sin(now/220));
+    ctx.strokeStyle='#ffd24a';ctx.lineWidth=3.5;ctx.beginPath();ctx.arc(a.x,a.y,r,0,7);ctx.stroke();
+    ctx.strokeStyle='rgba(255,210,74,.35)';ctx.lineWidth=7;ctx.beginPath();ctx.arc(a.x,a.y,r+5,0,7);ctx.stroke();
+  }
+  // 完成時的光圈
+  fx=fx.filter(f=>now-f.t<900);
+  for(const f of fx){
+    const t=(now-f.t)/900;if(t<0)continue;
+    ctx.strokeStyle=`rgba(255,210,74,${(1-t)*.8})`;ctx.lineWidth=4*(1-t)+1;
+    ctx.beginPath();ctx.arc(f.x,f.y,30+t*Math.max(W,H)*.5,0,7);ctx.stroke();
+  }
+}
+function tick(now){
+  raf=0;
+  const e=step();draw(now);
+  if(awake>0)awake--;
+  if(e>.02||awake>0||drag||fx.length||(st.sel!=null&&!reduced)||(!reduced&&(tut.hl.atoms.length||tut.hl.bond))||st.atoms.some(a=>a.shake))raf=requestAnimationFrame(tick);
+}
+function kick(n){awake=Math.max(awake,n||60);if(!raf)raf=requestAnimationFrame(tick);}
+
+/* ---------- 觸控 ---------- */
+function pos(ev){const r=cv.getBoundingClientRect();return{x:ev.clientX-r.left,y:ev.clientY-r.top};}
+function hitAtom(p){
+  for(let i=st.atoms.length-1;i>=0;i--){const a=st.atoms[i];if(Math.hypot(a.x-p.x,a.y-p.y)<R(a.e)+9)return a;}
+  return null;
+}
+function hitBond(p){
+  for(const k of st.bonds){
+    const a=atomBy(k.a),b=atomBy(k.b),dx=b.x-a.x,dy=b.y-a.y,l2=dx*dx+dy*dy||1;
+    const t=Math.max(0,Math.min(1,((p.x-a.x)*dx+(p.y-a.y)*dy)/l2));
+    if(Math.hypot(a.x+dx*t-p.x,a.y+dy*t-p.y)<14)return k;
+  }
+  return null;
+}
+cv.addEventListener('pointerdown',ev=>{
+  const p=pos(ev),a=hitAtom(p);
+  try{cv.setPointerCapture(ev.pointerId);}catch(e){}
+  if(a)drag={id:a.id,sx:p.x,sy:p.y,ox:a.x-p.x,oy:a.y-p.y,moved:false};
+  else drag={id:null,bond:hitBond(p),sx:p.x,sy:p.y,moved:false};
+  kick();
+});
+cv.addEventListener('pointermove',ev=>{
+  if(!drag)return;
+  const p=pos(ev);
+  if(!drag.moved&&Math.hypot(p.x-drag.sx,p.y-drag.sy)>8)drag.moved=true;
+  if(drag.moved&&drag.id!=null){
+    const a=atomBy(drag.id);
+    if(a){a.x=p.x+drag.ox;a.y=p.y+drag.oy;clampAtom(a);kick();}
+  }
+});
+function endDrag(ev,cancel){
+  if(!drag)return;
+  const d=drag;drag=null;
+  if(!cancel&&!d.moved){
+    if(d.id!=null)tapAtom(d.id);
+    else if(d.bond&&st.bonds.includes(d.bond))cycle(d.bond);
+    else if(st.sel!=null){st.sel=null;renderMeta();}
+  }
+  kick();
+}
+cv.addEventListener('pointerup',ev=>endDrag(ev,false));
+cv.addEventListener('pointercancel',ev=>endDrag(ev,true));
+
+/* ---------- 按鈕 ---------- */
+$('parts').addEventListener('click',ev=>{const b=ev.target.closest('.part');if(b)addPart(b.dataset.e);});
+$('btnDel').addEventListener('click',removeSel);
+$('btnClear').addEventListener('click',clearAll);
+$('btnH').addEventListener('click',autoH);
+$('btnHint').addEventListener('click',()=>{hintOn=!hintOn;$('hint').hidden=!hintOn;$('btnHint').setAttribute('aria-pressed',hintOn);});
+$('btnStay').addEventListener('click',()=>{
+  if(tut.on){tut.on=false;$('btnTut').setAttribute('aria-pressed',false);hintOn=false;$('hint').hidden=true;$('btnHint').setAttribute('aria-pressed',false);clearAll();}
+  else $('win').hidden=true;
+});
+$('btnTut').addEventListener('click',()=>setTut(!tut.on));
+$('btnBack').addEventListener('click',tutBack);
+$('btnNext').addEventListener('click',()=>{if(st.lvl+1<LEVELS.length)goLevel(st.lvl+1);else{$('win').hidden=true;openLevels();}});
+$('btnLevels').addEventListener('click',openLevels);
+$('btnCloseLevels').addEventListener('click',()=>{$('levels').hidden=true;});
+function openLevels(){
+  $('levelList').innerHTML=CHAPTERS.map((ch,ci)=>{
+    const got=ch.levels.filter(l=>done.has(l.id)).length;
+    return `<div class="chap"><h3><span>第 ${ci+1} 章　${ch.title}</span><b>${got} / ${ch.levels.length}</b></h3><div class="grid">`+
+      ch.levels.map(l=>{const i=LEVELS.indexOf(l);
+        return `<button class="lv ${done.has(l.id)?'done':''} ${i===st.lvl?'cur':''}" type="button" data-i="${i}"><span class="f">${fHtml(l.f)}</span><span class="n">${l.n}${done.has(l.id)?'　✓':''}</span></button>`;}).join('')+
+      '</div></div>';
+  }).join('');
+  $('levels').hidden=false;
+}
+$('levelList').addEventListener('click',ev=>{const b=ev.target.closest('.lv');if(b)goLevel(+b.dataset.i);});
+
+/* ---------- 雲端存檔：過關紀錄存成玩家自己 Google 雲端硬碟裡的隱藏 App 檔 ---------- */
+const GCLIENT='267421312122-l2ggo7t35tqpf8ej5osqttt08ke30lr1.apps.googleusercontent.com';
+const GFILE='ballstick.json',GAPI='https://www.googleapis.com';
+let gTok=null,gTokExp=0,gFileId=null,gClient=null,gOn=false,gTimer=0;
+const gNote=t=>{$('gNote').textContent=t;},gBtn=t=>{$('gBtn').textContent=t;};
+const gLinked=()=>{try{return localStorage.getItem('bskit-g')==='1';}catch(e){return false;}};
+const gTime=()=>new Date().toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'});
+function gLoadLib(){return new Promise((ok,no)=>{
+  if(window.google&&google.accounts&&google.accounts.oauth2)return ok();
+  const sc=document.createElement('script');sc.src='https://accounts.google.com/gsi/client';
+  sc.onload=()=>ok();sc.onerror=()=>no(new Error('lib'));document.head.appendChild(sc);
+});}
+async function gFetch(url,opt={}){
+  if(!gTok||Date.now()>gTokExp)throw new Error('auth');
+  const r=await fetch(url,Object.assign({},opt,{headers:Object.assign({Authorization:'Bearer '+gTok},opt.headers||{})}));
+  if(r.status===401){gTok=null;throw new Error('auth');}
+  if(!r.ok)throw new Error('http '+r.status);
+  return r;
+}
+async function gFindFile(){
+  const r=await gFetch(GAPI+'/drive/v3/files?spaces=appDataFolder&fields=files(id)&q='+encodeURIComponent("name='"+GFILE+"'"));
+  const j=await r.json();return j.files&&j.files[0]?j.files[0].id:null;
+}
+async function gWrite(){
+  const body=JSON.stringify({done:[...done],lvl:st.lvl,savedAt:Date.now()});
+  if(gFileId)return gFetch(GAPI+'/upload/drive/v3/files/'+gFileId+'?uploadType=media',{method:'PATCH',keepalive:true,headers:{'Content-Type':'application/json'},body});
+  const b='bskit'+Date.now(),meta=JSON.stringify({name:GFILE,parents:['appDataFolder']});
+  const mp='--'+b+'\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n'+meta+'\r\n--'+b+'\r\nContent-Type: application/json\r\n\r\n'+body+'\r\n--'+b+'--';
+  const r=await gFetch(GAPI+'/upload/drive/v3/files?uploadType=multipart&fields=id',{method:'POST',headers:{'Content-Type':'multipart/related; boundary='+b},body:mp});
+  gFileId=(await r.json()).id;
+}
+function gExpired(){gBtn('點這裡連回 Google');gNote('Google 連線過期了，進度先存在這台。點上面的按鈕重新連線，就會同步。');}
+function gPush(){
+  gTimer=0;
+  if(!gOn)return;
+  if(!gTok||Date.now()>gTokExp){gExpired();return;}
+  gWrite().then(()=>{gBtn('已連上 Google 同步');gNote('已同步到 Google 雲端硬碟　'+gTime());})
+    .catch(e=>{if(e.message==='auth')gExpired();else gNote('雲端同步失敗，進度先存在這台。稍後過關時會再試一次。');});
+}
+gQueue=()=>{
+  if(gOn){clearTimeout(gTimer);gTimer=setTimeout(gPush,800);}
+  else if(gLinked())setTimeout(()=>toast('進度先存在這台。到「關卡」連回 Google 就會同步'),60);
+};
+async function gAfterLogin(){
+  gNote('正在讀取 Google 雲端的進度…');
+  try{
+    gFileId=await gFindFile();
+    let d=null;
+    if(gFileId){const r=await gFetch(GAPI+'/drive/v3/files/'+gFileId+'?alt=media');d=await r.json().catch(()=>null);}
+    const before=done.size;
+    if(d&&Array.isArray(d.done))for(const id of d.done)if(LEVELS.some(l=>l.id===id))done.add(id);
+    save();gOn=true;
+    try{localStorage.setItem('bskit-g','1');}catch(e){}
+    if(!$('levels').hidden)openLevels();
+    const got=done.size-before;
+    await gWrite();
+    gBtn('已連上 Google 同步');
+    gNote((got>0?`從雲端接回 ${got} 關。`:'')+'已同步到 Google 雲端硬碟　'+gTime());
+  }catch(e){
+    if(e.message==='auth')gExpired();else gNote('讀取 Google 雲端失敗（'+e.message+'）。進度仍存在這台，請再點一次按鈕。');
+  }
+}
+async function gLogin(){
+  if(!(window.google&&google.accounts&&google.accounts.oauth2)){
+    try{await gLoadLib();}catch(e){gNote('無法載入 Google 登入，請確認網路後再試。');return;}
+  }
+  if(!gClient)gClient=google.accounts.oauth2.initTokenClient({client_id:GCLIENT,scope:'https://www.googleapis.com/auth/drive.appdata',
+    callback:t=>{
+      if(t&&t.access_token){gTok=t.access_token;gTokExp=Date.now()+((+t.expires_in||3600)-120)*1000;gAfterLogin();}
+      else gNote('Google 登入沒有完成，請再試一次。');
+    },
+    error_callback:()=>gNote('Google 登入被取消或被擋住了。請允許彈出視窗後再點一次。')});
+  gClient.requestAccessToken({prompt:gLinked()?'':'consent'});
+}
+$('gBtn').addEventListener('click',gLogin);
+/* 只有在能載入 Google 登入的地方（GitHub 版）才顯示同步區塊 */
+setTimeout(()=>gLoadLib().then(()=>{
+  $('cloud').hidden=false;
+  if(gLinked()){gBtn('點這裡連回 Google 同步');gNote('這台裝置連過 Google。每次開啟要點一下按鈕，才會繼續同步。');}
+}).catch(()=>{}),600);
+addEventListener('pagehide',()=>{if(gTimer){clearTimeout(gTimer);gPush();}});
+document.addEventListener('visibilitychange',()=>{if(document.hidden&&gTimer){clearTimeout(gTimer);gPush();}});
+
+/* ---------- 尺寸 ---------- */
+function resize(){
+  const r=$('stage').getBoundingClientRect();
+  if(r.width<10||r.height<10)return;
+  W=r.width;H=r.height;dpr=Math.min(3,window.devicePixelRatio||1);
+  cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr);
+  setScale();st.atoms.forEach(clampAtom);kick();
+}
+new ResizeObserver(resize).observe($('stage'));
+
+/* ---------- 啟動 ---------- */
+function start(data){
+  load();
+  let lvl=0;
+  try{lvl=+(localStorage.getItem('bskit-lvl')||0)||0;}catch(e){}
+  if(data&&Array.isArray(data.done))data.done.forEach(d=>done.add(d));
+  resize();
+  if(data&&typeof data.lvl==='number'&&Array.isArray(data.atoms)){
+    st={lvl:data.lvl,atoms:data.atoms.map(a=>({id:a.id,e:a.e,x:a.x,y:a.y,vx:0,vy:0,comp:0})).filter(a=>EL[a.e]),
+        bonds:(data.bonds||[]).map(k=>({a:k.a,b:k.b,o:k.o})),sel:null,won:false,nid:data.nid||1000};
+    goLevel(st.lvl,true);
+  }else{
+    // 第一次開啟時，在桌上先放兩顆氫當示範
+    goLevel(lvl);
+    if(st.lvl===0&&!done.has('h2')){newAtom('H',W*.38,H*.45);newAtom('H',W*.62,H*.5);changed();}
+  }
+  if(data&&data.tut)setTut(true);
+  if(document.fonts&&document.fonts.ready)document.fonts.ready.then(()=>kick());
+}
+window.claude?.hot?.snapshot?.(()=>({lvl:st.lvl,nid:st.nid,done:[...done],tut:tut.on,
+  atoms:st.atoms.map(a=>({id:a.id,e:a.e,x:a.x,y:a.y})),bonds:st.bonds.map(k=>({a:k.a,b:k.b,o:k.o}))}));
+if(window.claude?.hot?.ready)window.claude.hot.ready(start);else start(window.claude?.hot?.data??{});
+</script>
+</body>
+</html>
