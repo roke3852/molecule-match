@@ -296,7 +296,10 @@ body.px{--ink:#14142b;--ink-2:#23284f;--mat:#2e3670;--mat-deep:#191c3d;--paper:#
 .px .whosec{font-size:12px}
 /* iPhone 從主畫面開啟時，系統會在螢幕最上面蓋一層霧面效果。這裡讓遊戲自己鋪滿到狀態列底下，
    並在最上緣放一條固定的實心色帶，內容則往下讓開瀏海／動態島 */
-:root{--sat:env(safe-area-inset-top,0px);--top:calc(var(--sat)*1.7)}   /* 霧面會延伸到狀態列下方，所以多留七成的空白；一般瀏覽器 --sat 是 0，不受影響 */
+:root{--sat:env(safe-area-inset-top,0px);--deco:18px;--top:calc(var(--sat) + var(--deco))}
+:root.ios{--deco:46px}      /* iPhone：最上面的霧面大約蓋住 40 點，整段都讓給裝飾框，字從框的下面才開始 */
+.topdeco{position:absolute;top:var(--sat);left:0;right:0;height:var(--deco);z-index:25;pointer-events:none;background:#14142b}
+.topdeco canvas{position:absolute;inset:0;width:100%;height:100%;image-rendering:pixelated;image-rendering:crisp-edges}
 .topcap{position:fixed;top:0;left:0;right:0;height:var(--sat);background:var(--ink);z-index:30;pointer-events:none}
 header{padding-top:calc(10px + var(--top))}
 .title{padding-top:calc(22px + var(--top))}
@@ -341,6 +344,7 @@ header{padding-top:calc(10px + var(--top))}
 <body>
 <div class="topcap" aria-hidden="true"></div>
 <div class="app">
+  <div class="topdeco" aria-hidden="true"><canvas id="decoCv"></canvas></div>
   <header>
     <div class="target">
       <h1 id="name"></h1>
@@ -2491,6 +2495,26 @@ $('btnTitle').addEventListener('click',()=>{$('levels').hidden=true;showTitle();
   for(const t of ['gesturestart','gesturechange','gestureend'])document.addEventListener(t,ev=>ev.preventDefault());
   document.addEventListener('touchmove',ev=>{if(ev.touches.length>1)ev.preventDefault();},{passive:false});
 })();
+
+/* ---------- 最上面的裝飾框：一條像素畫的鋸齒碳鏈。它專門用來墊在 iPhone 的霧面區底下 ---------- */
+if(/iPhone|iPad|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1))document.documentElement.classList.add('ios');
+function drawDeco(){
+  const c=$('decoCv'),cw=c.clientWidth,chh=c.clientHeight;if(cw<10||chh<4)return;
+  const w=Math.round(cw/2),h=Math.round(chh/2);c.width=w;c.height=h;
+  const g=c.getContext('2d'),big=h>=16;
+  g.fillStyle='#14142b';g.fillRect(0,0,w,h);
+  if(big)for(const s of STARS){g.fillStyle=s[2]===2?'#c9cbe6':'#5b6ea8';g.fillRect(Math.round(s[0]*w),Math.round(s[1]*(h-8)),1,1);}
+  /* 下緣的雙線 */
+  g.fillStyle='#5b6ea8';g.fillRect(0,h-4,w,1);g.fillStyle='#f2c14e';g.fillRect(0,h-2,w,1);
+  /* 鋸齒碳鏈：偶爾換成氧、氮、硫，向上或向下伸出一顆氫 */
+  const step=big?13:9,r=big?3:2,amp=big?3:1,cy=Math.round((h-4)/2),seq=['C','C','O','C','C','N','C','C','C','S','C','O','C','C','Cl','C','N','C'];
+  const pts=[];for(let i=0,x=Math.round(step/2)-step;x<w+step;i++,x+=step)pts.push([x,cy+(i%2?amp:-amp),seq[i%seq.length],i]);
+  for(let i=1;i<pts.length;i++){pxLine(g,pts[i-1][0],pts[i-1][1],pts[i][0],pts[i][1],3,INK);}
+  for(let i=1;i<pts.length;i++){pxLine(g,pts[i-1][0],pts[i-1][1],pts[i][0],pts[i][1],1,'#f6ecc9');}
+  if(big)for(const p of pts)if(p[3]%3===1){const d=p[3]%2?1:-1;pxLine(g,p[0],p[1],p[0],p[1]+d*4,1,'#f6ecc9');pxDisc(g,p[0],p[1]+d*4,1,PXC.H);}
+  for(const p of pts)pxDisc(g,p[0],p[1],r,PXC[p[2]]);
+}
+new ResizeObserver(drawDeco).observe($('decoCv'));
 
 /* ---------- 尺寸 ---------- */
 function resize(){
