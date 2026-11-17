@@ -7,7 +7,7 @@
 <title>分子球棍組裝</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600&family=DotGothic16&family=Noto+Sans+TC:wght@400;500;700;900&family=Press+Start+2P&display=swap" rel="stylesheet">
 <style>
 /* 版面想法：一張模型切割墊（深綠＋黃色刻度）當工作桌，上下是工具盒的深色邊條；黃色只留給「目前該注意的地方」。單一主題。 */
 :root{
@@ -115,7 +115,7 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-acti
 .me .nums span b{font-size:24px;font-weight:600;color:var(--mark);margin-right:4px}
 .me .acts{display:flex;gap:8px;flex-wrap:wrap}
 .syncnote{margin:0;font-size:12.5px;color:var(--paper);opacity:.8;min-height:1.2em}
-.me .acts .tool{background:var(--ink);min-height:38px;flex:1 1 40%}
+.me .acts .tool{background:var(--ink);min-height:38px;flex:1 1 30%}
 .rowp .tagx{display:inline-block;margin-left:6px;padding:0 6px;border-radius:6px;border:1px solid var(--line);font-size:11px;color:var(--mute);font-weight:400;vertical-align:middle}
 .whosec{margin:14px 0 2px;font-size:12.5px;color:var(--mute);letter-spacing:.06em}
 .tabs{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:14px;padding:4px;border-radius:12px;background:var(--ink-2)}
@@ -172,6 +172,64 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-acti
 .t-who b{color:var(--paper);font-size:15px}
 .t-who button{margin-left:auto;text-decoration:underline;text-underline-offset:3px;color:var(--paper);font-size:13px;min-height:32px;padding:0 4px}
 @media (max-height:620px){.t-name{font-size:clamp(40px,13vw,60px)}.t-sub{margin-bottom:8px}.t-go{min-height:52px}}
+.vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+/* 像素風封面：低解析度畫布放大，字用點陣字 */
+.title{background:#14142b;padding:22px 18px calc(14px + env(safe-area-inset-bottom,0px))}
+#tcv{image-rendering:pixelated;image-rendering:crisp-edges}
+.px-eye{margin:0;text-align:center;font-family:"Press Start 2P",ui-monospace,monospace;font-size:9px;letter-spacing:.14em;color:#f6ecc9;text-shadow:2px 2px 0 #14142b}
+.pxbox{background:#f6ecc9;color:#14142b;border:3px solid #14142b;border-radius:6px;box-shadow:inset 0 0 0 2px #f6ecc9,inset 0 0 0 5px #5b6ea8,0 5px 0 rgba(8,8,24,.55)}
+.px-menu{display:grid;padding:10px 12px;font-family:"DotGothic16","Noto Sans TC",sans-serif}
+.px-item{display:flex;align-items:center;gap:10px;min-height:46px;padding:0 8px;font-size:23px;letter-spacing:.14em;color:#14142b;text-align:left}
+.px-item i{font-style:normal;font-size:13px;width:14px;visibility:hidden}
+.px-item.sel i{visibility:visible;animation:blink 1s steps(1) infinite}
+.px-item:active{background:#14142b;color:#f6ecc9}
+.px-item:active i{visibility:visible;animation:none}
+@keyframes blink{0%{opacity:1}50%{opacity:0}}
+.title .t-stats{justify-content:center;gap:16px;margin:0 0 10px;font-family:"DotGothic16","Noto Sans TC",sans-serif;font-size:14px;color:#f6ecc9;text-shadow:2px 2px 0 #14142b}
+.title .t-stats b{font-family:"Press Start 2P",ui-monospace,monospace;font-size:16px;color:#f2c14e;margin-right:6px}
+.title .t-who{margin-top:12px;color:#c9cbe6;text-shadow:1px 1px 0 #14142b}
+.title .t-who b{color:#f6ecc9}
+/* 故事對話 */
+.story{position:absolute;inset:0;z-index:8;display:flex;flex-direction:column;justify-content:space-between;padding:18px 16px calc(18px + env(safe-area-inset-bottom,0px));
+  background:radial-gradient(130% 70% at 50% 28%,hsl(var(--h,160) 42% 30%),hsl(var(--h,160) 45% 13%) 55%,#07100f)}
+.story .skip{align-self:flex-end}
+.story>*{position:relative;z-index:1}
+.story #scv{position:absolute;z-index:0;image-rendering:pixelated;image-rendering:crisp-edges}
+.st-head{text-align:center;padding:0 8px}
+.st-eye{margin:0 0 8px;font-family:"Press Start 2P",ui-monospace,monospace;font-size:10px;letter-spacing:.16em;color:var(--mark)}
+.st-head{margin-bottom:auto;margin-top:6vh}
+.st-head h2{margin:0;font-size:clamp(28px,9.5vw,42px);font-weight:900;letter-spacing:.06em;text-shadow:3px 3px 0 #0b0b1c,-1px -1px 0 #0b0b1c,3px -1px 0 #0b0b1c,-1px 3px 0 #0b0b1c;text-wrap:balance}
+.st-eye{text-shadow:2px 2px 0 #0b0b1c}
+.st-box{position:relative;padding:14px 16px 26px;min-height:168px;cursor:pointer;width:100%;text-align:left;font:inherit}
+.st-who{display:flex;align-items:center;gap:8px;min-height:30px;margin-bottom:6px}
+.st-av{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-size:14px;font-weight:900;box-shadow:0 2px 0 rgba(0,0,0,.3)}
+.st-who b{font-size:15px}
+.st-text{margin:0;font-size:16px;line-height:1.75;min-height:5.25em}
+.st-text.nar{color:#3b4a5e}
+.st-more{position:absolute;right:16px;bottom:8px;font-size:12px;animation:blink 1s steps(1) infinite}
+.st-count{position:absolute;left:16px;bottom:8px;font-family:var(--f-num);font-size:13px;color:#5b6ea8}
+/* 任務卡 */
+.brief{position:absolute;inset:0;z-index:4;background:rgba(6,18,16,.78);display:flex;align-items:center;justify-content:center;padding:20px}
+.brief .pxbox{width:100%;max-width:420px;padding:18px 18px 16px;display:grid;gap:8px}
+.brief .st-eye{color:#5b6ea8;margin:0}
+.brief h2{margin:0;font-size:26px;font-weight:900}
+.brief p{margin:0;font-size:15.5px;line-height:1.7}
+.brief .br-tip{font-size:13px;color:#3b4a5e;border-top:2px dotted #5b6ea8;padding-top:8px}
+.brief .br-go{margin-top:6px;min-height:50px;border-radius:6px;background:#14142b;color:#f6ecc9;font-weight:900;font-size:17px;letter-spacing:.2em}
+.crumb{cursor:pointer}
+.sheet .tale{margin:0 0 8px;padding:8px 10px;border-left:4px solid #e0a800;background:rgba(224,168,0,.12);font-size:14px}
+.sheet .tale b{margin-right:6px}
+/* 探險日誌 */
+.jr-ch{margin:18px 0 6px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.jr-ch b{font-size:16px}
+.jr-ch small{color:var(--mute);font-size:12px}
+.jr{padding:10px 12px;border-radius:10px;background:var(--ink-2);border:1px solid var(--line);margin-bottom:6px}
+.jr b{font-size:14.5px}
+.jr b span{font-family:var(--f-num);color:var(--mark);margin-left:8px;font-size:16px}
+.jr p{margin:4px 0 0;font-size:13.5px;color:var(--paper)}
+.jr p.f{color:var(--mute);font-size:12.5px}
+.jr.off{opacity:.45}
+.chap h3 small{display:block;font-size:11.5px;opacity:.8;margin-top:2px}
 .chap{margin-top:16px}
 .chap h3{margin:0 0 8px;font-size:13px;font-weight:500;color:var(--mute);letter-spacing:.06em;display:flex;justify-content:space-between}
 .chap h3 b{font-family:var(--f-num);font-size:15px;font-weight:500;color:var(--mark)}
@@ -185,7 +243,7 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-acti
 .lv.cur{box-shadow:0 0 0 2px var(--mark)}
 
 @media (max-height:560px){.target h1{font-size:21px}.formula{font-size:24px}.part{min-height:62px}}
-@media (prefers-reduced-motion:reduce){.sheet,.want,.t-name span,.t-sub,.t-go{animation:none}}
+@media (prefers-reduced-motion:reduce){.sheet,.want,.px-item.sel i,.st-more{animation:none}}
 </style>
 </head>
 <body>
@@ -234,6 +292,7 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-acti
     <h2><b id="winName"></b><span id="winFormula"></span></h2>
     <div class="score" id="winScore" hidden></div>
     <p class="got" id="winGot" hidden></p>
+    <p class="tale" id="winTale" hidden></p>
     <p id="winFact"></p>
     <div class="row">
       <button class="stay" id="btnStay" type="button">再看一下</button>
@@ -244,18 +303,46 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-acti
   <section class="title" id="title">
     <canvas id="tcv" aria-hidden="true"></canvas>
     <div>
-      <p class="t-eye">BALL &amp; STICK MODEL KIT</p>
-      <h2 class="t-name"><span>分子</span><span>球棍</span><span>組裝</span></h2>
+      <h2 class="vh">分子球棍組裝　化學探險之旅</h2>
+      <p class="px-eye">MOLECULE KIT ADVENTURE</p>
     </div>
     <div>
-      <p class="t-cap"><b>腺苷</b>咖啡因要擋住的分子</p>
-      <p class="t-sub">只給你名字和一盒原子。<br>憑化學知識，親手把分子接出來。</p>
       <ul class="t-stats" id="tStats"></ul>
-      <button class="t-go" id="tStart" type="button">開始遊戲</button>
-      <div class="t-row"><button id="tTut" type="button">教學模式</button><button id="tBoard" type="button">排行榜</button></div>
+      <div class="pxbox px-menu">
+        <button class="px-item sel" id="tStart" type="button"><i>▶</i><span>開始遊戲</span></button>
+        <button class="px-item" id="tTut" type="button"><i>▶</i><span>教學模式</span></button>
+        <button class="px-item" id="tBoard" type="button"><i>▶</i><span>排行榜</span></button>
+      </div>
       <p class="t-who" id="tWho"></p>
       <div class="jl-sig" style="text-align:center;font-size:11px;line-height:1.4;letter-spacing:.08em;opacity:.6;padding:8px 0 0;color:inherit;font-family:inherit">Made by <b style="font-weight:700">Jim Lu</b></div>
     </div>
+  </section>
+
+  <section class="story" id="story" hidden>
+    <canvas id="scv" aria-hidden="true"></canvas>
+    <button class="pill skip" id="stSkip" type="button">跳過</button>
+    <div class="st-head"><p class="st-eye" id="stEye"></p><h2 id="stPlace"></h2></div>
+    <button class="pxbox st-box" id="stBox" type="button">
+      <span class="st-who"><span class="st-av" id="stAv"></span><b id="stName"></b></span>
+      <span class="st-text" id="stText" style="display:block"></span>
+      <span class="st-count" id="stCount"></span><span class="st-more" id="stMore">▼</span>
+    </button>
+  </section>
+
+  <section class="brief" id="brief" hidden>
+    <div class="pxbox">
+      <p class="st-eye" id="brEye"></p>
+      <h2 id="brName"></h2>
+      <p id="brText"></p>
+      <p class="br-tip" id="brTip" hidden></p>
+      <button class="br-go" id="brGo" type="button">開始組裝</button>
+    </div>
+  </section>
+
+  <section class="overlay sub" id="journal" hidden>
+    <div class="top"><h2>探險日誌</h2><button class="pill" data-close="journal" type="button">返回</button></div>
+    <p class="lead">走過的每一站、補回圖鑑的每一頁，都記在這裡。故事可以重看。</p>
+    <div id="journalList"></div>
   </section>
 
   <section class="overlay" id="levels" hidden>
@@ -470,6 +557,149 @@ const CHAPTERS=[
    fact:'生豆裡最主要的糖，45 顆原子。烘焙時幾乎全部分解，變成焦糖香、有機酸和褐色物質。'}
  ]}
 ];
+/* ---------- 故事：化學探險之旅。n＝旁白、b＝阿焙師、k＝小鍵 ---------- */
+const STORY={
+ pro:[
+  ['n','巷子底有一間老烘豆坊，招牌上的字早就被煙燻得看不清楚。你推開門，是來應徵學徒的。'],
+  ['b','來了啊。先別碰烘豆機，那個還早。你先看這個。'],
+  ['n','阿焙師從櫃子深處搬出一個木盒。盒蓋一掀，裡面是一格一格的彩色小球，還有一把灰白色的短棍。'],
+  ['b','我師父留下來的分子模型盒。他說，一杯咖啡裡的味道，全都是這些小球接出來的。'],
+  ['b','可惜盒子裡那本《風味圖鑑》散了，每一頁上的分子都掉了下來。沒有圖鑑，我就烘不出師父那一杯。'],
+  ['k','喂喂喂，誰把蓋子打開的？亮死了！'],
+  ['n','一根黃色的小短棒從盒子裡跳出來，站在一顆黑球上，雙手叉腰。'],
+  ['k','我叫小鍵，是這盒模型的管理員。原子和原子要牽手，都得經過我。你就是新來的組裝師？'],
+  ['b','就是這位。小鍵，帶著從頭走一趟，把圖鑑一頁一頁補回來。'],
+  ['k','行。規矩只有一條：我只告訴你分子的名字。要用哪些球、怎麼接，你自己想。'],
+  ['k','想不出來可以按「提示」求我，不過會扣分喔。完全不會的話，「教學」可以一步一步帶你，只是那一次不算分。'],
+  ['k','走吧。第一站，從你每天吸進去的那口空氣開始。']
+ ],
+ end:[
+  ['n','最後一顆氫接上去的時候，木盒裡的《風味圖鑑》自己闔了起來，封面上的字一個一個亮了。'],
+  ['k','五十三頁，一頁不缺。老實說，一開始我以為你撐不過峽谷。'],
+  ['n','阿焙師翻開圖鑑，看了很久，然後走向烘豆機。豆子下鍋，第一爆、第二爆，他一句話也沒說。'],
+  ['b','好了。喝喝看。'],
+  ['n','你喝了一口。先是柑橘般的酸，接著是焦糖的甜，最後有一點點煙燻的尾巴。'],
+  ['n','每一個味道，你都叫得出它的名字，也接得出它的樣子。'],
+  ['b','這就是我師父那一杯。以後這個盒子歸你了。'],
+  ['k','喂，那我呢？'],
+  ['b','你跟盒子是一起的。'],
+  ['k','好吧。新主人，下次想挑戰三顆星的時候再叫我。我可不會放水。']
+ ],
+ ch:[
+  {place:'空氣與水的國度',h:200,intro:[
+   ['n','盒子裡升起一陣白霧。霧散開，你們站在一片雲海上，腳下是閃著光的海面。'],
+   ['k','歡迎來到最簡單的地方。這裡的分子都很小，兩三顆球就是一個。'],
+   ['k','先記住每顆球有幾隻手：氫 1 隻、氧 2 隻、氮 3 隻、碳 4 隻。球上凸出來的黃色短棒，就是還空著的手。'],
+   ['k','手全部牽滿，分子才會安定下來。少一隻、多一隻，它都會鬧脾氣。'],
+   ['k','零件盒裡六種球都有，可是每一關只用得到其中幾種。別被多出來的球騙了。']
+  ]},
+  {place:'火與風的峽谷',h:14,intro:[
+   ['n','雲海盡頭是一道峽谷，熱風從谷底往上灌，兩側岩壁上有火光在跳。'],
+   ['k','這裡的原子脾氣急。牽一隻手不夠，要兩隻、三隻一起牽，我們叫它雙鍵和三鍵。'],
+   ['k','接好一根棍子之後，再點它一下，我就多搭一根。兩邊都還有空手才搭得上去喔。'],
+   ['b','（盒子外傳來聲音）火要有氧才燒得起來，燒完剩下什麼，等一下就知道了。烘豆的人天天跟這幾個分子打交道。'],
+   ['k','老頭子又在偷聽。走，先去找讓火燒起來的那一位。']
+  ]},
+  {place:'碳鏈之森',h:130,intro:[
+   ['n','穿過峽谷，眼前是一整片森林。樹幹是一節一節的黑球，往四面八方伸出去。'],
+   ['k','碳是這個世界的建築師。它有 4 隻手，可以一顆接一顆，接成長長的鏈子，其他空著的手再交給氫。'],
+   ['k','從這裡開始分子變大了，氫很多。你把碳、氧這些骨架接好，按一下「補氫」，剩下的我幫你補滿。'],
+   ['k','森林裡住著一群叫「醇」的傢伙，身上都帶著同一個記號。長什麼樣子，你接幾個就看出來了。'],
+   ['b','記號認得了，以後看到名字就知道怎麼接。這比背一百個分子有用。']
+  ]},
+  {place:'官能基市集',h:300,intro:[
+   ['n','森林邊緣有個熱鬧的市集。每個攤位都掛著不同的旗子，酸的、嗆的、甜的氣味混在一起。'],
+   ['k','這些旗子就是官能基，一小組固定接法的原子。分子身上掛哪一面旗，就是哪一種脾氣。'],
+   ['k','醛、酮、酸、胺，名字的最後一個字就是它的旗號。看到名字先想：它掛的是哪面旗？'],
+   ['b','咖啡裡的酸味、香味，說穿了都是這幾面旗子在作怪。這一站走完，才算真的看得懂圖鑑。'],
+   ['k','市集盡頭還有一個大傢伙在等你，是個圈圈。先不說，到了就知道。']
+  ]},
+  {place:'咖啡果園',h:350,intro:[
+   ['n','模型盒的第二層打開了。一股果香湧出來，你們站在山坡上，四周是結滿紅色果實的咖啡樹。'],
+   ['b','這是我年輕時去過的莊園。咖啡果摘下來的那一刻，酸和甜就已經藏在豆子裡了。'],
+   ['k','進階區囉。這裡的分子都是真的在咖啡裡找得到的，個頭也大得多。'],
+   ['k','酸味分子幾乎都掛著同一面旗，有的還一次掛兩三面。甜的那幾位，渾身掛滿了醇的記號。'],
+   ['b','檸檬的酸、蘋果的酸、優格的酸，喝起來不一樣，是因為分子長得不一樣。接出來就懂了。']
+  ]},
+  {place:'滾燙的烘豆爐',h:24,intro:[
+   ['n','一陣熱浪撲面而來。你們縮得很小很小，站在一顆正在滾筒裡翻滾的豆子表面，四周劈啪作響。'],
+   ['b','第一爆了。聽到沒有？豆子裡的水變成蒸氣衝出來，糖和胺基酸開始反應，香氣就是這時候生出來的。'],
+   ['k','這一站的分子都飄在空氣裡，是鼻子聞得到的那種。很多都帶著圈圈，有五個角的，也有六個角的。'],
+   ['k','圈圈裡除了碳，有時會混進一顆氧、一顆氮，甚至硫。零件盒裡那顆黃色大球終於要上場了。'],
+   ['b','咖啡的香氣分子有上千種。我們只挑最有名的十幾個，接完之後，聞咖啡的方式會不一樣。']
+  ]},
+  {place:'不眠之塔',h:255,intro:[
+   ['n','夜深了，烘豆坊只剩一盞燈。模型盒裡升起一座高塔，塔頂的窗戶亮著，好像永遠不打算熄。'],
+   ['k','這座塔的主人，就是讓全世界的人早上爬得起來的那一位。'],
+   ['b','咖啡因。兩個圈併在一起，上面掛著好幾個小尾巴。我師父說，接得出它的學徒才能碰烘豆機。'],
+   ['k','塔裡還住著它的兩個親戚，一個在茶裡，一個在巧克力裡。三個長得幾乎一樣，差別只在小尾巴掛在哪。'],
+   ['k','先從塔門口的守衛開始吧。它比較小，而且你在上一站見過它的親戚。']
+  ]},
+  {place:'生豆深處的寶庫',h:48,intro:[
+   ['n','圖鑑只剩最後三頁。小鍵帶你鑽進一顆還沒烘過的生豆，越往裡走越暗，盡頭有一扇很厚的門。'],
+   ['k','門後面是生豆裡份量最重的幾個分子。它們在烘焙時會碎掉，碎片就是你前面接過的那些酸和香氣。'],
+   ['b','也就是說，前面每一站學到的東西，這裡全部用得上。圈圈、旗子、碳鏈，一樣都少不了。'],
+   ['k','最大的那個有四十幾顆球。慢慢來，轉一轉模型，一段一段接。'],
+   ['b','接完這三個，圖鑑就齊了。我去把烘豆機熱起來等你。']
+  ]}
+ ],
+ /* 每一關：[出發前小鍵說的話, 完成後小鍵說的話]。出發前只給線索，不說分子式 */
+ lv:{
+  h2:['雲海上飄著全宇宙最輕的氣體。它小到只需要兩顆一樣的球，先拿它練練手。','接上了！圖鑑第一頁亮起來了。記住這個手感，後面都是這樣一根一根接。'],
+  h2o:['腳下那片海，全是同一種分子。你每天喝它、拿它沖咖啡，卻不一定接得出來。','一杯黑咖啡有九成八以上都是它。沒有水，後面那些味道一個也溶不出來。'],
+  nh3:['雲裡有一股嗆鼻的味道，這一關的主角是氮。它有三隻手，看你怎麼安排。','嗆歸嗆，植物要長大少不了氮。咖啡樹吃的肥料裡，就有它的身影。'],
+  ch4:['雲海下冒著一串串氣泡，一點就著。碳第一次出場，四隻手要全部用上。','碳的四隻手朝四個方向撐開，像一座小小的金字塔。轉一轉模型看看。'],
+  hcl:['遠處有一朵黃綠色的雲。零件盒最右邊那顆綠球，名字就寫在這個分子裡。','它溶進水裡是鹽酸，你的胃裡就有。「酸」這個字，後面還會一直遇到。'],
+  h2s:['海面傳來臭雞蛋味。別捏鼻子，這位新朋友的家族，以後在咖啡香氣裡是大明星。','含硫的分子通常很臭，可是極少量的時候反而很香。到了烘豆爐那一站你就懂。'],
+  o2:['谷口的火堆快熄了。它需要你每一口都在吸的那種氣體，只牽一隻手可不夠。','火旺起來了。烘豆、燃燒，連你身體裡消耗養分，都要靠它。'],
+  co2:['火燒過之後冒出來的氣體。沖咖啡時粉層鼓起來冒泡，也是它在往外跑。','新鮮的豆子裡憋著很多它，所以才要「養豆」，等它慢慢排出來。'],
+  n2:['空氣裡最多的其實不是氧，是這一位。它把自己綁得非常緊，誰也拆不開。','三根棍子牽得死死的。咖啡包裝裡常常充它，就是因為它幾乎什麼都不反應。'],
+  hcn:['岩縫裡飄來一絲苦杏仁味。這個分子很危險，幸好我們只是接模型。名字裡的三個字都是線索。','碳把一隻手給了氫，另外三隻全給了氮。排成一直線，乾淨俐落。'],
+  c2h4:['谷底長著一棵果樹，果子一夜之間全熟了。催熟它們的，是一種很小的氣體。','兩個碳用雙鍵牽著，整個分子是平的。把青香蕉和熟蘋果放在一起，就是請它幫忙。'],
+  c2h2:['岩壁上有人在焊東西，火焰藍得刺眼。這種氣體裡，碳和碳牽得比上一個更緊。','三鍵把四顆原子拉成一條直線。碳和碳之間，最多就是牽三隻手了。'],
+  c3h6:['峽谷出口掛著一條塑膠繩。做出它的原料分子，比催熟果子的那位多一個碳。','單鍵和雙鍵可以待在同一條鏈上。走出峽谷，前面就是森林了。'],
+  c2h6:['森林最外圍的小樹苗，只有兩節樹幹。名字裡的「乙」就是二的意思。','甲乙丙丁，一二三四。碳的數目就藏在名字的第一個字裡，這個暗號要記好。'],
+  c3h8:['營火旁有一桶瓦斯。它的碳鏈再長一節，看名字就知道有幾個碳。','立體看它是彎的，像鋸齒。碳鏈從來就不是一條直線。'],
+  ch4o:['第一位掛著「醇」記號的居民。它最小，也最毒，千萬不能喝。','看到了嗎？一顆氧牽著一顆氫，掛在碳上。這個小尾巴就是醇的記號。'],
+  c2h6o:['森林酒館裡每個杯子都有它。釀酒的酵母、發酵咖啡果的酵母，都會製造這個分子。','酒精。日曬和厭氧處理的咖啡帶酒香，就是發酵時多了它和它的夥伴。'],
+  dme:['奇怪，這一位用的零件和上一關一模一樣，名字卻不同。「醚」字是唯一的線索。','同樣的球，換個接法就是另一種分子。所以我才不讓你只看分子式嘛。'],
+  ipa:['酒館門口放著一瓶消毒用的酒精。名字裡的「異」，表示那個記號沒有掛在鏈子的尾巴上。','記號掛在中間還是尾端，性質就不一樣。位置也是分子的一部分。'],
+  ch2o:['市集第一攤，氣味刺鼻。「醛」這面旗子很簡單，就看你記不記得峽谷學的那一招。','碳和氧用雙鍵牽著，掛在鏈子的最尾端。這面旗就叫醛。'],
+  ch2o2:['被螞蟻咬過嗎？那股刺痛就是它。「酸」這面旗比醛多了一點東西。','同一個碳上，掛著雙鍵的氧，又掛著醇的小尾巴。咖啡裡所有的有機酸都掛這面旗。'],
+  c2h4o2:['隔壁攤在賣醋。把剛才那位的碳鏈加長一節，就是這位大家都嚐過的酸。','咖啡放涼之後酸味變明顯，它也有份。少少的很明亮，太多就像醋了。'],
+  c3h6o:['賣指甲油的攤子飄來去光水的味道。「酮」和醛是親戚，只是旗子掛的位置不同。','同一面碳氧雙鍵的旗，掛在鏈子中間就叫酮。'],
+  ch5n:['魚攤的腥味來自這一類分子。「胺」這面旗的主角，是那顆有三隻手的藍球。','氮帶著兩個氫掛在碳上。蛋白質、胺基酸、咖啡因，全都少不了氮。'],
+  urea:['這個分子改寫過化學史。它一口氣掛了三面旗：中間一面，左右各一面一樣的。','以前的人相信只有生物才做得出這種分子，直到有人在實驗室裡把它做了出來。'],
+  gly:['最小的胺基酸，蛋白質的積木。它一頭掛著胺的旗，另一頭掛著酸的旗。','烘豆時，胺基酸遇上糖會發生梅納反應。咖啡的褐色和烘焙香就是這樣來的。'],
+  c6h6:['市集盡頭的大傢伙。它不是一條鏈，而是頭尾相接的一個圈，而且整個是平的。','碳鏈的頭尾接起來就是環。這個六角形，你在烘豆爐那一站會一直看到。'],
+  lactic:['果園工人在喝優格。那種圓潤的酸，分子不大，卻同時帶著酸和醇兩種記號。','厭氧發酵的咖啡，乳酸菌會幫忙多做一些它，酸質喝起來比較柔。'],
+  malic:['咬一口青蘋果。這位的碳鏈兩頭都掛著酸的旗子，中間還藏了一個醇的記號。','咖啡果的果肉裡就有它。杯測師說的「蘋果般的酸」，指的就是這一位。'],
+  citric:['檸檬的酸。它比蘋果酸更貪心，一共掛了三面酸的旗子。','淺焙喝得到柑橘味，烘深了就淡了，因為它在高溫下會慢慢分解。'],
+  quinic:['樹下有一杯放太久的咖啡，喝起來澀澀的。兇手是個全用單鍵接成的六角環。','它是綠原酸碎掉之後的產物。咖啡在保溫壺裡放得越久，它越多，味道就越澀。'],
+  glucose:['終於有甜的了。它平常把自己捲成一個環，環上有一顆氧，還掛滿了醇的小尾巴。','咖啡果的甜來自它和果糖。兩個接在一起，就是寶庫裡等著你的那個大傢伙。'],
+  hmf:['有人把糖煮過頭了，鍋裡飄出焦糖味。糖脫掉水之後，縮成了一個五角的小環。','糖一受熱就會變出它。蜂蜜放久了、麵包烤上色，裡面也都有。'],
+  c2h4o:['爐子裡飄出的第一縷香氣，帶著青蘋果味。它很小，掛的是市集裡見過的醛旗。','它很容易揮發。剛磨好的咖啡粉香氣一下就散掉，跑最快的就有它。'],
+  c4h8o2:['一陣水果糖的香味。酸和醇手牽手接在一起，就成了「酯」。名字要倒過來讀。','乙酸加乙醇。發酵處理的咖啡，水果香常常是酯類的功勞。'],
+  c4h6o2:['奶油爆米花的味道。名字說得很清楚：四個碳，兩面酮的旗，掛在第二和第三個碳上。','奶油和發酵乳製品的香氣都靠它。咖啡裡的奶油感，它也有貢獻。'],
+  ch4s:['那顆黃色大球上場了。把森林裡最小的醇拿來，把氧換成它的同族兄弟。','單獨聞很臭，混在幾百種香氣裡，卻讓咖啡聞起來「新鮮」。豆子放久了，最先消失的就是它們。'],
+  c4h4o:['糖燒焦之後，碳和氧圍成了一個五角形的小環。爐子裡到處都是它的親戚。','五角環加一顆氧。接下來好幾個香氣分子，都是在它身上加掛東西。'],
+  furfural:['烤麵包和杏仁的甜香。在剛才那個五角環上，氧的隔壁加掛一面醛旗。','糖脫水就會變成它。淺焙到中焙，這種甜甜的烘烤香最明顯。'],
+  fft:['注意了，這是整爐最有名的一位。很多人說，它就是「咖啡味」本人。五角環，加上硫。','只要極低極低的濃度，人就聞得到。現煮咖啡那股香，少了它就不對了。'],
+  c5h5n:['爐溫越來越高，飄出一點焦苦味。這次是六角環，裡面混進了一顆氮。','生豆裡的葫蘆巴鹼受熱分解才有它。烘得越深，它越多。'],
+  mepyz:['堅果和可可的香氣。六角環裡這次有兩顆氮，面對面坐著，旁邊還掛了一個碳。','胺基酸和糖在高溫下相遇的產物。花生、可可、烤肉的香氣裡都有它的家族。'],
+  maltol:['棉花糖攤的甜香。六角環裡有一顆氧，環上掛了三樣東西：酮、醇，還有一個碳。','焦糖和烘焙的香氣裡常常有它。它會讓人覺得東西聞起來更甜。'],
+  guaiacol:['深焙的煙燻味來了。市集盡頭那個六角環上，相鄰的兩個碳各掛了一個帶氧的尾巴。','威士忌的煙燻、燻肉的香也有它。深焙咖啡裡，它是綠原酸燒出來的。'],
+  vanillin:['香草冰淇淋的味道。它和上一位長得很像，只是在環上多掛了一面醛旗。','香草莢裡的主角。咖啡裡只有一點點，卻讓整杯聞起來更甜、更圓。'],
+  vg4:['丁香般的辛香。還是上上一位那個架子，在醇記號的正對面，多了一小段帶雙鍵的碳鏈。','它也是綠原酸家族受熱的碎片。有些人說的「香料味」，就是它。'],
+  niacin:['塔門口的守衛。它是爐子裡那個含氮六角環的親戚，身上多掛了一面酸旗。','它也叫維生素 B3。生豆裡的葫蘆巴鹼烘過之後，有一部分會變成它。'],
+  caffeine:['塔頂的主人。兩個含氮的環併在一起，掛著兩面酮旗，還有三個單獨的碳。祝你好運。','接出來了！它長得很像讓人想睡的腺苷，所以能佔住位子，讓大腦收不到睏的訊號。'],
+  theophylline:['茶裡的親戚。和塔主幾乎一模一樣，只是五角環那邊少了一個小尾巴。','茶葉裡有它，你的身體分解咖啡因時也會做出它。'],
+  theobromine:['巧克力裡的親戚。零件和上一位完全相同，少掉的小尾巴換了位置。','巧克力的苦味有它一份。狗不能吃巧克力，就是因為牠們代謝它的速度太慢。'],
+  caffeic:['寶庫第一道鎖。六角環上有兩個相鄰的醇記號，另一頭伸出一段帶雙鍵的鏈子，尾巴是酸旗。','記住它。下一個大傢伙，有一半就是它。'],
+  cga:['生豆裡最多的多酚。把剛才的咖啡酸，和果園裡那個澀澀的六角環，用酯的方式接在一起。','生豆的澀、烘焙後的苦與煙燻，源頭都有它。一顆豆子怎麼烘，就是在決定它要碎成什麼。'],
+  sucrose:['最後一頁。一個六角的糖環和一個五角的糖環，中間用一顆氧牽著。四十五顆球，慢慢來。','生豆裡的糖幾乎都是它。烘焙時它全部分解，變成焦糖香、酸和咖啡的顏色。圖鑑，完成了。']
+ }
+};
 const BO={'-':1,'=':2,'#':3};
 function buildTarget(spec){
   const atoms=spec.a.split(' ').map((e,i)=>({id:i,e}));
@@ -565,8 +795,9 @@ function mergePlayers(into,from){
   for(const f of from||[]){
     if(!f||typeof f.name!=='string'||!f.best)continue;
     let p=into.find(x=>x.name===f.name);
-    if(!p){into.push({name:f.name,best:Object.assign({},f.best),made:f.made||Date.now(),up:f.up||0,ph:f.ph||null,d:f.d?1:0});continue;}
+    if(!p){into.push({name:f.name,best:Object.assign({},f.best),made:f.made||Date.now(),up:f.up||0,ph:f.ph||null,d:f.d?1:0,seen:Object.assign({},f.seen)});continue;}
     if(!p.ph&&f.ph)p.ph=f.ph;
+    if(f.seen)p.seen=Object.assign(p.seen||{},f.seen);
     for(const id in f.best){
       const a=p.best[id],b=f.best[id];
       p.best[id]=a?{s:Math.max(a.s,b.s),st:Math.max(a.st,b.st),t:a.t&&b.t?Math.min(a.t,b.t):(a.t||b.t||0)}:b;
@@ -626,7 +857,7 @@ let st={lvl:0,atoms:[],bonds:[],sel:null,won:false,nid:1};
 let drag=null,raf=0,awake=0,fx=[],flash=null,flashT=0,hintLv=0,bannerOpen=false,pref3=true,bottomPad=0;
 let tut={on:false,steps:[],i:0,A:null,B:null,map:null,good:null,off:false,hl:{atoms:[],bond:null}};
 const EMPTY=sig([],[]);
-let view3=false,rot={x:-.35,y:.5},fit=1,spinHold=0,titleOn=true,afterEnter=null;
+let view3=false,rot={x:-.35,y:.5},fit=1,spinHold=0,titleOn=true,afterEnter=null,pendingEnd=false,scene=null;
 const F3=700;
 
 const R=e=>EL[e].r*S;
@@ -676,7 +907,7 @@ function setScale(){
 }
 function renderHead(){
   const lv=level(),ch=CHAPTERS[lv.ci];
-  $('crumb').textContent=`${lv.adv?'進階':'基礎'} ${lv.ci+1}-${lv.li+1}　${ch.title}`;
+  $('crumb').textContent=`${lv.adv?'進階':'基礎'} ${lv.ci+1}-${lv.li+1}　${STORY.ch[lv.ci].place}`;
   $('name').textContent=lv.n;
   $('hint').innerHTML='接法　<b>'+lv.hint+'</b>';
   applyHint();
@@ -725,7 +956,7 @@ function renderMeta(msg){
   el.textContent=text;el.classList.toggle('warn',warn);
   $('btnDel').disabled=st.sel==null||st.won;
   const lvTip=level().tip;
-  $('tip').hidden=!lvTip||tut.on||st.won||st.atoms.length>3&&level().target.atoms.length>4;
+  $('tip').hidden=true;
   if(lvTip)$('tip').textContent=lvTip;
   renderCoach();
   topPad=$('hint').hidden?0:$('hint').offsetHeight+18;
@@ -854,7 +1085,7 @@ function win(){
   const p=player(),sc=$('winScore'),got=$('winGot');sc.hidden=true;got.hidden=true;
   if(!tut.on&&att.assist){got.hidden=false;got.textContent='這次中途用了教學，不計分。按「清空」重組一次就會計分。';}
   else if(!tut.on&&p){
-    const r=scoreOf(lv,sec,att.hint),old=p.best[lv.id],t0=titleIdx(p);
+    const r=scoreOf(lv,sec,att.hint),old=p.best[lv.id],t0=titleIdx(p),ch0=chDone(p,lv.ci);
     p.best[lv.id]={s:Math.max(r.s,old?old.s:0),st:Math.max(r.st,old?old.st:0),t:old&&old.t&&old.t<sec?old.t:Math.round(sec)};
     p.up=Date.now();save();gQueue();boardPush();
     sc.hidden=false;
@@ -863,10 +1094,13 @@ function win(){
     if(!old)notes.push('第一次完成');else if(r.s>old.s)notes.push(`新紀錄，比上次多 ${r.s-old.s} 分`);else notes.push(`最佳紀錄仍是 ${old.s} 分`);
     if(att.hint)notes.push(att.hint>1?'看過接法，分數 ×0.7':'看過分子式，分數 ×0.85');
     const t1=titleIdx(p);if(t1>t0)notes.unshift(`獲得稱號「${TITLES[t1].n}」`);
+    if(!ch0&&chDone(p,lv.ci))notes.unshift(`「${STORY.ch[lv.ci].place}」探索完成`);
+    if(stats(p).n===LEVELS.length&&!(p.seen&&p.seen.end))pendingEnd=true;
     got.hidden=false;got.textContent=notes.join('　·　');
   }
   showTimer();
-  $('winTag').textContent=tut.on?'教學完成':'組裝完成';
+  $('winTale').hidden=false;$('winTale').innerHTML='<b>小鍵</b>'+esc(STORY.lv[lv.id][1]);
+  $('winTag').textContent=tut.on?'教學完成':'圖鑑補回一頁';
   $('btnStay').textContent=tut.on?'自己組一次':'再看一下';
   if(!reduced){
     let cx=0,cy=0;for(const a of st.atoms){cx+=a.x;cy+=a.y;}
@@ -886,6 +1120,7 @@ function goLevel(i,keep){
   setScale();renderHead();save();
   if(!keep)attReset();
   changed();showTimer();
+  if(!keep){$('brief').hidden=true;storyFlow();}
 }
 
 /* ---------- 教學模式 ---------- */
@@ -1307,7 +1542,14 @@ $('btnStay').addEventListener('click',()=>{
 $('btnTut').addEventListener('click',()=>setTut(!tut.on));
 $('btn3d').addEventListener('click',()=>{pref3=!view3;try{localStorage.setItem('bskit-3d',pref3?'1':'0');}catch(e){}setView3(pref3);});
 $('btnBack').addEventListener('click',tutBack);
-$('btnNext').addEventListener('click',()=>{if(st.lvl+1<LEVELS.length)goLevel(st.lvl+1);else{$('win').hidden=true;openLevels();}});
+$('btnNext').addEventListener('click',()=>{
+  const go=()=>{if(st.lvl+1<LEVELS.length)goLevel(st.lvl+1);else{$('win').hidden=true;openLevels();}};
+  const p=player();
+  if(pendingEnd&&p){
+    pendingEnd=false;$('win').hidden=true;
+    playScene(STORY.end,{eye:'FINAL',place:'師父的那一杯',h:40},()=>{p.seen=p.seen||{};p.seen.end=1;p.d=1;save();openLevels();});
+  }else go();
+});
 $('btnLevels').addEventListener('click',openLevels);
 $('btnCloseLevels').addEventListener('click',()=>{$('levels').hidden=true;});
 let tab='basic';
@@ -1318,7 +1560,7 @@ function renderMe(){
   $('me').innerHTML=`<div class="who"><b>${esc(p.name)}</b><span class="badge">${TITLES[titleIdx(p)].n}</span></div>
     <div class="nums"><span><b>${s.s}</b>分</span><span><b>${s.st}</b>顆星</span><span><b>${s.n}</b>/ ${LEVELS.length} 關</span></div>
     <p class="syncnote" data-sync></p>
-    <div class="acts"><button class="tool" type="button" data-open="board">排行榜</button><button class="tool" type="button" data-open="titles">稱號</button><button class="tool" type="button" data-open="who">切換玩家</button><button class="tool" type="button" data-open="setpin">${p.ph?'更改密碼':'設定密碼'}</button></div>`;
+    <div class="acts"><button class="tool" type="button" data-open="board">排行榜</button><button class="tool" type="button" data-open="titles">稱號</button><button class="tool" type="button" data-open="journal">探險日誌</button><button class="tool" type="button" data-open="who">切換玩家</button><button class="tool" type="button" data-open="setpin">${p.ph?'更改密碼':'設定密碼'}</button></div>`;
 }
 const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 function openLevels(keepTab){
@@ -1332,7 +1574,7 @@ function openLevels(keepTab){
   $('levelList').innerHTML=CHAPTERS.map((ch,ci)=>{
     if((tab==='adv')!==!!ch.adv)return'';
     const got=ch.levels.filter(l=>best(l.id)).length;
-    return `<div class="chap"><h3><span>第 ${ci+1} 章　${ch.title}</span><b>${got} / ${ch.levels.length}</b></h3><div class="grid">`+
+    return `<div class="chap"><h3><span>第 ${ci+1} 站　${STORY.ch[ci].place}<small>${ch.title}</small></span><b>${got} / ${ch.levels.length}</b></h3><div class="grid">`+
       ch.levels.map(l=>{const i=LEVELS.indexOf(l),b=best(l.id);
         return `<button class="lv ${b?'done':''} ${i===st.lvl?'cur':''}" type="button" data-i="${i}"><span class="f">${b?fHtml(l.f):'？'}</span><span class="n">${l.n}</span>`+
           (b?`<span class="st">${'★'.repeat(b.st)+'☆'.repeat(3-b.st)}<i>${b.s}</i></span>`:'')+`</button>`;}).join('')+
@@ -1367,7 +1609,8 @@ async function openWho(force){
 function enter(name){
   store.cur=name;save();gQueue();boardPush();
   $('who').hidden=true;$('pin').hidden=true;
-  if(afterEnter){const a=afterEnter;afterEnter=null;hideTitle();if(a==='tut')setTut(true);}
+  if(afterEnter){const a=afterEnter;afterEnter=null;if(a==='tut')setTut(true);hideTitle();}
+  else if(!titleOn)storyFlow();
   titleWho();
   if(!$('levels').hidden)openLevels(true);
   if(st.won)clearAll();else{attReset();renderMeta();}
@@ -1385,7 +1628,7 @@ async function pickPlayer(raw){
   const rem=await savePull(name);
   $('whoMsg').textContent='';
   if(rem&&rem.best){
-    const fin=()=>{mergePlayers(store.players,[{name,best:rem.best,up:rem.up,ph:rem.ph||null}]);enter(name);toast('接回「'+name+'」之前的紀錄');};
+    const fin=()=>{mergePlayers(store.players,[{name,best:rem.best,up:rem.up,ph:rem.ph||null,seen:rem.seen}]);enter(name);toast('接回「'+name+'」之前的紀錄');};
     if(rem.ph)askPin(name,rem.ph,fin);else fin();
     return;
   }
@@ -1452,13 +1695,13 @@ async function syncOne(p,force){
   const old=await r.json();
   if(old&&old.ph&&old.ph!==p.ph&&!force)return 'locked';
   const before=JSON.stringify(p.best);
-  if(old&&old.best)mergePlayers([p],[{name:p.name,best:old.best,up:old.up}]);
+  if(old&&old.best)mergePlayers([p],[{name:p.name,best:old.best,up:old.up,seen:old.seen}]);
   const now=JSON.stringify(p.best),pulled=now!==before;
-  if(p.d||force||!old||JSON.stringify(old.best||{})!==now||(old.ph||null)!==(p.ph||null)){
+  if(p.d||force||!old||JSON.stringify(old.best||{})!==now||(old.ph||null)!==(p.ph||null)||JSON.stringify(old.seen||{})!==JSON.stringify(p.seen||{})){
     const put=async(u,d)=>{const x=await fetch(u,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(d),keepalive:true});if(!x.ok)throw new Error('http '+x.status);};
     const row=boardRow(p);
     if(row.s||p.ph||old){
-      await put(FBS+'/'+key+'.json',{n:p.name,best:p.best,ph:p.ph||null,up:Date.now()});
+      await put(FBS+'/'+key+'.json',{n:p.name,best:p.best,ph:p.ph||null,seen:p.seen||{},up:Date.now()});
       if(row.s)await put(FB+'/'+key+'.json',row);
     }
   }
@@ -1515,7 +1758,7 @@ async function openBoard(){
 }
 document.addEventListener('click',ev=>{
   const o=ev.target.closest('[data-open]'),c=ev.target.closest('[data-close]');
-  if(o){({board:openBoard,titles:openTitles,who:()=>openWho(false),setpin:setPin})[o.dataset.open]();}
+  if(o){({board:openBoard,titles:openTitles,who:()=>openWho(false),setpin:setPin,journal:openJournal})[o.dataset.open]();}
   if(c)$(c.dataset.close).hidden=true;
 });
 
@@ -1604,70 +1847,245 @@ setTimeout(()=>gLoadLib().then(()=>{
 addEventListener('pagehide',()=>{if(gTimer){clearTimeout(gTimer);gPush();}});
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&gTimer){clearTimeout(gTimer);gPush();}});
 
+/* ---------- 故事對話、任務卡、探險日誌 ---------- */
+const WHO={n:null,b:{n:'阿焙師',ch:'焙',c1:'#8a8e96',c2:'#1b1d21',ink:'#fff'},k:{n:'小鍵',ch:'鍵',c1:'#fff3b0',c2:'#e0a800',ink:'#3a2c00'}};
+function playScene(lines,head,done){
+  scene={lines,i:0,done,timer:0,full:'',h:head.h,els:head.els||ORDER};
+  if(!scRaf)scRaf=requestAnimationFrame(sceneFrame);
+  $('stEye').textContent=head.eye;$('stPlace').textContent=head.place;
+  $('story').style.setProperty('--h',head.h);
+  $('story').hidden=false;sceneLine();
+}
+/* 對話背景：和封面同一套像素畫法，顏色跟著每一站換，天上飄著那一站會用到的原子 */
+let scRaf=0;
+const CH_ELS=[['H','O','N','C'],['O','C','N'],['C','H','O'],['C','O','N'],['O','C','H'],['S','O','N','C'],['N','C','O'],['C','O','H']];
+function sceneFrame(now){
+  scRaf=0;if(!scene)return;
+  const c=$('scv'),cw=c.clientWidth,chh=c.clientHeight;
+  if(cw<10||chh<10){scRaf=requestAnimationFrame(sceneFrame);return;}
+  const PH=Math.round(PW*chh/cw);
+  if(c.width!==PW||c.height!==PH){c.width=PW;c.height=PH;}
+  const g=c.getContext('2d'),h=+scene.h,tt=reduced?0:now/1000;
+  const hz=Math.round(($('stBox').getBoundingClientRect().top-c.getBoundingClientRect().top)*PW/cw)-2;
+  const cols=Array.from({length:9},(_,i)=>`hsl(${h+i*5} ${34+i*3}% ${8+i*i*.6}%)`),band=hz/cols.length;
+  for(let i=0;i<cols.length;i++){
+    const y0=Math.round(i*band),y1=Math.round((i+1)*band);
+    g.fillStyle=cols[i];g.fillRect(0,y0,PW,y1-y0);
+    if(i+1<cols.length){g.fillStyle=cols[i+1];for(let y=y1-3;y<y1;y++)for(let x=(y&1);x<PW;x+=(y===y1-3?4:2))g.fillRect(x,y,1,1);}
+  }
+  for(const s of STARS){
+    if(Math.sin(tt*1.6+s[3])<-.55)continue;
+    g.fillStyle=s[2]===2?'#fffbe6':'#c9cbe6';g.fillRect(Math.round(s[0]*PW),Math.round(s[1]*hz*.5),1,1);
+  }
+  const els=scene.els;
+  for(let i=0;i<8;i++){
+    const e=els[i%els.length],r=5+(i*3)%7;
+    const x=((i*53.7)%100)/100*(PW+40)-20+Math.sin(tt*.4+i*1.3)*10,y=hz*(.42+((i*37)%50)/100)+Math.sin(tt*.7+i*2.1)*5;
+    pxDisc(g,x,y,r,PXC[e],i%3===2);
+  }
+  for(let x=0;x<PW;x++){
+    const y1=Math.round(hz-20-hill(x+tt*1.5+h,.045,7,.5)),y2=Math.round(hz-8-hill(x+60+tt*5+h*3,.07,5,2.1));
+    g.fillStyle=`hsl(${h+10} 30% 20%)`;g.fillRect(x,y1,1,PH-y1);
+    g.fillStyle=`hsl(${h+10} 34% 34%)`;g.fillRect(x,y1,1,1);
+    g.fillStyle=`hsl(${h+16} 38% 10%)`;g.fillRect(x,y2,1,PH-y2);
+  }
+  g.fillStyle='#07100f';g.fillRect(0,hz+2,PW,PH-hz);
+  if(!reduced)scRaf=requestAnimationFrame(sceneFrame);
+}
+function sceneLine(){
+  const [w,t]=scene.lines[scene.i],who=WHO[w],el=$('stText');
+  $('stAv').style.cssText=who?`background:radial-gradient(circle at 35% 30%,${who.c1},${who.c2});color:${who.ink}`:'visibility:hidden';
+  $('stAv').textContent=who?who.ch:'';$('stName').textContent=who?who.n:'';
+  el.classList.toggle('nar',!who);
+  $('stCount').textContent=(scene.i+1)+' / '+scene.lines.length;
+  scene.full=t;clearInterval(scene.timer);
+  if(reduced){el.textContent=t;scene.timer=0;return;}
+  let n=0;el.textContent='';
+  scene.timer=setInterval(()=>{n++;el.textContent=t.slice(0,n);if(n>=t.length){clearInterval(scene.timer);scene.timer=0;}},26);
+}
+function sceneNext(){
+  if(!scene)return;
+  if(scene.timer){clearInterval(scene.timer);scene.timer=0;$('stText').textContent=scene.full;return;}
+  scene.i++;
+  if(scene.i>=scene.lines.length)sceneEnd();else sceneLine();
+}
+function sceneEnd(){
+  if(!scene)return;
+  clearInterval(scene.timer);const d=scene.done;scene=null;$('story').hidden=true;
+  if(d)d();
+}
+$('stBox').addEventListener('click',sceneNext);
+$('stSkip').addEventListener('click',sceneEnd);
+/* 進到一關時：沒看過序章先播序章，第一次到這一站播這一站的開場，最後給任務卡 */
+function storyFlow(){
+  const p=player();if(!p||titleOn||scene)return;
+  p.seen=p.seen||{};
+  const lv=level(),c=STORY.ch[lv.ci],steps=[];
+  if(!p.seen.pro)steps.push(['pro',STORY.pro,{eye:'PROLOGUE',place:'老烘豆坊的木盒',h:150}]);
+  if(!p.seen['c'+lv.ci])steps.push(['c'+lv.ci,c.intro,{eye:'STAGE '+(lv.ci+1),place:c.place,h:c.h,els:CH_ELS[lv.ci]}]);
+  const next=()=>{
+    const x=steps.shift();
+    if(!x){if(!best(lv.id)&&!tut.on&&!st.won)openBrief();return;}
+    playScene(x[1],x[2],()=>{p.seen[x[0]]=1;p.d=1;save();next();});
+  };
+  next();
+}
+function openBrief(){
+  const lv=level(),b=best(lv.id);
+  $('brEye').textContent=`STAGE ${lv.ci+1}-${lv.li+1}　${STORY.ch[lv.ci].place}`;
+  $('brName').textContent=lv.n;
+  $('brText').textContent=STORY.lv[lv.id][b?1:0];
+  $('brTip').hidden=!lv.tip;$('brTip').textContent=lv.tip?'操作　'+lv.tip:'';
+  $('brGo').textContent=st.atoms.length?'繼續組裝':'開始組裝';
+  $('brief').hidden=false;
+}
+$('brGo').addEventListener('click',()=>{$('brief').hidden=true;kick();});
+$('crumb').addEventListener('click',openBrief);
+function openJournal(){
+  const p=player();if(!p)return;const seen=p.seen||{};
+  const again=(k,label)=>`<button class="pill" type="button" data-scene="${k}">${label}</button>`;
+  let h=seen.pro?`<div class="jr-ch"><b>序章　老烘豆坊的木盒</b>${again('pro','重看')}</div>`:'';
+  STORY.ch.forEach((c,ci)=>{
+    h+=`<div class="jr-ch"><span><b>第 ${ci+1} 站　${seen['c'+ci]?c.place:'？？？'}</b><br><small>${CHAPTERS[ci].title}</small></span>${seen['c'+ci]?again('c'+ci,'重看開場'):''}</div>`;
+    for(const l of CHAPTERS[ci].levels){
+      h+=best(l.id)?`<div class="jr"><b>${l.n}<span>${fHtml(l.f)}</span></b><p>${esc(STORY.lv[l.id][1])}</p><p class="f">${esc(l.fact)}</p></div>`
+        :`<div class="jr off"><b>${seen['c'+ci]?l.n:'？？？'}</b><p>圖鑑的這一頁還是空白的。</p></div>`;
+    }
+  });
+  if(seen.end)h+=`<div class="jr-ch"><b>終章　師父的那一杯</b>${again('end','重看')}</div>`;
+  $('journalList').innerHTML=h;$('journal').hidden=false;
+}
+$('journalList').addEventListener('click',ev=>{
+  const b=ev.target.closest('[data-scene]');if(!b)return;
+  const k=b.dataset.scene;
+  if(k==='pro')playScene(STORY.pro,{eye:'PROLOGUE',place:'老烘豆坊的木盒',h:150});
+  else if(k==='end')playScene(STORY.end,{eye:'FINAL',place:'師父的那一杯',h:40});
+  else{const ci=+k.slice(1),c=STORY.ch[ci];playScene(c.intro,{eye:'STAGE '+(ci+1),place:c.place,h:c.h,els:CH_ELS[ci]});}
+});
+
 /* ---------- 開始畫面 ---------- */
 const HERO={"a":[["N",132,164,-13],["C",126,126,-62],["C",109,153,40],["N",96,76,-56],["C",77,97,43],["N",117,193,88],["C",69,59,-2],["N",48,74,93],["N",33,8,18],["C",24,23,79],["C",10,-47,-10],["O",-38,-65,27],["C",-19,-60,-69],["C",-91,-87,-2],["C",-59,-111,-54],["O",19,-73,-118],["C",-130,-111,47],["O",-99,-136,-97],["O",-128,-76,99],["H",149,139,-111],["H",145,240,83],["H",96,185,138],["H",-3,-2,121],["H",57,-79,-11],["H",-48,-15,-88],["H",-129,-53,-26],["H",-28,-157,-45],["H",24,-35,-158],["H",-118,-163,63],["H",-185,-111,31],["H",-96,-126,-151],["H",-156,-29,102]],"b":[[0,1,1],[0,2,2],[1,3,2],[2,4,1],[2,5,1],[3,6,1],[4,7,1],[6,8,1],[7,9,2],[8,10,1],[10,11,1],[10,12,1],[11,13,1],[12,14,1],[12,15,1],[13,16,1],[14,17,1],[16,18,1],[6,4,2],[9,8,1],[13,14,1],[1,19,1],[5,20,1],[5,21,1],[9,22,1],[10,23,1],[12,24,1],[13,25,1],[14,26,1],[15,27,1],[16,28,1],[16,29,1],[17,30,1],[18,31,1]]};
 (()=>{let x=0,y=0,z=0;const n=HERO.a.length;for(const a of HERO.a){x+=a[1]/n;y+=a[2]/n;z+=a[3]/n;}for(const a of HERO.a){a[1]-=x;a[2]-=y;a[3]-=z;}})();
 const HEXT=Math.max(...HERO.a.map(a=>Math.hypot(a[1],a[2],a[3])))+26;
 const HSTART=HERO.a.map((a,i)=>{const t=i*2.399963,r=520+60*(i%5);return[Math.cos(t)*r,Math.sin(t*1.7)*r*.8,Math.sin(t)*r];});
 let tRaf=0,tRot={x:-.55,y:.3},tDrag=null,tT0=0;
-function tBall(g,x,y,r,d,label){
-  g.fillStyle='rgba(4,18,16,.3)';g.beginPath();g.arc(x+r*.12,y+r*.2,r,0,7);g.fill();
-  const gr=g.createRadialGradient(x-r*.35,y-r*.4,r*.08,x,y,r);gr.addColorStop(0,d.c1);gr.addColorStop(1,d.c2);
-  g.fillStyle=gr;g.beginPath();g.arc(x,y,r,0,7);g.fill();
-  if(label&&r>9){g.fillStyle=d.ink;g.font=`600 ${Math.round(r*.95)}px "Barlow Condensed",sans-serif`;g.textAlign='center';g.textBaseline='middle';g.fillText(label,x,y+1);}
+/* 像素風封面：畫在 208 像素寬的小畫布上再放大。標題字是 16×16 點陣字放大兩倍 */
+const PW=208,GLY={"險": "0040786048a04910520865f650004bbc4aa44aa473bc41104198426444440000", "球": "002800247c22102011fe10207d2210a410a8103010e81ca46323002000c00000", "旅": "0840084008407eff1084118c10701ed1124a124c22442244224242424c410000", "組": "0800087e524222421442087e124222427d42087e2a422a424a42484209ff0000", "探": "100013ff120112497c48108911061c201bff707010a8112412221c2160200000", "化": "02400240044004420842084418582860484008400840084108410841083e0000", "子": "00003ff00020004001c001800180fffe0180018001800180018001800e000000", "分": "02200410041008081004200240011ff802080208040804080808100860f00000", "裝": "0230223022303eff02307e3012fe22c03fff00c00f6c7a78023003dc1c070000", "棍": "080009fe090209fe7f0219021dfe2a002b10491109d60918091109d10b0e0000", "學": "0a40319e22423a5e218222427fff40014ff1003000c07fff0080008007000000", "之": "01000100010001007ff800100020004000802100220024003800470040fe0000"};
+const PXC={H:['#ffffff','#ece6d0','#a9adbf'],C:['#9a9db8','#4a4e69','#22223b'],N:['#b9d0ff','#5b8def','#2f4a9e'],O:['#ffc0b3','#e86a5c','#9e3340'],S:['#fff3a8','#f2c14e','#a67c1a'],Cl:['#d8ffa0','#8fd36a','#3f7d2b']};
+const INK='#14142b';
+const glyphBits=ch=>{const h=GLY[ch],o=[];for(let y=0;y<16;y++)o.push(parseInt(h.slice(y*4,y*4+4),16));return o;};
+let logoCv=null,logoPix=[],tagCv=null;
+function buildLogo(){
+  /* 標題：粗一點（往右多畫一格）、深色描邊、下方陰影，上半奶油色、下半金色 */
+  const txt='分子球棍組裝',sc=2,gw=16*sc,w=txt.length*gw+8,hh=16*sc+10;
+  logoCv=document.createElement('canvas');logoCv.width=w;logoCv.height=hh;
+  const g=logoCv.getContext('2d'),cells=[];
+  [...txt].forEach((ch,i)=>{const b=glyphBits(ch);for(let y=0;y<16;y++)for(let x=0;x<16;x++)if(b[y]>>(15-x)&1)cells.push([4+i*gw+x*sc,3+y*sc,y,i]);});
+  g.fillStyle='rgba(8,8,24,.6)';for(const c of cells)g.fillRect(c[0]+1,c[1]+5,sc+3,sc);
+  g.fillStyle=INK;for(const c of cells)g.fillRect(c[0]-2,c[1]-2,sc+5,sc+4);
+  logoPix=[];
+  for(const c of cells){
+    const gold=c[3]===2||c[3]===3;
+    g.fillStyle=gold?(c[2]<5?'#fff3a8':c[2]<11?'#f2c14e':'#d9952b'):(c[2]<5?'#ffffff':c[2]<11?'#f6ecc9':'#c9b98f');
+    g.fillRect(c[0],c[1],sc+1,sc);logoPix.push(c[0],c[1]);
+  }
+  const t2='化學探險之旅',sp=20;
+  tagCv=document.createElement('canvas');tagCv.width=t2.length*sp;tagCv.height=18;
+  const g2=tagCv.getContext('2d');
+  [...t2].forEach((ch,i)=>{const b=glyphBits(ch);
+    for(let y=0;y<16;y++)for(let x=0;x<16;x++)if(b[y]>>(15-x)&1){g2.fillStyle=INK;g2.fillRect(i*sp+x+1,y+2,1,1);}
+    for(let y=0;y<16;y++)for(let x=0;x<16;x++)if(b[y]>>(15-x)&1){g2.fillStyle='#f6ecc9';g2.fillRect(i*sp+x,y+1,1,1);}
+  });
 }
+function pxDisc(g,cx,cy,r,pal,far){
+  cx=Math.round(cx);cy=Math.round(cy);r=Math.max(1,Math.round(r));
+  const r2=r*r+r*.6,in2=(r-1)*(r-1)+(r-1)*.4,hr=Math.max(1,r*.34),hx=-r*.38,hy=-r*.42;
+  for(let dy=-r;dy<=r;dy++)for(let dx=-r;dx<=r;dx++){
+    const d=dx*dx+dy*dy;if(d>r2)continue;
+    let c;
+    if(d>in2&&r>2)c=INK;
+    else if((dx-hx)*(dx-hx)+(dy-hy)*(dy-hy)<=hr*hr)c=far?pal[1]:pal[0];
+    else if(dx+dy>r*.5)c=far?INK:pal[2];
+    else c=far?pal[2]:pal[1];
+    g.fillStyle=c;g.fillRect(cx+dx,cy+dy,1,1);
+  }
+}
+function pxLine(g,x0,y0,x1,y1,w,col){
+  const n=Math.max(1,Math.ceil(Math.max(Math.abs(x1-x0),Math.abs(y1-y0))));
+  g.fillStyle=col;
+  for(let i=0;i<=n;i++){const x=x0+(x1-x0)*i/n,y=y0+(y1-y0)*i/n;g.fillRect(Math.round(x-w/2),Math.round(y-w/2),w,w);}
+}
+const SKY=['#14142b','#191c3d','#222757','#2e3670','#414d8c','#6468a8','#9a7fb0','#d99aa0','#f2c59a'];
+const STARS=Array.from({length:46},(_,i)=>[(i*73.13)%1,(i*41.77)%1,i%7===0?2:1,i*1.9]);
+const hill=(x,a,b,c)=>Math.sin(x*a)*b+Math.sin(x*a*2.7+1.3)*b*.45+Math.sin(x*a*.37+c)*b*1.3;
 function titleFrame(now){
   tRaf=0;if(!titleOn)return;
-  const c=$('tcv'),w=c.clientWidth,h=c.clientHeight,d=Math.min(3,window.devicePixelRatio||1);
-  if(w<10||h<10){tRaf=requestAnimationFrame(titleFrame);return;}
-  if(c.width!==Math.round(w*d)||c.height!==Math.round(h*d)){c.width=Math.round(w*d);c.height=Math.round(h*d);}
-  const g=c.getContext('2d');g.setTransform(d,0,0,d,0,0);g.clearRect(0,0,w,h);
-  g.lineWidth=1;
-  for(let x=0,i=0;x<=w;x+=28,i++){g.strokeStyle=i%5?'rgba(255,210,74,.05)':'rgba(255,210,74,.13)';g.beginPath();g.moveTo(x+.5,0);g.lineTo(x+.5,h);g.stroke();}
-  for(let y=0,i=0;y<=h;y+=28,i++){g.strokeStyle=i%5?'rgba(255,210,74,.05)':'rgba(255,210,74,.13)';g.beginPath();g.moveTo(0,y+.5);g.lineTo(w,y+.5);g.stroke();}
-  /* 主角分子放在標題和按鈕之間的空檔，偏右，可以蓋到標題右邊 */
-  const bx=c.getBoundingClientRect(),d1=$('title').children[1].getBoundingClientRect(),d2=$('title').children[2].getBoundingClientRect();
-  const y0=Math.max(40,d1.bottom-bx.top-d1.height*.45),y1=d2.top-bx.top+18,gap=Math.max(120,y1-y0);
-  const cx=w*.63,cy=y0+gap/2,k=Math.min(w*.98,gap*1.12)/(2*HEXT);
-  const gl=g.createRadialGradient(cx,cy,8,cx,cy,Math.min(w,h)*.6);gl.addColorStop(0,'rgba(255,210,74,.2)');gl.addColorStop(1,'rgba(255,210,74,0)');
-  g.fillStyle=gl;g.fillRect(0,0,w,h);
-  /* 背景裡慢慢飄的零件 */
+  const c=$('tcv'),cw=c.clientWidth,chh=c.clientHeight;
+  if(cw<10||chh<10){tRaf=requestAnimationFrame(titleFrame);return;}
+  const PH=Math.round(PW*chh/cw),u=PW/cw;
+  if(c.width!==PW||c.height!==PH){c.width=PW;c.height=PH;}
+  if(!logoCv)buildLogo();
+  const g=c.getContext('2d');g.imageSmoothingEnabled=false;
   const tt=reduced?0:now/1000;
-  g.globalAlpha=.4;
-  for(let i=0;i<11;i++){
-    const e=ORDER[i%6],r=5+(i%5)*3.2;
-    const x=((i*137.5)%100)/100*w+Math.sin(tt*.35+i)*18,y=(((i*61)%100)/100*(h+80)+tt*(5+i%4*3))%(h+80)-40;
-    tBall(g,x,y,r,EL[e]);
+  const bx=c.getBoundingClientRect(),d2=$('title').children[2].getBoundingClientRect();
+  const hz=Math.round(Math.min(PH-20,(d2.top-bx.top)*u+4));        /* 地平線：剛好在選單上緣 */
+  /* 天空：一條一條的色帶，交界用棋盤格抖色 */
+  const band=hz/SKY.length;
+  for(let i=0;i<SKY.length;i++){
+    const y0=Math.round(i*band),y1=Math.round((i+1)*band);
+    g.fillStyle=SKY[i];g.fillRect(0,y0,PW,y1-y0);
+    if(i+1<SKY.length){g.fillStyle=SKY[i+1];for(let y=y1-3;y<y1;y++)for(let x=(y&1);x<PW;x+=(y===y1-3?4:2))g.fillRect(x,y,1,1);}
   }
-  g.globalAlpha=1;
-  if(!tDrag&&!reduced)tRot.y+=.006;
-  const el=now-tT0,cyR=Math.cos(tRot.y),syR=Math.sin(tRot.y),cxR=Math.cos(tRot.x),sxR=Math.sin(tRot.x);
+  for(const s of STARS){
+    const y=Math.round(s[1]*hz*.52),x=Math.round(s[0]*PW);
+    if(Math.sin(tt*1.6+s[3])<-.55)continue;
+    g.fillStyle=s[2]===2?'#fffbe6':'#c9cbe6';g.fillRect(x,y,1,1);
+    if(s[2]===2&&Math.sin(tt*1.6+s[3])>.5){g.fillRect(x-1,y,3,1);g.fillRect(x,y-1,1,3);}
+  }
+  /* 標題和副標 */
+  const ly=Math.round(Math.max(26,(bx.height*.085)*u+10)),lx=Math.round((PW-logoCv.width)/2);
+  const drop=reduced?0:Math.max(0,1-(now-tT0)/450),lyy=ly-Math.round(drop*drop*60);
+  g.drawImage(logoCv,lx,lyy);
+  if(!reduced){                                   /* 標題上掃過去的一道光 */
+    const sw=((tt*90)%420)-60;g.fillStyle='#ffffff';
+    for(let i=0;i<logoPix.length;i+=2){const d=logoPix[i]+logoPix[i+1]*.8-sw;if(d>=0&&d<7)g.fillRect(lx+logoPix[i],lyy+logoPix[i+1],3,2);}
+  }
+  const ty=ly+logoCv.height+6;
+  g.drawImage(tagCv,Math.round((PW-tagCv.width)/2)+2,ty);
+  g.fillStyle='#f2c14e';for(const sx of [Math.round((PW-tagCv.width)/2)-9,Math.round((PW+tagCv.width)/2)+5]){g.fillRect(sx+1,ty+7,3,3);g.fillRect(sx,ty+8,5,1);g.fillRect(sx+2,ty+6,1,5);}
+  /* 滿月和主角分子 */
+  const top=ty+26,cyM=Math.round((top+hz-8)/2),cxM=Math.round(PW/2),mr=Math.round(Math.min(PW*.3,(hz-top)*.42));
+  for(let dy=-mr;dy<=mr;dy++){const hw=Math.round(Math.sqrt(mr*mr-dy*dy));
+    g.fillStyle='#f6ecc9';g.fillRect(cxM-hw,cyM+dy,hw*2,1);
+    g.fillStyle='#e2d3a4';for(let x=cxM+Math.round(hw*.45)+((dy&1)?1:0);x<cxM+hw;x+=2)g.fillRect(x,cyM+dy,1,1);
+  }
+  /* 山：兩層剪影，近的那層慢慢往左捲 */
+  for(let x=0;x<PW;x++){
+    const y1=Math.round(hz-22-hill(x+tt*1.5,.045,7,.5)),y2=Math.round(hz-9-hill(x+60+tt*5,.07,5,2.1));
+    g.fillStyle='#3b3f7a';g.fillRect(x,y1,1,PH-y1);
+    g.fillStyle='#5b6ea8';g.fillRect(x,y1,1,1);
+    g.fillStyle='#1d2148';g.fillRect(x,y2,1,PH-y2);
+    g.fillStyle='#2e3670';if((x+y2)&1)g.fillRect(x,y2,1,2);
+  }
+  g.fillStyle=INK;g.fillRect(0,hz+2,PW,PH-hz);
+  /* 分子：原子從四面飛進來，組好之後慢慢自轉 */
+  if(!tDrag&&!reduced)tRot.y+=.007;
+  const k=Math.min(PW*1.02,(hz-top)*1.3)/(2*HEXT),el=now-tT0,cyR=Math.cos(tRot.y),syR=Math.sin(tRot.y),cxR=Math.cos(tRot.x),sxR=Math.sin(tRot.x);
   const P=HERO.a.map((a,i)=>{
-    const t=reduced?1:Math.max(0,Math.min(1,(el-200-i*26)/900)),q=1-Math.pow(1-t,3),s0=HSTART[i];
+    const t=reduced?1:Math.max(0,Math.min(1,(el-350-i*26)/900)),q=1-Math.pow(1-t,3),s0=HSTART[i];
     const x=s0[0]+(a[1]-s0[0])*q,y=s0[1]+(a[2]-s0[1])*q,z=s0[2]+(a[3]-s0[2])*q;
     const x1=x*cyR+z*syR,z1=-x*syR+z*cyR,y2=y*cxR-z1*sxR,z2=y*sxR+z1*cxR,sc=k*900/(900-z2*k);
-    return{x:cx+x1*sc,y:cy+y2*sc,s:sc,z:z2,e:a[0]};
+    return{x:cxM+x1*sc,y:cyM+y2*sc,s:sc,z:z2,e:a[0]};
   });
-  const ba=reduced?1:Math.max(0,Math.min(1,(el-1150)/500));
-  const items=HERO.b.map(b=>({b,z:(P[b[0]].z+P[b[1]].z)/2})).concat(P.map(p=>({p,z:p.z+.002}))).sort((u,v)=>u.z-v.z);
-  g.lineCap='round';
+  const bonds=reduced||el>1300;
+  const items=HERO.b.map(b=>({b,z:(P[b[0]].z+P[b[1]].z)/2})).concat(P.map(p=>({p,z:p.z+.002}))).sort((a,b)=>a.z-b.z);
   for(const it of items){
     if(it.b){
-      if(ba<=0)continue;
-      let a=P[it.b[0]],b=P[it.b[1]];if(a.z>b.z){const t=a;a=b;b=t;}
-      const dx=b.x-a.x,dy=b.y-a.y,dd=Math.hypot(dx,dy)||1,nx=-dy/dd,ny=dx/dd,sc=(a.s+b.s)/2,o=it.b[2];
-      const tr=Math.min(EL[a.e].r*a.s*.9,dd*.45),ax=a.x+dx/dd*tr,ay=a.y+dy/dd*tr;
-      g.globalAlpha=ba;
-      for(const pass of [0,1])for(const off of (o===1?[0]:[-5.5,5.5])){
-        g.strokeStyle=pass?'#dfe7e3':'rgba(6,24,21,.55)';g.lineWidth=(o===1?8:6)*sc+(pass?0:3);
-        g.beginPath();g.moveTo(ax+nx*off*sc,ay+ny*off*sc);g.lineTo(b.x+nx*off*sc,b.y+ny*off*sc);g.stroke();
-      }
-      g.globalAlpha=1;
-    }else{
-      const p=it.p,r=EL[p.e].r*p.s;
-      tBall(g,p.x,p.y,r,EL[p.e],p.e);
-      if(p.z<0){g.fillStyle=`rgba(10,36,31,${Math.min(.45,-p.z/330)})`;g.beginPath();g.arc(p.x,p.y,r+.5,0,7);g.fill();}
-    }
+      if(!bonds)continue;
+      const a=P[it.b[0]],b=P[it.b[1]],far=(a.z+b.z)/2<-80;
+      pxLine(g,a.x,a.y,b.x,b.y,it.b[2]>1?4:3,INK);
+      pxLine(g,a.x,a.y,b.x,b.y,it.b[2]>1?2:1,far?'#8b8fa8':'#f6ecc9');
+    }else pxDisc(g,it.p.x,it.p.y,EL[it.p.e].r*it.p.s*.9,PXC[it.p.e],it.p.z<-95);
   }
   if(!reduced||tDrag)tRaf=requestAnimationFrame(titleFrame);
 }
@@ -1675,16 +2093,16 @@ function titleWho(){
   const p=player(),el=$('tWho');
   if(p){const s=stats(p);el.innerHTML=`<b>${esc(p.name)}</b><span class="badge">${TITLES[titleIdx(p)].n}</span><span>${s.s} 分</span><button type="button" id="tSwitch">換人</button><span data-sync style="flex:1 1 100%;font-size:12px"></span>`;renderSync();}
   else el.textContent='第一次玩會先請你取個名字。';
-  $('tStart').textContent=p&&stats(p).n?'繼續遊戲':'開始遊戲';
+  $('tStart').querySelector('span').textContent=p&&stats(p).n?'繼續遊戲':'開始遊戲';
 }
 function showTitle(){
   titleOn=true;$('title').hidden=false;titleWho();
   $('tStats').innerHTML=`<li><b>${LEVELS.length}</b>關</li><li><b>${ORDER.length}</b>種原子</li><li><b>${TITLES.length}</b>個稱號</li>`;
   tT0=performance.now();if(!tRaf)tRaf=requestAnimationFrame(titleFrame);
 }
-function hideTitle(){titleOn=false;$('title').hidden=true;kick(90);showTimer();}
+function hideTitle(){titleOn=false;$('title').hidden=true;kick(90);showTimer();storyFlow();}
 $('tStart').addEventListener('click',()=>{if(player())hideTitle();else{afterEnter='play';openWho(false);}});
-$('tTut').addEventListener('click',()=>{if(player()){hideTitle();setTut(true);}else{afterEnter='tut';openWho(false);}});
+$('tTut').addEventListener('click',()=>{if(player()){setTut(true);hideTitle();}else{afterEnter='tut';openWho(false);}});
 $('tBoard').addEventListener('click',()=>openBoard());
 $('tWho').addEventListener('click',ev=>{if(ev.target.closest('#tSwitch')){afterEnter=null;openWho(false);}});
 $('btnTitle').addEventListener('click',()=>{$('levels').hidden=true;showTitle();});
