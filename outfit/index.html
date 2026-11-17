@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="穿搭試衣間">
 <meta name="theme-color" content="#2f3a4a">
-<meta name="app-version" content="1.4">
+<meta name="app-version" content="1.5">
 <title>穿搭試衣間</title>
 <style>
 :root{--bg:#f4f1ec;--card:#fff;--ink:#23201d;--mute:#857b70;--line:#e5ddd2;--accent:#2f3a4a;--hot:#c8553d;--soft:#ece6dc;--ok:#2f8f5b}
@@ -87,7 +87,7 @@ label.f{display:block;font-size:12.5px;color:var(--mute);margin:10px 0 4px}
 .toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--accent);color:#fff;font-size:14px;padding:9px 16px;border-radius:20px;z-index:30;max-width:90vw;text-align:center}
 .pal i{display:inline-block;width:18px;height:18px;border-radius:50%;border:1px solid rgba(0,0,0,.12);margin-right:3px;vertical-align:middle}
 .look svg{width:100%;height:190px;background:linear-gradient(#ece7df,#f7f4ef);border-radius:10px;display:block}
-.facebox{display:flex;justify-content:center;margin:8px 0}.facebox svg{width:190px;height:190px;border-radius:50%;background:linear-gradient(#e9e4dc,#f7f4ef);border:1px solid var(--line)}
+.facebox{display:flex;justify-content:center;margin:8px -12px;padding:6px 0;position:sticky;top:calc(44px + env(safe-area-inset-top));z-index:4;background:var(--card);border-bottom:1px solid var(--line)}.facebox svg{width:170px;height:170px;border-radius:50%;background:linear-gradient(#e9e4dc,#f7f4ef);border:1px solid var(--line)}
 .kv{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:13.5px}
 .kv b{font-weight:600}
 </style>
@@ -849,10 +849,15 @@ const FACE=[['臉型','faceShape','oval',[['oval','鵝蛋臉'],['round','圓臉'
  ['鬍子','beard','none',[['none','無'],['stubble','鬍渣'],['mustache','八字鬍'],['goatee','山羊鬍'],['full','落腮鬍']]],
  ['瀏海','bang','std',[['std','短瀏海'],['side','側分'],['full','齊瀏海'],['mid','中分'],['up','往上梳']]],
  ['髮型','hair','short',[['short','短髮'],['buzz','平頭'],['bob','鮑伯'],['long','長直髮'],['wavy','長捲髮'],['pony','馬尾'],['bun','丸子頭'],['curly','捲髮'],['bald','光頭']]]];
+const FPRE=[['側分短髮＋鬍渣',{faceShape:'oval',eye:'almond',brow:'thick',nose:'line',mouth:'small',lip:'none',beard:'stubble',bang:'side',hair:'short',lash:false,blush:false,freckle:false,eyeColor:'#3a2f2a',hairColor:'#2b2420',skin:'#f0cdb0'}],
+ ['清爽短髮',{faceShape:'oval',eye:'round',brow:'soft',nose:'dot',mouth:'smile',lip:'none',beard:'none',bang:'up',hair:'short',lash:false,blush:false,freckle:false}],
+ ['長髮淡妝',{faceShape:'heart',eye:'almond',brow:'soft',nose:'dot',mouth:'smile',lip:'pink',beard:'none',bang:'side',hair:'long',lash:true,blush:true,freckle:false}],
+ ['鮑伯大眼',{faceShape:'round',eye:'big',brow:'thin',nose:'dot',mouth:'small',lip:'nude',beard:'none',bang:'full',hair:'bob',lash:true,blush:true,freckle:false}]];
 const SWS=(k,cur,list)=>`<div class="sw">${list.map(c=>`<button data-act="fset" data-k="${k}" data-v="${c}" class="${cur===c?'on':''}" style="background:${c}"></button>`).join('')}</div>`;
 function faceCard(){const b=U.body,g=G(),s=g.headH+60;
   return`<div class="card"><div class="bar"><b>捏臉</b><button class="btn sm r" data-act="frand">🎲 隨機</button></div>
   <div class="facebox">${figure(b,Object.assign({},U.outfit,{hat:null}),{g,cls:'face',vb:`${f1(150-s/2)} ${f1(g.top-32)} ${f1(s)} ${f1(s)}`})}</div>
+  <label class="f">一鍵套用</label><div class="chips" style="flex-wrap:wrap">${FPRE.map((p,i)=>`<button class="chip" data-act="fpre" data-i="${i}">${p[0]}</button>`).join('')}</div>
   ${FACE.map(([n,k,df,opts])=>`<label class="f">${n}</label><div class="chips" style="flex-wrap:wrap">${opts.map(([v,t])=>`<button class="chip ${(b[k]||df)===v?'on':''}" data-act="fset" data-k="${k}" data-v="${v}">${t}</button>`).join('')}</div>`).join('')}
   <label class="f">細節</label><div class="chips">${[['lash','睫毛'],['blush','腮紅'],['freckle','雀斑']].map(([k,t])=>`<button class="chip s2 ${b[k]?'on':''}" data-act="ftog" data-k="${k}">${t}</button>`).join('')}</div>
   <label class="f">眼珠顏色</label>${SWS('eyeColor',b.eyeColor||'#3a2f2a',['#3a2f2a','#5b3a22','#8a5a2b','#3d5a80','#4a6b4a','#7b7f86'])}
@@ -863,12 +868,12 @@ function randFace(){const b=U.body,f=b.sex==='f',kd=b.kid,pk=l=>l[Math.floor(Mat
     if(k==='hair')l=f?['bob','long','wavy','pony','bun','short']:['short','short','buzz','curly','short'];if(k==='brow')l=l.filter(x=>x!=='none');if(k==='mouth')l=l.filter(x=>x!=='open');b[k]=pk(l);});
   b.lash=f&&!kd&&Math.random()<.7;b.blush=Math.random()<(f?.6:.15);b.freckle=Math.random()<.15;b.eyeColor=pk(['#3a2f2a','#3a2f2a','#5b3a22','#8a5a2b']);b.hairColor=pk(['#2b2420','#2b2420','#4a362a','#7a5236','#b8894f']);}
 function vMe(){const b=U.body,kn=DB.known[UK]||{};
-  return stage(true)+`<div class="card"><div class="bar"><b>性別</b><div class="chips r" style="padding:0"><button class="chip s2 ${b.sex==='m'?'on':''}" data-act="sex" data-v="m">${b.kid?'男孩':'男性'}</button><button class="chip s2 ${b.sex==='f'?'on':''}" data-act="sex" data-v="f">${b.kid?'女孩':'女性'}</button></div></div>
+  return`<div>`+stage(true)+`<div class="card"><div class="bar"><b>性別</b><div class="chips r" style="padding:0"><button class="chip s2 ${b.sex==='m'?'on':''}" data-act="sex" data-v="m">${b.kid?'男孩':'男性'}</button><button class="chip s2 ${b.sex==='f'?'on':''}" data-act="sex" data-v="f">${b.kid?'女孩':'女性'}</button></div></div>
   <div class="bar" style="margin-top:6px"><b>年齡</b><div class="chips r" style="padding:0"><button class="chip s2 ${b.kid?'':'on'}" data-act="age" data-v="0">大人</button><button class="chip s2 ${b.kid?'on':''}" data-act="age" data-v="1">小孩</button></div></div>
   <div class="muted" style="margin-bottom:6px">目前推薦${gName()}：款式圖鑑、商店、隨機搭配與風格示範都會跟著性別走。</div><b>身形設定</b>
   ${FIELDS.map(([k,n,mn,mx,u])=>`<div class="fld"><span>${n}</span><input type="range" min="${mn}" max="${mx}" step=".5" value="${b[k]}" data-body="${k}"><input type="number" min="${mn}" max="${mx}" step=".5" value="${b[k]}" data-body="${k}" inputmode="decimal"></div>`).join('')}
   <div class="muted">手長＝肩膀到手腕；腿長＝胯下到地面；腳長＝腳跟到最長腳趾。</div>
-  <button class="btn" style="margin-top:8px" data-act="est">依身高體重估算其他數據</button></div>
+  <button class="btn" style="margin-top:8px" data-act="est">依身高體重估算其他數據</button></div></div>
   ${faceCard()}
   <div class="card"><b>參考尺碼與穿搭建議</b><div id="sizeBox" style="margin-top:8px">${sizeBox()}</div></div>
   <div class="card"><b>帳號：${esc(U.name)}</b><div class="muted" id="cloudSt" style="margin:4px 0 8px">${cloud}</div>
@@ -949,6 +954,7 @@ document.addEventListener('click',async ev=>{
   else if(a==='fset'){U.body[d.k]=d.v;save();}
   else if(a==='ftog'){U.body[d.k]=!U.body[d.k];save();}
   else if(a==='frand'){randFace();save();}
+  else if(a==='fpre'){Object.assign(U.body,FPRE[+d.i][1]);save();toast('已套用：'+FPRE[+d.i][0]);}
   else if(a==='setpin'||a==='nopin'){const v=a==='nopin'?'':$('#newPin').value.trim();if(a==='setpin'&&!/^\d{4}$/.test(v))return toast('請輸入四個數字');
     DB.known[UK]={name:U.name,pin:v?hash(UK+':'+v):''};saveLocal();
     try{await fetch(FB+'/names/'+UK+'.json',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:U.name,pin:DB.known[UK].pin,up:Date.now()})});toast(v?'密碼已設定':'已取消密碼');}catch(e){toast('離線中，密碼只存在這台裝置');}}
