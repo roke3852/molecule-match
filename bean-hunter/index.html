@@ -192,6 +192,13 @@ svg{display:block;max-width:100%}
 .tscene .fb{opacity:0;animation:tfloat 12s linear infinite}
 @keyframes tfloat{0%{transform:translateY(600px);opacity:0}15%{opacity:.55}85%{opacity:.4}100%{transform:translateY(260px);opacity:0}}
 @media (prefers-reduced-motion:reduce){.title h1 span,.title button.primary,.tscene *{animation:none!important}.tscene .fb{display:none}.tscene .plane{transform:translate(120px,230px) rotate(-8deg)}}
+
+input{font:inherit;color:var(--ink);background:var(--paper);border:1.5px solid var(--ink);border-radius:4px;padding:10px 12px;min-height:44px;width:100%}
+input:focus-visible{outline:3px solid var(--cherry);outline-offset:2px}
+.prow{display:flex;gap:8px;align-items:stretch}
+.pbtn{flex:1;display:flex;flex-direction:column;align-items:flex-start;gap:0;text-align:left;border-left:4px solid var(--leaf)}
+.pbtn.you{border-left-color:var(--cherry)}
+.title .tplayer{display:flex;justify-content:space-between;align-items:center;font-size:14px;padding:8px 14px;min-height:40px}
 </style>
 </head>
 <body>
@@ -318,6 +325,7 @@ const CH=[
  ['ins','買下的每一批都驗過豆（至少買 3 批）',r=>r.lots.length>=3&&r.lots.every(l=>l.f.inspected)]
 ];
 let S=null;
+const LS='beanhunter-save';
 const metaOf=m=>({xp:+(m&&m.xp)||0,rel:{...(m&&m.rel)},dex:{...(m&&m.dex)},ach:{...(m&&m.ach)},pest:{...(m&&m.pest)}});
 let cloud={ref:null,state:'wait',busy:false,dirty:false,timer:0}, save={best:null,seasons:0,game:null,at:0,meta:metaOf()}, lastKey='';
 const level=()=>LV.filter(x=>x<=save.meta.xp).length;
@@ -460,7 +468,7 @@ function xpBar(){const lv=level(),a=LV[lv-1],b=LV[lv];
   return `<div class="stack" style="gap:4px"><div class="row between small"><b>Lv ${lv}　${LVN[lv-1]}</b><span class="num muted">${b?save.meta.xp+' / '+b+' 經驗':save.meta.xp+' 經驗'}</span></div><div class="daybar" style="margin:0;height:6px"><i style="width:${b?pct(save.meta.xp,a,b):100}%;background:var(--leaf)"></i></div></div>`}
 
 /* ---------- 畫面 ---------- */
-const CS=()=>({wait:'雲端存檔連線中…',ok:'進度會自動存到雲端。',off:'連不上雲端，進度只存在這台裝置。',err:'雲端存檔失敗，下次操作時會再試。'}[cloud.state]);
+const CS=()=>({wait:'線上存檔連線中…',ok:'進度會自動存到線上。',off:'連不上線上存檔，進度只存在這台裝置。',err:'線上存檔失敗，下次操作時會再試。'}[cloud.state]);
 function hud(){const bags=S.inv.reduce((s,l)=>s+l.bags,0);
   return `<div class="hud"><div class="cells g4">
   <div><div class="k">資金</div><div class="v">${$(S.cash)}</div></div>
@@ -497,17 +505,18 @@ function titleScene(){const id='title';let stars='',leaves='',fb='';
   <g class="branch"><path d="M400 640 Q360 600 330 560 T372 470" fill="none" stroke="#3b2a1c" stroke-width="5" stroke-linecap="round"/><path d="M344 580 Q318 600 286 628" fill="none" stroke="#3b2a1c" stroke-width="3.5" stroke-linecap="round"/>${leaves}${ch}</g>
   <rect y="330" width="400" height="310" fill="url(#tfade)"/></svg>`}
 function vIntro(){let g=null;try{g=save.game&&JSON.parse(save.game)}catch(e){}
-  const lv=level(),a=LV[lv-1],b=LV[lv];
+  const lv=level(),a=LV[lv-1],b=LV[lv],pl=curP();
   return `<div class="title">${titleScene()}
   <div class="thead"><div class="teye">GREEN COFFEE BUYER</div>
    <h1 aria-label="咖啡尋豆師">${[...'咖啡尋豆師'].map((c,i)=>`<span style="animation-delay:${.15+i*.12}s" aria-hidden="true">${c}</span>`).join('')}</h1>
    <div class="trule"><i></i>${beanIcon('日曬',20)}<i></i></div>
    <p class="ttag">一本舊筆記，三十天，三萬美金。<br>替半山烘焙所，把好豆子帶回來。</p></div>
   <div class="tmenu">
-   ${g?`<button class="primary" data-a="resume">繼續旅程<span>剩 ${g.days} 天・${$(g.cash)}</span></button><button data-a="start">放棄進度，開新的一季</button>`:`<button class="primary" data-a="start">${save.seasons?'開始新的一季':'開始遊戲'}</button>`}
+   ${P.list.length?`<button class="primary" data-a="players">繼續遊戲<span>從紀錄選擇${g?`・${esc(pl.n)} 剩 ${g.days} 天`:''}</span></button>`:''}
+   <button class="${P.list.length?'':'primary'}" data-a="newgame">新遊戲</button>
    <div class="trow"><button data-a="meta">生涯・圖鑑・故事</button><button data-a="tut">新手教學</button></div>
-   <div class="tstat"><div class="row between"><b>Lv ${lv}　${LVN[lv-1]}</b><span class="num">${save.best!==null?'最佳 '+$(save.best)+'・':''}${save.seasons} 季</span></div>
-    <div class="tbar"><i style="width:${b?pct(save.meta.xp,a,b):100}%"></i></div><div class="tcloud">${CS()}</div></div></div></div>`}
+   <div class="tstat"><div class="row between"><b>${pl?esc(pl.n)+'　':''}Lv ${lv}　${LVN[lv-1]}</b><span class="num">${save.best!==null?'最佳 '+$(save.best)+'・':''}${save.seasons} 季</span></div>
+    <div class="tbar"><i style="width:${b?pct(save.meta.xp,a,b):100}%"></i></div><div class="tcloud">${pl?CS():'輸入名字後，進度會存到線上，換裝置也能接著玩。'}</div></div></div></div>`}
 function vBrief(){const first=save.seasons===0, c=CH.find(x=>x[0]===S.ch);
   return `<div class="hero stack" style="padding-top:24px"><div class="eyebrow">${S.month} 月・季前會議</div><h1>${first?STORY[0][0]:'新的一季'}</h1></div>
   <div class="stack">${first?STORY[0][1].map(l=>say(l[0],l[1],l[2])).join('')+'<hr>':''}
@@ -670,8 +679,26 @@ function vMeta(){const m=save.meta,lv=level(),farmName=id=>{const o=ORIGINS.find
   ${rels.length?`<div class="card"><table>${rels.map(e=>`<tr><td>${farmName(e[0])}</td><td class="r">${hearts(e[1])}</td></tr>`).join('')}</table></div>`:'<p class="small muted">還沒有和任何莊園建立交情。向同一座莊園買豆會累積交情；把人惹毛了也會被記住。</p>'}
   <button class="primary" data-a="mclose">關閉</button></div>`}
 
-/* ---------- 存檔 ---------- */
-const LS='beanhunter-save';
+/* ---------- 玩家與線上存檔 ---------- */
+const FB='https://molecule-match-default-rtdb.asia-southeast1.firebasedatabase.app/trips/beanhunter';
+const LSP='beanhunter-players', lsKey=k=>'beanhunter-save:'+k;
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const nameKey=n=>Array.from(n).map(c=>c.codePointAt(0).toString(36)).join('-');
+const pinHash=(k,pin)=>pin?[1,2,3].map(i=>Math.floor(rnd('bh|'+k+'|'+pin,i)*0xffffffff).toString(36)).join(''):'';
+let P={cur:null,list:[]}, PV={on:false,msg:'',busy:false,board:null,berr:false}, dbc=null;
+const net={ready:(async()=>{try{if(window.claude){const d=await window.claude.use('db');if(d)dbc=d}}catch(e){}})(),
+  async get(col,k){if(dbc){const s=await dbc.doc(col+'/'+k).get();return s.exists?JSON.parse(JSON.stringify(s.data())):null}
+    const r=await fetch(`${FB}/${col}/${k}.json`);if(!r.ok)throw 0;return await r.json()},
+  async set(col,k,d){if(dbc)return dbc.doc(col+'/'+k).set(d);
+    const r=await fetch(`${FB}/${col}/${k}.json`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});if(!r.ok)throw 0},
+  async list(col){if(dbc){const q=await dbc.collection(col).limit(300).get();return q.docs.map(d=>JSON.parse(JSON.stringify(d.data())))}
+    const r=await fetch(`${FB}/${col}.json`);if(!r.ok)throw 0;return Object.values(await r.json()||{})}};
+const curP=()=>P.list.find(p=>p.k===P.cur)||null;
+const saveP=()=>{try{localStorage.setItem(LSP,JSON.stringify(P))}catch(e){}};
+const blank=()=>({best:null,seasons:0,game:null,at:0,meta:metaOf()});
+const shape=d=>({best:typeof d.best==='number'?d.best:null,seasons:d.seasons||0,game:typeof d.game==='string'?d.game:null,at:d.at||0,meta:metaOf(d.meta)});
+function readLocal(k){try{const d=JSON.parse(localStorage.getItem(lsKey(k))||'null');if(d&&typeof d==='object')return shape(d)}catch(e){}return null}
+const writeLocal=()=>{if(P.cur)try{localStorage.setItem(lsKey(P.cur),JSON.stringify(save))}catch(e){}};
 const pack=()=>S&&S.view!=='result'?JSON.stringify({view:S.view,month:S.month,cash:S.cash,start:S.start,days:S.days,loc:S.loc,orders:S.orders,trail:S.trail,event:S.event,evn:S.evn,calls:S.calls,dialog:S.dialog,ch:S.ch,
   origins:S.origins.map(o=>({id:o.id,season:o.season,list:o.list})),inv:S.inv.map(l=>({f:l.f.id,bags:l.bags,price:l.price}))}):null;
 function unpack(j){const g=JSON.parse(j),origins=g.origins.map(x=>({...ORIGINS.find(o=>o.id===x.id),season:x.season,list:x.list.map(f=>({rel:0,asked:{},notes:[],...f}))})),all=origins.flatMap(o=>o.list);
@@ -679,28 +706,59 @@ function unpack(j){const g=JSON.parse(j),origins=g.origins.map(x=>({...ORIGINS.f
     trail:g.trail||[],event:g.event||'',evn:g.evn||0,calls:g.calls||0,dialog:g.dialog||null,ch:CH.some(c=>c[0]===g.ch)?g.ch:CH[0][0],fly:null,res:null,anim:null,
     orders:g.orders.map(o=>typeof o==='string'?{...ORDERS.find(x=>x.id===o)}:o),inv:g.inv.map(l=>({f:all.find(f=>f.id===l.f),bags:l.bags,price:l.price}))}}
 const keyOf=()=>JSON.stringify([save.best,save.seasons,save.game,save.meta]);
-function flush(){if(!cloud.ref)return;if(cloud.busy){cloud.dirty=true;return}cloud.busy=true;
-  cloud.ref.set({v:2,best:save.best,seasons:save.seasons,game:save.game,at:save.at,meta:JSON.parse(JSON.stringify(save.meta))})
-   .then(()=>{if(cloud.state!=='ok'){cloud.state='ok';if(!S)render()}},()=>{cloud.state='err'})
-   .then(()=>{cloud.busy=false;if(cloud.dirty){cloud.dirty=false;flush()}})}
-function persist(){if(S)save.game=pack();const k=keyOf();if(k===lastKey)return;lastKey=k;save.at=Date.now();
-  try{localStorage.setItem(LS,JSON.stringify(save))}catch(e){}
-  clearTimeout(cloud.timer);cloud.timer=setTimeout(flush,900)}
-try{const d=JSON.parse(localStorage.getItem(LS)||'null');if(d&&typeof d==='object')save={best:d.best??null,seasons:d.seasons||0,game:d.game||null,at:d.at||0,meta:metaOf(d.meta)};
-  else{const b=localStorage.getItem('beanhunter-best');if(b!==null)save.best=+b}}catch(e){}
+function flush(force){const pl=curP();if(!pl)return;if(!force&&cloud.busy){cloud.dirty=true;return}if(!force)cloud.busy=true;
+  const k=pl.k,body={n:pl.n,best:save.best,seasons:save.seasons,game:save.game,at:save.at,meta:JSON.parse(JSON.stringify(save.meta))},
+    row={n:pl.n,ph:pl.ph||'',best:save.best,seasons:save.seasons,lv:level(),xp:save.meta.xp,at:save.at};
+  net.ready.then(()=>Promise.all([net.set('saves',k,body),net.set('board',k,row)]))
+   .then(()=>{if(P.cur===k&&cloud.state!=='ok'){cloud.state='ok';if(!S)render()}},()=>{if(P.cur===k)cloud.state='err'})
+   .then(()=>{if(force)return;cloud.busy=false;if(cloud.dirty){cloud.dirty=false;flush()}})}
+function persist(){if(!P.cur)return;if(S)save.game=pack();const k=keyOf();if(k===lastKey)return;lastKey=k;save.at=Date.now();
+  writeLocal();clearTimeout(cloud.timer);cloud.timer=setTimeout(flush,900)}
+function merge(d){const localNewer=save.at>(d.at||0),best=[save.best,d.best].filter(x=>typeof x==='number');
+  save.best=best.length?Math.max(...best):null;save.seasons=Math.max(save.seasons,d.seasons||0);
+  if(d.meta&&(+d.meta.xp||0)>=save.meta.xp&&!(S&&S.res))save.meta=metaOf(d.meta);
+  if(!S&&!localNewer){save.game=typeof d.game==='string'?d.game:null;save.at=d.at||0}
+  return localNewer||!!S}
+async function pull(k){cloud.state='wait';
+  try{await net.ready;const d=await net.get('saves',k);if(P.cur!==k)return;
+    if(d){const push=merge(d),key=keyOf();if(key!==lastKey||push){lastKey=key;writeLocal();if(push)flush()}}else if(save.at)flush();
+    cloud.state='ok'}catch(e){if(P.cur===k)cloud.state='off'}
+  if(P.cur===k&&(!S||S.view==='world'))render()}
+function usePlayer(k){clearTimeout(cloud.timer);if(P.cur&&P.cur!==k&&save.at)flush(true);
+  P.cur=k;saveP();S=null;save=readLocal(k)||blank();lastKey=keyOf();return pull(k)}
+async function login(name,pin){name=String(name||'').replace(/\s+/g,' ').trim().slice(0,12);pin=String(pin||'').trim();
+  if(!name){PV.msg='請輸入名字。';return}
+  if(pin&&!/^\d{4}$/.test(pin)){PV.msg='密碼要剛好 4 個數字，或是留空不設密碼。';return}
+  const k=nameKey(name),ph=pinHash(k,pin);
+  if(P.list.some(p=>p.k===k)){if(k!==P.cur)usePlayer(k);PV.on=false;PV.msg='';return}
+  let row=null,online=true;try{await net.ready;row=await net.get('board',k)}catch(e){online=false}
+  if(row&&row.ph&&row.ph!==ph){PV.msg=pin?'密碼不對，請再試一次。':'這個名字已經有人使用，而且設了密碼。請輸入密碼，或換一個名字。';return}
+  if(row)P.list.push({k,n:row.n||name,ph:row.ph||ph});
+  else{if(!P.list.length){try{const old=localStorage.getItem(LS);if(old){localStorage.setItem(lsKey(k),old);localStorage.removeItem(LS)}}catch(e){}}
+    P.list.push({k,n:name,ph})}
+  const pl=usePlayer(k);if(row)await pl;if(!row||(!row.ph&&ph)){save.at=save.at||Date.now();flush()}
+  PV.on=false;PV.msg='';if(!online)cloud.state='off'}
+function vPlayers(){const lvOf=xp=>LV.filter(x=>x<=xp).length, nw=PV.mode==='new';
+  const mine=P.list.map(p=>{const s=p.k===P.cur?save:readLocal(p.k)||blank(),lv=lvOf(s.meta.xp);let g=null;try{g=s.game&&JSON.parse(s.game)}catch(e){}
+    const sum=g?`${g.month} 月產季・剩 ${g.days} 天・${$(g.cash)}・已購 ${g.inv.reduce((a,l)=>a+l.bags,0)} 袋`:'沒有進行中的季';
+    const act=nw?(PV.sure===p.k?'<span class="tag bad">再按一次：放棄進行中的季，重新開始</span>':'<span class="tag">開新的一季 ›</span>'):(g?'<span class="tag hit">繼續 ›</span>':'<span class="tag">進入 ›</span>');
+    return `<div class="prow"><button class="pbtn ${p.k===P.cur?'you':''}" data-a="${nw?'newas':'pick'}" data-k="${p.k}"><span class="row between" style="width:100%"><b>${esc(p.n)}</b>${act}</span><span class="small muted">Lv ${lv} ${LVN[lv-1]}・完成 ${s.seasons} 季${s.best!==null?'・最佳 '+$(s.best):''}${p.ph?'・有密碼':''}</span><span class="small num">${sum}</span></button>${p.k===P.cur?'':`<button class="sm ghost" data-a="forget" data-k="${p.k}" aria-label="從這台裝置移除${esc(p.n)}">移除</button>`}</div>`}).join('');
+  const rows=(PV.board||[]).filter(r=>r&&typeof r.n==='string').sort((a,b)=>(b.best??-1e9)-(a.best??-1e9)||(b.xp||0)-(a.xp||0)).slice(0,30);
+  const board=PV.board===null?'<p class="small muted">讀取排行榜中…</p>':rows.length?`<table><tr><th>#</th><th>玩家</th><th class="r">最佳淨利</th><th class="r">季數</th></tr>${rows.map((r,i)=>{const lv=clamp(+r.lv||1,1,6),me=nameKey(r.n)===P.cur;
+    return `<tr><td class="num">${i+1}</td><td>${me?'<b>':''}${esc(r.n.slice(0,12))}${me?'</b>':''}<br><span class="small muted">Lv ${lv} ${LVN[lv-1]}</span></td><td class="r num">${typeof r.best==='number'?$(r.best):'—'}</td><td class="r num">${+r.seasons||0}</td></tr>`}).join('')}</table>`
+    :`<p class="small muted">${PV.berr?'連不上線上排行榜。':'還沒有人上榜。'}</p>`;
+  return `<div class="stack" style="padding-top:20px"><div class="row between"><h2>${nw?'新遊戲':'繼續遊戲'}</h2><button class="sm ghost" data-a="pclose">返回</button></div>
+  ${P.list.length?`<h3>${nw?'用現有的玩家開新的一季':'選擇紀錄'}</h3><p class="small muted">${nw?'等級、圖鑑和莊園交情會保留，只重開這一季。':'這台裝置登入過的玩家，點一下直接進入，不用再輸入密碼。'}</p>${mine}`:''}
+  <div class="card stack"><h3>${nw?'用新名字開始':'用其他名字登入'}</h3>
+   <label class="small" for="pname">名字</label><input id="pname" maxlength="12" autocomplete="off" placeholder="最多 12 個字">
+   <label class="small" for="ppin">4 碼數字密碼（可以不填）</label><input id="ppin" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="off" placeholder="不填就是不設密碼">
+   ${PV.msg?`<div class="msg">${PV.msg}</div>`:''}
+   <button class="primary" data-a="login" ${PV.busy?'disabled':''}>${PV.busy?'連線中…':nw?'建立並開始':'登入'}</button>
+   <p class="small muted">新名字會直接建立；用過的名字會接回原本的紀錄，換手機也一樣。名字會出現在排行榜上，建議用暱稱。密碼只是避免別人誤用你的名字，保護力不高，請不要用重要的密碼。</p></div>
+  <h3>排行榜</h3><div class="card">${board}</div></div>`}
+try{const d=JSON.parse(localStorage.getItem(LSP)||'null');if(d&&Array.isArray(d.list))P={cur:d.list.some(p=>p.k===d.cur)?d.cur:null,list:d.list.filter(p=>p&&p.k&&p.n)}}catch(e){}
+if(P.cur){save=readLocal(P.cur)||blank();setTimeout(()=>pull(P.cur),0)}
 lastKey=keyOf();
-(async()=>{await null;const t=setTimeout(()=>{if(cloud.state==='wait'){cloud.state='off';render()}},10000);
-  try{if(!window.claude)throw 0;const [db,user]=await Promise.all([claude.use('db'),claude.use('user')]);const id=user&&await user.id();if(!db||!id)throw 0;
-    cloud.ref=db.doc('data/users/'+id+'/save');const snap=await cloud.ref.get();
-    if(snap.exists){const d=JSON.parse(JSON.stringify(snap.data())),localNewer=save.at>(d.at||0);
-      const best=[save.best,d.best].filter(x=>typeof x==='number');save.best=best.length?Math.max(...best):null;
-      save.seasons=Math.max(save.seasons,d.seasons||0);
-      if(d.meta&&(+d.meta.xp||0)>=save.meta.xp&&!(S&&S.res))save.meta=metaOf(d.meta);
-      if(!S&&!localNewer){save.game=typeof d.game==='string'?d.game:null;save.at=d.at||0}
-      const k=keyOf();if(k!==lastKey||localNewer){lastKey=k;try{localStorage.setItem(LS,JSON.stringify(save))}catch(e){}if(localNewer||S)flush()}
-    }else if(save.at)flush();
-    cloud.state='ok'}catch(e){cloud.state='off'}
-  clearTimeout(t);if(!S||S.view==='world')render()})();
 
 /* ---------- 教學 ---------- */
 let T={on:false,step:0,cup:null};
@@ -771,7 +829,7 @@ function fx(){if(typeof document.querySelector!=='function')return;
       pl.setAttribute('transform',`translate(${x.toFixed(1)} ${y.toFixed(1)}) rotate(${(Math.atan2(dy,dx)*180/Math.PI).toFixed(0)})`);if(u<1&&pl.isConnected)requestAnimationFrame(step)};step(t0)}
   if(!still)document.querySelectorAll('[data-cnt]').forEach(el=>{const a=+el.dataset.from,b=+el.dataset.cnt,t0=performance.now();
     const st=t=>{const u=clamp((t-t0-500)/900,0,1);el.textContent=(a+(b-a)*u).toFixed(1);if(u<1&&el.isConnected)requestAnimationFrame(st)};st(t0)})}
-function render(){document.getElementById('app').innerHTML=T.on?vTut():M.on?vMeta():!S?vIntro():({brief:vBrief,world:vWorld,origin:vOrigin,farm:vFarm,result:vResult})[S.view]();
+function render(){document.getElementById('app').innerHTML=T.on?vTut():PV.on?vPlayers():M.on?vMeta():!S?vIntro():({brief:vBrief,world:vWorld,origin:vOrigin,farm:vFarm,result:vResult})[S.view]();
   fx();if(S&&S.res)S.res.fresh=-1}
 
 /* ---------- 行動 ---------- */
@@ -799,9 +857,19 @@ function arrive(o){S.event='';S.dialog=null;const fs=o.list.filter(f=>!f.auction
     else if(od.id!=='chain'){const n=Math.max(1,Math.ceil(od.bags*.3));S.dialog={k:'more',oid:od.id,n,who:`${od.who}・${od.name}`,text:`是我。這一季的需求比預期多，你要是能多帶 ${n} 袋，整張單每公斤我加 8%。但要全部到齊才算完成。`,yes:`答應，多帶 ${n} 袋`,no:'維持原本的量'}}
   }}
 const A={
- start(){newGame();M.on=false;window.scrollTo(0,0)},
+ start(){if(!P.cur)return A.players({mode:'new'});newGame();M.on=false;window.scrollTo(0,0)},
  depart(){S.view='world';window.scrollTo(0,0)},
- resume(){try{S=unpack(save.game)}catch(e){save.game=null}window.scrollTo(0,0)},
+ resume(){if(!P.cur)return A.players();try{S=unpack(save.game)}catch(e){save.game=null}window.scrollTo(0,0)},
+ players(d){PV.on=true;PV.mode=d&&d.mode==='new'?'new':'load';PV.sure=null;PV.msg='';PV.board=null;PV.berr=false;window.scrollTo(0,0);
+  net.ready.then(()=>net.list('board')).then(r=>{PV.board=r},()=>{PV.board=[];PV.berr=true}).then(()=>{if(PV.on)render()})},
+ newgame(){A.players({mode:'new'})},
+ newas(d){const s=d.k===P.cur?save:readLocal(d.k);if(s&&s.game&&PV.sure!==d.k){PV.sure=d.k;return}
+  if(d.k!==P.cur)usePlayer(d.k);PV.on=false;newGame();M.on=false;window.scrollTo(0,0)},
+ pclose(){PV.on=false},
+ pick(d){if(d.k!==P.cur)usePlayer(d.k);PV.on=false;if(save.game){try{S=unpack(save.game)}catch(e){save.game=null}}window.scrollTo(0,0)},
+ forget(d){if(d.k===P.cur)return;P.list=P.list.filter(p=>p.k!==d.k);saveP();try{localStorage.removeItem(lsKey(d.k))}catch(e){}},
+ login(){const v=id=>{const el=document.getElementById(id);return el&&el.value||''},n=v('pname'),p=v('ppin');PV.busy=true;PV.msg='';
+  const nw=PV.mode==='new';login(n,p).then(()=>{PV.busy=false;if(!PV.on){if(nw&&!save.game)newGame();else if(!nw&&save.game){try{S=unpack(save.game)}catch(e){save.game=null}}window.scrollTo(0,0)}render();persist()})},
  go(d){const o=S.origins.find(x=>x.id===d.id);S.msg='';S.say=null;if(S.loc===o.id){S.view='origin';window.scrollTo(0,0);return}
   const a=XY(S.loc||'twn'),b=XY(o.id);S.cash-=o.cost;S.days-=o.td;S.loc=o.id;S.sel=o.id;S.trail.push(o.id);arrive(o);S.view='world';
   S.fly={a,b,name:o.name};window.scrollTo(0,0);
@@ -864,7 +932,7 @@ function act(el){const fn=A[el.dataset.a];if(!fn||el.disabled||(S&&S.fly))return
   if(S&&S.view!=='result'&&S.view!=='brief'&&S.days<=0&&S.view!=='world'&&!S.fly){S.view='world';S.msg=''}
   render();persist()}
 document.addEventListener('click',e=>{const el=e.target.closest('[data-a]');if(el)act(el)});
-document.addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&e.target.matches('.card[data-a],g[data-a]')){e.preventDefault();act(e.target)}});
+document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.matches&&e.target.matches('#pname,#ppin')){e.preventDefault();act({dataset:{a:'login'}});return}if((e.key==='Enter'||e.key===' ')&&e.target.matches('.card[data-a],g[data-a]')){e.preventDefault();act(e.target)}});
 render();
 
 </script>
