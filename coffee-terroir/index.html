@@ -148,7 +148,14 @@ canvas{width:100%;height:230px;display:block}
 </head>
 <body>
 <header><h1>咖啡<span>風土</span>圖鑑</h1><p>產地 · 品種 · 莊園 · 處理法 · 烘焙 · 消消樂</p>
-<div class="cloudbar"><button id="gBtn" type="button"><span id="gBtnT">☁️ 用 Google 帳號同步進度</span></button><span id="syncNote">消消樂、配方挑戰的星星與烘焙紀錄存到你的 Google 雲端，換手機也接得上</span></div></header>
+<div class="cloudbar"><button id="pBtn" type="button"><span id="pBtnT">👤 輸入名字自動存檔</span></button><button id="gBtn" type="button"><span id="gBtnT">☁️ 或用 Google 帳號同步</span></button><span id="syncNote">輸入名字後，消消樂、配方挑戰的星星與烘焙紀錄會自動存到雲端，換手機輸入同一個名字就接得上</span></div>
+<div id="pForm" style="display:none;margin-top:8px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-size:13.5px">
+  <div id="pIn"><div class="row"><input id="pName" maxlength="12" placeholder="名字（最多 12 字）" style="flex:1;min-width:0;padding:7px 10px;border:1px solid var(--line);border-radius:8px;font:inherit"><input id="pPin" maxlength="4" inputmode="numeric" placeholder="4 位數密碼（可不填）" style="width:10.5em;padding:7px 10px;border:1px solid var(--line);border-radius:8px;font:inherit"></div>
+    <div class="row" style="margin-top:8px"><button class="btn" id="pOk" type="button">開始自動存檔</button><button class="btn sec" id="pCancel" type="button">取消</button></div>
+    <div style="color:var(--mut);font-size:12px;margin-top:6px">不用 Google 帳號。沒設密碼的話，知道名字的人都能讀取和覆蓋這份進度；想保護就設 4 位數密碼。</div></div>
+  <div id="pOut" style="display:none"><span id="pWho"></span> <button class="btn sec" id="pLogout" type="button" style="margin-left:6px">登出</button></div>
+  <div id="pMsg" style="color:var(--cherry);margin-top:4px"></div>
+</div></header></header>
 <main>
 <section class="view" id="v-origins">
   <h2 class="vt">產地與風味成因</h2><p class="vs">點開產地看風味特色、為什麼會有這種味道，以及地圖連結</p>
@@ -827,7 +834,7 @@ Storage.prototype.setItem=function(k,v){
 };
 function parse(v){if(v==null)return undefined;try{return JSON.parse(v)}catch(e){return v}}
 function snapshot(){const o={savedAt:+ls.get(STAMP)||0};SYNC_KEYS.forEach(k=>{const v=parse(ls.get(k));if(v!==undefined)o[k]=v});return o}
-function schedule(){if(!gOn)return;clearTimeout(pushT);pushT=setTimeout(push,1500)}
+function schedule(){fbSchedule();if(!gOn)return;clearTimeout(pushT);pushT=setTimeout(push,1500)}
 function libLoad(){return new Promise((ok,no)=>{if(window.google&&google.accounts&&google.accounts.oauth2)return ok();const sc=document.createElement('script');sc.src='https://accounts.google.com/gsi/client';sc.onload=()=>ok();sc.onerror=()=>no(new Error('lib'));document.head.appendChild(sc)})}
 setTimeout(()=>libLoad().catch(()=>{}),600);
 async function gf(url,opt={}){
@@ -893,6 +900,40 @@ function login(){
   };
   if(window.google&&google.accounts&&google.accounts.oauth2)go();else libLoad().then(go,()=>note('⚠️ 無法載入 Google 登入，請確認網路'));
 }
+
+/* 👤 名字自動存檔：存到 Firebase（和尋豆師、穿搭試衣間同一個資料庫），不需要 Google 帳號 */
+const FB='https://molecule-match-default-rtdb.asia-southeast1.firebasedatabase.app/trips/coffee-terroir/saves',PKEY='ct.player';
+let PL=null,fbT=null;try{PL=JSON.parse(ls.get(PKEY)||'null')}catch(e){}
+const nameKey=n=>Array.from(n).map(c=>c.codePointAt(0).toString(36)).join('-');
+async function pinHash(k,pin){if(!pin)return'';const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode('ct|'+k+'|'+pin));return Array.from(new Uint8Array(b)).slice(0,10).map(x=>x.toString(16).padStart(2,'0')).join('')}
+const pNote=t=>{const el=$('pBtnT');if(el)el.textContent=t};
+const hhmm=()=>new Date().toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'});
+function fbSchedule(){if(!PL)return;clearTimeout(fbT);fbT=setTimeout(fbPush,1200)}
+async function fbPush(){if(!PL)return;fbT=null;const body=JSON.stringify({n:PL.n,ph:PL.ph||'',at:Date.now(),data:snapshot()});
+  try{const r=await fetch(FB+'/'+PL.k+'.json',{method:'PUT',keepalive:body.length<60000,headers:{'Content-Type':'application/json'},body});if(!r.ok)throw 0;pNote('👤 '+PL.n+' · 已自動存檔 '+hhmm())}
+  catch(e){pNote('👤 '+PL.n+' · ⚠️ 離線，進度先存在這台')}}
+function applyRemote(rem){const m=merge(snapshot(),rem);let changed=false;
+  SYNC_KEYS.forEach(k=>{const v=JSON.stringify(m[k]);if(ls.get(k)!==v){ls.set(k,v);changed=true}});ls.set(STAMP,String(m.savedAt));return changed}
+async function fbPull(){if(!PL)return;pNote('👤 '+PL.n+' · 讀取雲端進度…');
+  try{const r=await fetch(FB+'/'+PL.k+'.json');if(!r.ok)throw 0;const d=await r.json();
+    const changed=d&&d.data&&typeof d.data==='object'?applyRemote(d.data):false;await fbPush();if(changed)location.reload()}
+  catch(e){pNote('👤 '+PL.n+' · ⚠️ 離線，進度先存在這台')}}
+function pUI(open){$('pForm').style.display=open?'block':'none';$('pIn').style.display=PL?'none':'block';$('pOut').style.display=PL?'block':'none';$('pMsg').textContent='';
+  if(PL)$('pWho').textContent='目前用「'+PL.n+'」自動存檔，每次過關或烘完豆都會自動上傳。'}
+$('pBtn').onclick=()=>pUI($('pForm').style.display==='none');
+$('pCancel').onclick=()=>pUI(false);
+$('pOk').onclick=async()=>{const name=$('pName').value.replace(/\s+/g,' ').trim().slice(0,12),pin=$('pPin').value.trim(),msg=$('pMsg');
+  if(!name){msg.textContent='請輸入名字。';return}
+  if(pin&&!/^\d{4}$/.test(pin)){msg.textContent='密碼要剛好 4 個數字，或是留空不設密碼。';return}
+  const k=nameKey(name),ph=await pinHash(k,pin);msg.textContent='連線中…';let row=null;
+  try{const r=await fetch(FB+'/'+k+'.json');if(!r.ok)throw 0;row=await r.json()}catch(e){msg.textContent='⚠️ 連不上雲端，請確認網路後再試。';return}
+  if(row&&row.ph&&row.ph!==ph){msg.textContent=pin?'密碼不對，請再試一次。':'這個名字已經有人使用，而且設了密碼。請輸入密碼，或換一個名字。';return}
+  PL={k,n:(row&&row.n)||name,ph:(row&&row.ph)||ph};ls.set(PKEY,JSON.stringify(PL));
+  const changed=row&&row.data&&typeof row.data==='object'?applyRemote(row.data):false;await fbPush();
+  if(changed)location.reload();else pUI(false)};
+$('pLogout').onclick=()=>{clearTimeout(fbT);PL=null;try{localStorage.removeItem(PKEY)}catch(e){}pNote('👤 輸入名字自動存檔');pUI(false)};
+document.addEventListener('visibilitychange',()=>{if(document.hidden&&fbT){clearTimeout(fbT);fbPush()}});
+if(PL){pNote('👤 '+PL.n+' · 自動存檔中');fbPull()}
 $('gBtn').onclick=()=>{if(gOn&&gTok&&Date.now()<gTokExp){push();return}login()};
 if(gTok&&ls.get(GFLAG)==='1')afterLogin();
 else if(ls.get(GFLAG)==='1')btn('☁️ 點這裡連回 Google 同步');
