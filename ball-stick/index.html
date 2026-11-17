@@ -70,11 +70,12 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-acti
 
 /* 下方：零件盒 */
 .tray{background:var(--ink);padding:10px 16px calc(10px + env(safe-area-inset-bottom,0px));display:flex;gap:10px;align-items:stretch}
-.parts{display:flex;gap:8px;flex:1;min-width:0;overflow-x:auto;padding:2px}
-.part{flex:0 0 auto;width:58px;min-height:74px;border-radius:12px;background:var(--ink-2);border:1px solid var(--line);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px}
+.parts{display:flex;gap:5px;flex:1;min-width:0;overflow-x:auto;padding:2px}
+.part{flex:1 1 0;min-width:40px;max-width:64px;min-height:74px;border-radius:12px;background:var(--ink-2);border:1px solid var(--line);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px}
 .part:active{transform:translateY(1px);border-color:var(--mark)}
 .ball{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-family:var(--f-num);font-weight:600;font-size:18px;box-shadow:0 3px 0 rgba(0,0,0,.3)}
-.part small{font-size:11.5px;color:var(--mute);line-height:1;display:flex;gap:4px;align-items:center}
+.part small{font-size:11.5px;color:var(--mute);line-height:1;display:flex;flex-direction:column;gap:4px;align-items:center}
+.formula .q{font-family:var(--f-body);font-size:15px;font-weight:500;color:var(--mute);border:1px dashed var(--line);border-radius:8px;padding:5px 10px;display:inline-block}
 .hands{display:inline-flex;gap:2px}
 .hands i{width:4px;height:4px;border-radius:50%;background:var(--mark)}
 .tools{display:grid;gap:6px;align-content:center}
@@ -259,16 +260,16 @@ const ORDER=['C','H','N','O','S','Cl'];
 const CHAPTERS=[
  {title:'第一次組裝',levels:[
   {id:'h2',n:'氫氣',f:'H2',a:'H H',b:'0-1',hint:'H–H',
-   tip:'點下方的 H 兩次，把球放上桌面。再先後點這兩顆球，就會接上一根棍子。',
+   tip:'點下方的 H 兩次，把球放上桌面。再先後點這兩顆球，就會接上一根棍子。零件盒裡用不到的原子不用理它。',
    fact:'最輕的分子。氫原子只有 1 隻手，兩顆互牽就滿了。'},
   {id:'h2o',n:'水',f:'H2O',a:'O',hint:'H–O–H',
    tip:'先放一顆 O 並點選它（出現黃圈），再點下方的 H，新的球會直接接上去。',
-   fact:'氧有 2 隻手，各牽一個氫。真實的水分子不是一直線，夾角約 104.5°。按「立體」可以看到它是彎的。'},
+   fact:'氧有 2 隻手，各牽一個氫。真實的水分子不是一直線，夾角約 104.5°，轉一下模型就看得出它是彎的。'},
   {id:'nh3',n:'氨',f:'NH3',a:'N',hint:'N 在中間，接 3 個 H',
    tip:'球上突出的小短棒，就是還沒接上的手。全部接滿才算完成。',
    fact:'氮有 3 隻手。氨帶刺鼻氣味，也是製造肥料的重要原料。'},
   {id:'ch4',n:'甲烷',f:'CH4',a:'C',hint:'C 在中間，接 4 個 H',
-   tip:'組好後按右上的「立體」看看：4 個氫其實朝著正四面體的四個角。',
+   tip:'用手指拖曳可以旋轉模型：4 個氫朝著正四面體的四個角。右上的「立體」可以切回平面。',
    fact:'碳有 4 隻手，是有機分子的骨架。甲烷是天然氣的主要成分。'},
   {id:'hcl',n:'氯化氫',f:'HCl',a:'Cl',hint:'H–Cl',
    fact:'氯和氫一樣只有 1 隻手。氯化氫溶進水裡就是鹽酸。'},
@@ -324,7 +325,7 @@ const CHAPTERS=[
   {id:'gly',n:'甘胺酸',f:'C2H5NO2',a:'N C C O O',b:'0-1 1-2 2=3 2-4',hint:'H₂N–CH₂–C(=O)–OH',
    fact:'最簡單的胺基酸，一頭是胺基、一頭是羧基。烘焙時胺基酸和糖發生梅納反應，產生香氣和褐色。'},
   {id:'c6h6',n:'苯',f:'C6H6',a:'C C C C C C',b:'0=1 1-2 2=3 3-4 4=5 5-0',hint:'六個 C 圍成環，單鍵和雙鍵交替',
-   tip:'把碳鏈頭尾兩顆球接起來，就圍成環。複雜的分子可以按「立體」，用手指拖著轉來看。',
+   tip:'把碳鏈頭尾兩顆球接起來，就圍成環。',
    fact:'六個碳圍成正六邊形，整個分子是平的。許多香氣分子都帶著這個環。'}
  ]},
  {title:'咖啡的酸與甜',autoH:true,adv:true,levels:[
@@ -470,10 +471,10 @@ CHAPTERS.forEach((ch,ci)=>ch.levels.forEach((lv,li)=>{
   LEVELS.push(Object.assign(lv,{ci,li,autoH:!!ch.autoH,adv:!!ch.adv,target:t,tsig:tsigs[0],tsigs,need:countEl(t.atoms),d3:t.bonds.length>=n||hv>=6,
     base:100+20*n,par:15+7*hv+(ch.autoH?0:2*(n-hv))}));
 }));
-/* 計分：基本分看分子大小；在標準時間內完成加 50%，超過 3 倍標準時間就沒有加成；看過提示打 7 折 */
+/* 計分：基本分看分子大小；在標準時間內完成加 50%，超過 3 倍標準時間就沒有加成；看過分子式 ×0.85，看過接法 ×0.7 */
 function scoreOf(lv,sec,hint){
   const tf=Math.max(0,Math.min(1,1-(sec-lv.par)/(2*lv.par)));
-  return{s:Math.round(lv.base*(1+.5*tf)*(hint?.7:1)),st:1+(hint?0:1)+(sec<=lv.par?1:0)};
+  return{s:Math.round(lv.base*(1+.5*tf)*[1,.85,.7][+hint||0]),st:1+(hint?0:1)+(sec<=lv.par?1:0)};
 }
 function stats(p){let s=0,st=0,n=0;for(const l of LEVELS){const b=p.best[l.id];if(b){s+=b.s;st+=b.st;n++;}}return{s,st,n};}
 const chDone=(p,ci)=>CHAPTERS[ci].levels.every(l=>p.best[l.id]);
@@ -553,7 +554,7 @@ const fHtml=f=>f.replace(/(\d+)/g,'<sub>$1</sub>');
 const cv=$('cv'),ctx=cv.getContext('2d');
 let W=300,H=300,S=1,dpr=1,topPad=0;
 let st={lvl:0,atoms:[],bonds:[],sel:null,won:false,nid:1};
-let drag=null,raf=0,awake=0,fx=[],flash=null,flashT=0,hintOn=false,bottomPad=0;
+let drag=null,raf=0,awake=0,fx=[],flash=null,flashT=0,hintLv=0,bannerOpen=false,pref3=true,bottomPad=0;
 let tut={on:false,steps:[],i:0,A:null,B:null,map:null,good:null,off:false,hl:{atoms:[],bond:null}};
 const EMPTY=sig([],[]);
 let view3=false,rot={x:-.35,y:.5},fit=1,spinHold=0;
@@ -568,10 +569,11 @@ const free=a=>EL[a.e].v-used(a.id);
 const level=()=>LEVELS[st.lvl];
 
 let store={players:[],cur:null,legacy:null},lastLvl=0;
-let att={on:false,t0:0,el:0,hint:false,assist:false};
+let att={on:false,t0:0,el:0,hint:0,assist:false};
 const player=()=>store.players.find(p=>p.name===store.cur)||null;
 const best=id=>{const p=player();return p?p.best[id]:null;};
 function load(){
+  try{pref3=localStorage.getItem('bskit-3d')!=='0';}catch(e){}
   try{const s=JSON.parse(localStorage.getItem('bskit-v2')||'null');if(s&&Array.isArray(s.players)){store=s;store.players=mergePlayers([],s.players);}}catch(e){}
   try{lastLvl=+(localStorage.getItem('bskit-lvl')||0)||0;}catch(e){}
   /* 舊版（沒有名字的時候）的過關紀錄：留給第一位取名字的玩家 */
@@ -584,7 +586,7 @@ function grantLegacy(p,ids){
 /* 這一關的計時 */
 const fmtT=sec=>Math.floor(sec/60)+':'+String(Math.floor(sec%60)).padStart(2,'0');
 const attSec=()=>(att.el+(att.t0?Date.now()-att.t0:0))/1000;
-function attReset(){att={on:false,t0:0,el:0,hint:hintOn,assist:tut.on};showTimer();}
+function attReset(){att={on:false,t0:0,el:0,hint:hintLv,assist:tut.on};showTimer();}
 function attStart(){if(!att.on&&!st.won){att.on=true;att.t0=Date.now();showTimer();}}
 function showTimer(){
   const el=$('timer');if(!el)return;
@@ -607,38 +609,49 @@ function renderHead(){
   const lv=level(),ch=CHAPTERS[lv.ci];
   $('crumb').textContent=`${lv.adv?'進階':'基礎'} ${lv.ci+1}-${lv.li+1}　${ch.title}`;
   $('name').textContent=lv.n;
-  $('formula').innerHTML=fHtml(lv.f);
   $('hint').innerHTML='接法　<b>'+lv.hint+'</b>';
-  $('hint').hidden=!hintOn;
-  $('btnHint').setAttribute('aria-pressed',hintOn);
+  applyHint();
   $('btnH').hidden=!lv.autoH;
-  $('parts').innerHTML=ORDER.filter(e=>lv.need[e]).map(e=>{
+  /* 零件盒永遠放滿六種原子：要用哪幾種、各幾顆，得自己判斷 */
+  $('parts').innerHTML=ORDER.map(e=>{
     const d=EL[e];
     return `<button class="part" type="button" data-e="${e}" aria-label="放一顆${d.name}，${d.v} 隻手">
       <span class="ball" style="background:radial-gradient(circle at 35% 30%,${d.c1},${d.c2});color:${d.ink}">${e}</span>
       <small>${d.name}<span class="hands">${'<i></i>'.repeat(d.v)}</span></small></button>`;
   }).join('');
 }
+/* 分子式平常是蓋住的：提示第一段（或教學、過關後）才會翻開 */
+const revealed=()=>tut.on||st.won||hintLv>=1;
+function applyHint(){
+  const lv=level();
+  $('formula').innerHTML=revealed()?fHtml(lv.f):'<span class="q">分子式 ？</span>';
+  $('hint').hidden=!bannerOpen;
+  $('btnHint').setAttribute('aria-pressed',hintLv>0||bannerOpen);
+}
 function renderMeta(msg){
-  const lv=level(),have=countEl(st.atoms);
-  $('chips').innerHTML=ORDER.filter(e=>lv.need[e]).map(e=>{
-    const h=have[e]||0,n=lv.need[e],c=h===n?'ok':h>n?'over':'';
-    return `<span class="chip ${c}"><i style="background:${EL[e].c2==='#1b1d21'?'#3a3d43':EL[e].c2};${e==='H'?'background:#fff':''}"></i>${e} ${h}/${n}</span>`;
+  const lv=level(),have=countEl(st.atoms),rev=revealed();
+  applyHint();
+  $('chips').innerHTML=ORDER.filter(e=>rev?(lv.need[e]||have[e]):have[e]).map(e=>{
+    const h=have[e]||0,n=lv.need[e]||0,c=!rev?'':h===n?'ok':h>n?'over':'';
+    return `<span class="chip ${c}"><i style="background:${EL[e].c2==='#1b1d21'?'#3a3d43':EL[e].c2};${e==='H'?'background:#fff':''}"></i>${e} ${rev?h+'/'+n:h}</span>`;
   }).join('');
   const el=$('status');
   let text,warn=false;
   if(msg){text=msg;warn=true;}
   else if(st.won)text=view3?'完成了。用手指拖曳，可以轉動立體模型。':'完成了。拖拖看，模型會跟著晃。';
-  else if(view3&&st.atoms.length)text='立體檢視：拖曳旋轉，點球和棍子一樣可以組裝';
   else if(!st.atoms.length)text='點下方的球，放上桌面';
   else{
     const lack=[],extra=[];
     for(const e of ORDER){const h=have[e]||0,n=lv.need[e]||0;if(h<n)lack.push(`${e}×${n-h}`);if(h>n)extra.push(`${e}×${h-n}`);}
     const f=st.atoms.reduce((s,a)=>s+free(a),0);
-    if(extra.length){text='多了 '+extra.join('、');warn=true;}
+    if(!rev){
+      if(f>0)text=`還有 ${f} 隻手空著`;
+      else{text=`手都接滿了，但這還不是「${lv.n}」`;warn=true;}
+    }
+    else if(extra.length){text='多了 '+extra.join('、');warn=true;}
     else if(lack.length)text='還缺 '+lack.join('、');
     else if(f>0)text=`還有 ${f} 隻手空著`;
-    else{text='零件都用上了，但接法不一樣。按「提示」看看';warn=true;}
+    else{text='零件都用上了，但接法不一樣';warn=true;}
   }
   el.textContent=text;el.classList.toggle('warn',warn);
   $('btnDel').disabled=st.sel==null||st.won;
@@ -779,7 +792,7 @@ function win(){
     sc.innerHTML=`<span><b>${r.s}</b> 分</span><span class="stars">${'★'.repeat(r.st)+'☆'.repeat(3-r.st)}</span><span>${fmtT(sec)}（標準 ${fmtT(lv.par)}）</span>`;
     const notes=[];
     if(!old)notes.push('第一次完成');else if(r.s>old.s)notes.push(`新紀錄，比上次多 ${r.s-old.s} 分`);else notes.push(`最佳紀錄仍是 ${old.s} 分`);
-    if(att.hint)notes.push('看過提示，分數打 7 折');
+    if(att.hint)notes.push(att.hint>1?'看過接法，分數 ×0.7':'看過分子式，分數 ×0.85');
     const t1=titleIdx(p);if(t1>t0)notes.unshift(`獲得稱號「${TITLES[t1].n}」`);
     got.hidden=false;got.textContent=notes.join('　·　');
   }
@@ -798,8 +811,8 @@ function win(){
 function goLevel(i,keep){
   st.lvl=Math.max(0,Math.min(LEVELS.length-1,i));
   if(!keep){st.atoms=[];st.bonds=[];st.sel=null;st.won=false;st.nid=1;}
-  hintOn=tut.on&&LEVELS[st.lvl].hint.length<=40;$('win').hidden=true;$('levels').hidden=true;
-  if(view3)setView3(false);
+  hintLv=0;bannerOpen=tut.on&&LEVELS[st.lvl].hint.length<=40;$('win').hidden=true;$('levels').hidden=true;
+  if(view3!==pref3)setView3(pref3);
   if(tut.on){tut.steps=buildSteps(level());tut.i=0;tut.off=false;}
   setScale();renderHead();save();
   if(!keep)attReset();
@@ -868,7 +881,7 @@ function renderCoach(){
 function setTut(on){
   tut.on=on;$('btnTut').setAttribute('aria-pressed',on);
   if(on)att.assist=true;
-  hintOn=on&&level().hint.length<=40;$('hint').hidden=!hintOn;$('btnHint').setAttribute('aria-pressed',hintOn);
+  bannerOpen=on?level().hint.length<=40:hintLv>=2;
   if(on){
     tut.steps=buildSteps(level());tut.i=0;tut.off=false;
     if(st.won||!tutMatch(sig(st.atoms,st.bonds))){st.atoms=[];st.bonds=[];st.sel=null;st.won=false;$('win').hidden=true;}
@@ -1207,13 +1220,22 @@ $('parts').addEventListener('click',ev=>{const b=ev.target.closest('.part');if(b
 $('btnDel').addEventListener('click',removeSel);
 $('btnClear').addEventListener('click',clearAll);
 $('btnH').addEventListener('click',autoH);
-$('btnHint').addEventListener('click',()=>{hintOn=!hintOn;if(hintOn)att.hint=true;$('hint').hidden=!hintOn;$('btnHint').setAttribute('aria-pressed',hintOn);renderMeta();kick();});
+$('btnHint').addEventListener('click',()=>{
+  let msg='';
+  if(tut.on||st.won)bannerOpen=!bannerOpen;
+  else if(hintLv===0){hintLv=1;msg='分子式翻開了（這一關分數 ×0.85）。再按一次可以看接法';}
+  else if(hintLv===1){hintLv=2;bannerOpen=true;msg='接法也翻開了（這一關分數 ×0.7）';}
+  else bannerOpen=!bannerOpen;
+  if(!tut.on&&!st.won)att.hint=Math.max(att.hint,hintLv);
+  if(msg)toast(msg);else renderMeta();
+  kick();
+});
 $('btnStay').addEventListener('click',()=>{
-  if(tut.on){tut.on=false;$('btnTut').setAttribute('aria-pressed',false);hintOn=false;$('hint').hidden=true;$('btnHint').setAttribute('aria-pressed',false);clearAll();}
+  if(tut.on){tut.on=false;$('btnTut').setAttribute('aria-pressed',false);hintLv=0;bannerOpen=false;clearAll();}
   else{$('win').hidden=true;renderCoach();kick();}
 });
 $('btnTut').addEventListener('click',()=>setTut(!tut.on));
-$('btn3d').addEventListener('click',()=>setView3(!view3));
+$('btn3d').addEventListener('click',()=>{pref3=!view3;try{localStorage.setItem('bskit-3d',pref3?'1':'0');}catch(e){}setView3(pref3);});
 $('btnBack').addEventListener('click',tutBack);
 $('btnNext').addEventListener('click',()=>{if(st.lvl+1<LEVELS.length)goLevel(st.lvl+1);else{$('win').hidden=true;openLevels();}});
 $('btnLevels').addEventListener('click',openLevels);
@@ -1240,7 +1262,7 @@ function openLevels(keepTab){
     const got=ch.levels.filter(l=>best(l.id)).length;
     return `<div class="chap"><h3><span>第 ${ci+1} 章　${ch.title}</span><b>${got} / ${ch.levels.length}</b></h3><div class="grid">`+
       ch.levels.map(l=>{const i=LEVELS.indexOf(l),b=best(l.id);
-        return `<button class="lv ${b?'done':''} ${i===st.lvl?'cur':''}" type="button" data-i="${i}"><span class="f">${fHtml(l.f)}</span><span class="n">${l.n}</span>`+
+        return `<button class="lv ${b?'done':''} ${i===st.lvl?'cur':''}" type="button" data-i="${i}"><span class="f">${b?fHtml(l.f):'？'}</span><span class="n">${l.n}</span>`+
           (b?`<span class="st">${'★'.repeat(b.st)+'☆'.repeat(3-b.st)}<i>${b.s}</i></span>`:'')+`</button>`;}).join('')+
       '</div></div>';
   }).join('');
@@ -1418,6 +1440,7 @@ new ResizeObserver(resize).observe($('stage'));
 function start(data){
   load();
   resize();
+  view3=!pref3;
   if(data&&typeof data.lvl==='number'&&Array.isArray(data.atoms)){
     st={lvl:data.lvl,atoms:data.atoms.map(a=>({id:a.id,e:a.e,x:a.x,y:a.y,vx:0,vy:0,comp:0})).filter(a=>EL[a.e]),
         bonds:(data.bonds||[]).map(k=>({a:k.a,b:k.b,o:k.o})),sel:null,won:false,nid:data.nid||1000};
