@@ -1,0 +1,1197 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>盛世聽音・漢皇盛世管委會物語</title>
+<style>
+:root{--bg:#141826;--pan:#1e2438;--pan2:#262e48;--ink:#ece6d6;--mute:#9aa0b4;--gold:#f0c75a;--red:#c0392b;--line:#3a4466}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;touch-action:manipulation}
+body{min-height:100dvh}
+.frame{position:sticky;top:0;z-index:30;padding-top:env(safe-area-inset-top);background:linear-gradient(#0d1020,#1a2038)}
+.frame i{display:block;height:10px;background:
+ repeating-linear-gradient(90deg,var(--gold) 0 4px,transparent 4px 8px) top/100% 2px no-repeat,
+ repeating-linear-gradient(90deg,#7a2a2a 0 12px,#a03838 12px 14px,#7a2a2a 14px 26px,var(--gold) 26px 28px) center/100% 4px no-repeat,
+ repeating-linear-gradient(90deg,var(--gold) 0 4px,transparent 4px 8px) bottom/100% 2px no-repeat}
+.wrap{max-width:520px;margin:0 auto}
+.scr{display:none;padding:12px 14px 28px}.scr.on{display:block}
+canvas.px,img.px{image-rendering:pixelated;image-rendering:crisp-edges;display:block;width:100%}
+h1,h2{font-weight:700;letter-spacing:4px;margin:8px 0}
+.center{text-align:center}.mute{color:var(--mute)}.small{font-size:12px}.gold{color:var(--gold)}.ls{letter-spacing:3px}.lh{line-height:1.9}
+.btn{display:block;width:100%;margin:8px 0;padding:12px 14px;border:2px solid var(--line);background:var(--pan2);color:var(--ink);font-size:16px;font-family:inherit;border-radius:4px;text-align:left;cursor:pointer;line-height:1.55;box-shadow:0 3px 0 #0a0d18}
+.btn:active{transform:translateY(2px);box-shadow:0 1px 0 #0a0d18}
+.btn.c{text-align:center;background:#7a2a2a;border-color:#a8483a;font-weight:700;letter-spacing:3px}
+.btn.ghost{text-align:center;background:transparent;box-shadow:none}
+.btn small{display:block;color:var(--mute);font-size:12px}
+input{width:100%;padding:12px;font-size:17px;border-radius:4px;border:2px solid var(--line);background:#0f1322;color:var(--ink);font-family:inherit}
+/* 登入 */
+.tt1{font-size:34px;letter-spacing:10px;text-align:center;color:var(--gold);text-shadow:3px 3px 0 #7a2a2a;margin:14px 0 2px}
+.tt2{text-align:center;color:var(--mute);letter-spacing:3px;font-size:14px}
+.tport{display:flex;justify-content:center;gap:6px;margin:-34px 0 6px;position:relative}.tport img{width:64px;image-rendering:pixelated}
+.sig{text-align:center;color:#5c6380;font-size:12px;margin-top:22px;letter-spacing:2px}
+/* 章回 */
+.top{display:flex;align-items:center;gap:8px;margin-bottom:6px}.top b{flex:1;font-size:18px;letter-spacing:2px}
+.tbtn.off{opacity:.45;text-decoration:line-through}.tbtn{background:var(--pan2);border:1px solid var(--line);color:var(--ink);padding:6px 9px;border-radius:4px;font-size:13px;font-family:inherit}
+.menu{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin:10px 0}.menu button{background:var(--pan);border:1px solid var(--line);color:var(--ink);padding:9px 2px;border-radius:4px;font-size:13px;font-family:inherit}.menu small{display:block;color:var(--mute);font-size:11px}
+.vol{margin:16px 0 6px;color:var(--gold);letter-spacing:4px;font-size:14px;border-bottom:1px dashed var(--line);padding-bottom:4px}
+.chb{display:flex;align-items:center;gap:10px;width:100%;padding:10px 12px;margin:6px 0;background:var(--pan);border:2px solid var(--line);border-radius:4px;color:var(--ink);font-family:inherit;text-align:left}
+.chb .no{color:var(--mute);font-size:13px;width:52px}.chb .tt{flex:1}.chb .tt b{display:block;font-size:17px;letter-spacing:2px}.chb .tt small{color:var(--mute);font-size:12px}
+.chb.lock{opacity:.45}.gr i{font-style:normal;display:inline-block;width:30px;height:30px;line-height:30px;text-align:center;font-weight:700;border-radius:3px;background:#5a4a20;color:var(--gold)}.gr i.g甲{background:#7a2a2a}
+/* 前情 */
+.recap,.ppl{background:var(--pan);border-left:4px solid var(--gold);padding:10px 12px;margin:12px 0;border-radius:3px}.recap p{margin:6px 0;line-height:1.8}
+.ppl>div{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}.pch{display:flex;align-items:center;gap:4px;background:var(--pan2);padding:3px 8px 3px 3px;border-radius:3px;font-size:13px}.pch img{width:28px;image-rendering:pixelated}
+/* 遊戲 */
+#sGame{padding:0}
+.gbar{display:flex;align-items:center;gap:6px;padding:8px 10px;background:#0f1322}.gbar b{flex:1;letter-spacing:2px;font-size:15px}
+.stats{display:flex;gap:10px;padding:5px 10px;font-size:12px;background:#0f1322;color:var(--mute);border-bottom:2px solid #2a3050}#stF{color:#f08a8a;flex:1}
+.stage{position:relative;border-bottom:3px solid #0a0d18}
+#port{position:absolute;right:4%;bottom:0;width:30%;image-rendering:pixelated;opacity:0;transition:opacity .2s}#port.on{opacity:1}#port.me{left:4%;right:auto}
+#dlg{margin:10px;background:rgba(14,18,32,.97);border:3px solid #c9a85a;outline:2px solid #0a0d18;border-radius:4px;padding:16px 14px 10px;min-height:150px;position:relative;cursor:pointer}
+#who{position:absolute;top:-14px;left:10px;background:#7a2a2a;border:2px solid #c9a85a;padding:2px 10px;font-size:14px;letter-spacing:2px;border-radius:3px}
+#txt{font-size:17px;line-height:1.85;min-height:94px;white-space:pre-wrap}#txt.nar{color:#cfd3e2}
+.drow2{display:flex;align-items:center;justify-content:space-between;margin-top:4px}
+#nextTip{color:var(--gold);font-size:13px;animation:bl 1s infinite}@keyframes bl{50%{opacity:.3}}
+#bNext{display:none;background:#7a2a2a;border:2px solid #c9a85a;color:var(--ink);padding:5px 16px;border-radius:3px;font-family:inherit;font-size:14px}
+body.note-on #bNext{display:inline-block}
+.tm{border-bottom:none}body.note-on .tm{border-bottom:2px dotted var(--gold);cursor:help}body.note-on .tm.t-p{border-bottom-color:#7fd0c0}body.note-on .tm.t-l{border-bottom-color:#f08a8a}
+#qbox{display:none;margin:10px;background:rgba(14,18,32,.98);border:3px solid #c9a85a;border-radius:4px;padding:14px 12px;max-height:62vh;overflow-y:auto}#qbox.on{display:block}
+.qk{display:inline-block;background:var(--gold);color:#1a1a1a;font-weight:700;padding:2px 8px;border-radius:2px;font-size:13px;letter-spacing:2px}
+.qp{margin:10px 0;line-height:1.8;font-size:16px}
+.ver{font-size:22px;font-weight:700;letter-spacing:6px;text-align:center;padding:6px;border-radius:3px}.ver.v2{color:#8de07f}.ver.v1{color:var(--gold)}.ver.v0{color:#f08a8a}.ver.jk{color:#c09af0}
+.dl{color:var(--gold);font-size:13px;margin:6px 0}
+.note{background:#232a44;border-left:4px solid #6fa8dc;padding:10px;margin:10px 0;line-height:1.8;font-size:14.5px;border-radius:3px}
+.say{background:#2a2030;border-left:4px solid #c06a1a;padding:8px 10px;margin:8px 0;line-height:1.7}.say b{color:#f0a060;margin-right:6px}
+.dcard{background:#f2ead6;color:#2a2416;border-radius:3px;padding:9px 10px;margin:8px 0;border:2px solid #8a7a5a;box-shadow:3px 3px 0 #0a0d18}
+.dh{display:flex;gap:8px;font-size:12px;align-items:center}.dh .cat{background:#2a3050;color:#fff;padding:1px 6px;border-radius:2px}.dh .mute{color:#8a7a5a;margin-left:auto}
+.dloc{font-size:13px;color:#6a5a3a;margin:4px 0}.dd{font-size:16px;line-height:1.6;font-weight:600}
+.gch{display:inline-block;min-width:26px;text-align:center;padding:1px 5px;font-weight:700;color:#fff;border-radius:2px;background:#7a8aa0}
+.gch.gS{background:#c0392b}.gch.gA{background:#e0603a}.gch.gD,.gch.gF,.gch.gFS,.gch.gFB{background:#c08a10}.gch.gE{background:#5f9f7f}
+h4{margin:14px 0 6px;color:var(--gold);font-size:14px;letter-spacing:2px}
+.bar{display:grid;grid-template-columns:86px 1fr 46px;gap:6px;align-items:center;font-size:13px;margin:4px 0}.bar i{display:block;height:12px;border-radius:2px}.bar b{text-align:right;font-weight:400}
+.grow{display:flex;flex-wrap:wrap;gap:6px}.gbox{border:2px solid;border-radius:3px;display:flex;align-items:center;font-size:13px}.gbox b{color:#fff;padding:2px 6px}.gbox span{padding:2px 7px}
+/* 其它 */
+.lg{padding:8px 0;border-bottom:1px dashed var(--line);line-height:1.8}.lg b{color:var(--gold);margin-right:6px}.lg.n{color:#cfd3e2}.lg.q{background:#232a44;padding:8px;border-radius:3px}
+#logBody{max-height:72vh;overflow-y:auto}
+.crow{display:flex;gap:10px;padding:10px 0;border-bottom:1px dashed var(--line)}.crow img{width:64px;height:77px;image-rendering:pixelated;flex:none}.crow b{display:block;letter-spacing:1px}.crow small{color:var(--mute)}.crow p{margin:4px 0;line-height:1.7;font-size:14px}
+.lrow{padding:10px 0;border-bottom:1px dashed var(--line)}.lrow p{margin:4px 0;line-height:1.7;font-size:14px}.lk{opacity:.5}
+.flt{display:flex;flex-wrap:wrap;gap:5px}.flt button{background:var(--pan);border:1px solid var(--line);color:var(--ink);padding:4px 8px;border-radius:3px;font-size:12px;font-family:inherit}.flt button.on{background:#7a2a2a}
+.drow{display:flex;gap:6px;align-items:flex-start}.drow>div{flex:1}.drow .gch{margin-top:12px}
+.big{font-size:96px;text-align:center;color:var(--gold);text-shadow:5px 5px 0 #7a2a2a;margin:16px 0 4px;font-weight:700}
+.sum{text-align:center;background:var(--pan);padding:10px;border-radius:3px;margin:10px 0;line-height:1.8}
+#pop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:50;align-items:center;justify-content:center;padding:20px}#pop.on{display:flex}
+#popB{background:#f2ead6;color:#2a2416;max-width:420px;width:100%;border:3px solid #8a7a5a;border-radius:4px;padding:16px;position:relative;line-height:1.75;max-height:80vh;overflow:auto}
+#popB .btn{background:#e2d6b8;color:#2a2416;border-color:#8a7a5a}#popB .btn.ghost{background:transparent}#popB .mute{color:#7a6a4a}
+#popX{position:absolute;right:8px;top:4px;font-size:22px;cursor:pointer;color:#8a7a5a}
+.pc{display:flex;gap:10px;align-items:center}.pc img{width:56px;image-rendering:pixelated}.pc b{display:block}.pc small{color:#7a6a4a}
+#toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,40px);background:#7a2a2a;border:2px solid #c9a85a;padding:8px 16px;border-radius:4px;opacity:0;transition:.25s;z-index:60;font-size:14px;max-width:90vw;text-align:center}#toast.on{opacity:1;transform:translate(-50%,0)}
+</style>
+<style>:root{--bg:#fff4e0;--pan:#ffffff;--pan2:#ffe6bd;--ink:#3a2a1a;--mute:#9a7f5e;--gold:#e8590c;--line:#f3c887}
+body{background:radial-gradient(#ffe2b0 1.5px,transparent 1.5px) 0 0/18px 18px,var(--bg)}
+.frame{background:linear-gradient(#ff8f5a,#ffb45a)}.frame i{background:repeating-linear-gradient(90deg,#fff 0 10px,#ff6b4a 10px 20px,#fff 20px 30px,#2fb5a0 30px 40px) center/100% 6px no-repeat}
+.btn{border-radius:14px;border-width:2.5px;box-shadow:0 4px 0 #e0a860;font-weight:500}.btn:active{box-shadow:0 1px 0 #e0a860}
+.btn.c{background:#ff6b4a;border-color:#d9482a;color:#fff;box-shadow:0 4px 0 #b83a20}
+.btn.opt{animation:slideIn .35s both cubic-bezier(.2,1.4,.4,1)}@keyframes slideIn{from{opacity:0;transform:translateX(-24px) scale(.96)}}
+.btn.lockd{opacity:.55;background:#eee;border-style:dashed;box-shadow:none;color:#888}.btn.cardopt{background:#f1e4ff;border-color:#8a4ad0}
+input{background:#fff}.tt1{color:#ff6b4a;text-shadow:3px 3px 0 #ffd38a}
+.tbtn,.menu button,.chb{border-radius:10px}.chb{box-shadow:0 3px 0 #f0c98a}.gr i{background:#ffd38a;color:#b84a10}.gr i.g甲{background:#ff6b4a;color:#fff}
+.gbar,.stats{background:#ff8f5a;color:#fff}.gbar .tbtn{background:#fff3;border-color:#fff6;color:#fff}.stats{color:#fff;border-bottom-color:#d9682a}#stF{color:#fff}
+.stage{border-bottom-color:#d9682a;overflow:hidden}#port.on{animation:hop .35s cubic-bezier(.2,1.6,.4,1)}@keyframes hop{from{transform:translateY(30%) scale(.9)}}
+#dlg{background:#fffdf6;border:3px solid #ff8f5a;outline:none;border-radius:16px;box-shadow:0 5px 0 #f0c98a}
+#who{background:#ff6b4a;border-color:#fff;color:#fff;border-radius:10px}#txt.nar{color:#7a5a3a}#txt.os{color:#8a4ad0;font-style:italic}#txt.os:before{content:"💭 "}
+#bNext{background:#ff6b4a;border-color:#fff;color:#fff;border-radius:10px}#nextTip{color:#ff6b4a}
+#qbox{background:#fffdf6;border:3px solid #2fb5a0;border-radius:16px;box-shadow:0 5px 0 #a8dccf}.qk{background:#2fb5a0;color:#fff;border-radius:8px}
+.ver.v2{color:#1f9a5a}.ver.v1{color:#d98a0c}.ver.v0{color:#d9382a}.pop{animation:pop .45s cubic-bezier(.2,1.8,.4,1)}@keyframes pop{from{transform:scale(.3);opacity:0}}
+.stchip{display:inline-block;margin-left:10px;color:#fff;font-size:13px;letter-spacing:1px;padding:3px 10px;border-radius:99px;vertical-align:middle}
+.routes{font-size:13px;color:var(--mute);margin:8px 0}.routes span{display:inline-block;color:#fff;padding:2px 8px;border-radius:99px;margin:3px 0 0 5px}
+.note{background:#e6f6ff;border-left-color:#3a9ad9;border-radius:10px}.say{background:#fff0dc;border-radius:10px}.lg.q{background:#fff0dc}
+.dcard{border-radius:12px}.sum,.recap,.ppl{border-radius:12px}.sum .bar{text-align:left}
+.cardb{background:#f1e4ff;border:2px dashed #8a4ad0;border-radius:10px;padding:8px;margin-top:6px;font-size:13.5px;line-height:1.7}.cardb b{display:block;color:#6a2ab0}
+.final{background:#fff;border:3px solid #ff6b4a;border-radius:16px;padding:14px;margin:12px 0;text-align:center}.final>b{display:block;font-size:30px;color:#ff6b4a;margin:6px 0}.final .bar{text-align:left}
+.floaty{position:absolute;left:50%;top:45%;font-size:56px;pointer-events:none;animation:fl 1.1s ease-out forwards}@keyframes fl{from{transform:translate(-50%,0) scale(.4);opacity:0}30%{opacity:1;transform:translate(-50%,-20px) scale(1.2)}to{transform:translate(-50%,-90px) scale(1);opacity:0}}
+#toast{background:#3a2a1a;border-color:#ffb45a;color:#fff;border-radius:99px}.flt button.on{color:#fff;background:#ff6b4a}
+#sIntro{padding:0;cursor:pointer}.istage{position:relative;background:#000;font-family:"Courier New",monospace}.istage>div{position:absolute;left:0;right:0;text-align:center;opacity:0;pointer-events:none}
+#ipre{top:46%;color:#fff;letter-spacing:6px}#ipre b{display:block;font-size:22px}#ipre small{color:#8cf;font-size:12px}.istage.pre #ipre{opacity:1;transition:opacity .6s}
+#ilogo{top:9%}#ilogo b{display:block;font-family:"PingFang TC","Noto Sans TC",sans-serif;font-size:13vw;font-weight:900;letter-spacing:.12em;color:#ffd84a;-webkit-text-stroke:2px #7a2a1a;text-shadow:0 5px 0 #7a2a1a,0 9px 0 rgba(0,0,0,.35)}
+#ilogo span{display:inline-block;margin-top:10px;background:#1d2244;color:#fff;padding:3px 12px;border-radius:99px;font-size:14px;letter-spacing:3px;font-family:inherit}#ilogo i{display:block;margin-top:6px;color:#fff;font-style:normal;font-size:12px;letter-spacing:6px;text-shadow:1px 1px 0 #7a2a1a}
+.istage.title #ilogo{opacity:1;animation:drop .7s cubic-bezier(.2,1.5,.4,1)}@keyframes drop{from{transform:translateY(-120%)}}
+#ipress{bottom:17%;color:#fff;font-size:16px;letter-spacing:3px;text-shadow:2px 2px 0 #1d2244}.istage.title #ipress{opacity:1;animation:bl 1s steps(2) infinite}
+#icopy{bottom:5%;color:#fff;font-size:11px;letter-spacing:2px;text-shadow:1px 1px 0 #1d2244}.istage.title #icopy{opacity:.9}
+@media(min-width:520px){#ilogo b{font-size:68px}}
+#icv{height:calc(100dvh - 16px);object-fit:cover}
+</style>
+</head>
+<body>
+<div class="frame"><i></i></div>
+<div class="wrap">
+<section class="scr" id="sIntro"><div class="istage"><canvas id="icv" class="px"></canvas><div id="ipre"><b>Jim Lu</b><small>presents</small></div><div id="ilogo"><b>盛世聽音</b><span>漢皇盛世・管委會物語</span><i>心機版</i></div><div id="ipress">▶ 點擊畫面開始</div><div id="icopy">© 2026 Jim Lu</div></div></section>
+<section class="scr" id="sLogin">
+ <canvas class="px" id="tbg"></canvas>
+ <div class="tport" id="tport"></div>
+ <div class="tt1">盛世聽音</div>
+ <div class="tt2">漢皇盛世・管委會物語</div>
+ <p class="center mute small lh">你是第一屆管委會委員沈默然。<br>輔佐主委，周旋於阿姨、物業、建商與里長之間。<br>正道、權謀、嗆聲、搞笑——上策不只一種。<br>聽話，要聽音。</p>
+ <div id="plist"></div>
+ <input id="nm" placeholder="輸入你的名字（新玩家）" maxlength="12">
+ <input id="pin" placeholder="4 位數密碼（可留空）" inputmode="numeric" maxlength="4" style="margin-top:8px">
+ <button class="btn c" id="bEnter">進　入</button>
+ <p class="center mute small">進度會自動同步到雲端：換裝置輸入同一個名字，就能接著玩。<br><span class="cst"></span></p>
+ <div class="sig">製作　Jim Lu</div>
+</section>
+
+<section class="scr" id="sChap">
+ <div class="top"><b>盛世聽音</b><span class="mute small" id="who2"></span><button class="tbtn" id="mShare">🔗</button><button class="tbtn" id="mSwitch">換人</button></div>
+ <div class="menu"><button id="mChars">人物譜<small id="cntC"></small></button><button id="mLaws">條文錄<small id="cntL"></small></button><button id="mData">缺失庫<small>4,003</small></button><button id="mQuote">語錄<small id="cntQ"></small></button><button id="mGloss">詞彙<small>奇策 <span id="cntJ"></span></small></button></div>
+ <button class="tbtn" id="mSet" style="width:100%">⚙ 設定（註解・音樂・音效）</button>
+ <div class="cst center small mute" style="margin-top:6px"></div><div id="chList"></div>
+ <div class="sig">製作　Jim Lu</div>
+</section>
+
+<section class="scr" id="sRecap"><div id="rcBody"></div></section>
+
+<section class="scr" id="sGame">
+ <div class="gbar"><b id="gTitle"></b><button class="tbtn" id="gMus" title="音樂">♪</button><button class="tbtn" id="gSfx" title="音效">🔊</button><button class="tbtn" id="gLog">回顧</button><button class="tbtn" id="gNote">註解：關</button><button class="tbtn" id="gQuit">離開</button></div>
+ <div class="stats"><span id="stF"></span><span id="stI"></span><span id="stR"></span></div>
+ <div class="stage"><canvas class="px" id="bg"></canvas><img id="port" alt=""></div>
+ <div id="dlg"><span id="who"></span><div id="txt"></div><div class="drow2"><span id="nextTip">▼</span><button id="bNext">下一句 ▶</button></div></div>
+ <div id="qbox"></div>
+</section>
+
+<section class="scr" id="sLog"><div class="top"><b>往前回顧</b><button class="tbtn" id="lgBack">回到遊戲</button></div><div id="logBody"></div></section>
+<section class="scr" id="sList"><div class="top"><b id="lbTitle"></b><button class="tbtn" id="lbBack">返回</button></div><div id="lbBody"></div></section>
+<section class="scr" id="sEnd"><div id="endBody"></div></section>
+</div>
+<div id="pop"><div id="popB"><span id="popX">×</span><div id="popIn"></div></div></div>
+<div id="toast"></div>
+<script>
+const POOL=[[2,105,"廢水","","B4F","汽車位178","車位旁管路未標示名稱及流向","A",0],[1,118,"6ER2","CD棟","6F","梯廳","盤內未放置單線圖","A",0],[1,250,"通風","","B1F","203機車位旁機房","排風機未設置檢修孔無法檢測逆止風門及熔斷百葉","A",0],[1,179,"ER2","","B1F","5號汽車位旁","盤內未放置對應單線圖","A",0],[1,190,"MG","","B1F","319號機車位旁發電機室","控制面板3組負載分配器未定位","A",0],[1,397,"EPF1","","B5F","337號機械車位後消防室","放置對應單線圖","A",0],[1,274,"給水","","B2F","059號車位旁","下水池進水管焊接處未上漆","A",0],[1,394,"PS3","","B5F","221號機械車位旁機房","盤內單線圖放置錯誤，清圖後需更換","A",0],[1,328,"給水","","B3F","127號車位旁","不明管路未除共兩處","A",0],[1,126,"PRC","","RF","梯間","盤內過門接地線未接","A",0],[1,213,"MP2","","B1F","5號汽車位旁","盤內中板一迴路未標示名牌","A",0],[1,322,"給水","","B3F","127號車位旁","下水池進水管貫穿樓層處未填塞","A",0],[1,186,"LL","","B1F","車道口防災中心","盤內N相銅排接點螺絲鏽蝕","A",0],[1,151,"給水","","1F","秀朗路一段十巷","總表排水孔堵塞積水","A",0],[1,218,"MR","","B1F","306號機車位旁","盤內第7迴路跳脫","A",0],[6,2099,"機械車位","270-280","B5F","","最下層車板下方地坪多處白華","A",0],[1,401,"給水","","B5F","326號車位後方","水錘吸收器關閉","A",0],[0,575,"火警","","B5F","汽車位224","消防箱內1_030電磁閥模組離線接電容","A",0],[1,1,"清水","AB棟","R3F","水箱室","上水池底部泥沙淤積","A",0],[0,14,"連結送水管","CD棟","R2F","水錶機房","機組下行管路未設置閘閥","A",0],[6,1547,"汽車位","卸貨車位","B1F","","空調外機周圍壁面穿管處未防火填塞","A",0],[6,1571,"機車位","37","B1F","","鐵捲門上天花一處水痕","A",0],[6,2037,"汽車位","196","B4F","","地坪穿管處未防火填塞","A",0],[0,353,"標示","AB棟","2F","走廊","磁力門前出口標示燈故障","A",0],[6,1665,"機車位","391","B1F","","車位前天花一處孔洞未防火填塞","A",0],[6,1655,"機車位","355","B1F","","車位旁穿管處一處水痕","A",0],[2,118,"PS2","","B5F","汽車位221中水機房","盤內第6迴排水泵電流值過低，現況6.1A，7.5HP約11.25A","A",0],[0,271,"排煙","CD棟","8F","梯廳","磁力門閉合不全","A",0],[6,1965,"汽車位","170-173","B4F","","車位後方壁面上方開口處多處打針未除","A",0],[1,384,"PB5","","B5F","279號機械車位旁機房","盤內各設備端子台螺絲鏽蝕","A",0],[0,180,"排煙","CD棟","14F","梯廳","排煙手動啟動開關膠帶貼覆","A",0],[0,112,"排煙","AB棟","19F","排煙室","中間排煙室2側磁力門閉合不全","A",0],[1,361,"給水","","B4F","152號車位旁","下水池進水管路焊接處未上漆","A",0],[0,347,"撒水","CD棟","3F","走廊","補助撒水栓箱1吋半及2吋半出管處無防火填塞共2處","A",0],[6,1620,"機車位","244","B1F","","車位上天花多處水痕","A",0],[0,199,"撒水","AB棟","12F","梯廳","補助撒水栓箱保護膜未除","A",0],[0,222,"廣播","CD棟","11F","整層","整層水平區劃揚聲器無動作","A",0],[6,1798,"汽車位","85-86","B3F","","車位後方腹壁牆內多處打針","A",0],[6,2075,"汽車位","325","B5F","","車位周邊壁面天花髒污裂痕漏水打針痕跡","A",0],[0,568,"連結送水管","","B5F","消防機房","控制盤電流錶故障","A",0],[6,1631,"機車位","290","B1F","","車位後壁面穿線處未防火填塞","A",0],[0,451,"火警","","B1F","防災中心","受信總機內個通訊模組不定時異常","A",0],[6,1685,"機車位","453","B1F","","車位上天花穿管處未防火填塞","A",0],[0,576,"火警","","B5F","汽車位241","消防箱內1_056、1_057電磁閥模組離線接電容","A",0],[4,54,"噴灌","","B1F","235機車位","車位上噴灌管路未標示名稱及流向","A",0],[6,1923,"汽車位","148","B4F","","壁面陰角處多處破損裂痕泥作不佳","B",1],[6,2047,"汽車位","207","B4F","","車位旁天花板與立柱多處泥作不佳油漆不佳裂痕","B",1],[7,13,"梯廳","A棟","R1F","","消防箱多處施工污染","B",1],[6,1844,"汽車位","106","B3F","","車位旁梯廳口壁面多處污染油漆不佳","B",1],[6,2057,"機電設備空間","158","B4F","","天花板多處泥作不佳油漆不佳","B",1],[6,1942,"汽車位","157-158","B4F","","壁面多處泥作不佳油漆不佳裂痕","B",1],[6,1860,"汽車位","111-122","B3F","","車位後壁面多處污染裂痕及油漆不佳","B",1],[6,1848,"汽車位","107","B3F","","車位旁壁面陰角處裂痕","B",1],[6,1861,"汽車位","114","B3F","","車位前壁面陰角處兩處裂痕","B",1],[6,2038,"汽車位","196","B4F","","車位旁天花板與壁面多處泥作不佳油漆不佳裂痕","B",1],[6,1998,"汽車位","182-184","B4F","","天花板多處油漆不佳裂痕","B",1],[6,1901,"汽車位","146","B3F","","車位旁壁面多處污染及油漆不佳","B",1],[6,1989,"汽車位","179-181","B4F","","地坪多處施工污染","B",1],[6,1227,"梯廳","CD棟","B2F","","樓層指示牌下方壁面破損","B",1],[6,1344,"外觀","左向","1F","","瓦斯總閥旁格柵門工程污染.脫漆","B",1],[6,1427,"外牆","正向","1F","","16F外牆石材黃漬異色","B",1],[6,1697,"汽車位","12","B2F","","車位前車道壁面多處污漬裂痕油漆不佳及批土不佳","B",1],[6,1308,"外觀","背向","1F","","後門前人行道地坪多處工程污染","B",1],[6,1469,"外牆","左向","1F","","11F外牆磁磚破損","B",1],[6,1737,"汽車位","54","B2F","","車位旁立柱多處污漬裂痕油漆不佳及批土不佳","B",1],[6,1992,"汽車位","179-186","B4F","","車位前壁面多處泥作不佳油漆不佳裂痕","B",1],[6,1419,"外觀","左向","1F","","人行道自來水孔蓋鏽蝕","B",1],[6,1351,"外觀","左向","1F","","3F外牆白華污染","B",1],[6,1830,"汽車位","98-101","B3F","","車位後壁面多處污染裂痕油漆不佳","B",1],[6,1890,"汽車位","135","B3F","","車位旁管路多處施工污染","B",1],[6,1688,"機車位","471-473","B1F","","車位上橫梁多處裂痕","B",1],[6,1393,"外觀","正向","1F","","45號安全梯旁石材柱工程污染","B",1],[6,1874,"汽車位","125","B3F","","車位後水箱周圍壁面陰角處裂痕","B",1],[0,129,"撒水","AB棟","18F","走廊","33號前撒水頭膠污染","B",1],[6,1764,"汽車位","74","B2F","","車位旁壁面多處污漬裂痕油漆不佳及批土不佳","B",1],[6,623,"梯廳","AB棟","4F","","磁力門上壁面一處破損","B",1],[6,1722,"汽車位","37","B2F","","機房外周圍壁面多處污漬裂痕油漆不佳及批土不佳","B",1],[6,736,"梯廳","AB棟","1F","","雙開防火門多處施工污染","B",1],[6,721,"梯廳","AB棟","2F","","7號至13號壁面多處施工污染","B",1],[6,486,"走廊","AB棟","9F","","天花多處污漬裂痕","B",1],[2,102,"排水","","B4F","176號汽車位","車位後複壁牆排水孔堵塞","B",2],[2,111,"PS1廢水","","B5F","汽車位279","箱門開啟時與揚聲器衝突，無法完全開啟","B",2],[4,22,"景觀燈","","1F","人行道","1號店鋪左側花圃蘑菇燈故障*2","B",2],[4,9,"噴灌","","1F","人行道","52號店鋪旁花圃管路斷管","B",2],[6,233,"梯廳","AB棟","19F","","窗戶安全扣故障","B",2],[4,71,"垃圾回收","","B1F","車道旁","垃圾冷藏庫內燈具故障一處","B",2],[4,19,"景觀燈","","1F","人行道","頂樓燈條故障","B",2],[6,1913,"車道","147","B4F","","天花板燈具故障","B",2],[1,292,"照明","","B2F","34號汽車位","車位旁壁燈故障","B",2],[0,599,"連結送水管","","B5F","消防機房","壓力桶壓力開關及壓力錶管路歪斜","B",2],[1,25,"23ER1","AB棟","23F","磁力門後","裝潢保護 無法檢測","B",2],[4,98,"景觀燈","","B5F","279號汽車位旁機房","MLB5盤內二線控遠端無法控制","B",2],[6,1050,"梯廳","CD棟","19F","","施工保護無法檢測","B",2],[4,27,"景觀燈","","1F","人行道","右向壁燈燈故障*6","B",2],[6,1075,"排煙室","CD棟","17F","","防火門開至90度無法自動閉合","B",2],[1,110,"9R2","CD棟","9F","梯廳","過門接地線未接","B",2],[4,37,"景觀燈","","1F","中庭","右側通風墩座右側蘑菇燈故障","B",2],[2,42,"雨水","","B1F","344機車","電動閥外蓋鬆脫未固定","B",2],[1,130,"1L","","1F","瑜珈室","中板遺失 無法核對迴路","B",2],[4,10,"景觀燈","","1F","人行道","1號店鋪右側花圃蘑菇燈故障","B",2],[1,418,"PB5","","B5F","279號機械車位旁機房","控制面板ON燈故障3盞","B",2],[6,117,"梯廳","AB棟","23F","","窗戶無法上鎖","B",2],[4,30,"景觀燈","","1F","人行道","45號店鋪前花圃蘑菇燈故障","B",2],[6,282,"走廊","AB棟","17F","","9號至13號住戶前天花崁燈故障","B",2],[1,374,"照明","","B4F","179號汽車位","車位後方燈具故障","B",2],[6,703,"梯廳","AB棟","2F","","弱電箱至7號裝潢保護無法檢測","B",2],[6,524,"一般梯","AB棟","7F","","平台燈具故障","B",2],[4,23,"景觀燈","","1F","人行道","右向人行道最後面花圃照樹燈故障","B",2],[6,137,"走廊","AB棟","22F","","7號住戶至13號住戶前天花多處崁燈故障","B",2],[6,1974,"汽車位","175","B4F","","車位旁燈具故障","B",2],[1,178,"ER1","","B1F","往B2F車道前機房","盤內上方微動開關燈具無動作","B",2],[2,70,"廢水雨水","","B1F","330機車","廢水壓力管未標示名稱及流向","B",2],[1,155,"給水","","1F","秀朗路一段十巷","總表壓力表未固定完全","B",2],[1,182,"ER2","","B1F","5號汽車位旁","盤內微動開關燈具無動作","B",2],[1,429,"PS1","","B5F","279號機械車位旁機房","配電盤箱門開啟時與壁面揚聲器衝突無法完全開啟","B",2],[6,519,"梯廳","AB棟","8F","","裝潢保護無法檢測","D",3],[6,754,"梯廳","AB棟","1F","","無障礙電梯車廂裝潢保護無法檢測","D",3],[1,516,"MLB4","","B4F","173號汽車位旁機房","圖面標示第5迴路接至保險絲，現況外接一組插座","F",3],[4,49,"泳池","","1F","","熱泵設備下方目前積水嚴重","D",3],[4,103,"泳池","","B1F","發電機室","平面圖標示為熱泵設置於發電機室，現況無","F",3],[6,234,"梯廳","AB棟","19F","","全區電梯門框保護中，無法檢測","D",3],[5,4,"中央監控","CD棟","R2F","","消防中繼機組未設監視點\n車道旁側門開門鈕防護罩脫落","D",3],[6,526,"走廊","AB棟","7F","","梯廳至3號裝潢保護無法檢測","D",3],[6,2171,"圖面","","R3F","","電梯機房百葉窗圖面應為60B,請提供材質證明","D",3],[0,229,"連結送水管","CD棟","11F","走廊","送水口閘閥設未設置檢修孔，爾後恐檢修不易","D",3],[1,507,"MR1","","B1F","往B2F車道前機房","圖面標示NG相銅排相連，現況無","F",3],[2,183,"清冊","","","","未提供擋水閘門數量清冊","D",3],[1,520,"PS3","","B5F","221號機械車位旁機房","圖面標示廢水泵為7.5HP,現況為5HP","FS",3],[6,796,"梯廳","AB棟","B1F-B5F","","兩台電梯保護中無法檢測","D",3],[6,1710,"汽車位","22","B2F","","機房多處雜物堆放無法檢測","D",3],[1,517,"PS2","","B5F","221號機械車位旁機房","圖面標示第9迴路ELCB為15AT,現況為20AT","F",3],[1,533,"圖面","","","","未提供變壓器出廠檢驗證明","D",3],[6,1154,"走廊","CD棟","5F","","出梯廳至25號戶裝潢保護中無法檢測","D",3],[1,522,"PK","","B5F","279號機械車位旁機房","圖面標示第4迴路無負載，現況有","F",3],[6,2173,"圖面","","R1F","","戶外平台一處風機旁未設置格柵牆與竣工圖不符","F",3],[6,2143,"機械車位","357-364","B5F","","因廠商未配合，無法下車板檢測","D",3],[1,479,"17L2","CD棟","17F","梯廳","圖面標示第3迴路SP 現況有負載","F",3],[1,535,"圖面","","","","未提供淨水設備出廠證明、保固書、操作手冊等","D",3],[4,102,"泳池","","B1F","247機車位","循環馬達流程圖標示2HP，現況標示為3HP，與圖不符","F",3],[1,511,"ML1","","B1F","往B2F車道前機房","圖面標示第10、12迴路有負載，現況無","FS",3],[6,1223,"梯廳","CD棟","B1F","","電梯至停車場大門壁面及地坪部分裝潢保護中無法檢測","D",3],[6,2174,"圖面","","R1F","","現況棋藝室使用空間與竣工圖不符,圖面為樓梯間","F",3],[6,2176,"圖面","","B1F","","171號機車位旁牆面開孔未封與竣工圖不符","F",3],[1,525,"PS3","","B5F","","昇位圖未設置此配電盤","F",3],[0,652,"圖說","","","","消防圖未提供主管機關圖","D",3],[6,681,"一般梯","AB棟","2F","","天花及橫梁多處未完工上漆","B",4],[6,886,"水箱區","CD棟","R3F","","全區天花板多處孔洞未補","B",4],[6,1073,"排煙室","CD棟","17F","","兩扇防火門與壁面接縫處收邊不佳","B",4],[6,876,"戶外水塔區","CD棟","R3F","","人孔蓋旁二丁掛一處鋼筋未除","B",4],[6,1109,"走廊","CD棟","14F","","天花板維修孔蓋蓋板遺失","B",4],[6,724,"一般梯","AB棟","2F-1F","","第二轉折平台壁面一處孔洞未收尾","B",4],[6,794,"無障礙地下梯","AB棟","1F-B5F","","扶手欄杆多處保護未除","B",4],[6,764,"無障礙梯","AB棟","1F","","平台天花兩處處管路未完工","B",4],[6,1380,"外觀","正向","1F","","面大門右側花圃室外機周圍土質流失","B",4],[6,1210,"無障礙電梯","CD棟","1F","","車廂天花多處孔洞未修補","B",4],[7,191,"健身房","","1F","","洗手台下方排水未加蓋","B",4],[6,678,"一般梯","AB棟","3F-2F","","轉折平台壁面一處釘子未除","B",4],[6,1329,"外觀","後門通道","1F","","梯廳玻璃門兩側擋水門框踢腳處未收尾","B",4],[6,872,"屋突","CD棟","R3F","","全區地坪多處砂石未除","B",4],[6,919,"水錶室","CD棟","R2F","","防火門旁一處鐵釘未除","B",4],[6,1331,"外觀","後門通道","1F","","梯廳玻璃門右下角壁磚未完工","B",4],[6,1367,"外觀","正向","1F","","大門口前地坪多處修補異色","B",4],[6,1324,"外觀","後門通道","1F","","健身房外排風墩座下方花圃土質流失","B",4],[6,974,"排煙室","CD棟","R1F","","壁面多處泥作不佳","B",4],[6,1386,"外觀","正向","1F","","面大門右側花圃施工廢棄物未清除","B",4],[6,1151,"一般梯排煙室","CD棟","5F","","排煙閘門上方壁面泥作不佳","B",4],[6,1334,"外觀","後門通道","1F","","瓦斯總閥下方地坪貫穿未填塞","B",4],[6,1200,"一般梯","CD棟","1F","","防火門上壁面線槽未完工收尾","B",4],[6,1157,"一般梯","CD棟","3F","","扶手固定不佳","B",4],[6,1349,"外觀","左向","1F","","消防送水口旁花圃不明管路未收尾","B",4],[6,1181,"梯廳","CD棟","2F","","電梯門片、叫車面板保護未除","B",4],[2,146,"排水","","B5F","279號汽車位","機電設備空間內地排未完工","B",4],[6,924,"走廊","CD棟","R2F","","管路上方兩處線槽未收尾","B",4],[6,242,"梯廳","AB棟","19F","","雙開防火門與壁面陰角處未收邊","B",4],[6,765,"無障礙梯","AB棟","1F","","平台壁面一處線路未完工","B",4],[9,5,"撒水","","B5F-B1F","汽車位","自警閥壓力開關管路建議施作拷克","E",5],[9,3,"泡沫","","B5F","消防機房","原液槽注入孔壓力錶建議裝設拷克","E",5],[6,1363,"外觀","正向","1F","","面大門左側花圃可進入中庭，建議加強安全防護","E",5],[9,31,"監視","","1F","","大門口側往泳池區通道增設監視器","E",5],[9,21,"門禁","","1F","櫃台","門禁電腦缺設UPS電源保護","E",5],[9,13,"給水","B2F","","059號車位旁","建議進水浮球定水位閥四分管新增閘閥","E",5],[9,27,"監視","","1F","","信箱區增設監視器","E",5],[9,6,"通風","","B1F~B5F","全區","通風排程建議需重新規劃","E",5],[9,30,"監視","","1F","","大門前方店面兩側人行道增設監視器","E",5],[9,19,"噴灌","","B5F","221號汽車位旁機房","水塔建議安裝溢流管","E",5],[9,15,"排水","","R1F","戶外平台","全區落水頭泥沙落葉堆積造成積水，建議定期清理","E",5],[9,25,"監視","","B1F","","無障礙機車區（回收區）增設監視器","E",5],[9,26,"監視","","1F","","KTV室增設監視器","E",5],[9,1,"撒水","AB棟","R1F-1F","梯廳","限流孔建議增設拷克","E",5],[9,32,"監視","","1F","","車道側，店面前增設監視器","E",5],[9,14,"擋水閘門","","1F","汽機車道","擋水閘門下方固定溝槽建議施作保護蓋","E",5],[9,34,"車道安全","","B1F~ B5F","","警示燈辨識不良，位置延伸","E",5],[9,23,"車道安全","","1F","","汽車、機車車道出口，增設警示燈","E",5],[9,20,"監視","","B1F","防災中心","監視主機x6台無UPS電源保護","E",5],[9,24,"監視","","B1F","","垃圾冷藏室內增設監視器","E",5],[2,26,"排水","","1F","車道","28號店鋪上方2、3樓陽台排水倒冒","S",0],[2,151,"排水","","B5F","汽車位262","車位後上方排水管路脫管","S",0]];
+const STATS={"total":4003,"cat":[["消防設備",652],["機電設備",535],["汙廢排設備",184],["發電機設備",46],["空調景觀",105],["弱電監控",25],["建築裝修",2178],["公共會館",236],["銷售買賣合約",8],["建議事項",34]],"g":{"D":115,"A":1018,"B":2716,"C":22,"F":80,"FS":15,"S":2,"E":35},"nat":[["安全",1020],["外觀",1410],["功能故障",157],["文件圖說",210],["其他施工",1171],["建議",35]],"fl":[["1F",633],["B1F",524],["B5F",437],["B3F",257],["B4F",246],["B2F",197],["R1F",167],["R3F",121],["R2F",100],["2F",91],["3F",83],["23F",75]]};
+</script>
+<script>
+// ===== 盛世聽音：漢皇盛世管委會物語 — 劇本資料 =====
+// 本作人物除「主委」外皆為虛構；事件素材取自社區會議記錄與第三方初勘缺失資料庫。
+const CHARS={
+me:{n:'沈委員（你）',t:'第一屆管委・本作主角',b:'本名沈默然，自稱康熙伴讀沈墨的第十代孫。家訓只有一句「聽話要聽音」。白天上班，晚上在實名制住戶群裡讀每一則訊息的弦外之音。',look:{skin:'#f0c9a0',hair:'#1c1c28',hs:'short',cl:'#2c4a7c',acc:'glasses'}},
+zw:{n:'主委',t:'第一屆主任委員',b:'交屋後被推上主委位子。想把漢皇盛世做成名副其實的「盛世」：辦活動、開公設、把規矩一條條立起來。做事快，偶爾快到讓人跟不上。',look:{skin:'#ecc49c',hair:'#22222e',hs:'side',cl:'#1b3a8a',acc:'tie'}},
+qian:{n:'錢委員',t:'財務委員',b:'每一塊錢都要看到發票。口頭禪：「這筆錢，從哪個科目出？」主委的煞車，也是主委最可靠的帳房。',look:{skin:'#f0c9a0',hair:'#3a3a3a',hs:'bald',cl:'#4a5a3a',acc:'glasses'}},
+yan:{n:'嚴監委',t:'監察委員',b:'隨身帶一本翻爛的《公寓大廈管理條例》，開會時會突然唸出條號。不站任何一派，只站在條文那一邊。',look:{skin:'#e0b088',hair:'#888',hs:'short',cl:'#333',acc:'book'}},
+lin:{n:'林阿姨',t:'住戶・「反對派」領袖',b:'退休的會計主任，「我住過三個社區」是她的開場白。反對花錢辦活動、反對開泳池、更反對伯克錸物業。嗓門大，帳卻算得比誰都準。',look:{skin:'#f0c9a0',hair:'#2a2030',hs:'perm',cl:'#8a2a4a',acc:'pearl'}},
+huang:{n:'黃阿姨',t:'住戶・群組轉發大隊長',b:'林阿姨的左右手。每天早上七點準時在群組貼長輩圖，晚上十點轉貼不知道哪裡來的「社區內幕」。',look:{skin:'#f4d0a8',hair:'#5a3a5a',hs:'perm',cl:'#c06a1a',acc:'phone'}},
+zhang:{n:'張媽媽',t:'住戶・中間派',b:'跟林阿姨是早餐店好姊妹，可孫子每天都在問泳池什麼時候開。誰說得有道理，她就點頭；誰把話說死，她就搖頭。',look:{skin:'#f0c9a0',hair:'#6a6a6a',hs:'bob',cl:'#3a7a6a',acc:''}},
+zhou:{n:'周經理',t:'伯克錸物業・社區經理',b:'被住戶罵、被委員催、被總公司壓。人不壞，就是手上永遠有十件事。最怕聽到的一句話是「經理，我問你喔……」',look:{skin:'#e8bf98',hair:'#1c1c28',hs:'short',cl:'#2f4f6f',acc:'tie'}},
+yun:{n:'小芸',t:'物業秘書',b:'服務中心櫃檯的第一張臉。剛被要求「遇人主動問好」，現在連快遞小哥都會被她九十度鞠躬嚇到。',look:{skin:'#f4d0a8',hair:'#3a2418',hs:'long',cl:'#e8e0c8',acc:''}},
+ade:{n:'阿德',t:'夜班保全',b:'站崗二十年，見過的住戶比管委會還多。最大的興趣是研究普渡供品的保存期限。',look:{skin:'#d9a880',hair:'#1c1c28',hs:'cap',cl:'#25304a',acc:''}},
+hong:{n:'洪協理',t:'協○建設・客服協理',b:'永遠笑著，永遠「非常有誠意」。他的話要聽一半：前一半是誠意，後一半才是條件。',look:{skin:'#ecc49c',hair:'#111',hs:'slick',cl:'#5a2a1a',acc:'tie'}},
+li:{n:'李主任',t:'工務所主任',b:'蓋了這棟樓的工程師。知道哪裡做得好、哪裡做得趕。公司要他少說，良心要他多說。',look:{skin:'#d9a880',hair:'#333',hs:'helmet',cl:'#c0882a',acc:''}},
+fang:{n:'方技師',t:'太古華電・第三方檢測領隊',b:'帶著 31 位工程師在 10 月 31 日走遍整棟樓。說話像檢測報告：短、準、不帶情緒。',look:{skin:'#f0c9a0',hair:'#222',hs:'short',cl:'#e8e0c8',acc:'helmet2'}},
+};
+
+// 條文錄（摘要白話，非原文）
+const LAWS={
+a29:{t:'第 29 條　管委會的成立',s:'《公寓大廈管理條例》',e:'公寓大廈應成立管理委員會或推選管理負責人；管委會由區分所有權人會議選出的委員組成，主任委員對外代表管委會。'},
+a36:{t:'第 36 條　管委會的職務',s:'《公寓大廈管理條例》',e:'執行區權會決議、共用部分的清潔維護修繕、住戶違規的制止、公共基金的收支保管、會計報告的公告……管委會是「執行者」，不是「老闆」。'},
+a35:{t:'第 35 條　帳目可以看',s:'《公寓大廈管理條例》',e:'利害關係人可以請求閱覽或影印規約、公共基金餘額、會計憑證、帳簿、財務報表、會議紀錄等，管委會不得拒絕。透明，是對付懷疑最好的藥。'},
+a18:{t:'第 18 條　公共基金',s:'《公寓大廈管理條例》',e:'公共基金來源包括起造人依工程造價提列、區權人依決議繳納、孳息及其他收入；應設專戶儲存，運用依區權會決議。'},
+a10:{t:'第 10 條　共用部分誰來修',s:'《公寓大廈管理條例》',e:'共用部分、約定共用部分的修繕、管理、維護，由管委會為之，費用由公共基金支付或由區權人依比例分擔。點交以後，修不好的都是自己的錢。'},
+a57:{t:'第 57 條　公設點交',s:'《公寓大廈管理條例》',e:'起造人應會同管委會針對水電、機械、消防設施及各類管線進行檢測，確認功能正常後移交；不能通過檢測或功能有明顯缺陷者，管委會得報請主管機關處理，可歸責起造人者由主管機關命其修復改善。'},
+a49:{t:'第 49 條　罰則',s:'《公寓大廈管理條例》',e:'起造人違反點交等義務，主管機關可處新臺幣 4 萬元以上 20 萬元以下罰鍰並限期改善，屆期未改善可連續處罰。談判桌上，這是一張不必亮出來、但對方知道你有的牌。'},
+c22:{t:'第 22 條　廣告即契約',s:'《消費者保護法》',e:'企業經營者應確保廣告內容真實，對消費者所負的義務不得低於廣告內容。銷售海報上的櫻花樹，不只是一張圖。'},
+};
+
+// 詞彙（點畫線的字看說明；註解模式開啟時顯示）
+const GLOSS={
+'管委會':'管理委員會。由區分所有權人會議選出委員組成，負責執行社區事務。',
+'區權會':'區分所有權人會議。全體所有權人組成的最高決策機關，比管委會大。',
+'區權人':'區分所有權人，也就是有產權的住戶。',
+'起造人':'申請建照、蓋房子的那一方，通常就是建商。',
+'工務所':'建商在工地的工程辦公室，負責施工與修繕。',
+'點交':'起造人把公共設施、圖說、基金正式移交給管委會。點交後保固才開始起算，所以建商往往想快、管委會往往要慢。',
+'初勘':'公設點交前的第一次全面檢測，把缺失全部列出來。',
+'履勘':'缺失修完後的再次現場勘驗，確認真的修好了。',
+'複驗':'針對初勘缺失逐項複查，看是否改善完成。',
+'竣工圖':'房子蓋好後依實際完成狀況繪製的圖。日後維修全靠它，所以「現況跟圖不符」是大事。',
+'第三方檢測':'由與建商、住戶都無利害關係的專業公司做的檢測，報告較有公信力。',
+'公共基金':'社區的存款。修繕、更新設備、應付大事都靠它，依區權會決議使用。',
+'管理費':'每月向住戶收取的費用，支付物業、清潔、水電等日常開銷。',
+'物業':'物業管理公司。負責社區日常行政、收費、報修、清潔與廠商管理。',
+'保全':'負責門禁、巡邏、收發包裹的人員，常與物業同一家公司。',
+'代管期':'管委會成立、點交完成前，由建商委任的物業先代為管理的期間。',
+'實名制住戶群':'以真實戶別登記加入的社區群組，管委會在此發佈正式決策。',
+'試營運':'正式開放前的試用期，用來發現問題、建立規則。',
+'防焰標章':'窗簾、地毯等經檢驗合格的防焰物品標示。公共空間沒有它，是安全缺失。',
+'自警閥':'自動警報逆止閥。撒水系統管路有水流動時會觸發警報，是消防撒水的「心臟瓣膜」。',
+'連結送水管':'消防隊到場後，從外部送水口把水打進大樓的專用管路。',
+'撒水頭':'天花板上的消防灑水頭。罩子沒拆，就等於沒裝。',
+'受信總機':'火警受信總機。所有偵煙、偵熱器的訊號都送到這裡，平常放在防災中心。',
+'防水閘門':'車道入口的擋水閘門，颱風豪雨時升起，防止水灌進地下室。',
+'泡沫灑水':'地下停車場用的泡沫滅火系統，用來撲滅汽油類火災。',
+'滾溝式':'一種管路接頭工法，用溝槽與管扣連接。合法，但檢測單位擔心地震時的脫管風險。',
+'白華':'牆面滲水後析出的白色鹽類結晶，代表水從某處跑了進來。',
+'導盲磚':'地面的觸覺引導磚，無障礙設施的一部分。',
+'拷克':'考克閥，小型旋塞閥。裝在壓力錶前，換錶時不必停整個系統。',
+'裝潢保證金':'住戶裝潢前繳交的押金，用來擔保公共區域不被弄壞。',
+'包場':'付費預約、整段時間獨占使用公設空間。',
+'長輩圖':'配上大字祝福語或養生資訊的圖片，常在早上七點出現。',
+'普渡':'中元節祭拜好兄弟的儀式。社區普渡是很多住戶第一次見面的場合。',
+'公版':'統一的標準回覆範本。',
+'S級':'本作解讀：立即危險，須馬上處理或隔離。',
+'A級':'本作解讀：影響安全的缺失，例如消防、標示、防火。',
+'B級':'本作解讀：一般缺失，多為外觀、施工污染或固定不佳。',
+'E級':'本作解讀：建議事項，非缺失但值得改善。',
+'F級':'本作解讀：現況與竣工圖說不符。',
+};
+
+const VOLS=['卷一 盛世開局','卷二 物業風雲','卷三 四千零三','卷四 談判桌'];
+const B=b=>['bg',b],N=t=>['n',t],S=(i,t)=>['s',i,t],Q=o=>['q',o],L=i=>['law',i],G=(k,n)=>['game',k,n],C=i=>['char',i];
+
+const CHAPTERS=[
+{id:1,vol:0,title:'盛世開局',year:'115 年 5 月・第一屆第 1 次例行會議',
+recap:['漢皇盛世交屋了。數百戶人家、四棟大樓、地下五層停車場、泳池、健身房、KTV，全都還帶著施工的灰。','區分所有權人會議選出了第一屆管委會。主委是個想做事的人。','你，沈默然，被樓層推派進了管委會。祖上傳下的家訓只有一句：「聽話要聽音。」','第一次例行會議，晚上八點，一樓會議室。'],
+sc:[B('meet'),N('一樓會議室的冷氣還有新家具的味道。十一位委員坐成一圈，桌上擺著一疊還沒拆封的〈公共設施使用管理辦法〉。'),S('zw','各位，我們是第一屆。第一屆不是來守成的，是來開局的。'),S('zw','管理費從 5 月 1 日開始收，5、6 月一起在 6 月收。我想在年底前把公設全部開起來，社區活動也要辦起來。'),S('qian','主委，錢還沒進來，先別急著花。'),S('zw','所以才要先把規矩立好。沈委員，你負責住戶溝通。'),C('me'),S('me','……我？'),S('yan','依第 36 條，管委會的職務包括「住戶意見的反映與處理」。主委是在依法分工。'),L('a36'),L('a29'),
+B('chat'),N('散會後，你打開了社區大群「漢皇盛世住戶交流群」。未讀訊息：999+。'),S('huang','【轉貼】聽說管委會一上任就要漲管理費？？？大家要注意喔🙏🙏'),S('lin','我住過三個社區，沒看過這麼急的。管理費都還沒收，就在說要辦活動、要開這個開那個。'),S('lin','錢是大家的，不是誰的政績。'),
+Q({k:'解語',p:'林阿姨這兩句話，真正在意的是什麼？',x:'林阿姨沒有說「我反對辦活動」，她說的是「錢是大家的」。她要的不是讓主委下不了台，而是一種保證：這筆錢花得出去，也收得回來、看得到。先回應「錢」，比回應「活動」有用得多。',o:[
+{t:'她就是反對主委，什麼都會反對。',v:0,d:[0,-1,-1],r:'你把她歸類成「反對派」。可這一類的人，往往是被歸類之後才真的變成反對派的。'},
+{t:'她怕的是錢花得不明不白——要的是透明，不是不做。',v:2,d:[1,2,1],r:'你在筆記本上寫下：「帳要比活動先公開。」這一行字，後來救了管委會好幾次。'},
+{t:'她想選下一屆主委，在搶話語權。',v:1,d:[0,1,0],r:'也許有一點。但她現在說的每一句都跟錢有關，跟位子無關。先處理眼前的，才看得到後面的。'}]}),
+N('群組裡又跳出十幾則訊息：有人問垃圾怎麼倒，有人問車位，有人貼了一張貓的照片，有人跟貼貓的照片吵起來。'),N('隔天，主委在委員群組裡丟了一句話。'),S('zw','大群太亂了，什麼都問，什麼都吵。我們回一句，下面就有一百句。你們覺得怎麼辦？'),
+Q({k:'回話',p:'主委問你對社區大群的看法。',x:'會議記錄後來的決議是：管委會自 5 月 31 日起不在大群回覆，重要決策改在「實名制住戶群」發佈。重點不是「封口」，而是讓正式訊息有一個可以負責、可以查證的地方——大群照樣可以聊天。',o:[
+{t:'「解散大群，以後只留實名群。」',v:0,d:[-1,0,-2],r:'錢委員倒吸一口氣：「那是住戶自己開的群，我們解散不了。」主委也搖頭：「這樣做，林阿姨明天就能說我們封鎖言論。」'},
+{t:'「大群讓它聊天，正式決策只在實名制住戶群發佈，管委會不在大群回覆。」',v:2,d:[2,2,1],r:'主委點頭：「訊息有出處，責任才有歸屬。」這一案後來以 9 票同意通過。'},
+{t:'「每一則都回，回到大家沒話說為止。」',v:0,d:[0,-1,0],r:'你試了一個晚上。凌晨兩點，你回到第 87 則時，第 88 則問的是：「委員這麼晚不睡，是不是在搞什麼？」'},
+{t:'「在大群裡發一張可愛的貓貼圖，讓大家冷靜一下。」',v:1,j:1,d:[0,0,0],r:'群組安靜了三秒。接著出現了四十二張貓貼圖，以及一則「委員是不是在敷衍我們」。'}]}),
+B('lobby'),N('6 月的第一個週末，你在大廳信箱區遇到了林阿姨。她正拿著管理費繳費單，對著光看。'),C('lin'),S('lin','你是那個沈委員？'),S('me','是，林阿姨好。'),S('lin','5、6 月一起收，我沒意見。我只問一件事：這筆錢存在哪？誰能動？我能不能看？'),
+Q({k:'決斷',p:'林阿姨要看帳。你怎麼回？',x:'《公寓大廈管理條例》第 35 條：利害關係人可以請求閱覽或影印公共基金餘額、會計憑證、帳簿、財務報表與會議紀錄。對一個退休會計主任說「可以看」，比說一百句「請相信我們」都管用。',o:[
+{t:'「阿姨，委員會都是義工，請您相信我們。」',v:0,d:[0,0,-2],r:'林阿姨笑了，那是會計主任看到「請相信我們」四個字時的笑。'},
+{t:'「可以。社區帳戶開在銀行專戶，每月財報會公告，您也可以依法到服務中心申請閱覽。」',v:2,d:[1,2,2],r:'林阿姨愣了一下，把繳費單折好：「……那我月底去看。」她轉身時，你聽見她小聲說：「至少這個委員懂規矩。」'},
+{t:'「這要問錢委員，我不清楚。」',v:1,d:[0,0,-1],r:'誠實，但她記住了：問委員，委員不知道。'}]}),
+L('a35'),N('那天晚上，你在筆記本上寫下第一條心得：反對的人，有時候只是第一個開口要答案的人。')]},
+
+{id:2,vol:0,title:'中秋夜宴',year:'115 年 9 月・中元普渡與中秋晚會',
+recap:['管理費開始收了。社區帳戶開在銀行專戶，每月財報照常公告。','主委決定：第一年，要讓住戶彼此認識。9 月 5 日中元普渡，接著是中秋晚會。','林阿姨每個月都去服務中心看帳。目前，她還沒挑出毛病。'],
+sc:[B('lobby'),N('9 月 5 日下午兩點，一樓前庭擺滿了供桌。泡麵、餅乾、罐頭堆成小山，香煙裊裊。服務中心先以零用金支付了採買。'),C('ade'),S('ade','沈委員，請教一下。普渡完的供品，是全部發還住戶，還是……保全也有份？'),S('me','阿德，你已經在吃了。'),S('ade','我在幫好兄弟試吃。這是專業。'),
+N('那是交屋以來，大家第一次在同一個地方站這麼久。有人認出了電梯裡常遇見的鄰居，有人交換了 LINE。'),N('然後是中秋。主委想辦一場像樣的晚會：頂樓燈串、舞台、音響、攤位、摸彩。'),
+B('roof'),N('晚會當晚，頂樓的燈串一路亮到了天邊。小孩在跑，大人在烤肉，阿德在摸彩箱旁邊站得筆直，眼睛一直往獎品那邊飄。'),S('zw','你看，這才叫社區。'),
+B('chat'),N('第二天早上七點，黃阿姨準時出現。'),S('huang','【早安🌹】勤儉持家才是福，鋪張浪費禍上身🍵 #早安 #平安喜樂'),S('huang','（同一分鐘）請問昨天晚會布置花了多少錢？？燈串氣球舞台，看起來不便宜喔🤔'),S('lin','我只想知道，花的是管理費還是公共基金？有沒有經過區權會？'),
+Q({k:'解語',p:'黃阿姨先貼了一張長輩圖，一分鐘後才問錢。這個順序在說什麼？',x:'長輩圖是「立場」，問題才是「攻擊」。先把「勤儉／鋪張」的框架丟出來，後面那句不管你回什麼，都會被放進那個框裡讀。所以回應不能只回數字，要回框架：錢怎麼來、怎麼花、怎麼結。',o:[
+{t:'只是早安圖，剛好跟問題放在一起而已。',v:0,d:[0,0,0],r:'剛好？黃阿姨的長輩圖庫存有三千張，她挑了「鋪張浪費」這一張。'},
+{t:'先定調「鋪張」，再問錢——不管數字多少，都會被讀成浪費。',v:2,d:[1,2,0],r:'你看懂了。回訊息之前，你決定先不碰「鋪張」兩個字，直接把整本帳攤開。'},
+{t:'她在暗示有委員中飽私囊。',v:1,d:[0,1,0],r:'可能有人這樣想，但她沒這樣說。把沒說出口的話替對方說出來，等於幫對方點火。'}]}),
+S('zw','沈委員，你來回。我怕我一回就變成在吵架。'),
+Q({k:'回話',p:'在實名制住戶群，你怎麼回應晚會花費？',x:'中秋晚會最後的帳是：收支 336,422 元，收支相抵，另有 5 萬元專款回存。數字本身就是最好的回答——前提是你願意把它攤開，連發票一起。',o:[
+{t:'「辦活動是為了社區凝聚力，錢花得很值得，請大家支持。」',v:0,d:[0,-1,-2],r:'林阿姨回了一個字：「多少？」'},
+{t:'公告完整收支明細：收支 336,422 元、收支相抵、5 萬元專款回存，憑證可至服務中心閱覽。',v:2,d:[2,2,2],r:'群組安靜了很久。最後是張媽媽回了一句：「孫子說明年還要摸彩。」黃阿姨按了一個讚。'},
+{t:'「贊助和攤位收入抵掉大部分了，沒花多少啦。」',v:1,d:[0,0,-1],r:'「沒花多少」是多少？林阿姨把這句截圖存了下來。'}]}),
+B('meet'),N('下一次例行會議，林阿姨以住戶身分列席旁聽，手上拿著一本她自己整理的晚會收支對照表。'),C('lin'),S('lin','我對過了。帳是平的。'),S('lin','但我要說——帳平，不代表該花。氣球拱門那一筆，明年可以不要。'),S('qian','……她說得對，那筆我也覺得可以省。'),
+Q({k:'決斷',p:'林阿姨挑出了一筆可以省的錢。主委看向你。',x:'康熙用人，敵人的話裡有對的部分就收下。承認一筆小錢可以省，換來的是她對整本帳的背書——這是最便宜的一筆交易。',o:[
+{t:'「阿姨說得對。明年活動預算會先公告，氣球拱門我們先拿掉。」',v:2,d:[2,2,2],r:'林阿姨點頭，沒有笑，但也沒有再舉手。會議記錄上第一次出現了一行：「住戶建議事項：採納。」'},
+{t:'「氣球拱門是小孩最喜歡的，不能拿掉。」',v:0,d:[-1,0,-1],r:'也許是真的。但你在她第一次願意坐下來談的時候，拒絕了她第一個建議。'},
+{t:'「這個我們再研究。」',v:1,d:[0,1,0],r:'標準的官方回答。林阿姨在本子上記了一筆：「研究。」'}]}),
+N('散會時，阿德在門口小聲問你：「委員，明年摸彩，保全可以抽嗎？」')]},
+
+{id:3,vol:0,title:'池水之爭',year:'115 年 10 月・泳池試營運',
+recap:['中秋過後，主委把下一個目標放在泳池。交屋快半年，泳池一直圍著封鎖線。','泳池廠商預定 10 月 9、10、11、24、25、26 日辦理試營運。','林阿姨帶頭反對：水電費、管理成本、小孩安全、外人混入——每一條都有道理。'],
+sc:[B('meet'),N('委員群組裡，主委丟出一份試營運計畫。十分鐘後，實名群裡就有人貼出了截圖。'),S('lin','泳池一開，水費、電費、加藥、救生員、保險，哪一樣不是錢？出了事誰負責？'),S('huang','【轉貼】某社區泳池小孩溺水，管委會被告到傾家蕩產😱😱'),S('zhang','……其實我孫子很想游啦。可是林姐說的也有道理。'),C('zhang'),
+Q({k:'解語',p:'張媽媽這句「其實我孫子很想游啦，可是林姐說的也有道理」，在說什麼？',x:'中間派說話永遠是兩段式：前半是真心，後半是人情。她在等一個能讓她「兩邊都不得罪」的方案——安全有交代，孫子也能游。贏得中間派，靠的不是說服，而是給台階。',o:[
+{t:'她站在林阿姨那邊，只是講得客氣。',v:0,d:[0,0,-1],r:'那她不會提孫子。她把真心放在前面，是在告訴你：只要安全，她是想開的。'},
+{t:'她想開，但需要一個「安全有交代」的理由，才不會得罪林阿姨。',v:2,d:[1,2,1],r:'你記下了：方案裡要有一段，是寫給張媽媽向林阿姨交代用的。'},
+{t:'她其實沒有意見，隨便講講。',v:0,d:[0,-1,0],r:'中間派從來不會「隨便講講」。他們每一句話都在計算自己的位置。'}]}),
+B('pool'),N('10 月 9 日，試營運第一天。你穿著拖鞋，跟著主委和泳池廠商把池邊走了一圈。'),N('你蹲下來，手指摸到一片突起的磁磚。再往前，池底躺著一顆螺絲。'),S('me','主委，這裡有螺絲。'),S('zw','……'),N('紀錄一條一條增加：池內部分磁磚突出或不平整、池內有螺絲等金屬異物、爬梯固定及防夾疑慮、出入口地面高低差、周邊碎石及施工材料、止滑設施、女淋浴間隔水、更衣室熱水設備、安全警示標示。'),N('池水沒有濃重的氯味，但水面和池底還有落葉和細小異物，水體些微混濁。'),S('zw','林阿姨要是看到這顆螺絲……'),
+Q({k:'回話',p:'主委看著那顆螺絲，問你：「還開不開？」',x:'會議後來的決議：試營運照常，但要建立清潔、巡檢與開放前安全確認機制；請物業蒐集住戶回饋（夜間燈光不足、排水溝加蓋等），彙整後再議；遮陽傘詢價後提群組決議。重點是：問題攤開，不是藏起來。',o:[
+{t:'「先把螺絲撿起來，當作沒看到，照常開。」',v:0,d:[-2,0,-2],r:'主委盯著你看：「你知道林阿姨下週也要來試游嗎？」你默默把螺絲放回原位，拍了照。'},
+{t:'「試營運照開，但這些缺失全部記錄、報給建商，並建立每次開放前的安全確認機制。」',v:2,d:[2,2,1],r:'「試營運本來就是用來找問題的。」主委把螺絲裝進夾鏈袋，「這顆，我們留著當證據。」'},
+{t:'「全部修好再開，明年再說。」',v:1,d:[0,0,0],r:'穩妥，但沒有人會因此發現下一個問題。試營運的意義，就是讓問題在有人看著的時候出現。'}]}),
+B('chat'),N('當晚，你把試營運缺失清單完整貼進實名群，附上照片與後續處理方式。'),S('lin','……螺絲？池子裡有螺絲？'),S('lin','這要建商負責，不是我們管理費出。'),S('me','是的，阿姨。這些都會列入給建商的缺失清單，點交前要修好。'),S('zhang','那安全確認機制是怎麼做？每次開放前有人檢查嗎？'),
+Q({k:'決斷',p:'張媽媽問「每次開放前有人檢查嗎？」——這是你給她台階的機會。',x:'把反對者最擔心的事變成制度裡的一條，反對就變成了參與。安全巡檢需要人，而最在乎安全的，正是反對最大聲的人。',o:[
+{t:'「物業會負責，請放心。」',v:1,d:[0,0,0],r:'林阿姨回：「物業？就是那個包裹都會放錯的物業？」你發現自己剛把球傳到了另一場戰爭。'},
+{t:'「每次開放前由物業依檢查表巡檢簽名，也歡迎住戶志工一起看——張媽媽、林阿姨願意的話，第一班就請您們。」',v:2,d:[2,2,2],r:'三分鐘後，張媽媽回：「好啊。」又過了十分鐘，林阿姨回了兩個字：「幾點？」'},
+{t:'「游泳本來就有風險，大家自己注意。」',v:0,d:[-1,-1,-2],r:'黃阿姨立刻把這句截圖，配上一張「安全第一」的長輩圖。'}]}),
+N('10 月 24 日，第二梯試營運。張媽媽的孫子是第一個跳下水的。林阿姨坐在池邊的塑膠椅上，手裡拿著檢查表，一格一格打勾。'),N('她沒有說好，也沒有說不好。但檢查表最後一行，她寫了一句：「排水溝要加蓋。」')]},
+
+{id:4,vol:1,title:'換將風波',year:'115 年 10 月・伯克錸物業',
+recap:['泳池的事暫時穩住了。林阿姨的火力，轉向了另一個目標：伯克錸物業。','秘書遇到住戶不打招呼、包裹放錯樓、保全夜班打瞌睡、水塔清洗通知太晚……','物業的服務期，將在起造人代管期結束時終止。續不續約，管委會必須表態。'],
+sc:[B('lobby'),C('yun'),N('早上八點半，你在大廳等電梯。櫃檯的小芸抬頭看了你一眼，又低頭繼續打字。'),N('電梯門打開，林阿姨走了出來，手上拿著一疊紙。'),S('lin','沈委員，你來得正好。這是連署書，四十三戶。我們要換物業。'),S('lin','包裹放錯三次、保全半夜打瞌睡、秘書看到人像沒看到。我住過三個社區，沒看過這種的。'),C('zhou'),
+B('meet'),N('委員會上，連署書放在桌子正中央。周經理坐在角落，額頭在冒汗。'),S('zhou','各位委員，我們……我們會改進。'),S('qian','換物業要重新招標、交接、適應，少說三個月。這三個月誰管？'),S('zw','我知道物業有問題。可是現在點交、初勘、泳池全在進行中，臨陣換將，誰來接這些爛攤子？'),
+Q({k:'解語',p:'林阿姨說「我們只是要一個會做事的物業」。她真正要的是什麼？',x:'四十三戶連署，是要一個「被聽見」的結果。換不換物業是手段，她要的是：投訴有人理、問題有人改、改了看得到。如果管委會能給她「看得到的改變」，連署書的目的其實就達到了。',o:[
+{t:'她就是要換掉物業，沒有別的。',v:0,d:[0,-1,0],r:'如果真的只是要換，她不會先拿來給你看，她會直接貼到群組。'},
+{t:'她要的是「被聽見」——投訴有人處理、改變看得見。換物業只是她能想到的手段。',v:2,d:[1,2,1],r:'你在連署書背面寫下：「給她一張改善清單，讓她自己打勾。」'},
+{t:'她想藉此證明管委會無能。',v:1,d:[0,1,-1],r:'這也許是黃阿姨的想法。但林阿姨把連署書拿給你，而不是貼到群組——她還在等管委會給答案。'}]}),
+S('zw','沈委員，你怎麼看？換，還是不換？'),
+Q({k:'回話',p:'主委要你表態。',x:'會議記錄的決議是：「暫不決議，待觀察物業後續表現再行討論。請物業務必改善服務態度，秘書、保全值勤時遇人主動問好（不論是否為住戶）。請提交物業保全各職務說明及工作職掌供管委會存查。」——不換，但也不放過。',o:[
+{t:'「換！住戶都連署了，我們順應民意。」',v:0,d:[-2,0,1],r:'主委皺眉：「民意要的是好的服務，不是一次交接。換了之後，新物業連水塔在哪都不知道。」'},
+{t:'「不換，物業已經很辛苦了。」',v:0,d:[-1,0,-2],r:'周經理感激地看了你一眼。林阿姨在門外，把這句話也聽見了。'},
+{t:'「暫不決議，給觀察期。要求物業主動問好、提交各職務職掌，改善項目列清單逐月追蹤。」',v:2,d:[2,2,1],r:'主委點頭：「不換將，但要練兵。」嚴監委補了一句：「依第 36 條，管委會有監督廠商之責，這是我們的本分。」'}]}),
+N('散會後，你在電梯口追上林阿姨。'),S('lin','不換？'),S('me','暫時不換。但這張改善清單，請您幫我們盯。每個月，哪一條沒做到，您直接打叉。'),
+Q({k:'決斷',p:'你把改善清單交給林阿姨。她沒接，看著你：「你們是要我當監工？」',x:'讓反對者當監工，是把她的力氣導向同一個方向。但前提是：清單要具體、要能驗證，而且她打的叉，你們真的要處理。否則她會發現這只是另一個「研究研究」。',o:[
+{t:'「不是監工，是幫我們把關。每一個叉，下次會議我們都會逐條回應，記在會議記錄裡。」',v:2,d:[2,2,2],r:'林阿姨接過清單，翻了翻：「第三條寫得太模糊。『改善態度』怎麼驗收？」你笑了——她已經開始在幫你改清單了。'},
+{t:'「阿姨您經驗豐富，交給您最放心了！」',v:1,d:[0,0,0],r:'她挑眉：「拍馬屁不用，給我一支筆就好。」'},
+{t:'「不想的話也沒關係，我們自己會處理。」',v:0,d:[0,-1,-1],r:'她把手縮了回去。那份清單後來在委員群組裡躺了兩個月，沒有人打勾。'}]}),
+N('第二天早上，你經過櫃檯。小芸突然站起來，九十度鞠躬：「委員早安！」'),N('後面的快遞小哥嚇得把箱子掉在地上。')]},
+
+{id:5,vol:1,title:'整頓物業',year:'115 年 11 月・公版 Q&A',
+recap:['物業進入觀察期。林阿姨拿著改善清單，每週來服務中心一次。','「主動問好」做到了，有時做得太到了。','但住戶問題五花八門，每個保全、秘書的回答都不一樣——這才是投訴的根源。'],
+sc:[B('office'),C('ade'),N('晚上十一點，服務中心。阿德的電話響了。'),S('ade','漢皇盛世您好……游泳池幾點開？呃，應該……八點？還是九點？我問一下……'),S('ade','……阿姨您說上週秘書說七點？那、那可能是七點吧……'),N('電話那頭，是林阿姨。'),
+B('meet'),S('zhou','委員，住戶的問題太多了：親友臨時停車、工班進出、私領域報修、公設預約、管理費收據……每個同仁回答都不太一樣。'),S('zw','所以林阿姨抓到的不是一個保全，是整個系統。'),
+Q({k:'解語',p:'林阿姨深夜十一點打電話問泳池開放時間——她真的想知道幾點開嗎？',x:'她當然知道幾點開，她手上有檢查表。她是在做「神秘客測試」：同一個問題，問不同的人，看答案一不一樣。這不是刁難，是一個退休會計主任的稽核本能。',o:[
+{t:'她記性不好，忘了。',v:0,d:[0,-1,0],r:'一個能對出 336,422 元收支的人，不會忘記泳池幾點開。'},
+{t:'她在測試物業的回答是否一致——神秘客稽核。',v:2,d:[1,2,0],r:'你翻出她上週的清單，果然有一行：「同一問題，不同人員回答不一。」'},
+{t:'她晚上睡不著，想找人聊天。',v:0,j:1,d:[0,0,0],r:'阿德後來真的陪她聊了二十分鐘普渡供品的保存期限。她掛電話前說：「你這個保全，還算有點用。」'}]}),
+S('zw','沈委員，你有什麼辦法？'),
+Q({k:'回話',p:'怎麼讓物業的回答一致？',x:'會議決議：授權物業服務中心依「Q&A 公版」統一回覆，分停車、報修、公設、帳單四類；涉及個案、費用、管委會決議或尚未確認之事項，不得逕自承諾。一致，才有公信力。',o:[
+{t:'「叫他們每次都打電話問委員就好。」',v:0,d:[-1,-1,0],r:'第一個晚上，你接了十七通電話。第十八通是阿德：「委員，請問廁所衛生紙放哪？」'},
+{t:'「做一份 Q&A 公版：停車、報修、公設、帳單分類統一回覆；涉及個案、費用或未決事項，一律不得逕自承諾，轉管委會。」',v:2,d:[2,2,1],r:'周經理眼睛亮了：「這樣同仁就不用自己猜了。」主委補一句：「不得承諾那一條，用粗體。」'},
+{t:'「換一批比較聰明的保全。」',v:1,d:[-1,0,0],r:'阿德在門外聽到了。那天晚上，他把普渡剩下的最後一包乖乖收起來，沒有分給你。'}]}),
+B('office'),N('公版上線的第一個晚上，十一點，電話又響了。'),S('ade','漢皇盛世您好。泳池試營運期間開放時間請依公告，目前為……（翻頁）……詳細時段我念給您聽。'),N('電話那頭沉默了三秒。'),S('lin','……好。謝謝。'),S('ade','不客氣！祝您晚安！還有，普渡供品的泡麵保存期限是六個月！'),S('lin','我沒問這個。'),
+N('垃圾冷藏室的開放時間也寫進了公版：因裝潢戶還有將近 40 戶，週一至週五 12:00～18:00 關閉，國定假日全面開放；等裝潢戶低於 20 戶再議。'),N('下一週，林阿姨的清單上，「回答不一」那一行，第一次打了勾。'),
+Q({k:'決斷',p:'物業開始進步了。主委想在委員會上正式表揚周經理，你覺得呢？',x:'改善要被看見，才會持續。但表揚的時機與方式要拿捏：在住戶仍有不滿時大張旗鼓，會被讀成「委員會跟物業同一國」。用數據說話，把功勞同時分給物業與提出意見的住戶，才不會兩頭落空。',o:[
+{t:'「在實名群大力表揚物業，讓大家知道他們很努力。」',v:0,d:[0,-1,-2],r:'黃阿姨秒回：「委員跟物業是一家人喔？」'},
+{t:'「在會議記錄寫下改善成果，並註明『感謝住戶意見協助改善』，把功勞也分給提意見的人。」',v:2,d:[2,2,2],r:'林阿姨在會議記錄公告的那一頁停了很久。她沒說什麼，只是把那一頁拍照存了下來。'},
+{t:'「先不要表揚，免得物業驕傲。」',v:1,d:[0,0,0],r:'周經理什麼都沒說。那個月，小芸的鞠躬角度回到了八十度。'}]})]},
+
+{id:6,vol:2,title:'十月三十一',year:'115 年 10 月 31 日・第三方初勘',
+recap:['依《公寓大廈管理條例》第 57 條，公設點交前，起造人要會同管委會檢測水電、機械、消防與各類管線。','管委會委託太古華電做第三方初勘。31 位工程師，一天，走遍整棟樓。','檢測當日：08:30 集合、08:45 團體拍照、13:30 防水閘門測試、13:45 泡沫灑水測試、16:30 初勘檢討報告。'],
+sc:[L('a57'),B('lobby'),N('10 月 31 日，早上八點半。大廳站滿了穿著輕便運動服的人：管委會、起造人、工務所、承包商、住戶代表、物業。'),C('fang'),S('fang','各位早。今天分九組，第 2、第 8 組工作量最重。挑高區請備鷹架，人孔蓋周邊一公尺請淨空。'),C('hong'),S('hong','大家辛苦了！我們協○建設一定全力配合，有小問題，當場就改，不用寫進報告，省大家的事！'),C('li'),S('li','……'),
+Q({k:'解語',p:'洪協理說「小問題當場就改，不用寫進報告」。這句話真正的意思是？',x:'寫進報告的缺失，要追蹤、要複驗、要算進點交條件；當場改掉而沒有紀錄的，等於從來沒存在過。「省大家的事」，省的其實是建商的事。會議早就約定：起造人應要求各承包商同步記錄缺失位置——當場改，也要記錄。',o:[
+{t:'建商很有誠意，能當場改最好。',v:0,d:[-1,-1,0],r:'方技師看了你一眼，什麼都沒說，但在他的筆記本上多畫了一個圈。'},
+{t:'不進報告，就不用追蹤、不用複驗——他想讓缺失數字變少。',v:2,d:[2,2,0],r:'你舉手：「當場改的，也請記錄，標註『已當場改善』。」方技師點頭：「本來就該這樣。」洪協理的笑容停了半秒。'},
+{t:'他只是想早點下班。',v:1,j:1,d:[0,0,0],r:'也許。但他後來一直待到晚上七點，一條一條盯著工程師寫了什麼。'}]}),
+B('base'),N('上午，你跟著第 8 組下到 B5。消防機房裡，幫浦的聲音像一頭在睡覺的牛。'),S('fang','沈委員，跟檢的委員可以一起判讀。我念現況，你判斷屬於哪一類。'),
+G('grade',6),
+N('下午一點半，防水閘門測試。閘門升起來的那一刻，所有人都屏住了呼吸。左側下方，一道細細的水流滲了出來。'),S('fang','擋水閘門左側下方漏水，判定不合格。'),S('li','……那是我們上個月才調過的。'),
+N('下午一點四十五分，泡沫灑水系統測試。地下室的警報聲響徹五層樓，阿德從 B1 跑上來大喊：「真的不是火災！真的不是！」'),
+B('meet'),N('下午四點半，初勘檢討。方技師翻開初版報告書電子檔。'),S('fang','初步統計，缺失約四千筆。正式報告十個工作日內提交。'),S('hong','四千？這、這個數字……裡面很多都是小問題吧？施工污染、保護膜沒撕？'),
+Q({k:'決斷',p:'洪協理想先「定調」四千筆都是小問題。你怎麼回應？',x:'數字公布前的定調最危險。正確的做法不是爭辯「大或小」，而是把分級交給第三方：等正式報告出來，依級別處理。安全類必須全修，外觀類可以談方式——但「談」是之後的事，不是今天。',o:[
+{t:'「對，大部分應該都是小問題。」',v:0,d:[-2,0,-1],r:'洪協理笑著拍拍你的肩：「沈委員明理！」那天的會議記錄上，這句話被記了下來。'},
+{t:'「大小交給第三方分級。報告出來前，我們不先定調，也請建商不要先定調。」',v:2,d:[2,2,1],r:'方技師難得開口：「分級是我們的工作。」洪協理收起了笑容：「當然，當然。」'},
+{t:'「四千筆！這是重大工程瑕疵，我們要提告！」',v:1,d:[-1,0,1],r:'主委拉了拉你的袖子。報告還沒出來，你已經把子彈打光了。'}]}),
+N('那天晚上回家，你的運動鞋底黏著一小塊施工水泥。你把它留了下來，放在書桌上，像一枚勳章。')]},
+
+{id:7,vol:2,title:'四千零三',year:'115 年 11 月・初勘缺失報告',
+recap:['太古華電的正式報告來了：4,003 筆缺失。','依程序，報告公告 5 日，住戶可至服務中心翻閱，不得拍照或攜出；住戶意見彙整後提供太古。','數字一傳開，社區炸了。'],
+sc:[B('chat'),S('huang','【震驚😱】四千多個缺失！！！我們買的是房子還是工地！？'),S('lin','四千零三筆。我去服務中心看了。'),S('lin','我只問一句：你們委員之前天天在社區走，怎麼都沒發現？'),
+Q({k:'解語',p:'林阿姨問「你們委員之前怎麼都沒發現？」——她在指責什麼？',x:'表面是指責委員失職，底下是恐懼：「如果委員都沒發現，那還有多少我們不知道的？」回應這種問題，辯解沒有用，要回答恐懼：第三方檢測存在的意義，就是找出肉眼找不到的東西。四千筆，是制度有效的證明，不是失職的證據。',o:[
+{t:'她在怪管委會失職，要給她一個交代。',v:1,d:[0,1,0],r:'交代可以給，但如果只回「我們沒失職」，她的恐懼還在。'},
+{t:'她怕的是「還有多少不知道的」——要讓她看到，這份報告就是為了找出看不見的問題。',v:2,d:[1,2,1],r:'你決定不辯解，改成把報告的分類攤開。'},
+{t:'她又在找機會攻擊主委。',v:0,d:[0,-1,-1],r:'也許。但她這次是自己跑去服務中心翻了報告——這是一個想知道真相的人。'}]}),
+N('你打開了缺失資料庫，開始整理。'),G('stats',0),
+S('me','各位住戶：4,003 筆中，建築裝修 2,178 筆，多為施工污染、保護未除、收邊不佳；消防設備 652 筆、機電設備 535 筆、公共會館 236 筆。最需要注意的是 2 筆 S 級：店鋪上方 2、3 樓陽台排水倒冒，以及 B5 車位 262 後上方排水管脫管。'),S('me','第三方檢測的目的，就是找出平常看不到的東西。這份報告越完整，建商要修的就越多，我們點交後自己花的就越少。'),L('a10'),
+S('lin','……那兩個 S 級，現在處理了沒？'),
+Q({k:'決斷',p:'林阿姨追問 S 級缺失。主委在委員群組問：「要等建商回函，還是先動？」',x:'立即危險的缺失，不能等談判。先要求建商限期處理，同時由物業做臨時隔離與警示（例如車位 262 周邊圍起、暫停使用）——安全與談判要分開，不能拿安全當籌碼，也不能讓對方拿安全來拖時間。',o:[
+{t:'「等建商正式回函再一起處理，免得被說我們亂動。」',v:0,d:[-2,0,-2],r:'三天後，B5 車位 262 的車主發現車頂一片水漬。林阿姨在群組裡只貼了一張照片，沒有說話。'},
+{t:'「S 級立即發函要求建商限期處理，物業先做隔離與警示，車位 262 暫停使用並通知車主。」',v:2,d:[2,2,2],r:'主委回：「照辦。」一小時後，阿德在車位 262 周邊拉起了黃色封鎖線，還很專業地貼了一張「施工中，好兄弟請繞道」。'},
+{t:'「叫物業先找人自己修，錢之後再跟建商要。」',v:1,d:[0,1,0],r:'快，但錢委員立刻跳出來：「自己修了，建商就會說『那不是我們的問題了』。」'}]}),
+B('lobby'),N('第五天，報告公告的最後一天。你在服務中心遇到林阿姨，她面前攤著報告，旁邊是一本寫滿數字的筆記本。'),S('lin','我算過了。B 級 2,716 筆，A 級 1,018 筆。消防的 A 級裡，有一堆是「盤內未放置單線圖」——這種東西，建商一定會說是文件問題、不是缺失。'),S('lin','還有，銷售海報上泳池區有躺椅、遮陽傘、櫻花樹。現況？一棵都沒有。'),S('me','阿姨……您把四千筆都看完了？'),S('lin','會計主任的職業病。'),
+Q({k:'決斷',p:'林阿姨比任何委員都更熟這份報告。主委說下個月要跟建商談判。你要不要提議請她一起上談判桌？',x:'康熙晚年用的人，很多是當年的對手。真正在意社區的反對者，是最好的談判代表：她夠兇、夠準，而且她坐在桌上，談出來的結果她就無法再說「暗箱作業」。風險是她可能失控——所以要先講好分工。',o:[
+{t:'「不行，她是反對派，會壞事。」',v:0,d:[0,-1,-1],r:'也許安全。但你放棄了全社區最懂這份報告的人。'},
+{t:'「請她以住戶代表身分列席，負責缺失與金額的核對；談判口徑由主委統一。」',v:2,d:[2,2,2],r:'你在委員群組提議，主委回了一句：「我也正有此意。」嚴監委補充：「會議公開、紀錄完整，依法沒有問題。」'},
+{t:'「讓她當主談判，我們在旁邊看就好。」',v:1,j:1,d:[-1,0,1],r:'主委看了你半天：「那主委要不要也讓給她？」'}]}),
+N('你走出服務中心時，林阿姨在後面叫住你。'),S('lin','沈委員。'),S('lin','……泳池排水溝加蓋那件事，我看到你們列進去了。'),N('她沒有說謝謝。但她說了「你們」，不是「你們委員」。')]},
+
+{id:8,vol:3,title:'建商回函',year:'115 年 11 月・建商回函討論案',
+recap:['住戶意見彙整後送交太古，再轉給建商。','建商的回函來了。厚厚一疊，開頭寫著「本公司秉持誠信，全力配合」。','翻到後面，才是重點。'],
+sc:[B('meet'),N('委員會議桌上，攤著建商的回函。錢委員用紅筆圈，嚴監委用藍筆畫，主委用手指一行一行往下走。'),C('hong'),S('hong','各位委員，我們很有誠意。四千零三筆，我們會處理絕大部分。'),S('hong','只有少數幾類，依合約與工程慣例，不在我們責任範圍。'),
+Q({k:'解語',p:'洪協理說「處理絕大部分，只有少數幾類不在責任範圍」。這句話怎麼聽？',x:'「絕大部分」按筆數算，很容易做到——施工污染、保護膜未除，一撕一擦就是幾百筆。「少數幾類」按金額算，往往才是大頭：消防配管工法、圖說不符、銷售承諾。談判時要問的不是「修幾筆」，而是「不修的那些，值多少錢」。',o:[
+{t:'建商很有誠意，大部分都修了。',v:0,d:[-1,-1,0],r:'錢委員把回函翻到最後一頁，指著一行小字：「那『少數幾類』加起來，比前面全部都貴。」'},
+{t:'用筆數講誠意，用類別藏金額——要問的是「不修的那些值多少」。',v:2,d:[2,2,0],r:'你把回函拆成兩欄：「建商願修」、「建商不修」。第二欄雖短，每一行後面都跟著一個很大的數字。'},
+{t:'他是在暗示我們要給點好處。',v:0,d:[0,0,-1],r:'嚴監委咳了一聲：「這種話，不要出現在會議記錄裡。」'}]}),
+N('回函中「不修」的理由，大致分成幾種：'),N('一、銷售海報泳池區的躺椅、遮陽傘、櫻花樹、落地盆栽，大廳木長椅、櫃檯旁木格柵——「海報為示意圖，僅供參考」。'),N('二、建議事項，例如監視主機加裝 UPS、車道增設警示燈、各樓增設監視器——「非合約範圍，屬管委會自行增設」。'),N('三、大量施工污染、刮痕——「部分為住戶裝潢期間造成」。'),N('四、消防管系滾溝式壓接配管、竣工圖與現況不符——「工法合法，現場微調不影響功能」。'),
+S('zw','一條一條來。先說海報。'),L('c22'),
+Q({k:'回話',p:'「海報為示意圖，僅供參考」——你怎麼回？',x:'《消費者保護法》第 22 條：企業經營者對消費者所負的義務，不得低於廣告內容。銷售海報不是裝飾，是買方決定購買的依據。這一類最適合要求「履行或折算」：櫻花樹可以種，種不了就折價。',o:[
+{t:'「海報確實常常只是示意，這部分我們放棄。」',v:0,d:[-1,-1,-2],r:'林阿姨在列席位上把筆放下：「你知道那幾棵櫻花樹，是我當初買這間的理由之一嗎？」'},
+{t:'「依消保法第 22 條，廣告內容是契約的一部分。請依海報履行，或提出等值折算方案。」',v:2,d:[2,2,2],r:'洪協理的笑容第一次垮了一角：「這個……我回去跟公司報告。」'},
+{t:'「海報上的櫻花樹，我們要一模一樣的，品種、高度、開花時間都要一樣。」',v:1,j:1,d:[0,0,1],r:'洪協理認真地問：「開花時間……我們也要負責？」你們兩個都沉默了。'}]}),
+S('qian','再來是「住戶裝潢造成」。'),S('li','（小聲）……大部分是我們自己弄的。保護膜沒撕的，總不會是住戶貼的吧。'),N('洪協理回頭瞪了李主任一眼。李主任低頭看手機。'),
+Q({k:'決斷',p:'李主任剛剛說溜了嘴。你要怎麼用這句話？',x:'在談判桌上把對方的人當場拆穿，贏了一句話，輸掉一個以後可能幫你的人。更好的做法是：不點名、不追打，改提一個「舉證」原則——建商主張是住戶造成的，請提出裝潢前後的紀錄；提不出來的，視為施工缺失。',o:[
+{t:'「李主任都說了是你們弄的，洪協理還要狡辯嗎？」',v:0,d:[0,-1,0],r:'李主任的臉瞬間白了。從那天起，他在會議上再也沒開過口。'},
+{t:'「既然建商主張是住戶裝潢造成，請提出交屋與裝潢前後的檢查紀錄；無法舉證的，依施工缺失處理。」',v:2,d:[2,2,1],r:'洪協理沉默了一下：「我們……回去找資料。」散會時，李主任經過你身邊，輕輕點了一下頭。'},
+{t:'假裝沒聽到，繼續下一項。',v:1,d:[0,0,0],r:'安全。但一張好牌，你沒有打。'}]}),
+N('最後是消防配管與圖說不符。方技師的報告寫得很清楚：滾溝式壓接配管「後續易有因地震或年久管內壓力不足加壓時產生脫管之虞，需檢討說明」；消防水箱容量現況 5.26 立方公尺，圖面標示 3.5 立方公尺。'),S('hong','您看，水箱比圖上大，這是我們多給的！'),
+Q({k:'解語',p:'洪協理說「水箱比圖上還大，是多給的」。這句話的問題在哪？',x:'圖說不符的重點不是「大或小」，而是「圖不對」。竣工圖是未來二十年維修、申報、改善的依據；圖跟現況對不上，下一個維修廠商就會照著錯的圖施工。要求的不是拆水箱，而是：更新竣工圖、提出說明與佐證。',o:[
+{t:'大一點確實比較好，這條可以不追究。',v:0,d:[-1,-1,0],r:'嚴監委翻開條例：「第 57 條要移交的，是竣工圖說。圖不對，就是沒移交完整。」'},
+{t:'問題不在大小，在「圖不對」——要求更新竣工圖並提出說明，否則日後維修全靠猜。',v:2,d:[2,2,1],r:'方技師在旁邊說：「這也是我們報告的意思。」洪協理把這一條，從「不修」移到了「補圖說」。'},
+{t:'水箱大，水費就多，要求建商補貼水費。',v:0,j:1,d:[0,0,0],r:'錢委員認真算了一下：「……每個月大概多三塊錢。」主委：「下一項。」'}]}),
+B('meet'),N('會議的決議寫得很長：回函內容逐項審查；不合理或未具體說明之項目，另行函覆建商，要求補充佐證資料或重新評估；費用相關項目不予全盤接受。'),N('最後一行：「待建商補充資料後，召開協商會議。」'),N('那就是——談判桌。')]},
+
+{id:9,vol:3,title:'談判桌',year:'115 年 12 月・缺失協商會議',
+recap:['建商補了一部分資料，堅持一部分不修，剩下的「可以談」。','管委會這邊：主委主談、錢委員算帳、嚴監委管條文，林阿姨以住戶代表身分列席，負責核對缺失。','你坐在主委旁邊。你的工作，是聽懂對方每一句話底下的那一句。'],
+sc:[B('office'),C('hong'),C('li'),N('協○建設的會議室。冷氣開得很強，桌上的礦泉水都是名牌。'),S('hong','各位，今天我們把剩下的項目一次談完。我們很有誠意。'),S('lin','誠意多少錢？'),N('會議室安靜了三秒。'),S('zw','林阿姨的意思是，我們希望今天能談出具體方案。'),S('hong','……當然、當然。'),
+N('洪協理翻開清單，開始一項一項念。每念一項，他都會給出一個「處理方式」。'),S('zw','沈委員，你聽，你判斷。'),L('a49'),
+G('deal',10),
+N('兩個小時過去。礦泉水喝完了兩輪。'),S('hong','……好。照剛剛談的，安全類全修、文件類補圖、外觀類部分修繕部分折算。折算金額，我們回去算。'),S('lin','不用回去算。我算好了。'),N('林阿姨把筆記本推到桌子中央。上面是每一類缺失的筆數、單價、折算金額，字跡工整得像印刷的。'),S('hong','……'),
+Q({k:'決斷',p:'林阿姨把折算金額當場推出來。洪協理臉色很難看。主委看向你。',x:'談判最後一刻，要給對方一個能回去交代的台階。林阿姨的數字很準，但「當場逼簽」會讓對方回去無法向公司交代，反而拖更久。最好的收尾：以她的數字為基準寫入會議記錄，給建商一個明確期限回覆。',o:[
+{t:'「今天就照林阿姨的數字簽，不簽不准走。」',v:0,d:[-1,0,1],r:'洪協理站起來：「那我只好請公司法務來談了。」談判又延了一個月。'},
+{t:'「以林阿姨的試算為基準寫入會議記錄，請建商兩週內書面回覆；有異議的項目，逐項附佐證。」',v:2,d:[2,2,2],r:'洪協理鬆了一口氣，又有點不甘心：「……兩週，可以。」林阿姨收起筆記本，看了你一眼——那是第一次，你在她臉上看到類似讚許的表情。'},
+{t:'「這個數字我們也是參考，建商覺得多少合理？」',v:1,d:[0,0,-1],r:'林阿姨的筆記本，「啪」一聲闔上了。'}]}),
+N('走出協○建設時，天已經黑了。電梯裡只有你和林阿姨。'),S('lin','你知道我為什麼一開始那麼反對你們嗎？'),S('me','因為……錢？'),S('lin','因為我住過三個社區。第一屆管委會，每一屆都說要「開局」。結果開完局，帳是爛的，公設是壞的，建商早就跑了。'),S('lin','你們是第一個，讓我覺得可能不一樣的。'),N('電梯門打開。她先走了出去，沒有回頭。')]},
+
+{id:10,vol:3,title:'盛世聽音',year:'116 年春・履勘之前',
+recap:['建商在期限內回覆了。安全類缺失陸續修繕，圖說補正，外觀類依折算方案處理。','無爭議缺失修繕完成率達 100% 後，才會安排第一次履勘複驗。','泳池正式開放了。排水溝，加了蓋。'],
+sc:[B('pool'),N('春天的早晨。泳池邊多了幾把遮陽傘——那是管委會詢價後，在群組討論通過買的。'),N('林阿姨坐在池邊，手上拿著巡檢表。張媽媽的孫子已經會換氣了。'),C('zhang'),S('zhang','林姐，你那時候不是說絕對不能開泳池嗎？'),S('lin','我說的是，不能「隨便」開。'),
+B('lobby'),N('大廳的櫃檯，小芸抬頭：「委員早安。」——四十五度，剛剛好。'),C('ade'),S('ade','委員，跟您報告，今年普渡的供品清單，我已經先擬好了。'),S('me','阿德，現在才三月。'),S('ade','準備是專業。'),N('伯克錸物業的續約案，在觀察期後以附帶績效條件的方式通過。林阿姨的改善清單，成了合約附件。'),
+B('meet'),N('第一屆最後一次例行會議。散會後，會議室只剩你和主委。'),S('zw','沈委員，我一直想問你。'),S('zw','這一年，林阿姨、物業、建商……你是怎麼每次都知道他們真正想要什麼的？'),
+Q({k:'回話',p:'主委問你的祕訣。',x:'這一年的每一件事——晚會、泳池、物業、四千零三筆缺失、談判桌——答案都一樣：反對的聲音裡，常常藏著最在乎的人；誠意的聲音裡，常常藏著條件。聽話，要聽音。',o:[
+{t:'「家訓：聽話要聽音。」',v:2,d:[1,1,1],r:'主委笑了：「你祖上是誰啊？」你說：「說來話長，大概三百五十年。」'},
+{t:'「我也不知道，都是猜的。」',v:1,d:[0,0,0],r:'主委搖頭：「猜一次是運氣，猜一年不是。」'},
+{t:'「因為我每天晚上都在看群組，看到凌晨三點。」',v:1,j:1,d:[0,0,0],r:'主委沉默了一下：「……下一屆，你要不要先去看個醫生？」'}]}),
+S('zw','下一屆，我不打算連任了。'),S('zw','我想推薦一個人。'),
+Q({k:'決斷',p:'主委說下一屆要推薦一個人接任。你覺得他心裡想的是誰？',x:'這是整個故事最後一句弦外之音。主委這一年最大的收穫，不是修了多少缺失，而是讓最大聲的反對者，變成了最認真的參與者。由她接任，帳會最乾淨，物業會最怕，建商會最頭痛——而你，會是她最需要的那個「聽音」的人。',o:[
+{t:'「我？」',v:1,d:[0,0,0],r:'主委笑了：「你？你適合當委員。主委要會吵架，你太會聽了。」'},
+{t:'「……林阿姨。」',v:2,d:[2,2,2],r:'主委沒有回答，只是把一份區權會議程推到你面前。候選人登記表上，第一個名字，字跡工整得像印刷的。'},
+{t:'「阿德。」',v:0,j:1,d:[0,0,0],r:'主委認真想了五秒：「……他至少普渡會辦得很好。」'}]}),
+N('你走出會議室，經過大廳。阿德在門口向你立正敬禮。泳池那邊傳來小孩的笑聲。'),N('手機震了一下。實名制住戶群裡，黃阿姨貼了一張長輩圖：「盛世太平🌸 闔家平安」。'),N('底下，林阿姨按了一個讚。'),N('——全劇終・漢皇盛世，盛世聽音。')]},
+];
+
+// 談判桌：建商說法（依缺失性質）
+const DEAL_LINES={
+0:['這個不影響使用啦，消防也都過了。','安全的部分我們會「評估」。','這個我們之前改過了，可能是後來住戶動到。'],
+1:['這種刮痕，住戶裝潢期間很常見。','外觀的東西見仁見智，我們覺得還好。','保護膜沒撕？那個住戶自己撕一下就好了嘛。'],
+2:['這個應該是設定問題，不是缺失。','功能是正常的，只是有時候不太正常。','可能是物業操作不當。'],
+3:['圖我們有，只是現場微調，功能一樣。','文件的部分，我們找找看。','竣工圖是建築師畫的，不關我們的事。'],
+4:['收邊這種東西，每個工班手法不同。','這種程度在業界是可以接受的。','我們可以補，但要等工班有空。'],
+5:['這是加分題，不在合約範圍。','這個是管委會自己想加的吧？','建議事項，我們參考參考。'],
+};
+// 回應選項與評分：[堅持修繕, 折算補償, 要求補文件／說明, 列為建議、自行評估]
+const DEAL_OPTS=['堅持限期修繕','可談折算補償','要求補文件與說明','列為建議，社區自行評估'];
+const DEAL_SCORE={0:[2,0,1,0],1:[1,2,0,0],2:[2,1,1,0],3:[1,0,2,0],4:[2,1,0,0],5:[0,1,0,2]};
+const DEAL_WHY={
+0:'安全類缺失沒有討價還價的空間：消防、標示、防火、防焰都必須修到合格，不能拿來折現。',
+1:'外觀類（污染、刮痕、保護未除）數量多、單價低，最適合「部分修繕、部分折算」，把力氣留給安全類。',
+2:'功能故障要修到能正常運作。對方說「設定問題」，就請他當場設定給你看。',
+3:'圖說不符的重點是圖要對：要求更新竣工圖、提出說明與佐證，日後維修才有依據。',
+4:'其他施工缺失（收邊、固定、填塞）原則上要修，業界「可接受」不是驗收標準。',
+5:'建議事項不是缺失，硬要建商做不合理；列入社區自行評估，談判籌碼留給真正的缺失。',
+};
+const GRADE_OPTS=[['安全類','S／A：立即危險或影響安全'],['一般缺失','B／C：外觀、施工、固定不佳'],['圖說・待釐清','D／F／FS：與圖不符或需說明'],['建議事項','E：非缺失，建議改善']];
+const gradeFam=g=>/^(S|A)$/.test(g)?0:/^(B|C)$/.test(g)?1:/^(D|F|FS|FB)$/.test(g)?2:3;
+
+</script>
+<script>
+// ===== 追加劇本：群組素材（人物、帳號全部虛構化，台詞改寫） =====
+Object.assign(CHARS,{
+shan:{n:'阿山',t:'住戶・退費派',b:'群組裡的新聞連結供應商。主張「沒去活動的人，管理費要退」。頂樓不讓上他嫌扯，頂樓讓上他又擔心有人喝酒掉下去——唯一不變的，是不信任。',look:{skin:'#e0b088',hair:'#555',hs:'short',cl:'#3a6a4a',acc:'phone'}},
+dou:{n:'豆姐',t:'住戶・成語派',b:'說話像在寫對聯。「真真假假，假假真真」「戲劇要慢慢看」。沒有人確定她站哪一邊，這正是她要的效果。',look:{skin:'#f0c9a0',hair:'#4a2a3a',hs:'perm',cl:'#c0506a',acc:''}},
+anni:{n:'安妮',t:'住戶・長文條文派',b:'每則訊息都像一份陳情書，會引用條例條號。她不反對活動，她反對「說不清楚」。這種人一旦被說服，就是最強的盟友。',look:{skin:'#f4d0a8',hair:'#2a2a2a',hs:'bob',cl:'#2f7f7f',acc:'glasses'}},
+long9:{n:'阿龍',t:'住戶・小群組啦啦隊長',b:'在大群之外另起爐灶的「好人團」頭號成員。目標是把群組人數衝到五百、「比過主委」。熱血，但常常熱過頭。',look:{skin:'#ecc49c',hair:'#1c1c28',hs:'slick',cl:'#8a3a1a',acc:''}},
+wenqing:{n:'文青伯',t:'住戶・長文抒情派',b:'不貼長輩圖，貼散文。最擅長把一筆帳寫成一首詩，然後讓人找不到詩裡哪一行是帳。',look:{skin:'#e8bf98',hair:'#999',hs:'side',cl:'#5a4a7a',acc:'glasses'}},
+nai:{n:'小奈',t:'住戶・沉默的大多數',b:'「我是挺主委的，但旁邊的人……」她害怕在群組裡說話，可一開口就要換掉所有委員。',look:{skin:'#f4d0a8',hair:'#3a2418',hs:'long',cl:'#d090b0',acc:''}},
+wu:{n:'吳先生',t:'住戶・長篇和事佬',b:'每次想打圓場，都寫成一篇論文。有成見的人讀了覺得他在護航，仔細讀的人才發現，他其實一直在給對方遞台階。',look:{skin:'#e0b088',hair:'#333',hs:'short',cl:'#4a4a5a',acc:'glasses'}},
+qing:{n:'小晴',t:'住戶・實幹派',b:'不吵架、只做事。兩派都想拉她，她的回答永遠一樣：「謝謝，不用安排。」',look:{skin:'#f0c9a0',hair:'#2a1a12',hs:'bob',cl:'#e0a040',acc:''}},
+wei:{n:'薇委員',t:'委員',b:'中秋自掏腰包一萬多塊買月餅送全社區，被誇了一整天，也被懷疑了一整天：「她為什麼要這麼做？」',look:{skin:'#f4d0a8',hair:'#5a3020',hs:'long',cl:'#c04050',acc:'pearl'}},
+});
+// 群組語錄（改寫自群組素材，附解讀）
+const QUOTES={
+zhenjia:{t:'真真假假，假假真真。',s:'豆姐',e:'不站隊的人最愛這句。她不是在說誰說謊，而是在說：兩邊的說法我都不信，給我原始文件。'},
+xiju:{t:'戲劇要慢慢看，最後大家就了解了。',s:'豆姐',e:'表面是看戲，底下是「我在等你們露出破綻」。回應這種人，最好的方法是讓時間站在你這邊：持續公開、持續一致。'},
+jiaqi:{t:'一般正常人連假都有自己的規劃。',s:'阿山',e:'把「我沒去」說成「正常人都不會去」。把個人選擇包裝成多數意見，是群組吵架的經典招式。'},
+pao:{t:'社區是一襲華美的袍，爬滿了管理費的蚤子。',s:'文青伯（改寫）',e:'抒情的指控沒有一筆數字。詩不用回，帳要回：請他指出是哪一筆。'},
+wubaiQ:{t:'要比過主委，就要吸收各方好漢！',s:'阿龍',e:'人數不是正當性。群組五百人，區權會一票都不會多。'},
+tiren:{t:'我們這群不是最言論自由的嗎？哭哭。',s:'小群組成員',e:'喊言論自由的群組先踢了人。對立的兩邊，常常用的是同一套方法。'},
+xiaonvzi:{t:'我這種小女子，實在不敢講真話。',s:'小奈',e:'說不敢講的人，其實已經講了。她要的是一個不會被圍剿的發言位置。'},
+buyong:{t:'不用主委安排，謝謝。',s:'小晴',e:'被「安排」的人，在群組裡就是某一派的人。她拒絕的不是主委，是標籤。'},
+wujiandao:{t:'大家繼續不熟，不用演無間道。',s:'群組路人',e:'看穿了一切又什麼都不想參與的旁觀者。社區裡這種人最多，他們只在投票那天出現。'},
+shixiong:{t:'我跟第一任保全根本就是師兄弟。',s:'阿德',e:'沒有任何弦外之音。阿德只是想被拍照。'},
+};
+Object.assign(GLOSS,{
+'手環':'晚會報名識別用的手環。用來控管頂樓人數，卻被讀成「門票」。',
+'專款':'指定用途的錢，用完要結算，沒用完要回存，不能挪作他用。',
+'芳名錄':'贊助者名單。住戶、店家、廠商捐的獎品與現金都列在上面。',
+'公共意外責任險':'社區公共空間發生意外時的保險。包場、活動、非住戶進出，都要確認保單涵蓋範圍。',
+'切結書':'使用者簽名保證遵守規則、自負責任的文件。',
+'女兒牆':'屋頂邊緣的矮牆。頂樓活動最需要管制的地方。',
+'退群':'離開群組。在社區群組裡，退群常常比留言更大聲。',
+'大群':'住戶自己開的社區交流群，不是管委會的正式管道。',
+});
+const Qu=i=>['quote',i];
+
+const CH_A={id:11,vol:0,title:'手環之亂',year:'115 年 9 月底・晚會之後',
+recap:['中秋晚會辦完了。頂樓燈串、摸彩、烤肉——照片在群組裡洗了一整晚。','但為了控管頂樓人數，晚會採報名制，參加者要戴手環；沒報名的，那兩天不能上頂樓。','管委會另外開放 27 日頂樓賞月，當天向櫃檯登記即可。','這則公告，點燃了大群。'],
+sc:[B('chat'),N('晚會前一天下午五點，物業在大群貼出公告：「今明二天頂樓舉辦中秋晚會，參加者必須戴上漢皇盛世手環，才可上頂樓。沒報名者不能上頂樓賞月，請住戶配合。」'),C('shan'),S('shan','覺得很扯。頂樓公共空間，沒報名的人不能上去？為什麼？電費也是住戶分攤的耶。'),S('huang','而且還訂製手環，不知道是不是管理費出的🤔'),C('dou'),N('豆姐貼了一張貼圖：一個小女孩咬著紅色衣角，旁邊寫著「人家好怕」。'),
+Q({k:'解語',p:'「沒報名的人不能上頂樓」——規則本身有安全理由，為什麼會炸？',x:'頂樓還沒點交，人數要控管，這是對的。但公告的寫法把「安全管制」寫成了「誰有手環誰才能進」——聽起來像門票，像特權。住戶生氣的不是規則，是被排除在外的感覺。同一條規則，先講理由、再講限制，結果完全不同。',o:[
+{t:'這些人就是愛抱怨，什麼規則都會被罵。',v:0,d:[0,-1,-1],r:'也許有人是。但阿山那句「電費也是住戶分攤」，問的是一個合理的問題。'},
+{t:'公告只寫了「不能」，沒寫「為什麼」——安全管制被讀成了特權門票。',v:2,d:[1,2,1],r:'你把公告又讀了一遍。整段沒有出現「安全」兩個字。'},
+{t:'因為手環太醜了。',v:1,j:1,d:[0,0,0],r:'阿德後來跟你說，他覺得手環很好看，他戴了三天沒拆。'}]}),
+S('zw','沈委員，你回一下。我現在回什麼都會被說是在護航自己。'),
+Q({k:'回話',p:'你在實名制住戶群怎麼補充說明？',x:'先補理由（頂樓尚未點交、人數與安全控管），再補替代方案（27 日開放賞月），最後補錢（手環費用列在晚會收支裡，晚會結束後一併公告）。三件事一次講完，比被追問三次好。',o:[
+{t:'「規則就是規則，請大家配合。」',v:0,d:[-1,-1,-2],r:'阿山把這句截圖，轉到了大群，標題是「管委會的態度」。'},
+{t:'「頂樓尚未點交，晚會期間需控管人數與安全，故採報名制；27 日另開放全體住戶賞月。手環費用列入晚會收支，結束後一併公告。」',v:2,d:[2,2,1],r:'群組安靜了一些。張媽媽回：「原來是還沒點交喔。」阿山沒有再回，但也沒有再轉。'},
+{t:'「沒報名的人，可以跟有手環的人借手環上去。」',v:0,j:1,d:[-1,0,0],r:'主委打電話來，第一句話是：「你是想讓頂樓擠進八百個人嗎？」'}]}),
+B('roof'),N('晚會那晚，頂樓很熱鬧。芳名錄掛在入口：有住戶捐了空氣清淨機、八十八杯手搖飲、兩百顆蛋黃酥、三百個螢光手環，也有廠商贊助現金。'),C('wei'),N('薇委員自掏腰包一萬多塊，買了月餅，一戶一盒。'),
+B('chat'),N('連假結束，大群又熱了起來。'),S('shan','所以中秋節活動沒去，真的不能退錢喔？有點爛。聽說有挪用管理費。'),S('huang','可是剛看實名群說還有賺耶，賺的還轉入管理費。到底誰說的是真的？'),S('shan','有賺是他們的事。沒去的人的費用該退還。使用者付費是基本常識。'),S('shan','我沒去啊。一般正常人連假都有自己的規劃。管委會辦活動，去的人自費就好，不要偷我們住戶的管理費辦了。'),Qu('jiaqi'),S('dou','真真假假，假假真真？'),Qu('zhenjia'),S('dou','戲劇要慢慢看，最後大家就了解了。'),Qu('xiju'),
+Q({k:'解語',p:'豆姐說「真真假假，假假真真」。她在說什麼？',x:'她沒有說管委會說謊，也沒有說阿山說謊。她在說：兩邊各講各的，她一個都不信。對這種人，解釋越多越沒用——她要的是可以自己看的原始資料：收支明細、憑證、會議記錄。',o:[
+{t:'她在暗示管委會說謊。',v:0,d:[0,-1,-1],r:'你差點就回了一長串辯解。還好你先把那句話又讀了一遍——她也沒有站在阿山那邊。'},
+{t:'她兩邊都不信，要的是能自己核對的原始資料。',v:2,d:[1,2,1],r:'你決定不在群組裡爭論，改成把收支明細與憑證閱覽方式整理成一則正式公告。'},
+{t:'她在背成語練習寫書法。',v:1,j:1,d:[0,0,0],r:'後來你真的在社區書法班的作品牆上，看到了這八個字。'}]}),
+C('anni'),N('深夜十一點，一則很長的訊息出現了。'),S('anni','我先說，我不是反對辦活動。《公寓大廈管理條例》第 36 條，管委會的職務是執行區權會決議、管理共用部分。問題是「催繳管理費」跟「管理費怎麼用」是兩件事。'),S('anni','我手寫有記下來：年初的會議記錄，寫的是 5,000。這次公告寫的是 5 萬。整整差了十倍。我只是個平凡的小老百姓，我只想知道，哪一個數字才對？'),
+Q({k:'決斷',p:'安妮問的是一個具體問題：5,000 和 5 萬，哪個才對？你怎麼處理？',x:'會議記錄上的帳：中秋晚會收支 336,422 元，收支相抵，另有 5 萬元專款回存。具體的問題要用具體的文件回答：哪一筆是哪一次會議決議的、用途是什麼、結算後去了哪裡。一張對照表，勝過十段解釋。',o:[
+{t:'「這是會計細節，有疑問請洽物業。」',v:0,d:[-1,-1,-2],r:'安妮回：「好，那我週一去服務中心，請物業印給我看。」語氣很平靜。你知道這比吵架更可怕。'},
+{t:'公告對照表：年初那筆 5,000 是什麼、這次 5 萬專款何時決議、晚會收支 336,422 元相抵後 5 萬已回存；憑證可依法申請閱覽。',v:2,d:[2,2,2],r:'隔天早上，安妮回了一則短訊息——這是她第一次回短訊息：「收到，謝謝說明。」'},
+{t:'「5 萬是對的，5,000 是打錯。」',v:1,d:[0,0,0],r:'也許是。但你還沒查證就先下了結論。安妮回：「那請問是哪一份打錯？」'}]}),
+L('a35'),C('wenqing'),N('凌晨，文青伯貼了一篇長文。'),S('wenqing','部分委員把持權力，讓社區成了私人王國。住戶的管理費，沒有提升居住品質，而是拿來辦無效的歡樂活動。'),S('wenqing','社區是一襲華美的袍，走近一看，爬滿了管理費的蚤子。'),Qu('pao'),N('底下有四個人按了哭臉。'),
+Q({k:'回話',p:'文青伯的長文很有感染力。主委半夜傳訊息給你：「這要不要回？」',x:'抒情的指控沒有具體數字，正面反駁只會變成筆戰。最好的回應是把話題拉回可以驗證的事：「如果有哪一筆支出有疑問，請指出來，我們逐筆回答。」詩可以不回，帳一定要回。',o:[
+{t:'「寫一篇更長的回應，逐段反駁他。」',v:0,d:[-1,-1,-1],r:'你寫到第七段，發現自己也開始用比喻了。凌晨三點，你把草稿刪了。'},
+{t:'「不回比喻，只回一句：有疑問的支出請具體指出，管委會逐筆回答，憑證可閱覽。」',v:2,d:[2,2,1],r:'文青伯沒有指出任何一筆。三天後，那篇長文沉到了訊息的最底下。'},
+{t:'「回一首詩。」',v:1,j:1,d:[0,0,0],r:'你寫了一首七言絕句。主委讀完說：「平仄不對。」然後兩個人都笑了，那天晚上誰都沒再回群組。'}]}),
+B('meet'),S('zw','我們做了這麼多，為什麼還是被罵？'),S('qian','因為錢的事，從來不是做多少的問題，是說多清楚的問題。'),S('zw','……沈委員，下次活動，帳要比活動先出來。'),N('你在筆記本上，把第一回寫的那一行字，又描了一遍：「帳要比活動先公開。」')]};
+
+const CH_B={id:12,vol:1,title:'大群風雲',year:'115 年 11 月・頂樓與選舉',
+recap:['物業的回答一致了，林阿姨的清單開始打勾。','可大群從來不會安靜太久。這一次，話題換成了頂樓——還有明年的選舉。','有人在大群之外另開了一個小群，自稱「好人團」。'],
+sc:[B('chat'),C('shan'),N('下午三點，阿山連貼了三則新聞連結：有人在頂樓喝酒後墜樓、頂樓酒吧意外、大廈管委會因維護不力被判刑。'),S('shan','在大樓頂樓喝酒後來不慎墜樓的新聞，真的太誇張的多。頂樓是不是要禁酒？'),N('有人貼出了管委會剛通過的頂樓包場辦法：押金 5,000 元，租金每小時 2,000 元，4 小時 6,000 元，8 小時 10,000 元。'),S('shan','所以可以頂樓包場喝酒嗎？'),S('huang','沒點交，怕危險，住戶不能上去。但包場可以約親朋好友、不是住戶的人上去？有保險嗎？出事誰負責？'),S('dou','喝酒，保險也不會賠吧。'),S('ade','（保全帳號）報告：意外險是酒駕才不賠。'),N('群組安靜了兩秒。'),
+Q({k:'解語',p:'阿山之前說「頂樓不讓上很扯」，現在又擔心「頂樓有人喝酒」。他矛盾嗎？',x:'表面矛盾，其實一致：他不信任「管委會訂的規則」。不讓上，他覺得被排除；讓上，他覺得沒人負責。這次他問到的保險與責任，卻是真正該回答的問題——不要因為提問的人，就忽略問題本身。',o:[
+{t:'他很矛盾，就是為反對而反對。',v:0,d:[0,-1,-1],r:'也許。但如果真有人在頂樓出事，第一個被追究的，是寫包場辦法的人——也就是你們。'},
+{t:'他一貫不信任管委會的規則；但這次問的保險與責任，是真的該回答。',v:2,d:[1,2,1],r:'你把三則新聞都點開讀完，然後打開了社區的公共意外責任險保單。'},
+{t:'他只是想喝酒，在找地方。',v:1,j:1,d:[0,0,0],r:'阿德私訊你：「委員，阿山不喝酒，他喝豆漿。」'}]}),
+Q({k:'決斷',p:'頂樓包場規則要怎麼補？',x:'好的規則是讓擔心的人安心，而不是讓想玩的人掃興。重點在：確認保單涵蓋範圍、非住戶登記、包場人簽切結、女兒牆周邊管制、酒類與時段規範。把阿山的問題，寫成規則的一部分。',o:[
+{t:'「頂樓全面禁止，大家都別上去。」',v:0,d:[-1,0,-1],r:'阿山回：「我就說很扯。」——他現在又站回了另一邊。'},
+{t:'確認公共意外責任險涵蓋包場；非住戶須登記；包場人簽切結書；女兒牆周邊設管制區；酒類限包場時段且不得攀爬。',v:2,d:[2,2,2],r:'你把這幾條貼進實名群，最後加了一句：「感謝住戶提醒保險問題。」阿山按了一個讚，這是他第一次按讚。'},
+{t:'「出事了再說，保險公司會處理。」',v:0,d:[-2,-1,-2],r:'嚴監委在委員群組只回了一個條號，和一個「？」'}]}),
+C('zhang'),N('那天晚上，張媽媽私訊你，傳來一串截圖。'),S('zhang','沈委員，我不知道該不該給你看。這是另一個群組，他們說是「好人團」。'),C('long9'),N('截圖裡，阿龍寫著：「我們這個優質群組要壯大！要比過主委，就要吸收各方好漢！人數增加到 500！我們才是真正的好人團隊！」'),Qu('wubaiQ'),N('下一張：有人被踢了。另一個人寫：「怎麼突然要踢人了呢，我們這個群不是最言論自由的嗎，哭哭。」'),Qu('tiren'),N('再下一張：安妮留言「樓上幾位的說話方式讓人覺得失去理智，我該退群囉」，然後——「安妮離開聊天」。'),
+Q({k:'解語',p:'張媽媽為什麼把截圖傳給你？',x:'中間派傳截圖，有兩層意思：一是表態「我不是他們那邊的」；二是在看你會怎麼用。如果你拿去公開、反擊，她下次就不會再傳了，而且她會被那邊認出來。截圖是信任，不是彈藥。',o:[
+{t:'她要你拿去揭發他們。',v:0,d:[0,-1,-1],r:'如果她要揭發，她會自己貼到大群。她選擇私訊你。'},
+{t:'她在表態，也在試探你會怎麼用——截圖是信任，不是彈藥。',v:2,d:[1,2,1],r:'你回她：「謝謝張媽媽，我看過就好，不會外流。」她回了一個合掌的貼圖。'},
+{t:'她想邀你加入好人團。',v:1,j:1,d:[0,0,0],r:'你想像了一下自己在好人團裡被踢出去的畫面，決定不要。'}]}),
+B('meet'),S('zw','我看到了。他們說要「比過主委」。我想把截圖貼到實名群，讓大家看看他們的真面目。'),
+Q({k:'決斷',p:'主委想公開小群截圖反擊。你怎麼勸？',x:'公開私群截圖，會讓提供者曝光、讓管委會變成「也在監看住戶」的一方，還會把中間派推到對面。小群人數再多，在區權會也不會多一票。管委會能做的，是讓公開透明比小群的耳語更有說服力——安妮已經自己退群了，她才是該爭取的人。',o:[
+{t:'「貼！讓大家知道他們在搞小圈圈。」',v:0,d:[-2,0,-2],r:'截圖貼出去的第二天，張媽媽被小群認出來，被踢了。她再也沒有私訊過你。'},
+{t:'「不要公開。私群截圖會出賣提供的人。我們專心把帳和規則講清楚，然後邀請安妮來財務說明會。」',v:2,d:[2,2,2],r:'主委沉默了一下，把手機收起來：「你說得對。小群喊五百人，區權會也不會多一票。」'},
+{t:'「我們也開一個小群，叫『更好人團』。」',v:1,j:1,d:[-1,0,0],r:'錢委員：「那我們要不要也收會費？」嚴監委：「請不要再說了。」'}]}),
+B('chat'),C('nai'),N('週末，大群出現了一則訊息。'),S('nai','我是挺主委的做事態度，但旁邊的人……智囊團太弱、專業度不夠、自大的人也有。我這種小女子實在不敢講真話，看著大群這樣互相攻訐，我哪敢出聲，害怕下一個被欺負的人是我！'),S('nai','請各位先賢，能換掉不適任的委員，或換掉所有的委員，也許明天會更好！'),Qu('xiaonvzi'),N('「智囊團」三個字，你看了很久。你就是智囊團。'),
+Q({k:'回話',p:'小奈點名「智囊團太弱」。你要回嗎？',x:'她說「不敢講真話」，卻講了；她說「挺主委」，卻要換掉所有委員。底下是：她害怕被圍剿，所以只好用最大聲的話保護自己。公開回應等於證明她的恐懼是對的。私下道謝、認真檢討溝通方式，才是讓「沉默的大多數」願意開口的方法。',o:[
+{t:'在大群公開回應：「請問哪一位委員自大？請具體指出。」',v:0,d:[-1,-1,-2],r:'小奈沒有回。但有十二個人私訊主委：「委員好兇。」'},
+{t:'不公開回應。私訊感謝她的意見，並在下次會議檢討：委員在群組的語氣，是不是真的讓人不敢說話？',v:2,d:[1,2,2],r:'小奈回你：「謝謝，我以為會被罵。」那次會議，委員們第一次討論了「怎麼說話」，而不是「說什麼」。'},
+{t:'假裝沒看到。',v:1,d:[0,0,0],r:'安全。但「沉默的大多數」又少了一個願意開口的人。'}]}),
+C('wu'),N('吳先生出來打圓場了。一則訊息，二十四行。大意是：主委的出發點是好的，大家的擔心也是合理的，請大家給彼此一點時間。'),N('底下立刻有人回：「又來護航了。」'),N('那天深夜，張媽媽又私訊你。'),S('zhang','我以前也覺得吳先生每次打圓場，都變成製造對立，越圓越不圓。'),S('zhang','可是我後來慢慢看，他好像不是在幫主委，他是在給罵人的那一方台階下。上次有人突然暴走罵主委太太，他講了一大段，其實是在幫那個人收尾。'),S('zhang','只是他每次都長篇大論，很像有說不完的愛，哈哈哈。'),
+Q({k:'解語',p:'吳先生一直被說「護航」。他到底在做什麼？',x:'他把主委的意思婉轉地重講一遍，目的是讓對方有台階下；可是有成見的人只看到「又在幫主委說話」。他的問題不是立場，是長度。好人遞橄欖枝，也要遞得讓人接得住。',o:[
+{t:'他就是主委的人，在幫忙洗地。',v:0,d:[0,-1,0],r:'如果是，他不會在暴走的人說完之後，替對方把話圓回來。'},
+{t:'他在給對方遞台階，只是寫太長，被成見讀成了護航。',v:2,d:[1,2,1],r:'你私訊吳先生：「謝謝你。下次三行就夠了，大家會更接得住。」他回：「好的，我盡量。」——然後回了十一行。'},
+{t:'他偷偷喜歡某位住戶。',v:1,j:1,d:[0,0,0],r:'張媽媽：「不是啦！你們男生怎麼都往那邊想！」'}]}),
+C('qing'),N('十一月底，話題轉向了明年的選舉。'),S('lin','@小晴 明年妳一定要為社區服務！'),S('lin','肯付出的人最有福報。主委有講過會安排妳上來，很期待妳參與社區的事情。'),S('qing','不用主委安排，謝謝。'),Qu('buyong'),S('huang','希望明年小晴當主委、薇委員當副主委，那我們社區就有救了，全力支持！'),S('wenqing','大家繼續不熟，不用演無間道。'),Qu('wujiandao'),
+S('zw','……我是說過她很適合，但我沒說要安排啊。'),
+Q({k:'解語',p:'小晴說「不用主委安排，謝謝」。她在拒絕什麼？',x:'在兩派對立的社區，被「安排」就等於被貼標籤：她會變成「主委的人」，另一派會先打她。她拒絕的不是主委，是那個標籤。主委最好的回應，是公開說：選舉公開、歡迎任何人參選、管委會不安排任何人。',o:[
+{t:'她在跟主委劃清界線，她是對面的人。',v:0,d:[-1,-1,0],r:'可是她從來沒有在群組罵過主委。她只是不想被歸類。'},
+{t:'她拒絕的是「主委的人」這個標籤——她想靠自己被選上。',v:2,d:[2,2,1],r:'主委隔天在實名群貼了一則公告：「明年區權會委員選舉公開登記，歡迎所有住戶參選，管委會不推薦、不安排任何人。」小晴按了一個讚。'},
+{t:'她只是客氣。',v:1,d:[0,0,0],r:'客氣的人會說「謝謝，我考慮看看」。她說的是「不用」。'}]}),
+B('lobby'),N('那天晚上你下樓拿包裹，阿德正在跟新來的保全講古。'),S('ade','我跟第一任保全，根本就是師兄弟。'),Qu('shixiong'),S('me','阿德，你就是第一任保全。'),S('ade','所以我跟自己是師兄弟。'),N('電梯門打開，主委走了出來，看起來很累。'),S('zw','沈委員，我做這些，是懷著為全社區蒼生的心願……'),S('me','主委，這句留到區權會再說。'),N('主委笑了。這是這個月，你第一次看到他笑。')]};
+
+// 插入章回：手環之亂接在中秋夜宴後；大群風雲接在整頓物業後
+CHAPTERS.splice(CHAPTERS.findIndex(c=>c.id===2)+1,0,CH_A);
+CHAPTERS.splice(CHAPTERS.findIndex(c=>c.id===5)+1,0,CH_B);
+// 最終回的抉擇呼應「不用主委安排」
+(()=>{const c=CHAPTERS.find(x=>x.id===10);const q=c.sc.find(s=>s[0]==='q'&&/推薦一個人/.test(s[1].p));if(!q)return;
+ q[1].x='這是整個故事最後一句弦外之音。主委說「想推薦一個人」，可這一年你們學到的是：被「安排」的人，在社區裡就會被貼上標籤——小晴說過「不用主委安排」。最好的主委，最後一件事是不推薦任何人，讓區權會自己選。';
+ q[1].o=[
+ {t:'「我？」',v:1,d:[0,0,0],r:'主委笑了：「你？你適合當委員。主委要會吵架，你太會聽了。」'},
+ {t:'「林阿姨。」',v:1,d:[1,1,1],r:'主委點頭：「她很好。」又搖頭：「可是如果是我推薦的，她就輸了一半。」'},
+ {t:'「主委，誰都別推薦。小晴說過——不用主委安排。讓區權會自己選。」',v:2,d:[2,2,2],r:'主委愣了很久，然後大笑：「沈墨的後代，果然聽得出音。」他把一張空白的候選人登記表貼上公布欄。隔週，上面出現了兩個名字：一個字跡工整得像印刷的，一個只寫了兩個字——小晴。'},
+ {t:'「阿德。」',v:0,j:1,d:[0,0,0],r:'主委認真想了五秒：「……他至少普渡會辦得很好。」'}]})();
+
+// ===== 追加：多事之秋、B3 充電樁 =====
+Object.assign(CHARS,{
+qi:{n:'琪委員',t:'委員・追追追派',b:'信條是「凡事都要追」。出事的那一刻，她第一個問的是：「誰不夠積極？」——有時候問對了，有時候問錯了人。',look:{skin:'#f4d0a8',hair:'#2a1a1a',hs:'long',cl:'#b03040',acc:''}},
+ling:{n:'玲姐',t:'住戶・人脈派',b:'「我請議員來會勘。」她認識很多人，人脈是她的武器，也是她的標籤。安全問題她是真的在乎，只是說話常常比事實快一步。',look:{skin:'#e8bf98',hair:'#333',hs:'bob',cl:'#5a5a6a',acc:'phone'}},
+xiaobai:{n:'小白',t:'住戶・頭像是一隻白狗',b:'冷面笑匠。最擅長把恐慌講成段子：「爆炸失火，上帝會換一個新的軀殼給你。」但他每句玩笑底下，都是同一個問題：出事誰負責？',look:{skin:'#f0c9a0',hair:'#1c1c28',hs:'short',cl:'#e8e8e8',acc:''}},
+weng:{n:'翁先生',t:'CD 棟住戶',b:'清晨七點傳訊息：「自從檢測那天之後，嗡嗡聲變大了，24 小時都聽得到。請問現在能找誰處理？」——他問的不是誰的錯，是找誰。',look:{skin:'#ecc49c',hair:'#222',hs:'side',cl:'#2a2a3a',acc:''}},
+});
+const EXTRA_NAMES={'阿山':'shan','豆姐':'dou','安妮':'anni','阿龍':'long9','文青伯':'wenqing','小奈':'nai','吳先生':'wu','小晴':'qing','薇委員':'wei','琪委員':'qi','玲姐':'ling','小白':'xiaobai','翁先生':'weng'};
+Object.assign(QUOTES,{
+shiguang:{t:'汙水幹管裝的時候我還沒來，您也還沒住進來——我要怎麼監督？坐時光機？',s:'周經理（改寫）',e:'被罵「不積極」的人最常見的反擊：把時間線攤開。指責之前先問：這件事，發生在誰的任期？'},
+zhuizhui:{t:'凡事都要追追追，拖久了，小病變大病。',s:'琪委員',e:'方向沒錯，只是追錯了對象。該追的是建商與工務所，不是半夜三點在掃汙水的人。'},
+qubie:{t:'消防說的是「不宜」，不是「禁止」。',s:'住戶（改寫）',e:'吵架時最容易被吃掉的就是這種字。不宜＝要更多配套與同意，不是「違法」；但也絕不是「可以先裝再說」。'},
+quanhui:{t:'要合乎法規，就等召開區權會再說。',s:'玲姐',e:'整場吵架裡最短、最對的一句。共用部分的變更，答案從來不在群組裡。'},
+shangdi:{t:'爆炸失火，上帝會換一個新的軀殼給你，不只是換車。',s:'小白',e:'恐慌被講成了笑話，但笑話底下的問題是真的：出事誰負責？管委會不能幫任何人背這個鍋。'},
+niming:{t:'匿名的時候人都很兇，見了面都是「請、謝謝、對不起」。',s:'群組路人（改寫）',e:'兩個群組、兩種人格。管委會只能在實名群負責，但要記得：匿名群裡罵人的，是明天電梯裡的鄰居。'},
+});
+Object.assign(GLOSS,{
+'充電樁':'電動車充電設備。設在地下室時，涉及電力負載、共用電箱、消防與保險，是近年社區最常吵的議題之一。',
+'地主戶':'原本土地的所有權人，合建後分回房屋的住戶。',
+'汙水幹管':'整棟大樓汙水匯流的主要管線。堵住時，低樓層的地排會先「回冒」。',
+'回冒':'排水管堵塞後，汙水從地板排水孔倒灌出來。',
+'陰井':'地面下的排水檢查井。工地廢料丟進去，就是日後堵塞的種子。',
+'踢腳板':'牆面最下方的護板。門擋裝得不好，就成了絆腳的東西。',
+'智生活':'社區管理 App，用來公告、預約、繳費。不是貼競選文宣的地方。',
+'會勘':'相關單位一起到現場勘查。',
+'添附':'在別人的（或共有的）東西上加裝設備。依停車位使用規範，不得任意添附。',
+'財報':'社區每月財務報表，依規定要公告。晚了一個月，群組就會晚一個月不睡覺。',
+});
+
+const CH_C={id:13,vol:1,title:'多事之秋',year:'115 年 10 月底・淹水之夜',
+recap:['物業進入觀察期，Q&A 公版上線了。','10 月 24 日深夜，一樓公廁的地排，開始往外冒水。','那一夜之後，群組裡的每一個問題，都變成了「誰不夠積極」。'],
+sc:[B('lobby'),N('凌晨兩點，夜班保全回報：一樓公廁地排大量回冒。凌晨兩點半，周經理趕到社區，跟保全一起掃汙水，一直掃到天亮。'),C('zhou'),N('公廁、健身房、KTV、輕食區、沙發區全都泡了水。工務所說要等週一才能來裝逆止閥、通管。'),N('早上，管理中心發出公告：因排水幹管堵塞導致 1F 公廁地排回冒，經同仁連夜清理，KTV1 與沙發區已恢復開放，其餘公設暫停使用，全區持續除濕。'),
+B('chat'),C('qi'),S('qi','我的想法很簡單：一切事情都有軌跡。凡事都要追追追，建商總是拖拖拖，拖久了小病變大病。若是積極的話，一切事情就不會發生了。'),Qu('zhuizhui'),S('zhou','請問這次淹水的原因您有查清楚嗎？是汙水幹管堵塞造成回冒，這跟我積不積極有什麼關係？'),S('zhou','汙水幹管安裝的時候，我還沒有在社區，您也還沒住進來——我要怎麼監督？坐時光機？'),Qu('shiguang'),S('zw','積極？物業要兼當第三方勘驗、檢查社區全部缺失？'),N('群組裡，有人默默貼了一張「這關積極什麼事？？？？」的貼圖。'),
+Q({k:'解語',p:'琪委員說「若是積極的話，一切事情就不會發生」。她真正想表達的是什麼？',x:'她後來補了一句：「我的意思是監督建商把東西修好、把報告弄出來，讓住戶都知道。」——她要的是「追建商」，只是第一句話打到了正在掃汙水的人身上。聽音要聽到最後一句，而不是被第一句點燃。',o:[
+{t:'她在怪物業不積極，要換物業。',v:0,d:[0,-1,-1],r:'周經理已經被這樣讀了一次。如果你也這樣讀，下一個被燒到的就是管委會自己。'},
+{t:'她要的是「有人去追建商」，只是第一句話打錯了對象。',v:2,d:[1,2,1],r:'你私訊琪委員：「我們一起把要追建商的事列成清單，請周經理照清單發函？」她回：「對，我就是這個意思！」'},
+{t:'她只是心情不好，想找人吵架。',v:1,j:1,d:[0,0,0],r:'她那天確實也被汙水濺到了鞋子。'}]}),
+N('幾天後，工務所來通管，發現外面的陰井被丟了一堆工程廢棄物：水泥、發泡劑、罐頭、紙巾。'),C('li'),S('li','……這比較像是當初施工監工的問題。'),S('xiaobai','不知道是不是當初建商施工人員丟的。'),S('li','非常有可能。'),
+Q({k:'決斷',p:'淹水真兇浮出水面：陰井裡的工程廢料。下一步怎麼做？',x:'這是談判桌上最好的證據之一：照片、日期、清出的廢料、受損的公設。把它列入缺失清單與求償項目，比在群組裡爭論「誰積極」有用一百倍。同時也要回頭給在第一線掃汙水的人一句公道話。',o:[
+{t:'在群組宣布：「都是建商的錯！」然後就沒有然後了。',v:1,d:[0,0,1],r:'群組按了很多讚。但兩週後，洪協理說：「有證據嗎？」'},
+{t:'請物業拍照存證、保留清出的廢料與清潔費用，列入建商缺失與求償清單；並在會議記錄裡感謝當夜值班同仁。',v:2,d:[2,2,2],r:'周經理看到會議記錄那一行時，在服務中心坐了很久。那天他對每一個住戶都多笑了一下。'},
+{t:'叫物業自己清掉就好，省得麻煩。',v:0,d:[-1,-1,0],r:'清掉了，證據也沒了。下次淹水，你們連「是誰丟的」都說不清楚。'}]}),
+L('a57'),
+B('chat'),C('weng'),N('清晨七點，你的手機跳出一則私訊。'),S('weng','CD 棟一樓信箱室到二樓電梯走廊，都有運轉嗡嗡聲。自從檢測那天查完之後，嗡嗡運轉就變大，24 小時都聽得到，現在在家裡睡覺都會聽到。'),S('weng','請問現在能找誰處理？'),
+Q({k:'回話',p:'翁先生問「能找誰處理」。你怎麼回？',x:'他問的不是誰的錯，是找誰。答案要具體：誰、何時、怎麼回報進度。檢測後設備運轉狀態改變，很可能是某個設備被測試後沒有復歸——這正是初勘程序裡「起造人負責測試後復歸」的那一條。',o:[
+{t:'「這要等點交後才能處理喔。」',v:0,d:[-1,-1,-2],r:'翁先生回：「所以我要再失眠三個月？」'},
+{t:'「我今天請物業會同工務所查 CD 棟一樓到二樓的設備，看是否有檢測後沒有復歸的機組；處理進度我晚上回您。」',v:2,d:[2,2,2],r:'當天下午，工務所在 CD 棟找到一台檢測後沒切回自動的風機。那天晚上，翁先生傳來一個字：「靜。」'},
+{t:'「可能是您聽錯了。」',v:0,d:[-2,-1,-2],r:'翁先生把錄音檔傳過來，長達八小時。你聽了十秒就關掉了，嗡嗡聲還在你腦子裡迴響。'}]}),
+C('yun'),N('同一週，B4、B5 的住戶也傳來照片：天花板的水垂吸收器在滴水。工務查出原因：墊片變形移位。另外，3 到 6 樓有住戶被門擋絆倒，腳踢到很痛——那些門擋，有人根本沒說要裝，就被裝上了。'),
+S('lin','我只問：受傷了，誰負責？'),
+Q({k:'決斷',p:'門擋絆倒人的問題，住戶意見分歧：有人要裝、有人沒要卻被裝。管委會怎麼處理？',x:'先處理安全，再處理意願。已經有人受傷，就先調查 3 到 6 樓各戶意願；要裝的，位置要經確認、不能擋逃生動線；不要的，請建商拆除並修復地面——這也是第三方檢測的住戶意見，可以一併列入談判。',o:[
+{t:'「門擋是住戶自己的事，管委會不管。」',v:0,d:[-1,-1,-2],r:'可是門擋裝在走廊，走廊是共用部分。林阿姨在群組裡只回了一個條號：第 10 條。'},
+{t:'調查 3–6 樓各戶意願；要裝的確認位置不妨礙逃生，不要的請建商拆除並修復地面，一併列入住戶意見送第三方。',v:2,d:[2,2,1],r:'受傷的那位住戶回：「我只是想知道有人在處理。」你回：「有，這是處理的時間表。」'},
+{t:'「全部拆掉，一了百了。」',v:1,d:[0,0,-1],r:'7 樓以上的住戶馬上抗議：「我們的門擋好好的！」'}]}),
+B('chat'),N('月底，另一場風暴來了：信箱裡出現了競選傳單，智生活 App 上也出現了帶政治色彩的公告。'),S('lin','智生活不是公佈社區財報、會議記錄、充電樁這些重要事情的地方嗎？為什麼有這麼多政治色彩的東西？'),S('lin','九月份的財報公佈了沒？財報難產？要跟小孩一樣十月懷胎嗎？'),N('你打開委員群組：物業回覆，九月財報「已完成編製，進入審核階段」。'),S('me','（委員群組）是我們委員會還在審嗎？'),S('qian','已經好了，目前開會中。'),
+Q({k:'決斷',p:'財報延遲、信箱傳單、智生活政治公告，三件事一起燒。你先處理哪件？',x:'三件事裡，只有財報是「法定義務」：第 36 條，會計報告要公告。傳單與政治公告可以用一條規範處理（社區管理平台與信箱不受理任何競選文宣，物業不得代投），但財報一天不出來，所有懷疑都會找到養分。先把最該做的做完。',o:[
+{t:'先查是誰投的傳單，抓出來公開。',v:0,d:[-1,0,-1],r:'查了三天，查到的是一個已經離職的工讀生。財報還沒出來。'},
+{t:'先讓財報完成審核、立即公告並說明延遲原因；再訂一條規範：信箱與智生活不受理任何競選文宣，物業不得代投。',v:2,d:[2,2,2],r:'財報公告的那天晚上，林阿姨回：「收到。」隔天又補一句：「傳單那條也寫得很好。」'},
+{t:'先回林阿姨：「財報在審了啦，別急。」',v:1,d:[0,0,-1],r:'「在審」兩個字，她已經聽過了。'}]}),
+L('a36'),N('那一週結束時，你在筆記本上寫：「出事的時候，大家問的都是『誰的錯』。真正該回答的，是『找誰』和『何時』。」')]};
+
+const CH_D={id:14,vol:2,title:'B3 充電樁',year:'115 年 11 月・停車場之戰',
+recap:['四千零三筆缺失還在談，停車場又出事了。','有住戶發現：B3 的 CD 棟電梯旁，有人裝了電動車充電樁。','有人說是建商答應 12 位地主戶的，有人說是管委會同意的。群組裡的新聞連結，一天比一天多。'],
+sc:[B('chat'),C('lin'),S('lin','聽說社區 B3 設立充電樁，正好在 CD 棟電梯旁邊。既然都知道很危險，誰同意裝的？主委還是物業經理？沒申請工務局、台電、消防局評估就可以裝嗎？'),C('xiaobai'),S('xiaobai','爆炸失火，可能上帝會換一個新的軀殼吧。不是只有換車。'),S('huang','登出，換全新的人生😱'),S('xiaobai','下輩子別買這棟，ok？'),Qu('shangdi'),N('接著是連結：充電樁起火的新聞、地下停車場火災的新聞、電動車燃燒的比較表——用水量、滅火時間、復燃性。'),
+S('lin','消防局的指引寫：在地下停車空間設置時，優先設置在地下一層，不宜設置在地下三層以下。新聞跟法規都說不行了，還要討論什麼？'),
+C('ling'),S('ling','地下三樓根本沒辦法救，等到消防來，已經燒到樓上了。我請議員和消防來會勘。'),S('xiaobai','而且這種違規的，保險還不賠。如果建商已經脫手給管委會點交，刑責就在管委會上了。'),S('xiaobai','可能要善意提醒一下委員會：不要幫建商背鍋，這個鍋可能背不起。'),
+Q({k:'解語',p:'小白說「不要幫建商背鍋」。在一片恐慌裡，這句話點出了什麼？',x:'整件事最關鍵的不是「電動車危不危險」，而是「誰同意的、誰負責」。建商答應地主戶裝電盤，卻不承擔公共區域的風險；如果管委會默許，風險就從建商轉到全體住戶身上。小白用笑話包著的，是整件事唯一的重點。',o:[
+{t:'他在暗示管委會收了建商好處。',v:0,d:[0,-1,-1],r:'你差點就在群組回了一長串澄清。可是他沒有這樣說，他說的是「善意提醒」。'},
+{t:'重點不是電動車，是責任：建商答應的事，不能讓管委會和全體住戶來承擔。',v:2,d:[2,2,1],r:'你在委員群組打了一句：「我們從來沒有同意過，對吧？」——結果發現，大家都以為是別人同意的。'},
+{t:'他只是在講冷笑話。',v:1,j:1,d:[0,0,0],r:'冷笑話講到第五則，你發現每一則都是同一個問題。'}]}),
+B('meet'),N('臨時委員會。十一位委員，沒有一個人記得自己同意過。'),S('qian','電錶室是鎖著的。如果他接的是公共電，那就是大家在幫他付電費；如果他另外拉了電，那是誰開的門？'),S('yan','停車位使用規範第五條：地下室停車位為專供停車使用，不得移作他用，不得添附任何設備或障礙物。'),S('yan','共用部分的變更，要經區權會決議。管委會沒有這個權限。'),
+C('anni'),S('anni','我查了一個判決：住戶在地下室車位旁設置充電箱，使用牆面、天花板和共用電箱，未經區權會同意，被判要拆除。沒開區權會，沒有勝訴的案例。'),
+S('xiaobai','（另一則）不過消防說的是「不宜」，不是「禁止」。法規沒有絕對禁止，配套做好、社區同意的話，或許可以。'),Qu('qubie'),
+Q({k:'解語',p:'「不宜」和「禁止」，這兩個字的差別為什麼重要？',x:'「不宜」意味著：要更嚴格的條件、更多配套、更多同意，而不是「違法」。這個差別決定了管委會的立場——不是去宣判「違法、拆掉」，而是說「未經程序、不得使用」，然後把決定權交回區權會與主管機關。說錯一個字，就可能被反告。',o:[
+{t:'沒差，反正都是不行。',v:0,d:[0,-1,0],r:'如果你在公告上寫「違法」，車主的律師下週就會寄存證信函來。'},
+{t:'「不宜」是要更多配套與同意，不是違法——管委會不該宣判，該做的是「依程序」。',v:2,d:[1,2,1],r:'嚴監委點頭：「措辭決定我們站不站得住。」'},
+{t:'「不宜」就是「可以」，那就讓他裝吧。',v:0,d:[-2,0,-2],r:'群組裡的新聞連結，一夜之間又多了十二則。'}]}),
+S('zw','沈委員，我們怎麼表態？'),
+Q({k:'決斷',p:'B3 充電樁，管委會的正式立場是什麼？',x:'最穩的做法：一、公開說明管委會從未同意；二、未經區權會決議與主管機關審查前，暫停使用並封存電源；三、函請建商說明是誰答應、電從哪裡來；四、邀消防、主管機關會勘；五、把「社區要不要、在哪裡、怎麼裝充電設備」列入下次區權會議程。不是禁止，也不是放行，是交回程序。',o:[
+{t:'「立刻強制拆除！」',v:1,d:[0,0,1],r:'群組歡呼。但車主說：「你們管委會有權拆我的設備嗎？」嚴監委嘆氣：「他說的有一部分是對的。」'},
+{t:'公開說明管委會未曾同意；暫停使用並封存電源；函請建商說明；邀消防與主管機關會勘；列入區權會議程，由全體住戶決定。',v:2,d:[2,2,2],r:'公告發出後，林阿姨回：「我覺得請執法單位來判最好，一直吵也沒意思。」——這是她第一次跟管委會站在同一個方向。玲姐補了一句：「要合乎法規，就等召開區權會再說。」'},
+{t:'「這是建商跟地主戶的事，管委會不介入。」',v:0,d:[-2,-1,-2],r:'小白只回了一句：「恭喜，鍋背上了。」'}]}),
+Qu('quanhui'),L('a10'),
+B('chat'),N('那天深夜，匿名群組裡，有人替別人取了綽號；實名群組裡，大家見面又是「請、謝謝、對不起」。'),S('xiaobai','匿名的時候人都很兇，見了面都是「請、謝謝、對不起」。'),Qu('niming'),S('lin','大家同一個社區，之前也沒有深仇大怨。有很多管道可以溝通意見；真的想改變的住戶，可以準備明年參選下屆委員。四百多戶的大社區，你的意見是少數還是多數，就用選票來證明吧。'),
+N('你盯著這段話看了很久。發訊息的人，是林阿姨。'),
+Q({k:'回話',p:'林阿姨在匿名吵架最兇的時候，說了一段最冷靜的話。你要回應嗎？',x:'當反對者說出你最想說的話，最好的回應不是「謝謝支持」——那會讓她被貼上「管委會的人」的標籤。最好的回應是讓這段話繼續屬於她：按讚、不評論，然後在區權會議程上，把她說的「用選票證明」寫進去。',o:[
+{t:'回：「感謝林阿姨支持管委會！」',v:0,d:[0,-1,-1],r:'三分鐘後，黃阿姨回：「林姐什麼時候變成管委會的人了？」林阿姨收回了那則訊息。'},
+{t:'只按一個讚，不評論。然後把「充電設備設置」與「下屆委員選舉」一起列入區權會議程。',v:2,d:[1,2,2],r:'那則訊息留在群組裡，底下有四十多個讚。沒有人收回。'},
+{t:'假裝沒看到，繼續潛水。',v:1,d:[0,0,0],r:'安全。但你錯過了一個讓兩邊都下得了台的時刻。'}]}),
+N('區權會的議程，多了一案：「地下停車場電動車充電設備設置規範討論案」。提案人欄位，寫著兩個名字：管委會，以及住戶林○○。')]};
+
+CHAPTERS.splice(CHAPTERS.findIndex(c=>c.id===12)+1,0,CH_C);
+CHAPTERS.splice(CHAPTERS.findIndex(c=>c.id===7)+1,0,CH_D);
+
+</script>
+<script>
+// ===== 心機版：底牌、路線、新章回、舊題加料 =====
+Object.assign(CHARS,{
+gao:{n:'高里長',t:'里長・社區的常客',b:'每逢活動必到、必致詞、必合照。跟主委交情不錯，於是討厭他的人，順便也討厭主委。',look:{skin:'#e0b088',hair:'#222',hs:'slick',cl:'#1f7a4a',acc:'tie'}},
+jia:{n:'賈委員',t:'委員・防霾紗窗派',b:'口頭禪「我這是服務住戶」。服務項目包括：防霾紗窗團購、淨水器、裝潢介紹——每一項都剛好有朋友在做。',look:{skin:'#f0c9a0',hair:'#2a2a3a',hs:'side',cl:'#6a4a8a',acc:'phone'}},
+lu:{n:'魯委員',t:'委員・鋁門窗派',b:'主張陽台統一裝鋁門窗，「一勞永逸」。他小舅子的鋁門窗行，離社區走路五分鐘。',look:{skin:'#d9a880',hair:'#444',hs:'bald',cl:'#7a5a2a',acc:''}},
+});
+Object.assign(EXTRA_NAMES,{'高里長':'gao','賈委員':'jia','魯委員':'lu'});
+Object.assign(GLOSS,{
+'防霾紗窗':'號稱能擋 PM2.5 的細網紗窗。在本社區，它不只是紗窗，是一個派系。',
+'鋁門窗':'陽台外推或加裝的鋁製門窗。在本社區，它不只是門窗，是一段恩怨。',
+'利益迴避':'跟議案有利害關係的人，不參與討論與表決。說起來容易，做起來得罪人。',
+'團購':'一群人一起買以換取折扣。發起人通常說自己沒賺。',
+'底牌':'每個人真正在意的那件事。知道了，才知道他為什麼吵。',
+});
+const CARDS={
+lin_window:{c:'lin',who:'林阿姨',t:'十二萬的鋁門窗',e:'交屋第一週就在陽台裝了鋁門窗，被區權會決議（紗窗派勝出）要求拆除。從那天起，管委會說東，她就說西。她反對的不是晚會、泳池或物業——是「拆她窗的那群人」。'},
+huang_li:{c:'huang',who:'黃阿姨',t:'輸掉的那兩百票',e:'上次里長選舉，她幫高里長的對手掃街三個月，輸了兩百票。主委跟高里長合照之後，她的長輩圖就開始瞄準管委會。恨屋及烏。'},
+jia_side:{c:'jia',who:'賈委員',t:'委員推薦，每戶抽成',e:'帶廠商進社區量了四十幾戶，每戶都說是「委員推薦」。當委員是為了服務住戶——順便服務他的團購、淨水器和裝潢介紹。'},
+lu_alu:{c:'lu',who:'魯委員',t:'小舅子的鋁門窗行',e:'力推鋁門窗方案。那家「剛好認識」的廠商，是他小舅子開的。'},
+shan_fee:{c:'shan',who:'阿山',t:'槓龜的摸彩券',e:'他主張「沒去晚會的人要退費」。可是他有去，還在摸彩箱前排了三次隊，一個獎都沒中。隔天，他就成了退費派。'},
+hong_bonus:{c:'hong',who:'洪協理',t:'年底的點交獎金',e:'公司規定：年底前完成點交，他才有績效獎金。所以真正急的人不是管委會，是他。'},
+};
+const OS=t=>['os',t],K=i=>['card',i];
+const chOf=id=>CHAPTERS.find(c=>c.id===id);
+const qOf=(id,key)=>{const s=chOf(id).sc.find(s=>s[0]==='q'&&s[1].p.includes(key));if(!s){console.error('NOQ',id,key);return null}return s[1]};
+function ADD(id,key,opts,demote,x){const q=qOf(id,key);if(!q)return;if(demote)q.o.forEach(o=>{if(o.v===2){o.v=1;o.r=demote;o.d=[0,0,1];o.s='正'}});q.o.push(...opts);if(x)q.x=x}
+function RE(id,sub,txt){const s=chOf(id).sc.find(s=>(s[0]==='n'&&s[1].includes(sub))||(s[0]==='s'&&s[2].includes(sub)));if(!s){console.error('NOLINE',id,sub);return}if(s[0]==='n')s[1]=txt;else s[2]=txt}
+function INS(id,sub,steps){const sc=chOf(id).sc,i=sc.findIndex(s=>(s[0]==='n'&&s[1].includes(sub))||(s[0]==='s'&&s[2].includes(sub)));if(i<0){console.error('NOINS',id,sub);return}sc.splice(i+1,0,...steps)}
+
+const CH_E={id:15,vol:0,title:'紗窗戰爭',year:'115 年 6 月・陽台統一方案',
+recap:['新大樓的陽台，風大、灰塵多、蚊子更多。','區權會要選一個「陽台統一方案」：防霾紗窗，還是鋁門窗？','聽起來是裝修問題。實際上，是這個社區所有恩怨的起點。'],
+sc:[B('meet'),C('jia'),S('jia','各位，我幫大家談到了防霾紗窗的團購價！一戶省三千！我這是服務住戶，一毛錢都沒賺！'),C('lu'),S('lu','紗窗？颱風一來就破。鋁門窗才是一勞永逸。我剛好認識一家，品質保證。'),OS('一個「剛好談到團購」，一個「剛好認識一家」。這個社區的巧合，比偶像劇還多。'),
+Q({k:'解語',p:'賈委員強調「我一毛錢都沒賺」。沒人問，他為什麼要先講？',x:'此地無銀三百兩。沒被問就先否認的事，通常就是那件事。但「知道」跟「說破」是兩回事——底牌要留到有用的時候才翻。',o:[
+{t:'他熱心公益，怕被誤會。',v:0,s:'憨',d:[0,-1,0],r:'你感動地幫他倒了一杯茶。他順手遞給你一張淨水器的型錄。'},
+{t:'有抽成。但先不說破——去找阿德問清楚。',v:2,s:'謀',gc:'jia_side',d:[0,2,0],r:'阿德壓低聲音：「賈委員喔？他上個月帶廠商進來量了四十幾戶，每戶都說是『委員推薦』。」你點點頭，什麼都沒說。'},
+{t:'當場問：「賈委員，團購你抽幾趴？」',v:1,s:'嗆',d:[-1,0,1],r:'會議室瞬間結冰。賈委員臉漲紅：「你有證據嗎？」你沒有。魯委員在旁邊笑得很開心。'},
+{t:'他可能真的只是很愛紗窗。',v:1,j:1,d:[0,0,0],r:'賈委員的 LINE 頭像，確實是一片紗窗。'}]}),
+N('會後，兩位委員分別在走廊攔住你。'),S('jia','沈委員，你這票很關鍵。鋁窗那個魯委員，他小舅子就是開鋁門窗行的，你懂吧？'),S('lu','沈委員，別被紗窗派騙了。賈委員那個團購，廠商是他大學同學。你懂吧？'),OS('我懂。我現在什麼都懂了。'),
+Q({k:'決斷',p:'兩派都來拉你這一票。你怎麼投？',x:'兩邊都有私心的時候，「選邊」是最差的選項。可以走正道——比價、利益迴避；也可以走權謀——讓兩邊互相把對方的底掀完，你一張牌都不用出。',o:[
+{t:'提案：兩案都要三家比價，有利害關係的委員迴避表決。',v:2,s:'正',d:[1,1,2],r:'嚴監委第一個附議。賈、魯兩位委員同時瞪你——這是他們今年唯一一次意見一致。'},
+{t:'對兩邊都說「我再想想」，讓他們繼續互爆對方的料。',v:2,s:'謀',gc:'lu_alu',d:[0,3,0],r:'三天內，你的 LINE 收到了鋁門窗行的營業登記、團購廠商的同學會合照，還有兩份互相檢舉的草稿。你一個字都沒打。'},
+{t:'投給紗窗，因為賈委員先來拜託的。',v:0,s:'憨',d:[0,-1,-1],r:'魯委員從此在群組叫你「紗窗派」。這個標籤，你背了一整年。'},
+{t:'投廢票，在選票上畫一隻貓。',v:1,j:1,d:[0,0,0],r:'開票時主委盯著那張票看了很久：「……這隻貓畫得不錯。」'}]}),
+N('區權會表決：防霾紗窗案通過。陽台不得加裝鋁門窗，已裝設者限期改善。'),B('lobby'),C('lin'),N('問題是——有一戶，交屋第一週就把鋁門窗裝好了。十二萬，氣密、隔音、三道鎖。'),S('lin','拆？我花十二萬裝的，你們開個會就叫我拆？紗窗派的，我記住你們了。'),K('lin_window'),OS('原來如此。她不是反對管委會，她是反對「拆她窗的管委會」。問題是——那就是我們。'),
+Q({k:'回話',p:'林阿姨的鋁門窗依決議要限期拆除。誰去通知她？怎麼通知？',x:'決議要執行，但「誰去講」比「講什麼」重要。教科書做法是發函——合法，然後多一個終身反對者。權謀做法，是讓對的人去當壞人。',o:[
+{t:'依規約發函限期改善，公事公辦。',v:1,s:'正',d:[0,0,1],r:'函發了。窗拆了。從那天起，管委會說東，林阿姨就說西；管委會說泳池，她說溺水；管委會說中秋，她說浪費。'},
+{t:'請魯委員去通知——他是鋁窗派，她罵不下手；她的火會燒向紗窗派的賈委員。',v:2,s:'謀',need:'lu_alu',d:[1,3,0],r:'魯委員去了，回來時眼眶泛紅：「她說我們鋁窗派要團結。」隔天，林阿姨在群組第一個點名的是賈委員。你默默按了靜音。'},
+{t:'「阿姨，決議就是決議，不拆就開罰。」',v:0,s:'嗆',d:[0,0,-2],r:'她沒拆。她去申請調閱了管委會成立以來的每一張發票。'},
+{t:'建議她把鋁門窗漆成紗窗的顏色。',v:1,j:1,d:[0,0,0],r:'她居然認真考慮了三秒。'}]}),
+N('這一年，所有的反對——晚會、泳池、物業、手環——都是從陽台上那組十二萬的鋁門窗開始的。'),N('只是當時的你們，還以為她在意的是管理費。')]};
+
+const CH_F={id:16,vol:0,title:'里長與外快',year:'115 年 9 月底・合照風波',
+recap:['中秋晚會那天，高里長也來了。致詞三分鐘，合照三十張。','其中一張，是主委跟里長搭著肩、比著讚。','照片上傳實名群的那一刻，有人的手機差點被捏碎。'],
+sc:[B('roof'),C('gao'),S('gao','漢皇盛世是我們里的模範社區！主委年輕有為！有任何需要，里辦公室全力支持！來，大家看這邊，一、二、三——'),B('chat'),C('huang'),S('huang','【早安🌹】政治歸政治，社區歸社區🙏 莫讓清淨地，沾染選舉味🍵'),S('huang','（同一分鐘）請問晚會是社區活動還是造勢晚會？？？主委跟「某人」感情很好喔🤔'),OS('「某人」。她連名字都不想打。這不是意見，這是私仇。'),
+Q({k:'解語',p:'黃阿姨這一年反對管委會的每一件事。看到這張合照，你終於懂了什麼？',x:'恨屋及烏。她反對的從來不是晚會、手環或泳池，而是「跟里長站在一起的人」。知道病根，才知道藥不在管理辦法裡——規章背到滾瓜爛熟，也治不了一場選舉恩怨。',o:[
+{t:'她重視社區的政治中立，是位有原則的住戶。',v:0,s:'憨',d:[0,-1,0],r:'阿德聽到你這樣說，笑到帽子掉了。'},
+{t:'她氣的是里長——去問阿德，他們有什麼過節。',v:2,s:'謀',gc:'huang_li',d:[0,2,0],r:'阿德：「上次里長選舉，黃阿姨幫另一邊掃街三個月，輸了兩百票。開票那晚，她在騎樓罵到十二點。」原來如此。'},
+{t:'她想選里長。',v:1,j:1,d:[0,0,0],r:'你想像了一下她的競選文宣：全部都是長輩圖。竟然有點想投。'},
+{t:'在群組回她：「合照犯法嗎？」',v:0,s:'嗆',d:[-1,0,-1],r:'她回了十七張長輩圖，主題是「心虛」。'}]}),
+S('zw','我只是跟里長拍個照而已啊！這也能吵？沈委員，照片要不要撤？'),
+Q({k:'決斷',p:'主委與里長的合照，怎麼處理？',x:'撤照片等於認錯，不撤等於挑釁。正道是訂規矩：往後活動政治中立。權謀是把水攪勻：兩邊都請、兩邊都拍，合照就不再是立場，只是背景。',o:[
+{t:'不撤。但公告：往後管委會活動政治中立，不安排任何政治人物致詞。',v:2,s:'正',d:[1,1,2],r:'黃阿姨回：「早該這樣。」——這是她今年對管委會說過最接近讚美的話。'},
+{t:'下次活動把里長的對手也請來，兩邊都合照。黃阿姨就沒梗了。',v:2,s:'謀',need:'huang_li',d:[1,3,1],r:'重陽敬老活動，兩位都來了。黃阿姨站在她支持的那位旁邊，笑得像中了樂透，還主動幫主委拍照。高里長的臉色，你就別看了。'},
+{t:'立刻撤照，並請主委道歉。',v:0,s:'憨',d:[-2,-1,0],r:'主委：「我跟里長拍照要道歉？那我跟阿德拍照，要不要寫悔過書？」'},
+{t:'把照片裡的里長 P 成阿德。',v:1,j:1,d:[0,0,0],r:'阿德非常滿意，把那張照片設成了頭像。'}]}),
+B('lobby'),C('jia'),N('合照風波還沒完，服務中心又接到投訴：賈委員拿著「管委會委員」的名片，挨家挨戶敲門。'),S('yun','他說是「委員關懷訪視」……然後就開始介紹淨水器。有三戶以為是管委會指定的，就簽了。'),S('jia','我這是服務住戶！新大樓的水質誰來把關？我！我是用委員的專業在幫大家！'),OS('委員的專業。淨水器的專業。抽成的專業。'),
+Q({k:'決斷',p:'賈委員用委員身分推銷賺外快。你怎麼收拾？',x:'三種收拾法：立規矩（正）、遞紙條（謀）、掀桌子（嗆）。立規矩最乾淨，但你多一個敵人；遞紙條最省力，他還欠你一次；掀桌子最爽，然後委員會就分成兩半。沒有標準答案，只有你想當哪一種委員。',o:[
+{t:'在會議提案：委員不得以職務名義推銷商品，違者提報區權會。',v:2,s:'正',d:[1,1,2],r:'提案 8 比 2 通過。投反對的兩票是賈委員和魯委員——紗窗派和鋁窗派，終於為了共同的理想站在一起。'},
+{t:'私下跟他說：「林阿姨好像在查你的團購名單。」剩下的，他自己會處理。',v:2,s:'謀',need:'jia_side',d:[1,3,0],r:'賈委員臉色發白，當晚就把名片上的「委員」兩個字用立可白塗掉了。隔天他請你喝咖啡：「沈委員，以後有事儘管說。」——你多了一張可以用的票。'},
+{t:'在實名群公開點名：「請賈委員說明淨水器的事。」',v:1,s:'嗆',d:[-1,0,1],r:'群組炸了一整晚，很爽。隔天起，賈委員對你提的每一案都投反對，包括「會議室買衛生紙」。'},
+{t:'跟他買一台，看看水質到底怎樣。',v:0,j:1,d:[0,0,-1],r:'水確實變好喝了。但你現在也是「委員推薦」的一部分了。'}]}),
+N('那天晚上你在筆記本上寫：「這個社區的每一場吵架，檯面上是公共事務，檯面下是鋁門窗、選舉和淨水器。」'),N('「只讀規章的人，永遠看不懂這裡在吵什麼。」')]};
+CHAPTERS.splice(CHAPTERS.findIndex(c=>c.id===1)+1,0,CH_E);
+CHAPTERS.splice(CHAPTERS.findIndex(c=>c.id===11)+1,0,CH_F);
+
+// ---- 舊題加料：教科書答案不再是唯一上策 ----
+ADD(1,'林阿姨這兩句話',[{t:'錢只是藉口。她氣的是別的事——得先查出是哪件事。',v:2,s:'謀',d:[0,2,0],r:'你沒有回群組，而是下樓找阿德聊了半小時。阿德說：「林阿姨喔？你去看看她家陽台。」'}],'你把帳戶、流程、公告方式講得清清楚楚。她看都沒看，回了一句：「反正你們都講好了。」','她嘴上說的是錢，可你把帳攤開，她連看都不看——那就代表問題不在帳。屁話的重點從來不在內容，在「為什麼是她在講」。先找病根，再開藥。');
+ADD(1,'社區大群的看法',[{t:'「管委會不回大群。但留一個人在裡面潛水，只看、不說。」',v:2,s:'謀',d:[1,3,0],r:'主委挑眉：「誰潛？」全體委員看向你。從那天起，你有了一個頭像是風景照的分身。'}]);
+ADD(1,'林阿姨要看帳',[{t:'「歡迎。乾脆請您當財務觀察員，每月財報出來，第一個給您看、請您在群組公告。」',v:2,s:'謀',d:[1,3,1],r:'她愣住了。答應，就得替帳背書；不答應，就不能再說帳有問題。她掙扎了十秒：「……我很忙。」從此她沒再提過帳。'},{t:'「阿姨，您上次說帳有問題，是哪一筆？現在講。」',v:1,s:'嗆',d:[0,0,-1],r:'她講不出來。但她記住你了。'}],'你說可以看。她真的去看了，帳一毛不差。於是她改口：「帳做得這麼漂亮，一定有鬼。」');
+ADD(2,'晚會花費',[{t:'公告完整收支，並附上摸彩得獎名單——黃阿姨抽中了電風扇。',v:2,s:'謀',d:[1,3,1],r:'群組安靜了整整一小時。然後黃阿姨貼了一張長輩圖：「知足常樂🌸」。電風扇的事，她一個字都沒提。'}]);
+INS(11,'不要偷我們住戶的管理費辦了',[OS('等一下。晚會那天，我明明看到他在摸彩箱前面排了三次隊。'),K('shan_fee')]);
+ADD(11,'文青伯的長文',[{t:'「請他當下次活動的文宣組長。文筆這麼好，不寫邀請函太可惜。」',v:2,s:'謀',d:[1,3,1],r:'文青伯推辭了三次，接了。重陽活動的邀請函寫了一千兩百字，沒有人看完，但他整個月都沒空寫長文罵管委會。'}]);
+ADD(4,'會做事的物業',[{t:'她恨的不是物業。當初上門通知她拆鋁門窗的，就是周經理。',v:2,s:'謀',need:'lin_window',d:[1,3,0],r:'你翻了服務中心的紀錄：六月某日，「通知住戶陽台限期改善」，承辦人：周。所有的投訴，都是從那一天之後開始的。'}]);
+ADD(4,'主委要你表態',[{t:'「不換。但放個風聲出去：管委會已經在找三家物業報價。」',v:2,s:'謀',d:[1,3,0],r:'風聲是阿德傳的，傳得比公告還快。隔天早上，周經理七點就到了，小芸的鞠躬來到一百度。林阿姨也滿意了：「早該換了。」——雖然什麼都沒換。'}]);
+ADD(12,'頂樓包場規則要怎麼補',[{t:'規則補齊。再私訊阿山：「下次摸彩，你的券我幫你多攪兩下。」',v:2,s:'謀',need:'shan_fee',d:[1,3,0],r:'阿山已讀了十分鐘，回：「……你怎麼知道。」從此他轉貼的新聞，變成了美食推薦。'}]);
+ADD(12,'主委想公開小群截圖',[{t:'「不公開。而且請張媽媽繼續待在裡面——我們需要一雙眼睛。」',v:2,s:'謀',d:[1,3,0],r:'主委看你的眼神變了：「沈委員，你祖上到底是做什麼的？」張媽媽倒是很興奮：「我這算臥底嗎？」'}]);
+ADD(13,'三件事一起燒',[{t:'財報今天就出。傳單交給黃阿姨去查——她討厭里長，會查得比徵信社還認真。',v:2,s:'謀',need:'huang_li',d:[1,3,1],r:'你只在群組說了一句：「聽說傳單跟里辦公室有關？」三天後，黃阿姨交出了一份附監視器時間軸的調查報告。那三天，她一句管委會的壞話都沒空講。'}]);
+ADD(6,'洪協理想先',[{t:'笑著說「協理說得對」，然後請方技師把每一筆的級別投影到牆上，一筆一筆念。',v:2,s:'謀',d:[1,3,1],r:'念到第四十七筆「自警閥一次側壓力錶 0 kgf」的時候，洪協理自己舉手了：「我想……還是等正式報告好了。」'}]);
+ADD(7,'一起上談判桌',[{t:'「請她來。她不是盟友，是砲台——砲口對準建商，她就沒空轟我們。」',v:2,s:'謀',d:[2,3,0],r:'主委笑出聲：「借刀殺人？」你說：「是資源再利用。」'}]);
+ADD(14,'正式立場',[{t:'先不表態。把林阿姨蒐集的法規連結整理成「住戶陳情書」，原封不動轉給建商。',v:2,s:'謀',d:[1,3,1],r:'陳情書附了四十一個連結、三份公文。洪協理打電話來，聲音在抖：「沈委員，這位林女士……可以請她不要每天打來嗎？」你說：「協理，把電拆了，她就不打了。」'}]);
+(()=>{const q=qOf(8,'說溜了嘴');const o=q.o.find(x=>x.v===2);o.gc='hong_bonus';o.r+='他還傳了一則訊息給你：「協理年底前要點交完才有獎金。這句話我沒說過。」'})();
+ADD(9,'折算金額當場',[{t:'「協理不急，我們也不急。聽說貴公司希望年底前點交？我們可以慢慢談到明年。」',v:2,s:'謀',need:'hong_bonus',d:[2,3,1],r:'洪協理的筆掉在桌上。三秒後他說：「……林女士的數字，我看其實滿合理的。」當場簽了。林阿姨小聲問你：「你剛剛那句是什麼咒語？」'}]);
+// ---- 把太溫馨的橋段改回人性 ----
+RE(1,'有時候只是第一個開口要答案的人','那天晚上，你在筆記本上寫下第一條心得：有些人反對，不是因為你做錯了什麼，而是因為做的人不是她。');
+RE(7,'但她說了「你們」','她沒有說謝謝。五分鐘後，她在群組發文：「泳池排水溝加蓋，是我爭取來的。」');
+RE(9,'第一屆管委會，每一屆','因為我陽台那組鋁門窗。十二萬，裝了一個禮拜，你們開個會就叫我拆。');
+RE(9,'讓我覺得可能不一樣','所以別誤會。今天幫你們，是因為我更討厭建商。明天開始，我照常反對。');
+RE(10,'底下，林阿姨按了一個讚','底下，林阿姨回了一句：「太平？管理費的事還沒完。」——很好，一切正常。');
+
+</script>
+<script>
+// ===== 盛世聽音 — 遊戲引擎 =====
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const DCATS=['消防設備','機電設備','汙廢排設備','發電機設備','空調景觀','弱電監控','建築裝修','公共會館','銷售買賣合約','建議事項'];
+const DNAT=['安全','外觀','功能故障','文件圖說','其他施工','建議'];
+const LS={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+
+// ===== 盛世聽音 — 音樂與音效（WebAudio 即時合成，無外部檔案） =====
+const AU=(()=>{
+ let ctx=null,master,musG,sfxG,cur=null,timer=0,nextT=0,stepI=0,song=null,qMode=false;
+ const set=LS.get('shengshi-audio',{m:true,s:true});
+ const sv=()=>LS.set('shengshi-audio',set);
+ function init(){if(ctx)return true;try{ctx=new (window.AudioContext||window.webkitAudioContext)()}catch(e){return false}
+  master=ctx.createGain();master.gain.value=.9;master.connect(ctx.destination);
+  const comp=ctx.createDynamicsCompressor();comp.connect(master);
+  musG=ctx.createGain();musG.gain.value=set.m?.32:0;musG.connect(comp);
+  sfxG=ctx.createGain();sfxG.gain.value=set.s?.5:0;sfxG.connect(comp);
+  // 簡易回音
+  const dl=ctx.createDelay();dl.delayTime.value=.27;const fb=ctx.createGain();fb.gain.value=.25;const wet=ctx.createGain();wet.gain.value=.22;
+  musG.connect(dl);dl.connect(fb);fb.connect(dl);dl.connect(wet);wet.connect(comp);return true}
+ const f=n=>440*Math.pow(2,(n-69)/12);
+ function tone(t,midi,dur,type,vol,out,att=.01,rel){const o=ctx.createOscillator(),g=ctx.createGain();o.type=type;o.frequency.value=f(midi);
+  g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(vol,t+att);g.gain.exponentialRampToValueAtTime(.0008,t+(rel||dur));o.connect(g);g.connect(out);o.start(t);o.stop(t+(rel||dur)+.05);return o}
+ let nb=null;function noise(){if(nb)return nb;nb=ctx.createBuffer(1,ctx.sampleRate*.5,ctx.sampleRate);const d=nb.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;return nb}
+ function hit(t,kind,out,vol=1){if(kind==='k'){const o=ctx.createOscillator(),g=ctx.createGain();o.frequency.setValueAtTime(140,t);o.frequency.exponentialRampToValueAtTime(42,t+.14);g.gain.setValueAtTime(.7*vol,t);g.gain.exponentialRampToValueAtTime(.001,t+.18);o.connect(g);g.connect(out);o.start(t);o.stop(t+.2);return}
+  const s=ctx.createBufferSource();s.buffer=noise();const hp=ctx.createBiquadFilter();hp.type=kind==='h'?'highpass':'bandpass';hp.frequency.value=kind==='h'?7000:1800;const g=ctx.createGain();const d=kind==='h'?.04:.12;
+  g.gain.setValueAtTime((kind==='h'?.18:.35)*vol,t);g.gain.exponentialRampToValueAtTime(.001,t+d);s.connect(hp);hp.connect(g);g.connect(out);s.start(t);s.stop(t+d+.02)}
+ // ---- 曲目：每格 = 8 分音符；旋律用 MIDI 相對根音的度數（-=休止） ----
+ // 大調音階度數 → 半音
+ const MAJ=[0,2,4,5,7,9,11],MIN=[0,2,3,5,7,8,10];
+ const deg=(d,sc)=>{const o=Math.floor((d-1)/7),i=((d-1)%7+7)%7;return sc[i]+12*o};
+ const S=(o)=>o;
+ const SONGS={
+ title:S({bpm:84,root:62,sc:MAJ,lead:'triangle',mel:'5 - 6 5 3 - 2 - 1 - 2 3 5 - - - 6 - 8 6 5 - 3 - 2 - 3 2 1 - - -',ch:[1,6,4,5],bass:'1 - - 5 1 - - 5',dr:''}),
+ meet:S({bpm:92,root:60,sc:MAJ,lead:'triangle',mel:'3 - 5 - 6 - 5 3 2 - - - 1 2 3 - 5 - 3 - 2 1 2 - - - - - - -',ch:[1,4,6,5],bass:'1 - 5 - 1 - 5 -',dr:'k - h - s - h - k - h - s - h h'}),
+ lobby:S({bpm:104,root:65,sc:MAJ,lead:'square',mel:'1 3 5 3 6 - 5 - 4 6 8 6 5 - - - 3 5 6 5 3 - 2 - 1 2 3 2 1 - - -',ch:[1,6,2,5],bass:'1 - 1 5 6 - 6 5',dr:'k - h h s - h - k k h - s - h h'}),
+ chat:S({bpm:126,root:67,sc:MAJ,lead:'square',mel:'5 5 - 3 5 - 6 5 3 - 2 - 3 - - - 5 5 - 3 5 - 8 7 6 - 5 - 6 - - -',ch:[1,4,1,5],bass:'1 5 1 5 4 1 5 5',dr:'k h s h k h s h'}),
+ roof:S({bpm:116,root:62,sc:MAJ,lead:'square',mel:'1 1 5 5 6 6 5 - 4 4 3 3 2 2 1 - 5 5 4 4 3 3 2 - 5 5 4 4 3 3 2 -',ch:[1,4,1,5,1,4,5,1],bass:'1 5 1 5 1 5 1 5',dr:'k h s h k k s h'}),
+ pool:S({bpm:96,root:64,sc:MAJ,lead:'sine',mel:'5 - 3 - 6 - 5 - 3 2 1 - - - - - 2 - 3 - 5 - 6 - 5 - 3 - - - - -',ch:[4,1,4,5],bass:'1 - - 1 5 - - 5',dr:'k - h - - - h s k - h - - - h h'}),
+ base:S({bpm:100,root:57,sc:MIN,lead:'sawtooth',mel:'1 - - 3 - - 2 - 1 - 7 - 1 - - - 5 - - 4 - - 3 - 2 - 3 - 1 - - -',ch:[1,1,6,5],bass:'1 1 - 1 1 - 1 -',dr:'k - - h k - s - k - - h k h s h'}),
+ office:S({bpm:108,root:58,sc:MIN,lead:'square',mel:'1 - 3 - 5 - 4 3 2 - - - 5 - 4 - 3 - 2 - 1 - 2 - 7 - - - - -',ch:[1,4,5,1],bass:'1 - 1 1 5 - 5 5',dr:'k h s h k h s s'}),
+ tense:S({bpm:70,root:57,sc:MIN,lead:'triangle',mel:'5 - - - 4 - - - 3 - - - 2 - - -',ch:[1,6],bass:'1 - - - - - - -',dr:'k - - - - - - - k - - - - - - -'}),
+ };
+ const tok=s=>s.trim().split(/\s+/);
+ function play(name){if(!song||cur!==name){cur=name;song=SONGS[name]||SONGS.meet;song._m=tok(song.mel);song._b=tok(song.bass);song._d=song.dr?tok(song.dr):[];stepI=0}
+  if(!ctx||!set.m)return;if(!timer){nextT=ctx.currentTime+.06;timer=setInterval(sched,40)}}
+ function sched(){if(!ctx||!song)return;const sp=60/song.bpm/2;
+  while(nextT<ctx.currentTime+.18){const s=qMode?SONGS.tense:song;const m=s._m||(s._m=tok(s.mel)),b=s._b||(s._b=tok(s.bass)),d=s._d||(s._d=s.dr?tok(s.dr):[]);
+   const i=stepI,mi=m[i%m.length],bi=b[i%b.length],di=d.length?d[i%d.length]:'-',bar=Math.floor(i/8),cd=s.ch[bar%s.ch.length];const spd=60/s.bpm/2;
+   if(mi!=='-')tone(nextT,s.root+12+deg(+mi,s.sc),spd*.9,s.lead,s.lead==='sawtooth'?.05:s.lead==='square'?.07:.13,musG,.01,spd*1.6);
+   if(bi!=='-')tone(nextT,s.root-12+deg(cd,s.sc)+(bi==='5'?7:0),spd*.9,'triangle',.22,musG,.005,spd*1.1);
+   if(i%8===0)[0,2,4].forEach(k=>tone(nextT,s.root+deg(cd+k,s.sc),spd*7,'sine',.035,musG,.12,spd*7));
+   if(di!=='-')hit(nextT,di,musG,.55);
+   nextT+=spd;stepI++}}
+ function stop(){clearInterval(timer);timer=0}
+ const SFX={
+  tick:t=>tone(t,84+Math.random()*3|0,.03,'square',.025,sfxG,.002,.03),
+  next:t=>tone(t,79,.06,'triangle',.12,sfxG,.003,.08),
+  ask:t=>{[72,76,79].forEach((n,i)=>tone(t+i*.06,n,.12,'triangle',.14,sfxG,.005,.18))},
+  good:t=>{[72,76,79,84].forEach((n,i)=>tone(t+i*.07,n,.14,'square',.08,sfxG,.005,.22))},
+  mid:t=>{[72,74].forEach((n,i)=>tone(t+i*.1,n,.14,'triangle',.14,sfxG,.005,.2))},
+  bad:t=>{[67,63].forEach((n,i)=>tone(t+i*.14,n,.2,'sawtooth',.07,sfxG,.005,.3))},
+  joke:t=>{[72,79,74,81,76].forEach((n,i)=>tone(t+i*.05,n,.08,'square',.06,sfxG,.003,.1))},
+  chime:t=>{tone(t,88,.4,'sine',.12,sfxG,.003,.9);tone(t+.08,95,.4,'sine',.08,sfxG,.003,.9)},
+  phone:t=>{for(let i=0;i<2;i++)tone(t+i*.12,93,.06,'sine',.12,sfxG,.002,.08)},
+  stamp:t=>{hit(t,'k',sfxG,1.2);hit(t,'s',sfxG,.6)},
+  fail:t=>{[64,60,57,52].forEach((n,i)=>tone(t+i*.22,n,.3,'triangle',.16,sfxG,.01,.5))},
+  win:t=>{[67,72,76,79,84,79,84].forEach((n,i)=>tone(t+i*.09,n,.12,'square',.07,sfxG,.005,i===6?.8:.16))},
+  open:t=>{[60,67,72].forEach((n,i)=>tone(t+i*.08,n,.2,'triangle',.14,sfxG,.01,.4))},
+ };
+ function sfx(n){if(!ctx||!set.s||!SFX[n])return;try{SFX[n](ctx.currentTime+.01)}catch(e){}}
+ function unlock(){if(!init())return;if(ctx.state==='suspended')ctx.resume();if(cur&&set.m)play(cur)}
+ ['pointerdown','touchstart','keydown'].forEach(ev=>document.addEventListener(ev,unlock,{passive:true}));
+ document.addEventListener('visibilitychange',()=>{if(!ctx)return;document.hidden?ctx.suspend():ctx.resume()});
+ return {
+  scene(n){cur=null;play(n)},sfx,
+  q(v){qMode=v},
+  get m(){return set.m},get s(){return set.s},
+  toggleM(){set.m=!set.m;sv();if(ctx)musG.gain.setTargetAtTime(set.m?.32:0,ctx.currentTime,.05);if(set.m&&cur){init();play(cur)}return set.m},
+  toggleS(){set.s=!set.s;sv();if(ctx)sfxG.gain.value=set.s?.5:0;return set.s},
+ };
+})();
+
+// ---------- 存檔 ----------
+const blank=()=>({ch:{},chars:['me'],laws:[],quotes:[],mid:null,jokes:[],seen:{}});
+let P=LS.get('shengshi-players',{cur:null,list:[]}),SV=blank();
+function curP(){return P.list.find(p=>p.k===P.cur)||null}
+function load(){const p=curP();SV=p?Object.assign(blank(),LS.get('shengshi-sv-'+p.k,blank())):blank()}
+function save(){const p=curP();if(p){LS.set('shengshi-sv-'+p.k,SV);p.at=Date.now();LS.set('shengshi-players',P)}}
+function go(id){$$('.scr').forEach(s=>s.classList.toggle('on',s.id===id));window.scrollTo(0,0);if(id==='sChap'){renderChap();AU.q(false);AU.scene('title')}}
+function toast(t){const e=$('#toast');e.textContent=t;e.classList.add('on');clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove('on'),1900)}
+
+// ---------- 像素畫：背景 ----------
+const BW=192,BH=108;
+function px(x){return (c,a,b,w,h)=>{x.fillStyle=c;x.fillRect(Math.round(a),Math.round(b),Math.round(w),Math.round(h))}}
+function dith(x,c,a,b,w,h){x.fillStyle=c;for(let j=0;j<h;j++)for(let i=(j%2);i<w;i+=2)x.fillRect(a+i,b+j,1,1)}
+function shade(h,f){const n=parseInt(h.slice(1),16);return '#'+[n>>16,n>>8&255,n&255].map(v=>Math.max(0,Math.min(255,Math.round(v*f))).toString(16).padStart(2,'0')).join('')}
+const BG={
+meet(x,R){R('#e6dccb',0,0,BW,BH);R('#d4c7b0',0,62,BW,2);
+ R('#2a3550',12,10,62,36);for(let i=0;i<14;i++){const h=8+(i*37%20);R('#3b4a6e',14+i*4,44-h,3,h);if(i%2)R('#f6d36b',15+i*4,44-h+3,1,1)}R('#8a7a5a',12,10,62,2);R('#8a7a5a',42,10,2,36);
+ R('#f4f4f0',96,10,70,34);R('#9aa',96,44,70,2);R('#c0392b',102,16,24,2);R('#456',102,22,40,1);R('#456',102,26,52,1);R('#456',102,30,34,1);R('#2f7fc1',102,36,14,2);
+ R('#6a4a2a',8,70,176,10);R('#7d5a35',8,70,176,2);R('#4a3420',8,80,176,4);for(let i=0;i<7;i++){R('#2c2c38',16+i*25,60,12,10);R('#3c3c4c',16+i*25,60,12,2);R('#2c2c38',16+i*25,86,12,14)}
+ R('#e8e0c8',40,72,10,6);R('#e8e0c8',100,73,12,5);R('#c33',140,72,4,6);R('#d4c7b0',0,100,BW,8)},
+lobby(x,R){R('#3a3046',0,0,BW,60);for(let i=0;i<8;i++)R('#4a3e58',i*26,0,2,60);R('#e8d8b0',0,60,BW,48);for(let j=0;j<6;j++)for(let i=0;i<12;i++)if((i+j)%2)R('#d6c49a',i*16,60+j*8,16,8);
+ R('#f6d36b',90,4,12,2);R('#f6d36b',86,6,20,4);R('#fff3c0',94,10,4,4);
+ R('#5a3a22',112,46,64,18);R('#7a5232',112,46,64,3);R('#c9a85a',112,49,64,1);R('#e8e0c8',140,40,8,6);
+ R('#7d8597',14,20,40,34);for(let j=0;j<5;j++)for(let i=0;i<5;i++)R('#9aa3b5',16+i*8,22+j*6,6,4);
+ R('#2f5f3a',64,38,10,22);R('#3f7f4a',62,32,14,10);R('#8a5a2a',66,58,6,6);R('#2f5f3a',180,40,8,20);R('#3f7f4a',178,34,12,10)},
+chat(x,R){R('#1b2230',0,0,BW,BH);R('#0e1520',56,0,80,BH);R('#2a3a2a',56,0,80,10);R('#7fd07f',60,3,30,4);
+ const bub=(y,w,me,c)=>{if(me){R(c||'#8de07f',130-w,y,w,8);R('#0e1520',130-w,y,1,1)}else{R('#33415a',62,y-1,5,5);R(c||'#e8ecf2',70,y,w,8)}};
+ bub(14,40);bub(26,52,0,'#f6d36b');bub(38,30,1);bub(50,48);bub(62,36,0,'#f4c0c8');bub(74,44,1);bub(86,50);
+ for(let i=0;i<30;i++)R('#2a3550',(i*53)%56,(i*29)%BH,1,1),R('#2a3550',136+(i*41)%56,(i*17)%BH,1,1)},
+roof(x,R){const moon=(cx,cy,r,bg)=>{for(let j=-r;j<=r;j++)for(let i=-r;i<=r;i++){if(i*i+j*j<=r*r){x.fillStyle=((i+3)*(i+3)+(j-2)*(j-2)<=r*r)?bg:'#f8f0c0';x.fillRect(cx+i,cy+j,1,1)}}};for(let y=0;y<70;y++)R(shade('#1a2350',0.6+y/140),0,y,BW,1);for(let i=0;i<40;i++)R(i%5?'#8a94c8':'#fff',(i*53+17)%BW,(i*29+7)%50,1,1);
+ moon(155,15,6,'#141c40');
+ for(let i=0;i<10;i++){const h=10+(i*13%18);R('#101530',i*20,70-h,18,h);for(let j=0;j<3;j++)R('#f6d36b',i*20+4+j*5,72-h+4,1,1)}
+ R('#5a5a66',0,70,BW,38);R('#6a6a78',0,70,BW,2);for(let i=0;i<BW;i+=4)R('#3a3a46',i,80,2,28);
+ for(let i=0;i<BW;i++){const y=26+Math.round(Math.sin(i/14)*5);if(i%6===0)R(['#f6d36b','#f48080','#8de07f','#80c8f4'][i/6%4|0],i,y,2,2);else R('#2a2a34',i,y,1,1)}
+ R('#7a2a2a',70,64,52,12);R('#a03838',70,64,52,2);R('#e8e0c8',84,52,4,12);R('#e8e0c8',104,52,4,12);R('#2a2a34',80,48,32,4)},
+pool(x,R){R('#bfe4f2',0,0,BW,40);R('#f8f8ff',20,8,24,4);R('#f8f8ff',120,12,30,4);R('#d8d0c0',0,40,BW,68);for(let i=0;i<BW;i+=8)R('#c8c0ae',i,40,1,68);
+ R('#2f8fc0',16,56,160,40);R('#5fb8e0',16,56,160,3);for(let j=0;j<5;j++)for(let i=0;i<10;i++)R('#7fd0f0',22+i*16+(j%2)*6,62+j*7,6,1);
+ R('#e8e8e8',150,48,3,14);R('#e8e8e8',158,48,3,14);for(let i=0;i<4;i++)R('#e8e8e8',150,50+i*3,11,1);
+ R('#3a6a2a',0,22,14,22);R('#4a8a3a',4,16,16,10);R('#3a6a2a',176,24,16,20);R('#4a8a3a',172,18,16,10);R('#7a5a3a',8,36,3,8)},
+base(x,R){R('#5c6068',0,0,BW,BH);R('#4a4e56',0,0,BW,12);R('#6a6e76',0,78,BW,30);for(let i=0;i<BW;i+=12)R('#f6c33b',i,98,6,3);
+ R('#b33',0,16,BW,4);R('#d55',0,16,BW,1);R('#b33',40,20,4,40);R('#b33',120,20,4,30);R('#2f6fa0',0,24,BW,3);
+ R('#7a7e86',30,52,30,26);R('#8a8e96',30,52,30,3);R('#c33',36,58,18,10);R('#e8e8e8',40,61,4,4);R('#7a7e86',110,48,40,30);R('#9aa',114,54,14,8);R('#3b7',132,56,3,3);R('#c33',140,56,3,3);
+ R('#8a8e96',168,10,14,90);R('#fff',170,40,10,10);R('#222',172,42,2,6);R('#222',175,42,4,2);R('#222',175,45,4,1);R('#222',175,48,4,1);R('#222',178,45,1,3)},
+office(x,R){R('#cfe3ef',0,0,BW,64);for(let i=0;i<12;i++){const h=18+(i*29%30);R(i%2?'#8aa0b8':'#a0b4c8',i*17,64-h,15,h);for(let j=0;j<h/6-1;j++)R('#e8f0f8',i*17+3,64-h+3+j*6,9,2)}
+ for(let i=0;i<BW;i+=48)R('#555d68',i,0,2,64);R('#555d68',0,0,BW,3);R('#3a3e46',0,64,BW,44);
+ R('#e8e4dc',10,70,172,14);R('#fff',10,70,172,2);R('#b8b4ac',10,84,172,3);for(let i=0;i<8;i++){R('#8fd0f0',20+i*21,62,4,8);R('#2f6fa0',20+i*21,62,4,2)}
+ for(let i=0;i<6;i++)R('#22262e',18+i*30,88,16,20)},
+title(x,R){const moon=(cx,cy,r,bg)=>{for(let j=-r;j<=r;j++)for(let i=-r;i<=r;i++){if(i*i+j*j<=r*r){x.fillStyle=((i+3)*(i+3)+(j-2)*(j-2)<=r*r)?bg:'#f8f0c0';x.fillRect(cx+i,cy+j,1,1)}}};for(let y=0;y<BH;y++)R(shade('#24305a',0.45+y/180),0,y,BW,1);for(let i=0;i<50;i++)R(i%6?'#8a94c8':'#fff',(i*53+11)%BW,(i*31+5)%60,1,1);moon(166,18,7,'#141a33');
+ const tw=(a,w,h,c)=>{R(c,a,BH-h,w,h);R(shade(c,1.25),a,BH-h,w,2);for(let j=6;j<h-4;j+=6)for(let i=3;i<w-3;i+=5)if(((a+i)*7+j*3)%5)R('#f6d36b',a+i,BH-h+j,2,3);else R('#2a3050',a+i,BH-h+j,2,3)};
+ tw(14,34,78,'#3a4470');tw(52,34,90,'#46507c');tw(96,34,86,'#3a4470');tw(140,34,74,'#46507c');R('#2f8fc0',88,BH-8,10,8);R('#c33',0,BH-3,BW,3)},
+};
+function drawBG(cv,name){cv.width=BW;cv.height=BH;const x=cv.getContext('2d');x.imageSmoothingEnabled=false;(BG[name]||BG.meet)(x,px(x));
+ const g=x.createRadialGradient(BW/2,BH/2,20,BW/2,BH/2,120);g.addColorStop(0,'rgba(0,0,0,0)');g.addColorStop(1,'rgba(0,0,0,.35)');x.fillStyle=g;x.fillRect(0,0,BW,BH)}
+
+// ---------- 像素畫：人物 ----------
+const PW=40,PH=48;
+function face(id,talk,mood){const L=(CHARS[id]||CHARS.me).look,c=document.createElement('canvas');c.width=PW;c.height=PH;const x=c.getContext('2d'),R=px(x),K='#17141c';
+ const sk=L.skin,hr=L.hair,cl=L.cl,sk2=shade(sk,.86),cl2=shade(cl,.75),cl3=shade(cl,1.2);
+ // 身體
+ R(K,5,37,30,11);R(cl,6,38,28,10);R(cl3,6,38,28,1);R(cl2,6,44,28,4);R(cl2,19,38,2,10);
+ R(K,16,34,8,4);R(sk2,17,34,6,4);
+ if(L.acc==='tie'){R('#e8e0c8',16,38,8,3);R('#b3261e',19,39,2,8);R('#7a1818',19,46,2,2)}
+ if(L.acc==='pearl'){for(let i=0;i<7;i++)R('#fff',13+i*2,39+Math.abs(3-i)/2,1,1)}
+ if(L.hs==='cap'||L.id==='ade'){R('#e0b64a',9,41,4,3)}
+ // 頭
+ const hd=(a,b,w,h)=>{R(K,a,b,w,h)};R(K,10,9,20,26);R(K,9,12,22,20);R(sk,11,10,18,24);R(sk,10,13,20,18);R(sk2,11,30,18,4);R(sk2,10,26,1,5);R(sk2,29,26,1,5);
+ R(sk,8,19,2,5);R(sk,30,19,2,5);R(sk2,8,22,2,2);R(sk2,30,22,2,2);
+ // 頭髮
+ const H=(a,b,w,h)=>R(hr,a,b,w,h),hl=shade(hr,1.6);
+ switch(L.hs){
+ case 'short':H(9,6,22,8);H(9,10,3,8);H(28,10,3,8);R(hl,13,7,8,1);break;
+ case 'side':H(9,6,22,7);H(9,10,4,9);H(27,10,4,7);H(18,12,11,3);R(hl,12,7,10,1);break;
+ case 'bald':R(shade(sk,.95),11,8,18,4);H(9,15,3,8);H(28,15,3,8);R('#fff',15,9,3,1);break;
+ case 'perm':for(let j=0;j<12;j++)for(let i=0;i<26;i++){const xx=7+i,yy=3+j;if((i-13)*(i-13)/169+(j-7)*(j-7)/49<1&&(j<6||i<5||i>20))R((i+j)%3?hr:hl,xx,yy,1,1)}H(7,14,4,12);H(29,14,4,12);for(let i=0;i<6;i++)R(hl,8+i*4,4+(i%2),2,1);break;
+ case 'bob':H(8,6,24,8);H(8,12,4,18);H(28,12,4,18);R(hl,12,7,12,1);break;
+ case 'long':H(8,6,24,8);H(7,12,5,26);H(28,12,5,26);R(hl,12,7,12,1);break;
+ case 'cap':R('#25304a',8,5,24,7);R('#1a2236',6,11,28,2);R('#e0b64a',18,6,4,3);H(9,13,2,6);H(29,13,2,6);break;
+ case 'helmet':R('#e8b923',8,4,24,8);R('#c89a10',6,11,28,2);R('#fff3a0',12,5,8,1);H(9,13,2,6);H(29,13,2,6);break;
+ case 'slick':H(9,5,22,8);H(9,10,3,6);H(28,10,3,6);R(hl,12,6,14,1);R(hl,14,8,10,1);break;
+ default:H(9,6,22,8)}
+ if(L.acc==='helmet2'){R('#f4f4f4',8,3,24,9);R('#cfcfcf',6,11,28,2);R('#2f7fc1',18,5,4,3)}
+ // 眉眼
+ const ey=19,mb=mood==='frown'?1:0;R(shade(hr,.9),13,ey-3+mb,5,1);R(shade(hr,.9),22,ey-3+mb,5,1);
+ if(mood==='smile'){R(K,14,ey,4,1);R(K,22,ey,4,1);R(K,13,ey+1,1,1);R(K,18,ey+1,1,1);R(K,21,ey+1,1,1);R(K,26,ey+1,1,1)}
+ else{R('#fff',13,ey,5,3);R('#fff',22,ey,5,3);R(K,15,ey,2,3);R(K,24,ey,2,3);R('#fff',15,ey,1,1);R('#fff',24,ey,1,1)}
+ if(L.acc==='glasses'||L.acc==='book'&&0){R(K,12,ey-1,7,1);R(K,12,ey+3,7,1);R(K,12,ey-1,1,5);R(K,18,ey-1,1,5);R(K,21,ey-1,7,1);R(K,21,ey+3,7,1);R(K,21,ey-1,1,5);R(K,27,ey-1,1,5);R(K,19,ey,2,1)}
+ R(sk2,19,22,2,4);R(shade(sk,.7),19,25,3,1);
+ if(L.hs==='perm'||L.hs==='bob')R('#f4a0a0',12,25,3,2),R('#f4a0a0',25,25,3,2);
+ // 嘴
+ if(talk){R(K,17,28,6,3);R('#b3261e',18,29,4,2)}
+ else if(mood==='smile'){R(K,16,28,8,1);R(K,15,27,1,1);R(K,24,27,1,1)}
+ else if(mood==='frown'){R(K,16,28,8,1);R(K,15,29,1,1);R(K,24,29,1,1)}
+ else R(K,17,28,6,1);
+ if(L.acc==='phone'){R(K,30,36,6,10);R('#7fd0f0',31,37,4,7)}
+ if(L.acc==='book'){R(K,28,38,10,9);R('#7a1f1f',29,39,8,7);R('#e0b64a',30,41,6,1)}
+ return c.toDataURL()}
+const FC={};function faceURL(id,t,m){const k=id+t+m;return FC[k]||(FC[k]=face(id,t,m))}
+
+// ---------- 文字標記 ----------
+const NAMES={'主委':'zw','錢委員':'qian','嚴監委':'yan','林阿姨':'lin','林姐':'lin','黃阿姨':'huang','張媽媽':'zhang','周經理':'zhou','小芸':'yun','阿德':'ade','洪協理':'hong','李主任':'li','方技師':'fang'};
+Object.assign(NAMES,typeof EXTRA_NAMES!=='undefined'?EXTRA_NAMES:{});
+const LAWREF={'第 57 條':'a57','第 36 條':'a36','第 35 條':'a35','第 10 條':'a10','第 49 條':'a49','第 22 條':'c22','第 18 條':'a18','第 29 條':'a29'};
+const TERMS=[...Object.keys(NAMES).map(k=>[k,'p']),...Object.keys(LAWREF).map(k=>[k,'l']),...Object.keys(GLOSS).map(k=>[k,'g'])].sort((a,b)=>b[0].length-a[0].length);
+function mk(t){t=String(t);const used=new Array(t.length).fill(0),hit=[];
+ TERMS.forEach(([k,ty])=>{let p=t.indexOf(k);while(p>=0){let ok=true;for(let i=p;i<p+k.length;i++)if(used[i]){ok=false;break}
+  if(ok&&ty==='p'&&k==='主委'&&/[副]$/.test(t[p-1]||''))ok=false;
+  if(ok){for(let i=p;i<p+k.length;i++)used[i]=1;hit.push([p,k,ty])}p=t.indexOf(k,p+k.length)}});
+ hit.sort((a,b)=>a[0]-b[0]);let o='',i=0;hit.forEach(([p,k,ty])=>{o+=esc(t.slice(i,p))+`<span class="tm t-${ty}" data-k="${esc(k)}" data-t="${ty}">${esc(k)}</span>`;i=p+k.length});return o+esc(t.slice(i))}
+function popTerm(k,ty){let h='';if(ty==='p'){const id=NAMES[k],c=CHARS[id];h=`<div class="pc"><img src="${faceURL(id,0,'n')}"><div><b>${esc(c.n)}</b><small>${esc(c.t)}</small></div></div><p>${esc(c.b)}</p>`}
+ else if(ty==='l'){const l=LAWS[LAWREF[k]];h=`<b>${esc(l.s)} ${esc(l.t)}</b><p>${esc(l.e)}</p><small class="mute">白話摘要，非條文原文</small>`}
+ else h=`<b>${esc(k)}</b><p>${esc(GLOSS[k])}</p>`;showPop(h)}
+function showPop(h){$('#popIn').innerHTML=h;$('#pop').classList.add('on')}
+$('#pop').onclick=e=>{if(e.target.id==='pop'||e.target.id==='popX')$('#pop').classList.remove('on')};
+document.addEventListener('click',e=>{const s=e.target.closest('.tm');if(!s)return;if(!noteMode&&(s.closest('#txt')||s.closest('#qbox')))return;e.stopPropagation();popTerm(s.dataset.k,s.dataset.t)},true);
+
+// ---------- 遊戲狀態 ----------
+let CH=null,script=[],ip=0,st=null,log=[],typing=false,full='',tm=0,curSpk=null;
+let noteMode=LS.get('shengshi-note',false);
+function setNote(v){noteMode=v;LS.set('shengshi-note',v);document.body.classList.toggle('note-on',v);$('#gNote').textContent='註解：'+(v?'開':'關')}
+const DN=['信任','手腕','口碑'];
+const dtx=d=>d.map((v,i)=>v?`${DN[i]} ${v>0?'+':'−'}${Math.abs(v)}`:'').filter(Boolean).join('　');
+function stats(){const f=Math.max(0,Math.min(10,st.f));$('#stF').textContent='主委信任 '+'●'.repeat(f)+'○'.repeat(10-f);$('#stI').textContent='手腕 '+st.i;$('#stR').textContent='口碑 '+st.r}
+function saveMid(){SV.mid={id:CH.id,ip,st:JSON.parse(JSON.stringify(st)),log:log.slice(-200)};save()}
+function startCh(id,resume){CH=CHAPTERS.find(c=>c.id===id);script=CH.sc;
+ if(resume&&SV.mid&&SV.mid.id===id){ip=Math.max(0,SV.mid.ip-1);st=SV.mid.st;log=SV.mid.log||[];if(script[ip]&&script[ip][0]==='game')ip=Math.max(0,ip)}
+ else{ip=0;st={f:5,i:0,r:0,pts:0,max:0,bg:'meet'};log=[]}
+ $('#gTitle').textContent=CH.title;drawBG($('#bg'),st.bg);AU.q(false);AU.scene(st.bg);AU.sfx('open');$('#qbox').classList.remove('on');$('#dlg').style.display='';hideChar();go('sGame');stats();step()}
+function unlock(arr,id,msg){if(!SV[arr].includes(id)){SV[arr].push(id);save();toast(msg);AU.sfx(arr==='laws'?'stamp':'chime')}}
+function showChar(id,talk,mood){if(!id||id==='me'&&0){hideChar();return}curSpk=id;const p=$('#port');p.src=faceURL(id,talk?1:0,mood||'n');p.classList.add('on');p.classList.toggle('me',id==='me')}
+function hideChar(){curSpk=null;$('#port').classList.remove('on')}
+function step(){if(ip>=script.length)return finish();const s=script[ip++];
+ if(s[0]==='bg'){st.bg=s[1];drawBG($('#bg'),s[1]);AU.scene(s[1]);return step()}
+ if(s[0]==='char'){unlock('chars',s[1],'人物譜新增：'+CHARS[s[1]].n);return step()}
+ if(s[0]==='quote'){unlock('quotes',s[1],'語錄入冊：「'+QUOTES[s[1]].t.slice(0,14)+'…」');return step()}
+ if(s[0]==='law'){unlock('laws',s[1],'條文錄新增：'+LAWS[s[1]].t);return step()}
+ if(s[0]==='q')return ask(s[1]);
+ if(s[0]==='game')return mini(s[1],s[2]);
+ saveMid();
+ if(s[0]==='n'){log.push(['',s[1]]);hideChar();$('#who').style.display='none';say(s[1],true)}
+ else{log.push([s[1],s[2]]);if(st.bg==='chat')AU.sfx('phone');unlock('chars',s[1],'人物譜新增：'+CHARS[s[1]].n);showChar(s[1],1);const w=$('#who');w.style.display='inline-block';w.textContent=CHARS[s[1]].n.replace(/（.*）/,'');say(s[2],false)}}
+let mouth=0;
+function say(t,nar){const el=$('#txt');el.className=nar?'nar':'';full=t;typing=true;let n=0;el.textContent='';$('#nextTip').style.visibility='hidden';clearInterval(tm);
+ tm=setInterval(()=>{n++;el.textContent=full.slice(0,n);if(n%3===1)AU.sfx('tick');if(curSpk&&n%3===0){mouth^=1;$('#port').src=faceURL(curSpk,mouth,'n')}if(n>=full.length)endType()},26)}
+function endType(){clearInterval(tm);typing=false;if(curSpk)$('#port').src=faceURL(curSpk,0,'n');$('#txt').innerHTML=mk(full);$('#nextTip').style.visibility='visible'}
+function adv(){if(typing)endType();else{AU.sfx('next');step()}}
+$('#dlg').onclick=e=>{if(e.target.closest('.tm')&&noteMode)return;if(noteMode){if(typing)endType();return}adv()};
+$('#bNext').onclick=e=>{e.stopPropagation();adv()};
+$('#gNote').onclick=()=>{setNote(!noteMode);toast(noteMode?'註解模式開：點畫線的字看說明，按「下一句」前進':'註解模式關：點任何地方前進')};
+const audLab=()=>{$('#gMus').textContent=AU.m?'♪':'♪̸';$('#gMus').classList.toggle('off',!AU.m);$('#gSfx').textContent=AU.s?'🔊':'🔇'};
+$('#gMus').onclick=()=>{toast(AU.toggleM()?'音樂：開':'音樂：關');audLab()};$('#gSfx').onclick=()=>{toast(AU.toggleS()?'音效：開':'音效：關');audLab()};
+$('#gQuit').onclick=()=>{toast('進度已存檔');go('sChap')};
+$('#gLog').onclick=()=>{if(typing)endType();$('#logBody').innerHTML=log.length?log.map(l=>l[0]==='q'?`<div class="lg q"><b>【抉擇】</b>${mk(l[1])}<br>你的選擇：${mk(l[2])}　<b>${esc(l[3])}</b></div>`:l[0]?`<div class="lg"><b>${esc(CHARS[l[0]].n.replace(/（.*）/,''))}</b>${mk(l[1])}</div>`:`<div class="lg n">${mk(l[1])}</div>`).join(''):'<p class="mute">這一回才剛開始。</p>';go('sLog');const b=$('#logBody');setTimeout(()=>b.scrollTop=b.scrollHeight,0)};
+$('#lgBack').onclick=()=>go('sGame');
+
+// ---------- 抉擇 ----------
+function asker(){for(let i=ip-2;i>=0;i--){const s=script[i];if(s[0]==='s'&&s[1]!=='me')return s[1]}return 'zw'}
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a}
+function ask(q){saveMid();AU.q(true);AU.sfx('ask');const w=asker();showChar(w,0,'n');$('#dlg').style.display='none';const b=$('#qbox');b.classList.add('on');
+ const ord=shuffle(q.o.map((o,i)=>i));
+ b.innerHTML=`<span class="qk">${esc(q.k)}</span><div class="qp">${mk(q.p)}</div>`+ord.map(i=>`<button class="btn opt" data-i="${i}">${mk(q.o[i].t)}</button>`).join('');b.scrollTop=0;
+ $$('#qbox .opt').forEach(x=>x.onclick=e=>{if(e.target.closest('.tm')&&noteMode)return;answer(q,q.o[+x.dataset.i],w)})}
+function answer(q,o,w){st.f+=o.d[0];st.i+=o.d[1];st.r+=o.d[2];st.pts+=o.v;st.max+=Math.max(...q.o.map(x=>x.v));stats();
+ if(o.j){const k=CH.id+':'+o.t.slice(0,8);if(!SV.jokes.includes(k)){SV.jokes.push(k);save();toast('奇策錄 +1')}}
+ showChar(w,0,o.v===2?'smile':o.v===0?'frown':'n');
+ AU.sfx(o.j?'joke':['bad','mid','good'][o.v]);const lab=o.j?'奇策':['下策','中策','上策'][o.v];log.push(['q',q.p,o.t,lab]);const dl=dtx(o.d);
+ const b=$('#qbox');b.innerHTML=`<div class="ver ${o.j?'jk':'v'+o.v}">${lab}</div><div class="qp">${mk(o.r)}</div>${dl?`<div class="dl">${dl}</div>`:''}<div class="note"><b>弦外之音</b><br>${mk(q.x)}</div><button class="btn c" id="bCont">繼　續</button>`;b.scrollTop=0;
+ $('#bCont').onclick=()=>{AU.q(false);b.classList.remove('on');$('#dlg').style.display='';if(st.f<=0)return fail();step()}}
+function fail(){SV.mid=null;save();AU.q(true);AU.sfx('fail');$('#endBody').innerHTML=`<div class="big">辭</div><p class="center lh">主委信任已盡。<br>下一次例行會議，你的座位上換了一個人。<br>你這才想起家訓：<br><b class="gold">聽話要聽音。</b></p><button class="btn c" id="bRe">重來本回</button><button class="btn c" id="bLs">返回章回</button>`;go('sEnd');$('#bRe').onclick=()=>startCh(CH.id,false);$('#bLs').onclick=()=>go('sChap')}
+function finish(){SV.mid=null;const pct=st.max?st.pts/st.max:1,g=pct>=.85?'甲':pct>=.6?'乙':'丙',rk={甲:3,乙:2,丙:1},old=SV.ch[CH.id];
+ if(!old||rk[g]>rk[old.g]||(g===old.g&&st.r>old.r))SV.ch[CH.id]={g,i:st.i,r:st.r,f:st.f};save();AU.q(false);AU.sfx(g==='丙'?'mid':'win');
+ const cm={甲:'洞若觀火。這一回的每一句話，你都聽到了底。',乙:'大致無虧。只是有幾句話，你聽見了聲，沒聽見音。',丙:'驚險過關。不妨重玩一回，看看錯過了什麼。'}[g];
+ const nx=CHAPTERS[CHAPTERS.indexOf(CH)+1];
+ $('#endBody').innerHTML=`<div class="center mute ls">第${NUM[CHAPTERS.indexOf(CH)]}回・${esc(CH.title)}</div><div class="big">${g}</div><p class="center lh">${cm}</p><div class="sum">主委信任 ${st.f}　手腕 ${st.i}　口碑 ${st.r}<br><small>上策比例 ${Math.round(pct*100)}%</small></div>${nx?`<button class="btn c" id="bNx">下一回：${esc(nx.title)}</button>`:'<p class="center gold lh">全劇終。謝謝你陪漢皇盛世走完第一屆。</p>'}<button class="btn c" id="bLs">返回章回</button>`;
+ go('sEnd');if(nx)$('#bNx').onclick=()=>openRecap(nx.id);$('#bLs').onclick=()=>go('sChap')}
+const NUM=['一','二','三','四','五','六','七','八','九','十','十一','十二','十三','十四','十五','十六'];
+
+// ---------- 小遊戲 ----------
+function pickPool(n,mix){const by={};POOL.forEach(r=>(by[r[8]]=by[r[8]]||[]).push(r));Object.values(by).forEach(shuffle);const out=[];
+ (mix||[]).forEach(k=>{if(by[k]&&by[k].length)out.push(by[k].pop())});const rest=shuffle(Object.values(by).flat());while(out.length<n&&rest.length)out.push(rest.pop());return shuffle(out)}
+function card(r){const loc=[r[3],r[4],r[5]].filter(Boolean).join('・')||'全區';return `<div class="dcard"><div class="dh"><span class="cat">${esc(DCATS[r[0]])}</span><span>${esc(r[2]||'')}</span><span class="mute">#${r[1]}</span></div><div class="dloc">📍 ${esc(loc)}</div><div class="dd">${esc(r[6])}</div></div>`}
+function gchip(g){return `<span class="gch g${g.replace(/[^A-Z]/g,'')}">${esc(g)}</span>`}
+function mini(kind,n){saveMid();AU.q(kind!=='stats');AU.sfx('ask');$('#dlg').style.display='none';const b=$('#qbox');b.classList.add('on');
+ if(kind==='stats'){showChar('me',0,'n');b.innerHTML=`<span class="qk">缺失資料庫</span><div class="qp">太古華電初勘報告：共 <b class="gold">${STATS.total.toLocaleString()}</b> 筆</div>${statHTML()}<button class="btn c" id="bCont">繼　續</button>`;b.scrollTop=0;$('#bCont').onclick=()=>{b.classList.remove('on');$('#dlg').style.display='';step()};return}
+ const items=kind==='grade'?pickPool(n,[0,1,3,5,0,2]):pickPool(n,[0,0,1,1,2,3,4,5]);let k=0,score=0;
+ const round=()=>{if(k>=items.length)return done();const r=items[k];
+  if(kind==='grade'){showChar('fang',1,'n');b.innerHTML=`<span class="qk">跟檢判讀 ${k+1}/${items.length}</span><div class="qp">方技師念出現況，這一筆屬於哪一類？</div>${card(r)}`+GRADE_OPTS.map((o,i)=>`<button class="btn opt" data-i="${i}"><b>${o[0]}</b><small>${o[1]}</small></button>`).join('')}
+  else{const line=DEAL_LINES[r[8]][Math.random()*3|0];showChar('hong',1,'n');b.innerHTML=`<span class="qk">談判 ${k+1}/${items.length}</span>${card(r)}<div class="say"><b>洪協理</b>「${esc(line)}」</div><div class="qp">你的回應：</div>`+DEAL_OPTS.map((o,i)=>`<button class="btn opt" data-i="${i}">${esc(o)}</button>`).join('')}
+  b.scrollTop=0;$$('#qbox .opt').forEach(x=>x.onclick=()=>pick(r,+x.dataset.i))};
+ const pick=(r,i)=>{let v,why;if(kind==='grade'){const f=gradeFam(r[7]);v=i===f?2:0;why=`實際級別 ${gchip(r[7])}　性質：${DNAT[r[8]]}<br>${['安全類缺失：消防、標示、防火、防焰，影響人命，一定要修到合格。','一般缺失：外觀、污染、固定不佳。量大單價低，是談判時可以「部分折算」的那一類。','與竣工圖不符或待說明：重點是圖要對，日後維修才有依據。','建議事項：不是缺失，是第三方給社區的改善建議。'][f]}`}
+  else{const sc=DEAL_SCORE[r[8]];v=sc[i];const best=sc.indexOf(2);why=`這筆的性質：<b>${DNAT[r[8]]}</b>（級別 ${gchip(r[7])}）　最佳回應：<b>${DEAL_OPTS[best]}</b><br>${DEAL_WHY[r[8]]}`}
+  score+=v;st.pts+=v;st.max+=2;AU.sfx(['bad','mid','good'][v]);showChar(kind==='grade'?'fang':'hong',0,v===2?(kind==='grade'?'smile':'frown'):v===0?(kind==='grade'?'frown':'smile'):'n');
+  b.innerHTML=`<div class="ver v${v}">${['不對','還可以','正確'][v]}</div>${card(r)}<div class="note">${why}</div><button class="btn c" id="bCont">${k+1<items.length?'下一筆':'結　算'}</button>`;b.scrollTop=0;$('#bCont').onclick=()=>{AU.sfx('next');k++;round()}};
+ const done=()=>{AU.q(false);const max=items.length*2,p=score/max,d=p>=.8?[1,2,1]:p>=.5?[0,1,0]:[-1,0,-1];st.f+=d[0];st.i+=d[1];st.r+=d[2];stats();
+  const lab=kind==='grade'?`跟檢判讀：${score/2|0} / ${items.length} 題正確`:`談判桌：爭取到 ${score} / ${max} 分`;log.push(['q',kind==='grade'?'跟檢判讀':'缺失談判',lab,p>=.8?'上策':p>=.5?'中策':'下策']);
+  showChar(kind==='grade'?'fang':'hong',0,p>=.8?(kind==='grade'?'smile':'frown'):'n');
+  b.innerHTML=`<div class="ver ${p>=.8?'v2':p>=.5?'v1':'v0'}">${lab}</div><div class="qp">${kind==='grade'?(p>=.8?'方技師點頭：「沈委員，你可以來我們公司上班了。」':p>=.5?'方技師：「大致正確。級別交給我們，你負責記住哪些不能讓。」':'方技師：「沒關係，這就是為什麼需要第三方。」'):(p>=.8?'洪協理擦了擦汗：「沈委員……您以前做過工程？」':p>=.5?'洪協理笑得有點勉強：「我們回去研究研究。」':'洪協理笑得很開心。這不是好現象。')}</div><div class="dl">${dtx(d)}</div><button class="btn c" id="bCont">繼　續</button>`;b.scrollTop=0;
+  $('#bCont').onclick=()=>{b.classList.remove('on');$('#dlg').style.display='';if(st.f<=0)return fail();step()}};
+ round()}
+function bars(rows,max,col){return rows.map(([n,v])=>`<div class="bar"><span>${esc(n)}</span><i style="width:${Math.max(2,v/max*100)}%;background:${col||'var(--gold)'}"></i><b>${v.toLocaleString()}</b></div>`).join('')}
+function statHTML(){const c=STATS.cat.slice().sort((a,b)=>b[1]-a[1]),m=c[0][1];const go=['S','A','D','F','FS','B','C','E'];const g=go.filter(k=>STATS.g[k]).map(k=>[k,STATS.g[k]]);
+ const gc={S:'#c0392b',A:'#e0603a',D:'#d08a0f',F:'#d0a00f',FS:'#c0a020',B:'#7a8aa0',C:'#8a93a3',E:'#5f9f7f'};
+ return `<h4>依系統</h4>${bars(c,m)}<h4>依級別</h4><div class="grow">${g.map(([k,v])=>`<div class="gbox" style="border-color:${gc[k]}"><b style="background:${gc[k]}">${k}</b><span>${v.toLocaleString()}</span></div>`).join('')}</div><p class="mute small">級別意義為本作解讀：S 立即危險、A 影響安全、B／C 一般、D 待說明、F／FS 與圖不符、E 建議。</p><h4>依性質</h4>${bars(STATS.nat,Math.max(...STATS.nat.map(x=>x[1])),'#6fa8dc')}<h4>缺失最多的樓層</h4>${bars(STATS.fl.slice(0,8),STATS.fl[0][1],'#b48ad0')}`}
+
+// ---------- 選單 ----------
+function chDone(id){return !!SV.ch[id]}
+function renderChap(){const p=curP();$('#who2').textContent=p?p.n:'';let h='';VOLS.forEach((v,vi)=>{h+=`<div class="vol">${v}</div>`;CHAPTERS.filter(c=>c.vol===vi).forEach(c=>{const i=CHAPTERS.indexOf(c),lock=i>0&&!chDone(CHAPTERS[i-1].id),r=SV.ch[c.id],mid=SV.mid&&SV.mid.id===c.id;
+ h+=`<button class="chb${lock?' lock':''}" data-id="${c.id}" ${lock?'disabled':''}><span class="no">第${NUM[i]}回</span><span class="tt"><b>${esc(c.title)}</b><small>${esc(c.year)}</small></span><span class="gr">${lock?'🔒':r?`<i class="g${r.g}">${r.g}</i>`:mid?'<small>續</small>':''}</span></button>`})});
+ $('#chList').innerHTML=h;$$('.chb').forEach(b=>b.onclick=()=>openRecap(+b.dataset.id));
+ $('#cntC').textContent=SV.chars.length+'/'+Object.keys(CHARS).length;$('#cntL').textContent=SV.laws.length+'/'+Object.keys(LAWS).length;$('#cntJ').textContent=SV.jokes.length;$('#cntQ').textContent=SV.quotes.length+'/'+Object.keys(QUOTES).length}
+function openRecap(id){const c=CHAPTERS.find(x=>x.id===id),i=CHAPTERS.indexOf(c);const ppl=[...new Set(c.sc.filter(s=>s[0]==='s'||s[0]==='char').map(s=>s[1]))].filter(x=>x!=='me');
+ const mid=SV.mid&&SV.mid.id===id;
+ $('#rcBody').innerHTML=`<div class="center mute ls">${VOLS[c.vol]}・第${NUM[i]}回</div><h2 class="center">${esc(c.title)}</h2><div class="center mute">${esc(c.year)}</div><div class="recap"><b>前情提要</b>${c.recap.map(t=>`<p>${mk(t)}</p>`).join('')}</div><div class="ppl"><b>本回人物</b><div>${ppl.map(p=>`<span class="pch" data-p="${p}"><img src="${faceURL(p,0,'n')}">${esc(CHARS[p].n)}</span>`).join('')}</div></div>${mid?'<button class="btn c" id="rcMid">從中途繼續</button>':''}<button class="btn c" id="rcGo">${mid?'從頭開始':'開　始'}</button><button class="btn ghost" id="rcBack">返回</button>`;
+ go('sRecap');AU.sfx('open');$$('#rcBody .pch').forEach(e=>e.onclick=()=>{const id=e.dataset.p,c=CHARS[id];showPop(`<div class="pc"><img src="${faceURL(id,0,'n')}"><div><b>${esc(c.n)}</b><small>${esc(c.t)}</small></div></div><p>${esc(c.b)}</p>`)});
+ if(mid)$('#rcMid').onclick=()=>startCh(id,true);$('#rcGo').onclick=()=>startCh(id,false);$('#rcBack').onclick=()=>go('sChap')}
+$('#mChars').onclick=()=>{$('#lbTitle').textContent='人物譜';$('#lbBody').innerHTML=Object.keys(CHARS).map(id=>{const c=CHARS[id],u=SV.chars.includes(id);return `<div class="crow${u?'':' lk'}"><img src="${faceURL(id,0,u?'n':'n')}" style="${u?'':'filter:brightness(0) opacity(.35)'}"><div><b>${u?esc(c.n):'？？？'}</b><small>${u?esc(c.t):'故事進行後解鎖'}</small>${u?`<p>${esc(c.b)}</p>`:''}</div></div>`}).join('');go('sList')};
+$('#mLaws').onclick=()=>{$('#lbTitle').textContent='條文錄';$('#lbBody').innerHTML=Object.keys(LAWS).map(id=>{const l=LAWS[id],u=SV.laws.includes(id);return `<div class="lrow${u?'':' lk'}"><b>${u?esc(l.s+' '+l.t):'？？？'}</b>${u?`<p>${esc(l.e)}</p>`:'<p class="mute">故事進行後解鎖</p>'}</div>`}).join('')+'<p class="mute small">條文內容為白話摘要，正式內容請以全國法規資料庫為準。</p>';go('sList')};
+$('#mQuote').onclick=()=>{$('#lbTitle').textContent='群組語錄';$('#lbBody').innerHTML='<p class="mute small">改寫自社區群組的經典發言，人名皆為虛構。</p>'+Object.keys(QUOTES).map(id=>{const q=QUOTES[id],u=SV.quotes.includes(id);return `<div class="lrow${u?'':' lk'}"><b>${u?'「'+esc(q.t)+'」':'？？？'}</b>${u?`<p class="mute">—— ${esc(q.s)}</p><p>${esc(q.e)}</p>`:'<p class="mute">故事進行後解鎖</p>'}</div>`}).join('');go('sList')};
+$('#mGloss').onclick=()=>{$('#lbTitle').textContent='詞彙';$('#lbBody').innerHTML=Object.keys(GLOSS).map(k=>`<div class="lrow"><b>${esc(k)}</b><p>${esc(GLOSS[k])}</p></div>`).join('');go('sList')};
+$('#mData').onclick=()=>{$('#lbTitle').textContent='缺失資料庫';let f=-1;const draw=()=>{const L=POOL.filter(r=>f<0||r[0]===f);$('#lbBody').innerHTML=`<div class="qp">初勘缺失共 <b class="gold">${STATS.total.toLocaleString()}</b> 筆（資料來源：漢皇盛世 大樓結構圖・初勘缺失資料）</div>${statHTML()}<h4>遊戲題庫抽樣（${POOL.length} 筆）</h4><div class="flt"><button data-f="-1" class="${f<0?'on':''}">全部</button>${DCATS.map((c,i)=>POOL.some(r=>r[0]===i)?`<button data-f="${i}" class="${f===i?'on':''}">${c}</button>`:'').join('')}</div>${L.slice(0,80).map(r=>`<div class="drow">${gchip(r[7])}<div>${card(r)}</div></div>`).join('')}`;$$('#lbBody .flt button').forEach(b=>b.onclick=()=>{f=+b.dataset.f;draw()})};draw();go('sList')};
+$('#lbBack').onclick=()=>go('sChap');
+$('#mSet').onclick=()=>{showPop(`<b>設定</b><p><button class="btn" id="stNote">註解模式：${noteMode?'開':'關'}</button></p><p class="small mute">註解模式開啟時，畫線的人名、條文、名詞可以點開看說明，按「下一句」前進；關閉時，點畫面任何地方前進。</p><p><button class="btn" id="stMus">音樂：${AU.m?'開':'關'}</button><button class="btn" id="stSfx">音效：${AU.s?'開':'關'}</button></p><p><button class="btn ghost" id="stReset">清除本玩家進度</button></p>`);$('#stMus').onclick=()=>{$('#stMus').textContent='音樂：'+(AU.toggleM()?'開':'關');audLab()};$('#stSfx').onclick=()=>{$('#stSfx').textContent='音效：'+(AU.toggleS()?'開':'關');audLab()};$('#stNote').onclick=()=>{setNote(!noteMode);$('#stNote').textContent='註解模式：'+(noteMode?'開':'關')};$('#stReset').onclick=()=>{if($('#stReset').dataset.ok){SV=blank();save();$('#pop').classList.remove('on');renderChap();toast('已清除')}else{$('#stReset').dataset.ok=1;$('#stReset').textContent='再按一次確認清除'}}};
+$('#mSwitch').onclick=()=>{P.cur=null;LS.set('shengshi-players',P);showLogin()};
+
+// ---------- 登入 ----------
+function showLogin(){drawBG($('#tbg'),'title');AU.scene('title');$('#plist').innerHTML=P.list.map(p=>`<button class="btn pl" data-k="${p.k}">▶ ${esc(p.n)}<small>${Object.keys((LS.get('shengshi-sv-'+p.k,{ch:{}})).ch||{}).length}/${CHAPTERS.length} 回</small></button>`).join('');
+ $$('#plist .pl').forEach(b=>b.onclick=()=>{P.cur=b.dataset.k;LS.set('shengshi-players',P);load();go('sChap')});go('sLogin')}
+$('#bEnter').onclick=()=>{const n=$('#nm').value.trim();if(!n){toast('請輸入名字');return}let p=P.list.find(x=>x.n===n);if(!p){p={k:'p'+Date.now().toString(36),n,at:Date.now()};P.list.push(p)}P.cur=p.k;LS.set('shengshi-players',P);load();go('sChap')};
+$('#nm').onkeydown=e=>{if(e.key==='Enter')$('#bEnter').click()};
+// 防雙擊放大
+let lt=0;document.addEventListener('touchend',e=>{const n=Date.now();if(n-lt<320&&!e.target.closest('input,textarea'))e.preventDefault();lt=n},{passive:false});
+setNote(noteMode);audLab();
+$('#tport').innerHTML=['zw','me','lin','hong'].map(i=>`<img src="${faceURL(i,0,i==='hong'?'smile':'n')}">`).join('');
+if(curP()){load();go('sChap')}else showLogin();
+
+</script>
+<script>
+// ===== 心機版引擎：路線、底牌、內心 OS、動畫 =====
+const STY={正:['正道','📜','#2f7fc1'],謀:['權謀','🦊','#8a4ad0'],嗆:['嗆聲','🔥','#e0453a'],滑:['搞笑','🤪','#e8a00c'],憨:['老實','🥔','#8a8a8a']};
+const styOf=o=>o.s||(o.j?'滑':o.v===2?'正':(o.v===0&&/！/.test(o.t))?'嗆':'憨');
+const hasCard=id=>(SV.cards||[]).includes(id);
+function giveCard(id){SV.cards=SV.cards||[];if(!hasCard(id)){SV.cards.push(id);save();toast('🃏 底牌入手：'+CARDS[id].who+'「'+CARDS[id].t+'」');AU.sfx('stamp');stats()}}
+DN[0]='信任';DN[1]='心機';
+stats=function(){const f=Math.max(0,Math.min(10,st.f));$('#stF').textContent='信任 '+'♥'.repeat(f)+'♡'.repeat(10-f);$('#stI').textContent='🦊'+st.i;$('#stR').textContent='👍'+st.r+'　🃏'+(SV.cards||[]).length};
+function floaty(e){const d=document.createElement('div');d.className='floaty';d.textContent=e;$('.stage').appendChild(d);setTimeout(()=>d.remove(),1100)}
+const _step=step;
+step=function(){const s=script[ip];
+ if(s&&s[0]==='card'){ip++;giveCard(s[1]);return step()}
+ if(s&&s[0]==='os'){ip++;log.push(['me','（心裡話）'+s[1]]);saveMid();showChar('me',0,'n');const w=$('#who');w.style.display='inline-block';w.textContent='沈委員・心裡話';say(s[1],false);$('#txt').classList.add('os');return}
+ return _step()};
+ask=function(q){saveMid();AU.q(true);AU.sfx('ask');const w=asker();showChar(w,0,'n');$('#dlg').style.display='none';const b=$('#qbox');b.classList.add('on');
+ const ord=shuffle(q.o.map((o,i)=>i));
+ b.innerHTML=`<span class="qk">${esc(q.k)}</span><div class="qp">${mk(q.p)}</div>`+ord.map((i,n)=>{const o=q.o[i],lock=o.need&&!hasCard(o.need);return lock?`<button class="btn opt lockd" disabled style="animation-delay:${n*70}ms">🔒 需要底牌：${esc(CARDS[o.need].who)}的祕密</button>`:`<button class="btn opt${o.need?' cardopt':''}" data-i="${i}" style="animation-delay:${n*70}ms">${o.need?'🃏 ':''}${mk(o.t)}</button>`}).join('');b.scrollTop=0;
+ $$('#qbox .opt[data-i]').forEach(x=>x.onclick=e=>{if(e.target.closest('.tm')&&noteMode)return;answer(q,q.o[+x.dataset.i],w)})};
+answer=function(q,o,w){const sy=styOf(o);st.f+=o.d[0];st.i+=o.d[1];st.r+=o.d[2];st.pts+=o.v;st.max+=Math.max(...q.o.map(x=>x.v));st.sty=st.sty||{};st.sty[sy]=(st.sty[sy]||0)+1;if(o.gc)giveCard(o.gc);stats();
+ if(o.j){const k=CH.id+':'+o.t.slice(0,8);if(!SV.jokes.includes(k)){SV.jokes.push(k);save();toast('奇策錄 +1')}}
+ AU.sfx(o.j?'joke':['bad','mid','good'][o.v]);showChar(w,0,o.v===2?'smile':o.v===0?'frown':'n');floaty(STY[sy][1]);
+ const lab=['下策','中策','上策'][o.v]+'・'+STY[sy][0];log.push(['q',q.p,o.t,lab]);const dl=dtx(o.d);
+ const routes=[...new Set(q.o.filter(x=>x.v===2).map(styOf))];
+ const b=$('#qbox');b.innerHTML=`<div class="ver v${o.v} pop">${['下策','中策','上策'][o.v]}<span class="stchip" style="background:${STY[sy][2]}">${STY[sy][1]} ${STY[sy][0]}</span></div><div class="qp">${mk(o.r)}</div>${dl?`<div class="dl">${dl}</div>`:''}<div class="note"><b>弦外之音</b><br>${mk(q.x)}</div>${routes.length>1?`<div class="routes">這題的上策不只一種：${routes.map(r=>`<span style="background:${STY[r][2]}">${STY[r][1]} ${STY[r][0]}</span>`).join('')}</div>`:''}<button class="btn c" id="bCont">繼　續</button>`;b.scrollTop=0;
+ $('#bCont').onclick=()=>{AU.q(false);b.classList.remove('on');$('#dlg').style.display='';if(st.f<=0)return fail();step()}};
+const TITLE={謀:['老狐狸','你沒吵過一次架，卻贏了每一場。大家都說你人很好——這正是你最可怕的地方。'],正:['包青天','你用規矩擋下了一切。沒有人喜歡你，但也沒有人抓得到你的把柄。'],嗆:['人形砲台','你說了所有人不敢說的話。群組截圖裡，你出現的次數僅次於黃阿姨。'],滑:['社區開心果','沒有人知道你的立場，包括你自己。但開會只要有你，大家就不會打起來。'],憨:['老實人','你相信每一個人說的每一句話。這個社區需要你這樣的人——大概吧。']};
+function styBars(o){const t=Object.values(o).reduce((a,b)=>a+b,0)||1;return Object.keys(STY).filter(k=>o[k]).sort((a,b)=>o[b]-o[a]).map(k=>`<div class="bar"><span>${STY[k][1]} ${STY[k][0]}</span><i style="width:${o[k]/t*100}%;background:${STY[k][2]}"></i><b>${o[k]}</b></div>`).join('')}
+const topSty=o=>Object.keys(o).sort((a,b)=>o[b]-o[a])[0]||'憨';
+finish=function(){SV.mid=null;const pct=st.max?st.pts/st.max:1,g=pct>=.85?'甲':pct>=.6?'乙':'丙',rk={甲:3,乙:2,丙:1},old=SV.ch[CH.id];
+ if(!old||rk[g]>rk[old.g]||(g===old.g&&st.r>old.r))SV.ch[CH.id]={g,i:st.i,r:st.r,f:st.f};SV.styc=SV.styc||{};SV.styc[CH.id]=st.sty||{};save();AU.q(false);AU.sfx(g==='丙'?'mid':'win');
+ const cm={甲:'洞若觀火。這一回的每一句屁話，你都聽出了底下那一句。',乙:'大致無虧。只是有幾句話，你聽見了聲，沒聽見音。',丙:'驚險過關。你把屁話當真話回了。'}[g];
+ const me=st.sty||{},ts=topSty(me),nx=CHAPTERS[CHAPTERS.indexOf(CH)+1];let fin='';
+ if(!nx){const all={};Object.values(SV.styc).forEach(o=>Object.keys(o).forEach(k=>all[k]=(all[k]||0)+o[k]));const T=TITLE[topSty(all)];fin=`<div class="final"><small>第一屆任期總評</small><b>${STY[topSty(all)][1]} ${T[0]}</b><p>${T[1]}</p>${styBars(all)}<p class="small mute">底牌蒐集 ${(SV.cards||[]).length}/${Object.keys(CARDS).length}</p></div>`}
+ $('#endBody').innerHTML=`<div class="center mute ls">第${NUM[CHAPTERS.indexOf(CH)]}回・${esc(CH.title)}</div><div class="big pop">${g}</div><p class="center lh">${cm}</p><div class="sum">信任 ${st.f}　心機 ${st.i}　口碑 ${st.r}<br><small>有效回應 ${Math.round(pct*100)}%</small></div><div class="sum"><b>本回路線：${STY[ts][1]} ${STY[ts][0]}派</b>${styBars(me)}</div>${fin}${nx?`<button class="btn c" id="bNx">下一回：${esc(nx.title)}</button>`:'<p class="center gold lh">全劇終。謝謝你陪漢皇盛世走完第一屆。</p>'}<button class="btn c" id="bLs">返回章回</button>`;
+ go('sEnd');if(nx)$('#bNx').onclick=()=>openRecap(nx.id);$('#bLs').onclick=()=>go('sChap')};
+$('#mChars').onclick=()=>{$('#lbTitle').textContent='人物譜與底牌';$('#lbBody').innerHTML=`<p class="mute small">🃏 底牌 ${(SV.cards||[]).length}/${Object.keys(CARDS).length}：每個人真正在意的那件事。拿到底牌，後面的章回會多出只有你能選的選項。</p>`+Object.keys(CHARS).map(id=>{const c=CHARS[id],u=SV.chars.includes(id),cd=Object.keys(CARDS).filter(k=>CARDS[k].c===id);return `<div class="crow${u?'':' lk'}"><img src="${faceURL(id,0,'n')}" style="${u?'':'filter:brightness(0) opacity(.35)'}"><div><b>${u?esc(c.n):'？？？'}</b><small>${u?esc(c.t):'故事進行後解鎖'}</small>${u?`<p>${esc(c.b)}</p>`:''}${u?cd.map(k=>hasCard(k)?`<div class="cardb"><b>🃏 ${esc(CARDS[k].t)}</b>${esc(CARDS[k].e)}</div>`:`<div class="cardb lk">🃏 底牌未取得</div>`).join(''):''}</div></div>`}).join('');go('sList')};
+if($('#sChap').classList.contains('on'))renderChap();
+
+// ===== 雲端存檔（與三朝聽音同一套：名字登入、可選 4 位數密碼） =====
+const FB='https://molecule-match-default-rtdb.asia-southeast1.firebasedatabase.app/trips/shengshi';
+const nameKey=n=>Array.from(n).map(c=>c.codePointAt(0).toString(36)).join('-');
+function h32(t,seed){let h=2166136261^seed;for(let i=0;i<t.length;i++){h^=t.charCodeAt(i);h=Math.imul(h,16777619)}h^=h>>>13;h=Math.imul(h,0x5bd1e995);return ((h^(h>>>15))>>>0).toString(36)}
+const pinHash=(k,pin)=>pin?[1,2,3].map(i=>h32('ss|'+k+'|'+pin,i*7919)).join(''):'';
+const fixSV=d=>{const o=Object.assign(blank(),d||{});['chars','laws','quotes','jokes','cards'].forEach(k=>o[k]=Array.isArray(o[k])?o[k]:[]);if(!o.chars.length)o.chars=['me'];o.ch=o.ch||{};o.styc=o.styc||{};return o};
+function mergeSV(a,b){const u=(x,y)=>[...new Set([...(x||[]),...(y||[])])],rk={甲:3,乙:2,丙:1},nw=(a.at||0)>=(b.at||0)?a:b,o=fixSV(nw);
+ ['chars','laws','quotes','jokes','cards'].forEach(k=>o[k]=u(a[k],b[k]));o.ch={};new Set([...Object.keys(a.ch||{}),...Object.keys(b.ch||{})]).forEach(id=>{const x=(a.ch||{})[id],y=(b.ch||{})[id];o.ch[id]=!x?y:!y?x:rk[y.g]>rk[x.g]?y:x});
+ o.styc=Object.assign({},(nw===a?b:a).styc||{},nw.styc||{});o.at=Math.max(a.at||0,b.at||0);return o}
+let cloudT=0;
+function setCloud(s){const t={wait:'☁ 同步中…',ok:'☁ 已同步到雲端',off:'⚠ 離線中，先存在這台裝置'}[s]||'';$$('.cst').forEach(e=>e.textContent=t)}
+async function cpush(){const p=curP();if(!p)return;setCloud('wait');try{const r=await fetch(`${FB}/saves/${p.k}.json`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({n:p.n,ph:p.ph||'',at:SV.at||0,sv:SV})});if(!r.ok)throw 0;setCloud('ok')}catch(e){setCloud('off')}}
+async function cpull(){const p=curP();if(!p)return;const k=p.k;setCloud('wait');try{const r=await fetch(`${FB}/saves/${k}.json`);if(!r.ok)throw 0;const d=await r.json();if(P.cur!==k)return;
+  if(d&&d.sv){SV=mergeSV(fixSV(SV),fixSV(d.sv));_save();if((SV.at||0)>(d.at||0))return cpush()}else if(SV.at)return cpush();setCloud('ok')}catch(e){setCloud('off')}
+ if($('#sChap').classList.contains('on'))renderChap()}
+const _save=save;save=function(){SV.at=Date.now();_save();clearTimeout(cloudT);cloudT=setTimeout(cpush,1200)};
+const _load=load;load=function(){_load();SV=fixSV(SV)};
+async function login(name,pin){name=String(name||'').replace(/\s+/g,' ').trim().slice(0,12);pin=String(pin||'').trim();
+ if(!name)return '請輸入名字';if(pin&&!/^\d{4}$/.test(pin))return '密碼要剛好 4 個數字，或留空';
+ const lp=P.list.find(p=>p.n.toLowerCase()===name.toLowerCase());if(lp){P.cur=lp.k;LS.set('shengshi-players',P);load();cpull();return ''}
+ const k=nameKey(name.toLowerCase());let row=null;try{const r=await fetch(`${FB}/saves/${k}.json`);if(r.ok)row=await r.json()}catch(e){}
+ const ph=pinHash(k,pin);if(row&&row.ph&&row.ph!==ph)return pin?'密碼不對，再試一次':'這個名字設了密碼，請輸入密碼或換個名字';
+ P.list.push({k,n:(row&&row.n)||name,ph:(row&&row.ph)||ph,at:Date.now()});P.cur=k;LS.set('shengshi-players',P);load();if(row&&row.sv){SV=mergeSV(SV,fixSV(row.sv));_save();setCloud('ok')}else{SV.at=Date.now();_save();cpush()}return ''}
+$('#bEnter').onclick=async()=>{const b=$('#bEnter');b.disabled=true;b.textContent='連線中…';const e=await login($('#nm').value,$('#pin').value);b.disabled=false;b.textContent='進　入';if(e)return toast(e);go('sChap')};
+const _showLogin=showLogin;showLogin=function(){_showLogin();$$('#plist .pl').forEach(b=>b.onclick=()=>{P.cur=b.dataset.k;LS.set('shengshi-players',P);load();go('sChap');cpull()})};
+$('#mShare').onclick=async()=>{try{await navigator.clipboard.writeText(location.href);toast('已複製連結')}catch(e){toast(location.href)}};
+
+// ===== 開場動畫（復古掌機風，原創畫面） =====
+let introPhase=0,introT0=0,introRAF=0;
+function startIntro(){go('sIntro');AU.scene('title');const c=$('#icv'),x=c.getContext('2d'),W=160,H=144;c.width=W;c.height=H;x.imageSmoothingEnabled=false;
+ const R=(col,a,b,w,h)=>{x.fillStyle=col;x.fillRect(Math.round(a),Math.round(b),Math.round(w),Math.round(h))};
+ const lerp=(a,b,t)=>'rgb('+a.map((v,i)=>Math.round(v+(b[i]-v)*t)).join(',')+')',cl=v=>Math.max(0,Math.min(1,v));
+ const stars=[...Array(46)].map((_,i)=>[(i*53+7)%W,(i*29+3)%84,i%4]);
+ const TW=[[8,30,86],[42,30,104],[80,30,98],[118,30,80]];introT0=performance.now();introPhase=0;const st=$('.istage');st.className='istage';
+ function frame(now){const t=(now-introT0)/1000;
+  if(t<2.8){R('#000',0,0,W,H);const p=cl(t/1.3),sx=165-p*92,sy=14+p*48;if(t<1.5)for(let i=0;i<9;i++)R(i?['#cfe','#8cf','#48a'][i%3]:'#fff',sx+i*4,sy-i*2.1,i<3?3:2,i<3?3:1);
+   if(t>1.3){const k=Math.sin((t-1.3)*9)>0;R('#fff',72,60,3,3);if(k){R('#ffd',73,54,1,15);R('#ffd',66,61,15,1)}}
+   st.classList.toggle('pre',t>1.4);}
+  else{const s=t-2.8,d=cl(s/5);st.classList.remove('pre');
+   for(let y=0;y<H;y++)R(lerp(y<70?[12,16,48]:[30,28,70],y<70?[255,150,90]:[255,214,140],d*(.55+y/H*.45)),0,y,W,1);
+   if(d<.9)stars.forEach(([a,b,k])=>{if((Math.floor(t*3)+k)%4)R(d<.5?'#fff':'#fda',a,b,1,1)});
+   const sunY=118-d*52;x.fillStyle='#fff3b0';x.beginPath();x.arc(80,sunY,17,0,7);x.fill();x.fillStyle='#ffd24a';x.beginPath();x.arc(80,sunY,13,0,7);x.fill();
+   for(let i=0;i<3;i++){const cx=((s*(5+i*2)+i*70)%(W+50))-40,cy=22+i*17;R('rgba(255,255,255,.75)',cx+5,cy,22,3);R('rgba(255,255,255,.75)',cx,cy+3,34,4)}
+   const rise=(1-cl(s/2.2))**2*90;TW.forEach(([a,w,h],i)=>{const y=H-h+rise;R('#1d2244',a,y,w,h+rise);R('#2c3364',a,y,w,2);R('#141831',a+w-4,y,4,h);
+    for(let j=5;j<h-6;j+=7)for(let k=3;k<w-6;k+=6){const on=s>1.6+((i*7+j*3+k)%23)*.14;R(on?(((Math.floor(t*2)+j+k)%19)?'#ffd86a':'#fff'):'#0e1228',a+k,y+j,3,4)}});
+   R('#2f8fc0',0,H-5,W,5);R('#7fd0f0',((t*20)%W),H-4,10,1);R('#7fd0f0',((t*20+70)%W),H-2,14,1);
+   if(s>2.2&&s<5.2){const p=(s-2.2)/3,px=-12+p*190,py=52-Math.sin(p*3.1)*22;for(let i=1;i<7;i++)R('rgba(255,255,255,'+(.5-i*.07)+')',px-i*5,py+2+i*.6,3,1);
+    x.fillStyle='#fff';x.beginPath();x.moveTo(px+12,py);x.lineTo(px,py-4);x.lineTo(px+3,py+1);x.lineTo(px,py+5);x.fill();R('#c8d4e8',px+2,py+1,7,1)}
+   if(s>5&&s<5.5)R('rgba(255,255,255,'+(1-(s-5)*2)+')',0,0,W,H);
+   if(s>=5&&introPhase<1){introPhase=1;st.classList.add('title');AU.sfx('win')}}
+  introRAF=requestAnimationFrame(frame)}
+ cancelAnimationFrame(introRAF);introRAF=requestAnimationFrame(frame)}
+$('#sIntro').onclick=()=>{if(introPhase<1){introT0=performance.now()-7800;return}cancelAnimationFrame(introRAF);AU.sfx('open');if(curP()){load();go('sChap');cpull()}else showLogin()};
+startIntro();
+
+</script>
+</body>
+</html>
