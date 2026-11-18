@@ -49,7 +49,23 @@ input{display:block;width:100%;margin:4px 0 12px;padding:10px;font-size:17px;fon
 /* game */
 #stage{position:relative;flex:1;min-height:150px;overflow:hidden;background:#000}
 #bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-#port{position:absolute;left:50%;bottom:0;width:176px;height:209px;margin-left:-88px;display:none;filter:drop-shadow(0 3px 0 #0008) drop-shadow(0 0 10px #0009)}
+#pw{position:absolute;left:50%;bottom:0;width:176px;height:209px;margin-left:-88px;display:none}
+#pi{width:100%;height:100%;animation:idle 2.6s steps(1) infinite}
+#port{display:block;width:100%;height:100%;transform-origin:50% 100%;filter:drop-shadow(0 3px 0 #0008) drop-shadow(0 0 10px #0009)}
+@keyframes idle{0%,100%{transform:none}50%{transform:translateY(2px)}}
+#pw.enter{animation:enter .3s steps(5) both}@keyframes enter{from{transform:translateX(28px);opacity:0}to{transform:none;opacity:1}}
+.act-nod{animation:nod .55s steps(7) 1}@keyframes nod{0%,100%{transform:none}30%{transform:translateY(9px)}60%{transform:none}80%{transform:translateY(4px)}}
+.act-no{animation:no .8s steps(8) 1}@keyframes no{0%,100%{transform:none}25%{transform:translateX(-5px) rotate(-1.5deg)}75%{transform:translateX(5px) rotate(1.5deg)}}
+.act-shake{animation:shake .45s steps(9) 1}@keyframes shake{0%,100%{transform:none}20%{transform:translateX(-7px)}40%{transform:translateX(7px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
+.act-tremble{animation:tremble .14s steps(2) infinite}@keyframes tremble{0%{transform:translateX(-2px)}100%{transform:translateX(2px)}}
+.act-jump{animation:jump .45s steps(6) 1}@keyframes jump{0%,100%{transform:none}35%{transform:translateY(-20px)}70%{transform:translateY(3px)}}
+.act-laugh{animation:laugh .3s steps(3) 4}@keyframes laugh{0%,100%{transform:none}50%{transform:translateY(-6px)}}
+.act-bow{animation:bow 1.4s steps(12) 1}@keyframes bow{0%,100%{transform:none}25%,70%{transform:translateY(40px) scaleY(.93)}}
+.act-kneel{animation:kneel .5s steps(5) forwards}@keyframes kneel{to{transform:translateY(34px) scaleY(.94)}}
+.act-slump{animation:slump 1s steps(6) forwards}@keyframes slump{to{transform:translateY(12px) rotate(1.5deg)}}
+.act-lean{animation:lean .5s steps(5) forwards}@keyframes lean{to{transform:translateX(-12px) rotate(-3deg)}}
+#emo{position:absolute;top:0;right:4px;width:48px;height:48px;image-rendering:pixelated;display:none;filter:drop-shadow(2px 2px 0 #0009)}
+#emo.pop{display:block;animation:emo 1.8s steps(12) forwards}@keyframes emo{0%{transform:scale(.4) translateY(10px);opacity:0}10%{transform:scale(1.15);opacity:1}18%{transform:none}82%{opacity:1}100%{opacity:0;transform:translateY(-6px)}}
 #stage::after{content:"";position:absolute;left:0;right:0;bottom:0;height:34%;background:linear-gradient(transparent,#0b0707d0);pointer-events:none}
 #stage{border-bottom:1px solid #7a5a1a}
 .stats{position:absolute;top:6px;left:6px;right:6px;display:flex;gap:6px;font-size:12px}
@@ -160,7 +176,7 @@ u[data-g]{text-decoration:underline dotted #f6cf5a;text-underline-offset:5px;cur
 
 <section class="screen" id="sGame">
   <div class="bar"><b id="gTitle"></b><button id="gAu" class="au-c">♪ 全開</button><button id="gNote">註解：關</button><button id="gLog">回顧</button><button data-go="sBook" id="gBook">卷宗</button><button id="gQuit">存檔離開</button></div>
-  <div id="stage"><img id="bg" alt=""><img id="port" alt="">
+  <div id="stage"><img id="bg" alt=""><div id="pw"><div id="pi"><img id="port" alt=""></div><img id="emo" alt=""></div>
     <div class="stats"><span id="stF"></span><span id="stI"></span><span id="stR"></span></div></div>
     <div id="dlg" class="px"><div id="who"></div><div id="txt"></div><div id="nextTip">▼</div><button id="bNext">下一句 ▶</button></div>
   <div id="qbox" class="px" style="margin:6px"></div>
@@ -194,6 +210,7 @@ u[data-g]{text-decoration:underline dotted #f6cf5a;text-underline-offset:5px;cur
   <p>遊戲畫面右上角可切換 <b>註解模式</b>：<br><b>開</b>——畫線的字可以點，要按對話框右下角的「下一句」才會前進，不怕誤觸。<br><b>關</b>——不顯示畫線，點對話框任何地方就是下一句，適合只想看劇情的時候。</p>
   <p>有些題目藏著一個不太正經的選項，選了會得到 <b class="jk">奇策</b>：不加分也不扣分，但會發生奇怪的事，並收入「奇策錄」。</p>
   <p><b>中途存檔</b>：每一句都會自動存檔並同步到線上。隨時可按「存檔離開」，下次從章回頁最上方的「繼續上次進度」接著玩，換裝置也可以。<br><b>回顧</b>：遊戲中按「回顧」可往前翻看本回說過的每一句話和你做過的選擇，裡面畫線的字一樣能點。</p>
+  <p><b>人物表情與動作</b>：說話時嘴會動、平常會眨眼。人物會依台詞與情節變換表情（笑、怒、哭、驚、冷笑、沉思、惶恐），並做出點頭、搖頭、拍案發怒、跳起、叩頭、跪下、垂頭等動作，頭上冒出 ！、？、⋯、怒、汗、♪ 等小圖示。</p>
   <p><b>聲音</b>：背景音樂會隨場景變換（大殿、書房、夜宮、塞外、宮門各有一段曲子），答題時轉為緊張的鼓聲。開頭畫面可分別開關音樂與音效；遊戲中右上角的「♪」可切換全開／只開音效／靜音。iPhone 若沒有聲音，請檢查側邊的靜音開關。</p>
   <p>每回結束按表現評為甲、乙、丙等。作答後的「弦外之音」會說明背後的史實與典故。出場人物與名句會陸續收入「卷宗」。</p>
   <p style="opacity:.7;font-size:13.5px">本作依《清史稿》、清代硃批諭旨及筆記軼聞改編，部分情節為戲劇化處理；對白為原創，引用之古文與硃批均註明出處。</p>
@@ -494,7 +511,11 @@ hs:['off','#f4d0a8',null,0,'#7a1f4a','#c0392b',0],ly:['off','#ecc49c','#aaa',2,'
 qf:['off','#e0b088','#2a2a2a',1,'#31506b','#3a7bd5',0],yzt:['off','#ecc49c','#444',1,'#2c4a7c','#3a7bd5',0],
 jq:['emp','#f0c9a0',null,0,'#e8b923','#f6cf5a',0],tj:['eun','#f0c9a0',null,0,'#4a5a6a','#888',0]};
 function shade(hex,f){const n=parseInt(hex.slice(1).length===3?hex.slice(1).replace(/./g,'$&$&'):hex.slice(1),16);const c=[n>>16,n>>8&255,n&255].map(v=>Math.max(0,Math.min(255,Math.round(v*f))));return '#'+c.map(v=>v.toString(16).padStart(2,'0')).join('')}
-function drawPortrait(x,id){const [ty,sk,bd,bs,robe,top,old]=ART[id];const R=(c,a,b,w,h)=>{x.fillStyle=c;x.fillRect(a,b,w,h)};
+// 表情：b 眉、e 眼、m 口、c 臉色、t 淚
+const EXPR={n:{b:'n',e:'open',m:'n'},stern:{b:'stern',e:'open',m:'flat'},smile:{b:'n',e:'happy',m:'smile',c:'pink'},laugh:{b:'up',e:'happy',m:'laugh',c:'pink'},
+ angry:{b:'angry',e:'half',m:'grit',c:'flush'},sad:{b:'sad',e:'half',m:'frown'},cry:{b:'sad',e:'shut',m:'frown',t:1},shock:{b:'up',e:'wide',m:'o',c:'pale'},
+ smirk:{b:'smirk',e:'half',m:'smirk'},think:{b:'sad',e:'side',m:'flat'},fear:{b:'sad',e:'wide',m:'frown',c:'pale'}};
+function drawPortrait(x,id,ex='n',fr=0){const [ty,sk,bd,bs,robe,top,old]=ART[id];const R=(c,a,b,w,h)=>{x.fillStyle=c;x.fillRect(a,b,w,h)};
  const sk2=shade(sk,.84),sk3=shade(sk,.7),rb2=shade(robe,.72),rb3=shade(robe,1.25),K='#17141c',G='#e0b64a',G2='#a87a1a';
  // --- 身體 ---
  R(K,3,28,26,10);R(robe,4,29,24,9);R(robe,6,28,20,1);R(rb2,4,30,2,8);R(rb2,26,30,2,8);R(rb3,7,29,3,1);R(rb3,22,29,3,1);
@@ -513,17 +534,49 @@ function drawPortrait(x,id){const [ty,sk,bd,bs,robe,top,old]=ART[id];const R=(c,
  // --- 頭 ---
  R(K,9,10,14,16);R(K,10,26,12,1);R(sk,10,11,12,14);R(sk,11,25,10,1);R(sk2,20,12,2,13);R(sk2,11,24,10,1);R(sk3,21,14,1,10);
  R(sk,9,16,1,4);R(sk2,22,16,1,4);R(K,8,16,1,4);R(K,23,16,1,4);
- // 眉眼鼻口
+ // 眉眼鼻口（表情 ex、畫格 fr：0 一般 1 眨眼 2 說話）
  const brow=bd&&bd!=='#e8e8e8'&&bd!=='#e0e0e0'&&bd!=='#d8d8d8'?bd:(old?'#bbb':'#3a3030');
- if(ty==='gen'||id==='yz'){R(brow,11,15,2,1);R(brow,13,16,2,1);R(brow,19,15,2,1);R(brow,17,16,2,1)}else{R(brow,11,15,4,1);R(brow,17,15,4,1)}
- R('#fff',11,17,4,2);R('#fff',17,17,4,2);R(K,12,17,2,2);R(K,18,17,2,2);R('#fff',12,17,1,1);R('#fff',18,17,1,1);R(sk2,11,19,4,1);R(sk2,17,19,4,1);
+ const XP=EXPR[ex]||EXPR.n,M=ty==='wom'?'#c0392b':'#9a4034',M2=ty==='wom'?'#e05a5a':'#c46a5a',DK='#4a1414';
  R(sk2,15,18,1,3);R(sk3,15,21,2,1);R(sk3,14,21,1,1);
- R('#9a4034',14,23,4,1);R('#c46a5a',14,23,2,1);
  if(old){R(sk2,12,13,8,1);R(sk3,11,20,1,2);R(sk3,20,20,1,2);R(sk2,12,21,1,1);R(sk2,19,21,1,1)}
- if(ty==='wom'){R('#e89aa0',11,20,2,1);R('#e89aa0',19,20,2,1);R('#c0392b',14,23,4,1);R('#e05a5a',15,23,2,1)}
+ if(ty==='wom'){R('#e89aa0',11,20,2,1);R('#e89aa0',19,20,2,1)}
+ // 眉
+ const bw=ex==='n'&&(ty==='gen'||id==='yz')?'stern':XP.b;
+ ({n:()=>{R(brow,11,15,4,1);R(brow,17,15,4,1)},
+   stern:()=>{R(brow,11,15,2,1);R(brow,13,16,2,1);R(brow,19,15,2,1);R(brow,17,16,2,1)},
+   angry:()=>{R(brow,11,14,2,1);R(brow,13,15,1,1);R(brow,14,16,1,1);R(brow,19,14,2,1);R(brow,18,15,1,1);R(brow,17,16,1,1)},
+   sad:()=>{R(brow,11,16,2,1);R(brow,13,15,2,1);R(brow,19,16,2,1);R(brow,17,15,2,1)},
+   up:()=>{R(brow,11,13,4,1);R(brow,17,13,4,1)},
+   smirk:()=>{R(brow,11,15,4,1);R(brow,17,14,3,1);R(brow,20,15,1,1)}})[bw]();
+ // 眼
+ let em=XP.e;if(fr===1&&/^(open|wide|half|side)$/.test(em))em='closed';
+ const eye=(x0,mirror)=>{const px=v=>mirror?x0+3-v:x0+v;
+  ({open:()=>{R('#fff',x0,17,4,2);R(K,x0+1,17,2,2);R('#fff',x0+1,17,1,1);R(sk2,x0,19,4,1)},
+   wide:()=>{R('#fff',x0,16,4,3);R(K,x0+1,17,2,1);R(sk2,x0,19,4,1)},
+   half:()=>{R(K,x0,17,4,1);R('#fff',x0,18,4,1);R(K,x0+1,18,2,1);R(sk2,x0,19,4,1)},
+   side:()=>{R('#fff',x0,17,4,2);R(K,x0+2,17,2,2);R(sk2,x0,19,4,1)},
+   closed:()=>{R(K,x0,18,4,1);R(sk2,x0,19,4,1)},
+   happy:()=>{R(K,px(0),18,1,1);R(K,x0+1,17,2,1);R(K,px(3),18,1,1)},
+   shut:()=>{R(K,x0,18,4,1);R(K,px(0),17,1,1)}})[em]()};
+ eye(11,false);eye(17,true);
+ if(XP.c==='flush'){R('#e8907a',11,20,2,1);R('#e8907a',19,20,2,1)}
+ if(XP.c==='pink'){R('#f0a8a0',11,20,2,1);R('#f0a8a0',19,20,2,1)}
+ if(XP.c==='pale'){R(shade(sk,.9),11,12,10,2)}
  // 鬚
- if(bs>=1){const b2=shade(bd,.75);R(bd,13,22,2,1);R(bd,17,22,2,1);R(bd,12,24,8,2);R(b2,13,25,6,1);R(sk,14,24,4,1)==0;R(bd,14,24,4,1)}
+ if(bs>=1){const b2=shade(bd,.75);R(bd,13,22,2,1);R(bd,17,22,2,1);R(bd,12,24,8,2);R(b2,13,25,6,1);R(bd,14,24,4,1)}
  if(bs===2){const b2=shade(bd,.75);R(bd,12,26,8,3);R(bd,13,29,6,2);R(bd,14,31,4,2);R(b2,13,27,1,3);R(b2,18,27,1,3);R(b2,15,29,2,4)}
+ // 口（畫在鬍鬚之後，表情才看得到）
+ let mm=XP.m;if(fr===2)mm={n:'talk',flat:'talk',frown:'talkf',smirk:'talks',smile:'talks',grit:'grit',laugh:'laugh2',o:'o2'}[mm]||mm;
+ ({n:()=>{R(M,14,23,4,1);R(M2,14,23,2,1)},flat:()=>{R(DK,14,23,4,1)},
+   smile:()=>{R(M,14,23,4,1);R(M,13,22,1,1);R(M,18,22,1,1);R(M2,15,23,2,1)},
+   laugh:()=>{R(M,13,22,6,1);R(DK,14,23,4,2);R('#f4ece0',14,23,4,1);R('#c46a5a',15,24,2,1)},
+   laugh2:()=>{R(M,13,22,6,1);R(DK,14,23,4,1);R('#f4ece0',14,23,4,1)},
+   frown:()=>{R(M,14,23,4,1);R(M,13,24,1,1);R(M,18,24,1,1)},
+   grit:()=>{R(DK,13,23,6,2);R('#f4ece0',13,23,6,1);R(DK,15,23,1,1);R(DK,17,23,1,1)},
+   o:()=>{R(DK,15,23,2,2);R(M,14,23,1,2);R(M,17,23,1,2)},o2:()=>{R(DK,15,22,2,3);R(M,14,23,1,1);R(M,17,23,1,1)},
+   smirk:()=>{R(M,14,23,3,1);R(M,17,22,1,1);R(M,18,21,1,1)},
+   talk:()=>{R(M,14,23,4,1);R(DK,15,23,2,2)},talkf:()=>{R(M,13,23,6,1);R(DK,14,24,4,1)},talks:()=>{R(M,13,22,1,1);R(M,18,22,1,1);R(DK,14,23,4,2);R('#c46a5a',15,24,2,1)}})[mm]();
+ if(XP.t){R('#8fd0ff',11,19,1,3);R('#cfefff',11,19,1,1);R('#8fd0ff',20,19,1,3);R('#cfefff',20,19,1,1)}
  if(id==='jy'){/* jy glasses */[10,17].forEach(g=>{R(K,g,16,5,1);R(K,g,19,5,1);R(K,g,16,1,4);R(K,g+4,16,1,4)});R(K,15,17,2,1)}
  // --- 冠 ---
  if(ty==='gen'){R(K,8,2,16,10);R('#8a8a8a',9,4,14,7);R('#b0b0b0',10,4,5,2);R('#666',19,5,4,6);R('#555',8,10,16,2);R(G,8,10,16,1);R(G,15,7,2,3);
@@ -697,17 +750,29 @@ function enhanceBg(d,W,H,k){const L=BGL[k]||[],dark=k==='night'||k==='study'?0.3
   let m=v*(1+n*.07);r*=m;g*=m;b*=m;
   for(const l of L){const ex=x-l[0],ey=y-l[1],q=1-Math.sqrt(ex*ex+ey*ey)/l[2];if(q>0){const a=q*q*l[6];r+=(l[3]-r)*a*.6+l[3]*a*.18;g+=(l[4]-g)*a*.6+l[4]*a*.18;b+=(l[5]-b)*a*.6+l[5]*a*.18}}
   d[p]=r;d[p+1]=g;d[p+2]=b}}
-function enhancePortrait(d,W,H){for(let y=0;y<H;y++)for(let x=0;x<W;x++){const p=(y*W+x)*4;if(!d[p+3])continue;
+function enhancePortrait(d,W,H,hl=true){for(let y=0;y<H;y++)for(let x=0;x<W;x++){const p=(y*W+x)*4;if(!d[p+3])continue;
   const m=1.07-.16*(x/W)+(y<H*.45?.03:-.02);let h=(x*374761393+y*668265263)^(x+y*31);h=(h^(h>>13))*1274126177;const n=(((h>>>16)&255)/255-.5)*.035;
   // 外緣柔邊：貼著透明處的像素略暗，輪廓更俐落
   const edge=(x>0&&!d[p-1])||(x<W-1&&!d[p+7])||(y>0&&!d[p-W*4+3])?.82:1;
   for(let k=0;k<3;k++)d[p+k]=d[p+k]*(m+n)*edge}
  const dot=(x,y,r,g,b,a)=>{const p=(y*W+x)*4;if(!d[p+3])return;d[p]+=(r-d[p])*a;d[p+1]+=(g-d[p+1])*a;d[p+2]+=(b-d[p+2])*a};
- [[25,34],[37,34]].forEach(([x,y])=>{dot(x,y,255,255,255,.95);dot(x+2,y+2,255,255,255,.35)}); // 眼神光
+ if(hl)[[25,34],[37,34]].forEach(([x,y])=>{dot(x,y,255,255,255,.95);dot(x+2,y+2,255,255,255,.35)}); // 眼神光
  for(let x=22;x<=42;x+=1)dot(x,26+((x-32)*(x-32)/60|0),255,240,210,.10); // 額頭受光
  dot(30,43,255,220,200,.35);dot(31,46,255,210,200,.3); // 鼻尖、唇光
  for(let y=60;y<H;y++)for(let x=8;x<W-8;x++)if(((x*3+y*5)%17)===0)dot(x,y,255,225,150,.16); // 衣料織紋
 }
+
+// ===== 情緒小圖示（12x12）=====
+function drawEmo(x,k){const R=(c,a,b,w,h)=>{x.fillStyle=c;x.fillRect(a,b,w,h)},K='#17141c';
+ const bub=()=>{R(K,1,0,10,1);R(K,0,1,1,8);R(K,11,1,1,8);R(K,1,9,10,1);R('#fff',1,1,10,8);R(K,3,10,2,1);R(K,3,11,1,1);R('#fff',3,9,1,1)};
+ ({'!':()=>{bub();R('#c0392b',5,2,2,4);R('#c0392b',5,7,2,1)},
+   '?':()=>{bub();R('#1b3a8a',4,2,4,1);R('#1b3a8a',7,3,1,1);R('#1b3a8a',6,4,1,1);R('#1b3a8a',5,5,1,1);R('#1b3a8a',5,7,1,1)},
+   '...':()=>{bub();[2,5,8].forEach(a=>R('#555',a,5,2,2))},
+   vein:()=>{const c='#e0302a',h='#ff8a7a';[[3,1,1,3,1,3,3,1],[8,1,1,3,8,3,3,1],[3,8,1,3,1,8,3,1],[8,8,1,3,8,8,3,1]].forEach(([a,b,w,hh,a2,b2,w2,h2])=>{R(c,a,b,w+1,hh);R(c,a2,b2,w2,h2+1)});R(h,4,4,1,1);R(h,7,4,1,1);R(h,4,7,1,1);R(h,7,7,1,1)},
+   sweat:()=>{R('#3a7bd5',5,1,2,2);R('#3a7bd5',4,3,4,2);R('#3a7bd5',3,5,6,4);R('#3a7bd5',4,9,4,1);R('#bfe4ff',4,5,2,2)},
+   note:()=>{R('#e0b64a',6,1,1,7);R('#e0b64a',7,1,3,1);R('#e0b64a',9,1,1,3);R('#e0b64a',3,7,4,3);R('#fff3a8',4,7,1,1)},
+   spark:()=>{R('#f6cf5a',5,0,2,12);R('#f6cf5a',0,5,12,2);R('#fff',5,5,2,2);R('#f6cf5a',3,3,1,1);R('#f6cf5a',8,3,1,1);R('#f6cf5a',3,8,1,1);R('#f6cf5a',8,8,1,1)},
+   sigh:()=>{const c='#dfe4f2';R(c,3,3,4,3);R(c,2,4,6,1);R(c,6,2,4,4);R(c,5,3,6,2);R('#ffffff',7,3,2,1);R(c,1,8,2,2);R(c,0,10,1,1)}})[k]()}
 
 // ===== 難字難詞（自動比對每句台詞）=====  詞: [讀音提示, 解釋]
 const GLOSS={
@@ -1248,6 +1313,8 @@ const AU=(()=>{
    o.connect(g);g.connect(sfxG);o.start(t);l.start(t);o.stop(t+.62);l.stop(t+.62);wood(t+.64,.28,sfxG,720);wood(t+.78,.28,sfxG,520)},
   chime:t=>[2093,2637,3136].forEach((f,i)=>bell(t+i*.07,f,.09,sfxG)),
   save:t=>bell(t,1568,.07,sfxG),
+  surprise:t=>pluck(t,fq("5'"),.24,sfxG,.7,.09),
+  angry:t=>{drum(t,.32,sfxG);drum(t+.12,.18,sfxG)},
   gong:t=>gong(t,.55,sfxG,73),
   paper:t=>hiss(t,.1,sfxG,.12,'highpass',3200),
   fanfare:t=>{['1','2','3','5','6',"1'"].forEach((n,i)=>pluck(t+i*.08,fq(n),.36,sfxG,.6));gong(t+.5,.3,sfxG,110)},
@@ -1409,6 +1476,54 @@ function overall(){const gs=CHAPTERS.map(c=>SV.ch[c.id]).filter(Boolean);if(gs.l
  if(r>=n)return '「直臣」——仕途坎坷，屢遭申飭，但後世修史者提起沈家，總要添一句：其言也直。';
  return '「循吏」——無大功，亦無大過。在這座紫禁城裡，能平安告老，已是難得的本事。再讀一遍，或許能聽出更多。'}
 const NUM=['一','二','三','四','五','六','七','八','九','十','十一','十二','十三','十四','十五','十六'];let CH,script,ip,st,typing,tm;
+// ---------- 人物表情與動作 ----------
+const pc2={},ec={};
+function face(id,ex,fr){const k=id+'|'+ex+'|'+fr;return pc2[k]||(pc2[k]=hi(x=>drawPortrait(x,id,ex,fr),32,38,(d,W,H)=>enhancePortrait(d,W,H,(EXPR[ex]||EXPR.n).e==='open'&&fr!==1)))}
+function emoImg(k){if(ec[k])return ec[k];const c=document.createElement('canvas');c.width=c.height=12;drawEmo(c.getContext('2d'),k);return ec[k]=c.toDataURL()}
+const DEFEX={hs:'smirk',ab:'smirk',ys:'smile',yt:'smirk',mz:'smile',xl:'smile',jy:'smile',lw:'smile',zc:'smile'};
+const CUE=[[/罪該萬死|恕罪|饒命|請罪|知罪|奴才該死|開恩|不敢/,'fear','bow','sweat'],
+ [/跪|叩頭|叩首|伏地|伏在地上|腿一軟/,'fear','kneel','sweat'],
+ [/發抖|顫/,'fear','tremble','sweat'],
+ [/放肆|大膽|混帳|豈有此理|荒唐|住口|好大的膽|欺君|拍案|大怒|怒吼|怒斥|厲聲|鐵青|臉色一沉/,'angry','shake','vein'],
+ [/冷笑|好手段|含笑|笑容|微笑|嘴角|擠了擠眼/,'smirk','lean',''],
+ [/哈哈|大笑|笑出聲|笑得|說得好|好一張|擊節|拊掌|撫掌|妙！|妙。/,'laugh','laugh','note'],
+ [/痛哭|哭|淚/,'cry','slump','sigh'],
+ [/嘆|唉|可惜|慚愧|慘然/,'sad','slump','sigh'],
+ [/！？|？！|竟然|居然|驚|愣|失聲|怎麼可能|倒抽/,'shock','jump','!'],
+ [/沉默|良久|不語|一言不發|半晌|沉吟|閉目/,'think','','...'],
+ [/點頭|頷首|准了|甚慰|很好|不錯/,'smile','nod',''],
+ [/搖頭/,'stern','no',''],[/拱手|踞坐|箕踞/,'smirk','nod','']];
+const NSKIP=/奏疏辭氣|三跪九叩|上摺|摺子|奏摺/,NOV=[['手在發抖','yz','angry','tremble','vein'],['九阿哥胤禟忽然起身','yt','angry','lean','vein']];
+const NALIAS={yr:['太子'],yz:['四爺','四哥'],ys:['八爺','八哥'],yt:['九爺'],hs:['和大人'],jy:['紀大人']};
+const OV=[['老臣有罪，可老臣沒有反心','angry','shake','vein'],['動手！','angry','shake','!'],['朕殺他的權','stern','nod',''],['老臣給皇上請安','smirk','nod',''],['皇上好興致','smirk','lean',''],
+ ['少年人嬉戲','smirk','',''],['我一個老婆子','smile','',''],['玩物喪志，那也得真有一手','smirk','nod','spark'],['不法祖德','angry','tremble','vein'],['不必出自皇父之手','smirk','lean',''],
+ ['萬言萬當，不如一默','think','nod','...'],['徐徐調治，天下之福','think','nod',''],['朕近日夢見太皇太后','sad','slump','sigh'],['只認得皇上的旨意','smirk','',''],['四哥，好手段','smirk','lean','vein'],
+ ['你自己看。','angry','','vein'],['朕就是這樣漢子','angry','shake','!'],['公義私恩，如是則已','cry','slump',''],['老頭子走了沒有','smile','','note'],['飛入蘆花都不見','smile','nod','spark'],
+ ['一片一片又一片','smile','nod','note'],['兩片三片四五片','smile','nod','note'],['六片七片八九片','think','','sweat'],['紀大人的字，和某會一直掛著','smirk','','...'],['實不過以倡優蓄之','angry','shake','vein'],
+ ['朕夢中亦未料','shock','tremble','!'],['朕酗酒？','angry','shake','vein'],['皇上恕罪！奴才方才唸點心單子','fear','bow','sweat'],['沈大人，奴才是替御膳房','smile','','note'],['〈特參近臣疏〉','stern','','!'],
+ ['郭大人的墨寶','smile','',''],['臣弟辦事不力，罪該萬死','sad','kneel',''],['天朝物產豐盈','smile','nod',''],['所稱奇異之物','smirk','',''],['典守者不得辭其責耳','smile','nod','spark'],
+ ['兩個人一起猜，那就是商量了','smirk','lean',''],['皇考大事方畢','sad','',''],['臣不勝驚駭','fear','tremble','sweat'],['索大人，這鍋還得半個時辰','smile','','note'],['和某感激不盡','smile','nod',''],
+ ['郭某無禮，自罰一杯','smirk','nod',''],['一勞永逸。分寸你們自己拿','stern','nod',''],['朕不能讓任何一個人笑得太久','smirk','',''],['臣請獨任專征','stern','nod','']];
+const ERA=[['皇上',()=>CH.vol===0?'kx':CH.vol===1?'yz':'ql'],['新君',()=>CH.id===8?'jq':CH.id===4?'yz':null],['王爺',()=>CH.id===4?'yz':null],['太上皇',()=>'ql'],['和大人',()=>'hs'],['紀大人',()=>'jy'],['你',()=>'me']];
+let curId=null,curEx='n',blinkAt=0,lastCue=null;
+function cueOf(t){for(const c of CUE){const r=new RegExp(c[0].source,'g');let m;while((m=r.exec(t))){const pre=t.slice(Math.max(0,m.index-3),m.index);if(/[未不沒無][下曾敢肯]?$/.test(pre)||/並未|沒有|不曾|未曾/.test(pre))continue;return {ex:c[1],act:c[2],emo:c[3],at:m.index}}}return null}
+function findChar(t,at){let best=null,bp=-1;const see=(w,id)=>{if(!id)return;let p=t.indexOf(w);while(p>=0&&p<at){if(p>bp){bp=p;best=id}p=t.indexOf(w,p+1)}};
+ for(const id in PALIAS)PALIAS[id].forEach(n=>see(n,id));for(const id in NALIAS)NALIAS[id].forEach(n=>see(n,id));
+ for(const [w,f] of ERA)see(w,f());see('他',curId);return best}
+function inferSpeech(id,t){const emp=/^(kx|yz|ql|jq)$/.test(id);if(t==='……')return {ex:'think',act:'',emo:'...'};
+ for(const o of OV)if(t.includes(o[0]))return {ex:o[1],act:o[2],emo:o[3]};
+ let c=cueOf(t);if(!c&&lastCue&&lastCue.id===id)c=Object.assign({},lastCue,{emo:''});
+ if(!c){c={ex:DEFEX[id]||(emp?'stern':'n'),act:'',emo:''};if(/？$/.test(t))c.emo='?';else if(/！$/.test(t)&&emp)c.act='nod'}return c}
+function inferNarr(t){for(const o of NOV)if(t.includes(o[0]))return {id:o[1],ex:o[2],act:o[3],emo:o[4]};
+ for(const sen of t.split(/[。！？]/)){if(NSKIP.test(sen))continue;const c=cueOf(sen);if(!c)continue;const id=findChar(sen,c.at);if(id&&CHARS[id]&&ART[id])return Object.assign({id},c)}return null}
+function showChar(id,c){const W=$('#pw'),P=$('#port'),E=$('#emo');const changed=id!==curId||W.style.display==='none';curId=id;curEx=c.ex;P.src=face(id,c.ex,0);W.style.display='block';
+ if(changed){W.classList.remove('enter');void W.offsetWidth;W.classList.add('enter')}
+ P.className='';void P.offsetWidth;if(c.act)P.className='act-'+c.act;
+ E.className='';if(c.emo){E.src=emoImg(c.emo);void E.offsetWidth;E.className='pop';AU.sfx(c.emo==='vein'?'angry':c.emo==='!'?'surprise':'')}
+ blinkAt=Date.now()+1500+Math.random()*2500}
+function hideChar(){$('#pw').style.display='none';$('#emo').className='';curId=null}
+setInterval(()=>{if(!curId||typing||cur!=='sGame'||$('#pw').style.display==='none'||Date.now()<blinkAt)return;const P=$('#port'),id=curId,ex=curEx;P.src=face(id,ex,1);
+ setTimeout(()=>{if(curId===id&&curEx===ex&&!typing)P.src=face(id,ex,0)},140);blinkAt=Date.now()+2200+Math.random()*3500},150);
 function openRecap(i){CH=CHAPTERS[i];if(!SV.recaps.includes(CH.id)){SV.recaps.push(CH.id);save()}
  $('#rcTitle').textContent=`${VOLS[CH.vol]}・${CH.title}`;const cast=[];const walk=a=>a.forEach(x=>{if((x[0]==='s'||x[0]==='char')&&x[1]!=='tj'&&!cast.includes(x[1]))cast.push(x[1]);if(x[0]==='if'){walk(x[2]);walk(x[3])}});walk(CH.sc);
  cast.forEach(id=>{if(!SV.chars.includes(id))SV.chars.push(id)});save();
@@ -1433,20 +1548,19 @@ function step(){if(ip>=script.length)return finish();const s=script[ip++];
  if(s[0]==='quote'){if(!SV.quotes.includes(s[1])){SV.quotes.push(s[1]);save();toast('名句入錄：'+QUOTES[s[1]].s)}return step()}
  if(s[0]==='if'){script.splice(ip,0,...(st.flags[s[1]]?s[2]:s[3]));return step()}
  if(s[0]==='q')return ask(s[1]);
- const P=$('#port');
  if(s[0]==='n')log.push(['',s[1]]);else log.push([s[1],s[2]]);saveMid();
- if(s[0]==='n'){P.style.display='none';$('#who').style.display='none';say(s[1],true)}
- else{unlockChar(s[1]);P.src=portrait(s[1]);P.style.display='block';$('#who').style.display='inline-block';$('#who').textContent=CHARS[s[1]].n.replace(/（.*）/,'');$('#who').dataset.p=(PALIAS[s[1]]||[])[0]||'';if(!$('#who').dataset.p)delete $('#who').dataset.p;say(s[2],false)}}
-function say(t,nar){const el=$('#txt');el.className=nar?'nar':'';full=t;typing=true;let n=0;el.textContent='';$('#nextTip').style.visibility='hidden';clearInterval(tm);
- tm=setInterval(()=>{n+=1;el.textContent=full.slice(0,n);if(n%3===1)AU.sfx('tick');if(n>=full.length)endType()},28)}
-function endType(){clearInterval(tm);typing=false;$('#txt').innerHTML=mk(full);$('#nextTip').style.visibility='visible'}
+ if(s[0]==='n'){const c=inferNarr(s[1]);lastCue=c;if(c)showChar(c.id,c);else hideChar();$('#who').style.display='none';say(s[1],true)}
+ else{unlockChar(s[1]);const c=inferSpeech(s[1],s[2]);lastCue=null;showChar(s[1],c);$('#who').style.display='inline-block';$('#who').textContent=CHARS[s[1]].n.replace(/（.*）/,'');$('#who').dataset.p=(PALIAS[s[1]]||[])[0]||'';if(!$('#who').dataset.p)delete $('#who').dataset.p;say(s[2],false)}}
+function say(t,nar){const talk=!nar&&curId;const el=$('#txt');el.className=nar?'nar':'';full=t;typing=true;let n=0;el.textContent='';$('#nextTip').style.visibility='hidden';clearInterval(tm);
+ tm=setInterval(()=>{n+=1;el.textContent=full.slice(0,n);if(n%3===1)AU.sfx('tick');if(talk&&n%3===0&&curId)$('#port').src=face(curId,curEx,(n/3)%2?2:0);if(n>=full.length)endType()},28)}
+function endType(){clearInterval(tm);typing=false;if(curId)$('#port').src=face(curId,curEx,0);$('#txt').innerHTML=mk(full);$('#nextTip').style.visibility='visible'}
 let noteMode=false;try{noteMode=localStorage.getItem('sanchao-note')==='1'}catch(e){}
 function setNote(v){noteMode=v;try{localStorage.setItem('sanchao-note',v?'1':'0')}catch(e){}const g=$('#sGame');g.classList.toggle('note-on',v);g.classList.toggle('note-off',!v);$('#gNote').textContent='註解：'+(v?'開':'關');if(!v)hidePop()}
 $('#gNote').onclick=()=>{setNote(!noteMode);toast(noteMode?'註解模式開啟：點畫線的字看說明，按「下一句」前進':'註解模式關閉：點任何地方前進')};
 $('#bNext').onclick=e=>{e.stopPropagation();hidePop();if(typing)endType();else{AU.sfx('next');step()}};
 $('#dlg').onclick=()=>{if(noteMode){if(typing)endType();return}if(typing)endType();else{AU.sfx('next');step()}};
 setNote(noteMode);
-function ask(q){saveMid();AU.q(true);AU.sfx('ask');$('#dlg').style.display='none';$('#port').style.display='none';const b=$('#qbox');b.style.display='block';
+function ask(q){saveMid();AU.q(true);AU.sfx('ask');$('#dlg').style.display='none';hideChar();const b=$('#qbox');b.style.display='block';
  const ord=q.o.map((o,i)=>i).sort(()=>Math.random()-.5);
  b.innerHTML=`<span class="qk">${q.k}</span><div class="qp">${mk(q.p)}</div>`+ord.map(i=>`<button class="btn" data-i="${i}">${mk(q.o[i].t)}</button>`).join('');b.scrollTop=0;
  $$('#qbox .btn').forEach(x=>x.onclick=()=>answer(q,q.o[+x.dataset.i]))}
