@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>咖啡店口袋清單</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@500;700;900&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f4ede3; --paper:#fffaf3; --ink:#2b1d14; --sub:#7a6555; --line:#e3d6c5;
+  --bean:#5b3a25; --crema:#c98a4b; --leaf:#4f6b4a; --night:#2d3a4a; --tag:#efe3d2;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;touch-action:manipulation}
+body{font-family:"Noto Sans TC",system-ui,sans-serif;background:var(--bg);color:var(--ink);
+  padding:env(safe-area-inset-top) env(safe-area-inset-right) calc(env(safe-area-inset-bottom) + 24px) env(safe-area-inset-left);
+  background-image:radial-gradient(circle at 15% 0%,#ead8bf 0,transparent 45%),radial-gradient(circle at 100% 30%,#efe1cc 0,transparent 40%);}
+.wrap{max-width:640px;margin:0 auto;padding:0 16px}
+header{padding:26px 0 10px}
+.kicker{font-size:12px;letter-spacing:.25em;color:var(--crema);font-weight:700}
+h1{font-family:"Noto Serif TC",serif;font-weight:900;font-size:30px;margin:6px 0 4px;letter-spacing:.04em}
+.lead{color:var(--sub);font-size:14px;margin:0}
+.stats{display:flex;gap:10px;margin:16px 0 6px}
+.stat{flex:1;background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:10px 12px}
+.stat b{font-family:"Noto Serif TC",serif;font-size:22px;display:block}
+.stat span{font-size:12px;color:var(--sub)}
+.bar{display:flex;gap:8px;align-items:center;margin:14px 0;flex-wrap:wrap}
+.chip{border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:999px;padding:7px 14px;font-size:14px;font-family:inherit;cursor:pointer}
+.chip.on{background:var(--bean);border-color:var(--bean);color:#fff}
+.addbtn{margin-left:auto;background:var(--crema);border:none;color:#fff;border-radius:999px;padding:8px 14px;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:20px;margin:14px 0;overflow:hidden;box-shadow:0 6px 18px -12px rgba(60,35,20,.35);cursor:pointer;transition:transform .15s}
+.card:active{transform:scale(.99)}
+.cover{height:118px;position:relative;display:flex;align-items:flex-end;padding:14px 16px;color:#fff}
+.cover h2{font-family:"Noto Serif TC",serif;font-size:21px;margin:0;line-height:1.25;text-shadow:0 1px 6px rgba(0,0,0,.25)}
+.cover .en{font-size:12px;opacity:.85;letter-spacing:.05em;margin-top:2px}
+.cover svg{position:absolute;right:10px;top:10px;opacity:.28}
+.badge{position:absolute;left:14px;top:12px;font-size:12px;background:rgba(255,255,255,.22);backdrop-filter:blur(4px);padding:3px 10px;border-radius:999px}
+.badge.done{background:#fff;color:var(--leaf);font-weight:700}
+.cbody{padding:12px 16px 14px}
+.tagline{font-size:14.5px;line-height:1.6;margin:0 0 10px}
+.tags{display:flex;flex-wrap:wrap;gap:6px}
+.tag{background:var(--tag);color:var(--bean);font-size:12px;padding:3px 9px;border-radius:999px}
+.meta{display:flex;gap:14px;font-size:12.5px;color:var(--sub);margin-top:10px;flex-wrap:wrap}
+.empty{text-align:center;color:var(--sub);padding:40px 0;font-size:14px}
+
+/* sheet */
+.mask{position:fixed;inset:0;background:rgba(30,18,10,.45);opacity:0;pointer-events:none;transition:opacity .2s;z-index:10}
+.mask.show{opacity:1;pointer-events:auto}
+.sheet{position:fixed;left:0;right:0;bottom:0;max-height:92vh;overflow-y:auto;background:var(--paper);border-radius:22px 22px 0 0;transform:translateY(100%);transition:transform .25s ease;z-index:11;padding-bottom:calc(env(safe-area-inset-bottom) + 20px);-webkit-overflow-scrolling:touch}
+.sheet.show{transform:none}
+.sheet .inner{max-width:640px;margin:0 auto}
+.grab{width:44px;height:5px;border-radius:9px;background:var(--line);margin:10px auto 0}
+.shead{padding:4px 18px 16px;position:relative}
+.close{position:absolute;right:12px;top:0;border:none;background:var(--tag);width:34px;height:34px;border-radius:50%;font-size:18px;color:var(--bean);cursor:pointer}
+.shead h2{font-family:"Noto Serif TC",serif;font-size:24px;margin:16px 40px 2px 0;line-height:1.3}
+.shead .en{color:var(--sub);font-size:13px}
+.sec{padding:14px 18px;border-top:1px dashed var(--line)}
+.sec h3{font-size:13px;letter-spacing:.15em;color:var(--crema);margin:0 0 8px}
+.sec p{margin:0 0 8px;line-height:1.75;font-size:15px}
+.sec ul{margin:0;padding-left:18px;line-height:1.75;font-size:15px}
+.must{display:grid;gap:8px}
+.mi{background:var(--bg);border-radius:12px;padding:10px 12px}
+.mi b{display:block;font-size:15px}
+.mi span{font-size:13px;color:var(--sub);line-height:1.6}
+.info{display:grid;grid-template-columns:64px 1fr;gap:6px 10px;font-size:14.5px;line-height:1.6}
+.info dt{color:var(--sub)}
+.info dd{margin:0}
+.warn{background:#fbf0dc;border-left:3px solid var(--crema);padding:8px 10px;border-radius:6px;font-size:13px;color:#6b4b2a;margin-top:8px;line-height:1.6}
+.amen{display:flex;flex-wrap:wrap;gap:6px}
+.amen span{border:1px solid var(--line);border-radius:10px;padding:4px 9px;font-size:13px}
+.btns{display:flex;gap:8px;flex-wrap:wrap}
+.btn{flex:1;min-width:130px;text-align:center;text-decoration:none;border-radius:12px;padding:11px 10px;font-size:14.5px;font-weight:700;border:none;font-family:inherit;cursor:pointer}
+.btn.pri{background:var(--bean);color:#fff}
+.btn.sec2{background:var(--tag);color:var(--bean)}
+.btn.ok{background:var(--leaf);color:#fff}
+.stars{display:flex;gap:4px;font-size:28px;margin:4px 0 8px}
+.stars button{background:none;border:none;font-size:28px;color:#d9c7b0;cursor:pointer;padding:0}
+.stars button.on{color:var(--crema)}
+textarea,input,select{width:100%;font-family:inherit;font-size:16px;border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:#fff;color:var(--ink)}
+textarea{min-height:90px;resize:vertical}
+label{display:block;font-size:13px;color:var(--sub);margin:10px 0 4px}
+.src a{color:var(--sub);font-size:12.5px;display:block;line-height:1.8;word-break:break-all}
+.danger{background:none;border:none;color:#a3483a;font-size:13px;margin-top:10px;cursor:pointer;font-family:inherit}
+footer{text-align:center;color:var(--sub);font-size:12px;margin-top:28px;letter-spacing:.08em}
+footer .sig{font-family:"Noto Serif TC",serif;font-style:italic;font-size:15px;color:var(--bean);letter-spacing:.12em}
+.toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 24px);transform:translateX(-50%) translateY(20px);background:var(--ink);color:#fff;padding:9px 16px;border-radius:999px;font-size:14px;opacity:0;transition:.2s;z-index:20;pointer-events:none}
+.toast.show{opacity:1;transform:translateX(-50%)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="kicker">CAFÉ WISHLIST</div>
+    <h1>咖啡店口袋清單</h1>
+    <p class="lead">想去的咖啡店，一張卡片一家。點開看詳細介紹，去過再打分數、寫筆記。</p>
+    <div class="stats">
+      <div class="stat"><b id="sAll">0</b><span>口袋名單</span></div>
+      <div class="stat"><b id="sWant">0</b><span>還沒去</span></div>
+      <div class="stat"><b id="sDone">0</b><span>已朝聖</span></div>
+    </div>
+  </header>
+
+  <div class="bar">
+    <button class="chip on" data-f="all">全部</button>
+    <button class="chip" data-f="want">想去</button>
+    <button class="chip" data-f="done">去過</button>
+    <button class="addbtn" id="addBtn">＋ 新增店家</button>
+  </div>
+
+  <div id="list"></div>
+
+  <footer>
+    <div class="sig">— Jim Lu —</div>
+    <div>製作｜咖啡店口袋清單</div>
+  </footer>
+</div>
+
+<div class="mask" id="mask"></div>
+<div class="sheet" id="sheet"><div class="inner" id="sheetIn"></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+const SEED = [
+{
+  id:"jijiexiang",
+  name:"季節香茶葉與咖啡烘焙屋",
+  en:"Season Tea & Coffee Roastery",
+  area:"新北・永和",
+  color:["#6b4128","#a8693a"],
+  icon:"bean",
+  tagline:"1998 年開到現在的巷弄老烘焙屋，單品＋配方豆超過 45 款，老闆用「燉湯」的邏輯煮咖啡。",
+  tags:["自家烘焙","手沖單品","老字號","開到深夜","台灣茶"],
+  price:"約 $150–300／人",
+  mrt:"捷運頂溪站",
+  intro:[
+    "季節香是永和仁愛路上的獨資小店，商業登記從 1998 年就設在這個地址，是一間名副其實的老咖啡館。店內是深色木質傢俱配大型吧台，後方一整排生豆與熟豆，音響也有不少人特別稱讚。",
+    "最有名的是菜單長度：單品加配方就有約 45 款，再加上隱藏版超過 50 種，等於一個月天天喝都能不重複。除了咖啡，店名裡的「茶葉」也是真的——有台灣茶、花茶、鮮奶茶，還有鬆餅可以配。",
+    "老闆自稱是饕客，把做菜的原理放進沖煮：研磨後先過篩，不同粒徑分批下，用較低溫慢慢萃取，避免煮過頭帶出雜味。點杯時老闆很樂意解說，是可以邊喝邊上課的店。"
+  ],
+  must:[
+    {n:"亮晶晶（經典配方・深焙 D6）", d:"店內偏重的招牌配方，堅果調、像 85% 苦甜巧克力，滑順不澀、放涼也順口。早期報導約 $150／杯。"},
+    {n:"請老闆推薦一支單品", d:"豆單太長，直接說你喜歡的風味（花果酸、甜感、醇厚），讓老闆挑。"},
+    {n:"台灣茶／花茶＋鬆餅", d:"同行的人不喝咖啡也有得點。"}
+  ],
+  info:[
+    ["地址","新北市永和區仁愛路 71 號"],
+    ["電話","02-8660-4684"],
+    ["營業","週一～週六 10:30–23:00\n週日 約 12:00 或 14:00 起–23:00（各來源不一）"],
+    ["交通","捷運頂溪站步行可達"],
+    ["均消","約 $150–300"]
+  ],
+  amen:["不限時","Wi-Fi","插座","開到深夜","戶外吸菸區","可外帶咖啡豆"],
+  tips:[
+    "週日下午一開門戶外座位就可能坐滿，想坐得舒服建議平日去。",
+    "可以問老闆「過篩分批煮」的做法，回家試在自己的手沖上。",
+    "有賣豆子，喝到喜歡的可以直接帶一包回家。"
+  ],
+  warn:"網路上的營業時間多是幾年前的資料，週日開門時間各來源不同，出發前先看 Google 地圖或臉書粉專確認。",
+  map:"https://maps.app.goo.gl/bfgYViMHxA9EfHUL7",
+  src:[
+    ["灣兜 uantau：一個月喝不完的 50 款咖啡","https://utimes.today/2018/12/27/tea-and-coffee/"],
+    ["Cafe Nomad 店家資訊","https://cafenomad.tw/shop/3c0f76ef-85c8-4e22-bb14-a225170f53cf"],
+    ["跳躍的宅男 食記","https://www.jumpman.tw/922.html"],
+    ["台灣公司網 商業登記","https://www.twincn.com/item.aspx?no=73791326"]
+  ]
+},
+{
+  id:"urbancanyon",
+  name:"城市峽谷咖啡館",
+  en:"Urban Canyon by Brown Study",
+  area:"新北・板橋",
+  color:["#2d3a4a","#4f6b4a"],
+  icon:"glass",
+  tagline:"白天咖啡館、晚上變酒吧。老闆阿問是三屆台灣咖啡調酒冠軍，咖啡調酒是這裡的看家本領。",
+  tags:["咖啡調酒","冠軍咖啡師","日咖夜酒","木質綠植","江子翠"],
+  price:"約 $200–400／人",
+  mrt:"捷運江子翠站",
+  intro:[
+    "Urban Canyon 是團隊 Brown Study 的第一個據點，2021 年 11 月 28 日在江子翠雙十路試營運。他們想在城市裡做一個靠近自然的角落，讓人暫時「登出」放鬆，所以店裡以木頭和大量綠色植栽為主調。",
+    "主理人阿問同時是咖啡師與調酒師，拿過三屆台灣咖啡調酒冠軍（Coffee in Good Spirits），也代表台灣出賽 2022 年世界賽。店裡白天賣咖啡和甜點，晚上變成酒吧，可以喝到他的世界賽作品，或直接說想要的風味請他客製。",
+    "咖啡豆方面，店家長期選用 Caravela Coffee 的生豆，也被 Caravela 列為合作店家；早期也有 Stopover、Moonshine 等烘豆商的豆子。除了內用外帶，也有咖啡教學和場地出租。"
+  ],
+  must:[
+    {n:"阿問的咖啡調酒", d:"來這裡的重點。可以點 2022 WCIGS 世界賽作品，或描述想要的方向（咖啡感、甜一點、酸一點）請他現調。"},
+    {n:"Highball", d:"老闆常跟熟客聊用哪支威士忌做 highball，會換不同威士忌嘗試。"},
+    {n:"卡布奇諾＋布丁", d:"不喝酒的選擇。熱卡布約 $130；布丁走綿軟、蛋香濃的路線。"}
+  ],
+  info:[
+    ["地址","新北市板橋區雙十路二段 157 號 1 樓"],
+    ["電話","02-2257-0050"],
+    ["營業","（2023 年資料）\n週一、二、五 16:00–00:00\n週六、日 14:00–00:00\n週三、四 公休"],
+    ["交通","捷運江子翠站步行約 10 分鐘內"],
+    ["均消","約 $200–400"]
+  ],
+  amen:["平日不限時","Wi-Fi","插座","營業到深夜","茶水自取","無服務費","咖啡教學"],
+  tips:[
+    "想喝咖啡調酒就挑晚上去，白天以咖啡、甜點為主。",
+    "低消為一杯飲品；座位以兩人座居多，人多建議先打電話。",
+    "愛喝手沖的話，可以問現在用的是哪支 Caravela 的豆子。"
+  ],
+  warn:"店家臉書近期提到「峽谷轉型之際」，營業時間與型態可能改過，出發前務必先看粉專或 Google 地圖最新時間。",
+  map:"https://maps.app.goo.gl/XHACrCkm2CofQpzX9",
+  src:[
+    ["Caravela Coffee 合作店家頁","https://www.caravela-asia.coffee/pages/new-page-2-1-1-1-1-1-1"],
+    ["Dcard：三屆咖啡調酒冠軍的秘密基地","https://www.dcard.tw/f/coffee/p/242717388"],
+    ["Oscar：江子翠最新開幕咖啡館","https://www.oscarbs.net/urban-canyon-by-brown-study-soft-opening/"],
+    ["Footinder 營業時間","https://footinder.com.tw/%E6%96%B0%E5%8C%97%E5%B8%82%E6%9D%BF%E6%A9%8B%E5%8D%80/99451/"],
+    ["Facebook 粉專","https://www.facebook.com/Urban-Canyon-by-Brown-Study-%E5%9F%8E%E5%B8%82%E5%B3%BD%E8%B0%B7%E5%92%96%E5%95%A1%E9%A4%A8-101409099010970"]
+  ]
+}
+];
+
+const KEY="cafeWishlist.v1";
+let state={custom:[],user:{}}; // user[id] = {done, stars, date, note}
+try{const s=JSON.parse(localStorage.getItem(KEY)||"null"); if(s) state=Object.assign(state,s);}catch(e){}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(state));}catch(e){}}
+function allShops(){return SEED.concat(state.custom)}
+function u(id){return state.user[id]||(state.user[id]={done:false,stars:0,date:"",note:""})}
+let filter="all";
+
+const icons={
+ bean:'<svg width="90" height="90" viewBox="0 0 100 100"><ellipse cx="50" cy="50" rx="30" ry="42" transform="rotate(30 50 50)" fill="#fff"/><path d="M34 22 C60 40 40 60 66 78" stroke="#000" stroke-opacity=".35" stroke-width="5" fill="none" transform="rotate(0 50 50)"/></svg>',
+ glass:'<svg width="90" height="90" viewBox="0 0 100 100"><path d="M22 18 H78 L50 52 Z" fill="#fff"/><rect x="47" y="50" width="6" height="30" fill="#fff"/><rect x="32" y="80" width="36" height="6" rx="3" fill="#fff"/><circle cx="66" cy="16" r="7" fill="#fff"/></svg>',
+ cup:'<svg width="90" height="90" viewBox="0 0 100 100"><path d="M18 34 H70 V62 a20 20 0 0 1 -20 20 H38 a20 20 0 0 1 -20 -20 Z" fill="#fff"/><path d="M70 42 h8 a10 10 0 0 1 0 20 h-8" stroke="#fff" stroke-width="6" fill="none"/><path d="M34 12 q6 8 0 16 M48 12 q6 8 0 16" stroke="#fff" stroke-width="4" fill="none"/></svg>'
+};
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+function render(){
+  const shops=allShops();
+  const done=shops.filter(s=>u(s.id).done).length;
+  sAll.textContent=shops.length; sDone.textContent=done; sWant.textContent=shops.length-done;
+  const vis=shops.filter(s=>filter==="all"||(filter==="done")===u(s.id).done);
+  list.innerHTML=vis.length?vis.map(s=>{
+    const x=u(s.id), c=s.color||["#5b3a25","#c98a4b"];
+    return `<div class="card" data-id="${esc(s.id)}">
+      <div class="cover" style="background:linear-gradient(135deg,${c[0]},${c[1]})">
+        <span class="badge ${x.done?'done':''}">${x.done?'✓ 去過'+(x.stars?' ・'+'★'.repeat(x.stars):''):'想去'}</span>
+        ${icons[s.icon]||icons.cup}
+        <div><h2>${esc(s.name)}</h2><div class="en">${esc(s.en||"")}</div></div>
+      </div>
+      <div class="cbody">
+        <p class="tagline">${esc(s.tagline||"")}</p>
+        <div class="tags">${(s.tags||[]).map(t=>`<span class="tag">${esc(t)}</span>`).join("")}</div>
+        <div class="meta"><span>📍 ${esc(s.area||"")}</span>${s.mrt?`<span>🚇 ${esc(s.mrt)}</span>`:""}${s.price?`<span>💰 ${esc(s.price)}</span>`:""}</div>
+      </div></div>`}).join(""):`<div class="empty">${filter==="done"?"還沒有去過的店，出發吧 ☕":"這裡空空的"}</div>`;
+}
+
+function open(id){
+  const s=allShops().find(x=>x.id===id); if(!s) return; const x=u(id);
+  const navUrl="https://www.google.com/maps/dir/?api=1&destination="+encodeURIComponent(s.name+" "+(s.info?.[0]?.[1]||s.address||""));
+  sheetIn.innerHTML=`<div class="grab"></div>
+  <div class="shead"><button class="close" data-close>×</button>
+    <h2>${esc(s.name)}</h2><div class="en">${esc(s.en||"")}　${esc(s.area||"")}</div></div>
+  ${s.intro?`<div class="sec"><h3>店家介紹</h3>${s.intro.map(p=>`<p>${esc(p)}</p>`).join("")}</div>`:""}
+  ${s.must?.length?`<div class="sec"><h3>必點・亮點</h3><div class="must">${s.must.map(m=>`<div class="mi"><b>${esc(m.n)}</b><span>${esc(m.d)}</span></div>`).join("")}</div></div>`:""}
+  <div class="sec"><h3>實用資訊</h3>
+    <dl class="info">${(s.info||[["地址",s.address||"—"]]).map(([k,v])=>`<dt>${esc(k)}</dt><dd>${esc(v).replace(/\n/g,"<br>")}</dd>`).join("")}</dl>
+    ${s.warn?`<div class="warn">⚠️ ${esc(s.warn)}</div>`:""}
+  </div>
+  ${s.amen?.length?`<div class="sec"><h3>環境設備</h3><div class="amen">${s.amen.map(a=>`<span>${esc(a)}</span>`).join("")}</div></div>`:""}
+  ${s.tips?.length?`<div class="sec"><h3>去之前知道</h3><ul>${s.tips.map(t=>`<li>${esc(t)}</li>`).join("")}</ul></div>`:""}
+  <div class="sec"><h3>出發</h3><div class="btns">
+    ${s.map?`<a class="btn pri" href="${esc(s.map)}" target="_blank" rel="noopener">Google 地圖</a>`:""}
+    <a class="btn sec2" href="${navUrl}" target="_blank" rel="noopener">導航過去</a></div>
+    ${(s.info||[]).find(i=>i[0]==="電話")?`<p style="font-size:13px;color:var(--sub);margin-top:8px">☎ ${esc(s.info.find(i=>i[0]==="電話")[1])}</p>`:""}
+  </div>
+  <div class="sec"><h3>我的紀錄</h3>
+    <button class="btn ${x.done?'sec2':'ok'}" data-toggle style="width:100%">${x.done?'改回「想去」':'✓ 我去過了'}</button>
+    <div ${x.done?'':'style="display:none"'}>
+      <label>評分</label>
+      <div class="stars">${[1,2,3,4,5].map(n=>`<button data-star="${n}" class="${n<=x.stars?'on':''}">★</button>`).join("")}</div>
+      <label>造訪日期</label><input type="date" data-date value="${esc(x.date)}">
+    </div>
+    <label>筆記（想點什麼、喝了什麼、風味心得）</label>
+    <textarea data-note placeholder="例如：亮晶晶 深焙，堅果、黑巧克力…">${esc(x.note)}</textarea>
+    ${s.custom?`<button class="danger" data-del>刪除這家店</button>`:""}
+  </div>
+  ${s.src?.length?`<div class="sec src"><h3>資料來源</h3>${s.src.map(([t,l])=>`<a href="${esc(l)}" target="_blank" rel="noopener">${esc(t)}</a>`).join("")}</div>`:""}`;
+  sheet.dataset.id=id; sheet.scrollTop=0;
+  sheet.classList.add("show"); mask.classList.add("show");
+}
+function close(){sheet.classList.remove("show");mask.classList.remove("show");render();}
+
+function openAdd(){
+  sheetIn.innerHTML=`<div class="grab"></div>
+  <div class="shead"><button class="close" data-close>×</button><h2>新增想去的店</h2><div class="en">貼上 Google 地圖連結就能一鍵開地圖</div></div>
+  <form class="sec" id="addForm">
+    <label>店名 *</label><input name="name" required>
+    <label>區域</label><input name="area" placeholder="例如：台北・大安">
+    <label>地址</label><input name="address">
+    <label>Google 地圖連結</label><input name="map" type="url" placeholder="https://maps.app.goo.gl/...">
+    <label>一句話介紹／為什麼想去</label><textarea name="tagline"></textarea>
+    <label>標籤（用逗號分隔）</label><input name="tags" placeholder="手沖, 自家烘焙">
+    <div style="height:12px"></div><button class="btn pri" style="width:100%">加入清單</button>
+  </form>`;
+  sheet.dataset.id=""; sheet.classList.add("show"); mask.classList.add("show");
+  document.getElementById("addForm").onsubmit=e=>{
+    e.preventDefault(); const f=new FormData(e.target); const name=f.get("name").trim(); if(!name) return;
+    const pal=[["#5b3a25","#c98a4b"],["#3f4f3a","#8a9a5b"],["#4a2f3a","#b0706a"],["#2f3f52","#6f8fa8"]];
+    state.custom.push({id:"c"+Date.now(),custom:true,name,area:f.get("area"),address:f.get("address"),
+      map:f.get("map"),tagline:f.get("tagline"),tags:f.get("tags").split(/[,，、]/).map(t=>t.trim()).filter(Boolean),
+      info:[["地址",f.get("address")||"—"]],color:pal[state.custom.length%pal.length],icon:"cup"});
+    save(); close(); toast("已加入 "+name);
+  };
+}
+
+function toast(t){toastEl.textContent=t;toastEl.classList.add("show");setTimeout(()=>toastEl.classList.remove("show"),1600)}
+const toastEl=document.getElementById("toast");
+
+list.onclick=e=>{const c=e.target.closest(".card"); if(c) open(c.dataset.id)};
+mask.onclick=close;
+addBtn.onclick=openAdd;
+document.querySelectorAll(".chip").forEach(b=>b.onclick=()=>{
+  document.querySelectorAll(".chip").forEach(x=>x.classList.remove("on"));b.classList.add("on");filter=b.dataset.f;render();});
+sheet.addEventListener("click",e=>{
+  const id=sheet.dataset.id;
+  if(e.target.closest("[data-close]")) return close();
+  if(!id) return; const x=u(id);
+  if(e.target.closest("[data-toggle]")){x.done=!x.done; if(x.done&&!x.date) x.date=new Date().toISOString().slice(0,10); save(); open(id); toast(x.done?"已標記去過 ☕":"改回想去");}
+  const st=e.target.closest("[data-star]"); if(st){x.stars=+st.dataset.star; save(); sheet.querySelectorAll("[data-star]").forEach(b=>b.classList.toggle("on",+b.dataset.star<=x.stars));}
+  if(e.target.closest("[data-del]")){state.custom=state.custom.filter(s=>s.id!==id); delete state.user[id]; save(); close(); toast("已刪除");}
+});
+sheet.addEventListener("input",e=>{
+  const id=sheet.dataset.id; if(!id) return; const x=u(id);
+  if(e.target.matches("[data-note]")){x.note=e.target.value; save();}
+  if(e.target.matches("[data-date]")){x.date=e.target.value; save();}
+});
+let lastT=0; document.addEventListener("touchend",e=>{const n=Date.now(); if(n-lastT<300) e.preventDefault(); lastT=n;},{passive:false});
+document.addEventListener("dblclick",e=>e.preventDefault());
+render();
+</script>
+</body>
+</html>
