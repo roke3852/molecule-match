@@ -120,6 +120,7 @@ input{background:#0c1022}.tt1{color:#ffcf5a;text-shadow:3px 3px 0 #8a2a18}
 #icopy{bottom:5%;color:#fff;font-size:11px;letter-spacing:2px;text-shadow:1px 1px 0 #1d2244}.istage.title #icopy{opacity:.9}
 @media(min-width:520px){#ilogo b{font-size:68px}}
 #icv{height:calc(100dvh - 16px);object-fit:cover}
+#sGame.on{min-height:calc(100dvh - 30px)}
 </style>
 </head>
 <body>
@@ -1191,6 +1192,16 @@ function startIntro(){go('sIntro');AU.scene('title');const c=$('#icv'),x=c.getCo
  cancelAnimationFrame(introRAF);introRAF=requestAnimationFrame(frame)}
 $('#sIntro').onclick=()=>{if(introPhase<1){introT0=performance.now()-7800;return}cancelAnimationFrame(introRAF);AU.sfx('open');showLogin()};
 startIntro();
+
+// ===== 點畫面任何地方都能推進對話 =====
+$('#dlg').onclick=null;
+document.addEventListener('click',e=>{
+ if(!$('#sGame').classList.contains('on'))return;
+ if($('#qbox').classList.contains('on')||$('#pop').classList.contains('on'))return;
+ if(e.target.closest('button,input,a,#pop,.gbar,#toast'))return;
+ if(noteMode){if(e.target.closest('.tm'))return;if(typing)endType();return}
+ adv();
+});
 
 </script>
 </body>
