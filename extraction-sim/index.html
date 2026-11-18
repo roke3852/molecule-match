@@ -831,6 +831,8 @@ u.rest,.bd.rest{background:#5a8aa0}u.peak,.bd.peak{background:#c9a66b}u.fade,.bd
 .imgl{display:inline-block;font-size:12px;color:#8fc7e8;text-decoration:none;margin-top:2px}.imgl:active{opacity:.6}
 .ftags em.my{color:#1a1512;background:#8fd0b8;border-color:#8fd0b8;font-weight:700}.mytag{display:flex;flex-direction:column;gap:6px}.mytag .sug{border-style:dashed;color:var(--muted)}
 .tagin{display:flex;gap:6px}.tagin input{flex:1;min-width:0;background:transparent;border:1px solid var(--line);border-radius:6px;color:var(--ink);font:inherit;font-size:14px;padding:7px 8px}.tagin button{background:transparent;border:1px solid var(--line);border-radius:6px;color:var(--ink);font:inherit;font-weight:700;padding:0 14px;cursor:pointer}
+.c-pill.gi{align-self:flex-start;font-size:12px;padding:3px 10px;margin-top:2px}.gic.big svg{image-rendering:pixelated}
+.cmps{display:flex;flex-direction:column;gap:8px}.cmp{display:grid;grid-template-columns:5.5em auto 1fr;gap:4px 10px;align-items:baseline;font-size:14px;border-top:1px solid var(--line);padding-top:8px}.cmp b{font-family:var(--f-mono)}.cmp em{font-style:normal;font-size:12px;color:var(--muted);text-align:right}.cmp em.up{color:#7fd39a}.cmp em.dn{color:#d9705f}.cmp small{grid-column:1/-1;font-size:12px;color:var(--muted)}
 .brew-anim .smoke{opacity:0}.brew-anim.go .smoke{animation:baSteam 1.2s ease-out 2s 3}
 </style>
 <script>
@@ -4912,6 +4914,34 @@ const KETTLES=[
  {id:'brewista',name:'Brewista Artisan',type:'鵝頸・600 ml・恆溫',cap:600,stab:.92,temp:1,price:5200,lore:'比賽選手愛用，壺嘴細、水流穩，控溫精準到 1 度。'},
  {id:'stagg',name:'Fellow Stagg EKG',type:'細鵝頸・600 ml・恆溫',cap:600,stab:.96,temp:1,price:6800,lore:'配重把手加上限流壺嘴，就算手抖水流也很穩。外型像一件雕塑。'}];
 const TOOLS=[{id:'thermo',name:'探針溫度計',type:'插在壺裡，即時看水溫',price:350,lore:'沒有恆溫壺的時候，它就是你的眼睛。'},{id:'wdt',name:'佈粉針（WDT）',type:'把結塊的粉撥鬆，粉床更均勻',price:450,lore:'幾根細針插在軟木塞上。沖之前在粉裡畫圈，打散結塊，水就不會只走同一條路。'},{id:'filter',name:'濾水器',type:'濾掉自來水的氯味，裝一次一直用',price:1800,lore:'水佔一杯咖啡的 98%。濾掉氯和雜味，風味才乾淨。'}];
+/* ---------- v9：器材擴充到 100 樣以上 ---------- */
+[['kono','KONO 名門','短肋錐形，流速慢、口感厚',{het:.6,q:1.1,u:.93,by:.03}],['kasuya','V60 粕谷模型','肋骨只到一半，後段流速慢，適合四六法',{het:.6,q:1.05,u:.94,by:.04}],['mugen','Hario 無限 MUGEN','無肋貼紙、幾乎不繞流，一刀流專用',{het:.5,q:1.0,u:.97,by:.005}],
+ ['flower','CAFEC 花瓣濾杯','花瓣狀深肋，排氣好、流速快',{het:.65,q:1.4,u:.92,by:.07}],['deep27','CAFEC Deep 27','27° 深錐，小粉量也有厚粉層',{het:.7,q:1.2,u:.95,by:.03}],['mountain','山形濾杯 Mt. FUJI','山形開孔錐形，流速偏快、明亮',{het:.62,q:1.3,u:.93,by:.06}],
+ ['ufo','UFO Dripper','80° 寬角淺錐，流速很快、乾淨',{het:.7,q:1.5,u:.9,by:.06}],['crystaleye','泰摩 冰瞳錐形','透明直肋錐形，流速快',{het:.65,q:1.5,u:.92,by:.07}],['chemex','Chemex','厚濾紙玻璃壺，極乾淨、流速偏慢',{het:.6,q:.85,u:.94,by:.02}],
+ ['kalita102','Kalita 102 梯形三孔','扇形濾紙三小孔，老派厚實',{het:.4,q:.75,u:.97,by:.02}],['melitta','Melitta 單孔梯形','單一小孔，半浸泡，穩定好上手',{het:.4,q:.6,u:.97,by:.015}],['beehouse','Bee House 蜂屋','陶瓷梯形雙孔，甜感好',{het:.4,q:.85,u:.97,by:.02}],
+ ['april','April Brewer','平底大孔，流速快又均勻',{het:.2,q:1.25,u:1,by:.012}],['staggx','Fellow Stagg [X]','雙層不鏽鋼平底，保溫好',{het:.22,q:1.0,u:.99,by:.01}],['b75','泰摩 冰瞳 B75','平底超大開孔，流速最快',{het:.25,q:1.6,u:.99,by:.02}],
+ ['december','December Dripper','可調孔數的平底濾杯',{het:.2,q:1.0,u:1,by:.012}],['tricolate','Tricolate','直筒無繞流加分水盤，萃取率很高',{het:.1,q:.7,u:1,by:0}],['pulsar','NextLevel Pulsar','直筒無繞流，均勻度最好',{het:.12,q:.9,u:1,by:0}]
+].forEach(([id,name,sub,d])=>{if(!DRIPPER[id]){DRIPPER[id]=Object.assign({name,desc:sub},d);G.BREWERS.push({id,name,sub});}});
+[{id:'c2',name:'泰摩 栗子 C2',type:'手搖・38mm 錐刀，入門款',um:40,z:280,fines:.17},{id:'c3',name:'泰摩 栗子 C3 ESP Pro',type:'手搖・S2C 錐刀',um:25,z:260,fines:.15},{id:'q2',name:'1Zpresso Q2',type:'手搖・38mm 錐刀，旅行用',um:30,z:270,fines:.16},
+ {id:'xultra',name:'1Zpresso X-Ultra',type:'手搖・40mm 錐刀，外調',um:12.5,z:240,dial:'num',rot:60,fines:.13},{id:'kinu',name:'Kinu M47 Classic',type:'手搖・47mm 錐刀，全金屬',um:10,z:240,fines:.12},{id:'x25',name:'Comandante X25 Trailmaster',type:'手搖・輕量旅行版',um:27.25,fines:.15},
+ {id:'skerton',name:'Hario Skerton',type:'手搖・陶瓷錐刀，玻璃罐',um:60,z:300,fines:.22},{id:'porlex',name:'Porlex Mini',type:'手搖・陶瓷錐刀，可塞進愛樂壓',um:50,z:300,fines:.2},{id:'pietro',name:'Pietro',type:'手搖・58mm 平刀',um:10,z:230,fines:.09},{id:'s3',name:'泰摩 栗子 S3',type:'手搖・S2C890 錐刀，外調',um:15,z:240,fines:.12},
+ {id:'ode',name:'Fellow Ode Gen 2',type:'電動・64mm 平刀，家用單品',um:25,z:250,fines:.1},{id:'opus',name:'Fellow Opus',type:'電動・40mm 錐刀',um:30,z:260,fines:.15},{id:'virtuoso',name:'Baratza Virtuoso+',type:'電動・40mm 錐刀，定時',um:25,z:250,fines:.14},
+ {id:'wilfa',name:'Wilfa Uniform',type:'電動・58mm 平刀',um:20,z:250,fines:.1},{id:'t078',name:'泰摩 078',type:'電動・78mm 渦輪刀盤',um:15,z:230,fines:.07},{id:'df64',name:'DF64 Gen 2',type:'電動・64mm 平刀，無段，單品豆倉',um:null,fines:.09},
+ {id:'zerno',name:'Zerno Z1',type:'電動・64mm 平刀，無段，低轉速',um:null,fines:.07},{id:'guatemala',name:'Mahlkönig Guatemala',type:'電動・71mm 平刀，商用賣豆機',um:30,z:240,fines:.075}
+].forEach(g=>{if(!GRINDERS.find(x=>x.id===g.id))GRINDERS.push(g);});
+[{id:'horoku',name:'陶瓷烘焙壺（焙烙）',type:'直火陶壺・一次 60 g',price:900,rq:.58,batch:60,lore:'日本茶的焙烙拿來烘咖啡，在瓦斯爐上不停搖晃。煙很大，但香氣迷人。'},{id:'behmor',name:'Behmor 2000AB',type:'家用電熱滾筒・一次 400 g',price:13000,rq:.7,batch:400,lore:'長得像烤箱的家用烘豆機，容量大、排煙少，偏向中深焙。'},
+ {id:'hottop',name:'Hottop KN-8828B',type:'家用電熱滾筒・一次 250 g',price:30000,rq:.78,batch:250,lore:'台灣製的經典家用滾筒機，有觀景窗和冷卻盤，很多烘豆師的第一台。'},{id:'ikawa',name:'IKAWA Home',type:'熱風・App 曲線・一次 100 g',price:38000,rq:.8,batch:100,lore:'用手機選曲線的熱風樣品機，產地的尋豆師人手一台。'},
+ {id:'bullet',name:'Aillio Bullet R1 V2',type:'電熱感應滾筒・一次 1 kg',price:95000,rq:.88,batch:1000,lore:'感應加熱的 1 公斤機，紅外線量豆溫，小型烘豆坊的主力。'},{id:'stronghold',name:'Stronghold S7 Pro',type:'智慧熱風＋鹵素・一次 850 g',price:180000,rq:.95,batch:850,lore:'直立式智慧烘豆機，可以完整重現冠軍的烘焙曲線。'}
+].forEach(r=>{if(!ROASTERS.find(x=>x.id===r.id))ROASTERS.push(r);});ROASTERS.sort((a,b)=>a.price-b.price);
+KETTLES.push({id:'fish',name:'泰摩 魚03 手沖壺',type:'細口・600 ml・不能控溫',cap:600,stab:.85,temp:0,price:1100,lore:'壺嘴像魚嘴，出水垂直好控制，價格親民。'},{id:'buono',name:'Hario Buono 雲朵壺',type:'鵝頸・1 L・不能控溫',cap:1000,stab:.82,temp:0,price:1600,lore:'蜂巢狀壺身的經典手沖壺，全世界咖啡店都看得到。'},
+ {id:'kinto',name:'KINTO Pour Over Kettle',type:'細口・900 ml・不能控溫',cap:900,stab:.8,temp:0,price:2300,lore:'霧面不鏽鋼加木把手，北歐風吧台的標準配備。'},{id:'staggpo',name:'Fellow Stagg 直火壺',type:'細鵝頸・1 L・壺蓋內建溫度計',cap:1000,stab:.95,temp:0,th:1,price:3500,lore:'不插電的 Stagg，壺蓋上就有溫度計，放在爐上自己煮。'},
+ {id:'takahiro',name:'Takahiro 雫 0.5 L',type:'極細口・500 ml・不能控溫',cap:500,stab:.97,temp:0,price:3800,lore:'日本職人愛用的極細口壺，可以一滴一滴點水。'},{id:'fisht',name:'泰摩 魚 Smart 溫控壺',type:'細口・600 ml・恆溫',cap:600,stab:.9,temp:1,price:3200,lore:'魚嘴壺的溫控版，升溫快、握把順手。'},
+ {id:'buonot',name:'Hario Buono 溫控壺',type:'鵝頸・800 ml・恆溫',cap:800,stab:.86,temp:1,price:4200,lore:'雲朵壺加上底座和溫控，熟悉的手感不用再顧火。'},{id:'yukiwa',name:'YUKIWA M-5 手沖壺',type:'不鏽鋼細口・750 ml・不能控溫',cap:750,stab:.9,temp:0,price:6500,lore:'燕三條職人打造，喫茶店吧台上的夢幻逸品。'});
+TOOLS.push({id:'scale',name:'智慧電子秤',type:'注水時即時顯示流速（g/s）',price:1800,lore:'會算流速的咖啡秤。看得到每秒幾克，手才練得穩。'},{id:'blower',name:'清潔吹球',type:'每次磨完吹一吹，磨豆機髒得慢三成',price:150,lore:'相機用的吹球，吹掉刀盤上的殘粉。'},{id:'brush',name:'清潔毛刷組',type:'殘粉刷得乾淨，18 天沒清才會發霉',price:300,lore:'豬鬃刷加細刷，刀盤的每個角落都刷得到。'},
+ {id:'rdt',name:'RDT 噴霧瓶',type:'磨豆前噴一下除靜電，乾淨度 +0.3',price:120,lore:'磨豆前在豆子上噴一點水霧，細粉就不會到處黏。'},{id:'sieve',name:'篩粉器',type:'篩掉三成細粉，後段不容易塞水',price:2200,lore:'把最細的粉篩掉，杯子更乾淨，但也會損失一點濃度。'},{id:'paper',name:'麻纖維濾紙',type:'流速穩定、沒有紙味，乾淨度 +0.4',price:260,lore:'Abaca 麻纖維濾紙，選手們比賽都帶自己的濾紙。'},
+ {id:'lily',name:'力狸 Lilydrip',type:'放進錐形濾杯撐開粉床，均勻度與乾淨度 +0.3',price:650,lore:'一顆放在濾杯底部的陶瓷小塔，讓粉層變薄、水流分散。'},{id:'thermos',name:'保溫熱水瓶',type:'中途加水，水溫不會掉',price:1200,lore:'吧台旁邊一瓶滾燙的熱水，手沖壺隨時補滿。'},{id:'airscape',name:'真空儲豆罐',type:'賞味期延長 6 天',price:1500,lore:'壓下內蓋把空氣擠出去，豆子老得慢。'},
+ {id:'cupset',name:'杯測匙與杯測碗',type:'向尋豆師杯測樣品只要 NT$50',price:900,lore:'自己帶杯測匙，尋豆師就知道你是內行人。'},{id:'refract',name:'濃度計',type:'每沖一杯多得 1 點經驗',price:6000,lore:'滴一滴咖啡就知道濃度和萃取率，進步看得見。'},{id:'server',name:'玻璃分享壺',type:'出杯更體面，小費 +10%',price:500,lore:'先滴進分享壺、搖一搖再倒進杯子，風味更均勻。'},
+ {id:'cups',name:'職人陶杯組',type:'客人喝得更開心，小費 +20%',price:2400,lore:'手拉坯的陶杯，每一只的釉色都不一樣。'},{id:'apron',name:'職人圍裙',type:'看起來更專業，更容易累積魅力',price:1600,lore:'帆布加皮革肩帶，穿上去就有架勢。'});
 const KPRICE={},TPRICE={};KETTLES.forEach(k=>KPRICE[k.id]=k.price);TOOLS.forEach(k=>TPRICE[k.id]=k.price);
 const WATERS={tap:{n:'自來水',fr:.92,sw:.97,bt:1.06,cl:-1,d:'有氯味，香氣和乾淨度打折'},filter:{n:'過濾水',fr:1,sw:1,bt:1,cl:0,d:'乾淨、中性'},mineral:{n:'礦泉水',fr:1.06,sw:1.04,bt:.97,cl:.6,d:'礦物質適中，香氣和甜感更好'}};
 /* 偶爾上門的厲害咖啡師：關係好了會教你配方、幫你牽線 */
@@ -4970,7 +5000,7 @@ function mig(s){
 /* ---------- 經驗、魅力 ---------- */
 const lvOf=xp=>1+Math.floor(Math.sqrt((xp||0)/30));
 const xpFor=lv=>30*(lv-1)*(lv-1);
-function gain(xp,ch){const s=S(),l0=lvOf(s.xp);s.xp+=xp||0;s.charm=Math.max(0,Math.min(100,(s.charm||0)+(ch||0)));const l1=lvOf(s.xp);if(l1>l0)setTimeout(()=>{toast('升級！咖啡師等級 '+l1);SFX.p('levelup');},700);}
+function gain(xp,ch){const s=S(),l0=lvOf(s.xp);s.xp+=xp||0;s.charm=Math.max(0,Math.min(100,(s.charm||0)+(ch||0)+(ch>0&&s.tools&&s.tools.apron&&Math.random()<.35?1:0)));const l1=lvOf(s.xp);if(l1>l0)setTimeout(()=>{toast('升級！咖啡師等級 '+l1);SFX.p('levelup');},700);}
 /* ---------- 自烘豆：生豆 × 烘焙度 × 品質 ---------- */
 const qOf=id=>{const B=beanOf(id);return B?(B.q||80):80;};
 const baseOf=id=>{const B=beanOf(id);return B?(B.base||B.id):id;};
@@ -4984,7 +5014,7 @@ function ensureBean(id){if(/^L\d/.test(id))return mkBatch(id);if(!/^r\./.test(id
   BEANS.push(o);return o;}
 
 /* ---------- 豆子批次：每一批有編號和烘焙日，養豆與走味會改變風味 ---------- */
-function ageInfo(roast,d){const rest=Math.max(2,Math.round(12-2*roast)),stale=Math.round(35-4*roast),k=d>stale?Math.min(1,(d-stale)/30):0;
+function ageInfo(roast,d){const rest=Math.max(2,Math.round(12-2*roast)),stale=Math.round(35-4*roast)+(S()&&S().tools&&S().tools.airscape?6:0),k=d>stale?Math.min(1,(d-stale)/30):0;
   return {rest,stale,k,r:d<rest?d/rest:1,st:d<rest?'養豆中':!k?'最佳賞味':k<.5?'開始走味':'走味',cls:d<rest?'rest':!k?'peak':k<.5?'fade':'stale',
     note:d<rest?'再 '+(rest-d)+' 天進入賞味期':!k?'賞味期還有 '+(stale-d)+' 天':k<1?'香氣正在流失':'香氣幾乎散光了'};}
 const freshF=(roast,d)=>{const A=ageInfo(roast,d);return d<A.rest?.55+.45*A.r:1-.55*A.k;};
@@ -5315,10 +5345,10 @@ const AN=document.createElement('div');AN.className='brew-anim';AN.hidden=true;d
 function brewAnim(opt,done){const B=beanOf(opt.bean)||{roast:3},col=roastCol(B.roast),br=opt.brewer,press=br==='press',sw=br==='switch',Gd=GRINDERS.find(g=>g.id===opt.grinder)||GRINDERS[0];
   if(matchMedia('(prefers-reduced-motion:reduce)').matches)return done(null);
   const kind=Gd.id==='blade'?'blade':/電動/.test(Gd.type)?'elec':'hand',rows=GS[Gd.id]||GS.c40,gh=rows.length*8,gy=204-gh,gp=Object.assign({},palOf(Gd.id),{H:null,K:null});
-  const KT=kettleNow(),kp=palOf(KT.id),hasTh=!!S().tools.thermo,setT=S().last.temp;
+  const KT=kettleNow(),kp=palOf(KT.id),hasTh=!!S().tools.thermo||!!KT.th,setT=S().last.temp;
   const dose=DOSE,target=Math.round(dose*opt.ratio),maxPour=dose*18+6,CAPW=press?330:sw?290:200,grind=S().last.grind;
-  const flat=['orea','kalita','origami_w'].includes(br),topW=br==='solo'?40:58,botW=flat?34:br==='solo'?10:14,bp=palOf(br);
-  const BF={v60:1.2,origami_c:1.3,solo:1.3,cone:1,orea:1,origami_w:.95,kalita:.75,switch:1.05},rate=4.2*Math.max(.5,Math.min(1.6,grind/700))*(BF[br]||1)*(1-Gd.fines*1.2);
+  const flat=['orea','kalita','origami_w','kalita102','melitta','beehouse','april','staggx','b75','december','tricolate','pulsar'].includes(br),topW=br==='solo'?40:58,botW=flat?34:br==='solo'?10:14,bp=palOf(br);
+  const BF={v60:1.2,origami_c:1.3,solo:1.3,cone:1,orea:1,origami_w:.95,kalita:.75,switch:1.05},rate=4.2*Math.max(.5,Math.min(1.6,grind/700))*(BF[br]||(DRIPPER[br]?Math.max(.6,Math.min(1.5,DRIPPER[br].q)):1))*(1-Gd.fines*1.2);
   const dpath='M'+(216-topW/2)+' 98h'+topW+'l-'+(topW-botW)/2+' 34h-'+botW+'z';
   const beans=Array.from({length:12},(_,i)=>'<ellipse class="bn" cx="'+(70+(i%5)*6)+'" cy="'+(gy-26)+'" rx="3.4" ry="2.3" fill="'+col+'" style="animation-delay:'+(i*.05)+'s"/>').join('');
   AN.innerHTML='<div class="ba-box"><svg viewBox="0 0 300 230" width="100%" aria-hidden="true"><defs><clipPath id="baClip"><path d="'+(press?'M197 100h38v104h-38z':dpath)+'"/></clipPath></defs>'+
@@ -5346,7 +5376,7 @@ function brewAnim(opt,done){const B=beanOf(opt.bean)||{roast:3},col=roastCol(B.r
   if(cup){cup.style.transformBox='fill-box';cup.style.transformOrigin='50% 100%';cup.style.transform='scaleY(0)';}
   kt.style.transformBox='fill-box';kt.style.transformOrigin='35% 60%';st.style.opacity=0;
   let stage='beans',prog=0,hold=false,ang=0,last=performance.now(),raf=0,lastS=0,ended=false;
-  let Tb=setT,cool=0,kw=Math.max(60,KT.cap-120);const hbox=AN.querySelector('.ba-heat');if(KT.id==='pot'){const b3=AN.querySelector('[data-fl="3"]');b3.disabled=true;b3.style.opacity=.3;}
+  let feNow=0,Tb=setT,cool=0,kw=Math.max(60,KT.cap-120);const hbox=AN.querySelector('.ba-heat');if(KT.id==='pot'){const b3=AN.querySelector('[data-fl="3"]');b3.disabled=true;b3.style.opacity=.3;}
   let pouring=false,flow=5,t=0,started=false,poured=0,Wd=0,cupG=0,segs=0,lastStop=-99,open=true,closedT=0,lastPS=0,clog=0,warned=false;const PLG=[],VW=[];
   const fm=x=>Math.floor(x/60)+':'+String(Math.floor(x%60)).padStart(2,'0');
   function toGrind(){stage='grind';cap.textContent='磨豆・'+fmtGrind(Gd,grind).split('・')[0];tip.textContent=kind==='hand'?'按住或連點畫面，轉動把手':kind==='blade'?'按住畫面，按下砍豆機':'按住畫面，啟動磨豆機';}
@@ -5375,14 +5405,14 @@ function brewAnim(opt,done){const B=beanOf(opt.bean)||{roast:3},col=roastCol(B.r
     else if(stage==='heat'){Tb=Math.min(100,Tb+dt*(Tb<94?5.5:2));$q('baHT').textContent=hasTh?Tb.toFixed(0)+'°C':'？°C';$q('baHH').textContent=Tb<75?'壺底冒出小泡泡':Tb<86?'泡泡變多，開始有聲音':Tb<95?'大泡泡一串串往上衝':'大滾沸騰！';}
     else if(stage==='pour'){const sc=(!pouring&&poured>=target-2)||(press&&!pouring&&started)?16:6,g=dt*sc;
       if(pouring&&kw<=0){setPour(false);tip.textContent='壺裡沒水了，先按「加水」';}
-      if(pouring){const fe=flow*(KT.id==='pot'?1.35:1)*Math.max(.3,1+Math.sin(now/170)*(1-KT.stab)*.9+(Math.random()-.5)*(1-KT.stab)*.8),a=fe*g;kw-=a;poured+=a;Wd+=a;const L=PLG[PLG.length-1];L.ml+=a;L.e=t;clog+=(flow>=8?1:flow>=5?.35:.1)*Gd.fines*Math.pow(700/grind,1.5)*a/60;
+      if(pouring){const fe=flow*(KT.id==='pot'?1.35:1)*Math.max(.3,1+Math.sin(now/170)*(1-KT.stab)*.9+(Math.random()-.5)*(1-KT.stab)*.8),a=fe*g;feNow=fe;kw-=a;poured+=a;Wd+=a;const L=PLG[PLG.length-1];L.ml+=a;L.e=t;clog+=(flow>=8?1:flow>=5?.35:.1)*Gd.fines*Math.pow(700/grind,1.5)*a/60;
         if(!warned&&clog>.8&&!press){warned=true;tip.textContent='細粉被沖到濾紙上堵住了，水下得很慢（塞水）';}if(now-lastPS>1650){SFX.p('pour');lastPS=now;}if(poured>=maxPour){setPour(false);tip.textContent='水加太多了，已經到上限';}else if(Wd>=CAPW){setPour(false);tip.textContent='快滿出來了！等水位降下來再注水';}}
       const dr=Math.max(0,Wd-2*dose);if(!press&&open&&dr>0){const d=Math.min(dr,rate/(1+1.6*clog)*Math.min(1,dr/25+.15)*g);Wd-=d;cupG+=d;}
       if(started){t+=g;if(!KT.temp)cool+=g*.03;}if(sw&&!open&&Wd>2*dose)closedT+=g;
       kt.style.transform=pouring?'translate(4px,6px) rotate(24deg)':'';st.style.opacity=pouring?.95:0;st.style.strokeWidth=flow<4?1.6:flow<6?2.6:4.2;st.style.strokeDashoffset=(-now/10).toFixed(0);
       const L=Math.min(1,Wd/CAPW);if(press){water.setAttribute('y',(204-104*L).toFixed(1));water.setAttribute('height',(104*L).toFixed(1));}
       else{const hh=4+30*Math.min(1,Math.max(0,Wd-dose)/(CAPW-dose));water.setAttribute('y',(132-hh).toFixed(1));water.setAttribute('height',hh.toFixed(1));cup.style.transform='scaleY('+Math.min(1,cupG/270).toFixed(3)+')';AN.classList.toggle('dripping',open&&dr>1);}
-      $q('baT').textContent=fm(t);$q('baK').textContent='壺 '+Math.max(0,Math.round(kw))+' ml・'+(KT.temp?setT+'°C 恆溫':hasTh?(Tb-cool).toFixed(0)+'°C':'？°C');$q('baW').textContent=Math.round(poured)+' / '+target+' g';$q('baW').className=poured>target+8?'over':poured>=target-4?'hit':'';$q('baS').textContent='第 '+segs+' 段'+(sw?'・浸泡 '+fm(closedT):'');
+      $q('baT').textContent=fm(t);$q('baK').textContent='壺 '+Math.max(0,Math.round(kw))+' ml・'+(KT.temp?setT+'°C 恆溫':hasTh?(Tb-cool).toFixed(0)+'°C':'？°C')+(S().tools.scale?'・流速 '+(pouring?feNow.toFixed(1):'0.0')+' g/s':'');$q('baW').textContent=Math.round(poured)+' / '+target+' g';$q('baW').className=poured>target+8?'over':poured>=target-4?'hit':'';$q('baS').textContent='第 '+segs+' 段'+(sw?'・浸泡 '+fm(closedT):'');
       if(pouring&&poured>=target&&poured-flow*g<target){setPour(false);tip.textContent='到目標水量了，等它滴完'+(press?'，再壓下濾網':'');SFX.p('hint');}
       if(!press&&started&&!pouring&&poured>=target-2&&dr<1&&open){finish();return;}}
     raf=requestAnimationFrame(loop);}
@@ -5393,7 +5423,7 @@ function brewAnim(opt,done){const B=beanOf(opt.bean)||{roast:3},col=roastCol(B.r
   AN.querySelectorAll('[data-fl]').forEach(b=>b.onclick=()=>{flow=+b.dataset.fl;AN.querySelectorAll('[data-fl]').forEach(x=>x.setAttribute('aria-pressed',x===b));});
   if(bValve)bValve.onclick=()=>{open=!open;if(!open)VW.push([Math.round(t),null]);else if(VW.length)VW[VW.length-1][1]=Math.round(t);bValve.textContent=open?'關上閥門':'打開閥門';bValve.classList.toggle('stop',!open);vi.setAttribute('fill',open?'#5fbf7a':'#d9705f');vi.setAttribute('x',open?228:222);SFX.p('tick');};
   $q('baHeatOk').onclick=()=>{if(stage!=='heat')return;Tb=Math.round(Tb);SFX.p('tick');toPour();};
-  $q('baRefill').onclick=()=>{if(stage!=='pour')return;if(pouring)setPour(false);kw=KT.cap;if(started)t+=KT.temp?20:12;if(!KT.temp)Tb-=4;lastStop=t;tip.textContent=KT.temp?'加滿水了，等它回到 '+setT+'°C（花了 20 秒）':'加了熱水瓶的水，水溫掉了一點（花了 12 秒）';SFX.p('pour');};
+  $q('baRefill').onclick=()=>{if(stage!=='pour')return;if(pouring)setPour(false);kw=KT.cap;if(started)t+=KT.temp?20:12;if(!KT.temp&&!S().tools.thermos)Tb-=4;lastStop=t;tip.textContent=KT.temp?'加滿水了，等它回到 '+setT+'°C（花了 20 秒）':''+(S().tools.thermos?'保溫瓶的水夠熱，水溫沒掉（花了 12 秒）':'加了熱水瓶的水，水溫掉了一點（花了 12 秒）');SFX.p('pour');};
   bEnd.onclick=()=>{if(stage!=='pour')return;if(!started){tip.textContent='還沒注水呢';return;}finish();};
   AN.querySelector('.ba-skip').onclick=()=>finish(true);
   setTimeout(()=>{if(!ended){toGrind();last=performance.now();raf=requestAnimationFrame(loop);}},900);}
@@ -5446,11 +5476,12 @@ const newsHTML=()=>{const s=S();return '<div class="panel news"><h3 class="c-h3"
 const colorCount=keys=>{const s=S(),hex=keys.map(k=>C_[k][0]);return Object.keys(SK).filter(id=>ownsGear(id)&&(s.skins[id]||[0]).some(i=>SK[id][i]&&hex.includes(SK[id][i][1]))).length;};
 const limCount=()=>{const s=S();return Object.keys(SK).reduce((a,id)=>a+(ownsGear(id)?(s.skins[id]||[0]).filter(i=>SK[id][i]&&SK[id][i][4]>=1.3).length:0),0);};
 const nB=s=>s.brewers.length+s.home.brewers.length,nG=s=>s.grinders.length+s.home.grinders.length,nSt=s=>Object.values(s.rel).reduce((a,R)=>a+(R.ch||0),0),nCp=s=>CC.filter(X=>s.cw[X.ci]).length;
+const dexCount=()=>G.BREWERS.concat(GRINDERS,ROASTERS,KETTLES,TOOLS).filter(x=>ownsGear(x.id)).length;
 const ACH=[
- ['b3','濾杯新手','擁有 3 個濾杯',s=>nB(s)>=3],['b6','濾杯控','擁有 6 個濾杯',s=>nB(s)>=6],['b9','濾杯博物館館長','收集全部 9 種濾杯',s=>nB(s)>=9],
+ ['b3','濾杯新手','擁有 3 個濾杯',s=>nB(s)>=3],['b6','濾杯控','擁有 6 個濾杯',s=>nB(s)>=6],['b9','濾杯博物館館長','擁有 9 個濾杯',s=>nB(s)>=9],['b18','濾杯圖書館','擁有 18 個濾杯',s=>nB(s)>=18],['g20','磨豆機博物館','擁有 20 台磨豆機',s=>nG(s)>=20],['t10','道具箱爆滿','擁有 10 種小道具',s=>Object.keys(s.tools).length>=10],['all50','器材收藏家','圖鑑收集 50 樣',s=>dexCount()>=50],['all100','器材百科全書','圖鑑收集 100 樣',s=>dexCount()>=100],
  ['g3','磨豆機玩家','擁有 3 台磨豆機',s=>nG(s)>=3],['g6','刀盤研究員','擁有 6 台磨豆機',s=>nG(s)>=6],['g10','磨豆機敗家王','擁有 10 台磨豆機',s=>nG(s)>=10],['gpro','商用等級','擁有 EK43、EG-1、Ditting 或 Mazzer ZM 其中一台',s=>['ek43','eg1','ditting','zm'].some(ownsGear)],
- ['k3','壺癮','擁有 3 支手沖壺',s=>s.kettles.length>=3],['k7','壺中仙','收集全部 7 支手沖壺',s=>s.kettles.length>=7],['r3','烘豆玩家','擁有 3 台烘豆機',s=>s.roasters.length>=3],['rmax','烘豆坊主','買下 Giesen W1A',s=>s.roasters.includes('giesen')],
- ['tool','工具人','溫度計、濾水器、佈粉針全部到手',s=>s.tools.thermo&&s.tools.filter&&s.tools.wdt],
+ ['k3','壺癮','擁有 3 支手沖壺',s=>s.kettles.length>=3],['k7','壺中仙','擁有 7 支手沖壺',s=>s.kettles.length>=7],['k15','壺界霸主','收集全部 15 支手沖壺',s=>s.kettles.length>=15],['r3','烘豆玩家','擁有 3 台烘豆機',s=>s.roasters.length>=3],['rmax','烘豆坊主','買下 Giesen W1A',s=>s.roasters.includes('giesen')],
+ ['tool','工具人','溫度計、濾水器、佈粉針都到手',s=>s.tools.thermo&&s.tools.filter&&s.tools.wdt],
  ['cblack','黑武士','擁有 4 件黑色的器材',s=>colorCount(['black'])>=4],['cwhite','純白主義','擁有 4 件白色的器材',s=>colorCount(['white','snow'])>=4],['ccopper','銅臭味（褒義）','擁有 3 件銅製／銅色的器材',s=>colorCount(['copper'])>=3],
  ['cred','紅色警戒','擁有 3 件紅色的器材',s=>colorCount(['red','sunset'])>=3],['csteel','鋼鐵人','擁有 4 件不鏽鋼／銀色的器材',s=>colorCount(['steel'])>=4],['cwood','木質調','擁有 2 件木紋的器材',s=>colorCount(['wood','walnut','zebra'])>=2],
  ['cgreen','抹茶控','擁有 3 件綠色系的器材',s=>colorCount(['matcha','mint','teal','green','olive'])>=3],['cgold','金光閃閃','擁有 2 件金色／黃銅／玫瑰金的器材',s=>colorCount(['gold','brass','rosegold'])>=2],['lim6','限定款大戶','買到 6 件限定款',s=>limCount()>=6],['cpink','少女心','擁有 2 件粉紅色的器材',s=>colorCount(['pink'])>=2],['lim1','限量是殘酷的','買到 1 件限定款',s=>limCount()>=1],['lim3','限定款獵人','買到 3 件限定款',s=>limCount()>=3],['c40x','C40 色票本','收集 5 種 C40 配色',s=>ownsGear('c40')&&(s.skins.c40||[0]).length>=5],
@@ -5524,13 +5555,13 @@ function buyHTML(){const s=S();let h=nav()+head('採購',buyTab==='store'?'好�
        (ready?'<div><button class="c-pill hot" data-hs="'+H.id+'">💬 '+H.name+'有話想跟你說</button></div>':'')+'</div></div><div class="c-cards wide" style="margin-top:10px">'+
        items.map(([id,need])=>{const B=beanOf(id),lk=tr<need,cq=cupd(H.id,id),dl=deal(H.id,id),gp=greenPrice(id,H.id);
         return '<div class="c-card'+(B.sig?' sigc':'')+'"><div class="bagrow">'+bag(id,H.id,1)+'<div><b>'+(B.sig?'★ ':'')+B.name+' <small>生豆</small></b><small>'+B.sub+'・建議 '+ROAST_NAME(B.roast)+'</small><small>'+B.tags.join('・')+'</small>'+info(id)+'</div></div>'+
-        (lk?'<span class="pr">🔒 信任 '+need+' 解鎖</span>':'<div class="qline"><span>宣稱 '+(CLAIM[id]||84)+' 分</span>'+(cq!=null?'<b class="'+(cq>=(CLAIM[id]||84)?'up':'dn')+'">杯測 '+cq+' 分</b>':'<button class="c-pill" data-cup="'+H.id+':'+id+'"'+(s.money<100?' disabled':'')+'>☕ 杯測樣品 NT$100</button>')+'</div>'+
+        (lk?'<span class="pr">🔒 信任 '+need+' 解鎖</span>':'<div class="qline"><span>宣稱 '+(CLAIM[id]||84)+' 分</span>'+(cq!=null?'<b class="'+(cq>=(CLAIM[id]||84)?'up':'dn')+'">杯測 '+cq+' 分</b>':'<button class="c-pill" data-cup="'+H.id+':'+id+'"'+(s.money<(s.tools.cupset?50:100)?' disabled':'')+'>☕ 杯測樣品 NT$'+(s.tools.cupset?50:100)+'</button>')+'</div>'+
           '<span class="pr">'+(dl&&dl.rate<1?'<s>'+NT(Math.round(B.price*.55))+'</s> ':'')+NT(gp)+'／100 g 生豆'+(dl&&dl.rate<1?'（議價成功）':'')+'</span>'+
           '<div class="buyrow">'+[100,250,500].map(g=>{const p=Math.round(gp*g/100);return '<button data-ho="'+H.id+':'+id+':'+g+'"'+(s.money<p?' disabled':'')+'>'+g+' g<br>'+NT(p)+'</button>';}).join('')+(dl?'':'<button data-bar="'+H.id+':'+id+'">議價</button>')+'</div>')+'</div>';}).join('')+'</div></div>';}).join('');
     const pend=s.orders;if(pend.length)h+='<div class="panel"><h3 class="c-h3">運送中的訂單</h3><div class="c-list">'+pend.map(o=>'<div><span>'+esc(beanOf(o.id).name)+' 生豆 '+o.g+' g</span><small>第 '+o.at+' 天到貨</small></div>').join('')+'</div></div>';}
   if(buyTab==='gear'){h+='<p class="label">器材行每天進貨不一樣：有時候打折，有時候賣光。'+(s.day%10===0?'<b style="color:var(--gold)">今天週年慶，全館至少 8 折！</b>':'每逢第 10、20、30… 天是週年慶。')+'買來的器材，店裡放不下就先收在家裡。</p>';
     const row=(kind,list,price,nameOf,subOf)=>'<div class="c-cards">'+list.map(it=>{const id=it.id,own=ownsGear(id),Q=shopPrice(kind,id),M=Q.M,sk0=Q.sk0,SL=SK[id],has=(s.skins[id]||[0]).includes(sk0);
-      return '<div class="c-card'+(own?' own':'')+(M.off&&!own?' sale':'')+(Q.mult>1&&!M.out?' sigc':'')+'">'+(M.off&&!own&&!M.out?'<em class="tag">'+Math.round(M.off*100)+'% OFF</em>':'')+'<div class="gic">'+spr(id,sk0)+'</div><b>'+esc(nameOf(it))+'</b><small>'+esc(subOf(it))+'</small>'+realLink(id,nameOf(it))+(SL&&SL.length>1?'<small class="skn"><i style="background:'+SL[sk0][1]+'"></i>今日到貨：'+SL[sk0][0]+'</small>':'')+
+      return '<div class="c-card'+(own?' own':'')+(M.off&&!own?' sale':'')+(Q.mult>1&&!M.out?' sigc':'')+'">'+(M.off&&!own&&!M.out?'<em class="tag">'+Math.round(M.off*100)+'% OFF</em>':'')+'<div class="gic">'+spr(id,sk0)+'</div><b>'+esc(nameOf(it))+'</b><small>'+esc(subOf(it))+'</small><button class="c-pill gi" data-ginfo="'+kind+':'+id+'">ⓘ 效果與比較</button>'+realLink(id,nameOf(it))+(SL&&SL.length>1?'<small class="skn"><i style="background:'+SL[sk0][1]+'"></i>今日到貨：'+SL[sk0][0]+'</small>':'')+
        (own?'<span class="pr">✓ 已擁有</span>'+(SL&&!has&&!M.out?'<div class="buyrow"><button data-gs="'+id+':'+sk0+':'+Q.sp+'"'+(s.money<Q.sp?' disabled':'')+'>加購這個配色 '+NT(Q.sp)+'</button></div>':''):M.out?'<span class="pr out">售完・約 '+restock(s.day,id)+' 天後補貨</span>':'<span class="pr">'+(Q.price<Q.list?'<s>'+NT(Q.list)+'</s> ':'')+NT(Q.price)+'</span><div class="buyrow"><button data-gb="'+kind+':'+id+'"'+(s.money<Q.price?' disabled':'')+'>買下</button></div>')+'</div>';}).join('')+'</div>';
     const SEC=('<h3 class="c-h3">濾杯與器具</h3>'+row('brewer',G.BREWERS.filter(b=>BREWER_PRICE[b.id]),BREWER_PRICE,b=>b.name,b=>b.sub)+'<h3 class="c-h3" style="margin-top:14px">烘豆機</h3><p class="label">烘豆機越好，烘出來的豆子品質越高；後段比賽一定要有好機器。</p>'+row('roaster',ROASTERS.filter(r=>r.price),RPRICE,r=>r.name,r=>r.type+'・品質 '+Math.round(r.rq*100))+'<h3 class="c-h3" style="margin-top:14px">磨豆機</h3>'+row('grinder',GRINDERS.filter(g=>GRINDER_PRICE[g.id]).sort((a,b)=>GRINDER_PRICE[a.id]-GRINDER_PRICE[b.id]),GRINDER_PRICE,g=>g.name,g=>g.type+'・細粉 '+Math.round(g.fines*100)+'%')+'<h3 class="c-h3" style="margin-top:14px">手沖壺</h3><p class="label">壺嘴越細、越穩，水流越好控制，杯子越乾淨均勻。太小的壺沖到一半要加水；沒有恆溫的壺要自己煮水、看溫度。</p>'+row('kettle',KETTLES.filter(k=>k.price),KPRICE,k=>k.name,k=>k.type+'・穩定度 '+Math.round(k.stab*100))+'<h3 class="c-h3" style="margin-top:14px">小道具</h3>'+row('tool',TOOLS,TPRICE,k=>k.name,k=>k.type)).split(/(?=<h3 class="c-h3")/);h+=catChips()+SEC.filter((x,i)=>gearCat==='all'||GCATS[i+1][0]===['brewer','roaster','grinder','kettle','tool'][i]&&['brewer','roaster','grinder','kettle','tool'][i]===gearCat).join('');}
   return h;}
@@ -5591,7 +5622,7 @@ function gearHTML(){const s=S();let h=nav()+head('器材庫',gearTab==='use'?'�
    '<div class="seg" role="group">'+[['use','器材庫'],['dex','圖鑑']].map(([k,n])=>'<button data-gtab="'+k+'" aria-pressed="'+(gearTab===k)+'">'+n+'</button>').join('')+'</div>';
   const bn=id=>G.BREWERS.find(b=>b.id===id),gn=id=>GRINDERS.find(g=>g.id===id);
   if(gearTab==='use'){
-    const item=(kind,id,where)=>{const it=kind==='brewer'?bn(id):gn(id);return '<div class="gitem">'+'<div class="gic">'+(kind==='brewer'?icoBrewer(id):icoGrinder(it))+'</div><div><b>'+esc(it.name)+'</b><small>'+esc(kind==='brewer'?it.sub:it.type)+'</small>'+(kind==='grinder'?'<small class="care '+careOf(id).cls+'">'+careOf(id).txt+'・清潔後磨了 '+careOf(id).c+' 杯</small>':'')+((s.skins[id]||[0]).length>1?'<div class="skins">'+(s.skins[id]).map(i=>'<button data-sk="'+id+':'+i+'" aria-pressed="'+(skinOf(id)===i)+'" title="'+SK[id][i][0]+'"><i style="background:'+SK[id][i][1]+'"></i>'+SK[id][i][0]+'</button>').join('')+'</div>':SK[id]&&SK[id].length>1?'<small>'+SK[id][skinOf(id)][0]+'</small>':'')+''+realLink(id,it.name)+'</div><div class="gbtns">'+(kind==='grinder'?'<button data-clean="'+id+'">清潔</button>':'')+'<button data-mv="'+kind+':'+id+'">'+(where==='shop'?'收回家':'帶去店裡')+'</button></div></div>';};
+    const item=(kind,id,where)=>{const it=kind==='brewer'?bn(id):gn(id);return '<div class="gitem">'+'<div class="gic">'+(kind==='brewer'?icoBrewer(id):icoGrinder(it))+'</div><div><b>'+esc(it.name)+'</b><small>'+esc(kind==='brewer'?it.sub:it.type)+'</small>'+(kind==='grinder'?'<small class="care '+careOf(id).cls+'">'+careOf(id).txt+'・清潔後磨了 '+careOf(id).c+' 杯</small>':'')+((s.skins[id]||[0]).length>1?'<div class="skins">'+(s.skins[id]).map(i=>'<button data-sk="'+id+':'+i+'" aria-pressed="'+(skinOf(id)===i)+'" title="'+SK[id][i][0]+'"><i style="background:'+SK[id][i][1]+'"></i>'+SK[id][i][0]+'</button>').join('')+'</div>':SK[id]&&SK[id].length>1?'<small>'+SK[id][skinOf(id)][0]+'</small>':'')+'<button class="c-pill gi" data-ginfo="'+kind+':'+id+'">ⓘ 效果與比較</button>'+realLink(id,it.name)+'</div><div class="gbtns">'+(kind==='grinder'?'<button data-clean="'+id+'">清潔</button>':'')+'<button data-mv="'+kind+':'+id+'">'+(where==='shop'?'收回家':'帶去店裡')+'</button></div></div>';};
     h+='<p class="label">只有放在店裡的器材能拿來沖咖啡。店裡位置有限（名聲越高店越大），其他的收在家裡，要用再拿出來。</p>'+
      '<div class="panel shop-shelf"><h3 class="c-h3">🏪 店裡<span class="label">濾杯 '+s.brewers.length+'/'+capB(s)+'・磨豆機 '+s.grinders.length+'/'+capG(s)+'</span></h3>'+s.brewers.map(id=>item('brewer',id,'shop')).join('')+s.grinders.map(id=>item('grinder',id,'shop')).join('')+'</div>'+
      '<div class="panel home-shelf"><h3 class="c-h3">🏠 家裡收藏</h3>'+((s.home.brewers.map(id=>item('brewer',id,'home')).join('')+s.home.grinders.map(id=>item('grinder',id,'home')).join(''))||'<span class="label">家裡還沒有器材</span>')+'</div>'+
@@ -5797,7 +5828,7 @@ window.shopRender=render;
 window.shopBack=()=>{if(!DL.hidden)return true;if(view==='lobby')return false;view=view==='person'?'regs':view==='comprun'?'comp':view==='notes'&&(notesFrom==='serve'||notesFrom==='comprun')?notesFrom:'lobby';res=null;hintOn=false;render();scrollTo(0,0);return true;};
 function settle(){const s=S(),t=s.today,X=curCust(),r=res,R=X.R;r.final=true;const sigAsk=X.c.ev==='sig',isSig=!!s.sig&&baseOf(s.last.bean)===s.sig;
   const mult=X.c.tries>1?.8:1;let pay=0,tip=0,dRep=0,dA=0,dL=0;const bud=X.c.budget*(sigAsk?1.4:1);
-  if(r.pass){const ex=r.sc>=X.target+(100-X.target)*.55;tip=Math.round((r.sc-X.target)/Math.max(1,100-X.target)*.5*bud/5*(1+R.a/150))*5;pay=Math.round(bud*mult*(isSig&&!sigAsk?1.15:1))+tip;dRep=ex?3:2;dA=ex?5:3;dL=2;
+  if(r.pass){const ex=r.sc>=X.target+(100-X.target)*.55;tip=Math.round((r.sc-X.target)/Math.max(1,100-X.target)*.5*bud/5*(1+R.a/150)*(1+(s.tools.server?.1:0)+(s.tools.cups?.2:0)))*5;pay=Math.round(bud*mult*(isSig&&!sigAsk?1.15:1))+tip;dRep=ex?3:2;dA=ex?5:3;dL=2;
     if(isSig){dA+=1;r.sigB=1;if(sigAsk)dRep+=1;}gain(5,ex?1:0);}
   else if(r.near){pay=Math.round(bud*.6*mult/5)*5;dRep=-1;dA=-1;}
   else{pay=0;dRep=-2;dA=-3;dL=-2;}if(!r.pass)gain(2,0);
@@ -5807,7 +5838,7 @@ function settle(){const s=S(),t=s.today,X=curCust(),r=res,R=X.R;r.final=true;con
 /* ---------- v8：手沖壺、水、磨豆機清潔、器材價格 ---------- */
 const kettleNow=()=>{const s=S(),id=s.kettles.includes(s.last&&s.last.kettle)?s.last.kettle:s.kettles[s.kettles.length-1];return KETTLES.find(k=>k.id===id)||KETTLES[0];};
 const waterNow=()=>{const s=S();let w=(s.last&&s.last.water)||(s.tools.filter?'filter':'tap');if(w==='mineral'&&(s.minml||0)<300)w=s.tools.filter?'filter':'tap';if(w==='filter'&&!s.tools.filter)w='tap';return Object.assign({id:w},WATERS[w]);};
-function careOf(id){const s=S(),c=s.care[id]||(s.care[id]={c:0,d:s.day}),days=s.day-c.d,mold=c.c>0&&days>=12,lv=Math.min(1,c.c/30);
+function careOf(id){const s=S(),c=s.care[id]||(s.care[id]={c:0,d:s.day}),days=s.day-c.d,mold=c.c>0&&days>=(s.tools.brush?18:12),lv=Math.min(1,c.c/(s.tools.blower?40:30));
   return {c:c.c,days,mold,lv,txt:mold?'發霉了！':lv>=.8?'很髒':lv>=.4?'有點髒':c.c?'還算乾淨':'剛清潔過',cls:mold?'stale':lv>=.8?'fade':lv>=.4?'rest':'peak'};}
 const PRM={brewer:BREWER_PRICE,grinder:GRINDER_PRICE,roaster:RPRICE,kettle:KPRICE,tool:TPRICE};
 function ownsGear(id){const s=S();return s.brewers.includes(id)||s.grinders.includes(id)||s.home.brewers.includes(id)||s.home.grinders.includes(id)||s.roasters.includes(id)||s.kettles.includes(id)||!!s.tools[id];}
@@ -5820,6 +5851,62 @@ const RQ={cone:'錐形濾杯 手沖',v60:'Hario V60 濾杯',orea:'OREA Brewer V4
 const realLink=(id,name)=>'<a class="imgl" href="https://www.google.com/search?tbm=isch&q='+encodeURIComponent(RQ[id]||name)+'" target="_blank" rel="noopener">🔍 看實物照片</a>';
 let gearCat='all';const GCATS=[['all','全部'],['brewer','濾杯'],['roaster','烘豆機'],['grinder','磨豆機'],['kettle','手沖壺'],['tool','小道具']];
 const catChips=()=>'<div class="chips ftl" style="margin:8px 0">'+GCATS.map(([k,n])=>'<button data-gcat="'+k+'" aria-pressed="'+(gearCat===k)+'">'+n+'</button>').join('')+'</div>';
+const vipF_=0;
+Object.assign(BREWER_PRICE,{kono:900,kasuya:650,mugen:450,flower:500,deep27:400,mountain:1200,ufo:1300,crystaleye:600,chemex:1800,kalita102:300,melitta:250,beehouse:700,april:1100,staggx:1900,b75:900,december:1500,tricolate:1700,pulsar:2400});
+Object.assign(GRINDER_PRICE,{c2:1500,c3:2600,q2:2200,xultra:5200,kinu:9500,x25:5000,skerton:1300,porlex:2000,pietro:14000,s3:3800,ode:11000,opus:6500,virtuoso:9000,wilfa:10000,t078:22000,df64:14000,zerno:45000,guatemala:70000});
+Object.assign(GLORE,{kono:'KONO 名門是日本錐形濾杯的元祖，肋骨只有下半段，水流慢、口感厚。',kasuya:'世界冠軍粕谷哲與 Hario 合作的版本，肋骨到一半就沒了，後段流速變慢。',mugen:'星形凹槽讓濾紙完全貼壁，水只能從粉層走，適合一次注完。',flower:'花瓣形的深溝讓空氣順利排出，膨脹漂亮、流速快。',deep27:'27 度的窄深錐，十克粉也能有厚厚的粉層。',mountain:'陶瓷職人的山形濾杯，多個開孔、流速快。',
+ ufo:'像飛碟的寬淺錐形，粉層薄、流速非常快。',crystaleye:'透明 PCTG 材質，直肋排氣，CP 值很高。',chemex:'1941 年誕生、進了現代美術館的玻璃壺，厚濾紙濾出極乾淨的咖啡。',kalita102:'扇形濾紙配三個小孔，日本喫茶店的老味道。',melitta:'濾紙手沖的發明者，單一小孔讓水停留久一點。',beehouse:'日本製陶瓷梯形濾杯，兩個孔，簡單又甜。',
+ april:'哥本哈根 April 咖啡設計的平底濾杯，大開孔、流速快。',staggx:'Fellow 的雙層真空不鏽鋼平底濾杯，保溫好。',b75:'泰摩的平底濾杯，底部幾乎全開，流速是平底濾杯裡最快的。',december:'可以旋轉底座調整孔數的平底濾杯，一杯多種流速。',tricolate:'直筒設計加上分水盤，水完全不繞流，萃取率可以衝很高。',pulsar:'無繞流直筒加底部閥門，天文學家咖啡迷設計的濾杯。',
+ c2:'泰摩最暢銷的入門手搖，鋁合金機身、便宜又耐用。',c3:'S2C 刀盤加上細刻度，入門價位就有好的均勻度。',q2:'可以塞進愛樂壓的小手搖，出差旅行的好朋友。',xultra:'輕巧的外調手搖，刻度一目了然。',kinu:'德國製全金屬手搖，無段微調、可以傳家。',x25:'Comandante 的輕量旅行版，塑料機身配同一顆刀盤。',
+ skerton:'陶瓷刀盤加玻璃罐，許多人的第一台手搖。',porlex:'日本製不鏽鋼細筒，陶瓷刀盤，露營必備。',pietro:'少見的直立平刀手搖，杯子乾淨得像電動平刀。',s3:'泰摩的旗艦手搖，外調刻度、折疊把手。',ode:'為手沖而生的家用平刀磨豆機，安靜、殘粉少。',opus:'Fellow 的入門錐刀機，從義式到手沖都能磨。',
+ virtuoso:'Encore 的升級版，數位定時、刀盤更好。',wilfa:'挪威冠軍 Tim Wendelboe 參與調校的平刀磨豆機。',t078:'泰摩的 78mm 渦輪刀盤，細粉極少、甜感突出。',df64:'單品豆倉、風箱吹殘粉，玩家最愛改刀盤的平台。',zerno:'低轉速、可換刀盤的精品家用機，要排隊才買得到。',guatemala:'Mahlkönig 的賣豆機，咖啡店櫃台後面那台一定是它。'});
+Object.assign(GS,{
+ chemex:['...lllllllll....','...wllllllll....','....wllllll.....','.....wllll......','.....nnnnnn.....','.....nnynnn.....','....llllllll....','...llccccccll...','..llccccccccll..','..lccccccccccl..','..llllllllllll..'],
+ trap:['.AAAAAAAAAAAA...','.CAAAAAAAAAABBB.','.CAAAAAAAAAAB.B.','..CAAAAAAAAB..B.','..CAAAAAAAABBB..','...CAAAAAAB.....','...CAAAAAAB.....','..BBBBBBBBBB....','..AAAAAAAAAA....'],
+ cyl:['...AAAAAAAA.....','...CAAAAAAB.....','...llllllll.....','...lwllllll.....','...lwllllll.....','...lcccccll.....','...lcccccll.....','...AAAAAAAA.....','....AAAAAA......','...BBBBBBBB.....'],
+ skerton:HAND.concat(['....AAAAAAAA....','....CAAAAAAB....','.....AAAAAA.....','......oooo......','.....llllll.....','....llllllll....','....lccccccl....','....lccccccl....','....llllllll....']),
+ pietro:['.........KK.....','.........KK.....','....HHHHHHH.....','......HH........','....AAAAAAAA....','....ACAAAAAB....','....ACAAAAAB....','....AyyAAAAB....','....ACAAAAAB....','....ACAAAAAB....','....mmmmmmmm....','....ACAAAAAB....','....AAAAAAAA....'],
+ ode:['......llll......','...AAAAAAAAAA...','...ACAAAAAAAB...','...ACAyyAAAAB...','...ACAyyAAAAB...','...ACAAAAAAAB...','...AAAAAAAAAB...','...AA.ssss.AB...','...AA.ssss.AB...','..AAAAAAAAAAAA..'],
+ wilfa:['.....AAAAAA.....','.....AAAAAA.....','.....mmmmmm.....','.....ACAAAB.....','.....ACAAAB.....','.....ACAAAB.....','.....ACAAAB.....','.....ssssss.....','.....ACAAAB.....','.....ACAAAB.....','....AAAAAAAA....'],
+ horoku:['................','.....AAAAAA.....','...AAAAAAAAAA...','..AAAoooAAAAAAAA','..AAAAAAAAAACCC.','...AAAAAAAAAA...','.....BBBBBB.....','................','....f...f.......','...fff.fff......','..dddddddddd....'],
+ behmor:['.AAAAAAAAAAAAAA.','.AddddddddddAyA.','.AdllllllllldAA.','.AdlqlqlqlqldAr.','.AdllqlqlqlldAA.','.AdllllllllldAw.','.AddddddddddAAA.','.AAAAAAAAAAAAAA.','..dd........dd..'],
+ hottop:['......mmm.......','......mmm.......','..AAAAAAAAAAA...','.AAAdddddAAAAA..','.AAdlqlqldAAyA..','.AAdqlqlqdAArA..','.AAAdddddAAAAA..','.AAAAAAAAAAAAA..','.ddsssssssdd....','.dd.sssss.dd....','.dddddddddddd...'],
+ stronghold:['....AAAAAAAA....','....AllllllA....','....AlqqqqlA....','....AllllllA....','....AAAAAAAA....','....AoooooAA....','....AowwwoAA....','....AoooooAA....','....AAAyAAAA....','....AAAAAAAA....','..ssssssssssss..','...AAAAAAAAAA...'],
+ buono:['.......d........','......BBB.......','.....AAAAA....B.','.mm.CAAAAAA..B..','m...AAAAAAA.B...','m..CAAAAAAAAB...','m..AAAAAAAAA....','.mmCAAAAAAAA....','...AAAAAAAAA....','...BBBBBBBBB....'],
+ takahiro:['.......d........','.....BBBBB......','....AAAAAAA.....','.mm.CAAAAAA....B','m...CAAAAAA...B.','m...CAAAAAA..B..','m...CAAAAAA.B...','.mm.CAAAAAAB....','....AAAAAAA.....','....BBBBBBB.....'],
+ scale:['................','................','..dddddddddddd..','..ssssssssssss..','..ssssssssssss..','..dddddddddddd..','..doooooodddyd..','..dowwowoddddd..','..doooooodddrd..','..dddddddddddd..'],
+ blower:['.......A........','.......A........','.......A........','......AAA.......','.....AAAAA......','....ACAAAAA.....','....ACAAAAA.....','....AAAAAAA.....','.....AAAAA......','......BBB.......'],
+ brush:['.....eeeeee.....','.....eeeeee.....','.....eeeeee.....','.....ssssss.....','......AAAA......','......ACAA......','......ACAA......','......ACAA......','......ACAA......','.......AA.......'],
+ rdt:['......dd........','.....ddddss.....','......dd........','.....AAAA.......','....llllll......','....lwllll......','....lwllll......','....llllll......','....llllll......','....AAAAAA......'],
+ sieve:['..AAAAAAAAAAAA..','..CssssssssssB..','..AAAAAAAAAAAA..','..CmsmsmsmsmsB..','..AAAAAAAAAAAA..','..CccccccccccB..','..CccccccccccB..','..AAAAAAAAAAAA..'],
+ paper:['.wwwwwwwwwwww...','..wwwwwwwwww....','..wsswwwwwww....','...wwwwwwww.....','...wsswwwww.....','....wwwwww......','....wwwwww......','.....wwww.......','.....wwww.......','......ww........'],
+ lily:['.......ww.......','......wwww......','......wsww......','.....wwwwww.....','.....wswwww.....','....wwwwwwww....','....wswwwwww....','...wwwwwwwwww...','...ssssssssss...'],
+ thermos:['.....dddd.......','....AAAAAA.dd...','....AAAAAAd..d..','....ACAAAAd..d..','....ACAAAA.dd...','....ACAAAA......','....ACAAAA......','....ACAAAA......','....ACAAAA......','....BBBBBB......'],
+ airscape:['......dddd......','....AAAAAAAA....','....BBBBBBBB....','....ACAAAAAB....','....ACAAAAAB....','....ACAAAAAB....','....ACAAAAAB....','....ACAAAAAB....','....AAAAAAAA....'],
+ cupset:['............s...','...........s....','..........s.....','.wwwwwww.ss.....','.wcccccw.ss.....','.wcccccw........','..wwwww.........','...www..........'],
+ refract:['....AAAAAAAA....','....AooooooA....','....AoqqqqoA....','....AoqqqqoA....','....AooooooA....','....AAAAAAAA....','....AAllAAAA....','....AAllAAAA....','....BBBBBBBB....'],
+ server:['....llllllll.l..','....l......lll..','...llllllllll...','...lccccccccl...','...lccccccccl...','...lccccccccl...','....lcccccl.....','....lllllll.....'],
+ cups:['................','..AAAAAAAA......','..CccccccAAA....','..CAAAAAAA.A....','..CAAAAAAAAA....','...AAAAAAA......','....BBBBB.......','.BBBBBBBBBBB....'],
+ apron:['.....n....n.....','.....n....n.....','....AAAAAAAA....','....ACAAAAAB....','..nnAAAAAAAAnn..','....ACAAAAAB....','....AAnnnnAB....','....AAnAAnAB....','....AAAAAAAA....','....AAAAAAAA....']});
+Object.entries({kono:'cone',kasuya:'v60',mugen:'solo',flower:'v60',deep27:'solo',mountain:'v60',ufo:'cone',crystaleye:'v60',kalita102:'trap',melitta:'trap',beehouse:'trap',april:'orea',staggx:'orea',b75:'orea',december:'kalita',tricolate:'cyl',pulsar:'cyl',
+ c2:'k6',c3:'zp6',q2:'kultra',xultra:'kultra',kinu:'c40',x25:'c40',porlex:'kultra',s3:'zp6',opus:'encore',virtuoso:'encore',t078:'ode',df64:'p80',zerno:'p80',guatemala:'ditting',ikawa:'nano',bullet:'huky',
+ fish:'kalitak',kinto:'kalitak',fisht:'bona',buonot:'bona',yukiwa:'takahiro',staggpo:'stagg'}).forEach(([a,b])=>{GS[a]=GS[b];});
+GS.staggpo=GS.stagg.slice(0,8);GS.buonot=GS.buono.concat(['..dddddddddddd..','..ddddyydddddd..']);['buono','buonot','takahiro','yukiwa'].forEach(id=>{GS[id]=GS[id].map(r=>r.replace(/k/g,'m'));});
+Object.assign(SK,{kono:[sk('透明樹脂','clear'),sk('紅色','red'),sk('黑色','black'),skL('九十週年金・限定','gold',1.5)],kasuya:[sk('霧黑陶瓷','black'),sk('白色陶瓷','white')],mugen:[sk('透明黑','smoke'),sk('白色陶瓷','white')],flower:[sk('有田燒白','white'),sk('粉紅','pink'),sk('藍色','blue'),sk('黃色','yellow'),sk('透明','clear')],
+ deep27:[sk('透明','clear'),sk('黑色','black')],mountain:[sk('陶瓷白','white'),sk('墨黑','black'),sk('土耳其藍','teal')],ufo:[sk('陶瓷白','white'),sk('霧黑','black'),skL('窯變釉・限定','amber',1.4)],crystaleye:[sk('透明','clear'),sk('透明黑','smoke')],chemex:[sk('經典木環','wood'),skL('手工吹製・限定','walnut',1.6)],
+ kalita102:[sk('陶瓷白','white'),sk('咖啡色陶瓷','wood'),sk('銅製','copper')],melitta:[sk('陶瓷白','white'),sk('紅色','red'),sk('透明','clear')],beehouse:[sk('白色','white'),sk('天藍','lagoon'),sk('芥末黃','yellow'),sk('紅色','red')],april:[sk('透明','clear'),sk('陶瓷白','white'),sk('粉紅玻璃','pink')],
+ staggx:[sk('霧黑','black'),sk('拋光不鏽鋼','steel')],b75:[sk('透明','clear'),sk('透明黑','smoke')],december:[sk('不鏽鋼','steel'),sk('黑色','black'),skL('鈦色・限定','titan',1.3)],tricolate:[sk('透明','clear')],pulsar:[sk('透明黑','smoke')],
+ c2:[sk('黑色','black'),sk('白色','snow'),sk('綠色','green')],c3:[sk('黑色','black'),sk('白色','snow')],q2:[sk('鐵灰','grey'),sk('黑色','black')],xultra:[sk('鐵灰','grey'),sk('銀色','steel')],kinu:[sk('不鏽鋼','steel'),skL('黑金・限定','gold',1.3)],x25:[sk('黑色','black'),sk('湖水藍','lagoon'),sk('橄欖綠','olive')],
+ skerton:[sk('黑色','black')],porlex:[sk('不鏽鋼','steel')],pietro:[sk('黑色','black'),sk('白色','snow'),sk('粉紅','pink'),sk('薄荷','mint')],s3:[sk('黑色','black'),sk('銀色','steel')],ode:[sk('霧黑','black'),sk('白色','snow'),skL('胡桃木・限定','walnut',1.25)],opus:[sk('霧黑','black'),sk('白色','snow')],
+ virtuoso:[sk('黑色','black')],wilfa:[sk('黑色','black'),sk('銀色','steel')],t078:[sk('黑色','black'),sk('白色','snow')],df64:[sk('黑色','black'),sk('白色','snow'),sk('銀色','steel')],zerno:[sk('黑色','black'),sk('銀色','steel'),skL('胡桃木飾板・限定','walnut',1.2)],guatemala:[sk('黑色','black'),sk('白色','snow')],
+ horoku:[sk('素燒陶','amber')],behmor:[sk('黑色','black')],hottop:[sk('不鏽鋼','steel'),sk('黑色','black')],stronghold:[sk('白色','snow'),sk('黑色','black')],fish:[sk('黑色','black'),sk('白色','snow')],buono:[sk('不鏽鋼','steel'),sk('霧黑','black'),sk('銅製','copper')],kinto:[sk('霧面不鏽鋼','steel'),sk('黑色','black')],
+ staggpo:[sk('霧黑','black'),sk('拋光不鏽鋼','steel'),sk('銅色','copper')],takahiro:[sk('不鏽鋼','steel'),skL('銅製・限定','copper',1.4)],fisht:[sk('黑色','black'),sk('白色','snow')],buonot:[sk('不鏽鋼','steel'),sk('霧黑','black')],yukiwa:[sk('不鏽鋼','steel')],
+ blower:[sk('黑色','black'),sk('紅色','red')],brush:[sk('木柄','wood')],rdt:[sk('黑色','black')],sieve:[sk('黑色','black')],thermos:[sk('不鏽鋼','steel'),sk('紅色','red')],airscape:[sk('霧黑','black'),sk('紅色','red'),sk('薄荷綠','mint')],refract:[sk('黑色','black')],cups:[sk('灰釉','smoke'),sk('青瓷','mint'),sk('白瓷','white')],apron:[sk('帆布卡其','cream'),sk('丹寧藍','navy'),sk('黑色','black')]});
+Object.assign(RQ,{kono:'KONO 名門濾杯',kasuya:'Hario V60 Kasuya model 粕谷',mugen:'Hario MUGEN dripper',flower:'CAFEC flower dripper',deep27:'CAFEC Deep 27',mountain:'Mt. FUJI dripper 山形濾杯',ufo:'UFO dripper 濾杯',crystaleye:'Timemore 冰瞳 濾杯',chemex:'Chemex classic',kalita102:'Kalita 102 濾杯',melitta:'Melitta 濾杯 1x2',beehouse:'Bee House dripper',
+ april:'April Brewer',staggx:'Fellow Stagg X dripper',b75:'Timemore B75 濾杯',december:'December Dripper',tricolate:'Tricolate brewer',pulsar:'NextLevel Pulsar',c2:'Timemore C2 栗子',c3:'Timemore C3 ESP Pro',q2:'1Zpresso Q2',xultra:'1Zpresso X-Ultra',kinu:'Kinu M47 Classic',x25:'Comandante X25 Trailmaster',skerton:'Hario Skerton',porlex:'Porlex Mini',pietro:'Pietro grinder',s3:'Timemore S3 栗子',
+ ode:'Fellow Ode Gen 2',opus:'Fellow Opus',virtuoso:'Baratza Virtuoso+',wilfa:'Wilfa Uniform',t078:'Timemore Sculptor 078',df64:'DF64 Gen 2 grinder',zerno:'Zerno Z1',guatemala:'Mahlkonig Guatemala',horoku:'焙烙 咖啡 手烘',behmor:'Behmor 2000AB',hottop:'Hottop KN-8828B',ikawa:'IKAWA Home roaster',bullet:'Aillio Bullet R1 V2',stronghold:'Stronghold S7 Pro',
+ fish:'Timemore 魚03 手沖壺',buono:'Hario Buono kettle',kinto:'KINTO pour over kettle',staggpo:'Fellow Stagg stovetop kettle',takahiro:'Takahiro 雫 手沖壺',fisht:'Timemore Fish Smart 溫控壺',buonot:'Hario Buono 溫控壺',yukiwa:'YUKIWA M-5 手沖壺',scale:'Acaia Pearl 咖啡秤',blower:'磨豆機 清潔吹球',brush:'磨豆機 清潔刷',rdt:'RDT 咖啡 噴霧瓶',sieve:'Kruve sifter 篩粉器',
+ paper:'CAFEC Abaca 濾紙',lily:'Lilydrip 力狸',thermos:'保溫熱水瓶',airscape:'Airscape 儲豆罐',cupset:'杯測匙 杯測碗',refract:'DiFluid 濃度計',server:'Hario 玻璃分享壺',cups:'手作陶杯 咖啡',apron:'咖啡師 圍裙'});
 const vipF=()=>S().flags.vip?.9:1;
 const skinChips=id=>{const s=S();return (s.skins[id]||[0]).length>1?'<div class="skins">'+s.skins[id].map(i=>'<button data-sk="'+id+':'+i+'" aria-pressed="'+(skinOf(id)===i)+'"><i style="background:'+SK[id][i][1]+'"></i>'+SK[id][i][0]+'</button>').join('')+'</div>':SK[id]&&SK[id].length>1?'<small>'+SK[id][skinOf(id)][0]+'</small>':'';};
 let LASTX=null,notesFrom='lobby';
@@ -5841,8 +5928,10 @@ function notesHTML(){const s=S(),bk=notesFrom==='serve'||notesFrom==='comprun';
 function runBrew(base,ex){const s=S(),KT=kettleNow(),Wt=waterNow(),gc=careOf(s.last.grinder),B=beanOf(base.bean),XN=[];
   if(!(ex&&ex.pro)&&!KT.temp){const e=s.tools.thermo?1:4;base.temp=Math.max(80,Math.min(100,Math.round(base.temp+(Math.random()*2-1)*e)));XN.push('沒有恆溫壺，這杯實際水溫 '+base.temp+'°C');}
   const f0=B.f,c0=B.clar,f=f0.slice();f[5]*=Wt.fr;f[2]*=Wt.sw;f[4]*=Wt.bt*(1+.15*gc.lv);let cl=(c0||0)+Wt.cl-1.5*gc.lv;if(gc.mold){f[5]*=.75;f[3]*=1.3;f[4]*=1.15;cl-=3;XN.push('｜磨豆機發霉了，咖啡有霉味！');}
+  if(s.tools.sieve&&base.forceFines)base.forceFines*=.7;
   B.f=f;B.clar=cl;let r;try{r=G.brew(Object.assign(base,ex&&ex.pro||{}));}finally{B.f=f0;B.clar=c0;}
   r.even=Math.max(0,(r.even??5)-(1-KT.stab)*2.5);r.clarity=Math.max(0,(r.clarity??5)-(1-KT.stab)*1.5);
+  if(s.tools.rdt)r.clarity=Math.min(10,r.clarity+.3);if(s.tools.paper&&base.brewer!=='press')r.clarity=Math.min(10,r.clarity+.4);if(s.tools.lily&&DRIPPER[base.brewer]&&DRIPPER[base.brewer].het>=.5){r.clarity=Math.min(10,r.clarity+.3);r.even=Math.min(10,r.even+.3);}if(s.tools.refract)gain(1,0);
   if(s.tools.wdt&&s.last.wdt!=='off'&&base.brewer!=='press'){r.even=Math.min(10,r.even+1.3);r.clarity=Math.min(10,r.clarity+.4);}
   if(Wt.id==='mineral')s.minml-=300;s.care[s.last.grinder].c+=1;const B0=beanOf(base.bean)||{};
   LASTX={bean:B0.name||'',src:B0.src||base.bean,state:B0.st?'烘焙後第 '+B0.age+' 天（'+B0.st+'）':'',brewer:base.brewer,grinder:S().last.grinder,temp:base.temp,grind:base.grind,ratio:S().last.ratio,pour:S().last.pour,stir:S().last.stir,steep:S().last.steep,
@@ -5885,7 +5974,7 @@ $('shopBox').addEventListener('click',e=>{const b=e.target.closest('button');if(
     toast('向 '+H.name+' 訂了 '+g+' g '+B.name+' 生豆，第 '+(s.day+H.lead)+' 天到貨');SFX.p('coins');persist();render();return;}
   if(d.hs){playHunter(HM[d.hs]);return;}
   if(d.bar){const [h,id]=d.bar.split(':');bargain(h,id);return;}
-  if(d.cup){const [h,id]=d.cup.split(':');if(s.money<100)return;s.money-=100;const q=offerQ(h,id,s.day);s.cupd[h+'/'+id]={day:s.day,q};gain(2,0);persist();cupSheet(id,q,h,()=>render());return;}
+  if(d.cup){const [h,id]=d.cup.split(':');const cc=s.tools.cupset?50:100;if(s.money<cc)return;s.money-=cc;const q=offerQ(h,id,s.day);s.cupd[h+'/'+id]={day:s.day,q};gain(2,0);persist();cupSheet(id,q,h,()=>render());return;}
   if(d.gcup){const L=s.green.find(l=>l.k===d.gcup);if(!L||L.g<20)return;L.g-=10;L.known=true;gain(2,0);persist();cupSheet(L.id,L.q,L.h||'de',()=>render());return;}
   if(d.rsel){const L=s.green.find(l=>l.k===d.rsel);rsel={k:d.rsel,g:0,roast:beanOf(L.id).roast};render();return;}
   if(d.rs){s.roaster=d.rs;persist();render();return;}
@@ -5912,6 +6001,7 @@ $('shopBox').addEventListener('click',e=>{const b=e.target.closest('button');if(
   if(d.tagnew||d.tagadd){let id,x;if(d.tagnew){id=d.tagnew;const el=document.querySelector('#shopBox [data-tagin="'+id+'"]');x=(el&&el.value||'').trim().replace(/^#/,'').slice(0,8);}else{[id,x]=d.tagadd.split('|');}
     if(!x||!s.bat[id])return;const a=s.bat[id].tags=s.bat[id].tags||[];if(!a.includes(x)&&a.length<5)a.push(x);SFX.p('tick');persist();render();return;}
   if(d.tagx){const [id,x]=d.tagx.split('|');if(s.bat[id]&&s.bat[id].tags)s.bat[id].tags=s.bat[id].tags.filter(t=>t!==x);persist();render();return;}
+  if(d.ginfo){const [k,id]=d.ginfo.split(':');gearInfo(k,id);return;}
   if(d.gcat){gearCat=d.gcat;SFX.p('tick');render();return;}
   if(d.ctag!=null){cellTag=d.ctag;SFX.p('tick');render();return;}
   if(d.cell){if(cellOpen.has(d.cell))cellOpen.delete(d.cell);else cellOpen.add(d.cell);SFX.p('tick');render();return;}
@@ -5985,6 +6075,30 @@ BO.addEventListener('click',e=>{if(e.target===BO||e.target.closest('[data-x]'))B
 {const b=document.createElement('button');b.className='hub-card';b.id='hubBoard';b.style.setProperty('--hc','var(--gold)');
   b.innerHTML='<svg class="ic" viewBox="0 0 32 32" width="34" height="34" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 5h12v8a6 6 0 0 1-12 0z"/><path d="M10 7H5v3a5 5 0 0 0 5 5M22 7h5v3a5 5 0 0 1-5 5M16 19v5M11 27h10M13 24h6"/></svg><b>排行榜</b><span>看每位玩家的進度總覽：冠軍之路、名聲、等級、熟客故事。</span><em id="hubBoardS"></em>';
   $('hubLab').after(b);b.onclick=openBoard;}
+/* ---------- 器材詳情：預期效果、和目前裝備的差異 ---------- */
+const GI=document.createElement('div');GI.className='board-ov';GI.hidden=true;document.body.appendChild(GI);
+GI.addEventListener('click',e=>{if(e.target===GI||e.target.closest('[data-x]'))GI.hidden=true;});
+function cmpRow(label,nv,cv,fmt,up,note){const d=nv-cv,same=Math.abs(d)<1e-9,good=up?d>0:d<0;
+  return '<div class="cmp"><span>'+label+'</span><b>'+fmt(nv)+'</b><em class="'+(same?'':good?'up':'dn')+'">'+(cv==null||same?'＝ 一樣':(d>0?'▲':'▼')+' 目前 '+fmt(cv))+'</em>'+(note?'<small>'+note+'</small>':'')+'</div>';}
+function gearInfo(kind,id){const s=S(),pc=v=>Math.round(v*100)+'%';let name,sub,rows='',cur='',eff='';
+  if(kind==='brewer'){const it=G.BREWERS.find(x=>x.id===id),D=DRIPPER[id],cid=s.last.brewer,C=DRIPPER[cid],cn=G.BREWERS.find(x=>x.id===cid).name;name=it.name;sub=it.sub;cur='店裡正在用：'+cn;
+    if(!D)eff=id==='press'?'全程浸泡、金屬濾網：均勻度高、醇厚度和油脂多，但清晰度低。不受注水手法影響，只看浸泡時間。':'可以關閥浸泡再開閥濾出：均勻度高、寬容度大，注水時多一顆閥門按鈕。';
+    else{const c=C||null;rows=cmpRow('流速',D.q,c&&c.q,v=>v.toFixed(2)+'×',true,'越快越不容易過萃、口感越輕盈；越慢越厚實')+cmpRow('粉床均勻',1-D.het,c&&1-c.het,pc,true,'越高每一顆粉萃得越平均，杯子越甜越穩')+cmpRow('繞流',D.by,c&&c.by,pc,false,'水沒經過粉就流走的比例，越低萃取越完整')+cmpRow('萃取效率',D.u,c&&c.u,pc,true);
+      eff=(D.het<=.3?'平底型：寬容度高，甜感和均勻度好。':'錐形：中間粉層深，風味層次明顯，但更吃手法。')+(c?'':'（目前用的是浸泡式器具，無法直接比較）');}}
+  else if(kind==='grinder'){const it=GRINDERS.find(x=>x.id===id),c=GRINDERS.find(x=>x.id===s.last.grinder);name=it.name;sub=it.type;cur='店裡正在用：'+c.name;const el=/電動/.test(it.type);
+    rows=cmpRow('細粉量',it.fines,c.fines,pc,false,'細粉越少，杯子越乾淨、後段越不容易塞水變苦')+cmpRow('每格粗細',it.um||5,c.um||5,v=>(v===5&&!it.um?'無段':'約 '+v+' μm'),false,'每格越小，越能微調到剛好的研磨度');
+    eff=(el?'電動：按住就磨，速度快。':'手搖：要自己轉把手，磨一杯比較久。')+(it.fines<c.fines-.005?'換上它，預期清晰度提高、苦澀減少。':it.fines>c.fines+.005?'它的細粉比你現在這台多，杯子會比較濁。':'細粉量和現在這台差不多。');}
+  else if(kind==='roaster'){const it=ROASTERS.find(x=>x.id===id),c=ROASTERS.find(x=>x.id===s.roaster)||ROASTERS[0];name=it.name;sub=it.type;cur='烘豆室正在用：'+c.name;
+    rows=cmpRow('品質保留',it.rq,c.rq,pc,true,'生豆 88 分，用它烘出來大約 '+(88-(1-it.rq)*10).toFixed(1)+' 分')+cmpRow('一鍋容量',it.batch,c.batch,v=>v+' g',true);
+    const d=(it.rq-c.rq)*10;eff=d>0.05?'換上它，同一批生豆烘出來大約多 '+d.toFixed(1)+' 分。後段比賽需要品質保留 83 以上的機器。':d<-.05?'它比你現在的烘豆機差，烘出來會少 '+(-d).toFixed(1)+' 分。':'品質和現在這台一樣。';}
+  else if(kind==='kettle'){const it=KETTLES.find(x=>x.id===id),c=kettleNow();name=it.name;sub=it.type;cur='吧台正在用：'+c.name;
+    rows=cmpRow('水流穩定度',it.stab,c.stab,pc,true,'每差 10%，均勻度約差 0.25、清晰度約差 0.15')+cmpRow('容量',it.cap,c.cap,v=>v+' ml',true,it.cap<400?'沖一杯要中途加水':'一杯不用加水');
+    eff=(it.temp?'恆溫：設定幾度就是幾度，不用自己煮水看溫度。':it.th?'壺蓋內建溫度計：要自己煮水，但看得到溫度。':'不能控溫：磨完豆要自己煮水、決定何時離火。')+(c.temp&&!it.temp?'（你現在用的是恆溫壺，換它反而要自己顧火）':'');}
+  else{const it=TOOLS.find(x=>x.id===id);name=it.name;sub='小道具';eff=it.type+'。';cur=s.tools[id]?'已經在吧台上':'目前沒有這個效果';}
+  const own=ownsGear(id),L=GLORE[id]||(KETTLES.concat(TOOLS,ROASTERS).find(x=>x.id===id)||{}).lore||'';
+  GI.innerHTML='<div class="board-box" role="dialog" aria-label="'+esc(name)+'"><div class="c-row"><div class="gic big">'+spr(id,own?skinOf(id):daySkin(s.day,id),64)+'</div><button class="c-pill" data-x="1">關閉</button></div><h2>'+esc(name)+'</h2><span class="label">'+esc(sub)+(own?'・已擁有':'')+'</span>'+
+   (L?'<p class="label" style="color:var(--ink)">'+esc(L)+'</p>':'')+'<h3 class="c-h3">買了會怎樣</h3><p class="c-hint" style="margin:0">'+eff+'</p>'+(rows?'<h3 class="c-h3">和目前裝備比較<span class="label">'+esc(cur)+'</span></h3><div class="cmps">'+rows+'</div>':'<p class="label">'+esc(cur)+'</p>')+realLink(id,name)+'</div>';
+  GI.hidden=false;SFX.p('select');}
 /* ---------- 啟動 ---------- */
 const h=location.hash||'';let skip=false;try{skip=sessionStorage.getItem('brewLab.skipTitle')==='1';sessionStorage.removeItem('brewLab.skipTitle');}catch(e){}
 if(me&&skip){ov.hidden=true;}
