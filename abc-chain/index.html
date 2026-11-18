@@ -812,7 +812,7 @@ const bondOf=(a,b)=>st.bonds.find(k=>(k.a===a&&k.b===b)||(k.a===b&&k.b===a));
 function clampB(b){b.x=Math.max(R+2,Math.min(CW-R-2,b.x));b.y=Math.max(R+2,Math.min(CH-R-2,b.y));}
 function spot(){
   let best={x:CW/2,y:CH/2},bd=-1;
-  for(let i=0;i<40;i++){const x=CW*(.15+Math.random()*.7),y=CH*(.2+Math.random()*.6);let d=1e9;for(const b of st.balls)d=Math.min(d,Math.hypot(b.x-x,b.y-y));if(d>80)return{x,y};if(d>bd){bd=d;best={x,y};}}
+  for(let i=0;i<40;i++){const sl=slotLayout(),top=Math.min(CH-R-20,Math.max(...sl.map(p=>p.y))+R+30),x=CW*(.15+Math.random()*.7),y=top+Math.random()*Math.max(10,CH-R-14-top);let d=1e9;for(const b of st.balls)d=Math.min(d,Math.hypot(b.x-x,b.y-y));if(d>80)return{x,y};if(d>bd){bd=d;best={x,y};}}
   return best;
 }
 function toast(m){const t=$('toast');t.textContent=m;t.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>t.hidden=true,2000);}
@@ -845,11 +845,50 @@ function tapBall(id){
   else{const s=st.sel;st.sel=null;connect(s,id);}
   render();kick();
 }
+/* ---------- 格線：跟單字一樣多的格子󠇡，把珠子󠇡拖進去（或先點珠子󠇡再點格子󠇡）就會對齊、自動串起來 ---------- */
+function slotLayout(){
+  const n=W().w.length,per=Math.max(3,Math.floor((CW-16)/(2*R+12))),rows=n>per?2:1,r1=Math.ceil(n/rows);
+  const sp=Math.min(2*R+16,(CW-16)/r1),y0=Math.max(CH*.3,R+70),P=[];
+  for(let i=0;i<n;i++){const row=i<r1?0:1,k=row?i-r1:i,cnt=row?n-r1:r1;P.push({x:CW/2+(k-(cnt-1)/2)*sp,y:y0+row*(2*R+18)});}
+  return P;
+}
+const slotPos=i=>slotLayout()[i];
+function hitSlot(p){const P=slotLayout();for(let i=0;i<P.length;i++)if(Math.hypot(P[i].x-p.x,P[i].y-p.y)<R+10)return i;return -1;}
+function unslot(b){if(!b||b.slot==null)return;if(st.slots[b.slot]===b.id)st.slots[b.slot]=null;st.bonds=st.bonds.filter(k=>!(k.auto&&(k.a===b.id||k.b===b.id)));b.slot=null;}
+function putSlot(b,i){
+  if(st.won||!b)return;
+  const old=st.slots[i]!=null&&st.slots[i]!==b.id?ball(st.slots[i]):null;
+  if(old){unslot(old);old.y=Math.min(CH-R-4,old.y+2*R+20);old.vy=4;}
+  unslot(b);b.slot=i;st.slots[i]=b.id;b.fly=null;
+  const nb=[i-1,i+1].map(j=>st.slots[j]!=null?ball(st.slots[j]):null).filter(Boolean),keep=new Set(nb.map(x=>x.id));
+  /* 在格子󠇡裡的珠子󠇡只跟旁邊格子󠇡的珠子󠇡串在一起 */
+  st.bonds=st.bonds.filter(k=>{if(k.a!==b.id&&k.b!==b.id)return true;const o=k.a===b.id?k.b:k.a,ob=ball(o);return keep.has(o)||(ob&&ob.slot==null&&!nb.length);});
+  const freeUp=(x,keepIds)=>{while(deg(x.id)>=MAXB){const L=st.bonds.filter(k=>(k.a===x.id||k.b===x.id)&&!keepIds.has(k.a===x.id?k.b:k.a));if(!L.length)break;
+    L.sort((k1,k2)=>{const s=k=>{const o=ball(k.a===x.id?k.b:k.a);return o&&o.slot!=null?1:0;};return s(k1)-s(k2);});st.bonds.splice(st.bonds.indexOf(L[0]),1);}};
+  for(const c of nb){if(bondOf(b.id,c.id))continue;
+    freeUp(b,keep);freeUp(c,new Set([b.id,...[c.slot-1,c.slot+1].map(j=>st.slots[j]).filter(v=>v!=null)]));
+    if(deg(b.id)<MAXB&&deg(c.id)<MAXB)st.bonds.push({a:Math.min(b.id,c.id),b:Math.max(b.id,c.id),auto:1});}
+  SFX('place',VOW.has(b.ch)?'O':'N');if(nb.length)setTimeout(()=>SFX('bond'),70);
+  changed();
+}
+function slotSeq(){
+  if(!st.slots||!st.slots.length||st.slots.some(x=>x==null))return null;
+  const s=st.slots.map(id=>ball(id).ch).join('');return s===W().w?st.slots.slice():null;
+}
+function drawSlots(g,q,now){
+  if(st.won||!st.slots)return;const P=slotLayout(),r=Math.round(R*q)+2;
+  P.forEach((p,i)=>{const x=Math.round(p.x*q),y=Math.round(p.y*q),full=st.slots[i]!=null;
+    g.fillStyle=full?'rgba(255,255,255,.35)':'rgba(255,255,255,.55)';for(let dy=-r;dy<=r;dy++){const w=Math.floor(Math.sqrt(r*r-dy*dy));g.fillRect(x-w,y+dy,2*w+1,1);}
+    ring(g,x,y,r,'#4a2350',full?null:Math.floor(now/160)%8);
+    if(!full){g.fillStyle='rgba(74,35,80,.35)';g.fillRect(x-1,y+r+3,3,1);}
+    if(i<P.length-1&&P[i+1].y===p.y){const x2=Math.round(P[i+1].x*q);g.fillStyle='rgba(74,35,80,.25)';for(let xx=x+r+2;xx<x2-r-1;xx+=2)g.fillRect(xx,y,1,1);}
+  });
+}
 function removeSel(){
   if(st.sel==null||st.won)return;const id=st.sel;
-  st.bonds=st.bonds.filter(k=>k.a!==id&&k.b!==id);st.balls=st.balls.filter(b=>b.id!==id);st.sel=null;SFX('remove');changed();
+  unslot(ball(id));st.bonds=st.bonds.filter(k=>k.a!==id&&k.b!==id);st.balls=st.balls.filter(b=>b.id!==id);st.sel=null;SFX('remove');changed();
 }
-function clearAll(){if(st.balls.length)SFX('clear');st.balls=[];st.bonds=[];st.sel=null;st.won=false;st.clasp=null;$('win').hidden=true;changed();}
+function clearAll(){if(st.balls.length)SFX('clear');st.balls=[];st.bonds=[];st.slots=Array(W().w.length).fill(null);st.sel=null;st.won=false;st.clasp=null;$('win').hidden=true;changed();}
 /* 檢查：桌上的字母剛好接成一條線，從一頭讀過去就是這個字 */
 function readChain(){
   const n=st.balls.length;if(!n)return null;
@@ -864,6 +903,8 @@ function readChain(){
   return seq;
 }
 function check(){
+  const ss=slotSeq();
+  if(ss){const keep=new Set(ss);st.balls=st.balls.filter(b=>keep.has(b.id));st.bonds=st.bonds.filter(k=>keep.has(k.a)&&keep.has(k.b));return ss;}
   const w=W().w,seq=readChain();if(!seq)return null;
   const s=seq.map(id=>ball(id).ch).join('');
   if(s===w)return seq;if([...s].reverse().join('')===w)return seq.reverse();
@@ -881,20 +922,20 @@ function render(){
   $('word').innerHTML=[...w].map(c=>{used[c]=(used[c]||0)+1;return `<span class="${(have[c]||0)>=used[c]?'ok':''}">${show(c)}</span>`;}).join('');
   const el=$('status');let t,cls='';
   if(st.won){t='拼對了！';cls='good';}
-  else if(!st.balls.length)t='點下面的字母，把它放到桌上';
+  else if(!st.balls.length)t='點下面的字母，再把珠子󠇡拖進格子󠇡裡';
   else{
     const lack=[],extra=[];
     for(const c of new Set([...Object.keys(need),...Object.keys(have)])){const d=(need[c]||0)-(have[c]||0);if(d>0)lack.push(show(c));if(d<0)extra.push(show(c));}
     if(extra.length){t='多了 '+extra.join('、')+'，選它再按「拿走」';cls='warn';}
     else if(lack.length)t='還少 '+lack.join('、');
-    else if(st.bonds.length<st.balls.length-1)t='字母都對了！用棍子󠇡把它們接成一條線';
-    else{t='順序不對喔，點棍子󠇡可以拆開重󠇡接';cls='warn';}
+    else if(st.bonds.length<st.balls.length-1)t='字母都對了！把珠子󠇡照順序放進格子󠇡';
+    else{t='順序不對喔，把珠子󠇡拖出來換個格子󠇡';cls='warn';}
   }
   el.textContent=t;el.className='status '+cls;
   $('kDel').disabled=st.sel==null||st.won;
 }
 function win(seq){
-  st.won=true;st.sel=null;$('bubble').hidden=true;
+  st.won=true;st.sel=null;$('bubble').hidden=true;for(const b of st.balls)b.slot=null;if(st.slots)st.slots.fill(null);
   const before=owned();
   const first=!done[W().w],c0=coins();if(!first)RP[W().w]=(RP[W().w]|0)+1;st.wonAt=performance.now();
   done[W().w]=(done[W().w]|0)|1|(st.hinted?0:2)|(upper?4:0);save();saveDoll();
@@ -920,7 +961,7 @@ function win(seq){
 }
 function goLevel(i){
   lvl=Math.max(0,Math.min(WORDS.length-1,i));save();
-  st={balls:[],bonds:[],sel:null,won:false,nid:1,clasp:null};$('win').hidden=true;$('levels').hidden=true;$('bubble').hidden=true;
+  st={balls:[],bonds:[],sel:null,won:false,nid:1,clasp:null,slots:Array(WORDS[lvl].w.length).fill(null)};$('win').hidden=true;$('levels').hidden=true;$('bubble').hidden=true;
   const x=W();$('emo').innerHTML=icon(x.w);paintIcons($('emo'));$('zh').textContent=x.z;
   $('crumb').textContent=`${LANDS[x.si].name}　${x.i+1} / ${SECTIONS[x.si].w.split('|').length}`;
   buildTray();kick();
@@ -948,6 +989,7 @@ function step(){
   for(const a of A){
     if(st.won&&a.tx!=null){a.fx+=(a.tx-a.x)*.08;a.fy+=(a.ty-a.y)*.08;}
     if(a.fly)continue;
+    if(a.slot!=null&&!st.won){const p=slotPos(a.slot);if(p){a.x+=(p.x-a.x)*.45;a.y+=(p.y-a.y)*.45;a.vx=a.vy=0;}continue;}
     if(drag&&drag.moved&&drag.id===a.id){a.vx=a.vy=0;continue;}
     a.vx=(a.vx+a.fx)*.72;a.vy=(a.vy+a.fy)*.72;a.x+=a.vx;a.y+=a.vy;clampB(a);avoidDoll(a);mx=Math.max(mx,Math.abs(a.vx)+Math.abs(a.vy));
   }
@@ -958,6 +1000,7 @@ function draw(now){
   g.setTransform(1,0,0,1,0,0);g.imageSmoothingEnabled=false;
   skyLand(g,w,h-2,h,LANDS[W().si].h,tt);
   stageDoll(g,now);
+  drawSlots(g,q,now);
   /* 線會因為重力往下垂一點 */
   for(const k of st.bonds){const a=ball(k.a),b=ball(k.b);cord(g,a.x*q,a.y*q,b.x*q,b.y*q);}
   if(st.won&&st.clasp){const c=st.clasp,a=ball(c.a),b=ball(c.b);if(a&&b){cord(g,a.x*q,a.y*q,c.x*q,c.y*q);cord(g,b.x*q,b.y*q,c.x*q,c.y*q);
@@ -998,8 +1041,11 @@ function hitBond(p){for(const k of st.bonds){const a=ball(k.a),b=ball(k.b),dx=b.
 cv.addEventListener('pointerdown',ev=>{const p=pos(ev),b=hitBall(p);try{cv.setPointerCapture(ev.pointerId);}catch(e){}
   drag=b?{id:b.id,sx:p.x,sy:p.y,ox:b.x-p.x,oy:b.y-p.y,moved:false}:{id:null,bond:hitBond(p),sx:p.x,sy:p.y,moved:false};kick();});
 cv.addEventListener('pointermove',ev=>{if(!drag)return;const p=pos(ev);if(!drag.moved&&Math.hypot(p.x-drag.sx,p.y-drag.sy)>8)drag.moved=true;
-  if(drag.moved&&drag.id!=null&&!st.won){const b=ball(drag.id);if(b){b.x=p.x+drag.ox;b.y=p.y+drag.oy;clampB(b);kick();}}});
-function endDrag(cancel){if(!drag)return;const d=drag;drag=null;
+  if(drag.moved&&drag.id!=null&&!st.won){const b=ball(drag.id);if(b&&b.slot!=null)unslot(b);if(b){b.x=p.x+drag.ox;b.y=p.y+drag.oy;clampB(b);kick();}}});
+function endDrag(cancel,ev){if(!drag)return;const d=drag;drag=null;
+  if(!cancel&&d.moved&&d.id!=null&&!st.won){const b=ball(d.id);if(b){const i=hitSlot(b);if(i>=0){putSlot(b,i);kick();return;}changed();}}
+  if(!cancel&&!d.moved&&d.id==null&&!d.bond&&!st.won){const i=hitSlot({x:d.sx,y:d.sy});
+    if(i>=0){if(st.sel!=null){const b=ball(st.sel);st.sel=null;putSlot(b,i);}else if(st.slots[i]==null)toast('先點一顆珠子󠇡，再點這個格子󠇡');kick();return;}}
   if(!cancel&&!d.moved){if(d.id!=null)tapBall(d.id);else if(d.bond&&st.bonds.includes(d.bond)&&!st.won){st.bonds.splice(st.bonds.indexOf(d.bond),1);SFX('unbond');changed();}
     else if(!d.bond&&hitDoll({x:d.sx,y:d.sy})){openDoll();}
     else if(st.sel!=null){st.sel=null;render();}}
