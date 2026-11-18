@@ -501,6 +501,28 @@ nav a.on{color:var(--maple);font-weight:700;background:var(--maple-soft)}
     </div>
   </section>
 
+  <!-- 聖誕市集 -->
+  <section class="view" id="v-xmas">
+    <div class="sec">
+      <h3>🎄 2026 福岡聖誕市集・燈飾</h3>
+      <div class="hint">整理自 IG @fukuoka_insider 的 12 個會場懶人包。想去的點一下打勾（全家同步）。日期與時間以各會場官網為準。</div>
+      <div id="xmasPlan"></div>
+    </div>
+    <div class="sec">
+      <h3>☕ 限定馬克杯</h3>
+      <ul class="steps" style="padding-left:20px;margin:0">
+        <li>每個市集會場都有<b>不一樣的限定馬克杯</b>，要<b>搭配熱飲一起買</b>，不單獨賣，數量有限。</li>
+        <li><b>雨天限定、雪天限定杯</b>：只有下雨、下雪的日子才拿得到（福岡畫家田中千智的作品）。今年販售會場以官網公告為準。</li>
+        <li><b>天神限定・米飛兔杯</b>（和豪斯登堡合作）：11/20–12/25，附杯飲料 2,000 日圓（限無酒精飲料），<b>抽選制</b>，詳情看官網。</li>
+      </ul>
+    </div>
+    <div class="sec">
+      <h3>📍 12 個會場</h3>
+      <div class="hint">○ 聖誕市集　✨ 燈飾・拍照點　⛸️ 溜冰場</div>
+      <div id="xmas"></div>
+    </div>
+  </section>
+
   <!-- 百元店 -->
   <section class="view" id="v-shop">
     <div class="sec">
@@ -691,7 +713,7 @@ nav a.on{color:var(--maple);font-weight:700;background:var(--maple-soft)}
 
 <script>
 /* ---------- storage (safe) ---------- */
-const APPV='20261117a';
+const APPV='20261118a';
 (function(){function chk(){if(!/^https?:/.test(location.protocol))return;fetch(location.pathname+'?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.text():'').then(t=>{const m=t.match(/const APPV='([^']+)'/);if(!m||m[1]===APPV)return;let tried='';try{tried=sessionStorage.getItem('fukV')||''}catch(e){}if(tried===m[1])return;try{sessionStorage.setItem('fukV',m[1])}catch(e){}location.replace(location.pathname+'?v='+m[1]+location.hash)}).catch(()=>{})}
  chk();document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')chk()})})();
 const S={get(k,d){try{const v=localStorage.getItem('fuk26_'+k);return v==null?d:JSON.parse(v)}catch(e){return d}},
@@ -1311,6 +1333,43 @@ $('#shops').addEventListener('click',e=>{
  if(e.target.closest('a'))return;
  const r=e.target.closest('.cafe-h');if(!r)return;const id=r.parentNode.dataset.id,done=S.get('shops',{});done[id]=!done[id];S.set('shops',done);drawShops()});
 drawShops();
+const XMAS=[
+ {id:'A',n:'博多站前廣場',jp:'JR博多シティ クリスマスマーケット',k:'market',dt:'11/7–12/25',h:'平日 16:00–23:00・假日 12:00–23:00',ac:'JR 博多站博多口一出站就到',d:'白色木屋整排相連，像走進巴黎的冬日街角。有歐洲直送的雪花球、燭台，還有官方角色造型的「さんちゃん燒」，今年新增巧克力口味。',days:['11/21']},
+ {id:'B',n:'天神・福岡市役所前',jp:'福岡市役所前広場 クリスマスマーケット',k:'market',dt:'11/14–12/26',h:'平日 17:00–23:00・假日 12:00–23:00',ac:'地鐵天神站走路約 4 分鐘',d:'穿過德國傳統的光之拱門，滿滿燈光和木屋。很多九州創作者的手作雜貨，很適合挑聖誕禮物。',tip:'11/21 只營業到 21:30；11/28、29 休息。',days:['11/22','11/23','11/24','11/25','11/26','11/27']},
+ {id:'C',n:'天神中央公園',jp:'天神中央公園 クリスマスマーケット',k:'market',dt:'11/12–12/25',h:'平日 17:00–22:00・假日 12:00–22:00（燈飾到 24:00）',ac:'地鐵天神南站走路約 3 分鐘',d:'公園變身發光的森林：巨大愛心、聖誕老人列車，抬頭還能看到飛天聖誕老人。德國老牌香腸 Käfer 在這裡日本首次登場。',tip:'免費聖誕馬戲團 REVERIE：11/17–12/19，18:15、20:15 各一場（每場約 30 分），週五、六休演，雨天停演。',days:['11/22','11/23','11/24','11/25']},
+ {id:'D',n:'貴賓館前',jp:'旧福岡県公会堂貴賓館',k:'market',dt:'11/11–12/25',h:'平日 17:00–22:00・假日 12:00–22:00（燈飾到 24:00）',ac:'地鐵中洲川端站走路約 5 分鐘',d:'點燈的舊福岡縣公會堂貴賓館前，聚集世界各地 100 多位聖誕老人，有巨大的、也有戴墨鏡的南國聖誕老人。還有現烤蝴蝶餅和戴聖誕帽的造型車輪餅。',days:['11/22']},
+ {id:'E',n:'大名 Garden City',jp:'福岡大名ガーデンシティ',k:'market',dt:'11/13–12/25',h:'平日 17:00–22:00・假日 12:00–22:00',ac:'地鐵赤坂站走路約 4 分鐘',d:'穿過大門 360 度被燈光包圍，還有真的能坐上去的馬車燈飾。有專屬美食和音樂，氣氛比較沉穩。',days:['11/22']},
+ {id:'F',n:'中洲（燈飾）',jp:'福博であい橋',k:'light',dt:'11/2–1/12',h:'點燈 17:00–凌晨 1:00',ac:'地鐵中洲川端站 1 號出口',d:'從福博であい橋一路亮到中洲中央通，那珂川河面閃閃發光，燈飾延伸到河邊屋台區，看完燈還能順便吃屋台。',days:['11/22','11/24']},
+ {id:'G',n:'Passage 廣場（大丸旁）',jp:'パサージュ広場 天神',k:'market',dt:'11/13–12/25',h:'平日 16:00–21:00・假日 12:00–21:00',ac:'地鐵天神南站走路約 1 分鐘',d:'大丸福岡天神店旁邊，有大型聖誕樹、熱紅酒和舞台音樂。逛街購物的空檔順路過來喝一杯剛剛好。',tip:'21:00 就打烊，記得早點來。',days:['11/22','11/23','11/24']},
+ {id:'H',n:'百道濱・福岡塔前（溜冰場）',jp:'福岡タワー クリスマスマーケット',k:'rink',dt:'市集 11/20–1/6',h:'市集 平日 16:00–21:00・假日 12:00–22:00',ac:'西鐵巴士「福岡タワー南口」或「TNC放送会館前」下車',d:'福岡塔前綠道廣場變成有戶外溜冰場的聖誕市集，逛完市集可以直接下場溜冰。',tip:'溜冰場 11/20–2/23，平日 11:00–21:00（假日到 22:00）。大人 ¥1,600（假日 ¥1,900）、兒童 ¥1,200（假日 ¥1,500），租鞋＋手套 ¥500；有初學者教室，租鞋從 15cm 起，小朋友也能玩。',days:['11/26']},
+ {id:'I',n:'AEON Mall 香椎濱',jp:'イオンモール香椎浜',k:'market',dt:'11/20–12/24 的週五〜週日',h:'15:00–20:00',ac:'西鐵巴士「イオンモール香椎浜」或「香椎浜中央」下車',d:'商場外廣場排滿木屋，很適合帶小朋友逛。',tip:'週五〜週日開，另外 11/23（一）也有開；11/20 18:30 開始。',days:['11/21','11/22','11/23','11/27','11/28']},
+ {id:'J',n:'福岡機場（拍照點）',jp:'福岡空港',k:'light',dt:'期間未定',h:'',ac:'國內線・國際線航廈 1 樓入境大廳',d:'入境大廳有聖誕拍照點，還有聖誕老人和大雪人迎接旅客。',days:['11/21','11/28']},
+ {id:'K',n:'渡邊通（燈飾）',jp:'渡辺通 イルミネーション',k:'light',dt:'11/12–1/31',h:'點燈 17:00–24:00',ac:'地鐵渡邊通站、天神南站',d:'燈飾沿著大樓和街道延伸，從渡邊通 1 丁目一路連到天神十字路口，就在飯店門口附近，回飯店的路上就能看。',days:['11/21','11/22','11/23','11/24','11/25','11/26','11/27']},
+ {id:'kokura',n:'小倉（北九州）',jp:'小倉城 クリスマスマーケット',k:'market',dt:'11/20–12/25',h:'平日 17:00–22:00・假日 12:00–22:00（燈飾 17:00–22:00）',ac:'JR 西小倉站走路約 5 分鐘、JR 小倉站約 11 分鐘',d:'以小倉城為背景的聖誕市集，有美食攤位和舞台表演。旁邊紫川上的鷗外橋今年是一整片白色燈飾，一直亮到 1 月。',days:['11/27']}
+];
+const XPLAN=[
+ ['11/21（六）','抵達晚上逛博多站時，<b>A 博多站前廣場</b>就在博多口，假日開到 23:00。回飯店路上看 <b>K 渡邊通燈飾</b>。'],
+ ['11/22（日）','整天在天神，假日中午就開：<b>B 市役所前、C 天神中央公園、G Passage 廣場</b>都在走路範圍；想多看可加 <b>D 貴賓館、E 大名</b>。晚上在博多吃燒肉，可以順路看 <b>F 中洲燈飾</b>。'],
+ ['11/23（一）','<b>I AEON 香椎濱</b>這天有特別開（15:00–20:00），在香椎附近；回程若還有力氣可考慮。'],
+ ['11/24（二）','晚上去天神屋台，<b>C、G</b> 和 <b>F 中洲燈飾</b>都順路。'],
+ ['11/26（四）','下午在百道濱 teamLab，<b>H 福岡塔市集</b>平日 16:00 才開，小孩想溜冰可以考慮把 LaLaport 縮短。'],
+ ['11/27（五）','17:30 從小倉回博多，平日 17:00 開的 <b>小倉城市集</b>可以晚一班新幹線。']
+];
+function drawXmas(){
+ $('#xmasPlan').innerHTML=XPLAN.map(x=>`<div style="padding:8px 0;border-bottom:1px dashed var(--line);font-size:14px;line-height:1.6"><b style="color:#b5651d">${x[0]}</b>　${x[1]}</div>`).join('');
+ const done=S.get('xmas',{}),K={market:'🎄 市集',light:'✨ 燈飾',rink:'⛸️ 市集＋溜冰'};
+ $('#xmas').innerHTML=XMAS.map(c=>`<div class="cafe${done[c.id]?' on':''}" data-id="${c.id}">
+  <div class="cafe-h"><span class="box"></span><b>${c.id.length===1?c.id+'｜':''}${esc(c.n)}</b></div>
+  <div class="cafe-m"><span class="tag">${K[c.k]}</span><span class="tag" style="background:#eef3f8;color:#2c6e8f">📅 ${esc(c.dt)}</span>${c.h?`<span class="cafe-t">🕒 ${esc(c.h)}</span>`:''}</div>
+  <div class="cafe-d">${esc(c.d)}<div style="margin-top:6px;color:var(--sub)">🚇 ${esc(c.ac)}</div>${c.tip?`<div class="tip">💡 ${esc(c.tip)}</div>`:''}<div style="margin-top:6px;font-size:12.5px;color:var(--sub)">行程中可去：${c.days.join('、')}</div></div>
+  <div class="cafe-b"><a class="btn" href="${mapUrl(c.jp)}" target="_blank" rel="noopener">🗺️ 地圖</a><button class="btn ghost" data-xtaxi="${c.id}">🚕 給司機看</button></div>
+ </div>`).join('');
+}
+$('#xmas').addEventListener('click',e=>{
+ const tx=e.target.closest('[data-xtaxi]');if(tx){const c=XMAS.find(x=>x.id===tx.dataset.xtaxi);big(c.jp+'までお願いします。','請載我們到：'+c.n);$('#ovJp').style.whiteSpace='normal';return}
+ if(e.target.closest('a'))return;
+ const r=e.target.closest('.cafe-h');if(!r)return;const id=r.parentNode.dataset.id,done=S.get('xmas',{});done[id]=!done[id];S.set('xmas',done);drawXmas()});
+drawXmas();
 
 /* ---------- 吃喝買 ↔ 行程 連結 ---------- */
 const SPOTS={
@@ -1705,8 +1764,8 @@ reloaders.push(()=>{if(currentView()==='tax')drawTxLog()});
 drawCards();drawTax();
 
 /* ---------- routing ---------- */
-const VIEWS=['trip','map','sim','list','food','coffee','gift','shop','card','tax','chat','tools'];
-const GROUPS={trip:[['trip','🗓️ 每日行程'],['map','🗺️ 地圖'],['sim','▶️ 模擬']],buy:[['food','🍜 美食'],['coffee','☕ 咖啡'],['gift','🎁 伴手禮'],['shop','🛍️ 百元店'],['card','💳 刷卡'],['tax','🧾 退稅']],list:[['list','']],chat:[['chat','']],tools:[['tools','']]};
+const VIEWS=['trip','map','sim','xmas','list','food','coffee','gift','shop','card','tax','chat','tools'];
+const GROUPS={trip:[['trip','🗓️ 每日行程'],['map','🗺️ 地圖'],['sim','▶️ 模擬'],['xmas','🎄 聖誕']],buy:[['food','🍜 美食'],['coffee','☕ 咖啡'],['gift','🎁 伴手禮'],['shop','🛍️ 百元店'],['card','💳 刷卡'],['tax','🧾 退稅']],list:[['list','']],chat:[['chat','']],tools:[['tools','']]};
 const groupOf=v=>Object.keys(GROUPS).find(g=>GROUPS[g].some(x=>x[0]===v));
 function currentView(){const h=location.hash.slice(1);return VIEWS.includes(h)?h:'trip'}
 function route(){const v=currentView();VIEWS.forEach(x=>$('#v-'+x).classList.toggle('on',x===v));
@@ -1714,13 +1773,13 @@ function route(){const v=currentView();VIEWS.forEach(x=>$('#v-'+x).classList.tog
  document.querySelectorAll('nav a').forEach(a=>{a.classList.toggle('on',a.dataset.g===g);if(a.dataset.g===g&&g==='buy')a.setAttribute('href','#'+v)});
  const sn=$('#subnav');sn.classList.toggle('on',sub.length>1);sn.innerHTML=sub.length>1?sub.map(x=>`<a href="#${x[0]}" class="${x[0]===v?'on':''}">${x[1]}</a>`).join(''):'';
  $('#todayBtn').classList.toggle('on',v==='trip'&&ti>=0&&ti<8&&curDay!==ti);window.scrollTo(0,0);
- if(v==='map')drawMap();if(v==='trip'&&!editing)renderDay(true);if(v==='gift')drawGifts();if(v==='shop')drawShops();if(v==='sim')drawSim();else simStop();if(v==='food')drawFoods();if(v==='card')drawCards();if(v==='tax')drawTax();if(v==='coffee')drawCafes();if(v==='chat'&&window.FS)FS.chatOpen()}
+ if(v==='map')drawMap();if(v==='trip'&&!editing)renderDay(true);if(v==='gift')drawGifts();if(v==='shop')drawShops();if(v==='xmas')drawXmas();if(v==='sim')drawSim();else simStop();if(v==='food')drawFoods();if(v==='card')drawCards();if(v==='tax')drawTax();if(v==='coffee')drawCafes();if(v==='chat'&&window.FS)FS.chatOpen()}
 window.addEventListener('hashchange',route);
 
 /* ---------- family sync (Firebase Realtime Database, REST + 串流) ---------- */
 const FB_URL='https://molecule-match-default-rtdb.asia-southeast1.firebasedatabase.app';
 const FS=(function(){
- const KEYS=['done','cafes','shops','gifts','foods','gphoto','memo','savedNotes','edits','todo','pack','tax','xtabs','xlists'];
+ const KEYS=['done','cafes','shops','xmas','gifts','foods','gphoto','memo','savedNotes','edits','todo','pack','tax','xtabs','xlists'];
  const raw={get(k){try{return localStorage.getItem('fuk26_'+k)}catch(e){return null}},set(k,v){try{localStorage.setItem('fuk26_'+k,v)}catch(e){}},del(k){try{localStorage.removeItem('fuk26_'+k)}catch(e){}}};
  const okCode=c=>/^[A-Za-z0-9_-]{8,40}$/.test(c||'');
  const enc=k=>encodeURIComponent(k).replace(/\./g,'%2E'),dec=k=>{try{return decodeURIComponent(k)}catch(e){return k}};
@@ -1730,7 +1789,7 @@ const FS=(function(){
  try{const u=new URLSearchParams(location.search).get('fam');if(okCode(u))raw.set('fam',u)}catch(e){}
  code=raw.get('fam');if(!okCode(code))code=null;
  function leaves(key,v){const o={};if(v==null)return o;
-  if(key==='done'||key==='cafes'||key==='shops'||key==='gifts'||key==='foods'){for(const k in v)if(v[k])o[key+'/'+enc(k)]=true}
+  if(key==='done'||key==='cafes'||key==='shops'||key==='xmas'||key==='gifts'||key==='foods'){for(const k in v)if(v[k])o[key+'/'+enc(k)]=true}
   else if(key==='memo'){for(const k in v)if(v[k])o['memo/m'+k]=String(v[k])}
   else if(key==='savedNotes'){for(const k in v)if(v[k])o['notes/'+enc(k)]=String(v[k])}
   else if(key==='gphoto'){for(const k in v)if(v[k]&&v[k].h)o['gp/'+k]=v[k].h}
@@ -1741,7 +1800,7 @@ const FS=(function(){
   return o}
  function fromLeaves(key,E){
   const sub=pre=>{const o={};for(const p in E)if(p.startsWith(pre))o[p.slice(pre.length)]=E[p];return o};
-  if(key==='done'||key==='cafes'||key==='shops'||key==='gifts'||key==='foods'){const o={},x=sub(key+'/');for(const k in x)if(x[k])o[dec(k)]=true;return o}
+  if(key==='done'||key==='cafes'||key==='shops'||key==='xmas'||key==='gifts'||key==='foods'){const o={},x=sub(key+'/');for(const k in x)if(x[k])o[dec(k)]=true;return o}
   if(key==='memo'){const o={},x=sub('memo/m');for(const k in x)o[k]=String(x[k]);return o}
   if(key==='savedNotes'){const o={},x=sub('notes/');for(const k in x)o[dec(k)]=String(x[k]);return o}
   if(key==='gphoto'){const o={},x=sub('gp/');for(const k in x)o[k]={h:String(x[k]),u:null};return o}
@@ -1763,7 +1822,7 @@ const FS=(function(){
   dirty=false;sig=ns;
   KEYS.forEach(k=>{const v=fromLeaves(k,E);if(k==='gphoto'){let loc=null;try{loc=JSON.parse(raw.get(k))}catch(e){}const bh={};for(const i in loc||{})if(loc[i]&&loc[i].u)bh[loc[i].h]=loc[i].u;for(const i in v)v[i].u=bh[v[i].h]||null}if(k==='xtabs'||k==='xlists'){let loc=null;try{loc=JSON.parse(raw.get(k))}catch(e){}for(const i in loc||{})if(loc[i]&&loc[i].p)v[i]=loc[i]}if(v==null)raw.del(k);else raw.set(k,JSON.stringify(v));cache[k]=leaves(k,v)});
   done=S.get('done',{});memos=S.get('memo',{});ed=S.get('edits',null);
-  renderChips();renderDay(true);drawCafes();drawShops();reloaders.forEach(f=>{try{f()}catch(e){}});
+  renderChips();renderDay(true);drawCafes();drawShops();drawXmas();reloaders.forEach(f=>{try{f()}catch(e){}});
   photoSync();
  }
  function beat(force){if(!code)return;if(!force&&Date.now()-lastBeat<240000)return;lastBeat=Date.now();
