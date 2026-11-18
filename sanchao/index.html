@@ -215,7 +215,7 @@ u[data-g]{text-decoration:underline dotted #f6cf5a;text-underline-offset:5px;cur
   <p>遊戲畫面右上角可切換 <b>註解模式</b>：<br><b>開</b>——畫線的字可以點，要按對話框右下角的「下一句」才會前進，不怕誤觸。<br><b>關</b>——不顯示畫線，點對話框任何地方就是下一句，適合只想看劇情的時候。</p>
   <p>有些題目藏著一個不太正經的選項，選了會得到 <b class="jk">奇策</b>：不加分也不扣分，但會發生奇怪的事，並收入「奇策錄」。</p>
   <p><b>中途存檔</b>：每一句都會自動存檔並同步到線上。隨時可按「存檔離開」，下次從章回頁最上方的「繼續上次進度」接著玩，換裝置也可以。<br><b>回顧</b>：遊戲中按「回顧」可往前翻看本回說過的每一句話和你做過的選擇，裡面畫線的字一樣能點。</p>
-  <p><b>人物表情與動作</b>：說話時嘴會動、平常會眨眼。表情刻意收斂，靠眼瞼、視線、眉形與嘴角的細微變化傳達心思：審視、冷笑、沉吟、不悅、惶恐……；動作也只是點頭、搖頭、微顫、叩頭、跪下這類宮廷分寸。手上也有戲：權臣與乾隆搖著摺扇，沉吟時也是輕搖摺扇，動怒時伸手指人或握拳，惶恐時拱手，落淚時以袖拭目，宣讀奏摺時展開摺子。答題時你（左）與發問的人（右）同時在場，作答後對方會依你的回答給出反應。</p>
+  <p><b>人物表情與動作</b>：說話時嘴會動、平常會眨眼。表情刻意收斂，靠眼瞼、視線、眉形與嘴角的細微變化傳達心思：審視、冷笑、沉吟、不悅、惶恐……；動作也只是點頭、搖頭、微顫、叩頭、跪下這類宮廷分寸。手上也有戲：權臣與乾隆搖著摺扇，沉吟時也是輕搖摺扇，動怒時握拳，惶恐時拱手，落淚時以袖拭目，宣讀奏摺時展開摺子。答題時你（左）與發問的人（右）同時在場，作答後對方會依你的回答給出反應。</p>
   <p><b>聲音</b>：背景音樂會隨場景變換（大殿、書房、夜宮、塞外、宮門各有一段曲子），答題時轉為緊張的鼓聲。開頭畫面可分別開關音樂與音效；遊戲中右上角的「♪」可切換全開／只開音效／靜音。iPhone 若沒有聲音，請檢查側邊的靜音開關。</p>
   <p>每回結束按表現評為甲、乙、丙等。作答後的「弦外之音」會說明背後的史實與典故。出場人物與名句會陸續收入「卷宗」。</p>
   <p style="opacity:.7;font-size:13.5px">本作依《清史稿》、清代硃批諭旨及筆記軼聞改編，部分情節為戲劇化處理；對白為原創，引用之古文與硃批均註明出處。</p>
@@ -1619,11 +1619,11 @@ const PROBE=/^(kx|yz|ql|jq|xz|ab|hs|mz|ys|yt|lkd|sgt)$/;
 const COMIC=['老頭子走了沒有','皇上恕罪！奴才方才唸點心單子','沈大人，奴才是替御膳房','索大人，這鍋還得半個時辰','六片七片八九片','一片一片又一片','兩片三片四五片'];
 // 手勢：依表情與台詞判斷，少數關鍵台詞直接指定
 const FAN=/^(hs|ql|jy|ys|mz|yt)$/;
-const GOV=[['老頭子走了沒有',''],['動手！','point'],['不法祖德','point'],['臣弟辦事不力','clasp'],['飛入蘆花都不見','fan'],['一片一片又一片','fan'],['兩片三片四五片','fan'],['六片七片八九片','fan'],
- ['典守者不得辭其責耳','clasp'],['你自己看。','point'],['朕就是這樣漢子','fist'],['四哥，好手段','fan'],['皇上恕罪！奴才方才唸點心單子','clasp'],['紀大人的字，和某會一直掛著','fan']];
+const GOV=[['老頭子走了沒有',''],['動手！','fist'],['不法祖德','fist'],['臣弟辦事不力','clasp'],['飛入蘆花都不見','fan'],['一片一片又一片','fan'],['兩片三片四五片','fan'],['六片七片八九片','fan'],
+ ['典守者不得辭其責耳','clasp'],['你自己看。','fist'],['朕就是這樣漢子','fist'],['四哥，好手段','fan'],['皇上恕罪！奴才方才唸點心單子','clasp'],['紀大人的字，和某會一直掛著','fan']];
 function gestOf(id,ex,t){for(const g of GOV)if(t.includes(g[0]))return g[1];const a=ART[id]||[],emp=/^(kx|yz|ql|jq)$/.test(id);
  if(/^（.{0,4}摺）|^〈|^（供詞）/.test(t))return 'scroll';
- if(ex==='angry')return /你|爾|此人|這|他/.test(t)?'point':'fist';
+ if(ex==='angry')return 'fist';
  if(ex==='cry')return 'sleeve';
  if(ex==='fear')return 'clasp';
  if(ex==='think')return emp||a[3]>=1?'fan':'';
@@ -1660,7 +1660,7 @@ const bd=(ART[id]||[])[3]>=1;
  if(o.j){a={ex:'shock',act:'jump',emo:'...',g:'palm'};m=['smile','nod','']}
  else if(o.v===2){a=SCHEME.test(id)?{ex:'smirk',act:'nod',g:FAN.test(id)?'fan':''}:{ex:'smile',act:'nod',g:FAN.test(id)?'fan':''};m=['smirk','','']}
  else if(o.v===1){a={ex:'think',act:'',g:emp||bd?'fan':''};m=['n','','clasp']}
- else if(o.d[0]<=-2){a={ex:'angry',act:emp?'shake':'no',g:'point'};m=['fear','bow','clasp']}
+ else if(o.d[0]<=-2){a={ex:'angry',act:emp?'shake':'no',g:''};m=['fear','bow','clasp']}
  else{a={ex:'stern',act:'no',g:'palm'};m=['sad','slump','']}
  a.emo=a.emo||'';showChar(id,a);showMe(m[0],m[1],m[2])}
 setInterval(()=>{if(!curId||typing||cur!=='sGame'||$('#pw').style.display==='none'||Date.now()<blinkAt)return;const P=$('#port'),id=curId,ex=curEx;P.src=face(id,ex,1,curG);
