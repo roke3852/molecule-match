@@ -514,7 +514,8 @@ function shade(hex,f){const n=parseInt(hex.slice(1).length===3?hex.slice(1).repl
 // 表情：b 眉、e 眼、m 口、c 臉色、t 淚
 const EXPR={n:{b:'n',e:'open',m:'n'},stern:{b:'stern',e:'open',m:'flat'},smile:{b:'n',e:'happy',m:'smile',c:'pink'},laugh:{b:'up',e:'happy',m:'laugh',c:'pink'},
  angry:{b:'angry',e:'half',m:'grit',c:'flush'},sad:{b:'sad',e:'half',m:'frown'},cry:{b:'sad',e:'shut',m:'frown',t:1},shock:{b:'up',e:'wide',m:'o',c:'pale'},
- smirk:{b:'smirk',e:'half',m:'smirk'},think:{b:'sad',e:'side',m:'flat'},fear:{b:'sad',e:'wide',m:'frown',c:'pale'}};
+ smirk:{b:'smirk',e:'half',m:'smirk'},think:{b:'sad',e:'side',m:'flat'},fear:{b:'sad',e:'wide',m:'frown',c:'pale'},
+ probe:{b:'smirk',e:'half',m:'flat'}};
 function drawPortrait(x,id,ex='n',fr=0){const [ty,sk,bd,bs,robe,top,old]=ART[id];const R=(c,a,b,w,h)=>{x.fillStyle=c;x.fillRect(a,b,w,h)};
  const sk2=shade(sk,.84),sk3=shade(sk,.7),rb2=shade(robe,.72),rb3=shade(robe,1.25),K='#17141c',G='#e0b64a',G2='#a87a1a';
  // --- 身體 ---
@@ -1505,6 +1506,8 @@ const OV=[['老臣有罪，可老臣沒有反心','angry','shake','vein'],['動�
  ['兩個人一起猜，那就是商量了','smirk','lean',''],['皇考大事方畢','sad','',''],['臣不勝驚駭','fear','tremble','sweat'],['索大人，這鍋還得半個時辰','smile','','note'],['和某感激不盡','smile','nod',''],
  ['郭某無禮，自罰一杯','smirk','nod',''],['一勞永逸。分寸你們自己拿','stern','nod',''],['朕不能讓任何一個人笑得太久','smirk','',''],['臣請獨任專征','stern','nod','']];
 const ERA=[['皇上',()=>CH.vol===0?'kx':CH.vol===1?'yz':'ql'],['新君',()=>CH.id===8?'jq':CH.id===4?'yz':null],['王爺',()=>CH.id===4?'yz':null],['太上皇',()=>'ql'],['和大人',()=>'hs'],['紀大人',()=>'jy'],['你',()=>'me']];
+// 試探型問話不冒問號，改用瞇眼、挑眉的審視神情
+const PROBE=/^(kx|yz|ql|jq|xz|ab|hs|mz|ys|yt|lkd|sgt)$/;
 let curId=null,curEx='n',blinkAt=0,lastCue=null;
 function cueOf(t){for(const c of CUE){const r=new RegExp(c[0].source,'g');let m;while((m=r.exec(t))){const pre=t.slice(Math.max(0,m.index-3),m.index);if(/[未不沒無][下曾敢肯]?$/.test(pre)||/並未|沒有|不曾|未曾/.test(pre))continue;return {ex:c[1],act:c[2],emo:c[3],at:m.index}}}return null}
 function findChar(t,at){let best=null,bp=-1;const see=(w,id)=>{if(!id)return;let p=t.indexOf(w);while(p>=0&&p<at){if(p>bp){bp=p;best=id}p=t.indexOf(w,p+1)}};
@@ -1513,7 +1516,7 @@ function findChar(t,at){let best=null,bp=-1;const see=(w,id)=>{if(!id)return;let
 function inferSpeech(id,t){const emp=/^(kx|yz|ql|jq)$/.test(id);if(t==='……')return {ex:'think',act:'',emo:'...'};
  for(const o of OV)if(t.includes(o[0]))return {ex:o[1],act:o[2],emo:o[3]};
  let c=cueOf(t);if(!c&&lastCue&&lastCue.id===id)c=Object.assign({},lastCue,{emo:''});
- if(!c){c={ex:DEFEX[id]||(emp?'stern':'n'),act:'',emo:''};if(/？$/.test(t))c.emo='?';else if(/！$/.test(t)&&emp)c.act='nod'}return c}
+ if(!c){c={ex:DEFEX[id]||(emp?'stern':'n'),act:'',emo:''};if(/？/.test(t)&&PROBE.test(id))c.ex='probe';else if(/！$/.test(t)&&emp)c.act='nod'}return c}
 function inferNarr(t){for(const o of NOV)if(t.includes(o[0]))return {id:o[1],ex:o[2],act:o[3],emo:o[4]};
  for(const sen of t.split(/[。！？]/)){if(NSKIP.test(sen))continue;const c=cueOf(sen);if(!c)continue;const id=findChar(sen,c.at);if(id&&CHARS[id]&&ART[id])return Object.assign({id},c)}return null}
 function showChar(id,c){const W=$('#pw'),P=$('#port'),E=$('#emo');const changed=id!==curId||W.style.display==='none';curId=id;curEx=c.ex;P.src=face(id,c.ex,0);W.style.display='block';
