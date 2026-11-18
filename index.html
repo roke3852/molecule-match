@@ -42,9 +42,11 @@ h2{font-size:15px;color:var(--mute);margin:18px 2px 8px;font-weight:600}
 .note{font-size:12px;color:#7a4b12;background:#fff4e5;border-radius:8px;padding:4px 8px;margin-top:6px;line-height:1.4}
 .star{position:absolute;top:8px;right:8px;z-index:2;width:34px;height:34px;border:0;background:none;font-size:22px;line-height:1;cursor:pointer;color:#cbbfb2;border-radius:10px}
 .star.on{color:var(--star)}
+.share{position:absolute;top:46px;right:8px;z-index:2;width:34px;height:34px;border:0;background:none;font-size:17px;line-height:1;cursor:pointer;border-radius:10px;opacity:.75}
+.share:active{background:#efe6da}
 .mv{display:none;width:100%;gap:6px}
 .editing .mv{display:flex}
-.editing .star{display:none}
+.editing .star,.editing .share{display:none}
 .editing a.cover{display:none}
 .editing .app{flex-wrap:wrap;padding-right:14px}
 .mv button{flex:1;height:38px;border:1px solid var(--line);background:#faf6f0;color:var(--ink);border-radius:10px;font:inherit;font-size:13px;cursor:pointer}
@@ -83,7 +85,7 @@ footer{margin-top:28px;font-size:12px;color:var(--mute);text-align:center;line-h
   <div class="head">
     <div>
       <h1>Roke 的 App</h1>
-      <div class="sub">點一下打開・點 ☆ 加入最愛・長按卡片可拖曳排序</div>
+      <div class="sub">點一下打開・☆ 加入最愛・🔗 複製連結・長按可拖曳排序</div>
     </div>
     <button class="refresh" id="refreshBtn" aria-label="重新整理"><span class="r">↻</span>更新</button>
   </div>
@@ -114,7 +116,7 @@ footer{margin-top:28px;font-size:12px;color:var(--mute);text-align:center;line-h
   <footer>按右上角「↻ 更新」會重新抓這頁和所有 App 的最新版。<br>長按卡片可拖曳排序；按「編輯」可換分類（只記在這台裝置）。<br>新增或更新 App：在這頁的 APPS 清單加一行或改 ver / updated（日期＋時間）/ note。<br>版本號一變，首頁就會在那個 App 上顯示「新版」。<br><span id="hubVer"></span></footer>
 </main>
 <script>
-const HUB_VER = "2.3";
+const HUB_VER = "2.4";
 /* 分類：App 的 cat 填這裡的 id；順序就是分類標籤與分組的順序 */
 const CATS = [
   { id:"coffee", name:"咖啡", icon:"☕" },
@@ -218,6 +220,7 @@ function card(a, i, n){
       ${nw && a.note ? `<div class="note">${a.updated?`<b>${fmtFull(a.updated)}</b> 更新：`:"更新："}${a.note}</div>` : ""}
     </div>
     <button class="star${isFav(a)?" on":""}" data-fav="${a.path}" aria-label="我的最愛">${isFav(a)?"★":"☆"}</button>
+    <button class="share" data-share="${a.path}" aria-label="複製連結">🔗</button>
     <div class="ce"><span>分類</span><select data-catset="${a.path}" aria-label="分類">${[...CATS.map(c=>c.id),"other"].map(id=>`<option value="${id}"${catOf(a)===id?" selected":""}>${catName(id)}</option>`).join("")}</select></div>
     <div class="mv">
       <button data-mv="top" data-p="${a.path}" ${i===0?"disabled":""}>⤒ 置頂</button>
@@ -305,6 +308,22 @@ function move(path, how){
 }
 
 /* 重新整理：繞過快取重抓目錄頁與每個 App，再重新載入 */
+/* 分享：把這個 App 的網址複製到剪貼簿 */
+async function copyLink(path){
+  const a = APPS.find(x=>x.path===path);
+  const url = new URL(path, location.origin + location.pathname).href;
+  let ok = false;
+  try{ await navigator.clipboard.writeText(url); ok = true; }
+  catch(e){
+    try{
+      const t = document.createElement("textarea"); t.value = url; t.readOnly = true;
+      t.style.cssText = "position:fixed;top:0;left:0;opacity:0;font-size:16px";
+      document.body.appendChild(t); t.select(); t.setSelectionRange(0, url.length);
+      ok = document.execCommand("copy"); t.remove();
+    }catch(e2){}
+  }
+  toast(ok ? `已複製「${a ? a.name : path}」的連結` : `複製失敗，連結：${url}`);
+}
 function toast(msg){
   const t = document.createElement("div"); t.className = "toast"; t.textContent = msg;
   document.body.appendChild(t); setTimeout(()=>t.remove(), 2600);
@@ -452,6 +471,8 @@ listEl.addEventListener("dragstart", e=>e.preventDefault());
 listEl.addEventListener("contextmenu", e=>{ if(D) e.preventDefault(); });
 
 document.getElementById("list").addEventListener("click", e=>{
+  const sh = e.target.closest("[data-share]");
+  if(sh){ e.preventDefault(); copyLink(sh.dataset.share); return; }
   const f = e.target.closest("[data-fav]");
   if(f){ e.preventDefault();
     const p = f.dataset.fav;
