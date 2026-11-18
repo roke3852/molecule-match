@@ -4942,6 +4942,13 @@ TOOLS.push({id:'scale',name:'智慧電子秤',type:'注水時即時顯示流速�
  {id:'lily',name:'力狸 Lilydrip',type:'放進錐形濾杯撐開粉床，均勻度與乾淨度 +0.3',price:650,lore:'一顆放在濾杯底部的陶瓷小塔，讓粉層變薄、水流分散。'},{id:'thermos',name:'保溫熱水瓶',type:'中途加水，水溫不會掉',price:1200,lore:'吧台旁邊一瓶滾燙的熱水，手沖壺隨時補滿。'},{id:'airscape',name:'真空儲豆罐',type:'賞味期延長 6 天',price:1500,lore:'壓下內蓋把空氣擠出去，豆子老得慢。'},
  {id:'cupset',name:'杯測匙與杯測碗',type:'向尋豆師杯測樣品只要 NT$50',price:900,lore:'自己帶杯測匙，尋豆師就知道你是內行人。'},{id:'refract',name:'濃度計',type:'每沖一杯多得 1 點經驗',price:6000,lore:'滴一滴咖啡就知道濃度和萃取率，進步看得見。'},{id:'server',name:'玻璃分享壺',type:'出杯更體面，小費 +10%',price:500,lore:'先滴進分享壺、搖一搖再倒進杯子，風味更均勻。'},
  {id:'cups',name:'職人陶杯組',type:'客人喝得更開心，小費 +20%',price:2400,lore:'手拉坯的陶杯，每一只的釉色都不一樣。'},{id:'apron',name:'職人圍裙',type:'看起來更專業，更容易累積魅力',price:1600,lore:'帆布加皮革肩帶，穿上去就有架勢。'});
+/* ---------- v9.2：依價格校正器材參數（生涯模式）。濾杯只在生涯模式套用，不動實驗室的模型 ---------- */
+const CALD={melitta:[.96,.02,.45],kalita102:[.96,.02,.44],v60:[.96,.035,.42],deep27:[.96,.025,.42],mugen:[.98,.005,.4],flower:[.97,.035,.42],crystaleye:[.97,.03,.4],kasuya:[.97,.025,.38],origami_c:[.975,.03,.38],origami_w:[.98,.02,.3],beehouse:[.975,.02,.36],
+ solo:[.98,.02,.36],orea:[.99,.015,.28],kono:[.98,.02,.35],b75:[.985,.02,.27],april:[.99,.012,.24],mountain:[.985,.02,.3],ufo:[.985,.018,.29],december:[1,.012,.2],tricolate:[1,0,.18],chemex:[.99,.01,.25],staggx:[1,.008,.2],pulsar:[1,0,.1]};
+const drp=id=>{const D=DRIPPER[id],c=CALD[id];return D?(c?Object.assign({},D,{u:c[0],by:c[1],het:c[2]}):D):null;};
+Object.entries({encore:.21,porlex:.19,q2:.18,c3:.165,k6:.16,s3:.14,x25:.145,xultra:.14,zp6:.095,c40:.13,kultra:.125,opus:.13,c40rc:.125,nicecut:.12,virtuoso:.12,kinu:.115,wilfa:.11,ode:.105,pietro:.095,df64:.095,r220:.095,t078:.07,p80:.08,ek43:.072,zerno:.07,guatemala:.066,ditting:.064,zm:.062,eg1:.055}).forEach(([id,v])=>{const g=GRINDERS.find(x=>x.id===id);if(g)g.fines=v;});
+Object.entries({ikawa:.84,bullet:.92}).forEach(([id,v])=>{const r=ROASTERS.find(x=>x.id===id);if(r)r.rq=v;});
+Object.entries({minik:.76,fish:.84,kalitak:.82,buono:.83,kinto:.84,tsuki:.85,fisht:.87,staggpo:.9,bona:.88,takahiro:.93,buonot:.89,brewista:.93,yukiwa:.95,stagg:.97}).forEach(([id,v])=>{const k=KETTLES.find(x=>x.id===id);if(k)k.stab=v;});
 const KPRICE={},TPRICE={};KETTLES.forEach(k=>KPRICE[k.id]=k.price);TOOLS.forEach(k=>TPRICE[k.id]=k.price);
 const WATERS={tap:{n:'自來水',fr:.92,sw:.97,bt:1.06,cl:-1,d:'有氯味，香氣和乾淨度打折'},filter:{n:'過濾水',fr:1,sw:1,bt:1,cl:0,d:'乾淨、中性'},mineral:{n:'礦泉水',fr:1.06,sw:1.04,bt:.97,cl:.6,d:'礦物質適中，香氣和甜感更好'}};
 /* 偶爾上門的厲害咖啡師：關係好了會教你配方、幫你牽線 */
@@ -5929,7 +5936,8 @@ function runBrew(base,ex){const s=S(),KT=kettleNow(),Wt=waterNow(),gc=careOf(s.l
   if(!(ex&&ex.pro)&&!KT.temp){const e=s.tools.thermo?1:4;base.temp=Math.max(80,Math.min(100,Math.round(base.temp+(Math.random()*2-1)*e)));XN.push('沒有恆溫壺，這杯實際水溫 '+base.temp+'°C');}
   const f0=B.f,c0=B.clar,f=f0.slice();f[5]*=Wt.fr;f[2]*=Wt.sw;f[4]*=Wt.bt*(1+.15*gc.lv);let cl=(c0||0)+Wt.cl-1.5*gc.lv;if(gc.mold){f[5]*=.75;f[3]*=1.3;f[4]*=1.15;cl-=3;XN.push('｜磨豆機發霉了，咖啡有霉味！');}
   if(s.tools.sieve&&base.forceFines)base.forceFines*=.7;
-  B.f=f;B.clar=cl;let r;try{r=G.brew(Object.assign(base,ex&&ex.pro||{}));}finally{B.f=f0;B.clar=c0;}
+  const D0=DRIPPER[base.brewer],cd=CALD[base.brewer],dsv=D0&&cd?[D0.u,D0.by,D0.het]:null;if(dsv){D0.u=cd[0];D0.by=cd[1];D0.het=cd[2];}
+  B.f=f;B.clar=cl;let r;try{r=G.brew(Object.assign(base,ex&&ex.pro||{}));}finally{B.f=f0;B.clar=c0;if(dsv){D0.u=dsv[0];D0.by=dsv[1];D0.het=dsv[2];}}
   r.even=Math.max(0,(r.even??5)-(1-KT.stab)*2.5);r.clarity=Math.max(0,(r.clarity??5)-(1-KT.stab)*1.5);
   if(s.tools.rdt)r.clarity=Math.min(10,r.clarity+.3);if(s.tools.paper&&base.brewer!=='press')r.clarity=Math.min(10,r.clarity+.4);if(s.tools.lily&&DRIPPER[base.brewer]&&DRIPPER[base.brewer].het>=.5){r.clarity=Math.min(10,r.clarity+.3);r.even=Math.min(10,r.even+.3);}if(s.tools.refract)gain(1,0);
   if(s.tools.wdt&&s.last.wdt!=='off'&&base.brewer!=='press'){r.even=Math.min(10,r.even+1.3);r.clarity=Math.min(10,r.clarity+.4);}
@@ -6081,7 +6089,7 @@ GI.addEventListener('click',e=>{if(e.target===GI||e.target.closest('[data-x]'))G
 function cmpRow(label,nv,cv,fmt,up,note){const d=nv-cv,same=Math.abs(d)<1e-9,good=up?d>0:d<0;
   return '<div class="cmp"><span>'+label+'</span><b>'+fmt(nv)+'</b><em class="'+(same?'':good?'up':'dn')+'">'+(cv==null||same?'＝ 一樣':(d>0?'▲':'▼')+' 目前 '+fmt(cv))+'</em>'+(note?'<small>'+note+'</small>':'')+'</div>';}
 function gearInfo(kind,id){const s=S(),pc=v=>Math.round(v*100)+'%';let name,sub,rows='',cur='',eff='';
-  if(kind==='brewer'){const it=G.BREWERS.find(x=>x.id===id),D=DRIPPER[id],cid=s.last.brewer,C=DRIPPER[cid],cn=G.BREWERS.find(x=>x.id===cid).name;name=it.name;sub=it.sub;cur='店裡正在用：'+cn;
+  if(kind==='brewer'){const it=G.BREWERS.find(x=>x.id===id),D=drp(id),cid=s.last.brewer,C=drp(cid),cn=G.BREWERS.find(x=>x.id===cid).name;name=it.name;sub=it.sub;cur='店裡正在用：'+cn;
     if(!D)eff=id==='press'?'全程浸泡、金屬濾網：均勻度高、醇厚度和油脂多，但清晰度低。不受注水手法影響，只看浸泡時間。':'可以關閥浸泡再開閥濾出：均勻度高、寬容度大，注水時多一顆閥門按鈕。';
     else{const c=C||null;rows=cmpRow('流速',D.q,c&&c.q,v=>v.toFixed(2)+'×',true,'越快越不容易過萃、口感越輕盈；越慢越厚實')+cmpRow('粉床均勻',1-D.het,c&&1-c.het,pc,true,'越高每一顆粉萃得越平均，杯子越甜越穩')+cmpRow('繞流',D.by,c&&c.by,pc,false,'水沒經過粉就流走的比例，越低萃取越完整')+cmpRow('萃取效率',D.u,c&&c.u,pc,true);
       eff=(D.het<=.3?'平底型：寬容度高，甜感和均勻度好。':'錐形：中間粉層深，風味層次明顯，但更吃手法。')+(c?'':'（目前用的是浸泡式器具，無法直接比較）');}}
