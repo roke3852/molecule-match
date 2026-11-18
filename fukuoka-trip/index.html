@@ -531,6 +531,16 @@ nav a.on::before{left:calc(50% - 32px)!important;top:12px!important;margin-top:0
 .zmap-f a{color:var(--sea)}
 #imgov.ro #imgovD{display:none}
 #imgov.ro img{max-height:80vh}
+
+/* 行程模擬：金銀風格對話框 */
+.gsc{position:relative;margin:12px 0 4px;background:#fffff8;border:3px solid var(--px);box-shadow:inset 0 0 0 2px #fffff8,inset 0 0 0 4px var(--px);padding:14px 16px 18px;min-height:96px;cursor:pointer}
+.gsc-who{position:absolute;top:-12px;left:12px;background:var(--px);color:#fff;font-size:11px;font-family:Cubic11;padding:2px 8px}
+.gsc-say{font-size:16px;font-family:Unifont;line-height:1.75;color:var(--ink);white-space:pre-wrap}
+.gsc-nx{position:absolute;right:10px;bottom:4px;font-size:11px;font-family:Cubic11;color:var(--maple);opacity:0}
+.gsc.done .gsc-nx{opacity:1;animation:pxblink2 .8s steps(2) infinite}
+.sim-sec{margin-top:12px;border-top:2px dashed var(--line);padding-top:10px}
+.sim-sh{font-size:11px;font-family:Cubic11;color:var(--c,var(--maple));margin-bottom:4px}
+.sim-sec p{margin:0}
 </style>
 </head>
 <body>
@@ -848,7 +858,7 @@ nav a.on::before{left:calc(50% - 32px)!important;top:12px!important;margin-top:0
 
 <script>
 /* ---------- storage (safe) ---------- */
-const APPV='20261118g';
+const APPV='20261118h';
 /* 把 emoji 換成像素圖示 */
 (function(){
  const OK=new Set([0x25b6,0x1f302,0x1f321,0x1f324,0x1f326,0x1f327,0x1f328,0x1f329,0x1f32b,0x1f341,0x1f35b,0x1f35c,0x1f361,0x1f370,0x1f37d,0x1f381,0x1f384,0x1f389,0x1f38c,0x1f392,0x1f3ab,0x1f3c6,0x1f3e0,0x1f3e8,0x1f3ea,0x1f3ec,0x1f41f,0x1f44b,0x1f44d,0x1f455,0x1f466,0x1f467,0x1f468,0x1f469,0x1f46a,0x1f476,0x1f48a,0x1f4a1,0x1f4a7,0x1f4ac,0x1f4b3,0x1f4b4,0x1f4c5,0x1f4cb,0x1f4cc,0x1f4cd,0x1f4dd,0x1f4e3,0x1f4e4,0x1f4f1,0x1f4f7,0x1f4f8,0x1f50d,0x1f512,0x1f516,0x1f517,0x1f552,0x1f5a5,0x1f5bc,0x1f5d1,0x1f5d3,0x1f5e3,0x1f5fa,0x1f60c,0x1f683,0x1f684,0x1f687,0x1f68f,0x1f690,0x1f695,0x1f6b2,0x1f6b6,0x1f6c2,0x1f6c3,0x1f6cd,0x1f6ec,0x1f7e2,0x1f969,0x1f9c5,0x1f9e0,0x1f9e3,0x1f9e5,0x1f9ed,0x1f9ee,0x1f9f3,0x1f9fe,0x23f1,0x23f8,0x2600,0x2601,0x2614,0x2615,0x26a0,0x26c5,0x26c8,0x26f4,0x26f8,0x2705,0x270f,0x2728,0x2744,0x274c,0x2b50]);
@@ -1748,6 +1758,69 @@ function kmOf(a,b){const R=6371,dl=(b[0]-a[0])*Math.PI/180,dn=(b[1]-a[1])*Math.P
 function estMin(km,tr){const [,c]=trIcon(tr||'');if(/新幹線/.test(tr))return Math.round(km/150*60+8);if(/船/.test(tr))return Math.round(km/20*60+10);if(c==='rail')return Math.round(km/40*60+8);if(c==='car')return Math.round(km/(km>20?65:30)*60+5);if(km>3)return Math.round(km/25*60+10);return Math.round(km*1.3/4.5*60)}
 const kindOf=s=>GO_RX.test(s.n)&&!/^抵達.*(機場|入境)/.test(s.n)?'go':EAT_RX.test(s.n)?'eat':BUY_RX.test(s.n)?'buy':'see';
 const KIND={eat:'🍜 吃',buy:'🛍️ 買',see:'📸 玩・景點',go:'🚃 交通'};
+const DAYSTORY={
+ '11/21':'飛機穿過雲層，窗外慢慢亮起一整片燈海——福岡到了。這座城市的機場離市中心近得驚人，地鐵兩站就到博多。今晚不趕行程，先把行李放好，吃頓熱的，冒險明天正式開始。',
+ '11/22':'第一個早晨，不設鬧鐘。天神是福岡最熱鬧的地方，地上是百貨公司、地下是一整條歐風街道，聖誕燈飾已經掛滿樹梢。今天的任務很簡單：慢慢逛、好好吃，晚上用和牛燒肉替第一天收尾。',
+ '11/23':'今天是日本的國定假日「勤勞感謝之日」，太宰府一定人山人海，所以我們反其道而行，往海邊去。一條細長的沙洲伸進玄界灘，一邊是海豚、一邊是大草原，是屬於小朋友的一天。',
+ '11/24':'平日的早晨，西鐵電車載著上班族往天神走，我們卻反方向往南。終點是一千多年前「九州的首都」太宰府，還有一座藏在山裡、被紅葉包圍的神社。今天要走路、要爬坡，也要吃很多梅枝餅。',
+ '11/25':'包車在飯店門口等著，今天要翻過山，進入大分縣。上午和獅子、長頸鹿近距離見面，下午泡進溫泉鄉的慢步調。這是整趟旅程最「日本鄉間」的一天，在車上可以好好補眠。',
+ '11/26':'難得的悠閒早晨。中午那頓燒肉午餐是今天的大事，下午先鑽進會發光的數位森林，再去看一台高約 25 公尺的鋼彈站在海港邊。今天大人小孩都會很開心。',
+ '11/27':'搭上新幹線，十幾分鐘就穿過北九州。門司港曾是日本最繁華的國際港口之一，紅磚建築保留著一百年前的樣子；對岸的下關就是另一個縣、另一座島。今天要跨過海峽吃壽司。',
+ '11/28':'最後一天。把想看的再看一次，把想買的補齊。在大濠公園湖邊繞一圈，到博多的守護神面前說聲謝謝，然後帶著滿滿的行李和回憶，回家。'
+};
+const STORIES=[
+ {rx:/福岡機場|入境/,say:'機艙門打開，冷冷的空氣混著一點海的味道。跟著「到着」的黃色指標走，先拍一張機場的聖誕老人，再排隊過海關。小朋友，記得把護照拿好喔！',intro:'福岡機場是日本離市中心最近的大機場之一，國際線航廈到博多站車程大約 15 分鐘。',bg:'福岡機場就在市區旁邊，飛機起降時從城市上空低低掠過，所以福岡市中心的大樓都有高度限制。這也是福岡天際線看起來特別「平」的原因。'},
+ {rx:/直達博多|博多車站／飯店/,say:'計程車滑進博多站前，大大的「JR博多シティ」招牌閃著光，站前廣場的聖誕市集木屋一間接著一間。到了，這就是我們接下來八天的城市。',intro:'博多站是九州最大的車站，新幹線、JR、地鐵都在這裡交會，車站大樓 JR 博多 City 是百貨、美食街和屋頂廣場的綜合體。',bg:'「福岡」和「博多」原本是兩座城：那珂川西邊是武士住的城下町「福岡」，東邊是商人的港町「博多」。1889 年合併成一個市，市名叫福岡，車站卻保留了博多的名字，一直到今天。'},
+ {rx:/車站美食街/,say:'電扶梯一路往上，走廊兩邊都是熱騰騰的店：拉麵、牛舌、鐵板餃子……肚子已經在叫了。挑一家門口排隊人最多的，準沒錯。',intro:'博多站的 AMU PLAZA 頂樓餐廳街和地下「博多 1 番街」營業到很晚，適合剛下飛機的第一餐。',bg:'博多自古就是對外的港口，中國、朝鮮的商人和僧侶都從這裡上岸，日本最早的饅頭、烏龍麵和蕎麥麵相傳也是從博多傳進來的。'},
+ {rx:/晚間散步與雜貨/,say:'吃飽了，在燈光下慢慢走。雜貨店裡什麼都想摸一下，小朋友已經在挑想帶回家的貼紙。不急，這只是第一晚。',intro:'博多站周邊的 AMU PLAZA、KITTE 博多和巴士總站樓上都有生活雜貨與百元商店，逛到晚上九點左右。',bg:'博多站前的聖誕市集從 11 月初開始，白色木屋、熱紅酒和燭台燈，是福岡冬天最有代表性的風景之一。'},
+ {rx:/警固公園/,say:'睡飽了，推開窗是晴朗的天神。走進警固公園，鴿子在草地上散步，四周大樓的玻璃反射著藍天。小朋友在溜滑梯，大人買杯咖啡，旅行就是這樣開始的。',intro:'警固公園位於天神正中央，旁邊就是百貨公司和地下街入口，冬天晚上有燈飾。',bg:'公園曾經因為樹叢太密、晚上不安全而改造，拿掉遮擋視線的植栽，讓整個公園一眼看得透，現在成了天神最明亮的約會和集合地點。'},
+ {rx:/水炊|天神名產午餐/,say:'鍋子端上來，湯是乳白色的。店員提醒：先喝一口湯，再放雞肉。熱湯一下肚，整個人都醒了。最後的白飯雜炊，一定要留胃。',intro:'水炊鍋是博多代表的雞肉鍋，用雞骨長時間熬出白濁的湯；博多拉麵則是細麵配豚骨湯，可以加點「替玉」再來一球麵。',bg:'博多拉麵的麵特別細，據說是因為以前長濱魚市場的工人時間很趕，細麵煮得快、吃得快，「替玉」加麵的文化也從這裡開始。'},
+ {rx:/天神地下街與晚餐/,say:'晚上的天神又是另一個樣子：燈飾亮了，地下街的人潮變多。來碗熱呼呼的牛腸鍋，今天跑了一整天，值得。',intro:'博多牛腸鍋（もつ鍋）是福岡的冬天代表，牛小腸配高麗菜和韭菜，湯底有醬油和味噌兩種。',bg:'牛腸鍋原本是戰後物資缺乏時的平民料理，把別人不要的內臟煮成一鍋，1990 年代紅遍全日本，現在是到福岡必吃的名物。'},
+ {rx:/天神地下街/,say:'走下階梯，像走進一條歐洲的老街：石板地、鑄鐵花紋的天花板、昏黃的燈。外面再冷，這裡都暖暖的。前面那家甜點店好香……',intro:'天神地下街全長約 590 公尺，連接地鐵天神站、天神南站和各大百貨，150 多間店，下雨天也能逛一整天。',bg:'地下街 1976 年開業，設計參考 19 世紀的歐洲街道，地板用石頭拼花、天花板用唐草花紋，四十多年來一直是福岡人約會和逛街的地方。'},
+ {rx:/前往博多車站/,say:'在天神南站搭上地鐵七隈線，兩站就到博多。窗外是黑漆漆的隧道，小朋友盯著車廂裡的路線圖數站名。'},
+ {rx:/黑毛和牛燒肉|博多.*燒肉/,say:'炭火劈啪作響，油花漂亮的和牛一放上網子就滋滋冒煙。小朋友負責翻肉，大人負責吃。第一天，就用這一盤收尾吧。',intro:'九州是日本和牛的大產地，宮崎牛、佐賀牛、鹿兒島黑牛都很有名，在福岡吃燒肉價格比東京實惠。',bg:'日本的燒肉文化和戰後在日韓國人的料理有很深的關係，從大阪、福岡這些港口城市慢慢流行起來，變成全日本的國民美食。'},
+ {rx:/前往海之中道海洋世界/,say:'JR 香椎線的電車慢慢開出住宅區，窗外突然一邊是海、另一邊也是海——我們正走在一條伸進大海的細長沙洲上。'},
+ {rx:/海之中道海洋世界|マリンワールド/,say:'大玻璃後面，一大群沙丁魚像銀色的龍捲風一樣轉圈。表演池那邊傳來音樂，海豚一躍而起，背後就是真正的博多灣。小朋友，坐前排會被潑濕喔！',intro:'海之中道海洋世界是九州最大級的水族館，主打九州近海的海洋生物，海豚和海獅表演以博多灣為背景，非常壯觀。',bg:'海之中道是一條長約 8 公里的沙洲，一路連到志賀島。江戶時代，有農夫在志賀島的田裡挖到一顆刻著「漢委奴國王」的金印，是中國東漢皇帝送給這一帶小國的，現在是日本國寶。'},
+ {rx:/海鮮餐廳或園區午餐/,say:'窗外，海豚游過來又游過去，好像也在看我們吃飯。小朋友的兒童餐盤是海洋動物的形狀，捨不得吃。',intro:'館內餐廳的大窗戶正對海豚池，可以一邊吃飯一邊看海豚游泳。'},
+ {rx:/海之中道海濱公園/,say:'草原大到看不見盡頭。遠遠的白色大山丘上，一群小孩跳得好高——那就是傳說中的「彈跳雲」！鞋子脫掉，衝啊！',intro:'海之中道海濱公園佔地超過 300 公頃，有大草原、動物之森、花田和巨大的白色跳跳床，園內可以租腳踏車或搭遊園車。',bg:'這片土地二戰後曾被美軍使用，歸還後由國家規劃成國營公園，1981 年開放。昔日的軍事用地，現在是福岡人週末野餐的地方。'},
+ {rx:/返回福岡市區/,say:'回程的電車上，小朋友靠在大人肩膀上睡著了，手裡還握著水族館買的海豚吊飾。'},
+ {rx:/西鐵藥院站/,say:'早上的藥院站，上班族匆匆走過。我們拿著西瓜卡「嗶」一聲進站，反方向往太宰府出發。'},
+ {rx:/西鐵電車至太宰府/,say:'西鐵電車晃呀晃，窗外的大樓慢慢變成低矮的住宅和田地。在二日市換車，再坐一站，空氣好像變得比較清新了。',intro:'西鐵天神大牟田線從天神一路往南，在二日市站轉太宰府線，全程約 30 多分鐘。',bg:'西鐵（西日本鐵道）是九州最大的私鐵公司，太宰府線上偶爾會開出彩繪的觀光列車「旅人」，車廂裡畫著太宰府和沿線的風景。'},
+ {rx:/竈門神社/,say:'計程車沿著山路轉了幾個彎，一抬頭，整片山都燒成了紅色。石階兩旁的楓葉隧道沙沙作響，陽光從縫隙灑下來。在這裡拍的每一張照片都像明信片。',intro:'竈門神社在寶滿山山腳，境內有三百多棵楓樹，是九州數一數二的賞楓名所，也是求良緣的神社。',bg:'神社已有 1300 多年歷史，寶滿山自古是修行者的聖山。現代的社務所由知名設計師打造，和古老的山林融合在一起；因為名字和人氣漫畫主角同姓「竈門」，也吸引了很多漫畫迷來參拜。'},
+ {rx:/下山返回太宰府/,say:'下山的路上，楓葉一片片飄進車窗。肚子有點餓了，參道的香味好像已經在召喚我們。'},
+ {rx:/表參道午餐|梅枝餅/,say:'參道兩旁的店家都在烤梅枝餅，鐵板「喀啦喀啦」翻面，空氣裡都是紅豆和米香。剛烤好的燙燙的，兩手捧著吃最好吃。',intro:'太宰府天滿宮參道約 400 公尺，兩旁是梅枝餅老店、明太子料理和伴手禮店，還有隈研吾設計、用木條交錯搭成的星巴克。',bg:'傳說菅原道真被貶到太宰府時生活困苦，一位老婆婆隔著柵欄、用梅樹枝插著烤餅遞給他，這就是梅枝餅的由來。每個月 25 日的「天神日」，還會賣綠色的艾草口味。'},
+ {rx:/太宰府天滿宮/,say:'穿過朱紅色的太鼓橋，走過去、現在、未來三座橋，心也跟著靜下來。正殿前，一頭黃銅色的牛被摸得閃閃發亮。來，摸摸牛的頭，祈求變聰明！',intro:'太宰府天滿宮是全日本約一萬兩千座天滿宮的總本宮，供奉學問之神菅原道真，每年有大批考生來祈求合格。',bg:'菅原道真是平安時代的大學者，西元 901 年被政敵陷害、貶到太宰府，兩年後在這裡過世。傳說載著他遺體的牛走到這裡就不肯再走，於是就地安葬，建成了天滿宮。他在京都最愛的梅樹，據說一夜之間飛到太宰府陪他，就是正殿前的「飛梅」。'},
+ {rx:/返回福岡蒙特利酒店休息/,say:'回到飯店，鞋子一脫、往床上一倒。小朋友說今天的梅枝餅是全世界最好吃的點心。休息一下，晚上還有屋台。'},
+ {rx:/屋台/,say:'天色暗下來，河邊亮起一盞盞紅燈籠。拉開布簾，擠進小小的攤子，和隔壁的日本上班族肩並肩。老闆笑著問：「どこから来たの？」（從哪裡來的呀？）',intro:'屋台是福岡夜晚最有代表性的風景，中洲、天神、長濱一帶有上百攤，賣拉麵、關東煮、烤雞串和天婦羅。',bg:'福岡是全日本屋台最多的城市。戰後很多城市取締路邊攤，福岡卻在 2013 年訂了專門條例，把屋台當成觀光文化保留下來，一攤只能坐七、八個人，熱鬧又有人情味。'},
+ {rx:/飯店大廳出發/,say:'包車司機在大廳鞠躬打招呼，行李箱上的小朋友已經迫不及待。今天要穿過山，去找獅子和溫泉。'},
+ {rx:/九州自然動物園.*野生/,say:'車子慢慢開進大門，前面一隻長頸鹿正低頭看著我們。再往前，獅子懶洋洋地趴在路邊，近到可以看清楚牠的鬍鬚。小聲一點、別開窗——我們才是被參觀的那一方。',intro:'九州自然動物園（Africa Safari）位在大分縣宇佐市的山上，是日本最大級的野生動物園，約 70 種、1300 多隻動物放養在廣大的園區裡，可以開車或搭叢林巴士進去。',bg:'動物園開園已將近半個世紀，主打「讓人進籠子、讓動物自由」。最受歡迎的是叢林巴士，車窗外有鐵網，能從車上直接用夾子餵獅子和熊吃肉。'},
+ {rx:/九州自然動物園.*小動物/,say:'下了車，袋鼠就在腳邊跳來跳去，小羊湊過來聞聞你的手。小朋友第一次摸到天竺鼠，軟軟的、暖暖的，眼睛都亮了。',intro:'步行區有袋鼠森林、接觸式牧場、狗狗和貓咪沙龍，可以餵食、抱小動物，小小孩最愛。'},
+ {rx:/前往溫泉鄉由布院/,say:'車子翻過山頭，一座雙峰的山出現在前方，山下的小鎮冒著白白的溫泉煙。那就是由布院。'},
+ {rx:/由布院|湯之坪|金鱗湖/,say:'湯之坪街道上，可樂餅剛起鍋、布丁銅鑼燒冰冰涼涼，一路走一路吃。走到底，金鱗湖安安靜靜地映著由布岳，湖面還飄著薄薄的霧。',intro:'由布院是大分縣的溫泉鄉，主街湯之坪街道約 800 公尺，兩旁是甜點、雜貨和美術館；盡頭的金鱗湖冬天早晨會冒出夢幻的湖霧。',bg:'由布院背後是被稱為「豐後富士」的由布岳。1970 年代，當地旅館的年輕老闆們跑到德國的溫泉小鎮取經，決定不蓋大型飯店、保留田園風景，才有今天這種安靜的樣子。金鱗湖的名字來自明治時代：一位學者看到夕陽下魚躍出水面，鱗片閃著金光。'},
+ {rx:/啟程舒適返回福岡/,say:'回程的車上很安靜，大人小孩都睡著了。窗外的山慢慢暗下來，口袋裡還有一個沒吃完的布丁銅鑼燒。'},
+ {rx:/抵達福岡蒙特利飯店/,say:'回到熟悉的大廳，今天跑了大分一圈。辛苦了，晚上就在附近隨便吃吃吧。'},
+ {rx:/周邊自由晚餐/,say:'晚餐不用想太多，天神和渡邊通一帶走幾步就有拉麵、定食和家庭餐廳。小朋友點了兒童餐，玩具比飯還重要。'},
+ {rx:/櫛田神社/,say:'走進櫛田神社，一座十幾公尺高的華麗山車突然出現在眼前，上面站滿了武將和人偶。小朋友仰著頭：「這個會動嗎？」會的，每年夏天，大家會扛著它在博多街上奔跑！',intro:'櫛田神社是博多的總鎮守，當地人暱稱「お櫛田さん」。境內全年展示博多祇園山笠的「飾山」，旁邊就是博多最老的川端商店街。',bg:'神社相傳創建於 757 年。每年 7 月 1 日到 15 日的博多祇園山笠，男人們穿著兜襠布、扛著重約一噸的山車在街上全力奔跑，已經有七百多年歷史，是日本的重要無形民俗文化財。'},
+ {rx:/大東園/,say:'推開大東園的門，烤肉香撲鼻而來。定食端上桌：和牛五花、白飯、湯，還可以免費續飯。今天的午餐，是一整天的能量來源。',intro:'燒肉大東園本店在博多川端附近，是當地人也常去的老字號燒肉店，平日商業午餐份量足、價格親民。'},
+ {rx:/前往 BOSS E|BOSS E・ZO（teamLab）|百道海灘/,say:'走進 teamLab 森林，牆上的動物會跟著你走，伸手一抓，就「捕捉」到一隻發光的鹿。出了館，百道海灘的風吹過來，福岡塔就站在沙灘後面。',intro:'BOSS E・ZO FUKUOKA 在福岡 PayPay 巨蛋旁，裡面有 teamLab 森林等體驗設施；旁邊的百道海灘和高 234 公尺的福岡塔是福岡的海岸地標。',bg:'百道濱原本是一片填海地，1989 年在這裡辦了亞洲太平洋博覽會，之後發展成有巨蛋、高塔和人工沙灘的新市區。福岡塔外牆貼了八千片鏡子，被稱為「鏡之塔」。'},
+ {rx:/LaLaport/,say:'走出商場，一抬頭——一台高約 25 公尺的白色鋼彈就站在廣場上！音樂響起，燈光亮起，它的頭慢慢轉向我們……小朋友抓緊了大人的手。',intro:'LaLaport 福岡 2022 年開幕，戶外廣場站著實物大小的「RX-93ff ν 鋼彈」，每天有固定時間的燈光演出，商場內有玩具店、兒童遊樂設施和美食街。',bg:'這台 ν 鋼彈是日本少數的實物大鋼彈立像之一，總高約 24.8 公尺，連手上的浮游砲都做出來了，週末常常擠滿從全日本來朝聖的粉絲。'},
+ {rx:/返回福岡蒙特利酒店$/,say:'提著大包小包回飯店，小朋友手上抱著剛買的玩具。今天也是滿滿的一天。'},
+ {rx:/新幹線/,say:'月台上，白色的新幹線「咻」地滑進來。坐好、繫好，才剛打開零食，廣播就說：「下一站，小倉。」十幾分鐘，就從福岡市跑到北九州市了。',intro:'博多到小倉搭山陽新幹線只要 15 分鐘左右，是日本最短的新幹線區間之一。',bg:'小倉是北九州市的中心，也是九州的北大門，再往北穿過關門海峽，就到本州的下關。'},
+ {rx:/門司港車站/,say:'走出車站回頭看，這棟木造的西洋建築像是從一百年前的明信片裡走出來的。售票口、洗手台、時鐘，全都保留著大正時代的樣子。',intro:'門司港站是九州鐵路的起點，現在的站房 1914 年落成，是日本第一個被指定為重要文化財的車站，2019 年修復回大正時代的原貌。',bg:'門司港在明治時代被指定為國際貿易港，和中國、歐洲的航線都在這裡停靠，全盛時期銀行、商社林立，被稱為「九州的門戶」。'},
+ {rx:/九州鐵道紀念館/,say:'紅磚建築旁停著一排老火車，蒸汽機關車黑得發亮。小朋友坐上迷你列車，自己握著操縱桿開了一圈，神氣得不得了。',intro:'九州鐵道紀念館就在門司港站旁，展示歷代列車和鐵道模型，還能駕駛迷你列車、玩駕駛模擬器。',bg:'紀念館的主建築是 1891 年蓋的「九州鐵道」總公司大樓，九州的鐵路就是從這棟紅磚樓開始規劃、一路鋪到鹿兒島的。'},
+ {rx:/唐戶市場/,say:'搭上渡輪，五分鐘就跨過海峽，到了另一個縣、另一座島。市場裡人聲鼎沸，攤子上的壽司一盤一盤，鮪魚、海膽、河豚……拿一個托盤，自己挑！',intro:'唐戶市場在對岸的山口縣下關市，週五到週日有「活きいき馬關街」，一整排攤位賣現捏壽司和海鮮丼，可以坐在海邊吃。',bg:'下關是日本的河豚之都，當地把河豚叫做「ふく」，和「福」同音，象徵好運。眼前這片關門海峽，也是 1185 年源平合戰最後一役「壇之浦之戰」的戰場。'},
+ {rx:/門司港浪漫古蹟|門司港レトロ/,say:'海風吹過紅磚倉庫，藍色的開合橋慢慢升起，讓船通過。空氣裡飄著烤咖哩的香味——那可是門司港才有的名物。',intro:'門司港懷舊區保留了大正、昭和初期的舊門司稅關、舊大阪商船等西洋建築，還有藍翼門司開合橋和海峽景觀。',bg:'門司港的燒咖哩據說是昭和時代一家咖啡店，把剩下的咖哩放進烤箱烤，意外變成招牌；現在整個門司港有幾十家店在賣，各有各的做法。'},
+ {rx:/小倉城/,say:'天守閣在紅葉後面露出白色的身影，屋頂的線條在藍天下特別清楚。登上頂樓，整個小倉市區和遠方的海都在腳下。',intro:'小倉城的天守閣有「唐造」的特殊造型——第五層比第四層更寬，看起來像戴了一頂大帽子；城內有互動展示，旁邊是小倉城庭園。',bg:'小倉城由戰國大名細川忠興在 1602 年興建，原本的天守閣在江戶時代燒毀，現在的天守是 1959 年重建的。'},
+ {rx:/返回博多車站/,say:'新幹線又是一眨眼就到了博多。窗外夕陽把車廂染成橘色，今天走了好多路。'},
+ {rx:/大濠公園/,say:'清晨的大濠公園，湖面像鏡子一樣。慢跑的人、遛狗的人，還有一群天鵝船靜靜停在岸邊。沿著湖邊走一圈，把這幾天的回憶一件件想起來。',intro:'大濠公園中央是一座周長約 2 公里的大湖，有步道、兒童遊樂場、日本庭園和星巴克，是福岡人最愛的散步地點。',bg:'這片湖原本是福岡城的外護城河，1929 年整理成公園，湖中的島和橋據說是仿照中國杭州的西湖設計。隔壁的舞鶴公園就是福岡城的遺跡。'},
+ {rx:/川端/,say:'最後一次走進川端商店街，拱廊下的老店還是那麼熱鬧。來一碗熱熱的紅豆湯，跟博多說聲：謝謝你，我們還會再來。',intro:'川端商店街是博多最古老的商店街，全長約 400 公尺，有和服店、仙貝店、紅豆湯老店，盡頭直通櫛田神社。',bg:'商店街從明治時代就很熱鬧，「川端ぜんざい」紅豆湯一年四季都有，據說博多是日本紅豆湯的發源地之一。'},
+ {rx:/最後伴手禮補貨/,say:'購物清單一項項打勾：明太子、通りもん、雞蛋糕……行李箱塞得滿滿的。等等，好像還少了一個要送給老師的！'},
+ {rx:/前往機場/,say:'計程車往機場開，窗外的城市一點一點往後退。小朋友問：「我們什麼時候再來？」'},
+ {rx:/機場免稅/,say:'最後的機場時光，再買一盒伴手禮、再吃一碗拉麵。登機廣播響起，我們拎起行李——下一趟旅行，已經開始期待了。',intro:'福岡機場國際線航廈有免稅店、伴手禮店和拉麵、壽司等餐廳，出境後也能補買明太子和甜點。'}
+];
+function storyOf(s){if(!s||!s.n)return null;for(const x of STORIES)if(x.rx.test(s.n))return x;return null}
+
+function simStoryHtml(x,label){if(!x)return '';return `${x.say?`<div class="gsc" data-full="${esc(x.say)}"><div class="gsc-who">${label||'旁白'}</div><div class="gsc-say"></div><span class="gsc-nx">▼</span></div>`:''}${x.intro?`<div class="sim-sec"><div class="sim-sh">📖 景點介紹</div><p>${esc(x.intro)}</p></div>`:''}${x.bg?`<div class="sim-sec"><div class="sim-sh">🏯 故事與背景</div><p>${esc(x.bg)}</p></div>`:''}`}
 function simSteps(){const out=[];
  DAYS.forEach((_,di)=>{const st=D(di).stops;out.push({k:'day',di});let prev=null;
   st.forEach((s,i)=>{const ll=llOf(s),pl=prev&&llOf(prev);
@@ -1759,7 +1832,7 @@ function simSteps(){const out=[];
  });
  out.push({k:'end'});return out}
 let simI=Math.max(0,+S.get('simi',0)||0),simT=null,SIM=[];
-function simStop(){if(simT){clearInterval(simT);simT=null;const b=$('#simPlay');if(b){b.classList.remove('on');b.textContent='▶ 自動'}}}
+function simStop(){if(simT){clearTimeout(simT);simT=null;const b=$('#simPlay');if(b){b.classList.remove('on');b.textContent='▶ 自動'}}}
 function simMapSvg(st){
  const day=st.di!=null?st.di:null,pts=day!=null?D(day).stops.map(s=>({s,ll:llOf(s)})).filter(x=>x.ll):[];
  const cur=st.k==='stop'?llOf(st.s):st.k==='move'?llOf(st.to):null,from=st.k==='move'&&st.from?llOf(st.from):null;
@@ -1793,16 +1866,16 @@ function simCardHtml(st){
  if(st.k==='day'){const ss=d.stops,mv=SIM.filter(x=>x.k==='move'&&x.di===st.di),mins=mv.reduce((a,x)=>a+(x.min||0),0),cnt=k=>ss.filter(s=>kindOf(s)===k).length;
   return `<div class="sim-card" style="--c:${c}"><div class="top">${dl}<span class="sk">開始</span>${HOL[st.di]!==undefined?`<span class="sk" style="background:#fde2e2;color:#b3261e">🎌 日本三連休 ${st.di+1}/3</span>`:''}</div><h3>${esc(d.title)}</h3>
   <div class="sim-sum"><div><b>${cnt('see')}</b>景點</div><div><b>${cnt('eat')}</b>吃</div><div><b>${cnt('buy')}</b>買</div><div><b>${mv.length}</b>段交通</div></div>
-  <p>這天第一站是 <b>${esc(ss[0]?ss[0].t+' '+ss[0].n:'—')}</b>，交通合計約 <b>${mins>=60?Math.floor(mins/60)+' 小時 ':''}${mins%60} 分</b>。${d.pay?`<br>💳 ${esc(d.pay)}`:''}</p></div>`}
+  ${DAYSTORY[d.date]?simStoryHtml({say:DAYSTORY[d.date]},'今日序章'):''}<p>這天第一站是 <b>${esc(ss[0]?ss[0].t+' '+ss[0].n:'—')}</b>，交通合計約 <b>${mins>=60?Math.floor(mins/60)+' 小時 ':''}${mins%60} 分</b>。${d.pay?`<br>💳 ${esc(d.pay)}`:''}</p></div>`}
  if(st.k==='move'){const [ic]=trIcon(st.s.tr||''),fr=st.from?st.from.n:'飯店／出發地';
   return `<div class="sim-card" style="--c:${c}"><div class="top">${dl}<span class="sk go">🚃 交通</span>${st.own?`<span>${esc(st.s.t)}</span>`:''}</div>
   <div class="sim-go"><div class="from">${esc(trunc(fr,14))}</div><div class="arr">${ic}➜</div><div class="to">${esc(trunc(st.to.n,14))}</div></div>
   <div class="sim-dur">${st.min!=null?`<b>約 ${st.min>=60?Math.floor(st.min/60)+' 小時 ':''}${st.min%60?st.min%60+' 分':''}</b>`:'<b>—</b>'}<span>${st.real?'依行程表的時間':'依距離估算'}${!st.real&&st.gap?`・行程表空檔 ${st.gap} 分`:''}${st.km>.3?`・直線約 ${st.km<10?st.km.toFixed(1):Math.round(st.km)} 公里`:''}</span></div>
   <p>🚏 ${esc(st.s.tr||'—')}${st.own&&st.s.d?`<br>${esc(st.s.d)}`:''}</p>
-  ${st.own&&st.s.tip?`<div class="tip">💡 ${esc(st.s.tip)}</div>`:''}</div>`}
+  ${st.own&&st.s.tip?`<div class="tip">💡 ${esc(st.s.tip)}</div>`:''}${simStoryHtml(st.own?storyOf(st.s):(storyOf(st.to)&&storyOf(st.to).say&&/^(前往|搭)/.test(st.to.n)?storyOf(st.to):null),'移動中')}</div>`}
  const s=st.s,k=kindOf(s),SF=stopFoods(st.di),SG=stopGifts(st.di),f=SF[s.id],gs=SG[s.id];
  return `<div class="sim-card" style="--c:${c}"><div class="top">${dl}<span class="sk ${k}">${KIND[k]}</span></div>
- <div class="sim-tm">${esc(s.t)}</div><h3>${esc(s.n)}</h3>${s.d?`<p>${esc(s.d)}</p>`:''}${s.tip?`<div class="tip">💡 ${esc(s.tip)}</div>`:''}
+ <div class="sim-tm">${esc(s.t)}</div><h3>${esc(s.n)}</h3>${simStoryHtml(storyOf(s),'現場')}${s.d?`<div class="sim-sec"><div class="sim-sh">🗓️ 行程安排</div><p>${esc(s.d)}</p></div>`:''}${s.tip?`<div class="tip">💡 ${esc(s.tip)}</div>`:''}
  <div class="sim-chips">${f?`<a class="f" href="#food" data-farea="${f.k}">🍜 附近美食 ${FOODS.filter(x=>x.a===f.k).length} 間 ›</a>`:''}${gs?`<a class="g" href="#gift" data-gf="${gs.map(g=>g.id).join(',')}" data-gl="${esc(s.n)}">🎁 伴手禮 ${gs.length} 款 ›</a>`:''}<a class="t" href="#trip" data-go="${st.di}" data-id="${esc(s.id)}">🗓️ 在行程中看 ›</a><a class="t" href="${mapUrl(s.q||s.n)}" target="_blank" rel="noopener">📍 導航</a></div></div>`}
 function drawSim(){
  SIM=simSteps();simI=Math.min(simI,SIM.length-1);const st=SIM[simI],di=st.di!=null?st.di:-1;
@@ -1810,15 +1883,22 @@ function drawSim(){
  $('#simBar').style.width=(simI/(SIM.length-1)*100)+'%';
  const inDay=di>=0?SIM.filter(x=>x.di===di):[],pos=inDay.indexOf(st)+1;
  $('#simCnt').innerHTML=`<span>${di>=0?`D${di+1}：第 ${pos} / ${inDay.length} 步`:'總覽'}</span><span>全部 ${simI+1} / ${SIM.length}</span>`;
- $('#simMap').innerHTML=simMapSvg(st);$('#simCard').innerHTML=simCardHtml(st);
+ $('#simMap').innerHTML=simMapSvg(st);$('#simCard').innerHTML=simCardHtml(st);simType();
  $('#simPrev').disabled=simI===0;$('#simPrev').style.opacity=simI===0?.4:1;$('#simNext').textContent=simI===SIM.length-1?'↺ 從頭':'下一步 ›';
  const on=$('#simDays .on');if(on)on.scrollIntoView({inline:'center',block:'nearest'});
  S.set('simi',simI);
 }
+let simTw=null;
+function simType(){if(simTw){clearInterval(simTw);simTw=null}const g=$('#simCard .gsc');if(!g)return;const full=g.dataset.full,el=g.querySelector('.gsc-say');let i=0;g.classList.remove('done');
+ const step=()=>{i+=1;el.textContent=full.slice(0,i);if(i>=full.length){clearInterval(simTw);simTw=null;g.classList.add('done')}};
+ if(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches){el.textContent=full;g.classList.add('done');return}
+ simTw=setInterval(step,38)}
+$('#simCard').addEventListener('click',e=>{const g=e.target.closest('.gsc');if(!g)return;if(simTw){clearInterval(simTw);simTw=null;g.querySelector('.gsc-say').textContent=g.dataset.full;g.classList.add('done')}});
+function simDelay(){const g=$('#simCard .gsc'),n=g?g.dataset.full.length:0;return Math.min(16000,2600+n*38+2500*(n?1:0))}
 function simGo(n){simI=(n+SIM.length)%SIM.length;drawSim()}
 $('#simPrev').onclick=()=>{simStop();if(simI>0)simGo(simI-1)};
 $('#simNext').onclick=()=>{simStop();simGo(simI===SIM.length-1?0:simI+1)};
-$('#simPlay').onclick=e=>{if(simT){simStop();return}e.target.classList.add('on');e.target.textContent='⏸ 暫停';simT=setInterval(()=>{if(simI>=SIM.length-1){simStop();return}simGo(simI+1)},2600)};
+$('#simPlay').onclick=e=>{if(simT){simStop();return}e.target.classList.add('on');e.target.textContent='⏸ 暫停';const tick=()=>{if(!simT)return;if(simI>=SIM.length-1){simStop();return}simGo(simI+1);simT=setTimeout(tick,simDelay())};simT=setTimeout(tick,simDelay())};
 $('#simDays').onclick=e=>{const b=e.target.closest('[data-sd]');if(!b)return;simStop();simI=SIM.findIndex(x=>x.k==='day'&&x.di===+b.dataset.sd);drawSim()};
 document.addEventListener('keydown',e=>{if(currentView()!=='sim'||/^(INPUT|TEXTAREA)$/.test(e.target.tagName))return;if(e.key==='ArrowRight'){e.preventDefault();$('#simNext').click()}if(e.key==='ArrowLeft'){e.preventDefault();$('#simPrev').click()}});
 reloaders.push(()=>{if(currentView()==='sim')drawSim()});
