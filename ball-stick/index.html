@@ -128,6 +128,7 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-acti
 .lv .st{font-size:11px;letter-spacing:1px;color:var(--mark);display:flex;justify-content:space-between;font-family:var(--f-num)}
 .lv .st i{font-style:normal;color:var(--paper);font-size:13px;letter-spacing:0}
 .sub{z-index:7}
+#dex{z-index:9}
 .sub .lead{margin:4px 0 12px;font-size:13px;color:var(--mute)}
 .rows{display:grid;gap:6px}
 .rowp{display:grid;grid-template-columns:28px 1fr auto;gap:10px;align-items:center;padding:10px 12px;border-radius:12px;background:var(--ink-2);border:1px solid var(--line);text-align:left;width:100%}
@@ -334,6 +335,14 @@ header{padding-top:calc(10px + var(--top))}
 .au-pill[aria-pressed="false"]{background:#3b4a86;color:#a9adcf}
 .au-pill:active{transform:translateY(2px);box-shadow:0 1px 0 #0b0b1c}
 [data-au="m"][aria-pressed="false"],[data-au="s"][aria-pressed="false"]{opacity:.6}
+.freeok{bottom:12px;top:auto;background:var(--mark);color:#14142b;display:grid;gap:2px;box-shadow:0 4px 0 #0b0b1c}
+.freeok b{font-size:16px}.freeok span{font-size:13px}
+.px .freeok span{font-size:12px}
+.freebtn{width:100%;margin-top:12px;min-height:44px}
+.dex-acts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:2px 0 4px}
+.dex-acts .tool{min-height:44px}
+.lv .x{font-size:12px;color:var(--mute);line-height:1.3}
+.px .lv .x{font-size:12px}
 .chap{margin-top:16px}
 .chap h3{margin:0 0 8px;font-size:13px;font-weight:500;color:var(--mute);letter-spacing:.06em;display:flex;justify-content:space-between}
 .chap h3 b{font-family:var(--f-num);font-size:15px;font-weight:500;color:var(--mark)}
@@ -378,6 +387,7 @@ header{padding-top:calc(10px + var(--top))}
     <canvas id="cv" aria-label="組裝工作桌"></canvas>
     <p class="note hint" id="hint" hidden></p>
     <p class="note tip" id="tip" hidden></p>
+    <div class="note freeok" id="freeOk" hidden role="status"><b id="freeOkT"></b><span>按「圖鑑」換一個分子，或「清空」再組一次。</span></div>
     <aside class="lore pxbox" id="lore" hidden aria-label="這個分子的故事">
       <div class="lore-top"><span class="st-eye" id="loEye"></span><button class="pill" id="loClose" type="button">收起</button></div>
       <h2 id="loName"></h2>
@@ -423,6 +433,7 @@ header{padding-top:calc(10px + var(--top))}
       <ul class="t-stats" id="tStats"></ul>
       <div class="pxbox px-menu">
         <button class="px-item sel" id="tStart" type="button"><i>▶</i><span>開始遊戲</span></button>
+        <button class="px-item" id="tFree" type="button"><i>▶</i><span>自由模式</span></button>
         <button class="px-item" id="tTut" type="button"><i>▶</i><span>教學模式</span></button>
         <button class="px-item" id="tBoard" type="button"><i>▶</i><span>排行榜</span></button>
       </div>
@@ -459,6 +470,17 @@ header{padding-top:calc(10px + var(--top))}
     </div>
   </section>
 
+  <section class="overlay sub" id="dex" hidden>
+    <div class="top"><h2>分子圖鑑</h2><button class="pill" id="dexClose" type="button">返回</button></div>
+    <p class="lead">自由模式：挑一個分子來組裝。組對了會告訴你，不計分、不計時，也不影響關卡進度。</p>
+    <div class="dex-acts"><button class="tool go" id="dexRand" type="button">隨機挑一個</button><button class="tool" id="dexExit" type="button">離開自由模式</button></div>
+    <div class="tabs">
+      <button class="tab" id="dexBasic" type="button" aria-pressed="true">基礎</button>
+      <button class="tab" id="dexAdv" type="button" aria-pressed="false">進階</button>
+    </div>
+    <div id="dexList"></div>
+  </section>
+
   <section class="overlay sub" id="journal" hidden>
     <div class="top"><h2>探險日誌</h2><button class="pill" data-close="journal" type="button">返回</button></div>
     <p class="lead">走過的每一站、補回圖鑑的每一頁，都記在這裡。故事可以重看。</p>
@@ -468,6 +490,7 @@ header{padding-top:calc(10px + var(--top))}
   <section class="overlay" id="levels" hidden>
     <div class="top"><h2>關卡表</h2><span style="display:flex;gap:6px"><button class="pill" id="btnTitle" type="button">開始畫面</button><button class="pill" id="btnCloseLevels" type="button">回到工作桌</button></span></div>
     <div class="me" id="me"></div>
+    <button class="tool freebtn" id="btnFree" type="button">自由模式：從分子圖鑑挑一個來練習</button>
     <div class="tabs">
       <button class="tab" id="tabBasic" type="button" aria-pressed="true">基礎</button>
       <button class="tab" id="tabAdv" type="button" aria-pressed="false">進階</button>
@@ -1268,6 +1291,7 @@ const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const fHtml=f=>f.replace(/(\d+)/g,'<sub>$1</sub>');
 const cv=$('cv'),ctx=cv.getContext('2d');
 let W=300,H=300,S=1,dpr=1,topPad=0,pxMode=true;
+var freeOn=false,campLvl=0;   /* 自由模式：自己從分子圖鑑挑一個來練習，不計分、不播故事 */
 const PS=2;   /* 像素風：一個畫面像素＝2 個 CSS 像素 */
 let st={lvl:0,atoms:[],bonds:[],sel:null,won:false,nid:1};
 let drag=null,raf=0,awake=0,fx=[],flash=null,flashT=0,hintLv=0,bannerOpen=false,pref3=true,bottomPad=0;
@@ -1297,7 +1321,7 @@ function load(){
   /* 舊版（沒有名字的時候）的過關紀錄：留給第一位取名字的玩家 */
   try{if(!store.players.length&&!store.legacy){const old=JSON.parse(localStorage.getItem('bskit-done')||'[]');if(old.length)store.legacy=old;}}catch(e){}
 }
-function save(){try{localStorage.setItem('bskit-v2',JSON.stringify(store));localStorage.setItem('bskit-lvl',String(st.lvl));}catch(e){}}
+function save(){try{localStorage.setItem('bskit-v2',JSON.stringify(store));localStorage.setItem('bskit-lvl',String(freeOn?campLvl:st.lvl));}catch(e){}}
 function grantLegacy(p,ids){
   for(const id of ids||[]){const l=LEVELS.find(x=>x.id===id);if(l&&!p.best[id])p.best[id]={s:l.base,st:1,t:0};}
 }
@@ -1311,7 +1335,7 @@ function attStart(){
 }
 function showTimer(){
   const el=$('timer');if(!el)return;
-  el.textContent=tut.on||att.assist?'教學中':att.on||st.won?fmtT(attSec())+' / '+fmtT(level().par):'標準 '+fmtT(level().par);
+  el.textContent=freeOn?(tut.on?'教學中':'自由練習'):tut.on||att.assist?'教學中':att.on||st.won?fmtT(attSec())+' / '+fmtT(level().par):'標準 '+fmtT(level().par);
 }
 setInterval(()=>{if(att.on&&!st.won)showTimer();},500);
 document.addEventListener('visibilitychange',()=>{
@@ -1328,7 +1352,8 @@ function setScale(){
 }
 function renderHead(){
   const lv=level(),ch=CHAPTERS[lv.ci];
-  $('crumb').textContent=`${lv.adv?'進階':'基礎'} ${lv.ci+1}-${lv.li+1}　${STORY.ch[lv.ci].place}`;
+  $('crumb').textContent=freeOn?'自由模式':`${lv.adv?'進階':'基礎'} ${lv.ci+1}-${lv.li+1}　${STORY.ch[lv.ci].place}`;
+  $('btnLevels').textContent=freeOn?'圖鑑':'關卡';
   $('name').textContent=lv.n;
   $('hint').innerHTML='接法　<b>'+lv.hint+'</b>';
   applyHint();
@@ -1343,7 +1368,7 @@ function renderHead(){
   document.querySelectorAll('.pxb').forEach(c=>{const g=c.getContext('2d'),e=c.dataset.e;pxDisc(g,8,8,7,PXC[e]);pxText(g,e,8,8,1,PXI[e]);});
 }
 /* 分子式平常是蓋住的：提示第一段（或教學、過關後）才會翻開 */
-const revealed=()=>tut.on||st.won||hintLv>=1;
+const revealed=()=>freeOn||tut.on||st.won||hintLv>=1;
 function applyHint(){
   const lv=level();
   $('formula').innerHTML=revealed()?fHtml(lv.f):'<span class="q">分子式 ？</span>';
@@ -1352,6 +1377,7 @@ function applyHint(){
 }
 function renderMeta(msg){
   const lv=level(),have=countEl(st.atoms),rev=revealed();
+  $('freeOk').hidden=!(freeOn&&st.won);
   applyHint();
   $('chips').innerHTML=ORDER.filter(e=>rev?(lv.need[e]||have[e]):have[e]).map(e=>{
     const h=have[e]||0,n=lv.need[e]||0,c=!rev?'':h===n?'ok':h>n?'over':'';
@@ -1505,6 +1531,7 @@ function tapAtom(id){
 }
 function win(){
   st.won=true;st.sel=null;
+  if(freeOn){freeWin();return;}
   const lv=level();
   const sec=attSec();if(att.t0){att.el+=Date.now()-att.t0;att.t0=0;}
   const p=player(),sc=$('winScore'),got=$('winGot');sc.hidden=true;got.hidden=true;
@@ -1954,7 +1981,7 @@ $('btnClear').addEventListener('click',()=>{if(st.atoms.length)SFX('clear');clea
 $('btnH').addEventListener('click',autoH);
 $('btnHint').addEventListener('click',()=>{
   let msg='';SFX('hint');
-  if(tut.on||st.won)bannerOpen=!bannerOpen;
+  if(freeOn||tut.on||st.won)bannerOpen=!bannerOpen;
   else if(hintLv===0){hintLv=1;msg='分子式翻開了（這一關分數 ×0.85）。再按一次可以看接法';}
   else if(hintLv===1){hintLv=2;bannerOpen=true;msg='接法也翻開了（這一關分數 ×0.7）';}
   else bannerOpen=!bannerOpen;
@@ -1977,7 +2004,7 @@ $('btnNext').addEventListener('click',()=>{
     playScene(STORY.end,{eye:'FINAL',place:'師父的那一杯',h:40},()=>{p.seen=p.seen||{};p.seen.end=1;p.d=1;save();openLevels();});
   }else go();
 });
-$('btnLevels').addEventListener('click',openLevels);
+$('btnLevels').addEventListener('click',()=>{if(freeOn)openDex();else openLevels();});
 $('btnCloseLevels').addEventListener('click',()=>{$('levels').hidden=true;});
 let tab='basic';
 function renderMe(){
@@ -2012,6 +2039,54 @@ function openLevels(keepTab){
 $('levelList').addEventListener('click',ev=>{const b=ev.target.closest('.lv');if(b)goLevel(+b.dataset.i);});
 $('tabBasic').addEventListener('click',()=>{tab='basic';openLevels(true);});
 $('tabAdv').addEventListener('click',()=>{tab='adv';openLevels(true);});
+
+/* ---------- 自由模式與分子圖鑑 ---------- */
+let dexTab='basic';
+function openDex(keepTab){
+  if(!keepTab)dexTab=level().adv?'adv':'basic';
+  for(const [id,k] of [['dexBasic','basic'],['dexAdv','adv']]){
+    $(id).setAttribute('aria-pressed',dexTab===k);
+    $(id).innerHTML=(k==='adv'?'進階':'基礎')+`<small>${LEVELS.filter(l=>(k==='adv')===l.adv).length} 種</small>`;
+  }
+  $('dexExit').hidden=!freeOn;$('dexRand').parentNode.style.gridTemplateColumns=freeOn?'1fr 1fr':'1fr';
+  $('dexList').innerHTML=CHAPTERS.map((ch,ci)=>{
+    if((dexTab==='adv')!==!!ch.adv)return'';
+    return `<div class="chap"><h3><span>${STORY.ch[ci].place}<small>${ch.title}</small></span><b>${ch.levels.length} 種</b></h3><div class="grid">`+
+      ch.levels.map(l=>{const i=LEVELS.indexOf(l);
+        return `<button class="lv ${freeOn&&i===st.lvl?'cur':''}" type="button" data-i="${i}"><span class="f">${fHtml(l.f)}</span><span class="n">${l.n}</span><span class="x">${l.target.atoms.length} 顆原子</span></button>`;}).join('')+
+      '</div></div>';
+  }).join('');
+  $('dex').hidden=false;
+}
+function enterFree(i){
+  if(!freeOn)campLvl=st.lvl;
+  freeOn=true;
+  if(tut.on){tut.on=false;$('btnTut').setAttribute('aria-pressed',false);}
+  $('dex').hidden=true;$('levels').hidden=true;$('brief').hidden=true;
+  if(titleOn)hideTitle();
+  goLevel(i);
+}
+function exitFree(){
+  if(!freeOn)return;
+  freeOn=false;$('dex').hidden=true;$('freeOk').hidden=true;
+  goLevel(campLvl);
+}
+function freeWin(){
+  SFX('win');
+  $('freeOkT').textContent=`✓ 正確！這就是「${level().n}」`;
+  if(!reduced){
+    let cx=0,cy=0;for(const a of st.atoms){cx+=a.x;cy+=a.y;}
+    cx/=st.atoms.length;cy/=st.atoms.length;fx.push({x:cx,y:cy,t:performance.now()});
+  }
+  renderCoach();showTimer();
+}
+$('dexList').addEventListener('click',ev=>{const b=ev.target.closest('.lv');if(b)enterFree(+b.dataset.i);});
+$('dexBasic').addEventListener('click',()=>{dexTab='basic';openDex(true);});
+$('dexAdv').addEventListener('click',()=>{dexTab='adv';openDex(true);});
+$('dexClose').addEventListener('click',()=>{$('dex').hidden=true;});
+$('dexRand').addEventListener('click',()=>{const ls=LEVELS.map((l,i)=>i).filter(i=>(dexTab==='adv')===LEVELS[i].adv&&!(freeOn&&i===st.lvl));enterFree(ls[Math.floor(Math.random()*ls.length)]);});
+$('dexExit').addEventListener('click',exitFree);
+$('btnFree').addEventListener('click',()=>openDex());
 
 /* ---------- 玩家、稱號、排行榜 ---------- */
 const whoRow=(name,sub,score,cur,lock,far)=>`<button class="rowp ${cur?'you':''}" type="button" data-name="${esc(name)}"><span class="rk">${cur?'●':''}</span><span class="nm"><b>${esc(name)}${lock?'<span class="tagx">有密碼</span>':''}</b><small>${sub}</small></span><span class="sc">${score}<small>分</small></span></button>`;
@@ -2346,6 +2421,7 @@ $('stBox').addEventListener('click',()=>{SFX('tap');sceneNext();});
 $('stSkip').addEventListener('click',sceneEnd);
 /* 進到一關時：沒看過序章先播序章，第一次到這一站播這一站的開場，最後給任務卡 */
 function storyFlow(){
+  if(freeOn)return;
   const p=player();if(!p||titleOn||scene)return;
   p.seen=p.seen||{};
   const lv=level(),c=STORY.ch[lv.ci],steps=[];
@@ -2407,7 +2483,7 @@ $('brGo').addEventListener('click',()=>{
   if(att.on&&!att.t0&&!st.won&&!document.hidden&&$('lore').hidden)att.t0=Date.now();
   kick();
 });
-$('crumb').addEventListener('click',openBrief);
+$('crumb').addEventListener('click',()=>{if(freeOn)openDex();else openBrief();});
 function openJournal(){
   const p=player();if(!p)return;const seen=p.seen||{};
   const again=(k,label)=>`<button class="pill" type="button" data-scene="${k}">${label}</button>`;
@@ -2671,9 +2747,10 @@ function showTitle(){
   tT0=performance.now();if(!tRaf)tRaf=requestAnimationFrame(titleFrame);
 }
 function hideTitle(){titleOn=false;$('title').hidden=true;kick(90);showTimer();storyFlow();}
-$('tStart').addEventListener('click',()=>{SFX('start');if(player())hideTitle();else{afterEnter='play';openWho(false);}});
-$('tTut').addEventListener('click',()=>{SFX('start');if(player()){setTut(true);hideTitle();}else{afterEnter='tut';openWho(false);}});
+$('tStart').addEventListener('click',()=>{SFX('start');if(freeOn){freeOn=false;goLevel(campLvl);}if(player())hideTitle();else{afterEnter='play';openWho(false);}});
+$('tTut').addEventListener('click',()=>{SFX('start');if(freeOn){freeOn=false;goLevel(campLvl);}if(player()){setTut(true);hideTitle();}else{afterEnter='tut';openWho(false);}});
 $('tBoard').addEventListener('click',()=>openBoard());
+$('tFree').addEventListener('click',()=>{SFX('start');openDex();});
 $('tWho').addEventListener('click',ev=>{if(ev.target.closest('#tSwitch')){afterEnter=null;openWho(false);}});
 $('btnTitle').addEventListener('click',()=>{$('levels').hidden=true;showTitle();});
 (()=>{
