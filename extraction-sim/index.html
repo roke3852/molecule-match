@@ -4950,6 +4950,7 @@ const drp=id=>{const D=DRIPPER[id],c=CALD[id];return D?(c?Object.assign({},D,{u:
 Object.entries({encore:.21,porlex:.19,q2:.18,c3:.165,k6:.16,s3:.14,x25:.145,xultra:.14,zp6:.095,c40:.13,kultra:.125,opus:.13,c40rc:.125,nicecut:.12,virtuoso:.12,kinu:.115,wilfa:.11,ode:.105,pietro:.095,df64:.095,r220:.095,t078:.07,p80:.08,ek43:.072,zerno:.07,guatemala:.066,ditting:.064,zm:.062,eg1:.055}).forEach(([id,v])=>{const g=GRINDERS.find(x=>x.id===id);if(g)g.fines=v;});
 Object.entries({ikawa:.84,bullet:.92}).forEach(([id,v])=>{const r=ROASTERS.find(x=>x.id===id);if(r)r.rq=v;});
 Object.entries({minik:.76,fish:.84,kalitak:.82,buono:.83,kinto:.84,tsuki:.85,fisht:.87,staggpo:.9,bona:.88,takahiro:.93,buonot:.89,brewista:.93,yukiwa:.95,stagg:.97}).forEach(([id,v])=>{const k=KETTLES.find(x=>x.id===id);if(k)k.stab=v;});
+TOOLS.push({id:'conep',name:'錐形濾紙（Origami 用）',type:'雙溫層手沖的下層濾紙',price:180,lore:'Origami 原本就能用錐形濾紙。雙溫層手沖時，它墊在最下面，裝深焙豆、慢慢萃。'},{id:'cakep',name:'蛋糕濾紙（波浪濾紙）',type:'雙溫層手沖的上層濾紙',price:220,lore:'平底、一圈圈摺紋的蛋糕濾紙。雙溫層手沖時疊在錐形濾紙上面，裝淺焙豆、先吃到高溫。'});
 const KPRICE={},TPRICE={};KETTLES.forEach(k=>KPRICE[k.id]=k.price);TOOLS.forEach(k=>TPRICE[k.id]=k.price);
 const WATERS={tap:{n:'自來水',fr:.92,sw:.97,bt:1.06,cl:-1,d:'有氯味，香氣和乾淨度打折'},filter:{n:'過濾水',fr:1,sw:1,bt:1,cl:0,d:'乾淨、中性'},mineral:{n:'礦泉水',fr:1.06,sw:1.04,bt:.97,cl:.6,d:'礦物質適中，香氣和甜感更好'}};
 /* 偶爾上門的厲害咖啡師：關係好了會教你配方、幫你牽線 */
@@ -5271,6 +5272,7 @@ GS.guatemala=['.....dddddd.....','.....HHHHHH.....','.....HHfHHH.....','.....HHH
 GS.zerno=['.....bbb........','.....sss........','......s.........','.bAAAAgAAAAAAAA.','.bCCCCgCCCCCCCC.','.bAAAAgAAsAAAAA.','.bAAAAgAAAAAAAA.','...ss...g.......','...ss...g.......','..ssss...g......','..swss...g......','..ssss....g.....','..ssss....ggg...','.ggggggggggggg..'];
 GS.kinu=['...........HHHH.','...........HHHH.','....s.......HH..','..ggggggg....g..','..dddddd.g...g..','...ACAA...gggg..','...ACAA.........','...ACAA.........','...ACAA.........','...ACAA.........','...ACAA.........','...ACAA.........','...HHHH.........','..HHHHHH........','..HHHHHH........','..HHHHHH........'];
 GS.opus=['....AAAAAAAAA...','....AAAAAAAAA...','..BBwAwAwAwAw...','..BBAAAAAAAAs...','..BBACAAAAAAA...','..BBACAAAAAAA...','..BBACAAAAAAA...','..BBACAAAAAAA...','..BBACAAAAAAA...','..BBBBBBBBBBB...','..BB.BBBBBBB....','..BB.ACAAAAA....','..BB.ACAAAAA....','..BB.AAAAAAA....','.AAAAAAAAAAAAAA.','.BBBBBBBBBBBBsB.'];
+GS.conep=['.wwwwwwwwwwwwww.','..wwwwwwwwwwww..','..wwswwwwwwsww..','...wwwwwwwwww...','...wwswwwwsww...','....wwwwwwww....','.....wwwwww.....','......wwww......','.......ww.......'];GS.cakep=['.wswswswswswsws.','.wwwwwwwwwwwwww.','..wswswswswsws..','..wwwwwwwwwwww..','...wswswswsws...','...wwwwwwwwww...','....ssssssss....'];
 const skinOf=id=>{const s=S();return (s.skin&&s.skin[id])||0;};
 function palOf(id,i){const L=SK[id],v=L&&L[i==null?skinOf(id):i]||L&&L[0];return v?Object.assign({},PB,{A:v[1],B:v[2],C:v[3]}):PB;}
 function sprG(rows,pal){let h='';rows.forEach((r,y)=>{let x=0;while(x<r.length){const ch=r[x];let e=x+1;while(e<r.length&&r[e]===ch)e++;const c=pal[ch];if(c)h+='<rect x="'+x+'" y="'+y+'" width="'+(e-x)+'" height="1" fill="'+c+'"/>';x=e;}});return h;}
@@ -5469,7 +5471,7 @@ function stockLine(c){const b=bestStock(c),need=c.bg||200;if(!b)return '<small c
   return '<small class="pref '+(ok?'okc':'warn')+'">'+(ok?'✓':'⚠')+' 店裡最合他的：'+esc(b.B.name)+'（契合 '+b.m+'%'+(b.g<need?'，只剩 '+b.g+' g、他要 '+need+' g':'')+'）'+(b.m<60?'，不太合，該補貨了':'')+'</small>';}
 function todayHTML(){const s=S(),t=s.today,list=t.q.slice(t.idx).map(c=>CM[c.id]).filter(c=>rel(c.id).v>0);if(!list.length)return '';
   return '<div class="panel"><h3 class="c-h3">今天會來的熟客<span class="label">先確認他們要的有沒有庫存</span></h3><div class="tdy">'+list.map(c=>{const R=rel(c.id);return '<div class="tdr">'+av(c,34)+'<div><b>'+esc(c.name)+'</b><small class="pref">☕ 想喝：'+wantTxt(c.want)+'</small>'+(c.tw?(R.a>=15?'<small class="pref">🛍 可能買豆：'+tasteTxt(c.tw)+(c.bl?'・愛配方豆':'')+'</small>'+stockLine(c):'<small class="pref">🛍 可能買豆（再熟一點才知道口味）</small>'):'')+'</div></div>';}).join('')+'</div></div>';}
-const NEWS=['【產地】巴西遇上霜害，業者預估明年生豆報價可能上漲，量販店的巴西豆可以先備一點。','【產地】衣索比亞新產季到港，耶加雪菲水洗批次今年花香特別明顯。','【產地】肯亞拍賣會成交價創三年新高，AA 等級一包難求。','【產地】哥倫比亞薇拉產區雨季延長，處理廠改用更長的發酵時間。','【產地】巴拿馬藝伎競標落幕，冠軍批次每磅價格再度刷新紀錄。',
+const NEWS=['【比賽】2026 WBC 的分層萃取概念掀起話題：有烘豆師在 Origami 裡疊上蛋糕濾紙和錐形濾紙，上層淺焙吃高溫、下層深焙慢慢萃，叫它「雙溫層手沖」。','【器材】雙溫層手沖爆紅，蛋糕濾紙和 Origami 錐形濾紙在咖啡器材店一起熱賣。','【產地】巴西遇上霜害，業者預估明年生豆報價可能上漲，量販店的巴西豆可以先備一點。','【產地】衣索比亞新產季到港，耶加雪菲水洗批次今年花香特別明顯。','【產地】肯亞拍賣會成交價創三年新高，AA 等級一包難求。','【產地】哥倫比亞薇拉產區雨季延長，處理廠改用更長的發酵時間。','【產地】巴拿馬藝伎競標落幕，冠軍批次每磅價格再度刷新紀錄。',
  '【產地】阿里山咖啡評鑑出爐，蜜處理批次首度拿下特等獎。','【產地】印尼蘇門答臘豪雨不斷，曼特寧出口延遲兩週。','【產地】哥斯大黎加小農合作社推出「微批次」，每批只有三十公斤。','【產地】瓜地馬拉火山灰影響採收，安提瓜產量預估減少一成。','【產地】台灣屏東小農嘗試種植藝伎，第一批收成只有二十公斤。',
  '【趨勢】厭氧與共同發酵豆討論度居高不下，也有老饕直呼「太像香水」。','【趨勢】淺焙風潮回溫，年輕客人指名要「像果汁的咖啡」。','【趨勢】深焙沒有過時：老派喫茶店的法蘭絨手沖又紅了起來。','【趨勢】低因咖啡銷量成長，晚上想喝咖啡的人越來越多。','【趨勢】掛耳包市場飽和，精品店開始主打「現磨現沖才是本事」。',
  '【趨勢】配方豆翻身：越來越多冠軍店推出自家招牌配方。','【趨勢】冷萃退燒，冰手沖成為今年夏天的新寵。','【趨勢】咖啡訂閱制流行，熟客每月固定收到一包店家選豆。','【趨勢】平底濾杯銷量超越錐形？器材行老闆：「兩種都要有。」','【趨勢】越來越多咖啡店把烘焙日期印在包裝正面，客人更懂得看養豆天數。',
@@ -5773,7 +5775,7 @@ function serveHTML(){const s=S(),X=curCust(),o=s.last;fixSel();
   if(res)return h+resHTML();
   h+='<div class="panel"><h3 class="c-h3"><span class="n">1</span>從豆櫃挑豆子<span class="label">每杯用 '+DOSE+' g</span></h3><div class="c-cards">'+
     (Object.keys(s.beans).filter(id=>s.beans[id]>0&&beanOf(id)).map(id=>{const B=beanOf(id);return '<button class="c-card bean" data-set="bean:'+id+'" aria-pressed="'+(o.bean===id)+'"'+(beanOK(id)?'':' disabled')+'><span class="mini-jar"><i style="height:'+Math.min(100,s.beans[id]/5)+'%;background:'+roastCol(B.roast)+'"></i></span><b>'+(B.sig?'★ ':B.blend?'◆ ':'')+B.name+'</b><small>'+(B.blend?'自家配方':B.sub)+'・'+ROAST_NAME(B.roast)+'</small><small>'+B.tags.join('・')+'</small><span class="pr">剩 '+s.beans[id]+' g</span></button>';}).join('')||'<p class="label">倉庫沒有豆子了。</p>')+'</div></div>'+
-   '<div class="panel"><h3 class="c-h3"><span class="n">2</span>選器具</h3>'+gearPick()+'</div>'+ctlHTML()+
+   dualHTML()+'<div class="panel"><h3 class="c-h3"><span class="n">2</span>選器具</h3>'+gearPick()+'</div>'+ctlHTML()+
    '<button class="c-open" data-a="brew"'+(o.bean?'':' disabled')+'>'+(X.c.tries?'重沖一杯，再端給客人':'沖煮，端給客人')+'</button>';
   return h;}
 function resHTML(){const X=curCust(),L=X.C,r=res,last=r.final;
@@ -5941,7 +5943,7 @@ function notesHTML(){const s=S(),bk=notesFrom==='serve'||notesFrom==='comprun';
      (n.tech?'<p class="c-hint">'+esc(n.tech)+'</p>'+(n.plan?'<div class="nplan">'+n.plan.map((x,k)=>'<span>'+Math.floor(x[0]/60)+':'+String(x[0]%60).padStart(2,'0')+'　第 '+(k+1)+' 注 '+x[1]+' g（'+x[2]+' 秒，'+(x[1]/x[2]>=6.5?'大':x[1]/x[2]>=4?'中':'小')+'水流）</span>').join('')+'</div>':''):'<p class="label">這杯是自動完成的，沒有手法紀錄。</p>')+
      '<input class="nmemo" data-memo="'+i+'" maxlength="60" placeholder="寫點心得…" value="'+esc(n.memo||'')+'">'+
      '<div class="buyrow"><button data-napply="'+i+'">套用這組參數</button><button data-ndel="'+i+'">刪除</button></div></div>';}).join('');}
-function runBrew(base,ex){const s=S(),KT=kettleNow(),Wt=waterNow(),gc=careOf(s.last.grinder),B=beanOf(base.bean),XN=[];
+function runBrew(base,ex,q){const s=S(),KT=kettleNow(),Wt=waterNow(),gc=careOf(s.last.grinder),B=beanOf(base.bean),XN=[];
   if(!(ex&&ex.pro)&&!KT.temp){const e=s.tools.thermo?1:4;base.temp=Math.max(80,Math.min(100,Math.round(base.temp+(Math.random()*2-1)*e)));XN.push('沒有恆溫壺，這杯實際水溫 '+base.temp+'°C');}
   const f0=B.f,c0=B.clar,f=f0.slice();f[5]*=Wt.fr;f[2]*=Wt.sw;f[4]*=Wt.bt*(1+.15*gc.lv);let cl=(c0||0)+Wt.cl-1.5*gc.lv;if(gc.mold){f[5]*=.75;f[3]*=1.3;f[4]*=1.15;cl-=3;XN.push('｜磨豆機發霉了，咖啡有霉味！');}
   if(s.tools.sieve&&base.forceFines)base.forceFines*=.7;
@@ -5950,15 +5952,41 @@ function runBrew(base,ex){const s=S(),KT=kettleNow(),Wt=waterNow(),gc=careOf(s.l
   r.even=Math.max(0,(r.even??5)-(1-KT.stab)*2.5);r.clarity=Math.max(0,(r.clarity??5)-(1-KT.stab)*1.5);
   if(s.tools.rdt)r.clarity=Math.min(10,r.clarity+.3);if(s.tools.paper&&base.brewer!=='press')r.clarity=Math.min(10,r.clarity+.4);if(s.tools.lily&&DRIPPER[base.brewer]&&DRIPPER[base.brewer].het>=.5){r.clarity=Math.min(10,r.clarity+.3);r.even=Math.min(10,r.even+.3);}if(s.tools.refract)gain(1,0);
   if(s.tools.wdt&&s.last.wdt!=='off'&&base.brewer!=='press'){r.even=Math.min(10,r.even+1.3);r.clarity=Math.min(10,r.clarity+.4);}
-  if(Wt.id==='mineral')s.minml-=300;s.care[s.last.grinder].c+=1;const B0=beanOf(base.bean)||{};
+  if(q)return r;if(Wt.id==='mineral')s.minml-=300;s.care[s.last.grinder].c+=1;const B0=beanOf(base.bean)||{};
   LASTX={bean:B0.name||'',src:B0.src||base.bean,state:B0.st?'烘焙後第 '+B0.age+' 天（'+B0.st+'）':'',brewer:base.brewer,grinder:S().last.grinder,temp:base.temp,grind:base.grind,ratio:S().last.ratio,pour:S().last.pour,stir:S().last.stir,steep:S().last.steep,
     tech:ex?ex.txt:null,plan:ex&&ex.pro?ex.pro.plan.map((ml,i)=>[ex.pro.planT[i],ml,ex.pro.planD[i]]):null};if(ex||XN.length)setTimeout(()=>toast((ex?ex.txt:'')+XN.join('')+(r.R>=1.3?'｜塞水了！排水只剩 '+Math.round(100/r.R)+'%，苦澀變重':'')),900);return r;}
+
+/* 雙溫層手沖（2026 WBC 分層萃取概念）：Origami＋下層錐形濾紙（深焙 4 g）＋上層蛋糕濾紙（淺焙 11 g） */
+const DU_UP=11,DU_LO=4;
+function dualReady(){const s=S(),ori=s.brewers.some(b=>/^origami/.test(b)),ids=Object.keys(s.beans).filter(id=>beanOf(id)&&s.beans[id]>=DU_LO),srcs=new Set(ids.map(srcOf)),two=srcs.size>=2&&ids.some(id=>s.beans[id]>=DU_UP);
+  const L=[['Origami 濾杯（要放在店裡）',ori],['錐形濾紙',!!s.tools.conep],['蛋糕濾紙',!!s.tools.cakep],['兩支不同的咖啡豆（上層 '+DU_UP+' g、下層 '+DU_LO+' g）',two]];return {L,ok:L.every(x=>x[1])};}
+function dualOn(){const s=S(),o=s.last;return o.dual==='on'&&dualReady().ok&&o.bean&&o.bean2&&beanOf(o.bean2)&&srcOf(o.bean2)!==srcOf(o.bean)&&(s.beans[o.bean]||0)>=DU_UP&&(s.beans[o.bean2]||0)>=DU_LO;}
+function dualHTML(){const s=S(),o=s.last,D=dualReady();
+  let h='<div class="panel"><h3 class="c-h3">🏆 雙溫層手沖<span class="label">2026 WBC 分層萃取概念</span></h3><p class="label">在 Origami 裡疊兩層濾紙：上層蛋糕濾紙放淺焙（'+DU_UP+' g）吃高溫，釋放花香和柑橘酸；下層錐形濾紙放中深焙（'+DU_LO+' g），水流到下面已經降溫約 6°C，慢慢萃出焦糖與巧克力甜感。</p>';
+  if(!D.ok)return h+'<div class="c-tags">'+D.L.map(x=>'<span>'+(x[1]?'✅ ':'⬜ ')+esc(x[0])+'</span>').join('')+'</div><p class="label">湊齊上面四樣就能用這招。濾紙在「採購 → 器材」的小道具裡。</p></div>';
+  const on=o.dual==='on';h+='<div class="seg">'+[['on','用雙溫層手沖'],['off','一般沖法']].map(([k,n])=>'<button data-set="dual:'+k+'" aria-pressed="'+((on?'on':'off')===k)+'">'+n+'</button>').join('')+'</div>';
+  if(!on)return h+'</div>';
+  const B1=o.bean&&beanOf(o.bean),ids=Object.keys(s.beans).filter(id=>beanOf(id)&&s.beans[id]>=DU_LO&&(!B1||srcOf(id)!==srcOf(o.bean)));
+  h+='<p class="label" style="margin-top:10px">上層（步驟 1 選的豆子）：'+(B1?esc(B1.name)+'・'+ROAST_NAME(B1.roast)+((s.beans[o.bean]||0)<DU_UP?'・<b style="color:var(--fail)">不到 '+DU_UP+' g</b>':''):'還沒選')+'</p><h3 class="c-h3" style="margin-top:8px">下層豆子（'+DU_LO+' g）</h3><div class="c-cards">'+
+    (ids.map(id=>{const B=beanOf(id);return '<button class="c-card bean" data-set="bean2:'+id+'" aria-pressed="'+(o.bean2===id)+'"><span class="mini-jar"><i style="height:'+Math.min(100,s.beans[id]/5)+'%;background:'+roastCol(B.roast)+'"></i></span><b>'+esc(B.name)+'</b><small>'+ROAST_NAME(B.roast)+'</small><span class="pr">剩 '+s.beans[id]+' g</span></button>';}).join('')||'<p class="label">沒有另一支 '+DU_LO+' g 以上的豆子。</p>')+'</div>';
+  if(B1&&o.bean2&&beanOf(o.bean2)){const d=beanOf(o.bean2).roast-B1.roast;h+='<p class="c-hint">'+(d>=1?'上淺下深，溫差剛好，層次會很立體。':d<=-1?'上層比下層還深，高溫會先把苦味萃出來，建議對調。':'兩支烘焙度太接近，雙溫層的差別不明顯。')+'</p>';}
+  return h+(dualOn()?'<p class="label">這杯會用 Origami，濾杯選擇先不管。</p>':'<p class="label">選好上下兩支不同的豆子才會用雙溫層沖。</p>')+'</div>';}
+function dualBrew(ex){const s=S(),o=s.last,Gr=GRINDERS.find(g=>g.id===o.grinder),b={mode:'simple',grind:o.grind,ratio:o.ratio,pour:o.pour,stir:o.stir,steep:o.steep,forceFines:Gr.fines};
+  const r1=runBrew(Object.assign({},b,{bean:o.bean,brewer:'origami_w',temp:o.temp}),ex),r2=runBrew(Object.assign({},b,{bean:o.bean2,brewer:'origami_c',temp:Math.max(80,o.temp-6)}),null,1),r={};
+  for(const k in r1){const a=r1[k],c=r2[k];r[k]=typeof a==='number'&&typeof c==='number'?a*.75+c*.25:Array.isArray(a)&&Array.isArray(c)?a.map((x,i)=>x*.75+(c[i]||0)*.25):a;}
+  const d=beanOf(o.bean2).roast-beanOf(o.bean).roast;let t;
+  if(d>=1){r.clarity=Math.min(10,r.clarity+.6);r.even=Math.min(10,r.even+.5);r.aroma*=1.05;t='雙溫層成功：上層淺焙的花果香、下層深焙的焦糖甜感，層次很立體！';}
+  else if(d<=-1){r.clarity=Math.max(0,r.clarity-.5);t='上層放了比較深的豆子，高溫先把苦味萃出來，層次有點亂。';}
+  else t='兩支豆子烘焙度太接近，雙溫層的差別不明顯。';
+  if(LASTX)LASTX.dual=beanOf(o.bean2).name;setTimeout(()=>toast(t),2600);return r;}
+function useDual(){const s=S(),o=s.last,c=Math.round(beanOf(o.bean).price*DU_UP/100+beanOf(o.bean2).price*DU_LO/100)+CUP_COST;
+  [[o.bean,DU_UP],[o.bean2,DU_LO]].forEach(([id,g])=>{s.beans[id]-=g;if(s.beans[id]<=0)delete s.beans[id];});return c;}
 function brewNow(ex){const s=S(),o=s.last,Gr=GRINDERS.find(g=>g.id===o.grinder);
   return runBrew({mode:'simple',bean:o.bean,brewer:o.brewer,temp:o.temp,grind:o.grind,ratio:o.ratio,pour:o.pour,stir:o.stir,steep:o.steep,forceFines:Gr.fines},ex);}
-function doBrew(){const s=S(),t=s.today,X=curCust(),L=X.C,o=s.last;if(!o.bean||!beanOK(o.bean)||busy)return;busy=true;
-  brewAnim({bean:o.bean,brewer:o.brewer,grinder:o.grinder,ratio:o.ratio},ex=>{busy=false;
-  const B=beanOf(o.bean),r=brewNow(ex),pf=G.profile(r),sc=G.score(pf,L.want,L.tol);
-  const c=Math.round(B.price*DOSE/100)+CUP_COST;s.beans[o.bean]-=DOSE;if(s.beans[o.bean]<=0)delete s.beans[o.bean];
+function doBrew(){const s=S(),t=s.today,X=curCust(),L=X.C,o=s.last,DU=dualOn();if(!o.bean||!(DU||beanOK(o.bean))||busy)return;busy=true;
+  brewAnim({bean:o.bean,brewer:DU?'origami_w':o.brewer,grinder:o.grinder,ratio:o.ratio},ex=>{busy=false;
+  const B=beanOf(o.bean),r=DU?dualBrew(ex):brewNow(ex),pf=G.profile(r),sc=G.score(pf,L.want,L.tol);
+  let c;if(DU)c=useDual();else{c=Math.round(B.price*DOSE/100)+CUP_COST;s.beans[o.bean]-=DOSE;if(s.beans[o.bean]<=0)delete s.beans[o.bean];}
   s.money-=CUP_COST;t.cost+=c;X.c.tries+=1;X.c.cost=(X.c.cost||0)+c;
   const pass=sc>=X.target,near=!pass&&sc>=X.target-12;
   res={r,pf,sc,pass,near,final:false,verdict:pass?(sc>=X.target+(100-X.target)*.55?'客人非常滿意！':'客人很滿意'):near?'還可以，但不是他要的味道':'客人喝一口就放下了',
