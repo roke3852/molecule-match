@@ -520,7 +520,7 @@ function shade(hex,f){const n=parseInt(hex.slice(1).length===3?hex.slice(1).repl
 const EXPR={n:{b:'n',e:'open',m:'n'},stern:{b:'stern',e:'open',m:'flat'},smile:{b:'n',e:'happy',m:'smile',c:'pink'},laugh:{b:'up',e:'happy',m:'laugh',c:'pink'},
  angry:{b:'angry',e:'half',m:'grit',c:'flush'},sad:{b:'sad',e:'half',m:'frown'},cry:{b:'sad',e:'shut',m:'frown',t:1},shock:{b:'up',e:'wide',m:'o',c:'pale'},
  smirk:{b:'smirk',e:'half',m:'smirk'},think:{b:'sad',e:'side',m:'flat'},fear:{b:'sad',e:'wide',m:'frown',c:'pale'},
- probe:{b:'smirk',e:'half',m:'flat'}};
+ probe:{b:'smirk',e:'half',m:'flat'},regal:{b:'n',e:'open',m:'n'}};
 function drawPortrait(x,id,ex='n',fr=0,noFace=false){const [ty,sk,bd,bs,robe,top,old]=ART[id];const R=(c,a,b,w,h)=>{x.fillStyle=c;x.fillRect(a,b,w,h)};
  const sk2=shade(sk,.84),sk3=shade(sk,.7),rb2=shade(robe,.72),rb3=shade(robe,1.25),K='#17141c',G='#e0b64a',G2='#a87a1a';
  // --- 身體 ---
@@ -793,7 +793,9 @@ const EX2={n:{b:[0,0,0,0],e:['calm','calm'],g:0,m:'n'},
  smirk:{b:[0,0,-2,-1],e:['lid','lid'],g:-1,m:'smirk',x:'fold1'},
  think:{b:[0,1,0,1],e:['down','down'],g:1,m:'firm',x:'crease'},
  fear:{b:[1,-2,1,-2],e:['wide','wide'],g:0,m:'frown',x:'bead'},
- probe:{b:[0,1,-1,-1],e:['narrow','lid'],g:0,m:'firm',x:'deep'}};
+ probe:{b:[0,1,-1,-1],e:['narrow','lid'],g:0,m:'firm',x:'deep'},
+ // 帝王的審視：不瞇眼、不壓眼窩，只是眼皮略垂、一邊眉梢微抬，沉靜而有分量
+ regal:{b:[0,0,-1,0],e:['calm','lid'],g:0,m:'n'}};
 function drawFaceHi(x,id,ex='n',fr=0){const [ty,sk,bd,bs,robe,top,old]=ART[id];const R=(c,a,b,w,h)=>{x.fillStyle=c;x.fillRect(a,b,w,h)};
  const X=EX2[ex]||EX2.n,xs=(X.x||'').split(' '),sk2=shade(sk,.88),sk3=shade(sk,.75),sk4=shade(sk,.62),hiL=shade(sk,1.07);
  const K='#231512',IR='#3a2418',PU='#120a08',WH='#ece2d4';
@@ -1595,7 +1597,7 @@ function inferSpeech(id,t){const c=inferSpeech0(id,t);if(id!=='xl'&&!COMIC.some(
 function inferSpeech0(id,t){const emp=/^(kx|yz|ql|jq)$/.test(id);if(t==='……')return {ex:'think',act:'',emo:'...'};
  for(const o of OV)if(t.includes(o[0]))return {ex:o[1],act:o[2],emo:o[3]};
  let c=cueOf(t);if(!c&&lastCue&&lastCue.id===id)c=Object.assign({},lastCue,{emo:''});
- if(!c){c={ex:DEFEX[id]||(emp?'stern':'n'),act:'',emo:''};if(/？/.test(t)&&PROBE.test(id))c.ex='probe';else if(/！$/.test(t)&&emp)c.act='nod'}return c}
+ if(!c){c={ex:DEFEX[id]||(emp?'stern':'n'),act:'',emo:''};if(/？/.test(t)&&PROBE.test(id))c.ex=SCHEME.test(id)?'probe':'regal';else if(/！$/.test(t)&&emp)c.act='nod'}return c}
 function inferNarr(t){const c=inferNarr0(t);if(c)c.emo='';return c}
 function inferNarr0(t){for(const o of NOV)if(t.includes(o[0]))return {id:o[1],ex:o[2],act:o[3],emo:o[4]};
  for(const sen of t.split(/[。！？]/)){if(NSKIP.test(sen))continue;const c=cueOf(sen);if(!c)continue;const id=findChar(sen,c.at);if(id&&CHARS[id]&&ART[id])return Object.assign({id},c)}return null}
@@ -1654,7 +1656,7 @@ $('#gNote').onclick=()=>{setNote(!noteMode);toast(noteMode?'註解模式開啟�
 $('#bNext').onclick=e=>{e.stopPropagation();hidePop();if(typing)endType();else{AU.sfx('next');step()}};
 $('#dlg').onclick=()=>{if(noteMode){if(typing)endType();return}if(typing)endType();else{AU.sfx('next');step()}};
 setNote(noteMode);
-function ask(q){saveMid();AU.q(true);AU.sfx('ask');$('#dlg').style.display='none';q._who=askerId();showChar(q._who,{ex:SCHEME.test(q._who)?'smirk':'probe',act:'',emo:''});duo(true);showMe('think','');const b=$('#qbox');b.style.display='block';
+function ask(q){saveMid();AU.q(true);AU.sfx('ask');$('#dlg').style.display='none';q._who=askerId();showChar(q._who,{ex:SCHEME.test(q._who)?'smirk':'regal',act:'',emo:''});duo(true);showMe('think','');const b=$('#qbox');b.style.display='block';
  const ord=q.o.map((o,i)=>i).sort(()=>Math.random()-.5);
  b.innerHTML=`<span class="qk">${q.k}</span><div class="qp">${mk(q.p)}</div>`+ord.map(i=>`<button class="btn" data-i="${i}">${mk(q.o[i].t)}</button>`).join('');b.scrollTop=0;
  $$('#qbox .btn').forEach(x=>x.onclick=()=>answer(q,q.o[+x.dataset.i]))}
