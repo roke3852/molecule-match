@@ -833,6 +833,7 @@ u.rest,.bd.rest{background:#5a8aa0}u.peak,.bd.peak{background:#c9a66b}u.fade,.bd
 .tagin{display:flex;gap:6px}.tagin input{flex:1;min-width:0;background:transparent;border:1px solid var(--line);border-radius:6px;color:var(--ink);font:inherit;font-size:14px;padding:7px 8px}.tagin button{background:transparent;border:1px solid var(--line);border-radius:6px;color:var(--ink);font:inherit;font-weight:700;padding:0 14px;cursor:pointer}
 .c-pill.gi{align-self:flex-start;font-size:12px;padding:3px 10px;margin-top:2px}.gic.big svg{image-rendering:pixelated}
 .cmps{display:flex;flex-direction:column;gap:8px}.cmp{display:grid;grid-template-columns:5.5em auto 1fr;gap:4px 10px;align-items:baseline;font-size:14px;border-top:1px solid var(--line);padding-top:8px}.cmp b{font-family:var(--f-mono)}.cmp em{font-style:normal;font-size:12px;color:var(--muted);text-align:right}.cmp em.up{color:#7fd39a}.cmp em.dn{color:#d9705f}.cmp small{grid-column:1/-1;font-size:12px;color:var(--muted)}
+svg.dk{filter:drop-shadow(1px 0 0 #9aa3ad) drop-shadow(-1px 0 0 #9aa3ad) drop-shadow(0 1px 0 #9aa3ad) drop-shadow(0 -1px 0 #9aa3ad);overflow:visible}
 .brew-anim .smoke{opacity:0}.brew-anim.go .smoke{animation:baSteam 1.2s ease-out 2s 3}
 </style>
 <script>
@@ -5267,7 +5268,8 @@ Object.assign(C_,{mint:['#8fd0b8','#5fa58c','#c4ecdc'],lavender:['#a48fd0','#746
 const skinOf=id=>{const s=S();return (s.skin&&s.skin[id])||0;};
 function palOf(id,i){const L=SK[id],v=L&&L[i==null?skinOf(id):i]||L&&L[0];return v?Object.assign({},PB,{A:v[1],B:v[2],C:v[3]}):PB;}
 function sprG(rows,pal){let h='';rows.forEach((r,y)=>{let x=0;while(x<r.length){const ch=r[x];let e=x+1;while(e<r.length&&r[e]===ch)e++;const c=pal[ch];if(c)h+='<rect x="'+x+'" y="'+y+'" width="'+(e-x)+'" height="1" fill="'+c+'"/>';x=e;}});return h;}
-function spr(id,i,size){const rows=GS[id];if(!rows)return '';const n=rows.length,sz=size||38;return '<svg viewBox="0 '+(n-16)+' 16 16" width="'+sz+'" height="'+sz+'" shape-rendering="crispEdges" aria-hidden="true">'+sprG(rows,palOf(id,i))+'</svg>';}
+const isDark=h=>{if(!h||h[0]!=='#')return false;const v=parseInt(h.slice(1),16);return ((v>>16)*.3+((v>>8)&255)*.59+(v&255)*.11)<85;};
+function spr(id,i,size){const rows=GS[id];if(!rows)return '';const n=rows.length,sz=size||38,pal=palOf(id,i);return '<svg'+(isDark(pal.A)?' class="dk"':'')+' viewBox="0 '+(n-16)+' 16 16" width="'+sz+'" height="'+sz+'" shape-rendering="crispEdges" aria-hidden="true">'+sprG(rows,pal)+'</svg>';}
 const icoBrewer=(id,i)=>spr(id,i),icoGrinder=(g,i)=>spr(g.id,i),icoRoaster=id=>spr(id||S().roaster||'pan');
 function daySkin(day,id){const L=SK[id];if(!L||L.length<2)return 0;if(hsh(day*53+idn(id)*5)<.45)return 0;const w=L.map((v,i)=>i?(v[4]>=1.3?.3:1):0),tot=w.reduce((a,b)=>a+b,0);let x=hsh(day*29+idn(id))*tot;for(let i=1;i<L.length;i++){x-=w[i];if(x<=0)return i;}return L.length-1;}
 /* 研磨刻度：依每台磨豆機的實際格數顯示 */
@@ -5898,7 +5900,7 @@ Object.assign(GS,{
 Object.entries({kono:'cone',kasuya:'v60',mugen:'solo',flower:'v60',deep27:'solo',mountain:'v60',ufo:'cone',crystaleye:'v60',kalita102:'trap',melitta:'trap',beehouse:'trap',april:'orea',staggx:'orea',b75:'orea',december:'kalita',tricolate:'cyl',pulsar:'cyl',
  c2:'k6',c3:'zp6',q2:'kultra',xultra:'kultra',kinu:'c40',x25:'c40',porlex:'kultra',s3:'zp6',opus:'encore',virtuoso:'encore',t078:'ode',df64:'p80',zerno:'p80',guatemala:'ditting',ikawa:'nano',bullet:'huky',
  fish:'kalitak',kinto:'kalitak',fisht:'bona',buonot:'bona',yukiwa:'takahiro',staggpo:'stagg'}).forEach(([a,b])=>{GS[a]=GS[b];});
-GS.staggpo=GS.stagg.slice(0,11);GS.buonot=GS.buono.concat(['..dddddddddddd..','..ddddyydddddd..']);['buono','buonot','takahiro','yukiwa'].forEach(id=>{GS[id]=GS[id].map(r=>r.replace(/k/g,'m'));});
+GS.staggpo=GS.stagg.slice(0,11);GS.buonot=GS.buono.concat(['..dddddddddddd..','..ddddyydddddd..']);['buono','buonot','takahiro'].forEach(id=>{GS[id]=GS[id].map(r=>r.replace(/k/g,'m'));});GS.yukiwa=['........s.......','.......AAA......','.A....AAAAA.....','.AA...BBBBB.AA..','..A...ACAAA...A.','..A...ACAAA...A.','..A...ACAAAA..A.','.AA..AACAAAA..A.','.AA..ACAAAAA.A..','.AAAAACAAAAA.A..','..AAAACAAAAAA...','.....AAAAAAAA...','.....BBBBBBBB...'];
 Object.assign(SK,{kono:[sk('透明樹脂','clear'),sk('紅色','red'),sk('黑色','black'),skL('九十週年金・限定','gold',1.5)],kasuya:[sk('霧黑陶瓷','black'),sk('白色陶瓷','white')],mugen:[sk('透明黑','smoke'),sk('白色陶瓷','white')],flower:[sk('有田燒白','white'),sk('粉紅','pink'),sk('藍色','blue'),sk('黃色','yellow'),sk('透明','clear')],
  deep27:[sk('透明','clear'),sk('黑色','black')],mountain:[sk('陶瓷白','white'),sk('墨黑','black'),sk('土耳其藍','teal')],ufo:[sk('陶瓷白','white'),sk('霧黑','black'),skL('窯變釉・限定','amber',1.4)],crystaleye:[sk('透明','clear'),sk('透明黑','smoke')],chemex:[sk('經典木環','wood'),skL('手工吹製・限定','walnut',1.6)],
  kalita102:[sk('陶瓷白','white'),sk('咖啡色陶瓷','wood'),sk('銅製','copper')],melitta:[sk('陶瓷白','white'),sk('紅色','red'),sk('透明','clear')],beehouse:[sk('白色','white'),sk('天藍','lagoon'),sk('芥末黃','yellow'),sk('紅色','red')],april:[sk('透明','clear'),sk('陶瓷白','white'),sk('粉紅玻璃','pink')],
