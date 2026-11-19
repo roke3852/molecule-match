@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow, noarchive">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>咖啡人物誌</title>
+<style>
+:root{
+  --bg:#f6f1ea; --card:#fffdf9; --ink:#2b2018; --sub:#7a6a5c; --line:#e7ddd1;
+  --brand:#7a4a2a; --brand2:#b9773f; --gold:#c9962c; --chip:#efe5d8; --green:#4f7a4a;
+}
+*{box-sizing:border-box}
+html,body{margin:0;touch-action:manipulation;background:var(--bg);color:var(--ink);font-family:-apple-system,"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
+a{color:var(--brand)}
+.app{max-width:560px;margin:0 auto;min-height:100vh;padding-bottom:84px}
+header{position:sticky;top:0;z-index:5;background:rgba(246,241,234,.94);backdrop-filter:blur(8px);padding:14px 16px 10px;border-bottom:1px solid var(--line)}
+header h1{margin:0;font-size:20px;letter-spacing:.5px}
+header p{margin:2px 0 0;color:var(--sub);font-size:12.5px}
+main{padding:14px 16px}
+h2{font-size:16px;margin:20px 0 10px}
+.crop{position:fixed;inset:0;background:rgba(20,14,8,.82);z-index:30;display:none;align-items:center;justify-content:center;padding:16px}
+.crop.on{display:flex}
+.crop-in{background:var(--bg);border-radius:20px;padding:16px;width:100%;max-width:340px;text-align:center}
+.crop-t{font-weight:800;margin-bottom:10px}
+#cropC{width:280px;height:280px;border-radius:14px;touch-action:none;background:#222;max-width:100%}
+.crop-h{font-size:12px;color:var(--sub);margin:8px 0}
+#cropZ{width:100%}
+.prow{display:flex;gap:12px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:10px 12px}
+.prow .meta{flex:1;min-width:0}
+.pbtns{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.pbtns .btn{padding:6px 10px;font-size:12.5px;border-radius:10px}
+.pdone{font-size:11px;color:var(--green);font-weight:700}
+.cloud{font-size:11.5px;padding:1px 7px;border-radius:8px;background:var(--chip);color:var(--sub);white-space:nowrap}
+.cloud.ok{background:#e2ecdf;color:var(--green)}
+.cloud.bad{background:#f3ddd6;color:#a0442f}
+.search{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--card);font-size:15px;margin-bottom:10px}
+.chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;margin-bottom:6px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.sig-foot{text-align:center;color:var(--sub);font-size:12px;padding:8px 16px 24px}
+.sig-foot .sig{font-family:"Noto Serif TC",serif;font-style:italic;font-size:15px;color:var(--brand);letter-spacing:.12em;margin-bottom:2px}
+.chip{flex:none;padding:6px 12px;border-radius:999px;background:var(--chip);font-size:13px;white-space:nowrap}
+.chip.on{background:var(--brand);color:#fff}
+.list{display:flex;flex-direction:column;gap:10px}
+.card{display:flex;gap:12px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px;text-align:left;width:100%}
+.card:active{transform:scale(.99)}
+.av{flex:none;width:52px;height:52px;border-radius:50%;display:grid;place-items:center;color:#fff;font-weight:700;font-size:17px}
+.av2{flex:none;position:relative;border-radius:50%;overflow:hidden;display:grid;place-items:center;box-shadow:inset 0 0 0 2px rgba(255,255,255,.25)}
+.av2bg{position:absolute;inset:0;width:100%;height:100%}
+.av2i{position:relative;filter:drop-shadow(0 2px 2px rgba(0,0,0,.25))}
+.av2n{position:absolute;right:4%;bottom:4%;background:#fffdf9;color:#2b2018;font-weight:800;font-size:11px;min-width:20px;height:20px;padding:0 4px;border-radius:10px;display:grid;place-items:center;box-shadow:0 1px 2px rgba(0,0,0,.2)}
+.sq{flex:none;width:52px;height:52px;border-radius:12px;display:grid;place-items:center;color:#fff;font-size:22px}
+.meta{min-width:0;flex:1}
+.name{font-weight:700;font-size:15.5px}
+.sub{color:var(--sub);font-size:12.5px;margin-top:2px}
+.tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
+.tag{font-size:11px;padding:2px 7px;border-radius:6px;background:var(--chip);color:var(--brand)}
+.tag.gold{background:#f6e9c8;color:#8a6410}
+.tag.inf{background:#e2ecdf;color:var(--green)}
+.star{flex:none;font-size:18px;opacity:.35}
+.star.on{opacity:1}
+.hero{background:linear-gradient(135deg,#7a4a2a,#b9773f);color:#fff;border-radius:18px;padding:16px;margin-bottom:12px}
+.hero small{opacity:.8;font-size:12px}
+.hero .t{font-size:19px;font-weight:700;margin:4px 0}
+.hero .d{font-size:13.5px;line-height:1.55;opacity:.95}
+.hero button{margin-top:10px;background:rgba(255,255,255,.18);color:#fff;padding:7px 12px;border-radius:10px;font-size:13px}
+.quick{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.quick button{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 6px;font-size:13px}
+.quick b{display:block;font-size:20px;margin-bottom:2px}
+.cityhead{display:flex;align-items:baseline;justify-content:space-between;margin:18px 0 8px}
+.cityhead h3{margin:0;font-size:15px}
+.cityhead span{color:var(--sub);font-size:12px}
+nav{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);display:flex;justify-content:center;z-index:6;padding-bottom:env(safe-area-inset-bottom)}
+nav .in{display:flex;max-width:560px;width:100%}
+nav button{flex:1;padding:9px 0 10px;font-size:11.5px;color:var(--sub)}
+nav button b{display:block;font-size:20px;line-height:1.2}
+nav button.on{color:var(--brand);font-weight:700}
+.sheet-bg{position:fixed;inset:0;background:rgba(30,20,10,.45);z-index:10;display:none}
+.sheet{position:fixed;left:0;right:0;bottom:0;max-height:88vh;overflow-y:auto;background:var(--bg);border-radius:20px 20px 0 0;z-index:11;display:none;transform:translateY(100%);transition:transform .25s ease;max-width:560px;margin:0 auto;padding:0 18px 30px}
+.sheet.open{transform:none}
+.sheet .grab{width:42px;height:5px;border-radius:3px;background:#d6c8b8;margin:10px auto 6px}
+.sheet .close{position:sticky;top:0;float:right;margin-top:-4px;font-size:22px;padding:4px 8px;color:var(--sub)}
+.dhead{display:flex;gap:14px;align-items:center;margin:8px 0 12px}
+.dhead .av,.dhead .sq{width:64px;height:64px;font-size:21px}
+.dname{font-size:20px;font-weight:800}
+.dsub{color:var(--sub);font-size:13px;margin-top:3px}
+.sec{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-top:10px}
+.sec h4{margin:0 0 6px;font-size:13px;color:var(--brand)}
+.sec p{margin:0;font-size:14px;line-height:1.65}
+.tl{list-style:none;margin:0;padding:0}
+.tl li{display:flex;gap:10px;font-size:14px;padding:5px 0;border-bottom:1px dashed var(--line)}
+.tl li:last-child{border:0}
+.tl .y{flex:none;width:62px;white-space:nowrap;font-weight:700;color:var(--gold)}
+.linkrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 14px;border-radius:12px;background:var(--brand);color:#fff;text-decoration:none;font-size:14px}
+.btn.ghost{background:var(--chip);color:var(--brand)}
+.mini{display:flex;flex-direction:column;gap:8px}
+.mini .card{padding:9px}
+.mini .av,.mini .sq{width:40px;height:40px;font-size:15px}
+.empty{color:var(--sub);text-align:center;padding:30px 10px;font-size:14px;line-height:1.7}
+.note{color:var(--sub);font-size:11.5px;margin-top:22px;line-height:1.6}
+.seg{display:flex;background:var(--chip);border-radius:12px;padding:3px;margin-bottom:10px}
+.seg button{flex:1;padding:7px 0;border-radius:9px;font-size:14px}
+.seg button.on{background:var(--card);font-weight:700;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+</style>
+</head>
+<body>
+<div class="app">
+  <header><h1>☕ 咖啡人物誌</h1><p id="hsub">各國咖啡師 × 台日名店圖鑑　<span id="cloud" class="cloud">☁️ 連線中…</span></p></header>
+  <main id="view"></main>
+  <footer class="sig-foot"><div class="sig">— Jim Lu —</div><div>製作｜咖啡人物誌</div></footer>
+</div>
+<nav><div class="in">
+  <button data-tab="home" class="on"><b>🏠</b>首頁</button>
+  <button data-tab="people"><b>👤</b>咖啡師</button>
+  <button data-tab="shops"><b>📍</b>名店</button>
+  <button data-tab="photos"><b>🖼️</b>照片</button>
+  <button data-tab="saved"><b>⭐</b>收藏</button>
+</div></nav>
+<input type="file" id="pf" accept="image/*" style="display:none">
+<div class="crop" id="crop"><div class="crop-in">
+  <div class="crop-t" id="cropT">調整照片</div>
+  <canvas id="cropC" width="560" height="560"></canvas>
+  <div class="crop-h">拖曳移動・滑桿縮放，圓圈內就是頭像</div>
+  <input type="range" id="cropZ" min="1" max="4" step="0.01" value="1">
+  <div class="linkrow" style="justify-content:center"><button class="btn ghost" id="cropX">取消</button><button class="btn" id="cropOK">使用這張</button></div>
+</div></div>
+<div class="sheet-bg" id="bg"></div>
+<div class="sheet" id="sheet"></div>
+
+<script>
+/* ========== 資料 ========== */
+const FLAG={TW:"🇹🇼 台灣",JP:"🇯🇵 日本",AU:"🇦🇺 澳洲",CN:"🇨🇳 中國",ID:"🇮🇩 印尼",BR:"🇧🇷 巴西",PL:"🇵🇱 波蘭",UK:"🇬🇧 英國",US:"🇺🇸 美國",NO:"🇳🇴 挪威",MY:"🇲🇾 馬來西亞",CA:"🇨🇦 加拿大"};
+const COLORS=["#7a4a2a","#b9773f","#4f7a4a","#3f6a8a","#8a4f6a","#6a5a3f","#a5562f","#2f6f6a"];
+
+// type: champ = 比賽冠軍 / inf = 影響力人物
+const PEOPLE=[
+ {id:"berg",name:"吳則霖",en:"Berg Wu",c:"TW",type:"champ",
+  hl:"台灣第一位世界咖啡大師冠軍",
+  bio:"台大電子所畢業的理工咖啡人，從騎三輪車擺攤賣咖啡起家，用精算的方式研究萃取，2016 年拿下 WBC 冠軍。創立的興波咖啡多次被國際旅遊網站評為世界最佳咖啡館。",
+  awards:[["2016","WBC 世界咖啡大師賽 冠軍"]],
+  style:"重視「好喝要簡單」：客人不必懂咖啡也能喝到好味道。",
+  shops:["simplekaffa","sola"]},
+ {id:"chad",name:"王策",en:"Chad Wang",c:"TW",type:"champ",
+  hl:"台灣首位世界盃沖煮大賽冠軍",
+  bio:"2016 年 WBrC 第三名，隔年在布達佩斯奪冠，成為第一位拿下這個頭銜的台灣人。2018 年在台北開設 VWI by CHADWANG，品牌名取自水的三態：霧、水、冰。",
+  awards:[["2016","WBrC 世界盃沖煮大賽 第三名"],["2017","WBrC 世界盃沖煮大賽 冠軍"]],
+  style:"以 V60 追求乾淨度；店內用多層濾水調整礦物質，非常講究「水」。",
+  shops:["vwi"]},
+ {id:"gabee",name:"林東源",en:"Lin Dong-Yuan",c:"TW",type:"champ",
+  hl:"第一屆台灣咖啡大師冠軍",
+  bio:"台灣咖啡圈的 OG 級前輩，以拉花與創意咖啡聞名。2004 年開設 GABEE.，同年拿下第一屆台灣咖啡大師冠軍，也是第一位站上 WBC 世界賽的台灣選手。",
+  awards:[["2004","第一屆台灣咖啡大師 冠軍"],["2006","台灣咖啡大師 冠軍"],["2007","首位參加 WBC 的台灣選手"]],
+  style:"創意咖啡代表作「啡你莫薯」：用台灣地瓜入咖啡，分三段品嚐。",
+  shops:["gabee"]},
+ {id:"jameschen",name:"陳志煌",en:"James Chen",c:"TW",type:"champ",
+  hl:"北歐盃烘焙賽總冠軍",
+  bio:"花了十年鑽研烘豆才開店。2013 年拿下北歐盃咖啡烘焙賽濃縮組與總冠軍，是第一位奪得總冠軍的非北歐選手，把北歐淺焙風格帶進台灣。",
+  awards:[["2013","Nordic Roaster Competition 總冠軍＋濃縮組冠軍"]],
+  style:"主張「咖啡就是美食」，常與主廚合作咖啡入菜。",
+  shops:["fika"]},
+ {id:"bala",name:"林紹興",en:"Bala",c:"TW",type:"champ",
+  hl:"2026 世界拉花大賽冠軍",
+  bio:"COFFEE LOVER's PLANET 咖啡師，三度拿下台灣拉花選拔賽冠軍。2026 年 4 月在美國聖地牙哥從 33 位選手中奪下世界拉花大賽冠軍，是台灣第 7 座 WCC 世界冠軍。",
+  awards:[["2020","台灣拉花選拔賽 冠軍"],["2022","台灣拉花選拔賽 冠軍"],["2025","台灣拉花選拔賽 冠軍"],["2026","WLAC 世界拉花大賽 冠軍"]],
+  style:"寫實動物拉花：決賽作品是浣熊、長頸鹿和小熊貓。",shops:[]},
+ {id:"wen",name:"温景祥",en:"Wen Ching-Hsiang",c:"TW",type:"champ",nat:true,
+  hl:"台灣咖啡大師選拔賽冠軍",
+  bio:"Rebirth coffee 咖啡師。2025 年 11 月在南港展覽館拿下 WCC 世界盃咖啡大師台灣選拔賽冠軍，代表台灣參加 2026 巴拿馬世界咖啡大師賽。",
+  awards:[["2025","WCC 咖啡大師 台灣選拔賽 冠軍"],["2026","代表台灣出賽 WBC（巴拿馬）"]],
+  style:"",shops:[]},
+ {id:"tetsu",name:"粕谷哲",en:"Tetsu Kasuya",c:"JP",type:"champ",
+  hl:"亞洲首位 WBrC 冠軍・4:6 沖煮法",
+  bio:"喜歡數字與分析的沖煮者，2016 年成為第一位拿下世界盃沖煮大賽冠軍的亞洲人。在千葉船橋創立 PHILOCOFFEA，也監修便利商店咖啡。",
+  awards:[["2016","WBrC 世界盃沖煮大賽 冠軍"]],
+  style:"4:6 沖煮法：前 40% 水量調整甜與酸，後 60% 調整濃度，簡單好複製。",
+  shops:["philocoffea"]},
+ {id:"nagasaki",name:"長崎愛美",en:"Emi Nagasaki",c:"JP",type:"champ",nat:true,
+  hl:"2026 日本沖煮大賽冠軍・2027 世界賽日本代表",
+  bio:"PHILOCOFFEA 所屬咖啡師。前一份工作時在 SCAJ 看到日本咖啡師大賽深受感動，決定投入精品咖啡。2023-2024 年日本沖煮大賽（JBrC）決賽選手，2026 年 10 月在東京 Big Sight 奪冠，將代表日本出戰 2027 年在哥倫比亞舉辦的世界盃沖煮大賽。",
+  awards:[["2024","JBrC 2023-2024 決賽選手"],["2026","JBrC 日本沖煮大賽 冠軍"],["2027","WBrC 世界盃沖煮大賽 日本代表（哥倫比亞）"]],
+  style:"奪冠時用哥倫比亞 La Negrita 農園的紅藝伎（厭氧日曬），著重多醣帶來的口感與質地，分 7 次注水；器材用 HARIO V60 樹脂濾杯。",
+  shops:["philocoffea"]},
+ {id:"ito",name:"伊藤大貴",en:"Hiroki Ito",c:"JP",type:"champ",nat:true,
+  hl:"日本咖啡師大賽冠軍・WBC 2027 東京日本代表",
+  bio:"猿田彥珈琲咖啡師。JBC 2024 冠軍，2025 年在米蘭 WBC 拿下第五名；2026 年 10 月再度奪得日本冠軍，將代表日本出戰 2027 年 4 月 28 日起在東京舉行的世界咖啡大師賽，這是 WBC 睽違 20 年回到日本。",
+  awards:[["2019-23","日本拉花大賽 三度冠軍"],["2024","JBC 日本咖啡師大賽 冠軍"],["2025","WBC 世界賽 第五名"],["2026","JBC 日本咖啡師大賽 冠軍"],["2027","WBC 東京 日本代表"]],
+  style:"拉花出身的咖啡師，同時也是日本拉花大賽三冠王。",shops:["sarutahiko"]},
+ {id:"jak",name:"Jak Michal Ryan",en:"Jak Michal Ryan",c:"US",type:"champ",nat:true,
+  hl:"2026 美國咖啡師大賽冠軍",
+  bio:"德州奧斯汀 Proud Mary Coffee 咖啡師，前職業舞者。2026 年 6 月在丹佛奪得美國冠軍，代表美國參加巴拿馬 WBC。",
+  awards:[["2025","美國咖啡師大賽 第六名"],["2026","美國咖啡師大賽 冠軍"]],
+  style:"比賽主題是「時機」：加快或放慢某個步驟，會怎麼改變咖啡的體驗。",shops:[]},
+ {id:"gabrel",name:"Gabrel Tan",en:"Gabrel Tan",c:"AU",type:"champ",nat:true,
+  hl:"2026 澳洲咖啡師大賽冠軍",
+  bio:"Veneziano Coffee Roasters 品牌大使。連續五年參賽，拿過三次亞軍、一次季軍，2026 年終於奪冠；在巴拿馬 WBC 拿下第四名。",
+  awards:[["2022","澳洲咖啡師大賽 亞軍"],["2023","澳洲咖啡師大賽 季軍"],["2024","澳洲咖啡師大賽 亞軍"],["2025","澳洲咖啡師大賽 亞軍"],["2026","澳洲咖啡師大賽 冠軍"],["2026","WBC 世界賽 第四名"]],
+  style:"屢敗屢戰型選手，曾說世界冠軍 Jack Simpson 是激勵他的對手。",shops:[]},
+ {id:"hoff",name:"Jill Hoff",en:"Jill Hoff",c:"CA",type:"champ",nat:true,
+  hl:"加拿大咖啡師大賽冠軍",
+  bio:"卡加利 Monogram Coffee 咖啡師，拿下加拿大咖啡師大賽冠軍後，在 2026 巴拿馬 WBC 打進決賽、名列第六。",
+  awards:[["2026","加拿大咖啡師大賽 冠軍"],["2026","WBC 世界賽 第六名"]],style:"",shops:[]},
+ {id:"woodhouse",name:"Will Woodhouse-Banks",en:"Will Woodhouse-Banks",c:"UK",type:"champ",nat:true,
+  hl:"2025 英國咖啡師大賽冠軍",
+  bio:"英國 Bettys & Taylors 的創新研發人員，2025 年 7 月拿下英國咖啡師大賽冠軍，在米蘭 WBC 進入前 16 強。",
+  awards:[["2025","英國咖啡師大賽 冠軍"],["2025","WBC 世界賽 前 16 強"]],style:"",shops:[]},
+ {id:"izaki",name:"井崎英典",en:"Hidenori Izaki",c:"JP",type:"champ",
+  hl:"亞洲首位 WBC 冠軍",
+  bio:"2014 年在義大利里米尼奪得世界咖啡大師賽冠軍，是第一位拿下 WBC 的亞洲人。之後轉型為顧問，參與多家企業的咖啡開發。",
+  awards:[["2014","WBC 世界咖啡大師賽 冠軍"]],
+  style:"擅長把競賽等級的思路帶進大眾商品。",shops:[]},
+ {id:"iwase",name:"岩瀬由和",en:"Yoshikazu Iwase",c:"JP",type:"champ",
+  hl:"日本冠軍二連霸・WBC 亞軍",
+  bio:"與北添修一起從咖啡餐車起家，創立福岡的 REC COFFEE。拿下日本咖啡師大賽二連霸，2016 年 WBC 世界第二，帶動外界對福岡咖啡的關注。",
+  awards:[["2014","日本咖啡師大賽 冠軍"],["2015","日本咖啡師大賽 冠軍"],["2016","WBC 世界咖啡大師賽 亞軍"]],
+  style:"只用精品豆，烘焙與萃取都以突顯豆子個性為目標。",
+  shops:["rec-fukuoka","rec-taipei"]},
+ {id:"kunitomo",name:"國友栄一",en:"Eiichi Kunitomo",c:"JP",type:"inf",
+  hl:"Koffee Mameya 創辦人",
+  bio:"先以 Omotesando Koffee 推廣精品咖啡，再改做咖啡豆專賣的 Koffee Mameya，2021 年開設「咖啡懷石」概念的 Koffee Mameya Kakeru。",
+  awards:[["2017","開設 Koffee Mameya"],["2021","開設 Koffee Mameya Kakeru"]],
+  style:"自己不烘豆，從世界各地精選烘豆商；同一支豆用多種方式呈現。",
+  shops:["mameya-kakeru","mameya"]},
+ {id:"panwei",name:"Pan Wei",en:"Pan Wei",c:"CN",type:"champ",
+  hl:"2026 世界咖啡大師冠軍（最新）",
+  bio:"兩屆中國咖啡師冠軍，第二次站上世界舞台就在巴拿馬奪冠，主題是「家庭」。這是 WBC 第一次在中美洲舉辦。",
+  awards:[["2026","WBC 世界咖啡大師賽 冠軍"]],
+  style:"表面看起來輕鬆，背後藏著複雜的技術與實驗。",shops:[]},
+ {id:"jack",name:"Jack Simpson",en:"Jack Simpson",c:"AU",type:"champ",
+  hl:"2025 WBC 冠軍・連續三年站上頒獎台",
+  bio:"墨爾本 Axil Coffee Roasters 的咖啡師。2023 年第三、2024 年第二，2025 年在米蘭奪冠，是第四位拿下 WBC 的澳洲人。",
+  awards:[["2023","WBC 季軍"],["2024","WBC 亞軍"],["2025","WBC 冠軍"]],
+  style:"屢敗屢戰的代表人物。",shops:["axil"]},
+ {id:"jasin",name:"Mikael Jasin",en:"Mikael Jasin",c:"ID",type:"champ",
+  hl:"印尼首位 WBC 冠軍",
+  bio:"2024 年在韓國釜山拿下世界咖啡大師賽冠軍，是印尼第一位世界冠軍，也是 So So Good Coffee Company 的創辦人。",
+  awards:[["2024","WBC 世界咖啡大師賽 冠軍"]],
+  style:"推廣印尼咖啡產地。",shops:[]},
+ {id:"boram",name:"Boram Um",en:"Boram Um",c:"BR",type:"champ",
+  hl:"巴西首位 WBC 冠軍",
+  bio:"韓裔巴西人，家族經營 Fazenda Um 咖啡農園，創立 Um Coffee Co.。2023 年在雅典奪冠，目標是讓世界看見巴西高品質咖啡。",
+  awards:[["2023","WBC 世界咖啡大師賽 冠軍"]],
+  style:"農園到吧台一條龍。",shops:[]},
+ {id:"douglas",name:"Anthony Douglas",en:"Anthony Douglas",c:"AU",type:"champ",
+  hl:"2022 WBC 冠軍",
+  bio:"同樣出身墨爾本 Axil Coffee Roasters，2022 年拿下世界咖啡大師賽冠軍。",
+  awards:[["2022","WBC 世界咖啡大師賽 冠軍"]],style:"",shops:["axil"]},
+ {id:"rojewska",name:"Agnieszka Rojewska",en:"Agnieszka Rojewska",c:"PL",type:"champ",
+  hl:"史上首位女性 WBC 冠軍",
+  bio:"2018 年成為第一位拿下世界咖啡大師賽的女性，用衣索比亞咖啡，主打「好入口」而不是為複雜而複雜。",
+  awards:[["2018","WBC 世界咖啡大師賽 冠軍"]],style:"",shops:[]},
+ {id:"sasa",name:"Sasa Sestic",en:"Sasa Sestic",c:"AU",type:"champ",
+  hl:"2015 WBC 冠軍",
+  bio:"2015 年世界咖啡大師賽冠軍，澳洲坎培拉 ONA Coffee 創辦人，也以研究發酵處理法聞名。",
+  awards:[["2015","WBC 世界咖啡大師賽 冠軍"]],style:"",shops:["ona"]},
+ {id:"wendelboe",name:"Tim Wendelboe",en:"Tim Wendelboe",c:"NO",type:"champ",
+  hl:"北歐淺焙代表人物",
+  bio:"2004 年世界咖啡大師賽冠軍，在奧斯陸經營同名烘焙咖啡館，2026 年世界百大咖啡館排名第二。",
+  awards:[["2004","WBC 世界咖啡大師賽 冠軍"]],
+  style:"乾淨俐落的北歐淺焙手沖。",shops:["wendelboe"]},
+ {id:"peng",name:"George Jinyang Peng",en:"George Jinyang Peng",c:"CN",type:"champ",
+  hl:"2025 WBrC 冠軍",
+  bio:"在史上人數最多的一屆世界盃沖煮大賽（雅加達）奪冠，主題是溫度如何影響種植、烘焙、沖煮與品飲。",
+  awards:[["2023","WBrC 第五名"],["2025","WBrC 冠軍"]],style:"",shops:[]},
+ {id:"nas",name:"Nas Jaafar",en:"Nas Jaafar",c:"MY",type:"champ",
+  hl:"2026 WBrC 冠軍・馬來西亞首位",
+  bio:"2025 年馬來西亞沖煮大賽冠軍，2026 年在布魯塞爾拿下世界盃沖煮大賽，是馬來西亞第一位世界冠軍。",
+  awards:[["2025","馬來西亞沖煮大賽 冠軍"],["2026","WBrC 冠軍"]],style:"",shops:[]},
+ {id:"hoffmann",name:"James Hoffmann",en:"James Hoffmann",c:"UK",type:"inf",
+  hl:"2007 WBC 冠軍・咖啡 YouTuber",
+  bio:"2007 年世界咖啡大師賽冠軍，倫敦 Square Mile Coffee Roasters 共同創辦人。YouTube 頻道以器材評測與沖煮實驗聞名，著有《The World Atlas of Coffee》。",
+  awards:[["2007","WBC 世界咖啡大師賽 冠軍"]],
+  style:"理性實驗派，常推出簡單好複製的沖煮方法。",shops:[]},
+ {id:"morgan",name:"Morgan Eckroth",en:"Morgan Eckroth",c:"US",type:"inf",
+  hl:"美國冠軍・短影音咖啡師",
+  bio:"2022 年美國咖啡師大賽冠軍、同年 WBC 亞軍，以短影音讓更多年輕人認識精品咖啡。",
+  awards:[["2022","美國咖啡師大賽 冠軍"],["2022","WBC 亞軍"]],style:"",shops:[]},
+ {id:"lance",name:"Lance Hedrick",en:"Lance Hedrick",c:"US",type:"inf",
+  hl:"咖啡 YouTuber・拉花與萃取教學",
+  bio:"前競賽選手，YouTube 頻道以手沖、濃縮與拉花的深度教學受歡迎。",
+  awards:[],style:"喜歡拆解細節、反覆測試。",shops:[]},
+ {id:"rao",name:"Scott Rao",en:"Scott Rao",c:"US",type:"inf",
+  hl:"咖啡作家・Rao Spin",
+  bio:"寫過多本萃取與烘焙專書，影響許多咖啡師的沖煮觀念；手沖最後輕轉濾杯讓粉床平整的「Rao Spin」就以他命名。",
+  awards:[],style:"重視萃取均勻度。",shops:[]}
+];
+
+// region: TW / JP / WORLD
+const SHOPS=[
+ // 台北
+ {id:"simplekaffa",name:"興波咖啡 Simple Kaffa 旗艦店",city:"台北",r:"TW",area:"中正區・華山附近",
+  desc:"吳則霖創立，曾獲國際旅遊網站評為世界最佳咖啡館第一名。開門前常大排長龍，黑糖拿鐵、卡布奇諾是人氣品項。",
+  tags:["冠軍店","世界最佳咖啡館"],url:"https://www.simplekaffa.com",q:"Simple Kaffa 興波咖啡 華山"},
+ {id:"sola",name:"天空興波 Simple Kaffa Sola",city:"台北",r:"TW",area:"信義區・台北101 88樓",
+  desc:"興波的第二家旗艦店，位在台北 101 高樓層，邊喝咖啡邊俯瞰台北。",
+  tags:["冠軍店","景觀"],url:"https://www.simplekaffa.com",q:"Simple Kaffa Sola 天空興波"},
+ {id:"vwi",name:"VWI by CHADWANG",city:"台北",r:"TW",area:"大安區・忠孝復興站附近",
+  desc:"王策的品牌店，白色三角窗建築。菜單分 Basic、Select、Unique、Limited 四級，限量款有巴拿馬藝伎。",
+  tags:["冠軍店","手沖"],url:"",q:"VWI by CHADWANG 台北"},
+ {id:"gabee",name:"GABEE.",city:"台北",r:"TW",area:"松山區・民生社區",
+  desc:"2004 年開業的台灣咖啡老字號，招牌創意咖啡「啡你莫薯」是冠軍作品。",
+  tags:["冠軍店","創意咖啡","拉花"],url:"",q:"GABEE. 咖啡 民生東路"},
+ {id:"fika",name:"Fika Fika Cafe",city:"台北",r:"TW",area:"中山區・伊通公園旁",
+  desc:"北歐淺焙風格代表，招牌配方豆 Capulypuly 加奶或喝黑都平衡；拿鐵與濾泡咖啡是強項。",
+  tags:["冠軍店","北歐淺焙","自家烘焙"],url:"https://www.fikafikacafe.com",q:"Fika Fika Cafe 伊通街"},
+ {id:"rec-taipei",name:"REC COFFEE 台北敦化店",city:"台北",r:"TW",area:"大安區・東區",
+  desc:"福岡 REC COFFEE 的台灣店，2026 年 5 月開幕。",
+  tags:["冠軍店","日本名店分店"],url:"https://rec-coffee.com",q:"REC COFFEE 台北敦化店"},
+ {id:"sind",name:"Coffee Sind",city:"台北",r:"TW",area:"台北",
+  desc:"2026 世界百大咖啡館第 36 名，台灣入榜排名最高的一家。",
+  tags:["世界百大"],url:"",q:"Coffee Sind 台北"},
+ // 台中
+ {id:"tomorrow",name:"Tomorrow Coffee Roasters",city:"台中",r:"TW",area:"台中・侘寂老宅",
+  desc:"2026 世界百大咖啡館第 57 名，侘寂風格的老宅建築很受注目。",
+  tags:["世界百大","自家烘焙"],url:"",q:"Tomorrow Coffee Roasters 台中"},
+ {id:"stopover",name:"Coffee Stopover",city:"台中",r:"TW",area:"台中",
+  desc:"單品豆選擇多，適合慢慢比較；分店 Coffee Stopover Black 入選 2026 世界百大第 78 名。",
+  tags:["世界百大","單品多"],url:"https://www.coffeestopover.com",q:"Coffee Stopover 台中"},
+ // 高雄
+ {id:"keep",name:"KEEP Coffee Roastery",city:"高雄",r:"TW",area:"三民區",
+  desc:"2026 世界百大咖啡館第 46 名。烘焙與沖煮在同一空間，從生豆到杯中一手掌握。",
+  tags:["世界百大","自家烘焙"],url:"",q:"KEEP Coffee Roastery 高雄"},
+
+ // 東京
+ {id:"mameya-kakeru",name:"Koffee Mameya Kakeru",city:"東京",r:"JP",area:"清澄白河",
+  desc:"「咖啡懷石」體驗，同一支豆用冷萃、奶萃、濾泡、濃縮等方式呈現。全吧台座位，需事先網路預約。",
+  tags:["預約制","咖啡套餐"],url:"http://koffee-mameya.com/",q:"Koffee Mameya Kakeru"},
+ {id:"mameya",name:"Koffee Mameya",city:"東京",r:"JP",area:"表參道",
+  desc:"咖啡豆專賣店＋站立吧台，咖啡師會依你的口味與器材推薦豆子。",
+  tags:["買豆","站立吧台"],url:"http://koffee-mameya.com/",q:"Koffee Mameya Omotesando"},
+ {id:"fuglen",name:"Fuglen Tokyo",city:"東京",r:"JP",area:"澀谷・代代木公園",
+  desc:"奧斯陸名店的東京分店，北歐淺焙與復古家具，晚上變成雞尾酒吧。",
+  tags:["北歐淺焙","夜晚酒吧"],url:"https://fuglencoffee.jp",q:"Fuglen Tokyo Tomigaya"},
+ {id:"glitch",name:"Glitch Coffee & Roasters",city:"東京",r:"JP",area:"神保町",
+  desc:"東京淺焙單品的代表店之一，可以挑選世界各地的單品豆。",
+  tags:["淺焙","單品"],url:"https://glitchcoffee.com",q:"Glitch Coffee Roasters Jimbocho"},
+ {id:"onibus",name:"Onibus Coffee 中目黑",city:"東京",r:"JP",area:"中目黑",
+  desc:"老屋改建的小店，二樓可以看電車經過，重視產地與永續。",
+  tags:["自家烘焙","老屋"],url:"https://onibuscoffee.com",q:"Onibus Coffee Nakameguro"},
+ {id:"aboutlife",name:"About Life Coffee Brewers",city:"東京",r:"JP",area:"澀谷・道玄坂",
+  desc:"澀谷街角的立飲咖啡站，豆子來自不同烘豆商輪替。",
+  tags:["立飲","外帶"],url:"",q:"About Life Coffee Brewers Shibuya"},
+ {id:"sarutahiko",name:"猿田彥珈琲 惠比壽本店",city:"東京",r:"JP",area:"惠比壽",
+  desc:"東京人氣精品咖啡連鎖的起點。旗下咖啡師伊藤大貴是 2026 日本冠軍，台灣也有分店。",
+  tags:["冠軍店","連鎖名店"],url:"",q:"猿田彦珈琲 恵比寿本店"},
+ // 千葉
+ {id:"philocoffea",name:"PHILOCOFFEA",city:"千葉",r:"JP",area:"船橋",
+  desc:"粕谷哲創立，總部與烘豆所在船橋，東京表參道也有店。旗下有兩位冠軍：2016 WBrC 世界冠軍粕谷哲、2026 日本沖煮大賽冠軍長崎愛美。",
+  tags:["冠軍店","手沖"],url:"https://philocoffea.com",q:"PHILOCOFFEA Funabashi"},
+ // 京都
+ {id:"weekenders",name:"Weekenders Coffee 富小路",city:"京都",r:"JP",area:"錦市場附近",
+  desc:"京都北歐淺焙的先驅，藏在錦市場後方停車場裡的小店。",
+  tags:["北歐淺焙","自家烘焙"],url:"https://www.weekenderscoffee.com",q:"Weekenders Coffee Tominokoji"},
+ {id:"kurasu",name:"Kurasu Kyoto Stand",city:"京都",r:"JP",area:"京都車站附近",
+  desc:"京都車站走路就到的咖啡站，自家烘焙，抵達或離開京都時順路。",
+  tags:["自家烘焙","車站附近"],url:"https://kurasu.kyoto",q:"Kurasu Kyoto Stand"},
+ {id:"arabica",name:"% Arabica 嵐山",city:"京都",r:"JP",area:"嵐山・渡月橋旁",
+  desc:"白色極簡風的人氣店，坐在河邊看嵐山風景喝拿鐵。",
+  tags:["景觀","拿鐵"],url:"https://arabica.coffee",q:"% Arabica Kyoto Arashiyama"},
+ // 大阪
+ {id:"lilo",name:"LiLo Coffee Roasters",city:"大阪",r:"JP",area:"心齋橋・美國村",
+  desc:"大阪最早的精品咖啡店之一，店面小但單品選擇非常多，營業到晚上。",
+  tags:["單品多","晚上營業"],url:"",q:"LiLo Coffee Roasters Osaka"},
+ {id:"glitch-osaka",name:"Glitch Coffee Osaka",city:"大阪",r:"JP",area:"大阪",
+  desc:"東京 Glitch 的大阪店，同樣主打淺焙單品。",
+  tags:["淺焙"],url:"https://glitchcoffee.com",q:"Glitch Coffee Osaka"},
+ // 福岡
+ {id:"rec-fukuoka",name:"REC COFFEE 藥院店",city:"福岡",r:"JP",area:"藥院",
+  desc:"岩瀬由和與北添修創立，從咖啡餐車起家，現在是福岡最有名的咖啡店之一，也有博多烘焙所。",
+  tags:["冠軍店","福岡代表"],url:"https://rec-coffee.com",q:"REC COFFEE 薬院駅前店"},
+ {id:"manu",name:"manu coffee 春吉店",city:"福岡",r:"JP",area:"春吉",
+  desc:"2003 年開業，把精品咖啡在福岡變成文化的先驅。柳橋市場裡還有一家可以看那珂川的分店。",
+  tags:["福岡先驅","自家烘焙"],url:"https://www.manucoffee.com",q:"manu coffee 春吉"},
+ {id:"county",name:"COFFEE COUNTY Fukuoka",city:"福岡",r:"JP",area:"藥院",
+  desc:"久留米起家的烘豆商，老闆親自跑中美洲、衣索比亞挑豆，全部是單品，風味鮮明。",
+  tags:["單品","產地直選"],url:"https://coffeecounty.cc",q:"COFFEE COUNTY Fukuoka"},
+ {id:"nocoffee",name:"NO COFFEE",city:"福岡",r:"JP",area:"平尾",
+  desc:"福岡的潮流咖啡品牌，小店約 8 個座位。",
+  tags:["潮流","小店"],url:"",q:"NO COFFEE Fukuoka Hirao"},
+ {id:"filtersupply",name:"FILTER SUPPLY",city:"福岡",r:"JP",area:"平尾",
+  desc:"淺焙到深焙都有，超過十種單品可選。",
+  tags:["單品多"],url:"",q:"FILTER SUPPLY Fukuoka"},
+
+ // 世界（和咖啡師相關）
+ {id:"axil",name:"Axil Coffee Roasters",city:"墨爾本",r:"WORLD",area:"澳洲",
+  desc:"出了兩位世界冠軍（2022 Anthony Douglas、2025 Jack Simpson）的墨爾本烘豆商。",
+  tags:["冠軍店"],url:"https://axilcoffee.com.au",q:"Axil Coffee Roasters Melbourne"},
+ {id:"ona",name:"ONA Coffee",city:"坎培拉",r:"WORLD",area:"澳洲",
+  desc:"2015 WBC 冠軍 Sasa Sestic 創立。",
+  tags:["冠軍店"],url:"https://onacoffee.com.au",q:"ONA Coffee Canberra"},
+ {id:"wendelboe",name:"Tim Wendelboe",city:"奧斯陸",r:"WORLD",area:"挪威",
+  desc:"2026 世界百大咖啡館第 2 名，北歐淺焙手沖的代表。",
+  tags:["世界百大","冠軍店"],url:"https://timwendelboe.no",q:"Tim Wendelboe Oslo"}
+];
+
+/* ========== 頭像設計 ========== */
+const DISC={espresso:["☕","濃縮"],brew:["💧","手沖"],latte:["🎨","拉花"],roast:["🔥","烘豆"],media:["🎬","內容創作"]};
+const PDISC={berg:"espresso",chad:"brew",gabee:"latte",jameschen:"roast",bala:"latte",wen:"espresso",nagasaki:"brew",ito:"espresso",jak:"espresso",gabrel:"espresso",hoff:"espresso",woodhouse:"espresso",tetsu:"brew",izaki:"espresso",iwase:"espresso",kunitomo:"brew",panwei:"espresso",jack:"espresso",jasin:"espresso",boram:"espresso",douglas:"espresso",rojewska:"espresso",sasa:"espresso",wendelboe:"brew",peng:"brew",nas:"brew",hoffmann:"media",morgan:"media",lance:"media",rao:"media"};
+const CPAL={TW:["#2f5e8e","#c0473a"],JP:["#b8343a","#e8b9a8"],AU:["#1f6b4f","#e0b23c"],CN:["#b3261e","#e6a93a"],ID:["#a8323a","#d9c4b0"],BR:["#2f7a3e","#e2c23a"],PL:["#a8323a","#c9c0c0"],UK:["#24406e","#a8323a"],US:["#2b3f6e","#b8473a"],NO:["#8e2a33","#2c4c7a"],MY:["#22357a","#d9a92e"],CA:["#b0303a","#e3c2bd"]};
+const PIG={nagasaki:"https://www.instagram.com/gogotea00/"};
+let photos={};try{photos=JSON.parse(localStorage.getItem("bg_photos"))||{}}catch(e){}
+const PHOTO={tetsu:"data:image/jpeg;base64,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"};
+function avatar(p,size){
+  const ph=photos[p.id]||PHOTO[p.id];
+  if(ph) return `<div class="av2" style="width:${size}px;height:${size}px"><img src="${ph}" alt="${esc(p.name)}" style="width:100%;height:100%;object-fit:cover;display:block"></div>`;
+  const [a,b]=CPAL[p.c]||["#7a4a2a","#b9773f"], d=DISC[PDISC[p.id]||"espresso"];
+  const ini=/[\u4e00-\u9fff]/.test(p.name)?p.name.slice(0,1):p.en.split(" ").map(w=>w[0]).join("").slice(0,2);
+  return `<div class="av2" style="width:${size}px;height:${size}px;background:radial-gradient(circle at 30% 25%,${b},${a} 70%)">
+    <svg viewBox="0 0 100 100" class="av2bg"><circle cx="78" cy="22" r="26" fill="rgba(255,255,255,.12)"/><circle cx="18" cy="86" r="20" fill="rgba(0,0,0,.10)"/><path d="M0 70 Q50 52 100 70 L100 100 L0 100Z" fill="rgba(0,0,0,.12)"/></svg>
+    <span class="av2i" style="font-size:${size*0.42}px">${d[0]}</span>
+    <span class="av2n">${esc(ini)}</span></div>`;
+}
+function personLinks(p){
+  const L=[];
+  if(PIG[p.id]) L.push(`<a class="btn" href="${PIG[p.id]}" target="_blank" rel="noopener">📷 官方 Instagram</a>`);
+  p.shops.map(id=>S[id]).filter(s=>s&&s.url).forEach(s=>{if(!L.some(x=>x.includes(s.url)))L.push(`<a class="btn ghost" href="${s.url}" target="_blank" rel="noopener">🔗 ${esc(s.name)} 官網</a>`)});
+  L.push(`<a class="btn ghost" href="https://www.google.com/search?q=${encodeURIComponent(p.en+" "+(p.name!==p.en?p.name+" ":"")+"barista")}" target="_blank" rel="noopener">🔍 搜尋照片與介紹</a>`);
+  return `<div class="linkrow">${L.join("")}</div>`;
+}
+
+/* ========== 狀態 ========== */
+const store={get(k,d){try{return JSON.parse(localStorage.getItem(k))??d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+let fav=store.get("bg_fav",[]);
+let visited=store.get("bg_visit",[]);
+let photoFilter="todo";
+let tab="home", pFilter="all", pQuery="", sRegion="TW", sQuery="";
+const P=Object.fromEntries(PEOPLE.map(p=>[p.id,p]));
+const S=Object.fromEntries(SHOPS.map(s=>[s.id,s]));
+const ownersOf=sid=>PEOPLE.filter(p=>p.shops.includes(sid));
+const col=s=>COLORS[[...s].reduce((a,c)=>a+c.charCodeAt(0),0)%COLORS.length];
+const initials=p=>/[一-鿿]/.test(p.name)?p.name.slice(0,1):p.en.split(" ").map(w=>w[0]).join("").slice(0,2);
+const esc=t=>String(t).replace(/[&<>"]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m]));
+const mapUrl=q=>"https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(q);
+
+/* ========== 卡片 ========== */
+function personCard(p,mini){
+  const on=fav.includes("p:"+p.id);
+  return `<button class="card" data-open="p:${p.id}">
+    ${avatar(p,mini?40:52)}
+    <div class="meta"><div class="name">${esc(p.name)}${p.name!==p.en?` <span class="sub">${esc(p.en)}</span>`:""}</div>
+      <div class="sub">${FLAG[p.c]}・${esc(p.hl)}</div>
+      ${mini?"":`<div class="tags">${p.nat?'<span class="tag gold">🎖️ 國內冠軍</span>':p.type==="champ"?'<span class="tag gold">🏆 冠軍</span>':'<span class="tag inf">📣 影響力</span>'}${p.shops.length?'<span class="tag">有開店</span>':""}</div>`}
+    </div>${mini?"":`<span class="star ${on?"on":""}">⭐</span>`}</button>`;
+}
+function shopCard(s,mini){
+  const on=fav.includes("s:"+s.id), v=visited.includes(s.id);
+  return `<button class="card" data-open="s:${s.id}">
+    <div class="sq" style="background:${col(s.id)}">☕</div>
+    <div class="meta"><div class="name">${esc(s.name)}</div>
+      <div class="sub">${esc(s.city)}・${esc(s.area)}${v?"・✅ 去過":""}</div>
+      ${mini?"":`<div class="tags">${s.tags.map(t=>`<span class="tag${t.includes("冠軍")?" gold":""}">${esc(t)}</span>`).join("")}</div>`}
+    </div>${mini?"":`<span class="star ${on?"on":""}">⭐</span>`}</button>`;
+}
+
+/* ========== 頁面 ========== */
+function dayPick(arr){const d=new Date();const n=d.getFullYear()*400+d.getMonth()*31+d.getDate();return arr[n%arr.length]}
+function renderHome(){
+  const p=dayPick(PEOPLE), s=dayPick(SHOPS.filter(x=>x.r!=="WORLD").slice().reverse());
+  const latest=["panwei","nas","nagasaki","jack"].map(id=>P[id]);
+  return `
+  <div class="hero"><small>今日咖啡師</small><div class="t">${esc(p.name)} ${p.name!==p.en?`<span style="font-size:14px;opacity:.85">${esc(p.en)}</span>`:""}</div>
+    <div class="d">${FLAG[p.c]}・${esc(p.hl)}</div><button data-open="p:${p.id}">看介紹 →</button></div>
+  <div class="hero" style="background:linear-gradient(135deg,#3f5a3a,#7f9a5a)"><small>今日名店</small><div class="t">${esc(s.name)}</div>
+    <div class="d">${esc(s.city)}・${esc(s.area)}</div><button data-open="s:${s.id}">看店家 →</button></div>
+  <div class="quick">
+    <button data-go="people:champ"><b>🏆</b>冠軍咖啡師</button>
+    <button data-go="shops:TW"><b>🇹🇼</b>台灣名店</button>
+    <button data-go="shops:JP"><b>🇯🇵</b>日本名店</button>
+  </div>
+  <div class="sec" style="margin-top:12px"><h4>📅 下一場世界賽</h4><p><b>WBC 2027 東京</b>・2027/4/28–5/1，睽違 20 年回到日本。日本代表：伊藤大貴。<br><b>WBrC 2027 哥倫比亞</b>・2027/9/30 起。日本代表：長崎愛美。</p></div>
+  <h2>最新世界冠軍</h2><div class="list mini">${latest.map(x=>personCard(x,true)).join("")}</div>
+  <h2>各國最新國內冠軍</h2><div class="list mini">${PEOPLE.filter(x=>x.nat).map(x=>personCard(x,true)).join("")}</div>
+  <h2>冠軍開的店</h2><div class="list mini">${SHOPS.filter(x=>ownersOf(x.id).length&&x.r!=="WORLD").slice(0,5).map(x=>shopCard(x,true)).join("")}</div>
+  <p class="note">雛形版本：收錄 ${PEOPLE.length} 位咖啡師、${SHOPS.length} 間店。人物與比賽成績已查證；店家營業資訊請以官網或地圖為準。</p>`;
+}
+function renderPeople(){
+  const countries=[...new Set(PEOPLE.map(p=>p.c))];
+  const fs=[["all","全部"],["champ","🏆 冠軍"],["nat","🎖️ 國內冠軍"],["inf","📣 影響力"],...countries.map(c=>[c,FLAG[c]])];
+  const q=pQuery.trim().toLowerCase();
+  const list=PEOPLE.filter(p=>(pFilter==="all"||p.type===pFilter||p.c===pFilter||(pFilter==="nat"&&p.nat))&&(!q||(p.name+p.en+p.hl+p.bio).toLowerCase().includes(q)));
+  return `<input class="search" id="pq" placeholder="搜尋名字、比賽、店名…" value="${esc(pQuery)}">
+  <div class="chips">${fs.map(([k,l])=>`<button class="chip ${pFilter===k?"on":""}" data-pf="${k}">${l}</button>`).join("")}</div>
+  <div class="list">${list.map(p=>personCard(p)).join("")||'<div class="empty">找不到符合的咖啡師</div>'}</div>`;
+}
+function renderShops(){
+  const q=sQuery.trim().toLowerCase();
+  const list=SHOPS.filter(s=>s.r===sRegion&&(!q||(s.name+s.city+s.area+s.desc+s.tags.join("")).toLowerCase().includes(q)));
+  const cities=[...new Set(list.map(s=>s.city))];
+  return `<div class="seg">${[["TW","🇹🇼 台灣"],["JP","🇯🇵 日本"],["WORLD","🌏 其他"]].map(([k,l])=>`<button class="${sRegion===k?"on":""}" data-sr="${k}">${l}</button>`).join("")}</div>
+  <input class="search" id="sq" placeholder="搜尋店名、城市、特色…" value="${esc(sQuery)}">
+  <div class="chips">${cities.map(c=>`<button class="chip" data-jump="${esc(c)}">${esc(c)}</button>`).join("")}</div>
+  ${cities.map(c=>{const g=list.filter(s=>s.city===c);return `<div class="cityhead" id="city-${esc(c)}"><h3>📍 ${esc(c)}</h3><span>${g.length} 間</span></div><div class="list">${g.map(s=>shopCard(s)).join("")}</div>`}).join("")||'<div class="empty">找不到符合的店家</div>'}`;
+}
+function renderSaved(){
+  const ps=fav.filter(f=>f.startsWith("p:")).map(f=>P[f.slice(2)]).filter(Boolean);
+  const ss=fav.filter(f=>f.startsWith("s:")).map(f=>S[f.slice(2)]).filter(Boolean);
+  const vs=visited.map(id=>S[id]).filter(Boolean);
+  const cn=`<p class="note" style="margin-top:0">${cloudState==="ok"?"☁️ 收藏與去過紀錄已存在雲端，換手機或電腦用同一個 Claude 帳號開啟就會同步。":cloudState==="wait"?"☁️ 正在連線雲端存檔…":cloudState==="local"?"📱 收藏與去過紀錄存在這台裝置的瀏覽器。":"⚠️ 目前連不上雲端存檔，紀錄先存在這台裝置。"}</p>`;
+  if(!ps.length&&!ss.length&&!vs.length) return cn+`<div class="empty">還沒有收藏<br>在咖啡師或店家頁按「⭐ 收藏」，<br>去過的店按「✅ 去過了」就會出現在這裡。</div>`;
+  return cn+`${ps.length?`<h2>收藏的咖啡師</h2><div class="list">${ps.map(p=>personCard(p)).join("")}</div>`:""}
+  ${ss.length?`<h2>想去的店</h2><div class="list">${ss.map(s=>shopCard(s)).join("")}</div>`:""}
+  ${vs.length?`<h2>✅ 去過的店（${vs.length}）</h2><div class="list">${vs.map(s=>shopCard(s)).join("")}</div>`:""}`;
+}
+
+function renderPhotos(){
+  const have=p=>!!(photos[p.id]||PHOTO[p.id]);
+  const n=PEOPLE.filter(have).length;
+  const list=PEOPLE.filter(p=>photoFilter==="all"||(photoFilter==="todo")!==have(p));
+  return `<div class="sec" style="margin-top:0"><h4>🖼️ 咖啡師照片（${n} / ${PEOPLE.length}）</h4>
+   <p>① 按「🔍 找照片」到 Google 圖片挑一張，長按存到手機相簿。<br>② 回來按「📁 選照片」，從相簿選那張，調整位置後按「使用這張」。</p></div>
+  <p class="note" style="margin-top:8px">${cloudState==="ok"?"☁️ 照片存在你的 Claude 帳號下，換裝置會同步；只有你自己看得到。":cloudState==="local"?"📱 照片存在這台裝置的瀏覽器，只有你自己看得到。":"⚠️ 目前連不上雲端，照片先存在這台裝置。"}</p>
+  <div class="seg" style="margin-top:10px">${[["todo","還沒有照片"],["done","已有照片"],["all","全部"]].map(([k,l])=>`<button class="${photoFilter===k?"on":""}" data-phf="${k}">${l}</button>`).join("")}</div>
+  <div class="list">${list.map(p=>`<div class="prow">${avatar(p,56)}
+    <div class="meta"><div class="name">${esc(p.name)}${p.name!==p.en?` <span class="sub">${esc(p.en)}</span>`:""}</div>
+     <div class="sub">${FLAG[p.c]}${have(p)?' ・<span class="pdone">✓ 已有照片</span>':""}</div>
+     <div class="pbtns"><a class="btn ghost" href="https://www.google.com/search?tbm=isch&q=${encodeURIComponent((p.name!==p.en?p.name+" ":"")+p.en+" barista")}" target="_blank" rel="noopener">🔍 找照片</a>
+      <button class="btn" data-pick="${p.id}">📁 ${have(p)?"換照片":"選照片"}</button>
+      ${photos[p.id]?`<button class="btn ghost" data-unphoto="${p.id}">🗑️</button>`:""}</div></div></div>`).join("")||'<div class="empty">這個分類沒有咖啡師 🎉</div>'}</div>`;
+}
+
+/* ========== 詳細頁 ========== */
+function personDetail(p){
+  const on=fav.includes("p:"+p.id);
+  const dd=DISC[PDISC[p.id]||"espresso"];
+  return `<div class="dhead">${avatar(p,72)}
+   <div><div class="dname">${esc(p.name)}</div><div class="dsub">${p.name!==p.en?esc(p.en)+"・":""}${FLAG[p.c]}・${dd[0]} ${dd[1]}</div>
+   <div class="tags">${p.nat?'<span class="tag gold">🎖️ 國內冠軍</span>':p.type==="champ"?'<span class="tag gold">🏆 冠軍</span>':'<span class="tag inf">📣 影響力</span>'}</div></div></div>
+   <div class="sec"><h4>簡介</h4><p>${esc(p.bio)}</p></div>
+   ${p.awards.length?`<div class="sec"><h4>成績時間軸</h4><ul class="tl">${p.awards.map(([y,t])=>`<li><span class="y">${y}</span><span>${esc(t)}</span></li>`).join("")}</ul></div>`:""}
+   ${p.style?`<div class="sec"><h4>風格・招牌</h4><p>${esc(p.style)}</p></div>`:""}
+   ${p.shops.length?`<div class="sec"><h4>他的店</h4><div class="mini">${p.shops.map(id=>shopCard(S[id],true)).join("")}</div></div>`:""}
+   ${personLinks(p)}
+   <div class="linkrow"><button class="btn ${on?"ghost":""}" data-fav="p:${p.id}">${on?"已收藏 ⭐":"⭐ 收藏"}</button></div>
+   <p class="note">${(photos[p.id]||PHOTO[p.id])?"照片由 App 作者提供。":"頭像是依國家色系與專長（"+Object.values(DISC).map(x=>x[0]+x[1]).join("、")+"）設計的識別圖示，不是本人照片。"}</p>`;
+}
+function shopDetail(s){
+  const on=fav.includes("s:"+s.id), v=visited.includes(s.id), owners=ownersOf(s.id);
+  return `<div class="dhead"><div class="sq" style="background:${col(s.id)}">☕</div>
+   <div><div class="dname">${esc(s.name)}</div><div class="dsub">${esc(s.city)}・${esc(s.area)}</div>
+   <div class="tags">${s.tags.map(t=>`<span class="tag${t.includes("冠軍")?" gold":""}">${esc(t)}</span>`).join("")}</div></div></div>
+   <div class="sec"><h4>店家特色</h4><p>${esc(s.desc)}</p></div>
+   ${owners.length?`<div class="sec"><h4>相關咖啡師</h4><div class="mini">${owners.map(p=>personCard(p,true)).join("")}</div></div>`:""}
+   <div class="linkrow">
+     ${s.url?`<a class="btn" href="${s.url}" target="_blank" rel="noopener">🔗 官方網站</a>`:""}
+     <a class="btn ${s.url?"ghost":""}" href="${mapUrl(s.q)}" target="_blank" rel="noopener">🗺️ Google 地圖</a>
+   </div>
+   <div class="linkrow">
+     <button class="btn ghost" data-fav="s:${s.id}">${on?"已收藏 ⭐":"⭐ 想去"}</button>
+     <button class="btn ghost" data-visit="${s.id}">${v?"✅ 去過了":"☐ 標記去過"}</button>
+   </div>`;
+}
+
+/* ========== 控制 ========== */
+const view=document.getElementById("view"), sheet=document.getElementById("sheet"), bg=document.getElementById("bg");
+let openKey=null;
+function render(){
+  view.innerHTML={home:renderHome,people:renderPeople,shops:renderShops,photos:renderPhotos,saved:renderSaved}[tab]();
+  document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("on",b.dataset.tab===tab));
+  const pq=document.getElementById("pq"); if(pq) pq.oninput=e=>{pQuery=e.target.value;keepFocus("pq",renderPeople)};
+  const sq=document.getElementById("sq"); if(sq) sq.oninput=e=>{sQuery=e.target.value;keepFocus("sq",renderShops)};
+}
+function keepFocus(id){const pos=document.getElementById(id).selectionStart;render();const el=document.getElementById(id);el.focus();try{el.setSelectionRange(pos,pos)}catch(e){}}
+function openSheet(key){
+  openKey=key;const [t,id]=key.split(":");
+  sheet.innerHTML=`<div class="grab"></div><button class="close" data-close>✕</button>`+(t==="p"?personDetail(P[id]):shopDetail(S[id]));
+  bg.style.display="block";sheet.style.display="block";sheet.offsetHeight;sheet.classList.add("open");sheet.scrollTop=0;
+}
+function closeSheet(){sheet.classList.remove("open");bg.style.display="none";openKey=null;setTimeout(()=>{if(!openKey){sheet.style.display="none";sheet.innerHTML=""}},260)}
+document.addEventListener("click",e=>{
+  const t=e.target.closest("button,[data-close]");if(!t)return;
+  if(t.dataset.tab){tab=t.dataset.tab;closeSheet();render();scrollTo(0,0);return}
+  if(t.dataset.open){openSheet(t.dataset.open);return}
+  if(t.hasAttribute("data-close")){closeSheet();return}
+  if(t.dataset.go){const [a,b]=t.dataset.go.split(":");tab=a;if(a==="people")pFilter=b;else sRegion=b;render();scrollTo(0,0);return}
+  if(t.dataset.pf){pFilter=t.dataset.pf;render();return}
+  if(t.dataset.phf){photoFilter=t.dataset.phf;render();return}
+  if(t.dataset.pick){pickFor=t.dataset.pick;const f=document.getElementById("pf");f.value="";f.click();return}
+  if(t.dataset.unphoto){removePhoto(t.dataset.unphoto);return}
+  if(t.dataset.sr){sRegion=t.dataset.sr;render();return}
+  if(t.dataset.jump){const el=document.getElementById("city-"+t.dataset.jump);if(el)scrollTo({top:el.offsetTop-70,behavior:"smooth"});return}
+  if(t.dataset.fav){const k=t.dataset.fav;fav=fav.includes(k)?fav.filter(x=>x!==k):[...fav,k];store.set("bg_fav",fav);cloudSave();openSheet(openKey);render();return}
+  if(t.dataset.visit){const k=t.dataset.visit;visited=visited.includes(k)?visited.filter(x=>x!==k):[...visited,k];store.set("bg_visit",visited);cloudSave();openSheet(openKey);render();return}
+});
+bg.onclick=closeSheet;
+
+/* ========== 照片挑選 ========== */
+let pickFor=null, cImg=null, cS=1, cX=0, cY=0, cBase=1, cDrag=null;
+const cropEl=document.getElementById("crop"), cC=document.getElementById("cropC"), cZ=document.getElementById("cropZ"), cx2=cC.getContext("2d");
+function cClamp(){const w=cImg.width*cBase*cS,hh=cImg.height*cBase*cS;cX=Math.min(0,Math.max(560-w,cX));cY=Math.min(0,Math.max(560-hh,cY))}
+function cDraw(){cClamp();cx2.fillStyle="#222";cx2.fillRect(0,0,560,560);cx2.drawImage(cImg,cX,cY,cImg.width*cBase*cS,cImg.height*cBase*cS);
+  cx2.save();cx2.fillStyle="rgba(0,0,0,.45)";cx2.beginPath();cx2.rect(0,0,560,560);cx2.arc(280,280,278,0,Math.PI*2,true);cx2.fill("evenodd");cx2.restore();
+  cx2.strokeStyle="rgba(255,255,255,.9)";cx2.lineWidth=3;cx2.beginPath();cx2.arc(280,280,278,0,Math.PI*2);cx2.stroke()}
+document.getElementById("pf").onchange=e=>{
+  const f=e.target.files&&e.target.files[0];if(!f||!pickFor)return;
+  const url=URL.createObjectURL(f),im=new Image();
+  im.onload=()=>{cImg=im;cBase=560/Math.min(im.width,im.height);cS=1;cZ.value=1;cX=(560-im.width*cBase)/2;cY=Math.min(0,(560-im.height*cBase)/3);
+    document.getElementById("cropT").textContent="調整照片："+P[pickFor].name;cropEl.classList.add("on");cDraw()};
+  im.onerror=()=>{URL.revokeObjectURL(url);cropMsg("這個檔案讀不出來，請換一張 JPG 或 PNG")};
+  im.src=url;
+};
+function cropMsg(m){const el=document.getElementById("hsub");const old=el.innerHTML;el.textContent="⚠️ "+m;setTimeout(()=>{el.innerHTML=old;setCloud(cloudState)},3500)}
+cZ.oninput=()=>{const ns=+cZ.value,k=ns/cS;cX=280-(280-cX)*k;cY=280-(280-cY)*k;cS=ns;cDraw()};
+cC.onpointerdown=e=>{cC.setPointerCapture(e.pointerId);cDrag={x:e.clientX,y:e.clientY,ox:cX,oy:cY}};
+cC.onpointermove=e=>{if(!cDrag)return;const r=560/cC.getBoundingClientRect().width;cX=cDrag.ox+(e.clientX-cDrag.x)*r;cY=cDrag.oy+(e.clientY-cDrag.y)*r;cDraw()};
+cC.onpointerup=cC.onpointercancel=()=>{cDrag=null};
+document.getElementById("cropX").onclick=()=>{cropEl.classList.remove("on");cImg=null};
+document.getElementById("cropOK").onclick=()=>{
+  if(!cImg||!pickFor)return;
+  const o=document.createElement("canvas");o.width=o.height=240;const k=240/560;
+  o.getContext("2d").drawImage(cImg,cX*k,cY*k,cImg.width*cBase*cS*k,cImg.height*cBase*cS*k);
+  const data=o.toDataURL("image/jpeg",0.82),id=pickFor;
+  photos[id]=data;savePhotosLocal();cropEl.classList.remove("on");cImg=null;render();
+  if(cloudCol){setCloud("saving");cloudCol.doc("photo-"+id).set({img:data,updatedAt:new Date().toISOString()}).then(()=>setCloud("ok")).catch(()=>setCloud("bad"))}
+};
+function savePhotosLocal(){try{localStorage.setItem("bg_photos",JSON.stringify(photos))}catch(e){}}
+function removePhoto(id){delete photos[id];savePhotosLocal();render();
+  if(cloudCol){cloudCol.doc("photo-"+id).delete().then(()=>setCloud("ok")).catch(()=>setCloud("bad"))}}
+async function cloudPhotos(){
+  const q=await cloudCol.get(), remote={};
+  q.docs.forEach(d=>{if(d.id.startsWith("photo-")){const v=d.data();if(v&&typeof v.img==="string"&&v.img.startsWith("data:image/"))remote[d.id.slice(6)]=v.img}});
+  if(!store.get("bg_psynced",false)){ // 第一次同步：本機有、雲端沒有的照片補上傳
+    for(const id of Object.keys(photos)) if(!remote[id]){await cloudCol.doc("photo-"+id).set({img:photos[id],updatedAt:new Date().toISOString()});remote[id]=photos[id]}
+    store.set("bg_psynced",true);
+  }
+  photos=remote;savePhotosLocal();
+}
+
+/* ========== 雲端存檔 ========== */
+let cloudCol=null;
+let cloudState="wait", cloudDoc=null, saving=false, dirty=false;
+function setCloud(s){cloudState=s;const el=document.getElementById("cloud");if(el){el.className="cloud "+(s==="ok"?"ok":(s==="wait"||s==="local")?"":"bad");el.textContent=s==="ok"?"☁️ 已同步":s==="saving"?"☁️ 儲存中…":s==="wait"?"☁️ 連線中…":s==="local"?"📱 存在本機":"⚠️ 僅存本機";if(s==="saving")el.className="cloud"}if((tab==="saved"||tab==="photos")&&s!=="saving")render()}
+const clean=a=>Array.isArray(a)?[...new Set(a.filter(x=>typeof x==="string"))]:[];
+async function cloudSave(){
+  if(!cloudDoc)return;
+  if(saving){dirty=true;return}
+  saving=true;setCloud("saving");
+  try{
+    do{dirty=false;await cloudDoc.set({fav,visited,updatedAt:new Date().toISOString()})}while(dirty);
+    setCloud("ok");
+  }catch(e){
+    try{await new Promise(r=>setTimeout(r,800+Math.random()*800));await cloudDoc.set({fav,visited,updatedAt:new Date().toISOString()});setCloud("ok")}
+    catch(e2){setCloud("bad")}
+  }
+  saving=false;
+}
+async function cloudLoad(){
+  const snap=await cloudDoc.get();
+  if(snap.exists){
+    const d=snap.data()||{};let f=clean(d.fav),v=clean(d.visited);
+    if(!store.get("bg_synced",false)){ // 這台裝置第一次同步：把本機原有的紀錄併進雲端
+      const f2=[...new Set([...f,...fav])],v2=[...new Set([...v,...visited])];
+      const changed=f2.length!==f.length||v2.length!==v.length;f=f2;v=v2;
+      fav=f;visited=v;if(changed)await cloudDoc.set({fav,visited,updatedAt:new Date().toISOString()});
+    }else{fav=f;visited=v}
+  }else{
+    await cloudDoc.set({fav,visited,updatedAt:new Date().toISOString()});
+  }
+  store.set("bg_fav",fav);store.set("bg_visit",visited);store.set("bg_synced",true);
+}
+async function cloudInit(){
+  if(!window.claude||!window.claude.use){setCloud("local");return}
+  const timer=setTimeout(()=>{if(cloudState==="wait")setCloud("bad")},10000);
+  try{
+    if(!window.claude||!window.claude.use)throw 0;
+    const [db,user]=await Promise.all([claude.use("db"),claude.use("user")]);
+    if(!db||!user)throw 0;
+    const id=await user.id();if(!id)throw 0;
+    cloudDoc=db.doc("data/users/"+id+"/save");
+    cloudCol=db.collection("data/users/"+id);
+    await cloudLoad();
+    try{await cloudPhotos()}catch(e){}
+    clearTimeout(timer);setCloud("ok");render();if(openKey)openSheet(openKey);
+  }catch(e){clearTimeout(timer);cloudDoc=null;cloudCol=null;setCloud("bad")}
+}
+document.addEventListener("visibilitychange",async()=>{
+  if(document.visibilityState!=="visible"||!cloudDoc||saving)return;
+  try{await cloudLoad();setCloud("ok");render()}catch(e){}
+});
+render();
+cloudInit();
+</script>
+</body>
+</html>
