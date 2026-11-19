@@ -121,6 +121,19 @@ svg .lbl{fill:var(--ink);font-weight:600}
 .rc-key{gap:14px;margin-top:6px}.rc-key span{display:inline-flex;align-items:center;gap:5px}.rc-sw{display:inline-block;width:14px;height:8px;border-radius:4px;position:static!important}
 details>summary{cursor:pointer;list-style:none}details>summary::-webkit-details-marker{display:none}details.card summary b{font-size:14px}
 .cmp tr[data-act]{cursor:pointer}
+.desk{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:14px 12px 16px;margin:8px 0 12px;border-radius:16px;background:linear-gradient(180deg,#a8774c,#8a5a34);box-shadow:inset 0 -6px 0 #6b4226,0 2px 8px rgba(0,0,0,.25);background-image:repeating-linear-gradient(90deg,rgba(255,255,255,.04) 0 2px,transparent 2px 22px),linear-gradient(180deg,#a8774c,#8a5a34)}
+.desk.sticky{position:sticky;top:0;z-index:6}
+.slot{min-height:84px;border:2px dashed rgba(255,244,225,.55);border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:6px 4px;color:#fff4e1;text-align:center;transition:transform .12s,background .12s}
+.slot.wide{grid-column:1/-1;min-height:46px;flex-direction:row;gap:10px}
+.slot-l{font-size:12px;font-weight:700;letter-spacing:.05em;opacity:.95}.slot-e{font-size:11px;opacity:.7}.slot-n{font-size:11px;line-height:1.25;max-width:100%;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.slot.full{border-style:solid;border-color:rgba(255,244,225,.85);background:rgba(255,244,225,.14);cursor:pointer}
+.slot.can{border-color:#ffe08a;background:rgba(255,224,138,.12)}.slot.hot{border-color:#ffe08a;background:rgba(255,224,138,.3);transform:scale(1.05)}
+.shelf{display:flex;flex-wrap:wrap;gap:8px}.shelf-row{margin-bottom:6px}
+.tool{width:76px;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 4px;border:1px solid var(--line);border-radius:12px;background:var(--bg);touch-action:none;user-select:none;-webkit-user-select:none;cursor:grab;text-align:center}
+.tool span{font-size:10.5px;line-height:1.2;color:var(--ink);overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.tool.used{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}.tool.bad{opacity:.35}
+.tool.ghost{position:fixed;left:0;top:0;z-index:50;pointer-events:none;box-shadow:0 8px 20px rgba(0,0,0,.35);opacity:.95}
+svg.px{image-rendering:pixelated}svg.dk{filter:drop-shadow(1px 0 0 #9aa3ad) drop-shadow(-1px 0 0 #9aa3ad) drop-shadow(0 1px 0 #9aa3ad) drop-shadow(0 -1px 0 #9aa3ad);overflow:visible}
 </style>
 </head>
 <body>
@@ -626,14 +639,6 @@ const fitMethod=(m,d)=>!m||!d||!m.drippers||!m.drippers.length||m.drippers.inclu
 const fitPaper=(p,d)=>!p||!d||!p.shape||p.shape===shapeOf(d)||(d.kind==='immersion'&&p.shape==='cone');
 let SEL=(()=>{try{return JSON.parse(localStorage.getItem('bn-sel')||'{}')}catch(e){return{}}})();
 const keepSel=()=>{try{localStorage.setItem('bn-sel',JSON.stringify(SEL))}catch(e){}};
-function curSel(){
-  const pick=(t,id)=>{const L=gear(t);return L.find(g=>g.id===id)||L[0]||null};
-  const bean=S.beans.find(b=>b.id===SEL.bean)||S.beans.slice().sort((a,b)=>({good:0,warn:1,cold:2,muted:3}[beanStatus(a).c]-{good:0,warn:1,cold:2,muted:3}[beanStatus(b).c]))[0]||null;
-  const d=pick('dripper',SEL.dripper);let p=pick('paper',SEL.paper);
-  if(p&&!fitPaper(p,d))p=gear('paper').find(x=>fitPaper(x,d))||null;
-  let m=SEL.method==='-'?null:pick('method',SEL.method);if(m&&!fitMethod(m,d))m=gear('method').find(x=>fitMethod(x,d))||null;
-  return{bean,g:pick('grinder',SEL.grinder),d,k:pick('kettle',SEL.kettle),p,w:pick('water',SEL.water),m};
-}
 const decs=s=>{const t=String(s);return t.includes('.')?t.split('.')[1].length:0};
 const fmtG=(g,v)=>!g||!has(v)?'—':(+v).toFixed(decs(g.step??1));
 function stepsFor(g,um){const st=+(g&&g.step)||1,u=+(g&&g.um)||30;return Math.round(um/u)*st}
@@ -753,28 +758,104 @@ function recipeCard(r,c,ai){
     <div class="row"><button class="btn sm pri" data-act="useRec" data-ai="${ai?1:''}">照這個配方記一杯</button>${!ai&&sampleFn&&r.hist&&r.hist.length?`<button class="btn sm" data-act="aiRec">請 Claude 依筆記微調</button>`:''}</div>
     ${!ai&&S.aiMsg?`<div class="sub">${esc(S.aiMsg)}</div>`:''}</div>`;
 }
+const SPR={"GS":{"v60":[".AAAAAAAAAAAA...",".CABAAABAAABABB.","..CABAAABAAB..B.","..CAABAAABAB..B.","...CABAAABB.BB..","...CAABAABB.....","....CABAAB......","....CAABAB......",".....CAAB.......","...AAAAAAAA.....","..BBBBBBBBBB...."],"orea":[".AAAAAAAAAAAAAA.",".CAAAAAAAAAAAAB.","..CAAAAAAAAAAB..","..CAAAAAAAAAAB..","...CAAAAAAAAB...","...CAAAAAAAAB...","...BBBBBBBBBB...","....B.B..B.B...."],"switch":[".llllllllllll...",".wlllllllllll...","..wlllllllll....","..wlllllllll....","...wlllllll.....","...wlllllll.....","....wlllll......","..AAAAAAAAAA....","..ABBBBBBBBAyy..","..AAAAAAAAAA.y..","...AAAAAAAA....."],"c40":["..........nnnnn.","..........nnnnn.","...g.......nnn..","...gggg.....g...","..AAAAAg....g...","..ACAAA.g...g...","..ACAAA..gggg...","..ACAAA.........","..ACAAA.........","..ACAAA.........","..ACAAA.........","..BBBBB.........","..lllll.........","..l...l.........","..lcccl.........","..lllll........."],"zp6":["...........bbb..","..........bbbbb.",".....g.....bbb..",".....gggg....g..","....AwAw.g...g..","....AAAA..g..g..","....ACAA...ggg..","....HHHH........","....HdHH........","....HHHH........","....HdHH........","....BBBB........","....mBmB........","....ACAA........","....ACAA........","....BBBB........"],"brewista":[".......dd.......","......BBBB......","....AAAAAAAA....",".m.AAAAAAAAAA...","m.mCAAAAAAAAA..B","m.mCAAAAAAAAA.B.","m.mCAAAAAAAAABB.",".m.AAAAAAAAAAB..","...AAAAAAAAAA...","....AAAAAAAA....","..dddddddddddd..","..dddyyddddddd.."],"conep":[".wwwwwwwwwwwwww.","..wwwwwwwwwwww..","..wwswwwwwwsww..","...wwwwwwwwww...","...wwswwwwsww...","....wwwwwwww....",".....wwwwww.....","......wwww......",".......ww......."],"cakep":[".wswswswswswsws.",".wwwwwwwwwwwwww.","..wswswswswsws..","..wwwwwwwwwwww..","...wswswswsws...","...wwwwwwwwww...","....ssssssss...."],"kalita":[".AAAAAAAAAAAAA..",".CAAAAAAAAAAABBB","..CAAAAAAAAAB..B","..CABABABABAB..B","..CAAAAAAAAABBB.","...AAAAAAAAAB...",".BBBBBBBBBBBBB..",".AAAAAAAAAAAAA.."],"origami_c":[".A.A.A.A.A.A.A..",".ABABABABABABA..","..ABABABABABA...","..CBABABABABA...","...ABABABABA....","....BABABAB.....","....ABABABA.....",".....BABAB......",".....ABABA......","..nnnnnnnnnnn...","...nnnnnnnnn...."],"kultra":["..........bbb...",".........bbbbb..","..........bbb...",".....g......g...",".....gggg...g...","....AwAw.gHHg...","....AAAA........","....ACAA........","....nnnn........","....nbnn........","....nnbn........","....nbnn........","....BBBB........","....mBmB........","....ACAA........","....BBBB........"],"stagg":[".......AAA......",".A....AAAAA.....",".AA...ACAAA.AA..","..A...ACAAAAAA..","..A...ACAAAA.AA.","..A..AACAAAA.AA.","..A..ACAAAAA..AA","..AA.ACAAAAAA.AA","...AAACAAAAAA...","....AAAAAAAAAA..","....BBBBBBBBBB..","..dddddddddddd..","..dddddddddyyd.."],"kalitak":["......dd........",".....BBBB.......",".....AAAA.......",".mmm.CAAA.....B.","m...mCAAA....B..","m...mCAAAA..B...","m...mCAAAA.B....",".mmm.CAAAABB....","....CAAAAAB.....","....AAAAAAA.....","....BBBBBBB....."],"cone":[".AAAAAAAAAAAA...",".CAAAAAAAAAABBB.","..CAAAAAAAAB..B.","..CAAAAAAAAB..B.","...CAAAAAAB.BB..","...CAAAAAAB.....","....CAAAAB......","....CAAAAB......",".....CAAB.......","..BBBBBBBBBB....","..AAAAAAAAAA...."],"filter":["...llllllll.....","...lwwwwwwl.mm..","...lwwwwwwlm..m.","...lllllllllm.m.","...llllllllmm...","...llllllll.....","...llllllll.....","...dddddddd....."],"bottle":["........dd......","........dd......",".......llll.....","......llllll....","......llllll....","......lwwwwl....","......lyyyyl....","......lyyyyl....","......lwwwwl....","......llllll....","......llllll....","......llllll....",".......llll....."]},"PB":{"k":"#2a2420","w":"#f4efe6","g":"#9aa3ad","d":"#5a6068","s":"#d5dbe0","b":"#8a5a34","n":"#5a3a22","c":"#4a2a16","l":"#bfe0ea","r":"#c0503a","y":"#d9bd86","o":"#23201e","f":"#f0a040","H":"#4a4f57","K":"#8a5a34","m":"#7d868f","e":"#e8c14a","q":"#8a9a5a"},"SK":{"v60":[["陶瓷白","#efe9dc","#c9c0ad","#ffffff"],["透明樹脂","#bfe0ea","#8fb8c6","#e6f6fa"],["紅色陶瓷","#c0392b","#8e2a20","#e06a5a"],["銅製","#c77b4a","#8f5230","#e8a878"],["霧黑","#3a3a3e","#232326","#5c5c62"],["透明琥珀","#c98a3a","#96621f","#e8b36a"],["橄欖綠陶瓷","#6b7a3a","#4a5626","#93a45e"],["土耳其藍陶瓷","#3aa6a0","#2a7a76","#6fcfc8"],["櫻花粉陶瓷","#e79bb0","#b9728a","#f6c4d2"],["黃銅・限定","#c9a23a","#94741f","#ecd070",1.5],["有田燒青花・限定","#27365a","#18223b","#4a5f94",1.6],["二十週年金・限定","#d9b24a","#a07f24","#f6e08c",1.8]],"orea":[["霧黑","#3a3a3e","#232326","#5c5c62"],["白色","#efe9dc","#c9c0ad","#ffffff"],["透明","#bfe0ea","#8fb8c6","#e6f6fa"],["淺灰","#6a6f78","#484c54","#9499a2"],["粉紅","#e79bb0","#b9728a","#f6c4d2"],["薄荷綠","#8fd0b8","#5fa58c","#c4ecdc"],["霓虹橘・限定","#f0862a","#b85f14","#ffb46a",1.3]],"switch":[["黑色底座","#3a3a3e","#232326","#5c5c62"],["白色底座","#efe9dc","#c9c0ad","#ffffff"],["紅色底座","#c0392b","#8e2a20","#e06a5a"],["抹茶綠底座","#8aa85a","#617a3a","#b4cf86"],["奶油白底座","#efe2c4","#c9b994","#fff6e0"],["銅色底座・限定","#c77b4a","#8f5230","#e8a878",1.3]],"c40":[["美國櫻桃木","#9a5a34","#6b3c20","#c07a4c"],["黑色","#3a3a3e","#232326","#5c5c62"],["紅色 Red Sonja","#c0392b","#8e2a20","#e06a5a"],["雪白 Snow","#ece8e0","#bdb8ae","#ffffff"],["鈷藍 Cobalt","#2f4f8f","#213866","#5a7ac0"],["液態琥珀","#c98a3a","#96621f","#e8b36a"],["賽車綠","#1f5a45","#143c2e","#3f8a6e"],["高山湖水藍","#4fa6b8","#327887","#8fd0dc"],["維吉尼亞胡桃木・限定","#5e3d28","#3f2718","#86604a",1.35],["夕陽橘・限定","#d8643a","#a2431f","#f09a70",1.4],["斑馬木・限定","#b89a6a","#5a3d22","#e0c79a",1.6],["黃金紀念款・限定","#d9b24a","#a07f24","#f6e08c",2]],"zp6":[["黑色","#3a3a3e","#232326","#5c5c62"],["銀色","#c9ced4","#8a95a1","#eef2f5"],["白色特仕版・限定","#ece8e0","#bdb8ae","#ffffff",1.3],["銅環紀念款・限定","#c77b4a","#8f5230","#e8a878",1.35]],"brewista":[["霧黑","#3a3a3e","#232326","#5c5c62"],["珍珠白","#ece8e0","#bdb8ae","#ffffff"],["櫻花粉","#e79bb0","#b9728a","#f6c4d2"],["薄荷綠","#3aa6a0","#2a7a76","#6fcfc8"],["天空藍","#4fa6b8","#327887","#8fd0dc"],["酒紅","#c0392b","#8e2a20","#e06a5a"],["鵝黃","#e8c14a","#b39030","#f4dc86"],["胡桃木紋・限定","#5e3d28","#3f2718","#86604a",1.3]],"kalita":[["不鏽鋼","#c9ced4","#8a95a1","#eef2f5"],["陶瓷白","#efe9dc","#c9c0ad","#ffffff"],["耐熱玻璃","#bfe0ea","#8fb8c6","#e6f6fa"],["銅製","#c77b4a","#8f5230","#e8a878"],["黑色不鏽鋼","#3a3a3e","#232326","#5c5c62"],["有田燒・限定","#27365a","#18223b","#4a5f94",1.4],["燕三條銅鎚目・限定","#c9a23a","#94741f","#ecd070",1.6]],"origami_c":[["美濃燒・白","#efe9dc","#c9c0ad","#ffffff"],["土耳其藍","#3aa6a0","#2a7a76","#6fcfc8"],["粉紅","#e79bb0","#b9728a","#f6c4d2"],["芥末黃","#e8c14a","#b39030","#f4dc86"],["霧黑","#3a3a3e","#232326","#5c5c62"],["海軍藍","#27365a","#18223b","#4a5f94"],["薄荷綠","#8fd0b8","#5fa58c","#c4ecdc"],["紅色","#c0392b","#8e2a20","#e06a5a"],["紫藤","#a48fd0","#7460a5","#cdbfee"],["抹茶","#8aa85a","#617a3a","#b4cf86"],["黑金彩・限定","#d9b24a","#a07f24","#f6e08c",1.5],["玫瑰金・限定","#d9a08a","#a8705c","#f2c8b8",1.4]],"kultra":[["銀色","#c9ced4","#8a95a1","#eef2f5"],["鐵灰","#5a6068","#3d4248","#80868e"],["黑色","#3a3a3e","#232326","#5c5c62"],["鈦金屬色・限定","#7d8590","#565d66","#a8b0ba",1.4]],"stagg":[["霧黑","#3a3a3e","#232326","#5c5c62"],["白色","#ece8e0","#bdb8ae","#ffffff"],["拋光銅","#c77b4a","#8f5230","#e8a878"],["薄荷綠","#8fd0b8","#5fa58c","#c4ecdc"],["胡桃木把手・限定","#5e3d28","#3f2718","#86604a",1.3]],"kalitak":[["不鏽鋼","#c9ced4","#8a95a1","#eef2f5"],["銅製","#c77b4a","#8f5230","#e8a878"],["燕三條鎚目銅・限定","#c9a23a","#94741f","#ecd070",1.5]],"cone":[["白色樹脂","#efe9dc","#c9c0ad","#ffffff"]],"bottle":[["透明","#bfe0ea","#8fb8c6","#e6f6fa"]]}};
+const ICONS={grinder:{c40:'C40 手搖',zp6:'ZP6 手搖',kultra:'K-Ultra 手搖'},dripper:{v60:'V60／NEO',orea:'Orea',switch:'Switch',kalita:'蛋糕杯',origami_c:'Origami',cone:'一般錐形'},paper:{conep:'錐形濾紙',cakep:'蛋糕濾紙'},kettle:{brewista:'Brewista',stagg:'Stagg',kalitak:'細口壺'},water:{bottle:'瓶裝水'}};
+function guessIcon(g){const n=String(g.name||'');
+  if(g.type==='grinder')return /zp6/i.test(n)?'zp6':/k-?ultra/i.test(n)?'kultra':'c40';
+  if(g.type==='dripper')return /orea/i.test(n)?'orea':/switch|聰明/i.test(n)?'switch':/kalita|wave|april|蛋糕/i.test(n)?'kalita':/origami/i.test(n)?'origami_c':g.kind==='flat'?'kalita':g.kind==='flat-fast'?'orea':g.kind==='immersion'?'switch':'v60';
+  if(g.type==='paper')return g.shape==='flat'?'cakep':'conep';
+  if(g.type==='kettle')return /stagg|fellow/i.test(n)?'stagg':/kalita|細口|宮崎/i.test(n)?'kalitak':'brewista';
+  return 'bottle';}
+function guessSkin(g,ic){const n=String(g.name||''),L=SPR.SK[ic]||[];const f=re=>{const i=L.findIndex(x=>re.test(x[0]));return i<0?null:i};
+  if(ic==='v60')return (/綠/.test(n)?f(/橄欖綠/):null)??(/樹脂|透明/.test(n)?f(/透明樹脂/):null)??(/銅/.test(n)?f(/銅製/):null)??(/黑/.test(n)?f(/霧黑/):null)??0;
+  if(ic==='orea')return /不鏽鋼|steel/i.test(n)?(f(/淺灰/)??0):/白/.test(n)?1:0;
+  if(ic==='zp6')return /銀/.test(n)?1:0;
+  if(ic==='c40')return /黑/.test(n)?1:0;
+  return 0;}
+const iconOf=g=>g.icon||guessIcon(g),skinIdx=g=>g.skin!=null&&g.skin!==''?+g.skin:guessSkin(g,iconOf(g));
+function sprite(ic,si,sz){const rows=SPR.GS[ic];if(!rows)return'';const L=SPR.SK[ic],v=L&&(L[si]||L[0]),pal=Object.assign({},SPR.PB,v?{A:v[1],B:v[2],C:v[3]}:{});
+  let h='';rows.forEach((r,y)=>{let x=0;while(x<r.length){const ch=r[x];let e=x+1;while(e<r.length&&r[e]===ch)e++;const c=pal[ch];if(c)h+=`<rect x="${x}" y="${y}" width="${e-x}" height="1" fill="${c}"/>`;x=e}});
+  const dk=v&&parseInt(v[1].slice(1),16),dark=dk!=null&&((dk>>16)*.3+((dk>>8)&255)*.59+(dk&255)*.11)<85;
+  return `<svg class="px${dark?' dk':''}" viewBox="0 ${rows.length-16} 16 16" width="${sz}" height="${sz}" shape-rendering="crispEdges" aria-hidden="true">${h}</svg>`}
+function bagSvg(b,sz){const tr=beanTraits(b),rc={vlight:'#c99a5e',light:'#b07a42',mlight:'#8a5a2e',medium:'#6a4022',dark:'#4a2a16'}[tr.roast],pc={washed:'#5a8fb8',natural:'#c0503a',honey:'#d9a03a',ferment:'#8a5ab8',unknown:'#7d868f'}[tr.proc];
+    return `<svg viewBox="0 0 60 72" width="${sz}" height="${sz*1.2}" aria-hidden="true"><path d="M10 8h40l4 58c0 3-2 5-5 5H11c-3 0-5-2-5-5z" fill="#2d2622"/><path d="M10 8h40v6H10z" fill="#3d3530"/><rect x="12" y="22" width="36" height="26" rx="3" fill="${pc}"/><ellipse cx="30" cy="35" rx="8" ry="10" fill="${rc}" stroke="#fff" stroke-width="1.5" transform="rotate(25 30 35)"/><path d="M27 27c5 4 1 12 6 16" stroke="#fff" stroke-width="1.5" fill="none"/><rect x="12" y="54" width="36" height="6" rx="2" fill="${rc}"/></svg>`}
+function methodSvg(m,sz){const n=+m.imm?'浸':(m.n||'?');return `<svg viewBox="0 0 40 40" width="${sz}" height="${sz}" aria-hidden="true"><rect x="3" y="3" width="34" height="34" rx="8" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="2"/><text x="20" y="${+m.imm?26:24}" text-anchor="middle" font-size="${+m.imm?16:14}" font-weight="800" fill="var(--accent)">${n}</text>${+m.imm?'':'<text x="20" y="33" text-anchor="middle" font-size="7" fill="var(--accent)">段</text>'}</svg>`}
+function itemArt(type,x,sz){if(type==='bean')return bagSvg(x,sz);if(type==='method')return methodSvg(x,sz);return sprite(iconOf(x),skinIdx(x),sz)}
+/* ---------- 沖煮桌：拖拉器材到桌上的空格 ---------- */
+const SLOTS=[['bean','咖啡豆'],['grinder','磨豆機'],['water','用水'],['dripper','濾杯'],['paper','濾紙'],['kettle','注水壺'],['method','手法']];
+const itemsOf=t=>t==='bean'?S.beans:gear(t);
+const itemById=(t,id)=>itemsOf(t).find(x=>x.id===id)||null;
+function curSel(){
+  const g=t=>SEL[t]&&SEL[t]!=='-'?itemById(t,SEL[t]):null;
+  return{bean:g('bean'),g:g('grinder'),d:g('dripper'),p:g('paper'),k:g('kettle'),w:g('water'),m:g('method')};
+}
+const needSlot=t=>t!=='method'&&itemsOf(t).length>0;
+const missing=()=>SLOTS.filter(([t])=>needSlot(t)&&!curSel()[{bean:'bean',grinder:'g',dripper:'d',paper:'p',kettle:'k',water:'w'}[t]]).map(s=>s[1]);
+function placeItem(t,id){
+  const x=itemById(t,id);if(!x)return;const c=curSel();
+  if(t==='paper'&&c.d&&!fitPaper(x,c.d)){toast(`${x.name}不適用${c.d.name}`);return}
+  if(t==='method'&&c.d&&!fitMethod(x,c.d)){toast(`「${x.name}」不是用在${c.d.name}的手法`);return}
+  SEL[t]=id;
+  if(t==='dripper'){if(c.p&&!fitPaper(c.p,x)){delete SEL.paper;toast(`${c.p.name}不適用，已拿下桌`)}if(c.m&&!fitMethod(c.m,x)){delete SEL.method}
+    const ms=gear('method').filter(m=>m.drippers&&m.drippers.includes(x.id));if(!SEL.method&&ms.length===1)SEL.method=ms[0].id;
+    const ps=gear('paper').filter(p=>fitPaper(p,x));if(!SEL.paper&&ps.length===1)SEL.paper=ps[0].id}
+  keepSel();S.ai=null;render();
+  const miss=missing();if(!miss.length)setTimeout(()=>{const e=$('#recOut');if(e)e.scrollIntoView({behavior:'smooth',block:'start'})},60);
+}
+const shortBean=b=>{let n=String(b.name);const r=String(b.roaster||'').split(/\s/)[0];if(r)n=n.replace(new RegExp('^'+r.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'\\s*'),'');if(b.origin)n=n.replace(new RegExp('^'+String(b.origin).replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'\\s*'),'');return n||b.name};
+function deskHtml(){
+  const c=curSel(),map={bean:c.bean,grinder:c.g,dripper:c.d,paper:c.p,kettle:c.k,water:c.w,method:c.m};
+  return `<div class="desk${missing().length?' sticky':''}">${SLOTS.filter(([t])=>itemsOf(t).length||t==='bean').map(([t,l])=>{const x=map[t];
+    return `<div class="slot ${x?'full':''} ${t==='method'?'wide':''}" data-slot="${t}" ${x?`data-act="unslot" data-v="${t}"`:''}><div class="slot-l">${l}${t==='method'&&!x?'（可不放）':''}</div>${x?`<div class="slot-art">${itemArt(t,x,t==='bean'?30:38)}</div><div class="slot-n">${esc(x.name)}</div>`:`<div class="slot-e">${t==='method'?'依器材自動':'拖到這裡'}</div>`}</div>`}).join('')}</div>`;
+}
+function shelfHtml(){
+  const c=curSel(),on={bean:c.bean,grinder:c.g,dripper:c.d,paper:c.p,kettle:c.k,water:c.w,method:c.m};
+  return SLOTS.filter(([t])=>itemsOf(t).length).map(([t,l])=>`<div class="shelf-row"><div class="grp">${l}</div><div class="shelf">${itemsOf(t).map(x=>{
+    const bad=(t==='paper'&&c.d&&!fitPaper(x,c.d))||(t==='method'&&c.d&&!fitMethod(x,c.d));
+    return `<div class="tool ${on[t]&&on[t].id===x.id?'used':''} ${bad?'bad':''}" data-drag="${t}" data-id="${esc(x.id)}">${itemArt(t,x,t==='bean'?34:42)}<span>${esc(t==='bean'?shortBean(x):x.name)}</span></div>`}).join('')}</div></div>`).join('');
+}
+/* 拖拉：滑鼠與觸控都走 pointer events；點一下也會直接放上桌 */
+let DR=null;
+document.addEventListener('pointerdown',ev=>{const el=ev.target.closest('[data-drag]');if(!el||ev.button>0)return;
+  DR={t:el.dataset.drag,id:el.dataset.id,el,x:ev.clientX,y:ev.clientY,moved:false,ghost:null};el.setPointerCapture&&el.setPointerCapture(ev.pointerId)});
+document.addEventListener('pointermove',ev=>{if(!DR)return;const dx=ev.clientX-DR.x,dy=ev.clientY-DR.y;
+  if(!DR.moved&&Math.hypot(dx,dy)>6){DR.moved=true;const g=DR.el.cloneNode(true);g.className='tool ghost';document.body.appendChild(g);DR.ghost=g;
+    document.querySelectorAll(`[data-slot="${DR.t}"]`).forEach(s=>s.classList.add('can'))}
+  if(DR.moved){ev.preventDefault();DR.ghost.style.transform=`translate(${ev.clientX-36}px,${ev.clientY-40}px)`;
+    const s=document.elementsFromPoint(ev.clientX,ev.clientY).map(e=>e.closest&&e.closest('[data-slot]')).find(Boolean);
+    document.querySelectorAll('.slot.hot').forEach(e=>e!==s&&e.classList.remove('hot'));if(s&&s.dataset.slot===DR.t)s.classList.add('hot')}});
+function endDrag(ev,cancel){if(!DR)return;const d=DR;DR=null;
+  if(d.ghost)d.ghost.remove();document.querySelectorAll('.slot.can,.slot.hot').forEach(e=>e.classList.remove('can','hot'));
+  if(cancel)return;
+  if(!d.moved){placeItem(d.t,d.id);return}
+  const s=document.elementsFromPoint(ev.clientX,ev.clientY).map(e=>e.closest&&e.closest('[data-slot]')).find(Boolean);
+  if(s&&s.dataset.slot===d.t)placeItem(d.t,d.id);else if(s)toast(`這格要放${SLOTS.find(x=>x[0]===s.dataset.slot)[1]}`)}
+document.addEventListener('pointerup',ev=>endDrag(ev));
+document.addEventListener('pointercancel',ev=>endDrag(ev,true));
 function vRecipe(){
-  const all=Object.keys(GT).map(t=>[t,gear(t)]);
-  let h=`<h2>器材庫</h2><div class="card">${all.map(([t,L])=>`<div class="grp">${GT[t]}</div><div class="chips">${L.map(x=>`<button class="chip" data-act="editGear" data-id="${esc(x.id)}">${esc(x.name)}</button>`).join('')}<button class="chip" data-act="newGear" data-v="${t}">＋ 新增${GT[t]}</button></div>`).join('')}
-    <div class="sub">磨豆機請填「平常沖中淺焙水洗、V60、15g」用的刻度，建議才會準。</div></div>`;
-  if(!S.beans.length)return h+'<div class="card sub">先到「豆子」頁新增豆子。</div>';
-  if(!gear('grinder').length||!gear('dripper').length)return h+'<div class="card sub">至少新增一台磨豆機和一個濾杯，就會算出配方。</div>';
-  const c=curSel(),sel=(k,t,L,cur)=>`<label class="f">${t}<select data-rsel="${k}">${L.map(x=>`<option value="${esc(x.id)}" ${cur&&x.id===cur.id?'selected':''}>${esc(x.name)}</option>`).join('')}</select></label>`;
-  h+=`<h2>選擇組合</h2><div class="card"><div class="grid2">${sel('bean','咖啡豆',S.beans,c.bean)}${sel('grinder','磨豆機',gear('grinder'),c.g)}${sel('dripper','濾杯',gear('dripper'),c.d)}${gear('paper').length?sel('paper','濾紙',gear('paper').filter(p=>fitPaper(p,c.d)),c.p):''}${gear('kettle').length?sel('kettle','注水壺',gear('kettle'),c.k):''}${gear('water').length?sel('water','用水',gear('water'),c.w):''}<label class="f">手法<select data-rsel="method"><option value="-" ${!c.m?'selected':''}>依器材自動</option>${gear('method').filter(x=>fitMethod(x,c.d)).map(x=>`<option value="${esc(x.id)}" ${c.m&&x.id===c.m.id?'selected':''}>${esc(x.name)}</option>`).join('')}</select></label></div>
-    ${c.bean?`<div class="row"><span class="pill ${beanStatus(c.bean).c}">${beanStatus(c.bean).t}</span><span class="tag">${esc(PL[beanTraits(c.bean).proc])}</span></div>`:''}</div>`;
-  const r=suggest(c);h+=recipeCard(r,c);
-  if(S.ai&&S.ai.key===comboKey(c)+c.bean.id)h+=recipeCard(S.ai.r,c,true);
-  if(r&&r.hist.length){
-    h+=`<h2>這個組合的調整歷程</h2><div class="card">${r.hist.map((x,i)=>{const pv=i?r.hist[i-1]:null;return `<div class="between" data-act="detail" data-id="${esc(x.id)}" style="cursor:pointer;padding:6px 0;border-bottom:1px solid var(--line)"><div><div class="mono">${esc(paramLine(x))}</div><div class="row">${pv?chgHtml(diff(pv,x)):'<span class="sub">第一杯</span>'}</div></div><div class="score">${has(x.score)?x.score:'—'}<small>${x===r.best?'最佳':'分'}</small></div></div>`}).join('')}</div>`;
-  }
-  /* 交叉比對：每支豆子 × 每個器材組合的第一杯 */
-  const G=gear('grinder'),D=gear('dripper'),P=gear('paper'),K=gear('kettle').slice(0,1),M=gear('method');
-  h+=`<h2>交叉比對</h2>`+S.beans.map(b=>{const rows=[];
-    for(const g of G)for(const d of D){const ps=P.filter(p=>fitPaper(p,d));for(const p of (ps.length?ps:[null]))for(const k of (K.length?K:[null]))for(const m of (M.filter(x=>fitMethod(x,d)&&x.drippers&&x.drippers.length).concat(M.some(x=>fitMethod(x,d)&&x.drippers&&x.drippers.length)?[]:[null]))){
-      const cc={bean:b,g,d,p,k,m},f=firstRecipe(b,g,d,k,p,m),n=brewsOf(b.id).filter(x=>inCombo(x,cc)),bs=n.filter(x=>has(x.score)).sort((a,c)=>c.score-a.score)[0];
-      rows.push(`<tr data-act="pickCombo" data-v="${esc([b.id,g.id,d.id,p?p.id:'',k?k.id:'',m?m.id:'-'].join(','))}"><td>${esc([g.name,d.name,p&&p.name,m&&m.name].filter(Boolean).join(' · '))}</td><td class="mono">${esc(fmtG(g,f.grind))}</td><td class="mono">${f.temp}°</td><td class="mono">1:${r1(f.ratio)}</td><td class="mono">${n.length?(bs?bs.score+'分':n.length+'杯'):'—'}</td></tr>`)}}
-    return `<details class="card"><summary><b>${esc(b.name)}</b> <span class="sub">${rows.length} 個組合</span></summary><table class="cmp"><tr><th>器材</th><th>刻度</th><th>水溫</th><th>比例</th><th>已沖</th></tr>${rows.join('')}</table><div class="sub">點一列就會切換到那個組合。表上是第一杯的建議；沖過之後以上面的「下一杯建議」為準。</div></details>`}).join('');
+  if(!S.beans.length)return '<div class="card sub">先到「豆子」頁新增豆子。</div>';
+  if(!gear('grinder').length||!gear('dripper').length)return gearLib()+'<div class="card sub">至少新增一台磨豆機和一個濾杯，就能開始擺桌。</div>';
+  const c=curSel(),miss=missing();
+  let h=`<div class="between" style="align-items:center"><h2 style="margin:0">沖煮桌</h2>${Object.keys(SEL).length?'<button class="btn sm" data-act="clearDesk">清空桌面</button>':''}</div>`+deskHtml();
+  h+=`<div id="recOut"></div>`;
+  if(miss.length)h+=`<div class="card sub">還差：${miss.join('、')}。把下面的器材拖到桌上對應的空格，或點一下直接放上去。</div>`;
+  else{const r=suggest(c);h=h.replace('<div id="recOut"></div>','<div id="recOut">'+(c.bean?`<div class="row" style="margin-top:4px"><span class="pill ${beanStatus(c.bean).c}">${beanStatus(c.bean).t}</span><span class="tag">${esc(PL[beanTraits(c.bean).proc])}</span></div>`:'')+recipeCard(r,c)+(S.ai&&S.ai.key===comboKey(c)+c.bean.id?recipeCard(S.ai.r,c,true):'')+'</div>');
+    if(r&&r.hist.length)h+=`<h2>這個組合的調整歷程</h2><div class="card">${r.hist.map((x,i)=>{const pv=i?r.hist[i-1]:null;return `<div class="between" data-act="detail" data-id="${esc(x.id)}" style="cursor:pointer;padding:6px 0;border-bottom:1px solid var(--line)"><div><div class="mono">${esc(paramLine(x))}</div><div class="row">${pv?chgHtml(diff(pv,x)):'<span class="sub">第一杯</span>'}</div></div><div class="score">${has(x.score)?x.score:'—'}<small>${x===r.best?'最佳':'分'}</small></div></div>`}).join('')}</div>`}
+  h+=`<h2>器材架</h2><div class="card">${shelfHtml()}</div>`;
+  h+=crossHtml()+gearLib();
   return h;
+}
+function gearLib(){
+  return `<details class="card"><summary><b>管理器材</b> <span class="sub">新增、修改、換圖示</span></summary>${Object.keys(GT).map(t=>`<div class="grp">${GT[t]}</div><div class="chips">${gear(t).map(x=>`<button class="chip" data-act="editGear" data-id="${esc(x.id)}">${esc(x.name)}</button>`).join('')}<button class="chip" data-act="newGear" data-v="${t}">＋ 新增${GT[t]}</button></div>`).join('')}
+    <div class="sub">磨豆機請填「平常沖中淺焙水洗、V60、15g」用的刻度，建議才會準。</div></details>`;
+}
+function crossHtml(){
+  const G=gear('grinder'),D=gear('dripper'),P=gear('paper'),K=gear('kettle').slice(0,1),M=gear('method'),W=gear('water')[0];
+  return `<details class="card"><summary><b>交叉比對</b> <span class="sub">每支豆子 × 每組器材的第一杯</span></summary>`+S.beans.map(b=>{const rows=[];
+    for(const g of G)for(const d of D){const ps=P.filter(p=>fitPaper(p,d));const ms=M.filter(x=>fitMethod(x,d)&&x.drippers&&x.drippers.length);for(const p of (ps.length?ps:[null]))for(const k of (K.length?K:[null]))for(const m of (ms.length?ms:[null])){
+      const cc={bean:b,g,d,p,k,m},f=firstRecipe(b,g,d,k,p,m),n=brewsOf(b.id).filter(x=>inCombo(x,cc)),bs=n.filter(x=>has(x.score)).sort((a,c)=>c.score-a.score)[0];
+      rows.push(`<tr data-act="pickCombo" data-v="${esc([b.id,g.id,d.id,p?p.id:'',k?k.id:'',m?m.id:'-',W?W.id:''].join(','))}"><td>${esc([g.name,d.name,p&&p.name,m&&m.name].filter(Boolean).join(' · '))}</td><td class="mono">${esc(fmtG(g,f.grind))}</td><td class="mono">${f.temp}°</td><td class="mono">1:${r1(f.ratio)}</td><td class="mono">${n.length?(bs?bs.score+'分':n.length+'杯'):'—'}</td></tr>`)}}
+    return `<div class="grp" style="margin-top:10px">${esc(b.name)}</div><table class="cmp"><tr><th>器材</th><th>刻度</th><th>水溫</th><th>比例</th><th>已沖</th></tr>${rows.join('')}</table>`}).join('')+'<div class="sub">點一列就會把那組器材擺上桌。</div></details>';
 }
 async function aiRec(){
   const c=curSel(),r=suggest(c);if(!sampleFn||!r)return;S.aiMsg='Claude 思考中…';render();
@@ -804,7 +885,7 @@ let GF=null;
 function startGear(type,id){const x=id?gearById(id):null;GF=x?{...x,_edit:true}:{id:newId(),type,name:''};drawGear()}
 function drawGear(){
   const t=GF.type,inp=(k,l,ty='text',x='')=>`<label class="f">${l}<input data-g="${k}" type="${ty}" value="${esc(GF[k]??'')}" ${ty==='number'?'step="any" inputmode="decimal" class="mono"':''} ${x}></label>`;
-  const sel=(k,l,o)=>`<label class="f">${l}<select data-g="${k}">${Object.entries(o).map(([v,n])=>`<option value="${v}" ${String(GF[k])===v?'selected':''}>${n}</option>`).join('')}</select></label>`;
+  const sel=(k,l,o)=>`<label class="f">${l}<select data-g="${k}">${Object.entries(o).map(([v,n])=>`<option value="${v}" ${String(k==='icon'?(GF.icon||guessIcon(GF)):GF[k])===v?'selected':''}>${n}</option>`).join('')}</select></label>`;
   let f='';
   if(t==='grinder')f=`<div class="grid2">${inp('base','常用刻度（中淺焙水洗、V60、15g）','number')}${inp('step','最小一格','number')}${inp('um','每格約幾 µm','number')}</div><div class="sub">數字越大越粗。不確定 µm 就先用預設，之後會依筆記慢慢修正。</div>`;
   if(t==='dripper'){GF.kind=GF.kind||'cone-fast';f=sel('kind','類型',DK)}
@@ -814,12 +895,12 @@ function drawGear(){
   if(t==='kettle'){GF.flow=GF.flow||'mid';if(GF.tc==null)GF.tc=true;f=`<div class="grid2">${sel('flow','水流',KF)}${sel('tc','可以控溫',{true:'可以',false:'不行'})}</div>`}
   openSheet(`<div class="sheet-head"><b>${GF._edit?'編輯':'新增'}${GT[t]}</b><button class="btn sm" data-act="close">取消</button></div><div class="sheet-body">
     ${GF._edit?'':`<fieldset><legend>常見型號</legend><div class="chips">${GP[t].map((p,i)=>`<button type="button" class="chip" data-act="gearPreset" data-v="${i}">${esc(p.name)}</button>`).join('')}</div></fieldset>`}
-    <fieldset><legend>資料</legend>${inp('name','名稱')}${f}</fieldset></div>
+    <fieldset><legend>資料</legend>${inp('name','名稱')}${f}</fieldset>${ICONS[t]?(()=>{const ic=GF.icon||guessIcon(GF),L=SPR.SK[ic]||[],si=GF.skin!=null&&GF.skin!==''?+GF.skin:guessSkin(GF,ic);return `<fieldset><legend>圖示</legend><div class="between" style="align-items:center"><div class="grid2" style="flex:1">${sel('icon','樣式',ICONS[t])}${L.length>1?`<label class="f">顏色<select data-g="skin">${L.map((x,i)=>`<option value="${i}" ${i===si?'selected':''}>${esc(x[0])}</option>`).join('')}</select></label>`:''}</div><div style="margin-left:10px">${sprite(ic,si,56)}</div></div></fieldset>`})():''}</div>
     <div class="sheet-foot">${GF._edit?`<button class="btn danger" data-act="delGear" data-id="${esc(GF.id)}">刪除</button>`:''}<button class="btn pri" data-act="saveGear">儲存</button></div>`);
 }
 async function saveGear(){
   if(!String(GF.name||'').trim()){toast('請填名稱');return}
-  const g={...GF};delete g._edit;['base','step','um','dose','water','n','first','each','imm'].forEach(k=>{if(k in g)g[k]=num(g[k])});if('tc' in g)g.tc=String(g.tc)==='true';
+  const g={...GF};delete g._edit;['base','step','um','dose','water','n','first','each','imm','skin'].forEach(k=>{if(k in g)g[k]=num(g[k])});if('tc' in g)g.tc=String(g.tc)==='true';
   try{await store.save('gear',g);closeSheet();toast('已儲存')}catch(e){toast('儲存失敗，請再試一次')}
 }
 
@@ -843,7 +924,9 @@ document.addEventListener('click',async ev=>{
   else if(a==='delGear'){if(confirmTap(el,'gear'+id)){await store.del('gear',id);closeSheet();toast('已刪除')}}
   else if(a==='useRec')useRec(!!el.dataset.ai);
   else if(a==='aiRec')aiRec();
-  else if(a==='pickCombo'){const[b,g,d,p,k,m]=v.split(',');Object.assign(SEL,{bean:b,grinder:g,dripper:d,paper:p,kettle:k,method:m});keepSel();render();$('#main').scrollTop=0}
+  else if(a==='pickCombo'){const[b,g,d,p,k,m,w]=v.split(',');SEL={bean:b,grinder:g,dripper:d,paper:p,kettle:k,method:m,water:w};Object.keys(SEL).forEach(x=>{if(!SEL[x])delete SEL[x]});keepSel();S.ai=null;render();$('#main').scrollTop=0}
+  else if(a==='unslot'){delete SEL[v];keepSel();S.ai=null;render()}
+  else if(a==='clearDesk'){SEL={};keepSel();S.ai=null;render()}
   else if(a==='beanPhoto')$('#beanPhoto').click();
   else if(a==='editBean'){if(!demoBlock())startBean(id)}
   else if(a==='delBean'){if(confirmTap(el,'bean'+id)){await store.del('beans',id);closeSheet();toast('已刪除')}}
@@ -871,7 +954,7 @@ document.addEventListener('click',async ev=>{
 document.addEventListener('input',ev=>{
   const t=ev.target;
   if(t.dataset.b&&BF){BF[t.dataset.b]=t.value;return}
-  if(t.dataset.g&&GF){GF[t.dataset.g]=t.value;return}
+  if(t.dataset.g&&GF){GF[t.dataset.g]=t.value;if(t.dataset.g==='icon'){GF.skin=0;drawGear()}else if(t.dataset.g==='skin')drawGear();return}
   if(t.dataset.f&&F){const k=t.dataset.f,ty=t.dataset.t;
     if(k==='_tn'){slot().n=t.value;return}
     if(ty==='num')F[k]=num(t.value);else if(ty==='time')F.time=parseTime(t.value);else if(ty==='dt'){const d=new Date(t.value).getTime();if(!isNaN(d))F.ts=d}else F[k]=t.value;
