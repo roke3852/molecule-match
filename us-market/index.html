@@ -94,8 +94,9 @@ textarea.f{min-height:80px;resize:vertical}
 #toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:8px 14px;border-radius:999px;font-size:13px;opacity:0;transition:opacity .2s;z-index:30}
 .disc{font-size:11px;color:var(--faint);text-align:center;margin-top:20px}
 .hit{fill:transparent;cursor:pointer}
-.bear-row{display:grid;grid-template-columns:62px 1fr 46px;gap:8px;align-items:center;padding:5px 0;cursor:pointer;font-size:13px}
-.bear-row .y{font:12px var(--mono);color:var(--muted)}
+.bear-row{display:grid;grid-template-columns:96px 1fr 46px;gap:8px;align-items:center;padding:5px 0;cursor:pointer;font-size:13px}
+.bear-row .y{font:11px/1.25 var(--mono);color:var(--faint)}
+.bear-row .y b{display:block;font:600 13px/1.3 var(--sans);color:var(--fg)}
 .bear-row .bar{height:16px;border-radius:0 4px 4px 0;background:var(--s1soft);position:relative}
 .bear-row.rec .bar{background:var(--s1)}
 .bear-row.now .bar{background:repeating-linear-gradient(45deg,var(--bear) 0 4px,transparent 4px 8px);border:1.5px solid var(--bear)}
@@ -520,9 +521,9 @@ const BEARS=[
 {y:"2025",nm:"關稅解放日",dd:19,mo:2,rec:0,dn:"4/2 川普宣布對等關稅，兩天蒸發 5 兆美元。",up:"4/9 宣布關稅暫停 90 天，S&P 單日 +9.5%，4/8 就是底。",note:"政策造成的空頭，政策退讓就結束。"},
 ];
 const SEMI=[
-["費半","2000–02 網路泡沫",84,"半導體庫存＋網路泡沫破裂"],["費半","2007–09 金融海嘯",70,"需求崩落"],["費半","2022 升息",46,"升息＋記憶體庫存修正"],["費半","2026 這次",34,"AI 硬體修正，進行中",1],
-["台股","1990 泡沫破裂",80,"12,682 → 2,485，資產泡沫＋波灣戰爭"],["台股","2000–01 網路泡沫",67,"10,393 → 3,446"],["台股","2007–08 金融海嘯",60,"9,859 → 3,955"],["台股","2022 升息",32,"18,619 → 12,629"],["台股","2026 這次",22.9,"49,823 → 38,427，進行中",1]];
-const NOW={y:"2026",nm:"這次（AI 修正）",dd:7.1,now:1};
+["費半","2000–02 網路泡沫",84,"半導體庫存＋網路泡沫破裂"],["費半","2007–09 金融海嘯",70,"需求崩落"],["費半","2022 通膨升息",46,"升息＋記憶體庫存修正"],["費半","2026 這次 AI 修正",34,"AI 硬體修正，進行中",1],
+["台股","1990 萬點崩盤",80,"12,682 → 2,485，資產泡沫＋波灣戰爭"],["台股","2000–01 網路泡沫",67,"10,393 → 3,446"],["台股","2007–08 金融海嘯",60,"9,859 → 3,955"],["台股","2022 通膨升息",32,"18,619 → 12,629"],["台股","2026 這次 AI 修正",22.9,"49,823 → 38,427，進行中",1]];
+const NOW={y:"2026",nm:"這次 AI 修正",dd:7.1,now:1};
 const BOMBS=[
 {ic:"🏦",t:"聯準會升息循環",lv:"h",lvt:"高",d:"12/10 幾乎確定升一碼，真正的風險是點陣圖顯示 2027 年還要升幾次。歷史上空頭要結束，幾乎都要等聯準會停手。",m:"引爆點：12/10 凌晨 3 點（台北）"},
 {ic:"🏗️",t:"AI 資料中心禁建令",lv:"h",lvt:"高",d:"民主黨選後喊全國暫停新建 AI 資料中心，紐約州已暫停大型資料中心許可、德州也在審查電網。這直接打到 AI 硬體需求的長期預期。但川普有否決權，聯邦版本很難過。",m:"引爆點：12 月德州 ERCOT 審查結果；1 月新國會開議提案"},
@@ -545,9 +546,9 @@ const SIGNALS=[
 ];
 function renderBear(){
   const all=[...BEARS,NOW],mx=90;
-  $("#bearChart").innerHTML=all.map((b,i)=>`<div class="bear-row ${b.now?"now":b.rec?"rec":""}" data-bj="${i}" data-tip="${b.y} ${b.nm}：−${b.dd}%${b.mo?`，${b.mo} 個月見底`:"（目前）"}"><span class="y">${b.y}</span><div class="bar" style="width:${b.dd/mx*100}%"></div><span class="p">−${b.dd}%</span></div>`).join("");
+  $("#bearChart").innerHTML=all.map((b,i)=>`<div class="bear-row ${b.now?"now":b.rec?"rec":""}" data-bj="${i}" data-tip="${b.y} ${b.nm}：−${b.dd}%${b.mo?`，${b.mo} 個月見底`:"（目前）"}"><span class="y"><b>${b.nm}</b>${b.y}</span><div class="bar" style="width:${b.dd/mx*100}%"></div><span class="p">−${b.dd}%</span></div>`).join("");
   const rec=BEARS.filter(b=>b.rec&&b.y!=="1929–32"),non=BEARS.filter(b=>!b.rec),avg=a=>Math.round(a.reduce((x,b)=>x+b.dd,0)/a.length),avgm=a=>Math.round(a.reduce((x,b)=>x+b.mo,0)/a.length);
-  $("#semiTw").innerHTML=["費半","台股"].map(g=>`<div class="fig" style="margin:6px 0 10px"><div class="t">${g==="費半"?"費城半導體指數":"台股加權指數"}</div>`+SEMI.filter(x=>x[0]===g).map(x=>`<div class="bear-row ${x[4]?"now":"rec"}" data-tip="${x[1]}：−${x[2]}%｜${x[3]}"><span class="y" style="font-size:11px">${x[1].split(" ")[0]}</span><div class="bar" style="width:${x[2]/90*100}%"></div><span class="p">−${x[2]}%</span></div>`).join("")+`</div>`).join("");
+  $("#semiTw").innerHTML=["費半","台股"].map(g=>`<div class="fig" style="margin:6px 0 10px"><div class="t">${g==="費半"?"費城半導體指數":"台股加權指數"}</div>`+SEMI.filter(x=>x[0]===g).map(x=>`<div class="bear-row ${x[4]?"now":"rec"}" data-tip="${x[1]}：−${x[2]}%｜${x[3]}"><span class="y"><b>${x[1].split(" ").slice(1).join(" ")}</b>${x[1].split(" ")[0]}</span><div class="bar" style="width:${x[2]/90*100}%"></div><span class="p">−${x[2]}%</span></div>`).join("")+`</div>`).join("");
   $("#bearStats").innerHTML=`<div class="stat"><div class="k">沒有衰退的空頭</div><div class="v">−${avg(non)}%</div><div class="d">平均約 ${avgm(non)} 個月見底（${non.length} 次）</div></div><div class="stat"><div class="k">伴隨衰退的空頭</div><div class="v">−${avg(rec)}%</div><div class="d">平均約 ${avgm(rec)} 個月見底（不含 1929）</div></div>`;
   $("#bearCards").innerHTML=BEARS.slice().reverse().map((b,k)=>`<article class="card bcard" id="bear-${BEARS.indexOf(b)}"><div class="meta"><span class="tag">${b.y}</span><span>${b.rec?"伴隨衰退":"沒有衰退"}・約 ${b.mo} 個月見底</span></div><h2>${b.nm}<span class="dd">−${b.dd}%</span></h2><div class="two"><div class="dn"><b>⬇ 下跌觸發</b>${b.dn}</div><div class="up"><b>⬆ 止跌觸發</b>${b.up}</div></div><div class="meta" style="margin-top:8px">💡 ${b.note}</div></article>`).join("");
   $("#bombs").innerHTML=BOMBS.map(b=>`<div class="bomb"><div class="ic">${b.ic}</div><div><b>${b.t}<span class="lv ${b.lv}">${b.lvt}</span></b><div style="font-size:14px">${b.d}</div><div class="m">${b.m}</div></div></div>`).join("");
