@@ -565,6 +565,24 @@ nav a.on::before{left:calc(50% - 32px)!important;top:12px!important;margin-top:0
 .sthumbs em{font-style:normal;font-size:var(--fs-s);color:var(--sub);margin-left:2px}
 .sim-hero{display:block;width:100%;max-height:220px;object-fit:cover;border:2px solid var(--px);margin:4px 0 10px;cursor:zoom-in}
 #simCard .sph{margin-top:4px}
+/* ✨ AI 建議 */
+.aibar{display:flex;gap:8px;margin-top:10px}
+.aibar .btn{flex:1;background:#fff7d6!important;color:var(--ink)}
+.aibox{margin-top:10px;border:2px dashed var(--px);background:#fffbea;padding:10px 10px 8px}
+.aibox .aih{display:flex;align-items:center;gap:6px;font-weight:700;font-size:16px;font-family:var(--ff-b)}
+.aibox .aih span{flex:1}
+.aibox .aih button{font-size:var(--fs-s);font-family:var(--ff-s);color:var(--sub);padding:2px 6px}
+.aibox .ais{font-size:var(--fs-s);font-family:var(--ff-s);color:var(--sub);margin:2px 0 6px}
+.aii{display:flex;gap:8px;align-items:flex-start;padding:7px 0;border-top:1px dotted var(--line)}
+.aii .t{flex:1;font-size:16px;font-family:var(--ff-b)}
+.aii .t em{display:block;font-style:normal;font-size:var(--fs-s);font-family:var(--ff-s);color:var(--sub)}
+.aii button{flex:none;border:2px solid var(--px);box-shadow:2px 2px 0 var(--px);background:var(--card);padding:3px 10px;font-weight:700;font-size:var(--fs-s);font-family:var(--ff-s)}
+.aii button:active{transform:translate(2px,2px);box-shadow:none}
+.aicats{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 6px}
+.aicats button{border:2px solid var(--px);background:var(--card);padding:4px 10px;font-size:var(--fs-s);font-family:var(--ff-s)}
+.aicats button.on{background:var(--maple);color:#fff}
+.aiacts{display:flex;gap:8px;margin-top:8px}
+.aiacts .btn{font-size:var(--fs-s);font-family:var(--ff-s);padding:6px 8px}
 </style>
 </head>
 <body>
@@ -1398,6 +1416,135 @@ $('#packAdd').onclick=()=>{addPack($('#packIn').value);$('#packIn').value=''};
 $('#todoIn').onkeydown=e=>{if(e.key==='Enter')$('#todoAdd').click()};
 $('#packIn').onkeydown=e=>{if(e.key==='Enter')$('#packAdd').click()};
 
+/* ---------- ✨ AI 建議（依清單名稱、已有項目和這趟福岡行程推薦） ---------- */
+// 每項：[要加的文字, 為什麼, 已有就不推薦的關鍵字（用 | 分開）]
+const AIC={
+ pack:{n:'🧳 打包衣物',rx:/打包|行李|衣|穿|帶什麼|要帶/,it:[
+  ['睡衣','飯店有浴衣，但小孩和怕冷的人自己帶比較好睡','睡衣|浴衣'],
+  ['圍巾、手套','11 月底福岡早晚約 8–10°C，海邊和夜晚風大','圍巾|手套|脖圍'],
+  ['毛帽／保暖帽','晚上逛屋台、看夜景時很實用','毛帽|帽子|保暖帽'],
+  ['好走的鞋','每天走路量大，太宰府參道、天神逛街都要走','鞋'],
+  ['拖鞋（房間用）','有些飯店拖鞋偏薄，小孩尺寸也不一定有','拖鞋'],
+  ['備用一套衣服（隨身）','行李晚到或小孩弄髒時可以先換','備用|換洗'],
+  ['輕便雨衣／折疊傘','11 月偶有陣雨，帶小孩撐傘不方便時雨衣好用','雨|傘'],
+  ['洗衣袋／髒衣袋','8 天 7 夜衣服分乾淨髒的，回程好整理','洗衣袋|髒衣|收納袋'],
+  ['暖暖包','早上出門、等車時給小孩用','暖暖包|暖包'],
+  ['口罩','機上乾燥、人多的地方可以戴','口罩'],
+  ['盥洗用品（牙刷、牙膏）','日本飯店多數有，但小孩牙刷和慣用牙膏要自備','牙刷|牙膏|盥洗'],
+  ['保濕乳液、護唇膏','福岡秋冬乾燥，加上飯店暖氣','乳液|護唇|保濕|凡士林'],
+  ['隱形眼鏡／眼鏡','藥妝店買得到但度數不一定合','眼鏡|隱形'],
+ ]},
+ doc:{n:'📄 證件與錢',rx:/證件|文件|必帶|重要|出發|錢|錢包|隨身/,it:[
+  ['護照（每人一本，含小孩）','5 大 2 小共 7 本，出門前一起點一次','護照'],
+  ['機票、訂房確認截圖','網路不穩時還能直接給櫃台看','機票|訂房|確認'],
+  ['Visit Japan Web QR Code','入境和海關申報用，先截圖存好','Visit Japan|VJW|入境'],
+  ['日圓現金','屋台、小店、神社御守常常只收現金','日圓|日幣|現金'],
+  ['信用卡（2 張不同卡組織）','一張刷不過還有備用','信用卡'],
+  ['西瓜卡／Suica（或 Apple Pay 版）','搭地鐵、巴士、便利商店都能用','西瓜卡|Suica|交通卡|IC卡'],
+  ['旅遊保險資料','小孩出門萬一要看醫生時用得到','保險'],
+  ['網卡／eSIM','落地就能用地圖和家人群組','網卡|eSIM|esim|SIM|wifi|WiFi|漫遊'],
+ ]},
+ elec:{n:'🔌 3C 電器',rx:/3C|電|充電|手機|相機/,it:[
+  ['手機充電線、充電頭','日本和台灣插頭一樣、電壓 100V，手機充電頭可以直接用','充電'],
+  ['行動電源（放隨身，不可託運）','整天在外面拍照開地圖很耗電','行動電源'],
+  ['延長線／多孔插座','一間房好幾個人要同時充電','延長線|多孔|插座'],
+  ['耳機','飛機上、小孩看影片用','耳機'],
+  ['平板＋小孩影片（先下載）','飛機和搭車時安撫小孩','平板|iPad|影片'],
+ ]},
+ kid:{n:'👶 小孩用品',rx:/小孩|兒童|寶寶|孩子|小朋友|女兒|兒子/,it:[
+  ['小孩換洗衣物（多一套）','玩水、吃東西弄髒是常態','小孩.*衣|兒童.*衣|換洗'],
+  ['濕紙巾、衛生紙','屋台、公園、飛機上都需要','濕紙巾|衛生紙'],
+  ['小孩零食、水壺','排隊和搭車時救命用','零食|水壺|水瓶'],
+  ['小孩常備藥（退燒、腸胃）','日本藥局不一定有兒童劑量','藥'],
+  ['推車／背巾','太宰府參道、動物園路長，小小孩會走累','推車|背巾'],
+  ['小玩具、貼紙書','餐廳等餐和飛機上可以打發時間','玩具|貼紙|繪本|畫'],
+  ['小孩的身分資料卡','寫上爸媽電話和飯店名稱，走散時用','名牌|聯絡|身分'],
+ ]},
+ med:{n:'💊 常備藥品',rx:/藥|醫|健康|急救/,it:[
+  ['感冒藥、退燒藥','溫差大容易著涼','感冒|退燒|普拿疼'],
+  ['腸胃藥','吃太多拉麵、生食時備用','腸胃|胃|止瀉'],
+  ['暈車藥','搭巴士、遊覽車時用','暈車|暈'],
+  ['OK 繃、優碘','走路磨腳、小孩跌倒','OK繃|OK 繃|繃|優碘'],
+  ['個人慢性病藥（多帶 2 天份）','以防班機延誤','慢性|處方'],
+  ['過敏藥','換環境、換食物時以防萬一','過敏'],
+ ]},
+ gift:{n:'🎁 伴手禮／購物',rx:/伴手禮|買|購物|藥妝|代購|禮|送/,it:[
+  ['博多通りもん','福岡最經典的伴手禮，送長輩安全牌','通りもん|通りもん|通饅頭'],
+  ['明太子（冷藏，回程前一天再買）','保冷時間有限，最後一天在博多站買','明太子'],
+  ['梅枝餅（太宰府現吃）','太宰府參道名物，當天吃最好吃','梅枝餅|梅ヶ枝'],
+  ['ひよ子 小雞饅頭','可愛又好分送，小孩也喜歡','ひよ子|小雞'],
+  ['一蘭泡麵禮盒','在家也能吃到一蘭，好分送','一蘭'],
+  ['藥妝清單（先列品名）','到藥妝店照著買比較不會漏','藥妝'],
+  ['送老師／同事的小包裝','單包裝的點心最好分','老師|同事|小包裝'],
+  ['免稅記得帶護照','要用護照才能辦免稅','免稅'],
+ ]},
+ todo:{n:'✅ 出發前待辦',rx:/待辦|要做|準備|行前|出發前|todo|TODO/,it:[
+  ['填 Visit Japan Web','入境前先填好，每人都要（小孩也要）','Visit Japan|VJW'],
+  ['買旅遊保險','出發前保，才有保障','保險'],
+  ['換日圓','出發前換好一部分現金','日圓|日幣|換錢'],
+  ['網卡／eSIM 先開通','落地馬上能用','網卡|eSIM|esim|SIM'],
+  ['線上報到、選座位','一家人坐一起，小孩旁邊要有大人','報到|劃位|選位|座位'],
+  ['確認行李重量限制','回程伴手禮常常超重','重量|行李'],
+  ['安排寵物照顧','8 天不在家','寵物|貓|狗|毛毛'],
+  ['冰箱清空、垃圾倒掉','回家才不會臭','冰箱|垃圾'],
+  ['下載 Google 地圖離線地圖','福岡市區先下載，沒網路也能看','離線|地圖'],
+  ['確認回程機場免稅手續','託運前要先辦免稅確認','免稅'],
+ ]},
+ food:{n:'🍜 想吃的',rx:/吃|美食|餐|拉麵|甜點|食/,it:[
+  ['博多豚骨拉麵','福岡必吃，一蘭、Shin-Shin 都有名','拉麵|一蘭'],
+  ['中洲屋台','晚上河邊的路邊攤，氣氛很好','屋台'],
+  ['牛腸鍋（もつ鍋）','福岡名物，天冷吃剛好','牛腸|もつ'],
+  ['水炊き 雞肉火鍋','湯頭溫和，小孩也能吃','水炊|雞肉鍋'],
+  ['明太子料理','明太子飯、明太玉子燒','明太子'],
+  ['梅枝餅','太宰府參道邊走邊吃','梅枝餅'],
+  ['一口餃子','博多特色小餃子，一人一盤很快吃完','餃子'],
+ ]},
+};
+const AIG=[['pack',6],['doc',5],['elec',3],['kid',3]]; // 名稱看不出主題時的混合推薦
+const aiOpen={},aiSeen={},aiCat={};
+const aiNorm=t=>String(t||'').toLowerCase().replace(/[\s（）()、，,／/＋+]/g,'');
+function aiHas(items,s){const all=items.map(x=>aiNorm(x.t)).join('|');if(!all)return false;
+ const keys=s[2].split('|').map(aiNorm).filter(Boolean);
+ return keys.some(k=>all.includes(k))||items.some(x=>{const a=aiNorm(x.t),b=aiNorm(s[0]);return a&&(a===b||b.includes(a)&&a.length>=2)})}
+function aiGuess(L){
+ if(aiCat[L.id])return aiCat[L.id];
+ const name=L.n||'',items=L.items||[];
+ for(const k in AIC)if(AIC[k].rx.test(name))return k;
+ // 用已經有的項目猜主題
+ let best=null,sc=0;for(const k in AIC){const n=AIC[k].it.filter(s=>aiHas(items,s)).length;if(n>sc){sc=n;best=k}}
+ if(best)return best;
+ const it=items.map(x=>x.t).join(' ');if(/衣|褲|襪|外套/.test(it))return 'pack';
+ return 'mix';
+}
+function aiPool(cat){
+ if(cat!=='mix')return AIC[cat].it;
+ let r=[];AIG.forEach(([k,n])=>r=r.concat(AIC[k].it.slice(0,n)));return r;
+}
+function aiList(id){const L=xlists[id],cat=aiGuess({...L,id}),items=L.items||[];
+ const seen=aiSeen[id]||0,pool=aiPool(cat).filter(s=>!aiHas(items,s));
+ const n=pool.length,st=n?seen%n:0;
+ return {cat,pool,show:pool.slice(st).concat(pool.slice(0,st)).slice(0,6),total:n};
+}
+function aiHTML(id){
+ if(!aiOpen[id])return `<div class="aibar"><button class="btn" data-xa="aio" data-id="${id}">✨ AI 建議：還漏了什麼？</button></div>`;
+ const r=aiList(id),cn=r.cat==='mix'?'🧭 綜合':AIC[r.cat].n;
+ const cats=`<div class="aicats">${Object.keys(AIC).map(k=>`<button data-xa="aic" data-id="${id}" data-c="${k}" class="${r.cat===k?'on':''}">${AIC[k].n}</button>`).join('')}</div>`;
+ const body=r.show.length?r.show.map((s,i)=>`<div class="aii"><div class="t">${esc(s[0])}<em>${esc(s[1])}</em></div><button data-xa="aia" data-id="${id}" data-t="${esc(s[0])}">＋加入</button></div>`).join('')
+  :`<div class="xempty">這個主題我想得到的都已經在清單上了 👍 可以換個主題看看。</div>`;
+ return `<div class="aibox"><div class="aih"><span>✨ AI 建議 · ${cn}</span><button data-xa="aix" data-id="${id}">收起</button></div>
+  <div class="ais">依清單名稱、已有的項目，和這趟 11/21–28 福岡（5 大 2 小、11 月底偏涼）推薦；已經在清單上的不會再出現。</div>
+  ${cats}${body}
+  <div class="aiacts">${r.show.length?`<button class="btn" data-xa="aiall" data-id="${id}">全部加入（${r.show.length}）</button>`:''}${r.total>6?`<button class="btn" data-xa="ain" data-id="${id}">🔄 換一批</button>`:''}</div></div>`;
+}
+function aiAct(a,id,b){const L=xlists[id];if(!L)return false;
+ if(a==='aio'){aiOpen[id]=1;drawX();return true}
+ if(a==='aix'){delete aiOpen[id];drawX();return true}
+ if(a==='aic'){aiCat[id]=b.dataset.c;aiSeen[id]=0;drawX();return true}
+ if(a==='ain'){aiSeen[id]=(aiSeen[id]||0)+6;drawX();return true}
+ if(a==='aia'){const t=b.dataset.t;(L.items=L.items||[]).push({t});xsaveL();drawX();toast('已加入：'+t);return true}
+ if(a==='aiall'){const r=aiList(id);r.show.forEach(s=>(L.items=L.items||[]).push({t:s[0]}));xsaveL();drawX();toast('已加入 '+r.show.length+' 項');return true}
+ return false;
+}
 /* ---------- 自訂清單與清單分頁 ---------- */
 let xtabs=S.get('xtabs',{}),xlists=S.get('xlists',{}),curTab='main',xf=null,xarm=null;
 const xid=()=>'x'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
@@ -1416,7 +1563,7 @@ function drawX(){
   if(xf&&xf.k==='renl'&&xf.id===id)return `<div class="sec"><h3>修改清單名稱</h3><div class="addrow" style="margin-top:0"><input id="xIn" maxlength="20" value="${esc(L.n)}"><button data-xa="renlok" data-id="${id}">儲存</button></div><div class="acts" style="margin-top:8px"><button class="btn ghost" data-xa="cancel">取消</button></div></div>`;
   return `<div class="sec" data-xl="${id}"><h3>${esc(L.n)}<span class="xh"><button data-xa="renl" data-id="${id}" aria-label="改名">✏️</button><button data-xa="dell" data-id="${id}" aria-label="刪除清單">${xarm==='l'+id?'確定刪除？':'🗑️'}</button></span></h3>
    ${(L.items||[]).length?L.items.map((x,i)=>`<div class="ck${x.on?' on':''}" data-xi="${i}"><span class="box"></span><span class="txt">${esc(x.t)}</span><button class="del" data-xd="${i}" aria-label="刪除">×</button></div>`).join(''):'<div class="xempty">還沒有項目</div>'}
-   <div class="addrow"><input data-xin="${id}" placeholder="新增項目…"><button data-xa="addi" data-id="${id}">加入</button></div></div>`}).join('');
+   <div class="addrow"><input data-xin="${id}" placeholder="新增項目…"><button data-xa="addi" data-id="${id}">加入</button></div>${aiHTML(id)}</div>`}).join('');
  h+=`<div class="sec"><h3>＋ 新增清單</h3><div class="hint">在「${curTab==='main'?'行前清單':esc(xtabs[curTab].n)}」這個分頁多加一張清單${curTab==='main'||!xtabs[curTab].p?'':'（只有你看得到）'}。</div><div class="addrow" style="margin-top:0"><input id="xNewL" maxlength="20" placeholder="清單名稱，例如：要買的伴手禮"><button data-xa="addl">新增</button></div></div>`;
  if(curTab!=='main')h+=`<div class="xfoot"><div class="hint">${xtabs[curTab].p?'🔒 這個分頁只存在這台手機，家人看不到。':'👨‍👩‍👧 這個分頁全家共用（開啟「家人共用」後會同步）。'}</div><button class="btn" data-xa="rent">✏️ 改分頁名稱</button><button class="btn ghost" data-xa="delt">${xarm==='t'?'再按一次確定刪除':'🗑️ 刪除這個分頁'}</button></div>`;
  $('#xbody').innerHTML=h;
@@ -1429,6 +1576,7 @@ $('#v-list').addEventListener('click',e=>{
  const b=e.target.closest('[data-xa]');
  if(!b){const r=e.target.closest('[data-xi]');if(r&&L){const it=L.items[+r.dataset.xi];it.on=!it.on;if(!it.on)delete it.on;xsaveL();drawX()}return}
  const a=b.dataset.xa,id=b.dataset.id,val=()=>(($('#xIn')||{}).value||'').trim();
+ if(a.startsWith('ai')&&aiAct(a,id,b))return;
  if(a==='newtab'){xf={k:'newtab'};xarm=null;drawX();return}
  if(a==='cancel'){xf=null;drawX();return}
  if(a==='mk'){const n=val();if(!n){toast('請先填分頁名稱');return}const tid=xid(),t={n,o:Date.now()};if(b.dataset.p==='1')t.p=1;xtabs[tid]=t;xsaveT();
