@@ -57,7 +57,13 @@ h2{font-size:13px;font-weight:700;color:var(--muted);margin:8px 0 0;letter-spaci
 .pill::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
 .pill.good{color:var(--good)}.pill.warn{color:var(--warn)}.pill.cold{color:var(--cold)}.pill.muted{color:var(--muted)}
 .tag{font-size:12px;padding:2px 8px;border-radius:6px;background:var(--sunken)}
-.chg{font-size:12px;padding:2px 8px;border-radius:6px;border:1px dashed var(--accent);color:var(--accent)}
+.chg{font-size:12px;padding:2px 8px;border-radius:6px;background:var(--sunken);color:var(--ink)}
+.bc{display:block;width:100%;text-align:left}.bc-meta{font-size:12px;color:var(--muted)}.bc-name{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bc-p{font-size:13px;color:var(--muted);margin:6px 0 4px}.bc-l{display:flex;gap:8px;font-size:13.5px;line-height:1.5;margin-top:3px}.bc-k{flex:0 0 auto;font-size:12px;color:var(--muted);padding-top:1px;width:28px}
+.bc-l b.up,.bc-l b.dn{font-weight:700;margin-left:1px}.bc-l b.up{color:var(--good)}.bc-l b.dn{color:var(--cold)}
+.bc-tags{margin-top:6px}.bc-next{margin-top:8px;padding-top:7px;border-top:1px solid var(--line);font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.score.hi{background:var(--accent);color:#fff}.score.hi small{color:#fff;opacity:.8}.score.lo,.score.dim{background:var(--sunken);color:var(--muted)}
+.calt{width:100%;border-collapse:collapse;font-size:13px;margin-top:6px}.calt th{font-weight:500;color:var(--muted);text-align:left;font-size:12px}.calt td,.calt th{padding:3px 4px;border-bottom:1px solid var(--line)}
 .score{font-family:var(--mono);font-weight:600;font-size:20px;min-width:44px;text-align:center;padding:4px 6px;border-radius:8px;background:var(--accent-soft);color:var(--accent)}
 .score small{display:block;font-size:10px;font-weight:400;font-family:var(--body);color:var(--muted)}
 .banner{border:1px dashed var(--warn);color:var(--warn);border-radius:10px;padding:8px 12px;font-size:13px}
@@ -377,23 +383,26 @@ function scatter({pts,xd,yd,xl,yl,band}){
 }
 
 /* ---------- views ---------- */
+const chgTxt=x=>{if(x.p.k==='pours')return'注水段落';const sh=v=>{v=String(v);return v.length>10?v.split(/[\s（(]/)[0]:v};return x.p.l+' '+sh(fmtP(x.p,x.from))+'→'+sh(fmtP(x.p,x.to))};
+const totBox=(b,lbl='總評')=>{const r=rk(b);return r==null?`<div class="score dim">—<small>${lbl}</small></div>`:`<div class="score ${r>=65?'hi':r<50?'lo':''}">${r}<small>${lbl}</small></div>`};
 function brewCard(b){
-  const bean=beanById(b.beanId),base=b.baseId?brewById(b.baseId):null,d=base?diff(base,b):[],fl=allFlavors(b);
-  return `<button class="card" data-act="detail" data-id="${esc(b.id)}">
-    <div class="between"><div><div class="title">${esc(bean?bean.name:'已刪除的豆子')}</div>
-      <div class="sub">${when(b.ts)}${has(b.restDay)?` · 養豆第 ${b.restDay} 天`:''}</div></div>
-      ${has(b.score)?`<div class="score">${b.score}<small>總分</small></div>`:''}</div>
-    <div class="mono sub">${esc(paramLine(b))}${has(b.tds)?` · TDS ${b.tds}`:''}${has(b.ey)?` · EY ${b.ey}%`:''}</div>
-    ${d.length?`<div class="row"><span class="sub">改了</span>${chgHtml(d)}</div>`:base?'<div class="sub">與上一杯相同配方（重現測試）</div>':''}
-    ${base&&effect(base,b).length?`<div class="row"><span class="sub">結果</span>${effHtml(effect(base,b))}</div>`:''}
-    ${fl.length||b.met?`<div class="row">${b.met?`<span class="pill ${b.met==='yes'?'good':b.met==='part'?'warn':'muted'}">${MET[b.met]}</span>`:''}${flavHtml(fl)}</div>`:''}
+  const bean=beanById(b.beanId),base=b.baseId?brewById(b.baseId):null,d=base?diff(base,b).filter(x=>has(x.to)):[],fl=allFlavors(b),ef=base?effect(base,b):[];
+  const nx=String(b.next||'').split('\n').map(x=>x.trim().replace(/^\d+[.、)]\s*/,'')).filter(Boolean)[0];
+  return `<button class="card bc" data-act="detail" data-id="${esc(b.id)}">
+    <div class="between" style="align-items:flex-start;gap:10px"><div style="min-width:0"><div class="bc-meta">${when(b.ts)}${has(b.restDay)?` · 第 ${b.restDay} 天`:''}</div>
+      <div class="title bc-name">${esc(bean?shortBean(bean):'已刪除的豆子')}</div></div>${totBox(b)}</div>
+    <div class="mono bc-p">${esc(paramLine(b))}${has(b.tds)?` · TDS ${b.tds}`:''}</div>
+    ${d.length?`<div class="bc-l"><span class="bc-k">變因</span><span>${esc(d.slice(0,3).map(chgTxt).join('、'))}${d.length>3?` 等 ${d.length} 項`:''}</span></div>`:base?'<div class="bc-l"><span class="bc-k">變因</span><span class="sub">同配方重現</span></div>':''}
+    ${ef.length?`<div class="bc-l"><span class="bc-k">結果</span><span>${ef.map(x=>`${x.l}<b class="${x.d>0?'up':'dn'}">${x.t}</b>`).join('　')}</span></div>`:''}
+    ${fl.length||b.met?`<div class="row bc-tags">${b.met?`<span class="pill ${b.met==='yes'?'good':b.met==='part'?'warn':'muted'}">${MET[b.met]}</span>`:''}${flavHtml(fl.slice(0,4))}</div>`:''}
+    ${nx?`<div class="bc-next">下次 → ${esc(nx)}</div>`:''}
   </button>`;
 }
 const demoBanner=()=>isDemo()?'<div class="banner">以下是範例資料，不會被儲存。先到「豆子」新增你的第一支豆子，範例就會消失。</div>':'';
 function vLog(){
   const bs=brews(),ready=beans().filter(b=>beanStatus(b).c==='good');
-  const wk=bs.filter(b=>b.ts>Date.now()-7*DAY),top=wk.filter(b=>has(b.score)).sort((a,b)=>b.score-a.score)[0];
-  return demoBanner()+`<div class="tiles"><div class="tile"><b>${wk.length}</b><span>近 7 天杯數</span></div><div class="tile"><b>${top?top.score:'—'}</b><span>近 7 天最高分</span></div><div class="tile"><b>${ready.length}</b><span>適飲期的豆子</span></div></div>
+  const wk=bs.filter(b=>b.ts>Date.now()-7*DAY),top=wk.map(rk).filter(x=>x!=null).sort((a,b)=>b-a)[0];
+  return demoBanner()+`<div class="tiles"><div class="tile"><b>${wk.length}</b><span>近 7 天杯數</span></div><div class="tile"><b>${top??'—'}</b><span>近 7 天最佳總評</span></div><div class="tile"><b>${ready.length}</b><span>適飲期的豆子</span></div></div>
   <h2>沖煮紀錄</h2>${bs.length?bs.map(brewCard).join(''):'<div class="card sub">還沒有紀錄。按下方「＋ 記一杯」開始。</div>'}`;
 }
 /* ---------- 風味曲線：養豆期往上爬、高峰、之後慢慢下滑 ---------- */
@@ -458,7 +467,7 @@ function runsHtml(list,{limit=30}={}){
     <div class="sub">紅框是跟上一杯不一樣的參數（刪除線是上一杯的值）。點一列看完整紀錄。</div>`;
 }
 /* ---------- 總評：三個溫度加權合成 0–100，缺的項目用個人中位數補 ---------- */
-const SDEF={wT:{hot:30,warm:40,room:30},wA:{sweet:25,balance:15,clean:20,body:15,aroma:15,finish:10},aromaFull:2.5,finishFull:2.5,bodyIdeal:3};
+const SDEF={wT:{hot:30,warm:40,room:30},wA:{sweet:25,balance:15,clean:20,body:15,aroma:15,finish:10},aromaFull:4,finishFull:2.5,bodyIdeal:3};
 const scoreCfg=()=>{const g=(S.gear||[]).find(x=>x.id==='cfg-score');return g?{...SDEF,...g,wT:{...SDEF.wT,...(g.wT||{})},wA:{...SDEF.wA,...(g.wA||{})}}:SDEF};
 const SKEYS=['fa','ra','acid','sweet','bitter','body','astr','huigan'],SFALL={fa:.5,ra:.5,acid:3.5,sweet:3,bitter:.5,body:2,astr:.5,huigan:.5};
 let MED=null,MEDN=-1;
@@ -533,7 +542,20 @@ function vAnalysis(){
   }
   return h;
 }
-function render(){
+/* 尺度校正：舊紀錄的香氣分數偏低（過去把一般咖啡香打 0–1），換成新的錨點尺度，原始分數保留在 calLog */
+const CAL={v:1,keys:['fa','ra'],map:x=>Math.min(5,x+1.5),label:'香氣改用新尺度（0 沒有／1 隱約／2 明顯但弱／3 清楚／4 強／5 主角）：前嗅、後嗅各 +1.5'};
+let calBusy=false;
+async function calibrate(){
+  if(calBusy||!store||!(S.loaded.beans&&S.loaded.brews&&S.loaded.gear)||isDemo())return;
+  const todo=S.brews.filter(b=>!(b.cal>=CAL.v));const g=(S.gear||[]).find(x=>x.id==='cfg-score'),fixCfg=g&&!(g.calV>=CAL.v);
+  if(!todo.length&&!fixCfg)return;calBusy=true;let n=0;
+  try{for(const b of todo){const ch=[],temps=JSON.parse(JSON.stringify(b.temps||{}));
+      for(const[t]of TEMPS){const s=temps[t]&&temps[t].s;if(!s)continue;for(const k of CAL.keys)if(has(s[k])){const to=CAL.map(+s[k]);if(to!==+s[k])ch.push({t,k,from:+s[k],to});s[k]=to}}
+      await store.save('brews',{...b,temps,cal:CAL.v,calLog:[...(b.calLog||[]),{v:CAL.v,at:Date.now(),label:CAL.label,ch}]});if(ch.length)n++}
+    if(fixCfg)await store.save('gear',{...g,aromaFull:Math.max(4,g.aromaFull||0),calV:CAL.v});
+    if(n)toast(`已把 ${n} 杯的香氣換成新尺度，原始分數記在每杯最下方`)}catch(e){}
+  calBusy=false}
+function render(){setTimeout(calibrate,0);
   document.querySelectorAll('nav a').forEach(a=>a.classList.toggle('on',a.dataset.v===S.view));
   if(!(S.loaded.beans&&S.loaded.brews)){$('#main').innerHTML='<div class="card sub">讀取中…</div>';return}
   const m=$('#main'),top=m.scrollTop;
@@ -550,11 +572,12 @@ function detail(id){
   const temps=TEMPS.filter(t=>b.temps?.[t[0]]&&(Object.keys(b.temps[t[0]].s||{}).length||(b.temps[t[0]].f||[]).length||b.temps[t[0]].n)).map(t=>{const x=b.temps[t[0]];
     return `<fieldset><legend>${t[1]}</legend><div class="row">${Object.entries(x.s||{}).filter(e=>has(e[1])).map(e=>`<span class="tag mono">${SCL[e[0]]} ${e[1]}</span>`).join('')}</div><div class="row">${flavHtml(x.f||[])}</div>${x.n?`<div>${esc(x.n)}</div>`:''}</fieldset>`}).join('');
   openSheet(`<div class="sheet-head"><b>${when(b.ts)}</b><button class="btn sm" data-act="close">關閉</button></div><div class="sheet-body">
-    <div class="between"><div><div class="title">${esc(bean?bean.name:'已刪除的豆子')}</div><div class="sub">${has(b.restDay)?`養豆第 ${b.restDay} 天`:''}</div></div>${has(b.score)?`<div class="score">${b.score}<small>總分</small></div>`:''}</div>
+    <div class="between"><div><div class="title">${esc(bean?bean.name:'已刪除的豆子')}</div><div class="sub">${has(b.restDay)?`養豆第 ${b.restDay} 天`:''}</div></div>${totBox(b)}</div>
     <fieldset><legend>參數</legend><dl class="kv mono">${PARAMS.map(p=>`<dt>${p.l}</dt><dd>${esc(fmtP(p,b[p.k]))}</dd>`).join('')}<dt>TDS</dt><dd>${b.tds??'—'}</dd><dt>萃取率</dt><dd>${has(b.ey)?b.ey+'%':'—'}</dd></dl></fieldset>
     ${b.dry?`<fieldset><legend>壺香</legend><div>${esc(b.dry)}</div></fieldset>`:''}${b.target||b.met?`<fieldset><legend>測試目的</legend><div>${esc(b.target||'')}</div>${b.met?`<div><span class="pill ${b.met==='yes'?'good':b.met==='part'?'warn':'muted'}">${MET[b.met]}</span></div>`:''}</fieldset>`:''}
     ${(b.flavors||[]).length?`<fieldset><legend>風味</legend><div class="row">${flavHtml(b.flavors)}</div></fieldset>`:''}${temps}
     ${b.note?`<fieldset><legend>整體敘述</legend><div>${esc(b.note)}</div></fieldset>`:''}${b.next?`<fieldset><legend>下次調整方向</legend><div style="white-space:pre-line">${esc(b.next)}</div></fieldset>`:''}
+    ${(b.calLog||[]).filter(l=>l.ch&&l.ch.length).map(l=>`<fieldset class="calf"><legend>尺度校正紀錄</legend><div class="sub">${new Date(l.at).toLocaleDateString('zh-TW')}　${esc(l.label)}</div><table class="calt"><tr><th></th><th>項目</th><th>原始</th><th>修正後</th></tr>${l.ch.map(c=>`<tr><td>${(TEMPS.find(t=>t[0]===c.t)||[,c.t])[1]}</td><td>${SCL[c.k]||c.k}</td><td class="mono">${c.from}</td><td class="mono"><b>${c.to}</b></td></tr>`).join('')}</table></fieldset>`).join('')}
   </div><div class="sheet-foot"><button class="btn danger" data-act="delBrew" data-id="${esc(b.id)}">刪除</button><button class="btn" data-act="editBrew" data-id="${esc(b.id)}">編輯</button><button class="btn pri" data-act="new" data-base="${esc(b.id)}">以此再沖一杯</button></div>`);
 }
 /* brew form */
@@ -742,7 +765,7 @@ function applyNote(j){
   }
 }
 async function saveBrew(){
-  const b={...F};
+  const b={...F};if(!(b.cal>=CAL.v))b.cal=CAL.v;
   if(!has(b.score)){const o=TEMPS.map(t=>b.temps?.[t[0]]?.s?.overall).filter(has);if(o.length)b.score=r1(o.reduce((a,c)=>a+c,0)/o.length)}b.restDay=restDay(beanById(b.beanId),b.ts);
   if(b.mode==='quick'&&!Object.keys(b.temps).length)b.temps={};
   ['_edit','_slot','_cat','_photoMsg','_paste','_pasteText','_parseMsg','eyManual'].forEach(k=>delete b[k]);
