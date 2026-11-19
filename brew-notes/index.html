@@ -708,7 +708,7 @@ const CAST={
 function pxAv(id,sz=40){const c=CAST[id];let r='';c.px.forEach((row,y)=>[...row].forEach((ch,x)=>{if(ch!=='.')r+=`<rect x="${x}" y="${y}" width="1.04" height="1.04" fill="${c.pal[ch]}"/>`}));
   return `<svg class="pxav" viewBox="0 0 28 32" width="${sz}" height="${Math.round(sz*32/28)}" shape-rendering="crispEdges" aria-hidden="true">${r}</svg>`}
 const hsh=s=>{let h=0;for(const c of String(s))h=(h*31+c.charCodeAt(0))|0;return Math.abs(h)};
-const pick=(arr,seed)=>arr[hsh(seed)%arr.length];
+const pick=(arr,seed)=>arr; /* 延後到開課時才隨機抽 */
 
 /* ---------- 產地資料：地圖座標、常見海拔、簡介 ---------- */
 const GEO=[
@@ -813,35 +813,35 @@ function beanUnit(b){
   const country=gs[0]?COUNTRY[gs[0].c]:'',km=gs[0]?kmTo(gs[0]):null,notes=String(b.notes||'').split(/[、,，\/]/).map(s=>s.trim()).filter(Boolean);
   const intro=String(b.intro||'').split(/\n+/).filter(Boolean)[0]||'';
   const st=[];
-  st.push({t:'產地在哪裡',vis:mapSvg(b),txt:`${b.origin||'產地未填'}${b.region?'・'+b.region:''}${b.station?'・'+b.station:''}。${intro||country}`,
+  st.push({k:'origin',t:'產地在哪裡',vis:mapSvg(b),txt:`${b.origin||'產地未填'}${b.region?'・'+b.region:''}${b.station?'・'+b.station:''}。${intro||country}`,
     sk:[['ye',`這支「${sb}」來自${gs.map(g=>g.n).join('和')||b.origin||'一個我也說不出名字的地方'}。${gs.length>1?'這是配方豆，兩個產地各司其職。':''}`],
       ['sour',gs.some(g=>g.c==='eth')?pick(['衣索比亞的豆袋，花香十支有八支寫得太浪漫。喝了才算數。','處理廠的名字比我的前男友還難記。'],sd):gs.some(g=>g.c==='twn')?'台灣豆的價錢是衣索比亞的三倍，請帶著敬意喝，還有錢包。':tr.blend?'配方豆就是把幾支豆子關在同一個袋子裡，叫它們好好相處。':'產地寫得這麼簡短，烘豆商是有多怕被問。'],
       ['ala',km?`我算了一下，離台灣大約 ${km.toLocaleString()} 公里。用走的……我先去買雙新鞋。`:'我覺得它來自咖啡星球。']]});
-  st.push({t:'海拔有多高',vis:altSvg(b,false),txt:a?`${a.lo===a.hi?a.lo:a.lo+'–'+a.hi} 公尺${a.est?'（豆袋沒寫，這是產區常見範圍）':''}。${ALTSAY((a.lo+a.hi)/2)}`:'還沒有海拔資料。',
+  st.push({k:'alt',t:'海拔有多高',vis:altSvg(b,false),txt:a?`${a.lo===a.hi?a.lo:a.lo+'–'+a.hi} 公尺${a.est?'（豆袋沒寫，這是產區常見範圍）':''}。${ALTSAY((a.lo+a.hi)/2)}`:'還沒有海拔資料。',
     sk:[['ye',a?`看這條帶子，${a.lo} 到 ${a.hi} 公尺${a.est?'是產區常見的高度':''}。${(a.lo+a.hi)/2>=1800?'山上冷，果子熟得慢，糖分和酸都存得多。':'不算高，豆子比較鬆，好萃、也容易萃過頭。'}`:'海拔沒寫，我們只好先跳過。'],
       ['sour',pick(['海拔高不保證好喝，但會讓烘豆商比較好意思把價錢寫高。','左邊那根是 101，旁邊那座山是你的咖啡。比例尺沒有騙你。'],sd+'a')],
       ['ala',a?pick([`${a.hi} 公尺！咖啡樹比我還會爬山。`,`這麼高，採收工人應該都有六塊肌。`],sd+'b'):'我們可以假設它住在二樓。']]});
   const vs=VARSAY.filter(([re])=>re.test(String(b.variety||'')+' '+b.name)).map(v=>v[1]);
-  st.push({t:'處理法與品種',vis:procSvg(tr.proc),txt:`${b.process?b.process+'。':''}${PROCSAY[tr.proc]}${vs.length?'\n'+vs.join('\n'):''}`,
+  st.push({k:'proc',t:'處理法與品種',vis:procSvg(tr.proc),txt:`${b.process?b.process+'。':''}${PROCSAY[tr.proc]}${vs.length?'\n'+vs.join('\n'):''}`,
     sk:[['ye',`處理法決定了果肉留下多少味道。這支是「${b.process||PL[tr.proc]}」${vs.length?'，品種是 '+(b.variety||''):''}。`],
       ['sour',{natural:'日曬的發酵味，有人叫它熱帶水果，有人叫它酒糟。看你喝到哪一批。',washed:'水洗豆乾淨是乾淨，沖壞了也是乾淨的難喝。',ferment:'共發酵那個桃子味是從哪來的？桃子自己知道。',honey:'蜜處理沒有加蜂蜜。我每年都要解釋一次。',unknown:'處理法沒寫？那我只好用猜的，猜錯不負責。'}[tr.proc]],
       ['ala',pick(['如果我是咖啡豆，我要選蜜處理，聽起來比較甜蜜。','我也想被日曬，但我老闆說我已經夠黑了。'],sd+'c')]]});
-  st.push({t:'風味與烘焙度',vis:flavorVis(b),txt:`標示風味：${b.notes||'沒寫'}。${has(b.agtron)?`Agtron ${b.agtron}，`:b.roastLevel?`標示${b.roastLevel}，`:''}${AGSAY(num(b.agtron))}`,
+  st.push({k:'flavor',t:'風味與烘焙度',vis:flavorVis(b),txt:`標示風味：${b.notes||'沒寫'}。${has(b.agtron)?`Agtron ${b.agtron}，`:b.roastLevel?`標示${b.roastLevel}，`:''}${AGSAY(num(b.agtron))}`,
     sk:[['ye',notes.length?`包裝寫了 ${notes.length} 個風味：${notes.join('、')}。不用每個都喝到，喝到一兩個就算贏。`:'包裝沒寫風味，那就照你自己舌頭的說法。'],
       ['sour',notes.length?`寫「${notes[0]}」？你上次真的喝到幾分？誠實說。`:'沒寫風味的豆子，有種神秘的自信。'],
       ['ala',notes.length?`${notes[notes.length-1]}！我決定今天晚餐就吃這個。`:'我喝什麼都覺得像咖啡，這是天賦。']]});
   const c=ownCombo(b);let r=null;try{r=suggest(c)}catch(e){}
-  st.push({t:'怎麼沖',vis:r?`<div class="trec"><div class="mono trec-p">${esc([c.g?c.g.name+' '+(has(r.grind)?fmtG(c.g,r.grind)+' 格':''):'',has(r.temp)?r.temp+'°C':'',has(r.dose)&&has(r.water)?r.dose+'g : '+r.water+'g':'',c.d?c.d.name:''].filter(Boolean).join(' ・ '))}</div>${r.method?`<div class="sub">手法：${esc(r.method)}</div>`:''}${(r.why||[]).slice(0,4).map(w=>`<div class="sub">・${esc(w)}</div>`).join('')}</div>`:'<div class="sub">先在「配方」放好器材，焙爺才能幫你算。</div>',
+  st.push({k:'recipe',t:'怎麼沖',vis:r?`<div class="trec"><div class="mono trec-p">${esc([c.g?c.g.name+' '+(has(r.grind)?fmtG(c.g,r.grind)+' 格':''):'',has(r.temp)?r.temp+'°C':'',has(r.dose)&&has(r.water)?r.dose+'g : '+r.water+'g':'',c.d?c.d.name:''].filter(Boolean).join(' ・ '))}</div>${r.method?`<div class="sub">手法：${esc(r.method)}</div>`:''}${(r.why||[]).slice(0,4).map(w=>`<div class="sub">・${esc(w)}</div>`).join('')}</div>`:'<div class="sub">先在「配方」放好器材，焙爺才能幫你算。</div>',
     txt:r?(r.title==='預期第一杯'?'這是用你的器材交叉推算的第一杯。':'這是根據你沖過的紀錄調整後的建議。')+(r.change?' '+r.change:''):'器材還沒設定。',
     sk:[['ye',r?`用 ${c.d?c.d.name:'你的濾杯'}，水溫 ${r.temp}°C 起手。${tr.roast==='light'||tr.roast==='vlight'?'淺焙，溫度別省。':tr.roast==='medium'||tr.roast==='dark'?'烘得比較深，溫度收一點，苦味才不會跑出來。':''}`:'器材還沒擺上桌。'],
       ['sour','這是起手式，不是聖旨。第一杯不好喝，先怪注水，再怪豆子。'],
       ['ala',pick(['我已經準備好了！（拿出三合一）','手沖的精髓就是手。所以我先去洗手。'],sd+'d')]]});
-  st.push({t:'什麼時候喝',vis:d!=null?`<div style="padding:4px 0">${curveSvg(b,{h:70,labels:true})}</div>`:'<div class="sub">沒有烘焙日。</div>',txt:adv.t,
+  st.push({k:'rest',t:'什麼時候喝',vis:d!=null?`<div style="padding:4px 0">${curveSvg(b,{h:70,labels:true})}</div>`:'<div class="sub">沒有烘焙日。</div>',txt:adv.t,
     sk:[['ye',d!=null?`今天養豆第 ${d} 天。${adv.t}。`:'沒有烘焙日，我也算不出來。'],
       ['sour',d!=null&&d>(b.winEnd??30)?'再放下去，香氣就要跟你說再見了。':'急什麼，豆子也要休息，跟你上班一樣。'],
       ['ala','養豆就像養寵物，只是它不會叫、也不會咬鞋子。']]});
   if(n.length){const sc=n.filter(x=>rk(x)!=null).sort((x,y)=>rk(y)-rk(x)),best=sc[0];
-    st.push({t:'你和它的紀錄',vis:scoreBars(n),txt:`你沖了 ${n.length} 杯${best?`，最高總評 ${rk(best)}（${when(best.ts)}：${paramLine(best)}）`:''}。${n.length>=2?'想看這些實驗的完整分析，可以開「實驗導覽」。':''}`,
+    st.push({k:'mine',t:'你和它的紀錄',vis:scoreBars(n),txt:`你沖了 ${n.length} 杯${best?`，最高總評 ${rk(best)}（${when(best.ts)}：${paramLine(best)}）`:''}。${n.length>=2?'想看這些實驗的完整分析，可以開「實驗導覽」。':''}`,
       sk:[['ye',best?`最好的那杯是 ${when(best.ts).split(' ')[0]}，${paramLine(best)}。記住這組數字。`:'有紀錄但還沒評分，下次記得打分。'],
         ['sour',n.length>=5?`${n.length} 杯了，有在進步，我承認。`:`才 ${n.length} 杯就想下結論？再沖。`],
         ['ala','我的紀錄只有一杯：大冰拿，半糖少冰。']],act:n.length>=2?{l:'開始實驗導覽',a:'tourExp',id:b.id}:null})}
@@ -861,7 +861,7 @@ function expUnit(b){
   const days=Math.round((n[n.length-1].ts-n[0].ts)/DAY)+1,st=[];
   const VARS=[['grind','刻度','格'],['method','手法',''],['temp','水溫','°C'],['dose','粉重','g'],['water','注水量','g'],['dripper','濾杯',''],['paper','濾紙',''],['grinder','磨豆機','']];
   const moved=VARS.filter(([k])=>new Set(n.map(x=>x[k]).filter(has).map(String)).size>1);
-  st.push({t:'實驗總覽',vis:scoreBars(n),txt:`${n.length} 杯、前後 ${days} 天，動過的變數：${moved.map(v=>v[1]).join('、')||'沒有'}。${best?`最高 ${rk(best)}（${when(best.ts)}），最低 ${rk(worst)}。`:''}`,
+  st.push({k:'overview',t:'實驗總覽',vis:scoreBars(n),txt:`${n.length} 杯、前後 ${days} 天，動過的變數：${moved.map(v=>v[1]).join('、')||'沒有'}。${best?`最高 ${rk(best)}（${when(best.ts)}），最低 ${rk(worst)}。`:''}`,
     sk:[['ye',`今天的單元：「${sb}」的 ${n.length} 杯實驗。先看整體，再一個變數一個變數拆。`],
       ['sour',moved.length>2?`${moved.length} 個變數輪流動，教科書說一次只改一個……你自己數數看。`:`${sc.length} 杯有完整評分，其他的……我就當作沒看見。`],
       ['ala',`${n.length} 杯！這已經不是手沖，是修行了。`]]});
@@ -872,7 +872,7 @@ function expUnit(b){
     let trend='';if(numeric&&G.length>=2){const lo=G[0],hi=G[G.length-1],dd=(key,name)=>lo[key]!=null&&hi[key]!=null&&Math.abs(hi[key]-lo[key])>=0.4?`${name}${hi[key]>lo[key]?'↑':'↓'}${r1(Math.abs(hi[key]-lo[key]))}`:'';
       const ch=[dd('acid','酸'),dd('sweet','甜'),dd('bitter','苦'),dd('body','厚')].filter(Boolean);if(ch.length)trend=`${l}從 ${lo.v} 到 ${hi.v}${u}：${ch.join('、')}。`}
     const why={grind:'越細，萃取越多：甜和厚度先上來，再細就換苦和澀。',temp:'水溫越高萃得越快，香氣和苦味都會一起放大。',method:'分段比例決定前段（酸、香）和後段（甜、厚、苦）各萃多少。',dose:'粉量多，濃度和厚度都上來。',water:'水多濃度變淡、萃取率上升。',dripper:'濾杯的肋骨和孔洞決定流速，流速決定萃取時間。',paper:'濾紙厚薄、流速不同，會改變流乾時間和乾淨度。',grinder:'不同磨豆機的細粉比例不同，口感乾淨度差很多。'}[k];
-    st.push({t:`變數：${l}`,vis:groupBars(G,l),txt:`${bg?`${l} ${bg.v}${u} 平均總評最高（${bg.avg}）${wg&&wg!==bg?`，${wg.v}${u} 最低（${wg.avg}）`:''}。`:''}${trend}${why}`,
+    st.push({k:'var-'+k,t:`變數：${l}`,vis:groupBars(G,l),txt:`${bg?`${l} ${bg.v}${u} 平均總評最高（${bg.avg}）${wg&&wg!==bg?`，${wg.v}${u} 最低（${wg.avg}）`:''}。`:''}${trend}${why}`,
       sk:[['ye',bg?`${l} ${bg.v}${u} 那根最高${bg.n<2?'，但只有 1 杯，可能是運氣':''}。下一步在它前後各再試一次，確認不是偶然。`:why],
         ['sour',k==='grind'&&numeric?pick([`前後才差 ${r1(Math.max(...vals.map(Number))-Math.min(...vals.map(Number)))} 格，你的舌頭分得出來？……好吧，數據說分得出來。`,`最好的是 ${bg?bg.v:'?'} 格，那你為什麼還一直往別的方向調？`],sd+k):k==='temp'?'降溫就想救苦味？溫度不是萬靈丹。':k==='method'?'同樣的水量，分法換來換去，說穿了就是在跟水流講道理。':`${l}也換？你是在做實驗，還是在逛街？`],
         ['ala',k==='grind'?pick(['磨豆機：我只是一台機器，為什麼要承受這麼多期待。',`我覺得 ${bg?bg.v:''} 格是處女座，龜毛但好喝。`],sd+k+'a'):k==='method'?'60-40、50-50……聽起來像我的存款跟花費比例。':k==='temp'?'92 度，剛好是我泡澡的……不對，那會熟。':'濾紙說它只是路過。']]})}
@@ -880,15 +880,15 @@ function expUnit(b){
   if(td.length>=3){const top=td.slice().sort((a,c)=>rk(c)-rk(a)).slice(0,Math.max(2,Math.ceil(td.length/3))),lo=Math.min(...top.map(x=>+x.tds)),hi=Math.max(...top.map(x=>+x.tds));
     const W=320,H=130,xs=td.map(x=>+x.tds),x0=Math.min(...xs)-0.05,x1=Math.max(...xs)+0.05,X=v=>20+(v-x0)/(x1-x0)*(W-30),Yv=v=>H-20-(H-34)*v/100;
     const vis=`<svg viewBox="0 0 ${W} ${H}" class="sbars" role="img" aria-label="TDS 對總評"><rect x="${X(lo)-4}" y="8" width="${X(hi)-X(lo)+8}" height="${H-28}" class="bandr"/>${td.map(x=>`<circle cx="${X(+x.tds)}" cy="${Yv(rk(x))}" r="5" class="dot"/><text x="${X(+x.tds)}" y="${Yv(rk(x))-8}" text-anchor="middle" class="d">${rk(x)}</text>`).join('')}<text x="${W/2}" y="${H-4}" text-anchor="middle" class="d">TDS ${x0.toFixed(2)} → ${x1.toFixed(2)}</text></svg>`;
-    st.push({t:'濃度甜蜜點',vis,txt:`分數前段的幾杯，TDS 落在 ${lo}–${hi}。這就是這支豆子在你器材上的濃度甜蜜點。`,
+    st.push({k:'tds',t:'濃度甜蜜點',vis,txt:`分數前段的幾杯，TDS 落在 ${lo}–${hi}。這就是這支豆子在你器材上的濃度甜蜜點。`,
       sk:[['ye',`TDS ${lo} 到 ${hi} 這一段，分數最集中。下次萃完先量 TDS，偏離太多就知道往哪調。`],['sour','濃不等於好喝，這句話我說了二十年。'],['ala',`TDS ${hi}，聽起來像一台很快的跑車。`]]})}
   const tav=t=>{const a=sc.map(x=>brewTotal(x)).filter(Boolean).map(x=>x.per[t]);return a.length?Math.round(a.reduce((p,c)=>p+c,0)/a.length):null};
   const hv=tav('hot'),wv=tav('warm'),rv=tav('room');
   if(hv!=null){const L=[['高溫',hv],['中溫',wv],['常溫',rv]],lw=L.slice().sort((a,c)=>a[1]-c[1])[0];
-    st.push({t:'三個溫度',vis:groupBars(L.map(([v,a])=>({v,avg:a,n:sc.length})),'溫度'),txt:`平均：高溫 ${hv}、中溫 ${wv}、常溫 ${rv}。${lw[0]}最弱${lw[0]==='常溫'?'，放涼後缺點會被放大，通常是苦、澀或酸太尖。':lw[0]==='高溫'?'，剛沖好時香氣或味道還沒展開。':'。'}`,
+    st.push({k:'temps',t:'三個溫度',vis:groupBars(L.map(([v,a])=>({v,avg:a,n:sc.length})),'溫度'),txt:`平均：高溫 ${hv}、中溫 ${wv}、常溫 ${rv}。${lw[0]}最弱${lw[0]==='常溫'?'，放涼後缺點會被放大，通常是苦、澀或酸太尖。':lw[0]==='高溫'?'，剛沖好時香氣或味道還沒展開。':'。'}`,
       sk:[['ye',`咖啡要喝三個溫度。這支豆子${lw[0]}掉最多，這是調整方向的線索。`],['sour','熱的時候什麼都好喝，放涼才見真章。'],['ala','我都一口氣喝完，所以我的常溫分數永遠是零。']]})}
   if(best){const lastNext=String(n[n.length-1].next||'').split('\n').map(x=>x.trim()).filter(Boolean).slice(0,2).join(' ');
-    st.push({t:'結論與下一步',vis:`<div class="trec"><div class="sub">目前最佳・總評 ${rk(best)}・${when(best.ts)}</div><div class="mono trec-p">${esc(paramLine(best))}${has(best.tds)?' ・ TDS '+best.tds:''}</div>${best.method?`<div class="sub">手法：${esc(best.method)}</div>`:''}</div>`,
+    st.push({k:'end',t:'結論與下一步',vis:`<div class="trec"><div class="sub">目前最佳・總評 ${rk(best)}・${when(best.ts)}</div><div class="mono trec-p">${esc(paramLine(best))}${has(best.tds)?' ・ TDS '+best.tds:''}</div>${best.method?`<div class="sub">手法：${esc(best.method)}</div>`:''}</div>`,
       txt:`目前最好的配方是 ${paramLine(best)}${best.method?'、'+best.method:''}。${lastNext?'你最後一杯寫的下一步：'+lastNext:''}`,
       sk:[['ye','先把最好的那杯重現一次。能重現，才是真的找到了；再從那裡一次只改一個變數。'],
         ['sour',pick(['下次別再一次動三個變數，拜託。','恭喜。接下來最難的事情是：重現它。'],sd+'z')],
@@ -899,7 +899,65 @@ function tourHub(){const done=tourDone(),bs=beans().filter(b=>!b.archived),ex=be
   return `<h2>焙爺開講</h2><div class="card tourhub"><div class="castrow">${['ye','sour','ala'].map(id=>`<div class="castc">${pxAv(id,56)}<b>${CAST[id].n}</b><span>${CAST[id].r}</span></div>`).join('')}</div>
     ${ex.length?`<div class="sub tsec">實驗導覽：把一系列測試整理成一堂課</div>${ex.map(b=>item('exp:'+b.id,'tourExp',b.id,shortBean(b),brewsOf(b.id).length+' 杯實驗')).join('')}`:''}
     <div class="sub tsec">豆子導覽：產地、海拔、處理法、怎麼沖</div>${bs.map(b=>item('bean:'+b.id,'tourBean',b.id,shortBean(b),[b.origin,b.process].filter(Boolean).join('・'))).join('')||'<div class="sub">還沒有豆子。</div>'}</div>`}
-function startTour(u){if(!u||!u.st.length){toast('資料不夠，還開不了課');return}TOUR={...u,i:0};drawTour()}
+/* ---------- 小劇場台詞庫：每次開課隨機抽，盡量不重複最近看過的 ---------- */
+const XS={
+ origin:{sour:['產地寫得越長，價錢通常越高。我只是陳述事實。','地圖上看很近對吧？那是因為比例尺很仁慈。','你知道處理廠的老闆叫什麼名字嗎？不知道沒關係，我也不知道。','產地不等於好喝，產地只等於運費。','每次聽到「高海拔小農」，我的錢包就開始發抖。','產區名字念不出來的豆子，通常比較貴。這是經驗法則。'],
+   ala:['我也想去產地，順便看看當地的狗。','如果坐飛機去，我要選靠窗，看咖啡樹從雲裡冒出來。','我去過最遠的產地是便利商店的咖啡機。','原來咖啡不是長在超市貨架上的嗎？','我決定下輩子當咖啡樹，每天曬太陽就好。','這條虛線好像我回家的路，彎彎曲曲。']},
+ alt:{sour:['海拔數字是處理廠報的，有沒有灌水，只有山知道。','高海拔的豆子硬，沖不開就說它「有個性」，我看是你水溫不夠。','你再盯著這座山看，它也不會變成你的。','一千公尺以下的豆子也有好喝的，別被數字綁架。'],
+   ala:['爬到那麼高才能喝到這杯，我先去練腿。','山上的咖啡樹會不會高山症？','101 好可憐，被拿來當比例尺。','如果我住在兩千公尺，我也會變得比較酸。','我只爬過 101 的樓梯，第 20 層就放棄了。']},
+ proc:{sour:['處理法寫得越複雜，越要問清楚：是豆子好喝，還是添加物好喝？','同一個處理廠，每批味道都不一樣，這叫農產品，不叫罐頭。','發酵控制得好叫風味，控制不好叫餿掉。','你喝到的水果味，八成是處理法的功勞，不是你的手法。'],
+   ala:['水洗聽起來好清爽，我也想被水洗一下。','咖啡豆在果肉裡泡澡，好羨慕。','如果有一種處理法叫「睡覺處理」，我一定很擅長。','蜜處理、日曬、水洗……好像在選三溫暖的行程。']},
+ flavor:{sour:['風味描述是詩，不是保證書。','你如果喝到芒果，請先確定你剛剛沒吃芒果。','Agtron 數字很漂亮，但舌頭才是最後的裁判。','包裝上寫四個風味，能喝到兩個就是好豆子了。','烘焙度跟風味的關係，比你跟健身房的關係還緊密。'],
+   ala:['我喝咖啡最常喝到的風味是：咖啡。','這個色條好像巧克力漸層，我餓了。','如果風味可以用拉花畫出來，我會畫一隻在吃水果的熊。','讀完這些風味，我覺得我剛吃完一桌水果盤。']},
+ recipe:{sour:['配方照抄不會錯，錯的是你注水時在滑手機。','起手水溫是建議，不是法律。','算出來的刻度你先別急著轉，先確認磨豆機歸零了沒。','用同一套器材，每個人沖出來都不一樣。差別在人。'],
+   ala:['我的沖煮手法是：閉上眼睛，相信宇宙。','手沖壺的壺嘴好像天鵝，我每次都想跟它說早安。','我覺得濾紙摺好的那一刻，咖啡就已經成功一半了。','如果沖壞了，就加牛奶，拿鐵萬歲。']},
+ rest:{sour:['豆子放太久會老，人也一樣，所以趁新鮮。','養豆不是放著忘記，是放著記得。','一包豆子開了不喝完，最後都進了垃圾桶，別問我怎麼知道。','冷凍可以停住時間，可惜只對豆子有效。'],
+   ala:['我也在養豆，養在我的肚子裡。','如果豆子會說話，它應該會說：快喝我。','曲線的高峰好像我週五下午的心情。','我決定幫這包豆子取名字，叫它小圓。']},
+ mine:{sour:['紀錄寫得越完整，我吐槽得越精準。','有分數的紀錄才算數，沒分數的叫日記。','你的進步我看到了，雖然我不會常說。'],
+   ala:['我也想要紀錄，我的紀錄是：今天喝了三杯，心跳很快。','你的紀錄好整齊，跟我的房間完全相反。','如果紀錄可以拉花，我要畫一棵聖誕樹。']},
+ overview:{sour:['實驗做得多不等於做得好，重點是有沒有一次只改一件事。','有些杯子沒打分，我就假裝它們是練習。','這張長條圖告訴我一件事：你很認真，但不一定有方向。','做實驗最怕的不是失敗，是不知道為什麼成功。'],
+   ala:['這張圖好像一排高低不一的咖啡杯。','那根紅色的好驕傲，挺得最高。','我做實驗只有一個變數：要不要加糖。','如果每杯咖啡都有名字，那根紅的應該叫冠軍。']},
+ var:{sour:['一次改兩個變數，就不知道是誰的功勞。','數據不多，別太早下結論。','差這一點點，有可能是今天水溫計心情不好。','你調了那麼多次，有沒有想過，可能是豆子在變？養豆天數也是變數。','圖上最高那根如果只有一杯，那叫運氣，不叫結論。'],
+   ala:['變數這兩個字，聽起來好像魔術。','我覺得每次調整都是在跟咖啡談戀愛，有時候會被甩。','如果我是那根最矮的長條，我會很想哭。','我調整變數的方式是：換一個杯子。']},
+ tds:{sour:['TDS 計再準，量之前沒有攪勻就是白量。','數字好看，喝起來不好喝，那也沒有用。','濃度跟萃取率是兩回事，別搞混。'],
+   ala:['我的 TDS 測量方式是：看起來黑黑的就是濃。','這片綠色的區域好像安全區，我要住進去。','TDS 好像考試分數，太高太低都要被罵。']},
+ temps:{sour:['常溫才是照妖鏡。','高溫好喝只能說及格，三個溫度都好喝才叫好。','你如果都趁熱喝完，那你的常溫分數就是在猜。'],
+   ala:['我喝咖啡的速度太快，所以我只認識高溫。','放涼的咖啡好像冷掉的人際關係，要重新加熱。','三個溫度好像三溫暖，我最喜歡中間那個。']},
+ end:{sour:['好，結論有了。下次不要再問我同樣的問題。','重現最好那杯，才是真本事。','我不會說你很厲害，但這次的紀錄很有用。','下一步只改一件事。我會盯著。'],
+   ala:['下課了！可以去喝咖啡了嗎？','今天學到最重要的事：咖啡很好喝。','我要把這堂課的心得畫成拉花。……失敗了，變成一團。','掌聲鼓勵！（自己拍）']}};
+/* 偶爾多一段兩人對嗆 */
+const BANTER=[[['ala','我覺得咖啡是一種液態的擁抱。'],['sour','那你剛剛那杯是被勒住脖子的擁抱。']],
+ [['ala','我昨天沖了一杯完美的咖啡！'],['sour','有記錄參數嗎？'],['ala','……我記得它很好喝。']],
+ [['sour','阿拉，你知道萃取率是什麼嗎？'],['ala','知道啊，就是我上班萃取熱情的比例，大概 3%。']],
+ [['ala','酸姐你為什麼叫酸姐？'],['sour','因為我喝過的酸，比你吃過的糖還多。']],
+ [['ala','我要發明一種咖啡，喝了會變聰明。'],['sour','那你自己要先喝兩杯。']],
+ [['sour','誰把我的杯測匙拿去攪奶泡？'],['ala','（默默把湯匙藏到背後）']],
+ [['ala','我覺得焙爺的鬍子裡一定藏了咖啡豆。'],['ye','……只有一顆，是備用的。']],
+ [['ala','焙爺，你沖了幾年咖啡？'],['ye','久到我還記得，手沖壺沒有細嘴的年代。'],['sour','那時候大家都在用茶壺嗎？']],
+ [['sour','焙爺，你又在對著豆子微笑了。'],['ye','好豆子值得一個微笑。'],['ala','那我值得幾個？']],
+ [['ala','如果咖啡是一首歌，這杯是什麼歌？'],['sour','是一首副歌太長的歌。']],
+ [['ala','我今天練拉花，畫了一隻天鵝。'],['sour','我看到的是一隻鴨子在溺水。']],
+ [['sour','記錄要寫清楚，不然一個月後你自己都看不懂。'],['ala','我一個月前的訊息我現在也看不懂。']],
+ [['ala','我覺得咖啡豆在袋子裡會聊天。'],['ye','會的，它們會排氣。'],['sour','那叫放屁，不叫聊天。']],
+ [['ala','酸姐，你喝過最難喝的咖啡是什麼？'],['sour','你上週請我喝的那杯。'],['ala','那是我的心意！'],['sour','心意很苦。']],
+ [['ye','手沖最重要的是什麼？'],['ala','手！'],['sour','……是耐心，還有一個會看溫度計的腦袋。']],
+ [['ala','我想把磨豆機取名叫小豆豆。'],['sour','它聽到會想自己拆掉自己。']],
+ [['sour','你知道一杯咖啡大概要用幾顆豆子嗎？'],['ala','一顆，很大的那種。'],['ye','十五克大約一百多顆。']],
+ [['ala','我覺得濾杯好像一頂帽子。'],['sour','那你戴戴看。'],['ala','……有點燙。']]];
+const recentKey='bn-tour-recent';
+function recentGet(){try{return JSON.parse(localStorage.getItem(recentKey)||'[]')}catch(e){return[]}}
+function recentPut(a){try{localStorage.setItem(recentKey,JSON.stringify(a.slice(-150)))}catch(e){}}
+function pickFresh(opts,used){const fresh=opts.filter(o=>!used.has(o));const pool=fresh.length?fresh:opts;return pool[Math.floor(Math.random()*pool.length)]}
+function resolveSkits(u){const rec=recentGet(),used=new Set(rec);const kind=k=>String(k||'').replace(/^var-.*/,'var');
+  let lastB=-1;
+  for(const s of u.st){const X=XS[kind(s.k)]||{};const out=[];
+    for(const[w,t]of s.sk){let opts=Array.isArray(t)?t.slice():[t];if(w!=='ye'&&X[w])opts=opts.concat(X[w]);const c=pickFresh(opts,used);used.add(c);rec.push(c);out.push([w,c])}
+    if(Math.random()<0.4){const cand=BANTER.map((b,i)=>i).filter(i=>i!==lastB&&!used.has('B'+i));if(cand.length){const i=cand[Math.floor(Math.random()*cand.length)];lastB=i;used.add('B'+i);rec.push('B'+i);
+      if(Math.random()<0.5)out.push(...BANTER[i]);else out.splice(1,0,...BANTER[i])}}
+    if(out.length>2&&Math.random()<0.35){const a=out.findIndex(x=>x[0]==='sour'),b=out.findIndex(x=>x[0]==='ala');if(a>0&&b>0){const t=out[a];out[a]=out[b];out[b]=t}}
+    s.sk=out}
+  recentPut(rec);return u}
+function startTour(u){if(!u||!u.st.length){toast('資料不夠，還開不了課');return}TOUR={...resolveSkits(u),i:0};drawTour()}
 function drawTour(){const u=TOUR,s=u.st[u.i],last=u.i===u.st.length-1;
   openSheet(`<div class="sheet-head"><b class="thead">🎓 ${esc(u.title)}</b><button class="btn sm" data-act="tourClose">離開</button></div><div class="sheet-body tour">
     <div class="tdots">${u.st.map((x,i)=>`<button type="button" class="${i===u.i?'on':i<u.i?'past':''}" data-act="tourGo" data-v="${i}" aria-label="第 ${i+1} 站：${esc(x.t)}"></button>`).join('')}</div>
