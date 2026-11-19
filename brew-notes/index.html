@@ -803,10 +803,16 @@ function placeItem(t,id){
   const miss=missing();if(!miss.length)setTimeout(()=>{const e=$('#recOut');if(e)e.scrollIntoView({behavior:'smooth',block:'start'})},60);
 }
 const shortBean=b=>{let n=String(b.name);const r=String(b.roaster||'').split(/\s/)[0];if(r)n=n.replace(new RegExp('^'+r.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'\\s*'),'');if(b.origin)n=n.replace(new RegExp('^'+String(b.origin).replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'\\s*'),'');return n||b.name};
+function silhouette(t,sz){const col='rgba(255,244,225,.38)';
+  if(t==='bean')return `<svg viewBox="0 0 60 72" width="${sz}" height="${sz*1.2}" aria-hidden="true"><path d="M10 8h40l4 58c0 3-2 5-5 5H11c-3 0-5-2-5-5z" fill="${col}"/></svg>`;
+  if(t==='method')return `<svg viewBox="0 0 40 24" width="${sz}" height="${sz*.6}" aria-hidden="true">${[0,1,2].map(i=>`<path d="M${6+i*14} 4c-4 6-6 9-6 12a6 6 0 0 0 12 0c0-3-2-6-6-12z" fill="${col}"/>`).join('')}</svg>`;
+  const ic={grinder:'c40',dripper:'v60',paper:'conep',kettle:'brewista',water:'bottle'}[t],rows=SPR.GS[ic];let h='';
+  rows.forEach((r,y)=>{let x=0;while(x<r.length){const ch=r[x];let e=x+1;while(e<r.length&&r[e]===ch)e++;if(ch!=='.')h+=`<rect x="${x}" y="${y}" width="${e-x}" height="1"/>`;x=e}});
+  return `<svg viewBox="0 ${rows.length-16} 16 16" width="${sz}" height="${sz}" shape-rendering="crispEdges" fill="${col}" aria-hidden="true">${h}</svg>`}
 function deskHtml(){
   const c=curSel(),map={bean:c.bean,grinder:c.g,dripper:c.d,paper:c.p,kettle:c.k,water:c.w,method:c.m};
   return `<div class="desk${missing().length?' sticky':''}">${SLOTS.filter(([t])=>itemsOf(t).length||t==='bean').map(([t,l])=>{const x=map[t];
-    return `<div class="slot ${x?'full':''} ${t==='method'?'wide':''}" data-slot="${t}" ${x?`data-act="unslot" data-v="${t}"`:''}><div class="slot-l">${l}${t==='method'&&!x?'（可不放）':''}</div>${x?`<div class="slot-art">${itemArt(t,x,t==='bean'?30:38)}</div><div class="slot-n">${esc(x.name)}</div>`:`<div class="slot-e">${t==='method'?'依器材自動':'拖到這裡'}</div>`}</div>`}).join('')}</div>`;
+    return `<div class="slot ${x?'full':''} ${t==='method'?'wide':''}" data-slot="${t}" ${x?`data-act="unslot" data-v="${t}"`:''}><div class="slot-l">${l}${t==='method'&&!x?'（可不放）':''}</div>${x?`<div class="slot-art">${itemArt(t,x,t==='bean'?30:38)}</div><div class="slot-n">${esc(x.name)}</div>`:`<div class="slot-art sil">${silhouette(t,t==='bean'?30:t==='method'?34:38)}</div><div class="slot-e">${t==='method'?'依器材自動':'拖到這裡'}</div>`}</div>`}).join('')}</div>`;
 }
 function shelfHtml(){
   const c=curSel(),on={bean:c.bean,grinder:c.g,dripper:c.d,paper:c.p,kettle:c.k,water:c.w,method:c.m};
