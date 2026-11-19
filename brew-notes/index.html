@@ -148,6 +148,14 @@ svg.px{image-rendering:pixelated}svg.dk{filter:drop-shadow(1px 0 0 #9aa3ad) drop
 .rec1{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}.rec-badge{display:inline-block;align-self:flex-start;width:fit-content;background:var(--accent);color:var(--accent-ink);font-size:12px;font-weight:700;padding:2px 10px;border-radius:99px;margin-bottom:6px}
 .adv{font-size:13.5px;margin:6px 0 4px;color:var(--ink)}
 .dirt{width:100%;margin-top:4px}.dirt-bar{height:8px;border-radius:4px;background:var(--sunken);overflow:hidden}.dirt-bar i{display:block;height:100%;border-radius:4px}.dirt-t{font-size:12px;margin-top:3px}.dirt.sm .dirt-bar{height:5px}.dirt.sm .dirt-t{font-size:9.5px;color:var(--muted)}
+.runs{display:flex;flex-direction:column;gap:8px;margin-bottom:6px}
+.run{border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:var(--surface);cursor:pointer}
+.rt{font-size:13px;margin:4px 0}.rchips{display:flex;flex-wrap:wrap;gap:4px;margin:6px 0}
+.rchip{font-size:11.5px;padding:2px 7px;border-radius:99px;background:var(--sunken)}.rchip.chg{background:var(--accent-soft);color:var(--accent);font-weight:700;box-shadow:0 0 0 1px var(--accent)}.rchip s{opacity:.6;font-weight:400}
+.rmeas{font-size:12px;color:var(--muted)}.rnext{font-size:12.5px;margin-top:4px;color:var(--accent)}
+.sgrid{display:grid;grid-template-columns:34px repeat(3,1fr);gap:3px 6px;align-items:center;margin-top:6px;font-size:11px}
+.sgrid b{font-size:11px;color:var(--muted);text-align:center;font-weight:600}.sgrid>span{color:var(--muted)}
+.sgrid i{position:relative;height:12px;background:var(--sunken);border-radius:3px;overflow:hidden;display:block}.sgrid i em{position:absolute;left:0;top:0;bottom:0;border-radius:3px;opacity:.75}.sgrid i small{position:absolute;right:3px;top:-1px;font-size:9.5px;color:var(--ink)}.sgrid i.na{opacity:.35}
 </style>
 </head>
 <body>
@@ -422,6 +430,26 @@ function vBeans(){
   (arc.length?`<details class="card"><summary><b>收藏庫</b> <span class="sub">${arc.length} 支喝完的豆子</span></summary>${arc.slice().sort((a,c)=>(c.archivedAt||0)-(a.archivedAt||0)).map(b=>{const n=brewsOf(b.id),best=n.filter(x=>has(x.score)).sort((x,y)=>y.score-x.score)[0];return `<div class="between" style="padding:8px 0;border-bottom:1px solid var(--line)"><div data-act="beanDetail" data-id="${esc(b.id)}" style="cursor:pointer;min-width:0"><div style="font-weight:600">${esc(b.name)}</div><div class="sub">${esc(b.roaster||'')}${b.roast?' · '+md(b.roast)+' 烘':''} · ${n.length} 杯${best?' · 最高 '+best.score+' 分':''}${b.archivedAt?' · '+iso(b.archivedAt)+' 喝完':''}</div></div><button class="btn sm" data-act="unarchive" data-id="${esc(b.id)}">取回</button></div>`}).join('')}</details>`:'')+
   `<h2>備份</h2><div class="card"><div class="sub">把所有豆子與紀錄複製成文字，可以貼到別處保存。</div><div><button class="btn sm" data-act="export">複製全部資料</button></div></div>`;
 }
+/* ---------- 實驗對照：像咖啡實驗室「保存的結果」一樣，一杯一列上下對照 ---------- */
+const RUNP=[['grind','刻度',v=>v],['temp','水溫',v=>v+'°'],['dose','粉',v=>v+'g'],['water','水',v=>v+'g'],['dripper','濾杯',v=>v],['paper','濾紙',v=>v],['method','手法',v=>v],['time','時間',v=>fmtTime(v)]];
+const SENS=[['acid','酸'],['sweet','甜'],['bitter','苦'],['body','厚'],['astr','澀'],['overall','整體']];
+function runsHtml(list,{limit=30}={}){
+  if(!list.length)return'<div class="card sub">還沒有沖煮紀錄。</div>';
+  const L=list.slice().sort((a,b)=>a.ts-b.ts).slice(-limit);
+  return `<div class="runs">${L.map((b,i)=>{const p=i?L[i-1]:null;
+    const chips=RUNP.filter(([k])=>has(b[k])).map(([k,l,f])=>{const ch=p&&has(p[k])&&String(p[k])!==String(b[k]);return `<span class="rchip ${ch?'chg':''}" title="${ch?'上一杯 '+esc(f(p[k])):''}">${l} ${esc(f(b[k]))}${ch?` <s>${esc(f(p[k]))}</s>`:''}</span>`}).join('');
+    const hasT=TEMPS.some(t=>b.temps&&b.temps[t[0]]&&Object.keys(b.temps[t[0]].s||{}).length);
+    const grid=hasT?`<div class="sgrid"><span></span>${TEMPS.map(t=>`<b>${t[1]}</b>`).join('')}${SENS.map(([k,l])=>`<span>${l}</span>${TEMPS.map(t=>{const v=b.temps?.[t[0]]?.s?.[k],pv=p?.temps?.[t[0]]?.s?.[k],dv=has(v)&&has(pv)&&v!==pv?v-pv:0;return has(v)?`<i title="${v}"><em style="width:${v/5*100}%;background:var(--${k==='overall'?'accent':k==='bitter'||k==='astr'?'warn':'good'})"></em><small>${dv?`<span style="color:var(--${dv>0?'accent':'cold'})">${dv>0?'▲':'▼'}</span>`:''}${v}</small></i>`:'<i class="na"></i>'}).join('')}`).join('')}</div>`:'';
+    const ey=has(b.ey)?b.ey:has(b.tds)&&has(b.bev)&&has(b.dose)?r1(b.tds*b.bev/b.dose):null;
+    return `<div class="run" data-act="detail" data-id="${esc(b.id)}"><div class="between"><div><b>${esc(when(b.ts))}</b><span class="sub"> · ${has(b.restDay)?'養豆第 '+b.restDay+' 天':''}</span></div><div class="score">${has(b.score)?b.score:'—'}<small>總分</small></div></div>
+      ${b.target?`<div class="rt">🎯 ${esc(b.target)}</div>`:''}
+      <div class="rchips">${chips}</div>
+      <div class="rmeas mono">${has(b.tds)?'TDS '+b.tds:''}${ey!=null?' · 萃取率 '+ey+'%':''}${b.dry?' · 壺香：'+esc(b.dry):''}</div>
+      ${grid}
+      ${b.note?`<div class="sub" style="margin-top:4px">${esc(b.note)}</div>`:''}
+      ${b.next?`<div class="rnext">➜ 下次：${esc(b.next).replace(/\n/g,'　')}</div>`:''}</div>`}).join('')}</div>
+    <div class="sub">紅框是跟上一杯不一樣的參數（刪除線是上一杯的值）。點一列看完整紀錄。</div>`;
+}
 function vAnalysis(){
   const withBrews=beans().filter(b=>brews().some(x=>x.beanId===b.id));
   if(!withBrews.length)return demoBanner()+'<div class="card sub">有了沖煮紀錄後，這裡會出現甜蜜點圖、養豆曲線與參數影響。</div>';
@@ -430,7 +458,8 @@ function vAnalysis(){
   const best=scored.slice().sort((a,b)=>b.score-a.score||b.ts-a.ts)[0];
   const judged=bs.filter(b=>b.met),metRate=judged.length?Math.round(judged.filter(b=>b.met==='yes').length/judged.length*100):null;
   let h=demoBanner()+`<label class="f">分析哪一支豆子<select id="aBean" data-sel="aBean">${withBrews.map(b=>`<option value="${esc(b.id)}" ${b.id===S.aBean?'selected':''}>${esc(b.name)}</option>`).join('')}</select></label>
-  <div class="tiles"><div class="tile"><b>${bs.length}</b><span>杯數</span></div><div class="tile"><b>${best?best.score:'—'}</b><span>最高分</span></div><div class="tile"><b>${metRate==null?'—':metRate+'%'}</b><span>目標達成率</span></div></div>`;
+  <div class="tiles"><div class="tile"><b>${bs.length}</b><span>杯數</span></div><div class="tile"><b>${best?best.score:'—'}</b><span>最高分</span></div><div class="tile"><b>${metRate==null?'—':metRate+'%'}</b><span>目標達成率</span></div></div>
+  <h2>實驗對照</h2>${runsHtml(bs)}`;
   if(best)h+=`<h2>目前的甜蜜點</h2><div class="card"><div class="between"><div><div class="title mono">${esc(paramLine(best))}</div><div class="sub">${esc([best.grinder,best.dripper,best.method].filter(Boolean).join(' · '))}</div></div><div class="score">${best.score}<small>總分</small></div></div>
     <div class="sub mono">${has(best.tds)?`TDS ${best.tds} · `:''}${has(best.ey)?`萃取率 ${best.ey}% · `:''}${has(best.restDay)?`養豆第 ${best.restDay} 天`:''}</div><div class="row">${flavHtml(allFlavors(best))}</div>
     <div><button class="btn sm pri" data-act="new" data-base="${esc(best.id)}">用這個配方再沖一杯</button></div></div>`;
