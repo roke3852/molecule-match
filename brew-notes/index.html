@@ -645,7 +645,7 @@ function drawBean(){
     <fieldset><legend>基本資料</legend>${inp('name','名稱','text','placeholder="例如 衣索比亞 果丁丁 水洗"')}<div class="grid2">${inp('origin','產國')}${inp('region','產區')}${inp('station','處理廠／莊園')}${inp('variety','品種')}${inp('process','處理法')}${inp('roaster','烘焙商')}${inp('agtron','烘焙度（Difluid Agtron）','number')}</div>${inp('notes','烘焙商標示的風味（選填）')}</fieldset>
     <fieldset><legend>養豆</legend><div class="grid2">${inp('roast','烘焙日','date')}${inp('weight','整包重量 g','number')}${inp('winStart','適飲期從第幾天','number')}${inp('winEnd','到第幾天','number')}</div>
       <div class="sub">每次記一杯會自動帶入養豆天數，並從重量扣掉粉重。冷凍期間不計入天數。</div></fieldset>
-    <fieldset><legend>介紹（選填）</legend><div class="grid2">${inp('altitude','海拔')}${inp('roastLevel','標示烘焙度')}${inp('agtronNote','色值備註')}</div><label class="f">豆子介紹<textarea data-b="intro" rows="5">${esc(BF.intro||'')}</textarea></label></fieldset>
+    <fieldset><legend>介紹（選填）</legend><div class="grid2">${inp('altitude','海拔')}${inp('roastLevel','標示烘焙度')}${inp('pack','包裝（例：單向閥豆袋、密封鐵罐）')}${inp('agtronNote','色值備註')}</div><label class="f">豆子介紹<textarea data-b="intro" rows="5">${esc(BF.intro||'')}</textarea></label></fieldset>
   </div><div class="sheet-foot">${b?`<button class="btn danger" data-act="delBean" data-id="${esc(b.id)}">刪除</button>`:''}<button class="btn pri" data-act="saveBean">儲存</button></div>`);
 }
 async function saveBean(){
@@ -923,7 +923,7 @@ function beanDetail(id){
   openSheet(`<div class="sheet-head"><b>${esc(b.name)}</b><span class="row" style="margin:0;flex-wrap:nowrap"><button class="btn sm" data-act="beanPdf" data-id="${esc(b.id)}">📄 PDF</button><button class="btn sm" data-act="close">關閉</button></span></div><div class="sheet-body">
     <div class="row"><span class="pill ${st.c}">${st.t}</span><span class="tag">${esc(PL[beanTraits(b).proc])}</span>${has(b.agtron)?`<span class="tag mono">Agtron ${esc(b.agtron)}・${RL[beanTraits(b).roast]}</span>`:''}</div>
     ${d!=null?`<div style="margin:6px 0 2px">${miniRest(b)}</div>`:''}
-    <fieldset><legend>基本資料</legend><dl class="kv">${[['產國',b.origin],['產區',b.region],['處理廠',b.station],['品種',b.variety],['處理法',b.process],['海拔',b.altitude],['標示烘焙度',b.roastLevel],['烘焙商',b.roaster],['烘焙日',b.roast],['標示風味',b.notes],['色值',b.agtronNote]].filter(r=>r[1]).map(r=>`<dt>${r[0]}</dt><dd>${esc(r[1])}</dd>`).join('')}</dl></fieldset>
+    <fieldset><legend>基本資料</legend><dl class="kv">${[['產國',b.origin],['產區',b.region],['處理廠',b.station],['品種',b.variety],['處理法',b.process],['海拔',b.altitude],['標示烘焙度',b.roastLevel],['包裝',b.pack],['烘焙商',b.roaster],['烘焙日',b.roast],['標示風味',b.notes],['色值',b.agtronNote]].filter(r=>r[1]).map(r=>`<dt>${r[0]}</dt><dd>${esc(r[1])}</dd>`).join('')}</dl></fieldset>
     <fieldset><legend>豆子介紹</legend>${b.intro?para(b.intro):`<div class="sub">還沒有介紹。${sampleFn?'按下面的 AI 分析會順便寫一份。':'可以在「編輯」裡自己填。'}</div>`}</fieldset>
     <fieldset><legend>AI 分析</legend>${b.ai&&b.ai.text?`<div class="sub">${esc(when(b.ai.at))} 分析・當時 ${b.ai.n||0} 杯紀錄</div>${para(b.ai.text)}`:''}
       ${sampleFn?`<div class="row"><button type="button" class="btn sm pri" data-act="aiBean" data-id="${esc(b.id)}">${b.ai&&b.ai.text?'重新分析':'AI 分析這支豆子'}</button><span class="sub" id="aiBeanMsg"></span></div><div class="sub">會讀豆子資料、色值、養豆天數和你所有的沖煮紀錄。</div>`:'<div class="sub">AI 分析要在 Claude 裡打開這個 App 才能用。</div>'}</fieldset>
@@ -1024,7 +1024,7 @@ function beanCanvas(b){
   if(d!=null){const s0=b.winStart??7,e0=b.winEnd??30,mx=Math.max(e0,d)+3,P=v=>M+(W-M*2)*Math.min(v,mx)/mx;
     x.fillStyle='#e8e2d8';x.beginPath();x.roundRect(M,y,W-M*2,20,10);x.fill();x.fillStyle='rgba(168,105,15,.3)';x.fillRect(M,y,P(s0)-M,20);x.fillStyle='rgba(43,122,87,.3)';x.fillRect(P(s0),y,P(e0)-P(s0),20);
     x.fillStyle=st.c==='good'?C.good:st.c==='warn'?C.warn:C.mut;x.fillRect(M,y+6,P(d)-M,8);x.fillStyle=C.ink;x.fillRect(P(d)-2,y-6,4,32);y+=60}
-  const kv=[['產國',b.origin],['產區',b.region],['處理廠',b.station],['品種',b.variety],['處理法',b.process],['海拔',b.altitude],['標示烘焙度',b.roastLevel],['烘焙商',b.roaster],['烘焙日',b.roast],['標示風味',b.notes],['色值',b.agtronNote]].filter(r=>r[1]);
+  const kv=[['產國',b.origin],['產區',b.region],['處理廠',b.station],['品種',b.variety],['處理法',b.process],['海拔',b.altitude],['標示烘焙度',b.roastLevel],['包裝',b.pack],['烘焙商',b.roaster],['烘焙日',b.roast],['標示風味',b.notes],['色值',b.agtronNote]].filter(r=>r[1]);
   kv.forEach(([k,v])=>{x.font=`400 24px ${F}`;x.fillStyle=C.mut;x.fillText(k,M,y+28);x.fillStyle=C.ink;x.font=`500 26px ${F}`;const ls=wrapText(x,v,W-M*2-200);ls.forEach((l,i)=>x.fillText(l,M+200,y+28+i*36));y+=ls.length*36+14;x.fillStyle=C.line;x.fillRect(M,y,W-M*2,1);y+=8});
   const sec=(title,body,col)=>{if(!body)return;y+=30;x.fillStyle=C.acc;x.fillRect(M,y,8,34);x.fillStyle=C.ink;x.font=`800 32px ${F}`;x.fillText(title,M+22,y+29);y+=60;x.font=`400 25px ${F}`;
     String(body).split(/\n+/).filter(Boolean).forEach(p=>{const head=/^【(.+?)】/.exec(p);if(head){x.fillStyle=C.acc;x.font=`700 25px ${F}`;x.fillText(head[1],M,y);y+=38;p=p.slice(head[0].length);x.font=`400 25px ${F}`}
