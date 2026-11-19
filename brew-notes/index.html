@@ -111,6 +111,14 @@ svg .band{fill:var(--good);opacity:.13}
 svg .lbl{fill:var(--ink);font-weight:600}
 #toast{position:fixed;left:50%;bottom:84px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:8px 14px;border-radius:99px;font-size:13px;z-index:30;display:none;max-width:90%}
 .up{color:var(--accent)}.down{color:var(--cold)}
+.rc-row{margin:10px 0 14px}.rc-name{font-size:14px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;flex:1}.rc-d{font-size:13px;white-space:nowrap;margin-left:8px}
+.rc-bar{position:relative;height:14px;border-radius:7px;background:var(--sunken);margin-top:6px;overflow:visible}
+.rc-bar i{position:absolute;top:0;bottom:0;border-radius:7px}
+.rc-rest{background:color-mix(in srgb,var(--warn) 22%,transparent)}.rc-win{background:color-mix(in srgb,var(--good) 30%,transparent)}
+.rc-fill{left:0;top:5px!important;bottom:5px!important;background:var(--muted)}.rc-fill.good{background:var(--good)}.rc-fill.warn{background:var(--warn)}.rc-fill.cold{background:var(--cold)}
+.rc-now{position:absolute;top:-3px;bottom:-3px;width:3px;margin-left:-1.5px;border-radius:2px;background:var(--ink)}
+.rc-axis{position:relative;height:16px;font-size:11px;color:var(--muted);margin-top:2px}.rc-axis span{position:absolute;transform:translateX(-50%)}
+.rc-key{gap:14px;margin-top:6px}.rc-key span{display:inline-flex;align-items:center;gap:5px}.rc-sw{display:inline-block;width:14px;height:8px;border-radius:4px;position:static!important}
 </style>
 </head>
 <body>
@@ -343,10 +351,20 @@ function vLog(){
   return demoBanner()+`<div class="tiles"><div class="tile"><b>${wk.length}</b><span>近 7 天杯數</span></div><div class="tile"><b>${top?top.score:'—'}</b><span>近 7 天最高分</span></div><div class="tile"><b>${ready.length}</b><span>適飲期的豆子</span></div></div>
   <h2>沖煮紀錄</h2>${bs.length?bs.map(brewCard).join(''):'<div class="card sub">還沒有紀錄。按下方「＋ 記一杯」開始。</div>'}`;
 }
+function restChart(bs){
+  const L=bs.map(b=>({b,d:restDay(b),s:b.winStart??7,e:b.winEnd??30,st:beanStatus(b)})).filter(x=>x.d!=null);
+  if(!L.length)return'';
+  const max=Math.ceil(Math.max(...L.map(x=>Math.max(x.e,x.d)))/5)*5+5,P=v=>(Math.min(v,max)/max*100).toFixed(2)+'%';
+  const ticks=[];for(let t=0;t<=max;t+=max>40?10:5)ticks.push(`<span style="left:${P(t)}">${t}</span>`);
+  return `<h2>養豆進度</h2><div class="card rc">${L.map(({b,d,s,e,st})=>`<div class="rc-row"><div class="between"><span class="rc-name">${esc(b.name)}</span><span class="mono rc-d" style="color:var(--${st.c==='muted'?'muted':st.c})">第 ${d} 天${b.frozenSince?' ❄':''}</span></div>
+    <div class="rc-bar"><i class="rc-rest" style="left:0;width:${P(s)}"></i><i class="rc-win" style="left:${P(s)};width:calc(${P(e)} - ${P(s)})"></i><i class="rc-fill ${st.c}" style="width:${P(d)}"></i><b class="rc-now" style="left:${P(d)}"></b></div></div>`).join('')}
+    <div class="rc-axis mono">${ticks.join('')}</div>
+    <div class="row sub rc-key"><span><i class="rc-sw rc-rest"></i>養豆期</span><span><i class="rc-sw rc-win"></i>適飲窗口</span><span><i class="rc-sw rc-fill good"></i>目前天數</span></div></div>`;
+}
 function vBeans(){
   const order={good:0,warn:1,cold:2,muted:3};
   const bs=beans().slice().sort((a,b)=>order[beanStatus(a).c]-order[beanStatus(b).c]);
-  return demoBanner()+`<div class="between" style="align-items:center"><h2 style="margin:0">我的豆子</h2><button class="btn sm pri" data-act="newBean">＋ 新增豆子</button></div>`+
+  return demoBanner()+restChart(bs)+`<div class="between" style="align-items:center"><h2 style="margin:0">我的豆子</h2><button class="btn sm pri" data-act="newBean">＋ 新增豆子</button></div>`+
   (bs.length?bs.map(b=>{const st=beanStatus(b),d=restDay(b),rem=remaining(b),n=brews().filter(x=>x.beanId===b.id).length;
     return `<div class="card"><div class="between"><div><div class="title">${esc(b.name)}</div><div class="sub">${esc([b.origin,b.region,b.station,b.variety,b.process,b.roaster].filter(Boolean).join(' · '))}</div></div>${d!=null?`<div class="score">${d}<small>養豆天</small></div>`:''}</div>
     <div class="row"><span class="pill ${st.c}">${st.t}</span>${has(b.agtron)?`<span class="tag mono">Agtron ${esc(b.agtron)}</span>`:''}${rem!=null?`<span class="tag mono" ${rem<45?'style="color:var(--warn)"':''}>剩 ${rem}g${rem<45?'，快用完':''}</span>`:''}<span class="tag">${n} 杯</span></div>
