@@ -134,6 +134,9 @@ details>summary{cursor:pointer;list-style:none}details>summary::-webkit-details-
 .tool.used{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}.tool.bad{opacity:.35}
 .tool.ghost{position:fixed;left:0;top:0;z-index:50;pointer-events:none;box-shadow:0 8px 20px rgba(0,0,0,.35);opacity:.95}
 svg.px{image-rendering:pixelated}svg.dk{filter:drop-shadow(1px 0 0 #9aa3ad) drop-shadow(-1px 0 0 #9aa3ad) drop-shadow(0 1px 0 #9aa3ad) drop-shadow(0 -1px 0 #9aa3ad);overflow:visible}
+.mr{width:100%;padding:0 2px}.mr-bar{position:relative;height:8px;border-radius:4px;background:var(--sunken);margin-top:3px}.mr-bar i{position:absolute;top:0;bottom:0;border-radius:4px}
+.mr-fill{left:0;top:2.5px!important;bottom:2.5px!important;background:var(--muted)}.mr-fill.good{background:var(--good)}.mr-fill.warn{background:var(--warn)}.mr-fill.cold{background:var(--cold)}
+.mr-bar b{position:absolute;top:-2px;bottom:-2px;width:2px;margin-left:-1px;background:var(--ink);border-radius:1px}.mr-t{font-size:10px;margin-top:2px}
 </style>
 </head>
 <body>
@@ -809,6 +812,8 @@ function silhouette(t,sz){const col='rgba(255,244,225,.38)';
   const ic={grinder:'c40',dripper:'v60',paper:'conep',kettle:'brewista',water:'bottle'}[t],rows=SPR.GS[ic];let h='';
   rows.forEach((r,y)=>{let x=0;while(x<r.length){const ch=r[x];let e=x+1;while(e<r.length&&r[e]===ch)e++;if(ch!=='.')h+=`<rect x="${x}" y="${y}" width="${e-x}" height="1"/>`;x=e}});
   return `<svg viewBox="0 ${rows.length-16} 16 16" width="${sz}" height="${sz}" shape-rendering="crispEdges" fill="${col}" aria-hidden="true">${h}</svg>`}
+function miniRest(b){const d=restDay(b);if(d==null)return '';const s=b.winStart??7,e=b.winEnd??30,st=beanStatus(b),mx=Math.max(e,d)+3,P=v=>(Math.min(v,mx)/mx*100).toFixed(1)+'%';
+  return `<div class="mr"><div class="mr-bar"><i class="rc-rest" style="left:0;width:${P(s)}"></i><i class="rc-win" style="left:${P(s)};width:calc(${P(e)} - ${P(s)})"></i><i class="mr-fill ${st.c}" style="width:${P(d)}"></i><b style="left:${P(d)}"></b></div><div class="mr-t mono" style="color:var(--${st.c==='muted'?'muted':st.c})">第 ${d} 天${b.frozenSince?' ❄':''}</div></div>`}
 function deskHtml(){
   const c=curSel(),map={bean:c.bean,grinder:c.g,dripper:c.d,paper:c.p,kettle:c.k,water:c.w,method:c.m};
   return `<div class="desk${missing().length?' sticky':''}">${SLOTS.filter(([t])=>itemsOf(t).length||t==='bean').map(([t,l])=>{const x=map[t];
@@ -818,7 +823,7 @@ function shelfHtml(){
   const c=curSel(),on={bean:c.bean,grinder:c.g,dripper:c.d,paper:c.p,kettle:c.k,water:c.w,method:c.m};
   return SLOTS.filter(([t])=>itemsOf(t).length).map(([t,l])=>`<div class="shelf-row"><div class="grp">${l}</div><div class="shelf">${itemsOf(t).map(x=>{
     const bad=(t==='paper'&&c.d&&!fitPaper(x,c.d))||(t==='method'&&c.d&&!fitMethod(x,c.d));
-    return `<div class="tool ${on[t]&&on[t].id===x.id?'used':''} ${bad?'bad':''}" data-drag="${t}" data-id="${esc(x.id)}">${itemArt(t,x,t==='bean'?34:42)}<span>${esc(t==='bean'?shortBean(x):x.name)}</span></div>`}).join('')}</div></div>`).join('');
+    return `<div class="tool ${on[t]&&on[t].id===x.id?'used':''} ${bad?'bad':''}" data-drag="${t}" data-id="${esc(x.id)}">${itemArt(t,x,t==='bean'?34:42)}<span>${esc(t==='bean'?shortBean(x):x.name)}</span>${t==='bean'?miniRest(x):''}</div>`}).join('')}</div></div>`).join('');
 }
 /* 拖拉：滑鼠與觸控都走 pointer events；點一下也會直接放上桌 */
 let DR=null;
