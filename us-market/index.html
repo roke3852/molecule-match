@@ -300,9 +300,16 @@ input[type=range]{width:100%;accent-color:var(--s1)}
 <div id="tip"></div><div id="toast"></div>
 
 <script>
-const ASOF="2026-11-20 01:15";
+const ASOF="2026-11-20 01:45";
 /* ---------- 大事資料 ---------- */
 const EVENTS=[
+{id:"ipo-rank",cat:"IPO",hot:1,date:"2026-11-20",title:"IPO 規模排行榜：Anthropic 募 813 億美元，是 Aramco 的 3 倍",
+ lead:"把 Anthropic 放進歷史排行榜來看：它以 813 億美元登上全球 IPO 募資第一，超過 6 月 SpaceX 的 750 億。第 3 名 SK 海力士（今年 7 月）也只有 265 億，2019 年的沙烏地阿美 256 億、2014 年的阿里巴巴 218 億，都只有它的四分之一左右。若承銷商行使超額配售，總額還可能到 935 億；另有同步私募 260 億美元。",
+ why:"錢的規模史無前例，但只賣出公司很小一部分。超大型公司 IPO 只釋出 2–7% 的股份，流通籌碼很少，價格容易被少量買盤推高，也容易在閉鎖期解禁時大跌——這是看 ANT 接下來走勢最重要的結構性因素。",
+ stats:[["募資額","$813億","全球史上第 1"],["是 Aramco 的","3.2 倍","2019 年 256 億"],["前 3–10 名合計","$1,654億","ANT 約占一半"],["占公司價值","5–7.5%","依市值算法不同"]],
+ charts:["ipoRank","ipoFloat","ipoNote"],
+ tl:[["2014-09","阿里巴巴 218 億，當時全球最大"],["2019-12","沙烏地阿美 256 億，紀錄保持 6 年半"],["2026-06","SpaceX 750 億，一口氣打破紀錄"],["2026-07","SK 海力士在 Nasdaq 募 265 億"],["2026-11","Anthropic 813 億，再破紀錄",1]],
+ src:[["Renaissance Capital：歷來最大 IPO 與估值","https://www.renaissancecapital.com/IPO-Center/Stats/Largest-Global-IPOs"],["Axios：初始市值 1.08 兆、完全稀釋約 1.5 兆","https://www.axios.com/2026/11/18/anthropic-ipo-1-trillion"],["Yahoo Finance：流通股約 132 億股","https://finance.yahoo.com/markets/stocks/articles/buy-sell-hold-anthropic-stock-130246454.html"],["Kucoin：同步私募 260 億","https://www.kucoin.com/news/flash/anthropic-kicks-off-record-81-3b-ipo-on-nasdaq-with-1-5t-valuation"],["Wikipedia：SpaceX 上市後一度腰斬","https://en.wikipedia.org/wiki/Initial_public_offering_of_SpaceX"],["Quantral：SpaceX 閉鎖期與近期股價","https://quantral.com/blog/spacex-ipo"],["Dealroom：前 25 大 IPO","https://dealroom.net/blog/biggest-ipos-of-all-time"]]},
 {id:"ant-ipo",cat:"IPO",hot:1,date:"2026-11-18",title:"Anthropic IPO 定價 83 美元，募資 813 億美元創紀錄",
  lead:"Claude 的開發商 Anthropic 以每股 83 美元定價，高於原本 70–78 美元的區間，並把發行股數加大到約 9.8 億股，總募資 813 億美元，超越 SpaceX 成為史上最大 IPO。台北時間今晚在 Nasdaq 掛牌，代號 ANT。Amodei 敲響開盤鐘後，經過約兩小時的開盤競價，ANT 首筆成交 111.50 美元，比承銷價 83 美元高約 34%，也高於競價時 100–104 美元的參考價和預測市場押的首日漲 20–25%。但開盤後很快被賣，盤中最高 115.10、最低 98.24，美東 12:10 回到約 102 美元（+23%），開出後半小時成交量就超過 3.9 億股；同一時間大盤反而下跌，道瓊跌逾千點（−2%）、S&P −1.4%、Nasdaq −1.3%。公司已簽下未來數年近 1 兆美元的算力採購承諾，Amodei 上 CNBC 表示有信心這筆投資會回本。治理上，長期利益信託（LTBT）可指派 7 席董事中的 4 席，上市後仍會保留。",
  why:"這是 AI 交易的大考：市場對 AI 越來越懷疑的時候，它能不能站穩，會直接影響明年 OpenAI 上市的定價，以及整條 AI 供應鏈（雲端、晶片）的情緒。",
@@ -466,6 +473,7 @@ function line(pts,{yfmt=v=>v,ymin,ymax,unit="",area=true}={}){ // pts: [label,va
   const li=pts.length-1;g+=`<text x="${X(li)-8}" y="${Y(pts[li][1])-10}" text-anchor="end" font-size="13" font-weight="600" style="fill:var(--fg);font-family:var(--mono)">${yfmt(pts[li][1])}</text>`;
   return g+"</svg>";
 }
+const IPORK=[["Anthropic","2026",813.4,13770],["SpaceX","2026",750,17450],["SK 海力士","2026",265.1,10860],["沙烏地阿美","2019",256,17070],["阿里巴巴","2014",217.7,1750],["軟銀電信","2018",213.5,640],["NTT Docomo","1998",180.9,760],["Visa","2008",178.6,340],["友邦保險 AIA","2010",178.2,310],["Enel","1999",164.5,550],["Facebook","2012",160.1,0],["通用汽車","2010",157.7,0],["工商銀行 H 股","2006",139.6,0],["德國電信","1996",130.3,0],["Rivian","2021",119.3,0]];
 const IPOH=[["Google",2004,18.0,-17.0],["Mastercard",2006,17.9,-13.1],["Visa",2008,28.4,-52.1],["Tesla",2010,40.5,-38.5],["GM",2010,3.6,-49.4],["LinkedIn",2011,109.4,-46.3],["Meta",2012,0.6,-53.6],["Twitter",2013,72.7,-58.4],["Alibaba",2014,38.1,-48.9],["Shopify",2015,51.1,-52.1],["Snap",2017,44.0,-56.3],["Spotify",2018,12.9,-45.6],["Lyft",2019,8.7,-79.5],["Zoom",2019,72.2,-39.7],["Pinterest",2019,28.4,-70.1],["Beyond Meat",2019,163.0,-77.0],["Uber",2019,-7.6,-68.0],["Saudi Aramco",2019,10.0,-26.8],["Snowflake",2020,111.6,-51.7],["Palantir",2020,31.0,-52.9],["DoorDash",2020,85.8,-47.5],["Airbnb",2020,112.8,-39.2],["Roblox",2021,54.4,-69.3],["Coupang",2021,40.7,-65.5],["Coinbase",2021,31.3,-58.8],["Robinhood",2021,-8.4,-90.2],["Rivian",2021,29.1,-88.0],["Arm",2023,24.7,-42.6],["Instacart",2023,12.3,-33.4],["Reddit",2024,48.4,-52.4],["CoreWeave",2025,0.0,-64.8],["Circle",2025,168.5,-80.9],["Chime",2025,37.4,-55.7],["Figma",2025,250.0,-86.2],["Klarna",2025,14.6,-73.2],["SpaceX",2026,19.2,-42.0]];
 const CH={
  antRange:()=>{const L=24,R=W-24,lo=60,hi=90,X=v=>L+(R-L)*(v-lo)/(hi-lo);
@@ -486,6 +494,16 @@ const CH={
    b:hbar([["G 輪",3800,"G 輪：募 300 億，估值 3,800 億"],["H 輪 (5月)",9650,"H 輪：募 650 億，估值 9,650 億"],["Damodaran",14500,"教授自估股權價值 1.45 兆（11/3 下修）"],["IPO 上看",15000,"CBS：掛牌估值最高約 1.5 兆"]],{unit:"$",hl:3,note:"實際市值要看總股數與掛牌後股價。"})}),
  nvdaBeat:()=>({t:"Nvidia 營收：實際 vs 預期 vs 指引（億美元）",s:"Q3 FY2027 打敗預期 60 多億，股價卻下跌",
    b:hbar([["Q3 分析師預期",1091,"市場預期 1,091 億"],["Q3 實際",1158.4,"實際 1,158.4 億"],["Q4 指引",1300,"公司給的下季指引 1,300 億"]],{unit:"$",hl:1})}),
+ ipoRank:()=>({t:"全球 IPO 募資排行榜（億美元，不含超額配售）",s:"點長條看年份；深藍＝Anthropic",
+   b:hbar(IPORK.map(r=>[r[0],r[2],`${r[0]}（${r[1]}）募資 ${fmt(r[2],1)} 億美元`,"$"+fmt(r[2],0)]),{hl:0,note:"金額為名目值、未調整通膨。資料：Renaissance Capital。"})}),
+ ipoFloat:()=>{const rows=IPORK.filter(r=>r[3]).map(r=>[r[0],r[2]/r[3]*100,`${r[0]}：募資 ${fmt(r[2],0)} 億 ÷ 估值 ${fmt(r[3]/10000,2)} 兆美元`,(r[2]/r[3]*100).toFixed(1)+"%"]);
+   return {t:"這次賣出公司的幾成？（募資額 ÷ IPO 估值）",s:"越短＝釋出的股份越少；Renaissance 估值口徑",b:hbar(rows,{hl:0,max:60,note:"Anthropic 若用 Axios 的初始市值 1.08 兆計算約 7.5%，用完全稀釋 1.5 兆計算約 5.4%；開盤價 111.5 美元時市值約 1.47 兆，比例約 5.5%。"})}},
+ ipoNote:()=>({t:"分析：錢最多，但賣得最少",s:"",b:`<ul class="tl" style="margin-top:4px">
+   <li class="big"><b>規模是斷層式的。</b>ANT 一檔就約等於第 3 到第 10 名加起來的一半，是 2019 年以前紀錄保持者沙烏地阿美的 3.2 倍。2026 年一年內出現三檔 250 億以上的 IPO，代表 AI 與太空的私募市場已經大到必須靠公開市場接手。</li>
+   <li class="big"><b>但比例是歷史最低一群。</b>過去的大型 IPO（Visa、AIA、軟銀電信、Enel）常賣出公司 25–58%；這一代的兆元公司只賣 2–7%。Anthropic 總股數約 132 億股，這次只賣出約 9.8 億股。</li>
+   <li class="big"><b>籌碼少＝漲跌都放大。</b>流通股少，少量資金就能推高股價，盤中從 115 掉到 98 的劇烈震盪就是例子。SpaceX 只釋出約 4%，上市三天衝到 225 美元，7 月底卻從高點腰斬，11 月中又回到 139 美元、只比承銷價高 3%。</li>
+   <li class="big"><b>真正的考驗在解禁。</b>閉鎖期通常約 180 天，ANT 大約落在 2027 年 5 月前後；屆時可賣出的股份可能是現在流通量的好幾倍。SpaceX 10 月一次解禁 13 億股、12 月閉鎖期全面結束，是 ANT 最好的預演。</li>
+   <li class="big"><b>對大盤的意義。</b>短短五個月，SpaceX、SK 海力士、Anthropic 從市場吸走約 1,800 億美元，加上 OpenAI 預計 2027 年上市，「AI 新股供給」本身就是壓抑既有 AI 股的力量——ANT 首日大漲、大盤卻下跌，就是資金被抽走的跡象。</li></ul>`}),
  antDay:()=>{const pts=[["承銷價",83,"11/18 定價"],["競價參考",102,"WSJ／參考價約 100–104"],["開盤",111.5,"首筆成交 $111.50（+34%）"],["盤中高",115.1,"盤中最高 $115.10（+39%）"],["盤中低",98.24,"盤中最低 $98.24（+18%）"],["12:10",102.01,"美東 12:10 約 $102.01（+22.9%）"]];
    return {t:"ANT 首日價格路徑（美元）",s:"開高走低：首筆成交後一度跌回 $98",b:line(pts,{yfmt:v=>"$"+v.toFixed(0),ymin:80,area:false})+`<div class="s" style="margin-top:4px">資料：WSJ 直播與行情頁截圖（台北 11/20 01:10）；收盤價待更新。</div>`}},
  ipoHist:()=>{const L=40,Rr=W-12,T=14,B=250,X=v=>L+(Rr-L)*(v+20)/270,Y=v=>T+(B-T)*(-v)/95;
