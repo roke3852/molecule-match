@@ -147,6 +147,7 @@ svg.px{image-rendering:pixelated}svg.dk{filter:drop-shadow(1px 0 0 #9aa3ad) drop
 .catc b{font-size:13px}.catc .sub{font-size:11px;line-height:1.3}.catc.own{border-color:var(--good);box-shadow:0 0 0 1px var(--good)}
 .rec1{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}.rec-badge{display:inline-block;align-self:flex-start;width:fit-content;background:var(--accent);color:var(--accent-ink);font-size:12px;font-weight:700;padding:2px 10px;border-radius:99px;margin-bottom:6px}
 .adv{font-size:13.5px;margin:6px 0 4px;color:var(--ink)}
+.dirt{width:100%;margin-top:4px}.dirt-bar{height:8px;border-radius:4px;background:var(--sunken);overflow:hidden}.dirt-bar i{display:block;height:100%;border-radius:4px}.dirt-t{font-size:12px;margin-top:3px}.dirt.sm .dirt-bar{height:5px}.dirt.sm .dirt-t{font-size:9.5px;color:var(--muted)}
 </style>
 </head>
 <body>
@@ -785,7 +786,7 @@ function recipeCard(r,c,ai){
   if(!r)return'';const g=c.g;
   const rows=[['刻度',g?`${fmtG(g,r.grind)}${g.base==null?'（先到器材設定填常用刻度）':''}`:'—'],['水溫',r.temp+'°C'],['粉水',`${r.dose}g : ${r.water}g（1:${r1(r.water/r.dose)}）`],['手法',r.method],['用水',c.w?c.w.name:'—'],['目標時間',`${fmtTime(r.tl)}–${fmtTime(r.th)}`],['目標',`TDS 1.30–1.42 · 萃取率 19.5–21.5%`]];
   return `<div class="card"><div class="between"><div class="title">${esc(ai?'Claude 的建議':r.title)}</div>${r.best?`<div class="score">${r.best.score}<small>最佳</small></div>`:''}</div>
-    ${r.change?`<div class="pill ${r.change.includes('重現')?'good':'warn'}" style="white-space:normal">${esc(r.change)}</div>`:''}
+    ${r.change?`<div class="pill ${r.change.includes('重現')?'good':'warn'}" style="white-space:normal">${esc(r.change)}</div>`:''}${c.g&&grinderDirt(c.g).pct>=100?`<div class="pill warn" style="white-space:normal">🧹 ${esc(c.g.name)} 已經用了 ${grinderDirt(c.g).n} 次，建議先拆開清洗，殘粉會讓風味變悶、刻度也會跑掉</div>`:''}
     <dl class="kv mono">${rows.map(x=>`<dt>${x[0]}</dt><dd>${esc(x[1])}</dd>`).join('')}</dl>
     <div class="sub mono" style="white-space:pre-line">${esc(r.pours)}</div>
     <details><summary class="sub">為什麼這樣設定</summary><ul class="sub" style="margin:6px 0;padding-left:18px">${r.why.map(w=>`<li>${esc(w)}</li>`).join('')}</ul></details>
@@ -858,7 +859,7 @@ function shelfHtml(){
   const c=curSel(),on={bean:c.bean,grinder:c.g,dripper:c.d,paper:c.p,kettle:c.k,water:c.w,method:c.m};
   return SLOTS.filter(([t])=>itemsOf(t).length).map(([t,l])=>`<div class="shelf-row"><div class="grp">${l}</div><div class="shelf">${itemsOf(t).map(x=>{
     const bad=(t==='paper'&&c.d&&!fitPaper(x,c.d))||(t==='method'&&c.d&&!fitMethod(x,c.d));
-    return `<div class="tool ${on[t]&&on[t].id===x.id?'used':''} ${bad?'bad':''}" data-drag="${t}" data-id="${esc(x.id)}">${itemArt(t,x,t==='bean'?34:42)}<span>${esc(t==='bean'?shortBean(x):x.name)}</span>${t==='bean'?batchLine(x)+miniRest(x):''}</div>`}).join('')}</div></div>`).join('');
+    return `<div class="tool ${on[t]&&on[t].id===x.id?'used':''} ${bad?'bad':''}" data-drag="${t}" data-id="${esc(x.id)}">${itemArt(t,x,t==='bean'?34:42)}<span>${esc(t==='bean'?shortBean(x):x.name)}</span>${t==='bean'?batchLine(x)+miniRest(x):t==='grinder'?dirtBar(x,1):''}</div>`}).join('')}</div></div>`).join('');
 }
 /* 拖拉：滑鼠與觸控都走 pointer events；點一下也會直接放上桌 */
 let DR=null;
@@ -1064,6 +1065,29 @@ async function catOwn(cid){const x=CAT.find(c=>c.id===cid);if(!x)return;
   try{await store.save('gear',g);toast(`已把 ${x.name} 放到器材架`);
     if(x.type==='grinder'){GF={...g,_edit:true};GF._msg='請填你平常沖中淺焙水洗、V60、15g 用的刻度';drawGear()}else catItem(cid)}catch(e){toast('儲存失敗')}}
 async function catDrop(id){const g=gearById(id);if(!g)return;Object.keys(SEL).forEach(k=>{if(SEL[k]===id)delete SEL[k]});keepSel();await store.del('gear',id);toast('已放回圖鑑');if(g.cat)catItem(g.cat);else closeSheet()}
+/* ---------- 磨豆機髒污程度：依使用次數、豆子油脂與清潔習慣估算何時該拆洗 ---------- */
+const ownsTool=cid=>(S.gear||[]).some(g=>g.cat===cid);
+function grinderKind(g){const c=CAT.find(x=>x.id===g.cat),sub=c?c.sub:'';if(g.cat==='blade')return'blade';if(/手搖/.test(sub)||/c40|comandante|zp6|k-?ultra|1zpresso|kingrinder|porlex|skerton|timemore 栗子 c|手搖/i.test(g.name+' '+sub))return'hand';return'electric'}
+const OIL={vlight:1,light:1,mlight:1,medium:1.25,dark:1.6};
+function grinderDirt(g){
+  const kind=grinderKind(g),base={hand:20,electric:40,blade:10}[kind];
+  const bl=ownsTool('blower'),br=ownsTool('brush');let mult=1;if(bl)mult*=1.4;if(br)mult*=1.3;
+  const limit=Math.round(base*mult),since=g.cleanAt||0;
+  const used=S.brews.filter(x=>x.grinder===g.name&&x.ts>since);
+  const load=used.reduce((s,x)=>{const b=S.beans.find(y=>y.id===x.beanId);return s+(b?OIL[beanTraits(b).roast]:1)},0);
+  const pct=Math.round(load/limit*100),oily=used.filter(x=>{const b=S.beans.find(y=>y.id===x.beanId);return b&&OIL[beanTraits(b).roast]>1}).length;
+  const why=[`${{hand:'手搖錐刀',electric:'電動磨豆機',blade:'砍豆機'}[kind]}：基本每 ${base} 次拆洗一次`];
+  if(bl||br)why.push(`你每次磨完都會用${[bl&&'吹球',br&&'毛刷'].filter(Boolean).join('和')}清潔，延長到每 ${limit} 次`);else why.push('到器材圖鑑把吹球、毛刷標成「我有」，代表每次都會清，拆洗間隔會拉長');
+  if(oily)why.push(`其中 ${oily} 次是中焙以上的豆子，油脂多、算 1.25–1.6 次`);
+  const c=pct>=100?'warn':pct>=75?'cold':'good',t=pct>=100?'該拆開清洗了':pct>=75?'快要該拆洗了':'還很乾淨';
+  return{n:used.length,load:Math.round(load*10)/10,limit,pct,c,t,why,left:Math.max(0,Math.ceil(limit-load))}}
+function dirtBar(g,small){const d=grinderDirt(g),w=Math.min(100,d.pct);
+  return `<div class="dirt ${small?'sm':''}"><div class="dirt-bar"><i style="width:${w}%;background:var(--${d.c==='good'?'good':d.c==='cold'?'warn':'accent'})"></i></div><div class="dirt-t mono">${small?`${d.n} 次・${d.pct}%`:`${d.t}・用了 ${d.n} 次（${d.pct}%）`}</div></div>`}
+function dirtPanel(g){const d=grinderDirt(g);
+  return `<fieldset><legend>清潔狀態</legend>${dirtBar(g)}
+    <div class="sub">${g.cleanAt?`上次拆洗：${iso(g.cleanAt)}`:'還沒記錄過拆洗，從第一杯開始算'}${d.pct<100?`・大約再 ${d.left} 次要拆洗`:''}</div>
+    <ul class="sub" style="margin:6px 0;padding-left:18px">${d.why.map(w=>`<li>${esc(w)}</li>`).join('')}</ul>
+    <div class="row"><button type="button" class="btn sm pri" data-act="cleaned" data-id="${esc(g.id)}">今天拆開洗好了（歸零）</button></div></fieldset>`}
 async function aiRec(){
   const c=curSel(),r=suggest(c);if(!sampleFn||!r)return;S.aiMsg='Claude 思考中…';render();
   const hist=r.hist.slice(-8).map(x=>({日期:iso(x.ts),養豆天:x.restDay,刻度:x.grind,水溫:x.temp,粉:x.dose,水:x.water,注水段:x.pours,時間:fmtTime(x.time),TDS:x.tds,萃取率:x.ey,總分:x.score,達成:x.met,感官:TEMPS.map(t=>x.temps?.[t[0]]).filter(Boolean),風味:allFlavors(x),測試目的:x.target,筆記:x.note,下次調整:x.next}));
@@ -1102,7 +1126,7 @@ function drawGear(){
   if(t==='kettle'){GF.flow=GF.flow||'mid';if(GF.tc==null)GF.tc=true;f=`<div class="grid2">${sel('flow','水流',KF)}${sel('tc','可以控溫',{true:'可以',false:'不行'})}</div>`}
   openSheet(`<div class="sheet-head"><b>${GF._edit?'編輯':'新增'}${GT[t]}</b><button class="btn sm" data-act="close">取消</button></div><div class="sheet-body">
     ${GF._edit?'':`<fieldset><legend>常見型號</legend><div class="chips">${GP[t].map((p,i)=>`<button type="button" class="chip" data-act="gearPreset" data-v="${i}">${esc(p.name)}</button>`).join('')}</div></fieldset>`}
-    ${GF._msg?`<div class="pill warn" style="white-space:normal">${esc(GF._msg)}</div>`:''}<fieldset><legend>資料</legend>${inp('name','名稱')}${f}</fieldset>${ICONS[t]?(()=>{const ic=GF.icon||guessIcon(GF),L=SPR.SK[ic]||[],si=GF.skin!=null&&GF.skin!==''?+GF.skin:guessSkin(GF,ic);return `<fieldset><legend>圖示</legend><div class="between" style="align-items:center"><div class="grid2" style="flex:1">${sel('icon','樣式',ICONS[t])}${L.length>1?`<label class="f">顏色<select data-g="skin">${L.map((x,i)=>`<option value="${i}" ${i===si?'selected':''}>${esc(x[0])}</option>`).join('')}</select></label>`:''}</div><div style="margin-left:10px">${sprite(ic,si,56)}</div></div></fieldset>`})():''}</div>
+    ${GF._msg?`<div class="pill warn" style="white-space:normal">${esc(GF._msg)}</div>`:''}<fieldset><legend>資料</legend>${inp('name','名稱')}${f}</fieldset>${t==='grinder'&&GF._edit?dirtPanel(GF):''}${ICONS[t]?(()=>{const ic=GF.icon||guessIcon(GF),L=SPR.SK[ic]||[],si=GF.skin!=null&&GF.skin!==''?+GF.skin:guessSkin(GF,ic);return `<fieldset><legend>圖示</legend><div class="between" style="align-items:center"><div class="grid2" style="flex:1">${sel('icon','樣式',ICONS[t])}${L.length>1?`<label class="f">顏色<select data-g="skin">${L.map((x,i)=>`<option value="${i}" ${i===si?'selected':''}>${esc(x[0])}</option>`).join('')}</select></label>`:''}</div><div style="margin-left:10px">${sprite(ic,si,56)}</div></div></fieldset>`})():''}</div>
     <div class="sheet-foot">${GF._edit?`<button class="btn danger" data-act="delGear" data-id="${esc(GF.id)}">刪除</button>`:''}<button class="btn pri" data-act="saveGear">儲存</button></div>`);
 }
 async function saveGear(){
@@ -1134,6 +1158,7 @@ document.addEventListener('click',async ev=>{
   else if(a==='editGear')startGear(null,id);
   else if(a==='gearPreset'&&GF){Object.assign(GF,GP[GF.type][+v]);drawGear()}
   else if(a==='saveGear')saveGear();
+  else if(a==='cleaned'){const g={...gearById(id),cleanAt:Date.now()};try{await store.save('gear',g);if(GF&&GF.id===id){GF.cleanAt=g.cleanAt;drawGear()}toast('已歸零，重新開始計算')}catch(e){toast('儲存失敗')}}
   else if(a==='gearDr'&&GF){const i=GF.drippers.indexOf(v);if(i<0)GF.drippers.push(v);else GF.drippers.splice(i,1);drawGear()}
   else if(a==='delGear'){if(confirmTap(el,'gear'+id)){await store.del('gear',id);closeSheet();toast('已刪除')}}
   else if(a==='useRec')useRec(!!el.dataset.ai);
