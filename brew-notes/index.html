@@ -396,7 +396,7 @@ function vBeans(){
     return `<div class="card"><div class="between"><div data-act="beanDetail" data-id="${esc(b.id)}" style="cursor:pointer"><div class="title">${esc(b.name)} ›</div>${sameKind(b).length>1?`<span class="tag mono">批次 ${md(b.roast)} 烘</span>`:''}<div class="sub">${esc([b.origin,b.region,b.station,b.variety,b.process,b.roaster].filter(Boolean).join(' · '))}</div></div>${d!=null?`<div class="score">${d}<small>養豆天</small></div>`:''}</div>
     <div class="row"><span class="pill ${st.c}">${st.t}</span>${has(b.agtron)?`<span class="tag mono">Agtron ${esc(b.agtron)}</span>`:''}${rem!=null?`<span class="tag mono" ${rem<45?'style="color:var(--warn)"':''}>剩 ${rem}g${rem<45?'，快用完':''}</span>`:''}<span class="tag">${n} 杯</span></div>
     ${b.notes?`<div class="sub">標示風味：${esc(b.notes)}</div>`:''}<div class="sub mono">烘焙日 ${esc(b.roast||'—')} · 適飲窗口 第 ${b.winStart??7}–${b.winEnd??30} 天</div>
-    <div class="row"><button class="btn sm" data-act="freeze" data-id="${esc(b.id)}">${b.frozenSince?'解凍，繼續計時':'冷凍，暫停計時'}</button><button class="btn sm" data-act="editBean" data-id="${esc(b.id)}">編輯</button><button class="btn sm" data-act="new" data-bean="${esc(b.id)}">用這支記一杯</button><button class="btn sm pri" data-act="beanDetail" data-id="${esc(b.id)}">介紹・發音・AI</button></div></div>`}).join(''):'<div class="card sub">還沒有豆子。</div>')+
+    <div class="row"><button class="btn sm" data-act="freeze" data-id="${esc(b.id)}">${b.frozenSince?'解凍，繼續計時':'冷凍，暫停計時'}</button><button class="btn sm" data-act="editBean" data-id="${esc(b.id)}">編輯</button><button class="btn sm" data-act="new" data-bean="${esc(b.id)}">用這支記一杯</button><button class="btn sm pri" data-act="beanDetail" data-id="${esc(b.id)}">分析</button></div></div>`}).join(''):'<div class="card sub">還沒有豆子。</div>')+
   `<h2>備份</h2><div class="card"><div class="sub">把所有豆子與紀錄複製成文字，可以貼到別處保存。</div><div><button class="btn sm" data-act="export">複製全部資料</button></div></div>`;
 }
 function vAnalysis(){
@@ -898,17 +898,17 @@ function beanDetail(id){
   const b=S.beans.find(x=>x.id===id)||beans().find(x=>x.id===id);if(!b)return;DB=id;
   const st=beanStatus(b),d=restDay(b),n=brewsOf(b.id),ws=wordsOf(b),sc=n.filter(x=>has(x.score)),best=sc.slice().sort((a,c)=>c.score-a.score)[0];
   const para=t=>String(t).split(/\n+/).filter(Boolean).map(p=>`<p style="margin:0 0 8px">${esc(p)}</p>`).join('');
-  openSheet(`<div class="sheet-head"><b>${esc(b.name)}</b><button class="btn sm" data-act="close">關閉</button></div><div class="sheet-body">
+  openSheet(`<div class="sheet-head"><b>${esc(b.name)}</b><span class="row" style="margin:0;flex-wrap:nowrap"><button class="btn sm" data-act="beanPdf" data-id="${esc(b.id)}">📄 PDF</button><button class="btn sm" data-act="close">關閉</button></span></div><div class="sheet-body">
     <div class="row"><span class="pill ${st.c}">${st.t}</span><span class="tag">${esc(PL[beanTraits(b).proc])}</span>${has(b.agtron)?`<span class="tag mono">Agtron ${esc(b.agtron)}・${RL[beanTraits(b).roast]}</span>`:''}</div>
     ${d!=null?`<div style="margin:6px 0 2px">${miniRest(b)}</div>`:''}
     <fieldset><legend>基本資料</legend><dl class="kv">${[['產國',b.origin],['產區',b.region],['處理廠',b.station],['品種',b.variety],['處理法',b.process],['海拔',b.altitude],['標示烘焙度',b.roastLevel],['烘焙商',b.roaster],['烘焙日',b.roast],['標示風味',b.notes],['色值',b.agtronNote]].filter(r=>r[1]).map(r=>`<dt>${r[0]}</dt><dd>${esc(r[1])}</dd>`).join('')}</dl></fieldset>
-    <fieldset><legend>英文發音</legend><div class="sub" style="margin-bottom:6px">點 🔊 聽發音。衣索比亞地名用的是英文拼法的念法，當地口音會略有不同。</div>
-      ${ws.length?`<div class="words">${ws.map((x,i)=>`<button type="button" class="word" data-act="say" data-v="${esc(x.say||x.w)}"><span class="w-en">🔊 ${esc(x.w)}</span>${x.ipa?`<span class="w-ipa mono">${esc(x.ipa)}</span>`:''}${x.zh?`<span class="w-zh">${esc(x.zh)}</span>`:''}</button>`).join('')}</div>
-      <div class="row"><button type="button" class="btn sm" data-act="say" data-v="${esc(ws.map(x=>x.say||x.w).join('. '))}">▶ 全部念一次</button></div>`:'<div class="sub">這支豆子沒有英文字。</div>'}</fieldset>
     <fieldset><legend>豆子介紹</legend>${b.intro?para(b.intro):`<div class="sub">還沒有介紹。${sampleFn?'按下面的 AI 分析會順便寫一份。':'可以在「編輯」裡自己填。'}</div>`}</fieldset>
     <fieldset><legend>AI 分析</legend>${b.ai&&b.ai.text?`<div class="sub">${esc(when(b.ai.at))} 分析・當時 ${b.ai.n||0} 杯紀錄</div>${para(b.ai.text)}`:''}
       ${sampleFn?`<div class="row"><button type="button" class="btn sm pri" data-act="aiBean" data-id="${esc(b.id)}">${b.ai&&b.ai.text?'重新分析':'AI 分析這支豆子'}</button><span class="sub" id="aiBeanMsg"></span></div><div class="sub">會讀豆子資料、色值、養豆天數和你所有的沖煮紀錄。</div>`:'<div class="sub">AI 分析要在 Claude 裡打開這個 App 才能用。</div>'}</fieldset>
     ${n.length?`<fieldset><legend>沖煮紀錄（${n.length} 杯）</legend>${best?`<div class="sub">最高分 ${best.score}：${esc(paramLine(best))}</div>`:''}${n.slice().reverse().slice(0,6).map(x=>`<div class="between" data-act="detail" data-id="${esc(x.id)}" style="cursor:pointer;padding:5px 0;border-bottom:1px solid var(--line)"><span class="mono" style="font-size:13px">${esc(when(x.ts))} · ${esc(paramLine(x))}</span><b>${has(x.score)?x.score:'—'}</b></div>`).join('')}</fieldset>`:''}
+    <details class="card" style="margin-top:10px"><summary><b>英文發音</b> <span class="sub">點開聽豆袋上的英文怎麼念</span></summary><div class="sub" style="margin-bottom:6px">點 🔊 聽發音。衣索比亞地名用的是英文拼法的念法，當地口音會略有不同。</div>
+      ${ws.length?`<div class="words">${ws.map((x,i)=>`<button type="button" class="word" data-act="say" data-v="${esc(x.say||x.w)}"><span class="w-en">🔊 ${esc(x.w)}</span>${x.ipa?`<span class="w-ipa mono">${esc(x.ipa)}</span>`:''}${x.zh?`<span class="w-zh">${esc(x.zh)}</span>`:''}</button>`).join('')}</div>
+      <div class="row"><button type="button" class="btn sm" data-act="say" data-v="${esc(ws.map(x=>x.say||x.w).join('. '))}">▶ 全部念一次</button></div>`:'<div class="sub">這支豆子沒有英文字。</div>'}</details>
   </div><div class="sheet-foot"><button class="btn" data-act="editBean" data-id="${esc(b.id)}">編輯</button><button class="btn" data-act="newBatch" data-id="${esc(b.id)}">＋新批次</button><button class="btn" data-act="toDesk" data-id="${esc(b.id)}">擺上沖煮桌</button><button class="btn pri" data-act="new" data-bean="${esc(b.id)}">記一杯</button></div>`);
 }
 async function aiBean(id){
@@ -979,15 +979,40 @@ function pdfFromCanvas(cv){
   add(enc(xr+`trailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n${xo}\n%%EOF`));
   return new Blob(parts,{type:'application/pdf'})}
 let PDF=null;
-function sharePdf(){
-  const c=curSel(),r=suggest(c);if(!r||!c.bean)return;
-  try{const cv=recipeCanvas(c,r),blob=pdfFromCanvas(cv),nm=`沖煮配方_${shortBean(c.bean).replace(/[\\/:*?"<>|\s]+/g,'_')}_${iso(Date.now())}.pdf`;
-    if(PDF&&PDF.url)URL.revokeObjectURL(PDF.url);PDF={blob,nm,url:URL.createObjectURL(blob)};
-    openSheet(`<div class="sheet-head"><b>分享配方 PDF</b><button class="btn sm" data-act="close">關閉</button></div><div class="sheet-body">
-      <img src="${cv.toDataURL('image/jpeg',.85)}" alt="配方預覽" style="width:100%;border-radius:10px;border:1px solid var(--line)">
+function showPdf(cv,nm,title){
+  try{const blob=pdfFromCanvas(cv);if(PDF&&PDF.url)URL.revokeObjectURL(PDF.url);PDF={blob,nm,url:URL.createObjectURL(blob)};
+    openSheet(`<div class="sheet-head"><b>${esc(title)}</b><button class="btn sm" data-act="close">關閉</button></div><div class="sheet-body">
+      <img src="${cv.toDataURL('image/jpeg',.85)}" alt="預覽" style="width:100%;border-radius:10px;border:1px solid var(--line)">
       <div class="sub">也可以長按上面的圖片存成照片分享。</div></div>
       <div class="sheet-foot">${DLS?'<button class="btn pri" data-act="pdfSave">儲存／分享 PDF</button>':`<a class="btn" href="${PDF.url}" target="_blank" rel="noopener" download="${esc(nm)}">下載 PDF</a><button class="btn pri" data-act="pdfShare">分享 PDF</button>`}</div>`)}
   catch(e){toast('PDF 產生失敗')}}
+const safeName=t=>String(t).replace(/[\\/:*?"<>|\s]+/g,'_');
+function sharePdf(){const c=curSel(),r=suggest(c);if(!r||!c.bean)return;showPdf(recipeCanvas(c,r),`沖煮配方_${safeName(shortBean(c.bean))}_${iso(Date.now())}.pdf`,'分享配方 PDF')}
+function beanCanvas(b){
+  const W=1240,M=80,F='-apple-system,"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif',MONO='ui-monospace,Menlo,monospace';
+  const cv=document.createElement('canvas');cv.width=W;cv.height=8000;const x=cv.getContext('2d');
+  const C={bg:'#fbf8f3',ink:'#1b2421',mut:'#5c6965',line:'#ddd5c8',acc:'#9e2b45',good:'#2b7a57',warn:'#a8690f'};
+  x.fillStyle=C.bg;x.fillRect(0,0,W,8000);
+  x.fillStyle=C.ink;x.fillRect(0,0,W,150);x.fillStyle='#fff';x.font=`800 54px ${F}`;x.fillText('豆子筆記',M,92);
+  x.font=`400 24px ${F}`;x.fillStyle='#d9d2c6';const t=new Date();x.fillText(`${t.getFullYear()}/${t.getMonth()+1}/${t.getDate()}`,M,128);x.textAlign='right';x.fillText('沖煮筆記 · Made by Jim Lu',W-M,92);x.textAlign='left';
+  let y=200;cvBag(x,b,M,y-10,120);x.fillStyle=C.ink;x.font=`800 40px ${F}`;const nl=wrapText(x,b.name,W-M*2-150);nl.slice(0,3).forEach((l,i)=>x.fillText(l,M+150,y+30+i*48));
+  let my=y+30+Math.min(3,nl.length)*48;x.font=`400 24px ${F}`;x.fillStyle=C.mut;const st=beanStatus(b),d=restDay(b);
+  [st.t+(d!=null?`　養豆第 ${d} 天`:''),has(b.agtron)?`Agtron ${b.agtron}・${RL[beanTraits(b).roast]}`:''].filter(Boolean).forEach(l=>{x.fillText(l,M+150,my);my+=34});
+  y=Math.max(y+140,my)+10;
+  if(d!=null){const s0=b.winStart??7,e0=b.winEnd??30,mx=Math.max(e0,d)+3,P=v=>M+(W-M*2)*Math.min(v,mx)/mx;
+    x.fillStyle='#e8e2d8';x.beginPath();x.roundRect(M,y,W-M*2,20,10);x.fill();x.fillStyle='rgba(168,105,15,.3)';x.fillRect(M,y,P(s0)-M,20);x.fillStyle='rgba(43,122,87,.3)';x.fillRect(P(s0),y,P(e0)-P(s0),20);
+    x.fillStyle=st.c==='good'?C.good:st.c==='warn'?C.warn:C.mut;x.fillRect(M,y+6,P(d)-M,8);x.fillStyle=C.ink;x.fillRect(P(d)-2,y-6,4,32);y+=60}
+  const kv=[['產國',b.origin],['產區',b.region],['處理廠',b.station],['品種',b.variety],['處理法',b.process],['海拔',b.altitude],['標示烘焙度',b.roastLevel],['烘焙商',b.roaster],['烘焙日',b.roast],['標示風味',b.notes],['色值',b.agtronNote]].filter(r=>r[1]);
+  kv.forEach(([k,v])=>{x.font=`400 24px ${F}`;x.fillStyle=C.mut;x.fillText(k,M,y+28);x.fillStyle=C.ink;x.font=`500 26px ${F}`;const ls=wrapText(x,v,W-M*2-200);ls.forEach((l,i)=>x.fillText(l,M+200,y+28+i*36));y+=ls.length*36+14;x.fillStyle=C.line;x.fillRect(M,y,W-M*2,1);y+=8});
+  const sec=(title,body,col)=>{if(!body)return;y+=30;x.fillStyle=C.acc;x.fillRect(M,y,8,34);x.fillStyle=C.ink;x.font=`800 32px ${F}`;x.fillText(title,M+22,y+29);y+=60;x.font=`400 25px ${F}`;
+    String(body).split(/\n+/).filter(Boolean).forEach(p=>{const head=/^【(.+?)】/.exec(p);if(head){x.fillStyle=C.acc;x.font=`700 25px ${F}`;x.fillText(head[1],M,y);y+=38;p=p.slice(head[0].length);x.font=`400 25px ${F}`}
+      x.fillStyle=col||C.ink;wrapText(x,p,W-M*2).forEach(l=>{x.fillText(l,M,y);y+=38});y+=14})};
+  sec('豆子介紹',b.intro);sec('分析',b.ai&&b.ai.text);
+  const n=brewsOf(b.id);if(n.length){y+=30;x.fillStyle=C.acc;x.fillRect(M,y,8,34);x.fillStyle=C.ink;x.font=`800 32px ${F}`;x.fillText(`沖煮紀錄（${n.length} 杯）`,M+22,y+29);y+=64;
+    n.slice().reverse().slice(0,10).forEach(z=>{x.font=`400 22px ${MONO}`;x.fillStyle=C.mut;x.fillText(when(z.ts),M,y);x.fillStyle=C.ink;x.fillText(paramLine(z),M+180,y);x.textAlign='right';x.font=`800 26px ${F}`;x.fillText(has(z.score)?String(z.score):'—',W-M,y);x.textAlign='left';y+=40})}
+  const ws=wordsOf(b);if(ws.length){y+=30;x.fillStyle=C.acc;x.fillRect(M,y,8,34);x.fillStyle=C.ink;x.font=`800 32px ${F}`;x.fillText('英文發音',M+22,y+29);y+=64;
+    ws.forEach(w=>{x.fillStyle=C.ink;x.font=`700 25px ${F}`;x.fillText(w.w,M,y);x.fillStyle=C.acc;x.font=`400 22px ${MONO}`;x.fillText(w.ipa||'',M+380,y);x.fillStyle=C.mut;x.font=`400 22px ${F}`;x.fillText(w.zh||'',M+700,y);y+=38})}
+  y+=50;const out=document.createElement('canvas');out.width=W;out.height=Math.max(Math.round(W*1.414),y);const o=out.getContext('2d');o.fillStyle=C.bg;o.fillRect(0,0,W,out.height);o.drawImage(cv,0,0);return out}
 async function pdfShare(){if(!PDF)return;const file=new File([PDF.blob],PDF.nm,{type:'application/pdf'});
   try{if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],title:'沖煮配方'});return}}catch(e){if(e&&e.name==='AbortError')return}
   const a=document.createElement('a');a.href=PDF.url;a.download=PDF.nm;a.target='_blank';document.body.appendChild(a);a.click();a.remove();toast('這裡不支援直接分享，已改成下載')}
@@ -1091,6 +1116,7 @@ document.addEventListener('click',async ev=>{
   else if(a==='useRec')useRec(!!el.dataset.ai);
   else if(a==='aiRec')aiRec();
   else if(a==='pdf')sharePdf();
+  else if(a==='beanPdf'){const b=S.beans.find(x=>x.id===id)||beans().find(x=>x.id===id);if(b)showPdf(beanCanvas(b),`豆子筆記_${safeName(shortBean(b))}.pdf`,'分享豆子 PDF')}
   else if(a==='pdfShare')pdfShare();
   else if(a==='pdfSave'){if(PDF&&DLS)DLS.save({filename:PDF.nm,data:PDF.blob}).then(()=>toast('已儲存 PDF')).catch(e=>{if(e&&e.code!=='declined')toast(e&&e.code==='rate_limited'?'稍等一下再試':'這裡無法儲存檔案，可以長按圖片存成照片')})}
   else if(a==='rTab'){S.rtab=v;render();$('#main').scrollTop=0}
