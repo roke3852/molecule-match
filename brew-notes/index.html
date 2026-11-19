@@ -172,6 +172,10 @@ function localStore(){
   const merge=r=>{dels=[...new Set(dels.concat(r.dels||[]))];for(const c of ['beans','brews']){const m=new Map(S[c].map(x=>[x.id,x]));(r[c]||[]).forEach(x=>{const o=m.get(x.id);if(!o||(x.u||0)>(o.u||0))m.set(x.id,x)});S[c]=[...m.values()].filter(x=>!dels.includes(x.id))}keep();render()};
   const G=/github\.io$/.test(location.hostname)?drive(snap,merge):null;
   if(!G)$('#sync').textContent='僅存在這台裝置';
+  /* 收件匣：Claude 幫忙整理的豆子／紀錄放在 inbox.json，開啟時只補進還沒有、也沒被刪掉的項目 */
+  fetch('inbox.json',{cache:'no-store'}).then(r=>r.ok?r.json():null).then(d=>{if(!d)return;
+    const add={};let n=0;for(const c of ['beans','brews']){add[c]=(d[c]||[]).filter(x=>x&&x.id&&!dels.includes(x.id)&&!S[c].some(y=>y.id===x.id));n+=add[c].length}
+    if(!n)return;merge(add);if(G)G.changed();toast(`已匯入 ${n} 筆新資料`)}).catch(()=>{});
   return{save:async(c,o)=>{up(S[c],{...clean(o),id:o.id,u:Date.now()});put()},del:async(c,id)=>{S[c]=S[c].filter(x=>x.id!==id);dels.push(id);put()}};
 }
 /* Google 雲端同步：存成自己 Google 雲端硬碟裡的隱藏 App 檔案（只在 GitHub 網址上啟用） */
