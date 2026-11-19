@@ -94,6 +94,41 @@ textarea.f{min-height:80px;resize:vertical}
 #toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:8px 14px;border-radius:999px;font-size:13px;opacity:0;transition:opacity .2s;z-index:30}
 .disc{font-size:11px;color:var(--faint);text-align:center;margin-top:20px}
 .hit{fill:transparent;cursor:pointer}
+.bear-row{display:grid;grid-template-columns:62px 1fr 46px;gap:8px;align-items:center;padding:5px 0;cursor:pointer;font-size:13px}
+.bear-row .y{font:12px var(--mono);color:var(--muted)}
+.bear-row .bar{height:16px;border-radius:0 4px 4px 0;background:var(--s1soft);position:relative}
+.bear-row.rec .bar{background:var(--s1)}
+.bear-row.now .bar{background:repeating-linear-gradient(45deg,var(--bear) 0 4px,transparent 4px 8px);border:1.5px solid var(--bear)}
+.bear-row .p{font:600 12px var(--mono);text-align:right}
+.bear-row:active{background:var(--grid)}
+.bcard h2{display:flex;gap:8px;align-items:baseline}
+.bcard .dd{font:700 20px var(--mono);color:var(--bear);margin-left:auto}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.two>div{border-radius:10px;padding:8px 10px;font-size:13.5px}
+.two .dn{background:var(--grid)}
+.two .up{background:var(--s1soft)}
+.two b{display:block;font-size:12px;color:var(--muted);margin-bottom:2px}
+.bomb{display:grid;grid-template-columns:28px 1fr;gap:8px;padding:10px 0;border-top:1px dashed var(--line)}
+.bomb:first-of-type{border-top:0}
+.bomb .ic{font-size:20px;line-height:1.3}
+.bomb b{display:block}
+.bomb .m{font-size:12px;color:var(--faint);margin-top:2px}
+.lv{display:inline-block;font-size:11px;font-weight:600;padding:0 7px;border-radius:999px;margin-left:6px;border:1.5px solid;vertical-align:1px}
+.lv.h{color:var(--bear);border-color:var(--bear)}.lv.m{color:var(--hlb);border-color:var(--hlb)}.lv.l{color:var(--neu);border-color:var(--neu)}.lv.g{color:var(--bull);border-color:var(--bull)}
+.sig{display:grid;grid-template-columns:22px 1fr auto;gap:8px;align-items:start;padding:8px 0;border-top:1px dashed var(--line);font-size:14px}
+.sig .st{font-size:12px;font-weight:600;white-space:nowrap}
+.gauge{position:relative;height:64px;margin:14px 0 6px}
+.gauge .tr{position:absolute;left:0;right:0;top:26px;height:10px;border-radius:5px;background:linear-gradient(90deg,var(--grid) 0 25%,var(--s1soft) 25% 50%,var(--hl) 50%)}
+.gauge .ln{position:absolute;top:18px;width:2px;height:26px;background:var(--fg);transform:translateX(-50%)}
+.gauge .lb{position:absolute;top:0;font:600 12px var(--mono);white-space:nowrap}
+.gauge .th{position:absolute;top:46px;transform:translateX(-50%);font-size:11px;color:var(--faint);white-space:nowrap}
+.gauge .tk{position:absolute;top:22px;width:1px;height:18px;background:var(--faint);transform:translateX(-50%)}
+input[type=range]{width:100%;accent-color:var(--s1)}
+.lvls{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:6px;margin-top:8px}
+.lvls div{border:1px solid var(--line);border-radius:8px;padding:6px 8px;font-size:12px;color:var(--muted)}
+.lvls div b{display:block;font:600 15px var(--mono);color:var(--fg)}
+.lvls div.hit2{border-color:var(--s1);background:var(--s1soft)}
+
 </style>
 </head>
 <body>
@@ -107,7 +142,8 @@ textarea.f{min-height:80px;resize:vertical}
     <button data-p="ev" aria-selected="true">大事圖解</button>
     <button data-p="vw" aria-selected="false">名人觀點</button>
     <button data-p="cal" aria-selected="false">接下來</button>
-    <button data-p="mine" aria-selected="false">我的追蹤</button>
+    <button data-p="bear" aria-selected="false">空頭史</button>
+    <button data-p="mine" aria-selected="false">我的</button>
   </nav>
 </header>
 
@@ -138,6 +174,64 @@ textarea.f{min-height:80px;resize:vertical}
     </div>
   </section>
 
+  <section class="pane" id="p-bear">
+    <div class="card">
+      <h2>這次跌到哪裡了？</h2>
+      <div class="meta">S&P 500 從 10/6 高點 7,818.93 起算；−10% 叫修正、−20% 叫空頭</div>
+      <div id="nowGauge"></div>
+      <div class="stats">
+        <div class="stat"><div class="k">S&P 500</div><div class="v">≈ −7%</div><div class="d">還不到修正</div></div>
+        <div class="stat"><div class="k">Nasdaq</div><div class="v">≈ −12%</div><div class="d">已進入修正</div></div>
+        <div class="stat"><div class="k">S&P 成分股</div><div class="v">≈58%</div><div class="d">距自身高點跌超過 20%</div></div>
+        <div class="stat"><div class="k">VIX 高點</div><div class="v">28</div><div class="d">11/5，之後回落</div></div>
+      </div>
+      <div class="why"><b>一句話</b>指數只跌了 7%，但底下大多數股票早就是空頭——這是「隱形空頭」：權值股撐住指數，傷害集中在 AI 硬體與中小型股。</div>
+    </div>
+
+    <div class="card">
+      <h2>📉 美股歷史上的大空頭</h2>
+      <div class="meta">S&P 500 收盤高點到低點跌幅（約略值）・深藍＝伴隨經濟衰退・點一下看細節</div>
+      <div id="bearChart" style="margin-top:10px"></div>
+      <div class="legend" style="margin-top:6px"><span><i style="background:var(--s1)"></i>有衰退</span><span><i style="background:var(--s1soft)"></i>沒有衰退</span><span><i style="background:var(--bear)"></i>這次</span></div>
+    </div>
+
+    <div class="card">
+      <h2>🔎 歷史給的三個規律</h2>
+      <div class="stats" id="bearStats"></div>
+      <ul class="tl" style="margin-top:4px">
+        <li class="big"><b>衰退決定深度。</b>沒有衰退的空頭平均跌兩成多、幾個月就見底；有衰退的平均跌四成、常拖一兩年。</li>
+        <li class="big"><b>止跌幾乎都靠「政策轉向」。</b>13 次裡有 10 次的底部，是聯準會轉鬆、政府救市或政策退讓（關稅暫停）觸發的，不是等好消息。</li>
+        <li class="big"><b>底部出現時，新聞通常還很糟。</b>2009 年 3 月、2020 年 3 月、2022 年 10 月見底時，經濟數據和獲利都還在惡化。</li>
+      </ul>
+    </div>
+
+    <div id="bearCards"></div>
+
+    <div class="card">
+      <h2>💣 這次還有哪些未爆彈</h2>
+      <div class="meta">依「可能多傷」排列；日期為已知的引爆點</div>
+      <div id="bombs" style="margin-top:6px"></div>
+    </div>
+
+    <div class="card">
+      <h2>🧭 什麼時候比較適合佈局？</h2>
+      <div class="meta">沒有人能抓到確切的底，以下是用歷史規律整理的判斷框架</div>
+      <div class="fig"><div class="t">兩種劇本</div>
+        <div class="two">
+          <div class="up"><b>劇本 A：AI 修正、不衰退（較可能）</b>像 2018、2022、2025：跌 15–25% 見底，關鍵在聯準會停止升息或某個政策利空落地。底部可能落在 12/10 FOMC 到 1 月新國會開議之間的消息面。</div>
+          <div class="dn"><b>劇本 B：AI 泡沫破裂＋衰退</b>像 2000–2002：資本支出急砍、私募信貸出事、失業上升，指數可能跌 30–50%、分好幾段跌一兩年。這時要分更多批、拉更長時間。</div>
+        </div>
+      </div>
+      <div class="fig"><div class="t">止跌訊號檢查表（亮越多越接近底部）</div><div id="signals"></div></div>
+      <div class="fig"><div class="t">分批價位試算</div><div class="s">拉動看 S&P 500／Nasdaq 跌到某個幅度時的點位，和歷史上哪些空頭差不多深</div>
+        <input type="range" id="ddR" min="5" max="50" step="1" value="15">
+        <div id="ddOut"></div>
+        <div class="lvls" id="lvls"></div>
+      </div>
+      <div class="why"><b>實務做法</b>不猜底、用「價位＋訊號」雙條件分批：例如 S&P −10%（約 7,040）先放第一批，−15%（約 6,650）且 VIX 衝過 30 放第二批，聯準會釋出停止升息訊號或 −20%（約 6,255）再放第三批；若走劇本 B，保留至少三分之一資金給 2027 年。</div>
+    </div>
+  </section>
+
   <section class="pane" id="p-mine">
     <div class="card">
       <h2>✍️ 新增一則追蹤</h2>
@@ -159,7 +253,7 @@ textarea.f{min-height:80px;resize:vertical}
 <div id="tip"></div><div id="toast"></div>
 
 <script>
-const ASOF="2026-11-19 12:10";
+const ASOF="2026-11-19 15:20";
 /* ---------- 大事資料 ---------- */
 const EVENTS=[
 {id:"ant-ipo",cat:"IPO",hot:1,date:"2026-11-18",title:"Anthropic IPO 定價 83 美元，募資 813 億美元創紀錄",
@@ -256,6 +350,8 @@ const CAL=[
 ["11/20","五","Anthropic 首日表現消化","看收盤價相對 83 美元的漲跌、成交量"],
 ["11/27","五","感恩節休市（11/26 週四）","11/27 半天交易，流動性低易有大波動"],
 ["12/10","四 03:00","FOMC 利率決議＋點陣圖","市場幾乎確定升息一碼；重點是 2027 年還要升幾次"],
+["12月","","德州 ERCOT 資料中心電網審查","結果會影響全美約 27% 的資料中心容量"],
+["1/3","2027","新國會開議","民主黨預計提出全國 AI 資料中心禁建法案"],
 ["待定","","Nvidia 正式執行長人選","董事會內外部人選都會考慮"],
 ["2027","","OpenAI IPO","Kalshi 曾反映較可能在 2027 上半年宣布"]
 ];
@@ -390,6 +486,64 @@ $("#mAdd").onclick=()=>{
   const m=LS.get("mine",[]);m.unshift({type:$("#mType").value,title:t,date:$("#mDate").value,stance:$("#mStance").value,body:b,url:u});LS.set("mine",m);
   $("#mTitle").value=$("#mBody").value=$("#mUrl").value="";renderMine();renderVw();toast("✅ 已新增");
 };
+
+/* ---------- 空頭史 ---------- */
+const BEARS=[
+{y:"1929–32",nm:"大蕭條",dd:86,mo:33,rec:1,dn:"1929 年 10 月股災：融資炒股泡沫破裂，隨後銀行連環倒閉、聯準會緊縮。",up:"1932 年 7 月見底；1933 年羅斯福上任、銀行假期與放棄金本位後才真正回穩。",note:"花了 25 年才回到 1929 高點（不含股息）。"},
+{y:"1937–38",nm:"羅斯福衰退",dd:54,mo:12,rec:1,dn:"經濟剛復甦，政府同時收緊財政、聯準會調高存款準備率。",up:"1938 年 4 月政府重啟支出、聯準會放鬆準備金後止跌。",note:"「太早緊縮」的經典教訓。"},
+{y:"1973–74",nm:"石油危機",dd:48,mo:21,rec:1,dn:"布列敦森林體系瓦解、通膨升溫、1973 年石油禁運，加上水門案。",up:"1974 年 10 月見底：尼克森下台、聯準會開始降息。",note:"高通膨＋高利率下的估值壓縮。"},
+{y:"1980–82",nm:"沃克升息",dd:27,mo:20,rec:1,dn:"聯準會主席沃克把利率拉到接近 20% 打通膨，兩次衰退。",up:"1982 年 8 月聯準會轉向降息（墨西哥債務危機後），開啟 18 年大多頭。",note:"升息是兇手，降息就是解藥。"},
+{y:"1987",nm:"黑色星期一",dd:34,mo:3,rec:0,dn:"估值偏高、利率上升，程式交易「投資組合保險」連環賣出，10/19 單日 −20.5%。",up:"葛林斯潘隔天宣布提供流動性，12 月見底。",note:"沒有衰退，兩年內回到高點。"},
+{y:"1990",nm:"波灣戰爭",dd:20,mo:3,rec:1,dn:"伊拉克入侵科威特，油價翻倍，美國進入衰退。",up:"10 月見底；1991 年 1 月沙漠風暴開打、油價崩跌，股市大漲。",note:"地緣衝突的底部常在「最壞消息成真」時。"},
+{y:"2000–02",nm:"網路泡沫",dd:49,mo:31,rec:1,dn:"科技股估值極端，聯準會升息到 6.5%，企業資本支出急砍；之後 911、安隆財報醜聞。",up:"2002 年 10 月見底（2003 年 3 月二次探底）：聯準會降到 1.25%、伊拉克戰爭開打。",note:"Nasdaq 跌 78%，花 15 年才回到高點——和這次最像的劇本 B。"},
+{y:"2007–09",nm:"金融海嘯",dd:57,mo:17,rec:1,dn:"次貸違約、房價下跌，貝爾斯登、雷曼兄弟倒閉，信用市場凍結。",up:"2009/3/9 見底：花旗說 1、2 月獲利、銀行壓力測試、會計規則放寬、QE 加碼。",note:"信用利差是最好的領先指標。"},
+{y:"2011",nm:"美債降評",dd:19,mo:5,rec:0,dn:"國會債限僵局、標普調降美國評等，歐債危機蔓延。",up:"10 月見底：歐洲提出救援方案、各國央行聯手提供美元流動性。",note:"差一點點就算空頭。"},
+{y:"2018 Q4",nm:"縮表＋貿易戰",dd:20,mo:3,rec:0,dn:"鮑爾說縮表「自動駕駛」、利率離中性還很遠，加上美中貿易戰。",up:"聖誕夜見底，2019/1/4 鮑爾說會「耐心」、可調整縮表，市場V轉。",note:"典型的「聯準會說錯話→改口」底部。"},
+{y:"2020",nm:"新冠疫情",dd:34,mo:1,rec:1,dn:"疫情封城，33 天跌 34%，史上最快的空頭。",up:"3/23 見底：聯準會宣布無上限 QE、國會通過 2 兆紓困法案。",note:"政策火力越大，底部越快。"},
+{y:"2022",nm:"通膨升息",dd:25,mo:9,rec:0,dn:"通膨衝到 9%，聯準會一年升息 425 個基點，成長股估值被腰斬。",up:"10/12 見底：通膨確定見頂、市場開始押升息放緩；隔年 ChatGPT 掀起 AI 行情。",note:"Nasdaq 跌 35%，這次的「升息」部分和它最像。"},
+{y:"2025",nm:"關稅解放日",dd:19,mo:2,rec:0,dn:"4/2 川普宣布對等關稅，兩天蒸發 5 兆美元。",up:"4/9 宣布關稅暫停 90 天，S&P 單日 +9.5%，4/8 就是底。",note:"政策造成的空頭，政策退讓就結束。"},
+];
+const NOW={y:"2026",nm:"這次（AI 修正）",dd:7.1,now:1};
+const BOMBS=[
+{ic:"🏦",t:"聯準會升息循環",lv:"h",lvt:"高",d:"12/10 幾乎確定升一碼，真正的風險是點陣圖顯示 2027 年還要升幾次。歷史上空頭要結束，幾乎都要等聯準會停手。",m:"引爆點：12/10 凌晨 3 點（台北）"},
+{ic:"🏗️",t:"AI 資料中心禁建令",lv:"h",lvt:"高",d:"民主黨選後喊全國暫停新建 AI 資料中心，紐約州已暫停大型資料中心許可、德州也在審查電網。這直接打到 AI 硬體需求的長期預期。但川普有否決權，聯邦版本很難過。",m:"引爆點：12 月德州 ERCOT 審查結果；1 月新國會開議提案"},
+{ic:"🟩",t:"Nvidia 接班與調查",lv:"h",lvt:"高",d:"執行長空缺、SEC 與外國情報調查進行中，加上新加坡營收與「東南亞遠端租用」可能被管。好財報都撐不住股價，代表市場在折價不確定性。",m:"引爆點：正式執行長人選、調查結果、出口規定"},
+{ic:"💳",t:"AI 債務與私募信貸",lv:"m",lvt:"中",d:"AI 建設越來越靠借錢（CoreWeave 等新雲端的信用利差擴大），若融資收緊，最先出事的是槓桿高的資料中心業者。2008 年的教訓：信用市場先壞，股市才會真的崩。",m:"觀察：高收益債利差、新雲端公司債價格"},
+{ic:"📈",t:"AI 新股供給潮",lv:"m",lvt:"中",d:"SpaceX、Anthropic 今年合計募資超過 1,500 億，OpenAI 預計 2027 上市。大量新股會吸走資金；IPO 閉鎖期（通常約 180 天）到期時也常有賣壓。",m:"觀察：ANT 掛牌後走勢、2027 年 5 月前後閉鎖期"},
+{ic:"🔥",t:"通膨偏熱",lv:"m",lvt:"中",d:"11/13 公布的通膨數據高於預期，是聯準會繼續升息的理由。",m:"觀察：12 月 CPI"},
+{ic:"🛢️",t:"油價／荷莫茲海峽",lv:"g",lvt:"已降溫",d:"11 月布蘭特原油跌了約兩成到 92 美元附近，海峽攻擊沒再推升油價——這顆雷暫時變成利多。",m:"觀察：美伊談判"},
+{ic:"📊",t:"已經跌了很多的股票",lv:"g",lvt:"利多",d:"約六成成分股已經跌超過 20%，摩根士丹利 Wilson 認為傷害大多已反映、修正在「最後幾局」。真正還沒跌的是少數超大型權值股。",m:"觀察：權值股是否補跌（常是最後一跌）"},
+];
+const SIGNALS=[
+["聯準會停止升息或暗示放緩","尚未","bear"],
+["VIX 衝過 30–40 後回落","部分（11/5 到 28）","neu"],
+["信用利差不再擴大","未確認","neu"],
+["權值股（Nvidia 等）補跌、出現恐慌量","進行中","neu"],
+["政策利空落地（禁建令、出口規定明朗）","尚未","bear"],
+["多數個股已深跌、跌勢鈍化","已出現","bull"],
+["油價回落、通膨壓力減輕","油價有、通膨未","neu"],
+];
+function renderBear(){
+  const all=[...BEARS,NOW],mx=90;
+  $("#bearChart").innerHTML=all.map((b,i)=>`<div class="bear-row ${b.now?"now":b.rec?"rec":""}" data-bj="${i}" data-tip="${b.y} ${b.nm}：−${b.dd}%${b.mo?`，${b.mo} 個月見底`:"（目前）"}"><span class="y">${b.y}</span><div class="bar" style="width:${b.dd/mx*100}%"></div><span class="p">−${b.dd}%</span></div>`).join("");
+  const rec=BEARS.filter(b=>b.rec&&b.y!=="1929–32"),non=BEARS.filter(b=>!b.rec),avg=a=>Math.round(a.reduce((x,b)=>x+b.dd,0)/a.length),avgm=a=>Math.round(a.reduce((x,b)=>x+b.mo,0)/a.length);
+  $("#bearStats").innerHTML=`<div class="stat"><div class="k">沒有衰退的空頭</div><div class="v">−${avg(non)}%</div><div class="d">平均約 ${avgm(non)} 個月見底（${non.length} 次）</div></div><div class="stat"><div class="k">伴隨衰退的空頭</div><div class="v">−${avg(rec)}%</div><div class="d">平均約 ${avgm(rec)} 個月見底（不含 1929）</div></div>`;
+  $("#bearCards").innerHTML=BEARS.slice().reverse().map((b,k)=>`<article class="card bcard" id="bear-${BEARS.indexOf(b)}"><div class="meta"><span class="tag">${b.y}</span><span>${b.rec?"伴隨衰退":"沒有衰退"}・約 ${b.mo} 個月見底</span></div><h2>${b.nm}<span class="dd">−${b.dd}%</span></h2><div class="two"><div class="dn"><b>⬇ 下跌觸發</b>${b.dn}</div><div class="up"><b>⬆ 止跌觸發</b>${b.up}</div></div><div class="meta" style="margin-top:8px">💡 ${b.note}</div></article>`).join("");
+  $("#bombs").innerHTML=BOMBS.map(b=>`<div class="bomb"><div class="ic">${b.ic}</div><div><b>${b.t}<span class="lv ${b.lv}">${b.lvt}</span></b><div style="font-size:14px">${b.d}</div><div class="m">${b.m}</div></div></div>`).join("");
+  const SC={bull:"✅",neu:"🟡",bear:"⬜"};
+  $("#signals").innerHTML=SIGNALS.map(x=>`<div class="sig"><span>${SC[x[2]]}</span><span>${x[0]}</span><span class="st" style="color:var(--${x[2]==="bear"?"faint":x[2]==="bull"?"bull":"muted"})">${x[1]}</span></div>`).join("")+`<div class="meta" style="margin-top:6px">目前亮 1 個、半亮 4 個：還在「跌勢中」，不像底部完成。</div>`;
+  // gauge
+  const X=v=>v/40*100;
+  $("#nowGauge").innerHTML=`<div class="gauge"><div class="tr"></div>${[10,20,30].map(v=>`<span class="tk" style="left:${X(v)}%"></span><span class="th" style="left:${X(v)}%">${v===10?"修正 ":v===20?"空頭 ":""}−${v}%</span>`).join("")}<span class="ln" style="left:${X(7.1)}%"></span><span class="lb" style="right:${100-X(7.1)+1}%">S&P −7%</span><span class="ln" style="left:${X(12)}%;background:var(--bear)"></span><span class="lb" style="left:${X(12)+1}%;color:var(--bear)">Nasdaq −12%</span></div>`;
+  ddUpd();
+}
+const SPX_HI=7818.93, NDQ_HI=27599.79;
+function ddUpd(){
+  const d=+$("#ddR").value, near=BEARS.filter(b=>Math.abs(b.dd-d)<=3).map(b=>b.y+" "+b.nm);
+  $("#ddOut").innerHTML=`<div class="row" style="justify-content:space-between;margin-top:6px"><b style="font:700 22px var(--mono)">−${d}%</b><span class="meta">${near.length?"差不多深："+near.join("、"):"歷史上沒有剛好這個深度的空頭"}</span></div>`;
+  $("#lvls").innerHTML=[10,15,20,25,30].map(v=>`<div class="${v===d?"hit2":""}">−${v}%<b>${fmt(SPX_HI*(1-v/100))}</b>Nasdaq ${fmt(NDQ_HI*(1-v/100))}</div>`).join("")+(![10,15,20,25,30].includes(d)?`<div class="hit2">−${d}%<b>${fmt(SPX_HI*(1-d/100))}</b>Nasdaq ${fmt(NDQ_HI*(1-d/100))}</div>`:"");
+}
+$("#ddR").addEventListener("input",ddUpd);
 /* ---------- 事件 ---------- */
 function go(p){document.querySelectorAll("nav button").forEach(b=>b.setAttribute("aria-selected",b.dataset.p===p));document.querySelectorAll(".pane").forEach(x=>x.classList.toggle("on",x.id==="p-"+p));if(p==="mine")renderMine();}
 document.addEventListener("click",e=>{
@@ -399,6 +553,7 @@ document.addEventListener("click",e=>{
   if(t.dataset.vwt){vwTag=t.dataset.vwt;renderVw();return}
   if(t.dataset.fav){let f=LS.get("fav",[]);f=f.includes(t.dataset.fav)?f.filter(x=>x!==t.dataset.fav):[...f,t.dataset.fav];LS.set("fav",f);renderEv();toast(f.includes(t.dataset.fav)?"⭐ 已收藏":"已取消收藏");return}
   if(t.dataset.del){const m=LS.get("mine",[]);m.splice(+t.dataset.del,1);LS.set("mine",m);renderMine();renderVw();return}
+  const bj=t.closest("[data-bj]");if(bj){const el=document.getElementById("bear-"+bj.dataset.bj);if(el)el.scrollIntoView({behavior:"smooth",block:"center"});return}
   if(t.dataset.jump){e.preventDefault();evCat="全部";renderEv();go("ev");setTimeout(()=>document.getElementById("ev-"+t.dataset.jump).scrollIntoView({behavior:"smooth"}),30);return}
 });
 $("#shareBtn").onclick=async()=>{try{await navigator.clipboard.writeText(location.href.split("#")[0]);toast("✅ 已複製連結")}catch(x){toast("複製失敗，請手動複製網址")}};
@@ -408,7 +563,7 @@ function showTip(el,x,y){tip.textContent=el.dataset.tip;tip.style.opacity=1;cons
 document.addEventListener("pointermove",e=>{const el=e.target.closest("[data-tip]");if(el&&e.pointerType==="mouse")showTip(el,e.clientX,e.clientY);else if(e.pointerType==="mouse")tip.style.opacity=0});
 document.addEventListener("pointerdown",e=>{const el=e.target.closest("[data-tip]");if(el){showTip(el,e.clientX,e.clientY);clearTimeout(showTip.t);showTip.t=setTimeout(()=>tip.style.opacity=0,2200)}else tip.style.opacity=0});
 document.addEventListener("dblclick",e=>e.preventDefault());
-renderEv();renderVw();
+renderEv();renderVw();renderBear();
 </script>
 <!-- Made by Jim Lu -->
 <div class="jl-sig" style="text-align:center;font-size:11px;line-height:1.4;letter-spacing:.08em;opacity:.6;padding:14px 12px;color:inherit;font-family:inherit">Made by <b style="font-weight:700">Jim Lu</b></div>
