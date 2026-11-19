@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta name="robots" content="noindex, nofollow, noarchive">
+<meta charset="utf-8">
+<meta name="author" content="Jim Lu">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>美股大事圖解</title>
+<style>
+:root{
+  --bg:#f4f3ef;--panel:#fcfcfb;--fg:#0b0b0b;--muted:#52514e;--faint:#8a8984;--line:#e2e0da;--grid:#ecebe6;
+  --s1:#2a78d6;--s1soft:#dbe8f8;--bull:#2a78d6;--bear:#eb6834;--neu:#8a8984;--hl:#fff4d6;--hlb:#e2b23a;
+  --sans:"PingFang TC","Noto Sans TC","Microsoft JhengHei",system-ui,sans-serif;
+  --mono:ui-monospace,"SF Mono",Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root{--bg:#121211;--panel:#1a1a19;--fg:#f0efec;--muted:#c3c2b7;--faint:#8d8c86;--line:#2c2c2a;--grid:#262624;--s1:#3987e5;--s1soft:#1d3047;--bull:#3987e5;--bear:#d95926;--neu:#8d8c86;--hl:#2f2712;--hlb:#c98500;color-scheme:dark}}
+*{box-sizing:border-box}
+html,body{margin:0;touch-action:manipulation}
+body{background:var(--bg);color:var(--fg);font:15px/1.65 var(--sans);-webkit-text-size-adjust:100%}
+header{position:sticky;top:0;z-index:5;background:var(--bg);padding:max(12px,env(safe-area-inset-top)) max(14px,env(safe-area-inset-right)) 0 max(14px,env(safe-area-inset-left));border-bottom:1px solid var(--line)}
+.top{display:flex;align-items:center;gap:8px;max-width:760px;margin:0 auto}
+h1{font-size:19px;margin:0;flex:1}
+.asof{font:12px var(--mono);color:var(--faint)}
+.ib{border:0;background:none;font-size:18px;width:36px;height:36px;border-radius:10px;cursor:pointer;color:var(--fg)}
+.ib:active{background:var(--line)}
+nav{display:flex;gap:4px;max-width:760px;margin:8px auto 0;overflow-x:auto;scrollbar-width:none}
+nav button{flex:none;border:0;background:none;color:var(--muted);font:500 14px var(--sans);padding:8px 12px;border-bottom:2px solid transparent;cursor:pointer}
+nav button[aria-selected=true]{color:var(--fg);border-bottom-color:var(--s1)}
+main{max-width:760px;margin:0 auto;padding:14px max(14px,env(safe-area-inset-left)) 40px}
+.pane{display:none}.pane.on{display:block}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 12px}
+.chip{border:1px solid var(--line);background:var(--panel);color:var(--muted);border-radius:999px;padding:4px 11px;font:13px var(--sans);cursor:pointer}
+.chip.on{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:14px}
+.card h2{font-size:17px;margin:0 0 2px;line-height:1.4}
+.meta{font-size:12px;color:var(--faint);display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.tag{font-size:11px;padding:1px 7px;border-radius:6px;background:var(--grid);color:var(--muted)}
+.tag.hot{background:var(--hl);color:var(--fg);border:1px solid var(--hlb)}
+.lead{margin:10px 0 6px}
+.why{background:var(--hl);border-left:3px solid var(--hlb);padding:8px 12px;border-radius:0 8px 8px 0;font-size:14px;margin:10px 0}
+.why b{font-size:12px;color:var(--muted);display:block}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin:12px 0}
+.stat{border:1px solid var(--line);border-radius:10px;padding:8px 10px}
+.stat .k{font-size:12px;color:var(--muted)}
+.stat .v{font:600 20px var(--mono);letter-spacing:-.02em}
+.stat .d{font-size:11px;color:var(--faint)}
+.fig{margin:14px 0 4px}
+.fig .t{font-size:13px;font-weight:600;margin-bottom:2px}
+.fig .s{font-size:12px;color:var(--faint);margin-bottom:6px}
+svg{display:block;width:100%;height:auto;overflow:visible}
+svg text{font-family:var(--sans);fill:var(--muted)}
+.tl{list-style:none;margin:10px 0 0;padding:0 0 0 14px;border-left:2px solid var(--line)}
+.tl li{position:relative;padding:0 0 10px 6px;font-size:14px}
+.tl li::before{content:"";position:absolute;left:-21px;top:7px;width:10px;height:10px;border-radius:50%;background:var(--panel);border:2px solid var(--s1)}
+.tl li.big::before{background:var(--s1)}
+.tl .dt{font:12px var(--mono);color:var(--faint);margin-right:6px}
+details.src{margin-top:8px;font-size:12px;color:var(--faint)}
+details.src a{color:var(--s1)}
+.row{display:flex;gap:8px;align-items:center}
+.star{border:0;background:none;font-size:18px;cursor:pointer;color:var(--faint);padding:0 2px}
+.star.on{color:var(--hlb)}
+/* 觀點 */
+.who{display:flex;gap:10px;align-items:center}
+.av{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;font-weight:700;font-size:15px;flex:none;background:var(--grid);color:var(--fg)}
+.who .n{font-weight:600}
+.who .o{font-size:12px;color:var(--muted)}
+.stance{margin-left:auto;font-size:12px;font-weight:600;padding:2px 8px;border-radius:999px;white-space:nowrap;border:1.5px solid}
+.stance.bull{color:var(--bull);border-color:var(--bull)}
+.stance.bear{color:var(--bear);border-color:var(--bear)}
+.stance.neu{color:var(--neu);border-color:var(--neu)}
+.q{margin:10px 0 0;padding:0;list-style:none}
+.q li{padding:8px 0;border-top:1px dashed var(--line);font-size:14px}
+.q li:first-child{border-top:0}
+.q .d{font:12px var(--mono);color:var(--faint);display:block}
+.q .en{font-style:italic;color:var(--muted)}
+.meter{display:flex;height:26px;border-radius:8px;overflow:hidden;gap:2px;margin:6px 0 4px}
+.meter div{display:grid;place-items:center;font-size:12px;font-weight:600;color:#fff}
+.legend{display:flex;gap:14px;font-size:12px;color:var(--muted);flex-wrap:wrap}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:4px;vertical-align:-1px}
+/* 行事曆 */
+.cal{display:grid;grid-template-columns:64px 1fr;gap:0 12px}
+.cal .day{font:600 13px var(--mono);text-align:right;padding:10px 0;color:var(--muted)}
+.cal .day small{display:block;font:11px var(--sans);color:var(--faint)}
+.cal .ev{padding:10px 0;border-top:1px solid var(--line)}
+.cal .ev b{display:block}
+.cal .ev span{font-size:13px;color:var(--muted)}
+/* 我的 */
+.f{width:100%;border:1px solid var(--line);background:var(--panel);color:var(--fg);border-radius:10px;padding:9px 10px;font:15px var(--sans);margin:4px 0 8px}
+textarea.f{min-height:80px;resize:vertical}
+.btn{border:1px solid var(--line);background:var(--panel);color:var(--fg);border-radius:10px;padding:8px 14px;font:500 14px var(--sans);cursor:pointer}
+.btn.pri{background:var(--s1);color:#fff;border-color:var(--s1)}
+.empty{color:var(--faint);text-align:center;padding:24px 0;font-size:14px}
+#tip{position:fixed;z-index:20;pointer-events:none;background:var(--fg);color:var(--bg);font-size:12px;line-height:1.45;padding:6px 9px;border-radius:8px;max-width:240px;opacity:0;transition:opacity .12s}
+#toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:8px 14px;border-radius:999px;font-size:13px;opacity:0;transition:opacity .2s;z-index:30}
+.disc{font-size:11px;color:var(--faint);text-align:center;margin-top:20px}
+.hit{fill:transparent;cursor:pointer}
+</style>
+</head>
+<body>
+<header>
+  <div class="top">
+    <h1>📰 美股大事圖解</h1>
+    <span class="asof" id="asof"></span>
+    <button class="ib" id="shareBtn" aria-label="複製連結">🔗</button>
+  </div>
+  <nav role="tablist">
+    <button data-p="ev" aria-selected="true">大事圖解</button>
+    <button data-p="vw" aria-selected="false">名人觀點</button>
+    <button data-p="cal" aria-selected="false">接下來</button>
+    <button data-p="mine" aria-selected="false">我的追蹤</button>
+  </nav>
+</header>
+
+<main>
+  <section class="pane on" id="p-ev">
+    <div class="chips" id="evChips"></div>
+    <div id="evList"></div>
+  </section>
+
+  <section class="pane" id="p-vw">
+    <div class="card">
+      <div class="fig" style="margin-top:0">
+        <div class="t">這批觀點的多空比例</div>
+        <div class="s">依每位人士最近一次發言判斷（偏多／中性／偏空）</div>
+        <div class="meter" id="meter"></div>
+        <div class="legend"><span><i style="background:var(--bull)"></i>▲ 偏多</span><span><i style="background:var(--neu)"></i>● 中性</span><span><i style="background:var(--bear)"></i>▼ 偏空</span></div>
+      </div>
+    </div>
+    <div class="chips" id="vwChips"></div>
+    <div id="vwList"></div>
+  </section>
+
+  <section class="pane" id="p-cal">
+    <div class="card">
+      <h2>接下來要盯的日子</h2>
+      <div class="meta">時間皆換算為台北時間</div>
+      <div class="cal" id="calList" style="margin-top:8px"></div>
+    </div>
+  </section>
+
+  <section class="pane" id="p-mine">
+    <div class="card">
+      <h2>✍️ 新增一則追蹤</h2>
+      <div class="meta">自己看到的新聞、分析師說的話，記在這裡（只存在這台裝置）</div>
+      <select class="f" id="mType" style="margin-top:10px"><option value="ev">大事</option><option value="vw">某人的觀點</option></select>
+      <input class="f" id="mTitle" placeholder="標題／人名（例如：Anthropic 首日收盤、Mike Wilson）">
+      <input class="f" id="mDate" type="date">
+      <select class="f" id="mStance"><option value="">（觀點才需要）多空傾向</option><option value="bull">▲ 偏多</option><option value="neu">● 中性</option><option value="bear">▼ 偏空</option></select>
+      <textarea class="f" id="mBody" placeholder="內容、數字、你的想法"></textarea>
+      <input class="f" id="mUrl" placeholder="來源連結（可不填）">
+      <div class="row"><button class="btn pri" id="mAdd">新增</button></div>
+    </div>
+    <div class="card"><h2>⭐ 我收藏的大事</h2><div id="favList"></div></div>
+    <div class="card"><h2>🗒️ 我的紀錄</h2><div id="mineList"></div></div>
+  </section>
+
+  <p class="disc">資料整理自公開新聞報導，僅供參考，不構成投資建議。</p>
+</main>
+<div id="tip"></div><div id="toast"></div>
+
+<script>
+const ASOF="2026-11-19 08:40";
+/* ---------- 大事資料 ---------- */
+const EVENTS=[
+{id:"ant-ipo",cat:"IPO",hot:1,date:"2026-11-18",title:"Anthropic IPO 定價 83 美元，募資 813 億美元創紀錄",
+ lead:"Claude 的開發商 Anthropic 以每股 83 美元定價，高於原本 70–78 美元的區間，並把發行股數加大到約 9.8 億股，總募資 813 億美元，超越 SpaceX 成為史上最大 IPO。台北時間今晚在 Nasdaq 掛牌，代號 ANT。",
+ why:"這是 AI 交易的大考：市場對 AI 越來越懷疑的時候，它能不能站穩，會直接影響明年 OpenAI 上市的定價，以及整條 AI 供應鏈（雲端、晶片）的情緒。",
+ stats:[["定價","$83","區間 $70–78"],["募資","$813億","史上最大"],["發行股數","≈9.8億股","原訂 8.25 億"],["代號","ANT","Nasdaq · 11/19 掛牌"]],
+ charts:["antRange","antRaise","antRun","antVal"],
+ tl:[["06-01","秘密遞交 S-1；前幾天才以 9,650 億美元估值完成 H 輪"],["10-26","公開 S-1，第三季營收欄位留白引起討論"],["11-02","補上第三季：營收約 170 億美元，季增 47%（Q2 季增 144%），成長放緩"],["11-10","定出 70–78 美元區間、8.25 億股"],["11-18","定價 83 美元，加大發行",1],["11-19","Nasdaq 掛牌交易",1]],
+ src:[["CNBC：定價 83 美元","https://www.cnbc.com/2026/11/18/anthropic-ipo-ai-offering-price.html"],["CNBC：70–78 美元區間","https://www.cnbc.com/2026/11/10/anthropic-sets-price-range-of-70-to-78-in-upcoming-ipo.html"],["CBS：估值上看 1.5 兆","https://www.cbsnews.com/news/anthropic-ipo-ai-boom-nasdaq-debut/"],["Renaissance Capital：第三季財報","https://www.renaissancecapital.com/IPO-Center/News/122533/anthropic-discloses-third-quarter-financial-results-ahead-of-multibillion"],["Futurum：營收年化走勢","https://futurumgroup.com/insights/anthropic-files-for-ipo-looking-to-beat-openai-to-the-punch/"]]},
+{id:"nvda-ceo",cat:"科技股",hot:1,date:"2026-11-12",title:"黃仁勳辭去 Nvidia 執行長，CFO Kress 暫代；財報優於預期股價仍跌",
+ lead:"黃仁勳因私人醜聞與外國情報疑慮，辭去 Nvidia 總裁、執行長與董事，結束 33 年任期。財務長 Colette Kress 兼任暫代執行長，Harvey Jones 成為公司第一位董事長。11/17 公布的財報營收 1,158 億美元、超出預期 60 多億，下季指引 1,300 億，但股價一週跌超過 13%。",
+ why:"Nvidia 約占 S&P 500 的 6%，又是 AI 資本支出的風向球；接班不確定性加上 SEC 調查，讓「好財報也撐不住股價」，連帶拖累 CoreWeave 等新雲端股。",
+ stats:[["Q3 營收","$1,158億","預期 $1,091億"],["Q4 指引","$1,300億",""],["近一週股價","−13%+","11/18 再跌 2.89%"],["暫代執行長","Colette Kress","兼 CFO"]],
+ charts:["nvdaBeat"],
+ tl:[["11-08","董事會對黃仁勳啟動獨立調查"],["11-09","Ackman、馬斯克公開聲援黃仁勳"],["11-11","董事會接受辭呈（8-K 日期）"],["11-12","正式宣布，Nvidia 當天跌逾 5%",1],["11-13","Altimeter 的 Gerstner 與 Atreides 的 Baker 聯名信：慢慢找接班人，不排除讓黃回任"],["11-17","財報：營收與指引都優於預期",1],["11-18","盤中由漲翻跌，收 −2.89%"]],
+ src:[["Unite.AI：8-K 與任命","https://www.unite.ai/?p=515159"],["CNBC：財報後下跌","https://www.cnbc.com/2026/11/18/nvidia-stock-earnings.html"],["CNBC：黃仁勳離職當週盤勢","https://www.cnbc.com/2026/11/11/stock-market-today-live-updates.html"],["Gerstner／Baker 聯名信","https://letsdatascience.com/news/two-major-investors-urge-nvidia-board-to-consider-jensen-hua-a3d2550f"]]},
+{id:"fed-hike",cat:"聯準會",hot:1,date:"2026-11-18",title:"聯準會 12/9 幾乎確定升息一碼",
+ lead:"現任主席是 Kevin Warsh。目前利率 3.75%–4.00%，10 月會議以 10 比 2 維持不變，投反對票的 Cook 與 Hammack 都主張升息。10 月非農新增 16.5 萬人遠高於預期，紐約 Fed 總裁 Williams 說更多升息可能必要，Waller 甚至提到通膨不降可考慮一次升兩碼。",
+ why:"市場從「降息」轉成「升息循環」，利率上升會壓縮高估值成長股（尤其 AI 股）的評價，這也是近期大盤連跌的背景之一。",
+ stats:[["目前利率","3.75–4.00%",""],["12月升息一碼機率","≈93%","Polymarket"],["10月會議","10 : 2","2 票主張升息"],["10月非農","+16.5萬","遠高於預期"]],
+ charts:["fedOdds","fedPath"],
+ tl:[["10-28","維持利率，兩位理事主張升息"],["11月初","10 月非農強勁"],["11-18","會議紀錄公布，市場已把一碼升息完全反映"],["12-10","台北時間凌晨 3 點公布決議（附點陣圖）",1]],
+ src:[["Polymarket：Fed 利率","https://polymarket.com/dashboards/fed-rates"],["Kalshi：12 月決議","https://kalshi.com/markets/kxfeddecision/fed-meeting/kxfeddecision-26dec"],["Forbes：12 月會議展望","https://www.forbes.com/sites/simonmoore/2026/11/09/what-to-expect-from-the-feds-december-meeting/"],["Coinpedia：Waller 談升兩碼","https://coinpedia.org/news/fomc-minutes-today-fed-rate-hike-clues-put-crypto-on-alert/"]]},
+{id:"mkt",cat:"大盤",date:"2026-11-18",title:"道瓊兩天跌掉 1,400 點，S&P 500 跌到 7 月以來新低",
+ lead:"11/17 道瓊重挫 848 點，S&P 500 收 7,340.53，是 7 月下旬以來最低；當天因 CNN 報導情報單位機密網路當機，盤中一度跌破千點。11/18 Nvidia 財報行情熄火，S&P 連跌第五天，道瓊再跌 561 點。",
+ why:"AI 股、Nvidia 接班、升息預期三件事疊在一起；但上週三大指數才剛創 8 月以來最佳單週，波動非常大。",
+ stats:[["道瓊 11/17","50,759","−1.64%"],["S&P 11/17","7,340.53","7 月以來最低"],["道瓊 11/18","−561點","−1.11%"]],
+ charts:["dow"],
+ src:[["CNBC：11/17 盤勢","https://www.cnbc.com/2026/11/16/stock-market-today-live-updates.html"],["Stocktitan：11/18 收盤","https://stocktitan.net/articles/stock-market-today-live-november-18-2026"],["Bloomberg：11/18 Markets Wrap","https://www.bloomberg.com/news/articles/2026-11-17/stock-market-today-dow-s-p-live-updates"]]},
+{id:"midterm",cat:"政治",date:"2026-11-03",title:"期中選舉：民主黨同時拿下參眾兩院",
+ lead:"民主黨贏得超乎預期的參眾兩院多數，華府從共和黨全面執政變成分治。選後隔天美股開高。",
+ why:"分治通常代表較少政策衝擊；歷史上期中選舉後 12 個月 S&P 平均報酬不錯，但 Trump 的稅收與支出議程推進會更難。",
+ stats:[["眾議院","民主黨","翻盤"],["參議院","民主黨","翻盤"]],
+ charts:[],
+ src:[["Al Jazeera：選後美股上漲","https://www.aljazeera.com/economy/2026/11/4/us-markets-rise-as-democrats-sweep-midterm-elections"],["Funds Society：分治的影響","https://www.fundssociety.com/en/news/mercados/the-blue-wave-leaves-a-divided-government-implications-and-market-reactions/"]]},
+{id:"openai",cat:"IPO",date:"2026-08-19",title:"OpenAI：目標 2027 年上市",
+ lead:"OpenAI 6/8 已秘密遞交 S-1，但財務長 Sarah Friar 8 月對員工說公司會在 2027 年成為上市公司，也可能更早；總裁 Brockman 也說 2027 年會準備好。顧問曾提出兩條路：等到 2027 年爭取 1 兆美元估值，或早點上市接受較低價格。",
+ why:"Anthropic 先上市等於幫 OpenAI 試水溫——ANT 掛牌後的表現，會決定 OpenAI 能不能拿到 1 兆美元等級的估值。",
+ stats:[["秘密遞件","6/8",""],["目標","2027",""],["期望估值","≈$1兆","媒體報導"]],
+ charts:["ipoRace"],
+ src:[["The Next Web：Friar 談 2027","https://thenextweb.com/news/openai-ipo-2027-friar-all-hands-valuation"],["Implicator：顧問的兩條路","https://www.implicator.ai/openai-leans-toward-2027-ipo-as-softbank-and-ai-stocks-slide/"],["The Next Web：Brockman","https://thenextweb.com/news/openai-ipo-2027-brockman-enterprise-revenue"]]}
+];
+
+/* ---------- 觀點資料 ---------- */
+const VIEWS=[
+{n:"Peter Oppenheimer",o:"高盛 全球股票首席策略師",tag:["大盤"],st:"bull",av:"GS",
+ q:[["11-13","12 個月 S&P 500 目標 8,700 點，約 14% 上漲空間（含股息約 16%）。2027 年獲利成長會從今年約 36% 大幅放緩到 11%，但大型雲端股估值已遠低於歷史水準、債券殖利率下降，可以抵銷。"]],
+ src:"https://www.roic.ai/news/goldman-sachs-sees-sp-500-at-8700-despite-slowing-ai-spending-11-13-2026"},
+{n:"Ben Snider",o:"高盛 美股首席策略師",tag:["大盤","AI"],st:"neu",av:"GS",
+ q:[["10-16","預估 S&P 500 每股盈餘 2026 年 375 美元、2027 年 415 美元；AI 資本支出貢獻了約一半的獲利成長，這股助力會退潮。漲勢會變溫和而不是結束，但領漲股太集中是風險。"]],
+ src:"https://investinglive.com/stock-market-update/goldman-sachs-sees-s-p-500-earnings-at-415-in-2027-but-warns-narrow-leadership-is-a-risk/"},
+{n:"Mike Wilson",o:"摩根士丹利 CIO／美股首席策略師",tag:["大盤"],st:"bull",av:"MS",
+ q:[["11-02","從 6 月開始的修正已進入「最後幾局」；Russell 3000 約六成個股從 6 月以來跌超過 20%，指數底下的傷害比表面嚴重。"],["11-09","市場常常擔心一件事好幾個月，等它真的發生時，大部分傷害早已反映——底部在望。"],["11月","看 2027 年 S&P 約 15% 上漲空間：獲利成長健康、油價下跌、AI 投資持續、估值低於合理價。"]],
+ src:"https://www.morganstanley.com/insights/podcasts/thoughts-on-the-market/market-bottom-final-retest-mike-wilson"},
+{n:"Dan Ives",o:"Yorkville Ives 合夥人（前 Wedbush）",tag:["Anthropic","AI"],st:"bull",av:"DI",
+ q:[["11-03","Anthropic 可能拿不到投資等級信評，形容是",["a bit of a gut punch"],"，估值可能跌破 1.5 兆。"],["11月","以 1 兆多美元這種「市場吞得下」的估值上市，比硬衝最高價好；長期 Anthropic 有機會值 3 兆，AI 革命才第三局。"]],
+ src:"https://stocktwits.com/news-articles/markets/equity/dan-ives-calls-anthropic-junk-rating-gut-punch-ipo-valuation-below-1-5-trillion/cNGXddmR95p"},
+{n:"Steve Eisman",o:"《大賣空》投資人",tag:["Anthropic","AI"],st:"bear",av:"SE",
+ q:[["10-28","不會參與 Anthropic IPO。認為 S-1 刻意不放第三季數字，被問是否故意時回答",["Only very intentional."],"。估計它未來的算力承諾可能高達 8,000–9,000 億美元。"],["8月","中國便宜的開源模型會引發價格戰，而 OpenAI 和 Anthropic 撐起大型雲端廠約七成的 AI 營收，一旦殺價會是整個體系的問題。"]],
+ src:"https://www.zerohedge.com/markets/very-intentional-steve-eisman-thinks-anthropic-hiding-something"},
+{n:"Aswath Damodaran",o:"NYU 教授「估值大師」",tag:["Anthropic"],st:"neu",av:"AD",
+ q:[["10-28","自己的模型算出 Anthropic 股權價值約 1.475 兆美元，情境從負值到 4 兆都有；強調 IPO 是被「定價」而不是被「估值」。也痛批雙層股權結構過度保護內部人。"],["11-03","把第三季數字放進去後，下修到 1.45 兆。"]],
+ src:"https://angelinvestorsnetwork.com/alternative-investments/the-anthropic-prospectus-arrives-my-but-not-the-ipo-valuation"},
+{n:"Jamie Dimon",o:"摩根大通 執行長",tag:["大盤","利率"],st:"bear",av:"JD",
+ q:[["10-13","市場底下藏著五個沒被充分反映的風險：通膨黏著、財政赤字、資產過貴、利率上升、地緣政治。"]],
+ src:"https://www.webull.com/news/15775608466678784"},
+{n:"Cathie Wood",o:"ARK Invest 執行長",tag:["Anthropic","AI"],st:"bull",av:"CW",
+ q:[["2026","ARK 私募基金持有 Anthropic 與 OpenAI；她認為這些公司要擴張到新世界需要大量資本，所以走向上市。對 AI 恐慌不以為然。"]],
+ src:"https://www.livewiremarkets.com/wires/cathie-wood-on-the-ai-panic-the-ipo-wave-and-what-a-cure-is-worth"},
+{n:"Gerstner & Baker",o:"Altimeter／Atreides",tag:["Nvidia"],st:"neu",av:"AB",
+ q:[["11-13","聯名信要 Nvidia 董事會慢慢、審慎地找接班人，包括考慮讓黃仁勳回任的可能。"]],
+ src:"https://letsdatascience.com/news/two-major-investors-urge-nvidia-board-to-consider-jensen-hua-a3d2550f"},
+{n:"Bill Ackman",o:"Pershing Square",tag:["Nvidia"],st:"neu",av:"BA",
+ q:[["11-09","在 X 上公開聲援黃仁勳，說再傑出的人也會犯錯，呼籲大家支持他和家人。"]],
+ src:"https://www.thehansindia.com/business/elon-musk-bill-ackman-back-nvidia-chief-huang-amid-controversy-1140436"},
+{n:"Ross Mayfield",o:"Baird 投資策略師",tag:["AI","大盤"],st:"bull",av:"RM",
+ q:[["11-11","CoreWeave 財報加上 Anthropic IPO 需求，帶動整個 AI 生態系的情緒回溫；上週跌過頭的部位正在回補。"]],
+ src:"https://www.cnbc.com/2026/11/10/stock-market-today-live-updates.html"},
+{n:"Williams & Waller",o:"聯準會官員",tag:["利率"],st:"bear",av:"Fed",
+ q:[["11月","紐約 Fed 總裁 Williams：為了壓低偏高的通膨，更多升息可能是必要的。理事 Waller 支持 12 月升息，若通膨不降可考慮一次兩碼。"]],
+ src:"https://coinpedia.org/news/fomc-minutes-today-fed-rate-hike-clues-put-crypto-on-alert/"}
+];
+
+/* ---------- 行事曆 ---------- */
+const CAL=[
+["11/19","四 晚上","ANT 在 Nasdaq 首日交易","Anthropic 上市首日；美股 22:30 開盤，IPO 首筆成交通常會晚一些"],
+["11/20","五","Anthropic 首日表現消化","看收盤價相對 83 美元的漲跌、成交量"],
+["11/27","五","感恩節休市（11/26 週四）","11/27 半天交易，流動性低易有大波動"],
+["12/10","四 03:00","FOMC 利率決議＋點陣圖","市場幾乎確定升息一碼；重點是 2027 年還要升幾次"],
+["待定","","Nvidia 正式執行長人選","董事會內外部人選都會考慮"],
+["2027","","OpenAI IPO","Kalshi 曾反映較可能在 2027 上半年宣布"]
+];
+
+/* ---------- 工具 ---------- */
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const LS={get(k,d){try{return JSON.parse(localStorage.getItem("usm_"+k))??d}catch(e){return d}},set(k,v){try{localStorage.setItem("usm_"+k,JSON.stringify(v))}catch(e){}}};
+function toast(t){const e=$("#toast");e.textContent=t;e.style.opacity=1;clearTimeout(toast.t);toast.t=setTimeout(()=>e.style.opacity=0,1600)}
+$("#asof").textContent="更新 "+ASOF.slice(5);
+const fmt=(n,d=0)=>n.toLocaleString("en-US",{minimumFractionDigits:d,maximumFractionDigits:d});
+
+/* ---------- 圖表（SVG） ---------- */
+const W=Math.round(Math.min(640,Math.max(340,(document.querySelector("main").clientWidth||380)-34)));
+function hbar(rows,{unit="",max,hl=0,note}={}){ // rows: [label,value,tipText]
+  const H=rows.length*44+10, L=120, R=W-70; max=max||Math.max(...rows.map(r=>r[1]))*1.05;
+  let g=`<svg viewBox="0 0 ${W} ${H}" role="img">`;
+  rows.forEach((r,i)=>{const y=8+i*44,w=Math.max(4,(R-L)*r[1]/max);
+    g+=`<text x="${L-10}" y="${y+20}" text-anchor="end" font-size="14" style="fill:var(--fg)">${esc(r[0])}</text>
+    <rect x="${L}" y="${y+6}" width="${w}" height="22" rx="4" style="fill:${i===hl?"var(--s1)":"var(--s1soft)"}"/>
+    <text x="${L+w+8}" y="${y+22}" font-size="14" font-weight="600" style="fill:var(--fg);font-family:var(--mono)">${esc(r[3]||(unit+fmt(r[1],r[1]%1?1:0)))}</text>
+    <rect class="hit" x="0" y="${y}" width="${W}" height="40" data-tip="${esc(r[2]||r[0])}"/>`});
+  return g+"</svg>"+(note?`<div class="s" style="margin-top:4px">${note}</div>`:"");
+}
+function line(pts,{yfmt=v=>v,ymin,ymax,unit="",area=true}={}){ // pts: [label,value,tip]
+  const H=230,L=56,R=W-20,T=16,B=H-30;
+  const vs=pts.map(p=>p[1]); ymin=ymin??Math.min(...vs); ymax=ymax??Math.max(...vs);
+  const pad=(ymax-ymin)*.08; ymin-=pad; ymax+=pad;
+  const X=i=>L+(R-L)*i/(pts.length-1), Y=v=>B-(B-T)*(v-ymin)/(ymax-ymin);
+  let g=`<svg viewBox="0 0 ${W} ${H}" role="img">`;
+  for(let k=0;k<=3;k++){const v=ymin+(ymax-ymin)*k/3,y=Y(v);g+=`<line x1="${L}" x2="${R}" y1="${y}" y2="${y}" style="stroke:var(--grid)"/><text x="${L-8}" y="${y+4}" text-anchor="end" font-size="11">${yfmt(v)}</text>`}
+  const d=pts.map((p,i)=>(i?"L":"M")+X(i).toFixed(1)+" "+Y(p[1]).toFixed(1)).join("");
+  if(area)g+=`<path d="${d}L${X(pts.length-1)} ${B}L${X(0)} ${B}Z" style="fill:var(--s1soft);opacity:.6"/>`;
+  g+=`<path d="${d}" fill="none" stroke-width="2" style="stroke:var(--s1)" stroke-linejoin="round"/>`;
+  pts.forEach((p,i)=>{g+=`<circle cx="${X(i)}" cy="${Y(p[1])}" r="4.5" style="fill:var(--s1);stroke:var(--panel)" stroke-width="2"/>
+    <text x="${X(i)}" y="${H-8}" text-anchor="middle" font-size="11">${esc(p[0])}</text>
+    <rect class="hit" x="${X(i)-24}" y="${T-10}" width="48" height="${B-T+20}" data-tip="${esc(p[0]+"｜"+(p[2]||unit+p[1]))}"/>`});
+  const li=pts.length-1;g+=`<text x="${X(li)-8}" y="${Y(pts[li][1])-10}" text-anchor="end" font-size="13" font-weight="600" style="fill:var(--fg);font-family:var(--mono)">${yfmt(pts[li][1])}</text>`;
+  return g+"</svg>";
+}
+const CH={
+ antRange:()=>{const L=24,R=W-24,lo=60,hi=90,X=v=>L+(R-L)*(v-lo)/(hi-lo);
+   let g=`<svg viewBox="0 0 ${W} 110" role="img"><line x1="${L}" x2="${R}" y1="60" y2="60" style="stroke:var(--line)" stroke-width="2"/>`;
+   [60,65,70,75,80,85,90].forEach(v=>g+=`<line x1="${X(v)}" x2="${X(v)}" y1="56" y2="64" style="stroke:var(--faint)"/><text x="${X(v)}" y="82" text-anchor="middle" font-size="11">$${v}</text>`);
+   g+=`<rect x="${X(70)}" y="50" width="${X(78)-X(70)}" height="20" rx="4" style="fill:var(--s1soft)"/><text x="${(X(70)+X(78))/2}" y="40" text-anchor="middle" font-size="12">原訂區間 $70–78</text>
+   <rect class="hit" x="${X(70)}" y="30" width="${X(78)-X(70)}" height="45" data-tip="11/10 修正版 S-1：8.25 億股，每股 70–78 美元"/>
+   <line x1="${X(83)}" x2="${X(83)}" y1="34" y2="72" style="stroke:var(--s1)" stroke-width="3"/><circle cx="${X(83)}" cy="60" r="7" style="fill:var(--s1);stroke:var(--panel)" stroke-width="2"/>
+   <text x="${X(83)}" y="24" text-anchor="middle" font-size="14" font-weight="700" style="fill:var(--fg)">定價 $83</text>
+   <text x="${X(83)}" y="102" text-anchor="middle" font-size="11">比區間上緣高 6.4%</text>
+   <rect class="hit" x="${X(83)-20}" y="10" width="40" height="95" data-tip="11/18 定價 83 美元，股數加大到約 9.8 億股"/></svg>`;
+   return {t:"定價落在哪裡？",s:"需求強，定價直接跳過原本區間",b:g}},
+ antRaise:()=>({t:"史上最大 IPO 募資額（億美元）",s:"Anthropic 超越 6 月的 SpaceX",
+   b:hbar([["Anthropic",813,"2026/11 · 每股 $83 · 約 9.8 億股"],["SpaceX",750,"2026/6 · CBS 報導 750 億（另有報導為 857 億）"]],{unit:"$",hl:0,note:"SpaceX 募資額各家報導不一（750–857 億），此處採 CBS 數字。"})}),
+ antRun:()=>({t:"年化營收（run rate）怎麼長上來的（億美元）",s:"一年內從 90 億到 800 億",
+   b:line([["24/12",10,"年化約 10 億"],["25/12",90,"年化約 90 億"],["26/2",140,"140 億"],["26/3",190,"190 億"],["26/4",300,"300 億"],["26/5",470,"470 億（H 輪公布）"],["26/7",650,"650 億（Bloomberg）"],["26/10",800,"800 億（S-1 修正版）"]],{yfmt:v=>"$"+fmt(Math.max(0,v)),ymin:0})}),
+ antVal:()=>({t:"估值階梯（億美元）",s:"私募兩輪 → 上市",
+   b:hbar([["G 輪",3800,"G 輪：募 300 億，估值 3,800 億"],["H 輪 (5月)",9650,"H 輪：募 650 億，估值 9,650 億"],["Damodaran",14500,"教授自估股權價值 1.45 兆（11/3 下修）"],["IPO 上看",15000,"CBS：掛牌估值最高約 1.5 兆"]],{unit:"$",hl:3,note:"實際市值要看總股數與掛牌後股價。"})}),
+ nvdaBeat:()=>({t:"Nvidia 營收：實際 vs 預期 vs 指引（億美元）",s:"Q3 FY2027 打敗預期 60 多億，股價卻下跌",
+   b:hbar([["Q3 分析師預期",1091,"市場預期 1,091 億"],["Q3 實際",1158.4,"實際 1,158.4 億"],["Q4 指引",1300,"公司給的下季指引 1,300 億"]],{unit:"$",hl:1})}),
+ fedOdds:()=>{const d=[["升一碼",93,"var(--s1)"],["升兩碼以上",5,"var(--s1soft)"],["不變",3,"var(--neu)"]];
+   let g=`<div class="meter" style="height:34px">`+d.map(x=>`<div style="flex:${x[1]};background:${x[2]};color:${x[0]==="升兩碼以上"?"var(--fg)":"#fff"}" data-tip="${x[0]}：${x[1]}%">${x[1]>4?x[1]+"%":""}</div>`).join("")+`</div><div class="legend">`+d.map(x=>`<span><i style="background:${x[2]}"></i>${x[0]} ${x[1]}%</span>`).join("")+`</div>`;
+   return {t:"12/9 會議，市場怎麼押？",s:"Polymarket 11/18（CME FedWatch 約 95%）",b:g}},
+ fedPath:()=>{const steps=[["9月","3.75–4.00"],["10月 維持","3.75–4.00"],["12月 預期","4.00–4.25"]];
+   let g=`<svg viewBox="0 0 ${W} 120" role="img">`;const X=i=>50+i*(W-100)/2;
+   g+=`<path d="M${X(0)} 80H${X(1)}V80H${(X(1)+X(2))/2}V40H${X(2)+30}" fill="none" stroke-width="2" stroke-dasharray="0" style="stroke:var(--s1)"/>`;
+   steps.forEach((s,i)=>{const y=i===2?40:80;g+=`<circle cx="${X(i)}" cy="${y}" r="6" style="fill:${i===2?"var(--panel)":"var(--s1)"};stroke:var(--s1)" stroke-width="2"/><text x="${X(i)}" y="${y-14}" text-anchor="middle" font-size="13" font-weight="600" style="fill:var(--fg);font-family:var(--mono)">${s[1]}%</text><text x="${X(i)}" y="112" text-anchor="middle" font-size="12">${s[0]}</text><rect class="hit" x="${X(i)-40}" y="10" width="80" height="100" data-tip="${s[0]}：${s[1]}%"/>`});
+   return {t:"聯邦基金利率路徑",s:"空心點＝市場預期，尚未發生",b:g+"</svg>"}},
+ dow:()=>({t:"道瓊工業指數 收盤",s:"11/11 → 11/18，5 個交易日",
+   b:line([["11/11",52486.49,"52,486.49（+0.49%）"],["11/12",52297.09,"52,297.09（−0.36%）黃仁勳離職"],["11/13",52347.55,"52,347.55（+0.1%）"],["11/16",51608.17,"51,608.17（由 11/17 跌點回推）"],["11/17",50759.42,"50,759.42（−848.75）"],["11/18",50198.17,"50,198.17（−561.25）"]],{yfmt:v=>fmt(v)})}),
+ ipoRace:()=>{const r=[["SpaceX","2026/6","掛牌，募約 750 億"],["Anthropic","2026/11","掛牌，募 813 億"],["OpenAI","2027","目標上市，期望估值約 1 兆"]];
+   let g=`<svg viewBox="0 0 ${W} 110" role="img"><line x1="60" x2="${W-60}" y1="50" y2="50" style="stroke:var(--line)" stroke-width="2"/>`;
+   r.forEach((x,i)=>{const cx=60+i*(W-120)/2,done=i<2;g+=`<circle cx="${cx}" cy="50" r="9" style="fill:${done?"var(--s1)":"var(--panel)"};stroke:var(--s1)" stroke-width="2"/><text x="${cx}" y="30" text-anchor="middle" font-size="14" font-weight="600" style="fill:var(--fg)">${x[0]}</text><text x="${cx}" y="78" text-anchor="middle" font-size="12">${x[1]}</text><text x="${cx}" y="96" text-anchor="middle" font-size="11">${done?"已上市":"排隊中"}</text><rect class="hit" x="${cx-60}" y="10" width="120" height="95" data-tip="${x[0]} ${x[1]}：${x[2]}"/>`});
+   return {t:"AI／太空三巨頭上市順序",s:"實心＝已上市，空心＝預計",b:g+"</svg>"}}
+};
+
+/* ---------- 渲染：大事 ---------- */
+let evCat="全部";
+function renderEv(){
+  const cats=["全部",...new Set(EVENTS.map(e=>e.cat))];
+  $("#evChips").innerHTML=cats.map(c=>`<button class="chip ${c===evCat?"on":""}" data-evc="${c}">${c}</button>`).join("");
+  const fav=LS.get("fav",[]);
+  $("#evList").innerHTML=EVENTS.filter(e=>evCat==="全部"||e.cat===evCat).map(e=>`
+  <article class="card" id="ev-${e.id}">
+    <div class="meta"><span class="tag ${e.hot?"hot":""}">${e.hot?"🔥 ":""}${e.cat}</span><span>${e.date}</span><span style="margin-left:auto"><button class="star ${fav.includes(e.id)?"on":""}" data-fav="${e.id}" aria-label="收藏">${fav.includes(e.id)?"★":"☆"}</button></span></div>
+    <h2>${esc(e.title)}</h2>
+    <p class="lead">${esc(e.lead)}</p>
+    ${e.stats?`<div class="stats">${e.stats.map(s=>`<div class="stat"><div class="k">${s[0]}</div><div class="v">${s[1]}</div>${s[2]?`<div class="d">${s[2]}</div>`:""}</div>`).join("")}</div>`:""}
+    <div class="why"><b>為什麼重要</b>${esc(e.why)}</div>
+    ${(e.charts||[]).map(c=>{const r=CH[c]();return `<div class="fig"><div class="t">${r.t}</div><div class="s">${r.s}</div>${r.b}</div>`}).join("")}
+    ${e.tl?`<div class="fig"><div class="t">時間軸</div><ul class="tl">${e.tl.map(t=>`<li class="${t[2]?"big":""}"><span class="dt">${t[0]}</span>${esc(t[1])}</li>`).join("")}</ul></div>`:""}
+    <details class="src"><summary>資料來源（${e.src.length}）</summary>${e.src.map(s=>`<div>· <a href="${s[1]}" target="_blank" rel="noopener">${esc(s[0])}</a></div>`).join("")}</details>
+  </article>`).join("");
+}
+/* ---------- 渲染：觀點 ---------- */
+let vwTag="全部";
+const ST={bull:"▲ 偏多",bear:"▼ 偏空",neu:"● 中性"};
+function allViews(){return VIEWS.concat(LS.get("mine",[]).filter(m=>m.type==="vw").map(m=>({n:m.title,o:"我的紀錄",tag:["我的"],st:m.stance||"neu",av:"✍️",q:[[m.date.slice(5),m.body]],src:m.url})))}
+function renderVw(){
+  const V=allViews();
+  const c={bull:0,neu:0,bear:0};V.forEach(v=>c[v.st]++);
+  $("#meter").innerHTML=[["bull","var(--bull)"],["neu","var(--neu)"],["bear","var(--bear)"]].filter(x=>c[x[0]]).map(x=>`<div style="flex:${c[x[0]]};background:${x[1]}" data-tip="${ST[x[0]]}：${c[x[0]]} 位">${c[x[0]]}</div>`).join("");
+  const tags=["全部",...new Set(V.flatMap(v=>v.tag))];
+  $("#vwChips").innerHTML=tags.map(t=>`<button class="chip ${t===vwTag?"on":""}" data-vwt="${t}">${t}</button>`).join("");
+  $("#vwList").innerHTML=V.filter(v=>vwTag==="全部"||v.tag.includes(vwTag)).map(v=>`
+  <article class="card">
+    <div class="who"><div class="av">${esc(v.av)}</div><div><div class="n">${esc(v.n)}</div><div class="o">${esc(v.o)}</div></div><span class="stance ${v.st}">${ST[v.st]}</span></div>
+    <ul class="q">${v.q.map(q=>`<li><span class="d">${q[0]}</span>${Array.isArray(q[2])?esc(q[1])+`<span class="en">“${esc(q[2][0])}”</span>`+esc(q[3]||""):esc(q[1])}</li>`).join("")}</ul>
+    <div class="meta" style="margin-top:6px">${v.tag.map(t=>`<span class="tag">${t}</span>`).join("")}${v.src?`<a href="${esc(v.src)}" target="_blank" rel="noopener" style="margin-left:auto;color:var(--s1)">來源 ↗</a>`:""}</div>
+  </article>`).join("");
+}
+/* ---------- 行事曆 ---------- */
+$("#calList").innerHTML=CAL.map(c=>`<div class="day">${c[0]}<small>${c[1]}</small></div><div class="ev"><b>${esc(c[2])}</b><span>${esc(c[3])}</span></div>`).join("");
+/* ---------- 我的 ---------- */
+function renderMine(){
+  const fav=LS.get("fav",[]);
+  $("#favList").innerHTML=fav.length?fav.map(id=>{const e=EVENTS.find(x=>x.id===id);return e?`<div style="padding:6px 0;border-top:1px dashed var(--line)"><a href="#ev" data-jump="${id}" style="color:var(--s1)">${esc(e.title)}</a></div>`:""}).join(""):`<div class="empty">在大事卡片右上角點 ☆ 收藏</div>`;
+  const m=LS.get("mine",[]);
+  $("#mineList").innerHTML=m.length?m.map((x,i)=>`<div style="padding:8px 0;border-top:1px dashed var(--line)"><div class="meta"><span class="tag">${x.type==="vw"?"觀點":"大事"}</span><span>${x.date}</span>${x.stance?`<span class="stance ${x.stance}" style="margin-left:0">${ST[x.stance]}</span>`:""}<button class="star" data-del="${i}" style="margin-left:auto;font-size:13px">刪除</button></div><b>${esc(x.title)}</b><div style="font-size:14px;white-space:pre-wrap">${esc(x.body)}</div>${x.url?`<a href="${esc(x.url)}" target="_blank" rel="noopener" style="font-size:12px;color:var(--s1)">來源 ↗</a>`:""}</div>`).join(""):`<div class="empty">還沒有紀錄</div>`;
+}
+$("#mDate").value=new Date(Date.now()+8*3600e3).toISOString().slice(0,10);
+$("#mAdd").onclick=()=>{
+  const t=$("#mTitle").value.trim(),b=$("#mBody").value.trim();if(!t){toast("請填標題或人名");return}
+  let u=$("#mUrl").value.trim();if(u&&!/^https?:\/\//.test(u))u="https://"+u;
+  const m=LS.get("mine",[]);m.unshift({type:$("#mType").value,title:t,date:$("#mDate").value,stance:$("#mStance").value,body:b,url:u});LS.set("mine",m);
+  $("#mTitle").value=$("#mBody").value=$("#mUrl").value="";renderMine();renderVw();toast("✅ 已新增");
+};
+/* ---------- 事件 ---------- */
+function go(p){document.querySelectorAll("nav button").forEach(b=>b.setAttribute("aria-selected",b.dataset.p===p));document.querySelectorAll(".pane").forEach(x=>x.classList.toggle("on",x.id==="p-"+p));if(p==="mine")renderMine();}
+document.addEventListener("click",e=>{
+  const t=e.target;
+  if(t.closest("nav button")){go(t.closest("nav button").dataset.p);window.scrollTo(0,0);return}
+  if(t.dataset.evc){evCat=t.dataset.evc;renderEv();return}
+  if(t.dataset.vwt){vwTag=t.dataset.vwt;renderVw();return}
+  if(t.dataset.fav){let f=LS.get("fav",[]);f=f.includes(t.dataset.fav)?f.filter(x=>x!==t.dataset.fav):[...f,t.dataset.fav];LS.set("fav",f);renderEv();toast(f.includes(t.dataset.fav)?"⭐ 已收藏":"已取消收藏");return}
+  if(t.dataset.del){const m=LS.get("mine",[]);m.splice(+t.dataset.del,1);LS.set("mine",m);renderMine();renderVw();return}
+  if(t.dataset.jump){e.preventDefault();evCat="全部";renderEv();go("ev");setTimeout(()=>document.getElementById("ev-"+t.dataset.jump).scrollIntoView({behavior:"smooth"}),30);return}
+});
+$("#shareBtn").onclick=async()=>{try{await navigator.clipboard.writeText(location.href.split("#")[0]);toast("✅ 已複製連結")}catch(x){toast("複製失敗，請手動複製網址")}};
+/* 提示框 */
+const tip=$("#tip");
+function showTip(el,x,y){tip.textContent=el.dataset.tip;tip.style.opacity=1;const r=tip.getBoundingClientRect();tip.style.left=Math.min(innerWidth-r.width-8,Math.max(8,x-r.width/2))+"px";tip.style.top=Math.max(8,y-r.height-12)+"px"}
+document.addEventListener("pointermove",e=>{const el=e.target.closest("[data-tip]");if(el&&e.pointerType==="mouse")showTip(el,e.clientX,e.clientY);else if(e.pointerType==="mouse")tip.style.opacity=0});
+document.addEventListener("pointerdown",e=>{const el=e.target.closest("[data-tip]");if(el){showTip(el,e.clientX,e.clientY);clearTimeout(showTip.t);showTip.t=setTimeout(()=>tip.style.opacity=0,2200)}else tip.style.opacity=0});
+document.addEventListener("dblclick",e=>e.preventDefault());
+renderEv();renderVw();
+</script>
+<!-- Made by Jim Lu -->
+<div class="jl-sig" style="text-align:center;font-size:11px;line-height:1.4;letter-spacing:.08em;opacity:.6;padding:14px 12px;color:inherit;font-family:inherit">Made by <b style="font-weight:700">Jim Lu</b></div>
+</body>
+</html>
