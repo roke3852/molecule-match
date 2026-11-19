@@ -307,7 +307,7 @@ const EVENTS=[
  lead:"Claude 的開發商 Anthropic 以每股 83 美元定價，高於原本 70–78 美元的區間，並把發行股數加大到約 9.8 億股，總募資 813 億美元，超越 SpaceX 成為史上最大 IPO。台北時間今晚在 Nasdaq 掛牌，代號 ANT。美股開盤後還在等開盤競價（SpaceX 當時等了 2 小時 16 分才成交），參考價指向約 100 美元、比承銷價高約兩成，Nasdaq 盤初也因此走高；預測市場押首日漲 20–25%。",
  why:"這是 AI 交易的大考：市場對 AI 越來越懷疑的時候，它能不能站穩，會直接影響明年 OpenAI 上市的定價，以及整條 AI 供應鏈（雲端、晶片）的情緒。",
  stats:[["定價","$83","區間 $70–78"],["募資","$813億","史上最大"],["發行股數","≈9.8億股","原訂 8.25 億"],["代號","ANT","Nasdaq · 11/19 掛牌"],["開盤參考價","≈$100","尚未首筆成交"]],
- charts:["antRange","antRaise","antRun","antVal"],
+ charts:["antRange","antRaise","antRun","antVal","ipoHist"],
  tl:[["06-01","秘密遞交 S-1；前幾天才以 9,650 億美元估值完成 H 輪"],["10-26","公開 S-1，第三季營收欄位留白引起討論"],["11-02","補上第三季：營收約 170 億美元，季增 47%（Q2 季增 144%），成長放緩"],["11-10","定出 70–78 美元區間、8.25 億股"],["11-18","定價 83 美元，加大發行",1],["11-19","Nasdaq 掛牌交易；開盤競價中，參考價約 100 美元",1],["11-23","最快這天開始有選擇權交易"]],
  src:[["CNBC：定價 83 美元","https://www.cnbc.com/2026/11/18/anthropic-ipo-ai-offering-price.html"],["CNBC：70–78 美元區間","https://www.cnbc.com/2026/11/10/anthropic-sets-price-range-of-70-to-78-in-upcoming-ipo.html"],["CBS：估值上看 1.5 兆","https://www.cbsnews.com/news/anthropic-ipo-ai-boom-nasdaq-debut/"],["Renaissance Capital：第三季財報","https://www.renaissancecapital.com/IPO-Center/News/122533/anthropic-discloses-third-quarter-financial-results-ahead-of-multibillion"],["Futurum：營收年化走勢","https://futurumgroup.com/insights/anthropic-files-for-ipo-looking-to-beat-openai-to-the-punch/"],["Crypto Briefing：參考價 100 美元","https://cryptobriefing.com/anthropic-shares-indicated-open-100-ipo/"],["Quartz：Nasdaq 盤初走高","https://qz.com/nasdaq-jumps-anthropic-ipo-debut-stock-111926"],["TradingKey：要看的價位與閉鎖期","https://www.tradingkey.com/analysis/stocks/us-stocks/262312732-ant-debuts-today-record-81-3-billion-ipo-83-line-to-watch-november-19-2026-tradingkey"],["Yahoo：上市日直播","https://finance.yahoo.com/technology/live/anthropic-ipo-live-company-said-to-price-stock-at-83-begin-trading-thursday-212656452.html"]]},
 {id:"nvda-ceo",cat:"科技股",hot:1,date:"2026-11-12",title:"黃仁勳辭去 Nvidia 執行長，CFO Kress 暫代；財報優於預期股價仍跌",
@@ -453,6 +453,7 @@ function line(pts,{yfmt=v=>v,ymin,ymax,unit="",area=true}={}){ // pts: [label,va
   const li=pts.length-1;g+=`<text x="${X(li)-8}" y="${Y(pts[li][1])-10}" text-anchor="end" font-size="13" font-weight="600" style="fill:var(--fg);font-family:var(--mono)">${yfmt(pts[li][1])}</text>`;
   return g+"</svg>";
 }
+const IPOH=[["Google",2004,18.0,-17.0],["Mastercard",2006,17.9,-13.1],["Visa",2008,28.4,-52.1],["Tesla",2010,40.5,-38.5],["GM",2010,3.6,-49.4],["LinkedIn",2011,109.4,-46.3],["Meta",2012,0.6,-53.6],["Twitter",2013,72.7,-58.4],["Alibaba",2014,38.1,-48.9],["Shopify",2015,51.1,-52.1],["Snap",2017,44.0,-56.3],["Spotify",2018,12.9,-45.6],["Lyft",2019,8.7,-79.5],["Zoom",2019,72.2,-39.7],["Pinterest",2019,28.4,-70.1],["Beyond Meat",2019,163.0,-77.0],["Uber",2019,-7.6,-68.0],["Saudi Aramco",2019,10.0,-26.8],["Snowflake",2020,111.6,-51.7],["Palantir",2020,31.0,-52.9],["DoorDash",2020,85.8,-47.5],["Airbnb",2020,112.8,-39.2],["Roblox",2021,54.4,-69.3],["Coupang",2021,40.7,-65.5],["Coinbase",2021,31.3,-58.8],["Robinhood",2021,-8.4,-90.2],["Rivian",2021,29.1,-88.0],["Arm",2023,24.7,-42.6],["Instacart",2023,12.3,-33.4],["Reddit",2024,48.4,-52.4],["CoreWeave",2025,0.0,-64.8],["Circle",2025,168.5,-80.9],["Chime",2025,37.4,-55.7],["Figma",2025,250.0,-86.2],["Klarna",2025,14.6,-73.2],["SpaceX",2026,19.2,-42.0]];
 const CH={
  antRange:()=>{const L=24,R=W-24,lo=60,hi=90,X=v=>L+(R-L)*(v-lo)/(hi-lo);
    let g=`<svg viewBox="0 0 ${W} 110" role="img"><line x1="${L}" x2="${R}" y1="60" y2="60" style="stroke:var(--line)" stroke-width="2"/>`;
@@ -472,6 +473,18 @@ const CH={
    b:hbar([["G 輪",3800,"G 輪：募 300 億，估值 3,800 億"],["H 輪 (5月)",9650,"H 輪：募 650 億，估值 9,650 億"],["Damodaran",14500,"教授自估股權價值 1.45 兆（11/3 下修）"],["IPO 上看",15000,"CBS：掛牌估值最高約 1.5 兆"]],{unit:"$",hl:3,note:"實際市值要看總股數與掛牌後股價。"})}),
  nvdaBeat:()=>({t:"Nvidia 營收：實際 vs 預期 vs 指引（億美元）",s:"Q3 FY2027 打敗預期 60 多億，股價卻下跌",
    b:hbar([["Q3 分析師預期",1091,"市場預期 1,091 億"],["Q3 實際",1158.4,"實際 1,158.4 億"],["Q4 指引",1300,"公司給的下季指引 1,300 億"]],{unit:"$",hl:1})}),
+ ipoHist:()=>{const L=40,Rr=W-12,T=14,B=250,X=v=>L+(Rr-L)*(v+20)/270,Y=v=>T+(B-T)*(-v)/95;
+   let g=`<div class="stats" style="margin-top:4px"><div class="stat"><div class="k">首日平均漲幅</div><div class="v">+49%</div><div class="d">中位數 +31%；92% 首日收漲</div></div><div class="stat"><div class="k">一年內最大回檔</div><div class="v">−55%</div><div class="d">中位數 −53%</div></div></div><svg viewBox="0 0 ${W} ${B+34}" role="img">`;
+   [0,-25,-50,-75].forEach(v=>g+=`<line x1="${L}" x2="${Rr}" y1="${Y(v)}" y2="${Y(v)}" style="stroke:var(--grid)"/><text x="${L-6}" y="${Y(v)+4}" text-anchor="end" font-size="10">${v}%</text>`);
+   [0,100,200].forEach(v=>g+=`<line x1="${X(v)}" x2="${X(v)}" y1="${T}" y2="${B}" style="stroke:var(--grid)"/><text x="${X(v)}" y="${B+14}" text-anchor="middle" font-size="10">+${v}%</text>`);
+   g+=`<line x1="${L}" x2="${Rr}" y1="${Y(-52.6)}" y2="${Y(-52.6)}" stroke-dasharray="4 3" style="stroke:var(--bear)"/><text x="${Rr}" y="${Y(-52.6)-4}" text-anchor="end" font-size="10" style="fill:var(--bear)">中位數 −53%</text>`;
+   g+=`<text x="${(L+Rr)/2}" y="${B+30}" text-anchor="middle" font-size="11">首日漲跌幅 →</text>`;
+   const lab={Figma:1,Robinhood:1,Rivian:1,Circle:1,Google:1,SpaceX:1,CoreWeave:1,"Beyond Meat":1,Mastercard:1};
+   IPOH.forEach(d=>{const x=X(d[2]),y=Y(d[3]),sx=d[0]==="SpaceX";g+=`<circle cx="${x}" cy="${y}" r="${sx?6:4.5}" style="fill:${sx?"var(--bear)":"var(--s1)"};stroke:var(--panel);opacity:.9" stroke-width="1.5"/>`;
+    if(lab[d[0]])g+=`<text x="${x+(d[2]>200?-7:7)}" y="${y+4}" font-size="10" text-anchor="${d[2]>200?"end":"start"}" style="fill:var(--fg)">${d[0]}</text>`;
+    g+=`<circle class="hit" cx="${x}" cy="${y}" r="11" data-tip="${d[0]}（${d[1]}）首日 ${d[2]>0?"+":""}${d[2]}%｜一年內最大回檔 ${d[3]}%"/>`});
+   g+=`<text x="${L+4}" y="${T+10}" font-size="10">↓ 一年內最大回檔</text></svg><div class="s" style="margin-top:4px">36 檔大型 IPO（2004 年 Google 至 2026 年 SpaceX）。首日漲得多，不代表之後不會大跌：Figma 首日 +250%，一年內最多跌 86%。SpaceX（橘點）上市還不滿一年，數字仍在變。資料：Carson Investment Research（Ryan Detrick 整理，2026/11/15）。</div>`;
+   return {t:"首日大漲很常見，之後大跌也很常見",s:"每個點是一檔 IPO：越右＝首日漲越多，越下＝上市後一年內最大回檔越深",b:g}},
  nvdaSgFlow:()=>{const bx=[["Nvidia","美國總部"],["新加坡子公司","開發票（1,040 億）"],["東南亞資料中心","馬來西亞・泰國・印尼"],["中國雲端／AI 公司","遠端租用算力"]];
    const H=bx.length*74,bw=Math.min(W-40,300),x=(W-bw)/2;let g=`<svg viewBox="0 0 ${W} ${H}" role="img">`;
    bx.forEach((b,i)=>{const y=i*74+4,last=i===3;g+=`<rect x="${x}" y="${y}" width="${bw}" height="48" rx="10" style="fill:${last?"var(--panel)":"var(--s1soft)"};stroke:${last?"var(--bear)":"var(--s1)"}" stroke-width="1.5" ${last?'stroke-dasharray="5 4"':""}/><text x="${W/2}" y="${y+21}" text-anchor="middle" font-size="14" font-weight="600" style="fill:var(--fg)">${b[0]}</text><text x="${W/2}" y="${y+39}" text-anchor="middle" font-size="11">${b[1]}</text>`;
@@ -693,13 +706,13 @@ const T=[
  sum:["五大指數裡 S&P 最淺、櫃買最深","這次是「AI 硬體空頭」，越靠近晶片跌越多","指數會被權值股撐住，要看個股廣度"]},
 {k:"ipo",ic:"🔔",n:"敲鐘之夜",sc:"ipo",go:["ev","ant-ipo"],L:[
  ["K","第一站，華爾街最大的新聞：Anthropic 今晚在 Nasdaq 掛牌，代號 ANT。"],
- {card:{t:"！重點：Anthropic IPO",l:["定價 $83（原區間 $70–78）","募資 813 億美元，史上最大","發行股數加大到約 9.8 億股"]}},
+ {card:{t:"！重點：Anthropic IPO",l:["定價 $83（原區間 $70–78）","募資 813 億美元，史上最大","發行股數加大到約 9.8 億股","歷史：大型 IPO 一年內平均最大回檔 −55%"]}},
  ["A","定價比區間還高，代表大家搶著要？"],
  ["K","對，需求強才會往上定價、加大發行。它的年化營收一年內從 90 億衝到 800 億美元。"],
  ["J","可是第三季營收季增從 144% 掉到 47%⋯⋯"],
  ["K","好眼力，這就是爭議所在。Eisman 不參與這次 IPO；Damodaran 估它約 1.45 兆，強調 IPO 是被「定價」不是被「估值」；Dan Ives 則看長線 3 兆。"],
  {q:["K","你覺得 ANT 首日表現，會怎麼影響整個市場？"],o:[
-  ["大漲","會替 AI 情緒打一劑強心針，OpenAI 明年上市也更有底氣。但要記得，大漲之後的閉鎖期到期（通常約 180 天）常有賣壓。"],
+  ["大漲","會替 AI 情緒打一劑強心針，OpenAI 明年上市也更有底氣。但歷史數據提醒：2004 年以來 36 檔大型 IPO，首日平均漲 49%，可是上市後一年內平均最大回檔 55%——Figma 首日漲 250%，之後最多跌 86%。"],
   ["破發","那會是 AI 信心的警訊，雲端和晶片股都會受影響。大型 IPO 破發，常出現在多頭的末段。"],
   ["平平","代表定價剛好合理，市場會回頭看基本面——也就是「成長放緩」這件事。"]]},
  ["K","不管哪種結果，ANT 都是 AI 情緒的溫度計。我們往下一站。"]],
