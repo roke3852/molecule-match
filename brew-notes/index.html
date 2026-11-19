@@ -156,6 +156,9 @@ svg.px{image-rendering:pixelated}svg.dk{filter:drop-shadow(1px 0 0 #9aa3ad) drop
 .sgrid{display:grid;grid-template-columns:34px repeat(3,1fr);gap:3px 6px;align-items:center;margin-top:6px;font-size:11px}
 .sgrid b{font-size:11px;color:var(--muted);text-align:center;font-weight:600}.sgrid>span{color:var(--muted)}
 .sgrid i{position:relative;height:12px;background:var(--sunken);border-radius:3px;overflow:hidden;display:block}.sgrid i em{position:absolute;left:0;top:0;bottom:0;border-radius:3px;opacity:.75}.sgrid i small{position:absolute;right:3px;top:-1px;font-size:9.5px;color:var(--ink)}.sgrid i.na{opacity:.35}
+.rank .rk{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);cursor:pointer}.rank .rk:last-of-type{border-bottom:0}
+.rk-n{width:24px;text-align:center;font-weight:800;color:var(--muted)}.rk.top .rk-n{color:var(--accent);font-size:18px}.rk-m{flex:1;min-width:0}.rk.top .score{background:var(--accent);color:var(--accent-ink)}.rk.top .score small{color:var(--accent-ink)}
+input[type=range]{width:100%}
 </style>
 </head>
 <body>
@@ -427,7 +430,7 @@ function vBeans(){
     <div class="row"><span class="pill ${st.c}">${st.t}</span>${has(b.agtron)?`<span class="tag mono">Agtron ${esc(b.agtron)}</span>`:''}${rem!=null?`<span class="tag mono" ${rem<45?'style="color:var(--warn)"':''}>剩 ${rem}g${rem<45?'，快用完':''}</span>`:''}<span class="tag">${n} 杯</span></div>
     <div class="adv">${esc(adv.t)}</div>${d!=null?curveSvg(b,{h:40}):''}${b.notes?`<div class="sub">標示風味：${esc(b.notes)}</div>`:''}<div class="sub mono">烘焙日 ${esc(b.roast||'—')} · 適飲窗口 第 ${b.winStart??7}–${b.winEnd??30} 天</div>
     <div class="row"><button class="btn sm" data-act="freeze" data-id="${esc(b.id)}">${b.frozenSince?'解凍，繼續計時':'冷凍，暫停計時'}</button><button class="btn sm" data-act="editBean" data-id="${esc(b.id)}">編輯</button><button class="btn sm" data-act="new" data-bean="${esc(b.id)}">用這支記一杯</button><button class="btn sm pri" data-act="beanDetail" data-id="${esc(b.id)}">分析</button><button class="btn sm" data-act="archive" data-id="${esc(b.id)}">喝完了，收進收藏庫</button></div></div>`}).join(''):'<div class="card sub">還沒有豆子。</div>')+
-  (arc.length?`<details class="card"><summary><b>收藏庫</b> <span class="sub">${arc.length} 支喝完的豆子</span></summary>${arc.slice().sort((a,c)=>(c.archivedAt||0)-(a.archivedAt||0)).map(b=>{const n=brewsOf(b.id),best=n.filter(x=>has(x.score)).sort((x,y)=>y.score-x.score)[0];return `<div class="between" style="padding:8px 0;border-bottom:1px solid var(--line)"><div data-act="beanDetail" data-id="${esc(b.id)}" style="cursor:pointer;min-width:0"><div style="font-weight:600">${esc(b.name)}</div><div class="sub">${esc(b.roaster||'')}${b.roast?' · '+md(b.roast)+' 烘':''} · ${n.length} 杯${best?' · 最高 '+best.score+' 分':''}${b.archivedAt?' · '+iso(b.archivedAt)+' 喝完':''}</div></div><button class="btn sm" data-act="unarchive" data-id="${esc(b.id)}">取回</button></div>`}).join('')}</details>`:'')+
+  (arc.length?`<details class="card"><summary><b>收藏庫</b> <span class="sub">${arc.length} 支喝完的豆子</span></summary>${arc.slice().sort((a,c)=>(c.archivedAt||0)-(a.archivedAt||0)).map(b=>{const n=brewsOf(b.id),best=n.filter(x=>rk(x)!=null).sort((x,y)=>rk(y)-rk(x))[0];return `<div class="between" style="padding:8px 0;border-bottom:1px solid var(--line)"><div data-act="beanDetail" data-id="${esc(b.id)}" style="cursor:pointer;min-width:0"><div style="font-weight:600">${esc(b.name)}</div><div class="sub">${esc(b.roaster||'')}${b.roast?' · '+md(b.roast)+' 烘':''} · ${n.length} 杯${best?' · 最高總評 '+rk(best):''}${b.archivedAt?' · '+iso(b.archivedAt)+' 喝完':''}</div></div><button class="btn sm" data-act="unarchive" data-id="${esc(b.id)}">取回</button></div>`}).join('')}</details>`:'')+
   `<h2>備份</h2><div class="card"><div class="sub">把所有豆子與紀錄複製成文字，可以貼到別處保存。</div><div><button class="btn sm" data-act="export">複製全部資料</button></div></div>`;
 }
 /* ---------- 實驗對照：像咖啡實驗室「保存的結果」一樣，一杯一列上下對照 ---------- */
@@ -441,7 +444,7 @@ function runsHtml(list,{limit=30}={}){
     const hasT=TEMPS.some(t=>b.temps&&b.temps[t[0]]&&Object.keys(b.temps[t[0]].s||{}).length);
     const grid=hasT?`<div class="sgrid"><span></span>${TEMPS.map(t=>`<b>${t[1]}</b>`).join('')}${SENS.map(([k,l])=>`<span>${l}</span>${TEMPS.map(t=>{const v=b.temps?.[t[0]]?.s?.[k],pv=p?.temps?.[t[0]]?.s?.[k],dv=has(v)&&has(pv)&&v!==pv?v-pv:0;return has(v)?`<i title="${v}"><em style="width:${v/5*100}%;background:var(--${k==='overall'?'accent':k==='bitter'||k==='astr'?'warn':'good'})"></em><small>${dv?`<span style="color:var(--${dv>0?'accent':'cold'})">${dv>0?'▲':'▼'}</span>`:''}${v}</small></i>`:'<i class="na"></i>'}).join('')}`).join('')}</div>`:'';
     const ey=has(b.ey)?b.ey:has(b.tds)&&has(b.bev)&&has(b.dose)?r1(b.tds*b.bev/b.dose):null;
-    return `<div class="run" data-act="detail" data-id="${esc(b.id)}"><div class="between"><div><b>${esc(when(b.ts))}</b><span class="sub"> · ${has(b.restDay)?'養豆第 '+b.restDay+' 天':''}</span></div><div class="score">${has(b.score)?b.score:'—'}<small>總分</small></div></div>
+    return `<div class="run" data-act="detail" data-id="${esc(b.id)}"><div class="between"><div><b>${esc(when(b.ts))}</b><span class="sub"> · ${has(b.restDay)?'養豆第 '+b.restDay+' 天':''}</span></div>${(()=>{const t=brewTotal(b);return `<div class="score">${rk(b)??'—'}<small>總評${t&&t.conf<70?' *':''}</small></div>`})()}</div>
       ${b.target?`<div class="rt">🎯 ${esc(b.target)}</div>`:''}
       <div class="rchips">${chips}</div>
       <div class="rmeas mono">${has(b.tds)?'TDS '+b.tds:''}${ey!=null?' · 萃取率 '+ey+'%':''}${b.dry?' · 壺香：'+esc(b.dry):''}</div>
@@ -450,17 +453,56 @@ function runsHtml(list,{limit=30}={}){
       ${b.next?`<div class="rnext">➜ 下次：${esc(b.next).replace(/\n/g,'　')}</div>`:''}</div>`}).join('')}</div>
     <div class="sub">紅框是跟上一杯不一樣的參數（刪除線是上一杯的值）。點一列看完整紀錄。</div>`;
 }
+/* ---------- 總評：三個溫度加權合成 0–100，缺的項目用個人中位數補 ---------- */
+const SDEF={wT:{hot:30,warm:40,room:30},wA:{sweet:25,balance:15,clean:20,body:15,aroma:15,finish:10},aromaFull:2.5,finishFull:2.5,bodyIdeal:3};
+const scoreCfg=()=>{const g=(S.gear||[]).find(x=>x.id==='cfg-score');return g?{...SDEF,...g,wT:{...SDEF.wT,...(g.wT||{})},wA:{...SDEF.wA,...(g.wA||{})}}:SDEF};
+const SKEYS=['fa','ra','acid','sweet','bitter','body','astr','huigan'],SFALL={fa:.5,ra:.5,acid:3.5,sweet:3,bitter:.5,body:2,astr:.5,huigan:.5};
+let MED=null,MEDN=-1;
+function medians(){const n=S.brews.length;if(MED&&MEDN===n)return MED;MED={};MEDN=n;
+  for(const[t]of TEMPS){MED[t]={};for(const k of SKEYS){const v=S.brews.map(b=>b.temps?.[t]?.s?.[k]).filter(has).map(Number).sort((a,c)=>a-c);MED[t][k]=v.length?v[Math.floor(v.length/2)]:SFALL[k]}}return MED}
+function brewTotal(b){
+  const hasAny=TEMPS.some(([t])=>b.temps&&b.temps[t]&&Object.keys(b.temps[t].s||{}).length);if(!hasAny)return null;
+  const c=scoreCfg(),M=medians();let got=0,all=0,sum=0,ws=0;const per={};
+  for(const[t]of TEMPS){const s=b.temps?.[t]?.s||{},v=k=>{all++;if(has(s[k])){got++;return+s[k]}return M[t][k]};
+    const fa=v('fa'),ra=v('ra'),acid=v('acid'),sweet=v('sweet'),bitter=v('bitter'),body=v('body'),astr=v('astr'),hg=v('huigan');
+    const p={aroma:Math.min(1,((fa+ra)/2)/c.aromaFull),sweet:sweet/5,balance:1-Math.min(1,Math.abs(acid-(sweet+.25))/2),clean:1-Math.min(1,(bitter+.7*astr)/3),body:Math.min(1,body/c.bodyIdeal),finish:Math.min(1,hg/c.finishFull)};
+    let a=0,w=0;for(const k in c.wA){a+=c.wA[k]*p[k];w+=c.wA[k]}per[t]=Math.round(a/w*100);sum+=c.wT[t]*per[t];ws+=c.wT[t]}
+  return{v:Math.round(sum/ws),per,conf:Math.round(got/all*100)}}
+const rk=b=>{const t=brewTotal(b);return t?t.v:has(b.score)?Math.round(b.score*20):null};
+function rankHtml(list){
+  const L=list.map(b=>({b,t:brewTotal(b),r:rk(b)})).filter(x=>x.r!=null).sort((a,c)=>c.r-a.r);
+  if(!L.length)return'<div class="card sub">還沒有可以評分的紀錄（至少要記一個溫度的感官分數）。</div>';
+  return `<div class="card rank">${L.map((x,i)=>{const b=x.b;return `<div class="rk ${i===0?'top':''}" data-act="detail" data-id="${esc(b.id)}"><div class="rk-n">${i===0?'★':i+1}</div>
+    <div class="rk-m"><div class="mono" style="font-size:13px">${esc([has(b.grind)?b.grind+' 格':'',has(b.temp)?b.temp+'°':'',b.method||''].filter(Boolean).join(' · '))}</div>
+    <div class="sub">${esc(when(b.ts))}${has(b.tds)?' · TDS '+b.tds:''}${x.t?` · 高${x.t.per.hot}／中${x.t.per.warm}／常${x.t.per.room}`:''}${x.t&&x.t.conf<70?` · 資料 ${x.t.conf}%`:''}</div></div>
+    <div class="score">${x.r}<small>總評</small></div></div>`}).join('')}
+    <div class="sub" style="margin-top:6px">總評 0–100：三個溫度各自算分（甜感、酸甜平衡、乾淨度、厚度、香氣、回甘），再依高 ${scoreCfg().wT.hot}％／中 ${scoreCfg().wT.warm}％／常 ${scoreCfg().wT.room}％ 加權。沒記到的項目用你自己過去紀錄的中位數補上，「資料 %」越低代表補得越多。</div></div>`}
+function scoreCfgHtml(){const c=scoreCfg(),L={sweet:'甜感',balance:'酸甜平衡',clean:'乾淨度（苦、澀越少越高）',body:'厚度',aroma:'香氣',finish:'回甘'};
+  return `<details class="card"><summary><b>評分方式</b> <span class="sub">調整權重與香氣校正</span></summary>
+    <div class="grp">各項權重</div>${Object.entries(L).map(([k,l])=>`<label class="f">${l}：<b class="mono">${c.wA[k]}</b><input type="range" min="0" max="40" step="5" value="${c.wA[k]}" data-scfg="wA.${k}"></label>`).join('')}
+    <div class="grp">溫度權重</div>${TEMPS.map(([t,l])=>`<label class="f">${l}：<b class="mono">${c.wT[t]}</b><input type="range" min="0" max="60" step="5" value="${c.wT[t]}" data-scfg="wT.${t}"></label>`).join('')}
+    <div class="grp">個人尺度校正</div>
+    <label class="f">你的香氣打幾分就算「滿分香氣」：<b class="mono">${c.aromaFull}</b><input type="range" min="1" max="5" step="0.5" value="${c.aromaFull}" data-scfg="aromaFull"></label>
+    <label class="f">回甘打幾分算滿分：<b class="mono">${c.finishFull}</b><input type="range" min="1" max="5" step="0.5" value="${c.finishFull}" data-scfg="finishFull"></label>
+    <label class="f">厚度打幾分算理想：<b class="mono">${c.bodyIdeal}</b><input type="range" min="1" max="5" step="0.5" value="${c.bodyIdeal}" data-scfg="bodyIdeal"></label>
+    <div class="sub">你的香氣習慣打 0–2，所以預設把 2.5 當滿分；之後如果決定改用「跟其他支豆子相比」的尺度打香氣，把這裡調回 5 就好。</div>
+    <div class="row"><button type="button" class="btn sm" data-act="scfgReset">恢復預設</button></div></details>`}
+let SCFGT=null;
+function setScfg(path,val){const c=JSON.parse(JSON.stringify(scoreCfg()));const[a,b]=path.split('.');if(b)c[a][b]=+val;else c[a]=+val;
+  const g={id:'cfg-score',type:'setting',name:'評分設定',wT:c.wT,wA:c.wA,aromaFull:c.aromaFull,finishFull:c.finishFull,bodyIdeal:c.bodyIdeal};
+  const i=S.gear.findIndex(x=>x.id==='cfg-score');if(i<0)S.gear.push(g);else S.gear[i]={...S.gear[i],...g};render();
+  clearTimeout(SCFGT);SCFGT=setTimeout(()=>store.save('gear',g).catch(()=>{}),600)}
 function vAnalysis(){
   const withBrews=beans().filter(b=>brews().some(x=>x.beanId===b.id));
   if(!withBrews.length)return demoBanner()+'<div class="card sub">有了沖煮紀錄後，這裡會出現甜蜜點圖、養豆曲線與參數影響。</div>';
   if(!withBrews.some(b=>b.id===S.aBean))S.aBean=brews()[0]&&withBrews.some(b=>b.id===brews()[0].beanId)?brews()[0].beanId:withBrews[0].id;
   const bean=beanById(S.aBean),bs=brewsOf(S.aBean),scored=bs.filter(b=>has(b.score));
-  const best=scored.slice().sort((a,b)=>b.score-a.score||b.ts-a.ts)[0];
+  const best=bs.filter(b=>rk(b)!=null).sort((a,b)=>rk(b)-rk(a)||b.ts-a.ts)[0];
   const judged=bs.filter(b=>b.met),metRate=judged.length?Math.round(judged.filter(b=>b.met==='yes').length/judged.length*100):null;
   let h=demoBanner()+`<label class="f">分析哪一支豆子<select id="aBean" data-sel="aBean">${withBrews.map(b=>`<option value="${esc(b.id)}" ${b.id===S.aBean?'selected':''}>${esc(b.name)}</option>`).join('')}</select></label>
-  <div class="tiles"><div class="tile"><b>${bs.length}</b><span>杯數</span></div><div class="tile"><b>${best?best.score:'—'}</b><span>最高分</span></div><div class="tile"><b>${metRate==null?'—':metRate+'%'}</b><span>目標達成率</span></div></div>
-  <h2>實驗對照</h2>${runsHtml(bs)}`;
-  if(best)h+=`<h2>目前的甜蜜點</h2><div class="card"><div class="between"><div><div class="title mono">${esc(paramLine(best))}</div><div class="sub">${esc([best.grinder,best.dripper,best.method].filter(Boolean).join(' · '))}</div></div><div class="score">${best.score}<small>總分</small></div></div>
+  <div class="tiles"><div class="tile"><b>${bs.length}</b><span>杯數</span></div><div class="tile"><b>${best?rk(best):'—'}</b><span>最高總評</span></div><div class="tile"><b>${metRate==null?'—':metRate+'%'}</b><span>目標達成率</span></div></div>
+  <h2>排行榜</h2>${rankHtml(bs)}${scoreCfgHtml()}<h2>實驗對照</h2>${runsHtml(bs)}`;
+  if(best)h+=`<h2>目前的甜蜜點</h2><div class="card"><div class="between"><div><div class="title mono">${esc(paramLine(best))}</div><div class="sub">${esc([best.grinder,best.dripper,best.method].filter(Boolean).join(' · '))}</div></div><div class="score">${rk(best)}<small>總評</small></div></div>
     <div class="sub mono">${has(best.tds)?`TDS ${best.tds} · `:''}${has(best.ey)?`萃取率 ${best.ey}% · `:''}${has(best.restDay)?`養豆第 ${best.restDay} 天`:''}</div><div class="row">${flavHtml(allFlavors(best))}</div>
     <div><button class="btn sm pri" data-act="new" data-base="${esc(best.id)}">用這個配方再沖一杯</button></div></div>`;
   // sweet spot map
@@ -781,13 +823,13 @@ function suggest(c){
   const first=firstRecipe(bean,g,d,k,p,m);
   const hist=brewsOf(bean.id).filter(x=>inCombo(x,c));
   if(!hist.length)return{...first,hist,title:'預期第一杯',change:null};
-  const L=hist[hist.length-1],scored=hist.filter(x=>has(x.score)),B=scored.slice().sort((a,b)=>b.score-a.score||b.ts-a.ts)[0]||null;
+  const L=hist[hist.length-1],scored=hist.filter(x=>rk(x)!=null),B=scored.slice().sort((a,b)=>rk(b)-rk(a)||b.ts-a.ts)[0]||null;
   const from=x=>{const w=x.water??first.water;return{grind:x.grind??first.grind,temp:x.temp??first.temp,dose:x.dose??first.dose,water:w,method:x.method||first.method,pours:x.pours||scaleP(first.pours,w/first.water),_w:w}};
   const out={...first,first:false,hist,last:L,best:B,why:[]};
   /* 最新一杯明顯比最佳那杯差：先回到最佳配方 */
-  if(B&&B!==L&&has(L.score)&&L.score<=B.score-0.5){
+  if(B&&B!==L&&rk(L)!=null&&rk(L)<=rk(B)-8){
     Object.assign(out,from(B));out.title='回到目前最佳配方';
-    out.change=`上一杯（${L.score} 分）比最佳那杯（${B.score} 分）差，先回到最佳參數，確認能重現`;
+    out.change=`上一杯（總評 ${rk(L)}）比最佳那杯（總評 ${rk(B)}）差，先回到最佳參數，確認能重現`;
     out.why=[`最佳那杯：${paramLine(B)}`];return out;
   }
   Object.assign(out,from(L));
@@ -804,7 +846,7 @@ function suggest(c){
     else{out.temp-=1;out.change=`過萃，降溫 1°C 到 ${out.temp}°C`}
   }else if(dg.thin>dg.strong){out.water=Math.round(out.water-out.dose*0.5);out.change=`偏淡，總水量減到 ${out.water}g（約 1:${r1(out.water/out.dose)}）`}
   else if(dg.strong>dg.thin){out.water=Math.round(out.water+out.dose*0.5);out.change=`偏濃，總水量加到 ${out.water}g（約 1:${r1(out.water/out.dose)}）`}
-  else if(has(L.score)&&L.score>=4||L.met==='yes'){out.change='已經很接近甜蜜點：同樣參數再沖一杯，確認能不能重現';}
+  else if((rk(L)??0)>=80||L.met==='yes'){out.change='已經很接近甜蜜點：同樣參數再沖一杯，確認能不能重現';}
   else{out.temp=Math.min(96,out.temp+0.5);out.change=`沒有明顯偏差，試升溫 0.5°C 到 ${out.temp}°C，看甜感會不會更多`}
   if(out._w&&out.water!==out._w)out.pours=scaleP(out.pours,out.water/out._w);
   out.title='下一杯建議';
@@ -814,7 +856,7 @@ function suggest(c){
 function recipeCard(r,c,ai){
   if(!r)return'';const g=c.g;
   const rows=[['刻度',g?`${fmtG(g,r.grind)}${g.base==null?'（先到器材設定填常用刻度）':''}`:'—'],['水溫',r.temp+'°C'],['粉水',`${r.dose}g : ${r.water}g（1:${r1(r.water/r.dose)}）`],['手法',r.method],['用水',c.w?c.w.name:'—'],['目標時間',`${fmtTime(r.tl)}–${fmtTime(r.th)}`],['目標',`TDS 1.30–1.42 · 萃取率 19.5–21.5%`]];
-  return `<div class="card"><div class="between"><div class="title">${esc(ai?'Claude 的建議':r.title)}</div>${r.best?`<div class="score">${r.best.score}<small>最佳</small></div>`:''}</div>
+  return `<div class="card"><div class="between"><div class="title">${esc(ai?'Claude 的建議':r.title)}</div>${r.best?`<div class="score">${rk(r.best)}<small>最佳</small></div>`:''}</div>
     ${r.change?`<div class="pill ${r.change.includes('重現')?'good':'warn'}" style="white-space:normal">${esc(r.change)}</div>`:''}${c.g&&grinderDirt(c.g).pct>=100?`<div class="pill warn" style="white-space:normal">🧹 ${esc(c.g.name)} 已經用了 ${grinderDirt(c.g).n} 次，建議先拆開清洗，殘粉會讓風味變悶、刻度也會跑掉</div>`:''}
     <dl class="kv mono">${rows.map(x=>`<dt>${x[0]}</dt><dd>${esc(x[1])}</dd>`).join('')}</dl>
     <div class="sub mono" style="white-space:pre-line">${esc(r.pours)}</div>
@@ -920,7 +962,7 @@ function vDesk(){
   h+=`<div id="recOut"></div>`;
   if(miss.length)h+=`<div class="card sub">還差：${miss.join('、')}。把下面的器材拖到桌上對應的空格，或點一下直接放上去。</div>`;
   else{const r=suggest(c);h=h.replace('<div id="recOut"></div>','<div id="recOut">'+(c.bean?`<div class="row" style="margin-top:4px"><span class="pill ${beanStatus(c.bean).c}">${beanStatus(c.bean).t}</span><span class="tag">${esc(PL[beanTraits(c.bean).proc])}</span></div>`:'')+recipeCard(r,c)+(S.ai&&S.ai.key===comboKey(c)+c.bean.id?recipeCard(S.ai.r,c,true):'')+'</div>');
-    if(r&&r.hist.length)h+=`<h2>這個組合的調整歷程</h2><div class="card">${r.hist.map((x,i)=>{const pv=i?r.hist[i-1]:null;return `<div class="between" data-act="detail" data-id="${esc(x.id)}" style="cursor:pointer;padding:6px 0;border-bottom:1px solid var(--line)"><div><div class="mono">${esc(paramLine(x))}</div><div class="row">${pv?chgHtml(diff(pv,x)):'<span class="sub">第一杯</span>'}</div></div><div class="score">${has(x.score)?x.score:'—'}<small>${x===r.best?'最佳':'分'}</small></div></div>`}).join('')}</div>`}
+    if(r&&r.hist.length)h+=`<h2>這個組合的調整歷程</h2><div class="card">${r.hist.map((x,i)=>{const pv=i?r.hist[i-1]:null;return `<div class="between" data-act="detail" data-id="${esc(x.id)}" style="cursor:pointer;padding:6px 0;border-bottom:1px solid var(--line)"><div><div class="mono">${esc(paramLine(x))}</div><div class="row">${pv?chgHtml(diff(pv,x)):'<span class="sub">第一杯</span>'}</div></div><div class="score">${rk(x)??'—'}<small>${x===r.best?'最佳':'總評'}</small></div></div>`}).join('')}</div>`}
   h+=`<h2>器材架</h2><div class="card">${shelfHtml()}</div>`;
   h+=crossHtml()+gearLib();
   return h;
@@ -933,8 +975,8 @@ function crossHtml(){
   const G=gear('grinder'),D=gear('dripper'),P=gear('paper'),K=gear('kettle').slice(0,1),M=gear('method'),W=gear('water')[0];
   return `<details class="card"><summary><b>交叉比對</b> <span class="sub">每支豆子 × 每組器材的第一杯</span></summary>`+S.beans.filter(b=>!b.archived).map(b=>{const rows=[];
     for(const g of G)for(const d of D){const ps=P.filter(p=>fitPaper(p,d));const ms=M.filter(x=>fitMethod(x,d)&&x.drippers&&x.drippers.length);for(const p of (ps.length?ps:[null]))for(const k of (K.length?K:[null]))for(const m of (ms.length?ms:[null])){
-      const cc={bean:b,g,d,p,k,m},f=firstRecipe(b,g,d,k,p,m),n=brewsOf(b.id).filter(x=>inCombo(x,cc)),bs=n.filter(x=>has(x.score)).sort((a,c)=>c.score-a.score)[0];
-      rows.push(`<tr data-act="pickCombo" data-v="${esc([b.id,g.id,d.id,p?p.id:'',k?k.id:'',m?m.id:'-',W?W.id:''].join(','))}"><td>${esc([g.name,d.name,p&&p.name,m&&m.name].filter(Boolean).join(' · '))}</td><td class="mono">${esc(fmtG(g,f.grind))}</td><td class="mono">${f.temp}°</td><td class="mono">1:${r1(f.ratio)}</td><td class="mono">${n.length?(bs?bs.score+'分':n.length+'杯'):'—'}</td></tr>`)}}
+      const cc={bean:b,g,d,p,k,m},f=firstRecipe(b,g,d,k,p,m),n=brewsOf(b.id).filter(x=>inCombo(x,cc)),bs=n.filter(x=>rk(x)!=null).sort((a,c)=>rk(c)-rk(a))[0];
+      rows.push(`<tr data-act="pickCombo" data-v="${esc([b.id,g.id,d.id,p?p.id:'',k?k.id:'',m?m.id:'-',W?W.id:''].join(','))}"><td>${esc([g.name,d.name,p&&p.name,m&&m.name].filter(Boolean).join(' · '))}</td><td class="mono">${esc(fmtG(g,f.grind))}</td><td class="mono">${f.temp}°</td><td class="mono">1:${r1(f.ratio)}</td><td class="mono">${n.length?(bs?'總評'+rk(bs):n.length+'杯'):'—'}</td></tr>`)}}
     return `<div class="grp" style="margin-top:10px">${esc(b.name)}</div><table class="cmp"><tr><th>器材</th><th>刻度</th><th>水溫</th><th>比例</th><th>已沖</th></tr>${rows.join('')}</table>`}).join('')+'<div class="sub">點一列就會把那組器材擺上桌。</div></details>';
 }
 /* ---------- 豆子詳細頁：介紹、英文發音、AI 分析 ---------- */
@@ -947,7 +989,7 @@ function say(t){try{const s=window.speechSynthesis;if(!s){toast('這個瀏覽器
 let DB=null;
 function beanDetail(id){
   const b=S.beans.find(x=>x.id===id)||beans().find(x=>x.id===id);if(!b)return;DB=id;
-  const st=beanStatus(b),d=restDay(b),n=brewsOf(b.id),ws=wordsOf(b),sc=n.filter(x=>has(x.score)),best=sc.slice().sort((a,c)=>c.score-a.score)[0];
+  const st=beanStatus(b),d=restDay(b),n=brewsOf(b.id),ws=wordsOf(b),sc=n.filter(x=>rk(x)!=null),best=sc.slice().sort((a,c)=>rk(c)-rk(a))[0];
   const para=t=>String(t).split(/\n+/).filter(Boolean).map(p=>`<p style="margin:0 0 8px">${esc(p)}</p>`).join('');
   openSheet(`<div class="sheet-head"><b>${esc(b.name)}</b><span class="row" style="margin:0;flex-wrap:nowrap"><button class="btn sm" data-act="beanPdf" data-id="${esc(b.id)}">📄 PDF</button><button class="btn sm" data-act="close">關閉</button></span></div><div class="sheet-body">
     <div class="row"><span class="pill ${st.c}">${st.t}</span><span class="tag">${esc(PL[beanTraits(b).proc])}</span>${has(b.agtron)?`<span class="tag mono">Agtron ${esc(b.agtron)}・${RL[beanTraits(b).roast]}</span>`:''}</div>
@@ -956,7 +998,7 @@ function beanDetail(id){
     <fieldset><legend>豆子介紹</legend>${b.intro?para(b.intro):`<div class="sub">還沒有介紹。${sampleFn?'按下面的 AI 分析會順便寫一份。':'可以在「編輯」裡自己填。'}</div>`}</fieldset>
     <fieldset><legend>AI 分析</legend>${b.ai&&b.ai.text?`<div class="sub">${esc(when(b.ai.at))} 分析・當時 ${b.ai.n||0} 杯紀錄</div>${para(b.ai.text)}`:''}
       ${sampleFn?`<div class="row"><button type="button" class="btn sm pri" data-act="aiBean" data-id="${esc(b.id)}">${b.ai&&b.ai.text?'重新分析':'AI 分析這支豆子'}</button><span class="sub" id="aiBeanMsg"></span></div><div class="sub">會讀豆子資料、色值、養豆天數和你所有的沖煮紀錄。</div>`:'<div class="sub">AI 分析要在 Claude 裡打開這個 App 才能用。</div>'}</fieldset>
-    ${n.length?`<fieldset><legend>沖煮紀錄（${n.length} 杯）</legend>${best?`<div class="sub">最高分 ${best.score}：${esc(paramLine(best))}</div>`:''}${n.slice().reverse().slice(0,6).map(x=>`<div class="between" data-act="detail" data-id="${esc(x.id)}" style="cursor:pointer;padding:5px 0;border-bottom:1px solid var(--line)"><span class="mono" style="font-size:13px">${esc(when(x.ts))} · ${esc(paramLine(x))}</span><b>${has(x.score)?x.score:'—'}</b></div>`).join('')}</fieldset>`:''}
+    ${n.length?`<fieldset><legend>沖煮紀錄（${n.length} 杯）</legend>${best?`<div class="sub">最高總評 ${rk(best)}：${esc(paramLine(best))}</div>`:''}${n.slice().reverse().slice(0,6).map(x=>`<div class="between" data-act="detail" data-id="${esc(x.id)}" style="cursor:pointer;padding:5px 0;border-bottom:1px solid var(--line)"><span class="mono" style="font-size:13px">${esc(when(x.ts))} · ${esc(paramLine(x))}</span><b>${rk(x)??'—'}</b></div>`).join('')}</fieldset>`:''}
     <details class="card" style="margin-top:10px"><summary><b>英文發音</b> <span class="sub">點開聽豆袋上的英文怎麼念</span></summary><div class="sub" style="margin-bottom:6px">點 🔊 聽發音。衣索比亞地名用的是英文拼法的念法，當地口音會略有不同。</div>
       ${ws.length?`<div class="words">${ws.map((x,i)=>`<button type="button" class="word" data-act="say" data-v="${esc(x.say||x.w)}"><span class="w-en">🔊 ${esc(x.w)}</span>${x.ipa?`<span class="w-ipa mono">${esc(x.ipa)}</span>`:''}${x.zh?`<span class="w-zh">${esc(x.zh)}</span>`:''}</button>`).join('')}</div>
       <div class="row"><button type="button" class="btn sm" data-act="say" data-v="${esc(ws.map(x=>x.say||x.w).join('. '))}">▶ 全部念一次</button></div>`:'<div class="sub">這支豆子沒有英文字。</div>'}</details>
@@ -1014,7 +1056,7 @@ function recipeCanvas(c,r){
   x.font=`500 28px ${MONO}`;String(r.pours||'').split('\n').forEach(l=>{x.fillStyle=C.acc;x.beginPath();x.arc(M+10,y-9,6,0,7);x.fill();x.fillStyle=C.ink;x.fillText(l,M+34,y);y+=44});
   y+=16;x.fillStyle=C.ink;x.font=`800 30px ${F}`;x.fillText('為什麼這樣設定',M,y+30);y+=58;x.font=`400 24px ${F}`;x.fillStyle=C.mut;
   (r.why||[]).forEach(w=>{wrapText(x,'・'+w,W-M*2).forEach(l=>{x.fillText(l,M,y);y+=34})});
-  if(r.best&&r.hist&&r.hist.length){y+=20;x.fillStyle=C.good;x.font=`700 24px ${F}`;x.fillText(`這組器材已沖 ${r.hist.length} 杯，最高分 ${r.best.score}：${paramLine(r.best)}`,M,y);y+=40}
+  if(r.best&&r.hist&&r.hist.length){y+=20;x.fillStyle=C.good;x.font=`700 24px ${F}`;x.fillText(`這組器材已沖 ${r.hist.length} 杯，最高總評 ${rk(r.best)}：${paramLine(r.best)}`,M,y);y+=40}
   y+=40;x.fillStyle=C.line;x.fillRect(M,y,W-M*2,2);y+=40;x.fillStyle=C.mut;x.font=`400 20px ${F}`;x.fillText('由「沖煮筆記」依豆子 × 器材交叉推算；之後依每杯筆記一次調整一個變數。',M,y);y+=50;
   const out=document.createElement('canvas');out.width=W;out.height=Math.max(Math.round(W*1.414),y);const o=out.getContext('2d');o.fillStyle=C.bg;o.fillRect(0,0,W,out.height);o.drawImage(cv,0,0);return out}
 function pdfFromCanvas(cv){
@@ -1196,6 +1238,7 @@ document.addEventListener('click',async ev=>{
   else if(a==='beanPdf'){const b=S.beans.find(x=>x.id===id)||beans().find(x=>x.id===id);if(b)showPdf(beanCanvas(b),`豆子筆記_${safeName(shortBean(b))}.pdf`,'分享豆子 PDF')}
   else if(a==='pdfShare')pdfShare();
   else if(a==='pdfSave'){if(PDF&&DLS)DLS.save({filename:PDF.nm,data:PDF.blob}).then(()=>toast('已儲存 PDF')).catch(e=>{if(e&&e.code!=='declined')toast(e&&e.code==='rate_limited'?'稍等一下再試':'這裡無法儲存檔案，可以長按圖片存成照片')})}
+  else if(a==='scfgReset'){const i=S.gear.findIndex(x=>x.id==='cfg-score');const g={id:'cfg-score',type:'setting',name:'評分設定',...JSON.parse(JSON.stringify(SDEF))};if(i<0)S.gear.push(g);else S.gear[i]=g;store.save('gear',g).catch(()=>{});render()}
   else if(a==='rTab'){S.rtab=v;render();$('#main').scrollTop=0}
   else if(a==='catF'){CATF=v;render()}
   else if(a==='catItem')catItem(v);
@@ -1231,6 +1274,7 @@ document.addEventListener('click',async ev=>{
 document.addEventListener('input',ev=>{
   const t=ev.target;
   if(t.dataset.b&&BF){BF[t.dataset.b]=t.value;return}
+  if(t.dataset.scfg){setScfg(t.dataset.scfg,t.value);return}
   if(t.dataset.catq!==undefined){CATQ=t.value;const m=$('#main'),p=t.selectionStart;render();const n=document.querySelector('[data-catq]');if(n){n.focus();try{n.setSelectionRange(p,p)}catch(e){}}return}
   if(t.dataset.g&&GF){GF[t.dataset.g]=t.value;if(t.dataset.g==='icon'){GF.skin=0;drawGear()}else if(t.dataset.g==='skin')drawGear();return}
   if(t.dataset.f&&F){const k=t.dataset.f,ty=t.dataset.t;
