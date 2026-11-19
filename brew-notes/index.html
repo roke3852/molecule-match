@@ -140,6 +140,8 @@ svg.px{image-rendering:pixelated}svg.dk{filter:drop-shadow(1px 0 0 #9aa3ad) drop
 .words{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px}
 .word{display:flex;flex-direction:column;align-items:flex-start;gap:1px;text-align:left;padding:7px 9px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink)}
 .w-en{font-weight:700;font-size:14px}.w-ipa{font-size:11.5px;color:var(--accent)}.w-zh{font-size:11.5px;color:var(--muted)}
+.bt{display:flex;flex-direction:column;align-items:center;font-size:10px;line-height:1.3;margin-top:1px}.bt-m{color:var(--accent);font-weight:700}.bt-a{color:var(--muted);white-space:nowrap;font-size:9.5px}.bt-n{opacity:.6}
+.slot-b{font-size:10px;opacity:.85}
 </style>
 </head>
 <body>
@@ -388,7 +390,7 @@ function vBeans(){
   const bs=beans().slice().sort((a,b)=>order[beanStatus(a).c]-order[beanStatus(b).c]);
   return demoBanner()+restChart(bs)+`<div class="between" style="align-items:center"><h2 style="margin:0">我的豆子</h2><button class="btn sm pri" data-act="newBean">＋ 新增豆子</button></div>`+
   (bs.length?bs.map(b=>{const st=beanStatus(b),d=restDay(b),rem=remaining(b),n=brews().filter(x=>x.beanId===b.id).length;
-    return `<div class="card"><div class="between"><div data-act="beanDetail" data-id="${esc(b.id)}" style="cursor:pointer"><div class="title">${esc(b.name)} ›</div><div class="sub">${esc([b.origin,b.region,b.station,b.variety,b.process,b.roaster].filter(Boolean).join(' · '))}</div></div>${d!=null?`<div class="score">${d}<small>養豆天</small></div>`:''}</div>
+    return `<div class="card"><div class="between"><div data-act="beanDetail" data-id="${esc(b.id)}" style="cursor:pointer"><div class="title">${esc(b.name)} ›</div>${sameKind(b).length>1?`<span class="tag mono">批次 ${md(b.roast)} 烘</span>`:''}<div class="sub">${esc([b.origin,b.region,b.station,b.variety,b.process,b.roaster].filter(Boolean).join(' · '))}</div></div>${d!=null?`<div class="score">${d}<small>養豆天</small></div>`:''}</div>
     <div class="row"><span class="pill ${st.c}">${st.t}</span>${has(b.agtron)?`<span class="tag mono">Agtron ${esc(b.agtron)}</span>`:''}${rem!=null?`<span class="tag mono" ${rem<45?'style="color:var(--warn)"':''}>剩 ${rem}g${rem<45?'，快用完':''}</span>`:''}<span class="tag">${n} 杯</span></div>
     ${b.notes?`<div class="sub">標示風味：${esc(b.notes)}</div>`:''}<div class="sub mono">烘焙日 ${esc(b.roast||'—')} · 適飲窗口 第 ${b.winStart??7}–${b.winEnd??30} 天</div>
     <div class="row"><button class="btn sm" data-act="freeze" data-id="${esc(b.id)}">${b.frozenSince?'解凍，繼續計時':'冷凍，暫停計時'}</button><button class="btn sm" data-act="editBean" data-id="${esc(b.id)}">編輯</button><button class="btn sm" data-act="new" data-bean="${esc(b.id)}">用這支記一杯</button><button class="btn sm pri" data-act="beanDetail" data-id="${esc(b.id)}">介紹・發音・AI</button></div></div>`}).join(''):'<div class="card sub">還沒有豆子。</div>')+
@@ -818,16 +820,20 @@ function silhouette(t,sz){const col='rgba(255,244,225,.38)';
   return `<svg viewBox="0 ${rows.length-16} 16 16" width="${sz}" height="${sz}" shape-rendering="crispEdges" fill="${col}" aria-hidden="true">${h}</svg>`}
 function miniRest(b){const d=restDay(b);if(d==null)return '';const s=b.winStart??7,e=b.winEnd??30,st=beanStatus(b),mx=Math.max(e,d)+3,P=v=>(Math.min(v,mx)/mx*100).toFixed(1)+'%';
   return `<div class="mr"><div class="mr-bar"><i class="rc-rest" style="left:0;width:${P(s)}"></i><i class="rc-win" style="left:${P(s)};width:calc(${P(e)} - ${P(s)})"></i><i class="mr-fill ${st.c}" style="width:${P(d)}"></i><b style="left:${P(d)}"></b></div><div class="mr-t mono" style="color:var(--${st.c==='muted'?'muted':st.c})">第 ${d} 天${b.frozenSince?' ❄':''}</div></div>`}
+const md=d=>{if(!d)return'';const p=String(d).split('-');return +p[1]+'/'+(+p[2])};
+const sameKind=b=>S.beans.filter(x=>x.name===b.name);
+function batchLine(b){const multi=sameKind(b).length>1;
+  return `<div class="bt mono"><span class="${multi?'bt-m':''}">${b.roast?md(b.roast)+' 烘':'未填烘焙日'}</span>${has(b.agtron)?`<span class="bt-a">Agtron ${esc(b.agtron)}</span>`:'<span class="bt-a bt-n">Agtron —</span>'}</div>`}
 function deskHtml(){
   const c=curSel(),map={bean:c.bean,grinder:c.g,dripper:c.d,paper:c.p,kettle:c.k,water:c.w,method:c.m};
   return `<div class="desk${missing().length?' sticky':''}">${SLOTS.filter(([t])=>itemsOf(t).length||t==='bean').map(([t,l])=>{const x=map[t];
-    return `<div class="slot ${x?'full':''} ${t==='method'?'wide':''}" data-slot="${t}" ${x?`data-act="unslot" data-v="${t}"`:''}><div class="slot-l">${l}${t==='method'&&!x?'（可不放）':''}</div>${x?`<div class="slot-art">${itemArt(t,x,t==='bean'?30:38)}</div><div class="slot-n">${esc(x.name)}</div>`:`<div class="slot-art sil">${silhouette(t,t==='bean'?30:t==='method'?34:38)}</div><div class="slot-e">${t==='method'?'依器材自動':'拖到這裡'}</div>`}</div>`}).join('')}</div>`;
+    return `<div class="slot ${x?'full':''} ${t==='method'?'wide':''}" data-slot="${t}" ${x?`data-act="unslot" data-v="${t}"`:''}><div class="slot-l">${l}${t==='method'&&!x?'（可不放）':''}</div>${x?`<div class="slot-art">${itemArt(t,x,t==='bean'?30:38)}</div><div class="slot-n">${esc(t==='bean'?shortBean(x):x.name)}</div>${t==='bean'?`<div class="slot-b mono">${x.roast?md(x.roast)+' 烘':''}${has(x.agtron)?' · '+esc(x.agtron):''}</div>`:''}`:`<div class="slot-art sil">${silhouette(t,t==='bean'?30:t==='method'?34:38)}</div><div class="slot-e">${t==='method'?'依器材自動':'拖到這裡'}</div>`}</div>`}).join('')}</div>`;
 }
 function shelfHtml(){
   const c=curSel(),on={bean:c.bean,grinder:c.g,dripper:c.d,paper:c.p,kettle:c.k,water:c.w,method:c.m};
   return SLOTS.filter(([t])=>itemsOf(t).length).map(([t,l])=>`<div class="shelf-row"><div class="grp">${l}</div><div class="shelf">${itemsOf(t).map(x=>{
     const bad=(t==='paper'&&c.d&&!fitPaper(x,c.d))||(t==='method'&&c.d&&!fitMethod(x,c.d));
-    return `<div class="tool ${on[t]&&on[t].id===x.id?'used':''} ${bad?'bad':''}" data-drag="${t}" data-id="${esc(x.id)}">${itemArt(t,x,t==='bean'?34:42)}<span>${esc(t==='bean'?shortBean(x):x.name)}</span>${t==='bean'?miniRest(x):''}</div>`}).join('')}</div></div>`).join('');
+    return `<div class="tool ${on[t]&&on[t].id===x.id?'used':''} ${bad?'bad':''}" data-drag="${t}" data-id="${esc(x.id)}">${itemArt(t,x,t==='bean'?34:42)}<span>${esc(t==='bean'?shortBean(x):x.name)}</span>${t==='bean'?batchLine(x)+miniRest(x):''}</div>`}).join('')}</div></div>`).join('');
 }
 /* 拖拉：滑鼠與觸控都走 pointer events；點一下也會直接放上桌 */
 let DR=null;
@@ -895,7 +901,7 @@ function beanDetail(id){
     <fieldset><legend>AI 分析</legend>${b.ai&&b.ai.text?`<div class="sub">${esc(when(b.ai.at))} 分析・當時 ${b.ai.n||0} 杯紀錄</div>${para(b.ai.text)}`:''}
       ${sampleFn?`<div class="row"><button type="button" class="btn sm pri" data-act="aiBean" data-id="${esc(b.id)}">${b.ai&&b.ai.text?'重新分析':'AI 分析這支豆子'}</button><span class="sub" id="aiBeanMsg"></span></div><div class="sub">會讀豆子資料、色值、養豆天數和你所有的沖煮紀錄。</div>`:'<div class="sub">AI 分析要在 Claude 裡打開這個 App 才能用。</div>'}</fieldset>
     ${n.length?`<fieldset><legend>沖煮紀錄（${n.length} 杯）</legend>${best?`<div class="sub">最高分 ${best.score}：${esc(paramLine(best))}</div>`:''}${n.slice().reverse().slice(0,6).map(x=>`<div class="between" data-act="detail" data-id="${esc(x.id)}" style="cursor:pointer;padding:5px 0;border-bottom:1px solid var(--line)"><span class="mono" style="font-size:13px">${esc(when(x.ts))} · ${esc(paramLine(x))}</span><b>${has(x.score)?x.score:'—'}</b></div>`).join('')}</fieldset>`:''}
-  </div><div class="sheet-foot"><button class="btn" data-act="editBean" data-id="${esc(b.id)}">編輯</button><button class="btn" data-act="toDesk" data-id="${esc(b.id)}">擺上沖煮桌</button><button class="btn pri" data-act="new" data-bean="${esc(b.id)}">記一杯</button></div>`);
+  </div><div class="sheet-foot"><button class="btn" data-act="editBean" data-id="${esc(b.id)}">編輯</button><button class="btn" data-act="newBatch" data-id="${esc(b.id)}">＋新批次</button><button class="btn" data-act="toDesk" data-id="${esc(b.id)}">擺上沖煮桌</button><button class="btn pri" data-act="new" data-bean="${esc(b.id)}">記一杯</button></div>`);
 }
 async function aiBean(id){
   const b=S.beans.find(x=>x.id===id);if(!b||!sampleFn)return;const msg=t=>{const e=$('#aiBeanMsg');if(e)e.textContent=t};msg('分析中，約需 20 秒…');
@@ -972,6 +978,7 @@ document.addEventListener('click',async ev=>{
   else if(a==='delBrew'){if(!demoBlock()&&confirmTap(el,'brew'+id)){await store.del('brews',id);closeSheet();toast('已刪除')}}
   else if(a==='newBean')startBean();
   else if(a==='beanDetail')beanDetail(id);
+  else if(a==='newBatch'){const b=S.beans.find(x=>x.id===id);if(b){BF={...b,id:newId(),roast:iso(Date.now()),agtron:null,agtronNote:null,ai:null,frozenDays:0,frozenSince:null};delete BF.u;BF._edit=false;BF._msg='同款新批次：改烘焙日、重量，有量色值就填 Agtron。';drawBean()}}
   else if(a==='say')say(v);
   else if(a==='aiBean')aiBean(id);
   else if(a==='toDesk'){SEL.bean=id;keepSel();closeSheet();location.hash='recipe';render()}
