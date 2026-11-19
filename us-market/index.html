@@ -201,17 +201,12 @@ input[type=range]{width:100%;accent-color:var(--s1)}
     </div>
 
     <div class="card">
-      <h2>📉 美股歷史上的大空頭</h2>
-      <div class="meta">S&P 500 收盤高點到低點跌幅（約略值）・深藍＝伴隨經濟衰退・點一下看細節</div>
+      <h2>📉 歷史上的大空頭</h2>
+      <div class="chips" id="ixChips" style="margin:8px 0 4px"></div>
+      <div class="meta" id="ixMeta"></div>
       <div id="bearChart" style="margin-top:10px"></div>
-      <div class="legend" style="margin-top:6px"><span><i style="background:var(--s1)"></i>有衰退</span><span><i style="background:var(--s1soft)"></i>沒有衰退</span><span><i style="background:var(--bear)"></i>這次</span></div>
-    </div>
-
-    <div class="card">
-      <h2>🔬 費半、加權、櫃買的歷史大空頭</h2>
-            <div class="meta">高點到低點約略跌幅（櫃買以盤中高低點計）；半導體和台股的空頭通常比 S&P 深 1.5–2 倍，櫃買又比加權更深</div>
-      <div id="semiTw" style="margin-top:10px"></div>
-      <div class="why"><b>怎麼看</b>費半 −34%，約是 2022 年那次（−46%）的七成；加權 −23%，接近 2022 年（−32%）。櫃買 −37% 已經比 2022 年（−34%）還深——中小型股的「2022 級修正」其實已經走完了。如果這次只是「AI 修正」，費半可能再跌一到兩成、加權再跌約一成，櫃買下檔相對有限；如果是 2000、2008 年那種泡沫破裂（櫃買曾跌 76–78%），現在還在半山腰。</div>
+      <div class="legend" style="margin-top:6px"><span><i style="background:var(--s1)"></i>美國有衰退</span><span><i style="background:var(--s1soft)"></i>沒有衰退</span><span><i style="background:var(--bear)"></i>這次</span></div>
+      <div class="why" id="ixWhy"></div>
     </div>
 
     <div class="card">
@@ -272,7 +267,7 @@ input[type=range]{width:100%;accent-color:var(--s1)}
 <div id="tip"></div><div id="toast"></div>
 
 <script>
-const ASOF="2026-11-19 18:00";
+const ASOF="2026-11-19 18:10";
 /* ---------- 大事資料 ---------- */
 const EVENTS=[
 {id:"ant-ipo",cat:"IPO",hot:1,date:"2026-11-18",title:"Anthropic IPO 定價 83 美元，募資 813 億美元創紀錄",
@@ -522,10 +517,23 @@ const BEARS=[
 {y:"2022",nm:"通膨升息",dd:25,mo:9,rec:0,dn:"通膨衝到 9%，聯準會一年升息 425 個基點，成長股估值被腰斬。",up:"10/12 見底：通膨確定見頂、市場開始押升息放緩；隔年 ChatGPT 掀起 AI 行情。",note:"Nasdaq 跌 35%，這次的「升息」部分和它最像。"},
 {y:"2025",nm:"關稅解放日",dd:19,mo:2,rec:0,dn:"4/2 川普宣布對等關稅，兩天蒸發 5 兆美元。",up:"4/9 宣布關稅暫停 90 天，S&P 單日 +9.5%，4/8 就是底。",note:"政策造成的空頭，政策退讓就結束。"},
 ];
-const SEMI=[
-["費半","2000–02 網路泡沫",84,"半導體庫存＋網路泡沫破裂"],["費半","2007–09 金融海嘯",70,"需求崩落"],["費半","2022 通膨升息",46,"升息＋記憶體庫存修正"],["費半","2026 這次 AI 修正",34,"AI 硬體修正，進行中",1],
-["台股","1990 萬點崩盤",80,"12,682 → 2,485，資產泡沫＋波灣戰爭"],["台股","2000–01 網路泡沫",67,"10,393 → 3,446"],["台股","2007–08 金融海嘯",60,"9,859 → 3,955"],["台股","2022 通膨升息",32,"18,619 → 12,629"],["台股","2026 這次 AI 修正",22.9,"49,823 → 38,427，進行中",1],
-["櫃買","2000–01 網路泡沫",76,"326.42 → 78.22"],["櫃買","2007–08 金融海嘯",78,"238.35 → 53.04"],["櫃買","2022 通膨升息",34,"238.92 → 158.16"],["櫃買","2026 這次 AI 修正",37.1,"453.50 → 285.33，進行中",1]];
+const IXH={
+ tw:{nm:"上市",full:"台股加權指數",now:22.9,meta:"加權指數高點到低點約略跌幅；台股空頭通常比 S&P 深",
+  why:"加權 −23%，接近 2022 年（−32%）與 2025 關稅（−29%）的七成多，但它被台積電撐住，中小型股實際跌得更深（看櫃買）。若只是 AI 修正，按過去非衰退空頭約 −30% 的經驗，大約還有一成下檔；若像 2000、2008 年泡沫破裂，現在還在半山腰。",
+  d:[["萬點崩盤","1990",80,1,"12,682 → 2,485，資產泡沫＋波灣戰爭"],["網路泡沫","2000–01",67,1,"10,393 → 3,446"],["金融海嘯","2007–08",60,1,"9,859 → 3,955"],["新冠疫情","2020",30,1,"約 12,197 → 8,523"],["通膨升息","2022",32,0,"18,619 → 12,629"],["關稅解放日","2024–25",29,0,"約 24,416 → 17,307"]]},
+ otc:{nm:"櫃買",full:"櫃買指數（中小型股）",now:37.1,meta:"櫃買指數盤中高點到低點約略跌幅；中小型股空頭通常比加權更深",
+  why:"櫃買 −37% 已經比 2022 年（−34%）還深——中小型股的「2022 級修正」其實已經走完了。如果只是 AI 修正，櫃買下檔相對有限；但如果是 2000、2008 年那種泡沫破裂（曾跌 76–78%），現在才跌到一半。",
+  d:[["網路泡沫","2000–01",76,1,"326.42 → 78.22"],["金融海嘯","2007–08",78,1,"238.35 → 53.04"],["通膨升息","2022",34,0,"238.92 → 158.16"]]},
+ nq:{nm:"納斯達克",full:"Nasdaq 綜合指數",now:12,meta:"Nasdaq 綜合指數收盤高點到低點約略跌幅；科技股空頭通常比 S&P 深 1.3–1.6 倍",
+  why:"Nasdaq −12% 剛進入修正。過去沒有衰退的 Nasdaq 空頭（2018、2022、2025）大多跌 24–36%；若這次比照，還有一到兩成以上的空間。2000 年網路泡沫跌了 78%，那是這次最需要防的劇本。",
+  d:[["石油危機","1973–74",60,1,"約 136 → 55"],["黑色星期一","1987",36,0,"約 456 → 292"],["波灣戰爭","1990",33,1,"約 470 → 323"],["網路泡沫","2000–02",78,1,"5,049 → 1,114"],["金融海嘯","2007–09",56,1,"2,860 → 1,268"],["縮表＋貿易戰","2018 Q4",24,0,"約 8,110 → 6,190"],["新冠疫情","2020",30,1,"約 9,817 → 6,860"],["通膨升息","2022",36,0,"16,057 → 10,213"],["關稅解放日","2025",24,0,"約 20,174 → 15,268"]]},
+ sp:{nm:"S&P",full:"S&P 500",now:7.1,meta:"S&P 500 收盤高點到低點約略跌幅・點一下看下跌與止跌觸發",
+  why:"S&P 只跌 7%，還不到修正。沒有衰退的空頭平均跌約 23%、約 4 個月見底；伴隨衰退的平均跌約 41%、約 15 個月見底。下面的卡片有每一次的下跌與止跌觸發。",d:null},
+ sox:{nm:"費半",full:"費城半導體指數",now:34,meta:"費城半導體指數高點到低點約略跌幅；半導體空頭通常是 S&P 的 1.5–2 倍",
+  why:"費半 −34%，約是 2022 年（−46%）的七成，已經跟 2020 疫情、2025 關稅那兩次差不多深。若只是 AI 修正，按 2022 年的比例可能再跌一到兩成；2000 年泡沫破裂時曾跌 84%。",
+  d:[["網路泡沫","2000–02",84,1,"半導體庫存＋網路泡沫破裂"],["金融海嘯","2007–09",70,1,"需求崩落"],["新冠疫情","2020",34,1,"約 −34%"],["通膨升息","2022",46,0,"升息＋記憶體庫存修正"],["關稅解放日","2024–25",35,0,"約 −35%（2024/7 高點到 2025/4）"]]}
+};
+let IXK="sp";
 const NOW={y:"2026",nm:"這次 AI 修正",dd:7.1,now:1};
 const BOMBS=[
 {ic:"🏦",t:"聯準會升息循環",lv:"h",lvt:"高",d:"12/10 幾乎確定升一碼，真正的風險是點陣圖顯示 2027 年還要升幾次。歷史上空頭要結束，幾乎都要等聯準會停手。",m:"引爆點：12/10 凌晨 3 點（台北）"},
@@ -548,11 +556,19 @@ const SIGNALS=[
 ["政府出手護盤（金管會限空）","已出現","neu"],
 ["油價回落、通膨壓力減輕","油價有、通膨未","neu"],
 ];
+function renderIx(){
+  const o=IXH[IXK];
+  $("#ixChips").innerHTML=["tw","otc","nq","sp","sox"].map(k=>`<button class="chip ${k===IXK?"on":""}" data-ix="${k}">${IXH[k].nm}</button>`).join("");
+  $("#ixMeta").textContent=o.meta;
+  const rows=o.d?o.d.map(x=>({nm:x[0],y:x[1],dd:x[2],rec:x[3],tip:`${x[1]} ${x[0]}：−${x[2]}%｜${x[4]}`})):BEARS.map((b,i)=>({nm:b.nm,y:b.y,dd:b.dd,rec:b.rec,bj:i,tip:`${b.y} ${b.nm}：−${b.dd}%，${b.mo} 個月見底`}));
+  rows.push({nm:"這次 AI 修正",y:"2026",dd:o.now,now:1,tip:`${o.full} 目前距高點 −${o.now}%`});
+  $("#bearChart").innerHTML=rows.map(b=>`<div class="bear-row ${b.now?"now":b.rec?"rec":""}" ${b.bj!=null?`data-bj="${b.bj}"`:""} data-tip="${b.tip}"><span class="y"><b>${b.nm}</b>${b.y}</span><div class="bar" style="width:${b.dd/90*100}%"></div><span class="p">−${b.dd}%</span></div>`).join("");
+  $("#ixWhy").innerHTML=`<b>怎麼看・${o.full}</b>${o.why}`;
+}
 function renderBear(){
   const all=[...BEARS,NOW],mx=90;
-  $("#bearChart").innerHTML=all.map((b,i)=>`<div class="bear-row ${b.now?"now":b.rec?"rec":""}" data-bj="${i}" data-tip="${b.y} ${b.nm}：−${b.dd}%${b.mo?`，${b.mo} 個月見底`:"（目前）"}"><span class="y"><b>${b.nm}</b>${b.y}</span><div class="bar" style="width:${b.dd/mx*100}%"></div><span class="p">−${b.dd}%</span></div>`).join("");
+  renderIx();
   const rec=BEARS.filter(b=>b.rec&&b.y!=="1929–32"),non=BEARS.filter(b=>!b.rec),avg=a=>Math.round(a.reduce((x,b)=>x+b.dd,0)/a.length),avgm=a=>Math.round(a.reduce((x,b)=>x+b.mo,0)/a.length);
-  $("#semiTw").innerHTML=["費半","台股","櫃買"].map(g=>`<div class="fig" style="margin:6px 0 10px"><div class="t">${{費半:"費城半導體指數",台股:"台股加權指數",櫃買:"台股櫃買指數（中小型股）"}[g]}</div>`+SEMI.filter(x=>x[0]===g).map(x=>`<div class="bear-row ${x[4]?"now":"rec"}" data-tip="${x[1]}：−${x[2]}%｜${x[3]}"><span class="y"><b>${x[1].split(" ").slice(1).join(" ")}</b>${x[1].split(" ")[0]}</span><div class="bar" style="width:${x[2]/90*100}%"></div><span class="p">−${x[2]}%</span></div>`).join("")+`</div>`).join("");
   $("#bearStats").innerHTML=`<div class="stat"><div class="k">沒有衰退的空頭</div><div class="v">−${avg(non)}%</div><div class="d">平均約 ${avgm(non)} 個月見底（${non.length} 次）</div></div><div class="stat"><div class="k">伴隨衰退的空頭</div><div class="v">−${avg(rec)}%</div><div class="d">平均約 ${avgm(rec)} 個月見底（不含 1929）</div></div>`;
   $("#bearCards").innerHTML=BEARS.slice().reverse().map((b,k)=>`<article class="card bcard" id="bear-${BEARS.indexOf(b)}"><div class="meta"><span class="tag">${b.y}</span><span>${b.rec?"伴隨衰退":"沒有衰退"}・約 ${b.mo} 個月見底</span></div><h2>${b.nm}<span class="dd">−${b.dd}%</span></h2><div class="two"><div class="dn"><b>⬇ 下跌觸發</b>${b.dn}</div><div class="up"><b>⬆ 止跌觸發</b>${b.up}</div></div><div class="meta" style="margin-top:8px">💡 ${b.note}</div></article>`).join("");
   $("#bombs").innerHTML=BOMBS.map(b=>`<div class="bomb"><div class="ic">${b.ic}</div><div><b>${b.t}<span class="lv ${b.lv}">${b.lvt}</span></b><div style="font-size:14px">${b.d}</div><div class="m">${b.m}</div></div></div>`).join("");
@@ -582,6 +598,7 @@ document.addEventListener("click",e=>{
   if(t.dataset.vwt){vwTag=t.dataset.vwt;renderVw();return}
   if(t.dataset.fav){let f=LS.get("fav",[]);f=f.includes(t.dataset.fav)?f.filter(x=>x!==t.dataset.fav):[...f,t.dataset.fav];LS.set("fav",f);renderEv();toast(f.includes(t.dataset.fav)?"⭐ 已收藏":"已取消收藏");return}
   if(t.dataset.del){const m=LS.get("mine",[]);m.splice(+t.dataset.del,1);LS.set("mine",m);renderMine();renderVw();return}
+  if(t.dataset.ix){IXK=t.dataset.ix;renderIx();return}
   const bj=t.closest("[data-bj]");if(bj){const el=document.getElementById("bear-"+bj.dataset.bj);if(el)el.scrollIntoView({behavior:"smooth",block:"center"});return}
   if(t.dataset.jump){e.preventDefault();evCat="全部";renderEv();go("ev");setTimeout(()=>document.getElementById("ev-"+t.dataset.jump).scrollIntoView({behavior:"smooth"}),30);return}
 });
