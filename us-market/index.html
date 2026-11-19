@@ -133,6 +133,36 @@ textarea.f{min-height:80px;resize:vertical}
 .ixax{display:grid;grid-template-columns:70px 1fr 54px;gap:8px;font-size:11px;color:var(--faint)}
 .ixax div{position:relative;height:14px}
 .ixax span{position:absolute;transform:translateX(-50%)}
+.tw-scene{width:100%;height:auto;border-radius:12px;display:block;image-rendering:pixelated;border:2px solid var(--line)}
+.tw-hero{position:relative;margin-bottom:14px}
+.tw-cast{display:flex;justify-content:space-around;margin-top:-30px;position:relative}
+.tw-cast>div{display:flex;flex-direction:column;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:6px 8px;width:31%}
+.tw-cast b{font-size:14px}.tw-cast small{font-size:10.5px;color:var(--faint);text-align:center;line-height:1.3}
+.tw-stop{display:grid;grid-template-columns:28px 28px 1fr 20px;align-items:center;gap:6px;padding:10px 4px;border-top:1px dashed var(--line);cursor:pointer;font-size:15px}
+.tw-stop:first-of-type{border-top:0}
+.tw-stop .no{font:600 12px var(--mono);color:var(--faint);text-align:center;border:1.5px solid var(--line);border-radius:999px;width:24px;height:24px;display:grid;place-items:center}
+.tw-stop.done .no{background:var(--s1);border-color:var(--s1);color:#fff}
+.tw-stop .ck{color:var(--faint);text-align:right}.tw-stop.done .ck{color:var(--bull);font-weight:700}
+.tw-stop:active{background:var(--grid)}
+.tw-top{display:flex;align-items:center;gap:10px;margin-bottom:10px;font-weight:600;font-size:14px}
+.tw-top .btn{padding:5px 10px;font-size:13px}
+.tw-dlg{display:grid;grid-template-columns:64px 1fr;gap:10px;margin-top:12px;background:#10131c;color:#f0efec;border:3px solid #e2b23a;border-radius:6px;padding:12px;min-height:120px;cursor:pointer;box-shadow:0 4px 0 #8a6a18;user-select:none;-webkit-user-select:none}
+.tw-av{background:#1f2533;border:2px solid #3a4150;border-radius:4px;height:64px;display:grid;place-items:center}
+.tw-tx{position:relative}
+.tw-tx b{color:#e2b23a;font-size:14px;display:block;margin-bottom:2px}
+.tw-tx div{font-size:15.5px;line-height:1.7;min-height:52px}
+.tw-more{position:absolute;right:0;bottom:-4px;color:#e2b23a;font-size:12px;animation:twb 1s infinite}
+@keyframes twb{50%{opacity:.2}}
+.tw-card{margin-top:12px;background:var(--panel);border:2px solid var(--hlb);border-radius:6px;padding:10px 12px;font-size:14px;animation:twin .25s ease}
+.tw-card b{display:block;color:var(--hlb);margin-bottom:4px}
+.tw-card div{padding:2px 0;border-top:1px dashed var(--line)}.tw-card b+div{border-top:0}
+@keyframes twin{from{transform:translateY(6px);opacity:0}}
+#twOpts{display:flex;flex-direction:column;gap:8px;margin-top:10px}
+.tw-opt{border:2px solid var(--s1);background:var(--panel);color:var(--fg);border-radius:6px;padding:10px 12px;font:600 15px var(--sans);text-align:left;cursor:pointer}
+.tw-opt::before{content:"▶ ";color:var(--s1)}
+.tw-opt:active{background:var(--s1soft)}
+.tw-pick{font-size:13px;color:var(--faint);text-align:right}
+.tw-end{margin-top:12px}
 input[type=range]{width:100%;accent-color:var(--s1)}
 .lvls{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:6px;margin-top:8px}
 .lvls div{border:1px solid var(--line);border-radius:8px;padding:6px 8px;font-size:12px;color:var(--muted)}
@@ -150,6 +180,7 @@ input[type=range]{width:100%;accent-color:var(--s1)}
   </div>
   <nav role="tablist">
     <button data-p="ev" aria-selected="true">大事圖解</button>
+    <button data-p="tour" aria-selected="false">導覽員</button>
     <button data-p="vw" aria-selected="false">名人觀點</button>
     <button data-p="cal" aria-selected="false">接下來</button>
     <button data-p="bear" aria-selected="false">空頭史</button>
@@ -162,6 +193,8 @@ input[type=range]{width:100%;accent-color:var(--s1)}
     <div class="chips" id="evChips"></div>
     <div id="evList"></div>
   </section>
+
+  <section class="pane" id="p-tour"><div id="tourBox"></div></section>
 
   <section class="pane" id="p-vw">
     <div class="card">
@@ -267,7 +300,7 @@ input[type=range]{width:100%;accent-color:var(--s1)}
 <div id="tip"></div><div id="toast"></div>
 
 <script>
-const ASOF="2026-11-19 18:10";
+const ASOF="2026-11-19 18:30";
 /* ---------- 大事資料 ---------- */
 const EVENTS=[
 {id:"ant-ipo",cat:"IPO",hot:1,date:"2026-11-18",title:"Anthropic IPO 定價 83 美元，募資 813 億美元創紀錄",
@@ -609,6 +642,191 @@ function showTip(el,x,y){tip.textContent=el.dataset.tip;tip.style.opacity=1;cons
 document.addEventListener("pointermove",e=>{const el=e.target.closest("[data-tip]");if(el&&e.pointerType==="mouse")showTip(el,e.clientX,e.clientY);else if(e.pointerType==="mouse")tip.style.opacity=0});
 document.addEventListener("pointerdown",e=>{const el=e.target.closest("[data-tip]");if(el){showTip(el,e.clientX,e.clientY);clearTimeout(showTip.t);showTip.t=setTimeout(()=>tip.style.opacity=0,2200)}else tip.style.opacity=0});
 document.addEventListener("dblclick",e=>e.preventDefault());
+
+/* ---------- 導覽員：收盤後的交易室（文字遊戲） ---------- */
+const PAL={g:"#a7adb5",s:"#f1c27d",e:"#1d1d1d",b:"#2b2b2b",r:"#c0392b",n:"#1f3a5f",w:"#f4f4f4",t:"#c0392b",h:"#2b2321",p:"#e58fa6",c:"#2a78d6",o:"#eb6834"};
+const SPR={
+ K:["...gggggg...","..gggggggg..",".gggggggggg.",".gssssssssg.",".sbbbssbbbs.",".sbebssbebs.",".ssssssssss.","..sssrrsss..","...ssssss...","..nnnwwnnn..",".nnnnwtnnnn.",".nnnnwtnnnn."],
+ A:["...hhhhhh...","..hhhhhhhh..",".hhhhhhhhhh.",".hhsssssshh.",".hssssssssh.",".hsessssesh.",".hssssssssh.",".hsssrrsssh.",".hh.ssss.hh.","..pppwwppp..",".pppppppppp.",".pppppppppp."],
+ J:["..cccccccc..",".cccccccccc.",".ccccccccccc",".hssssssssh.",".ssssssssss.",".sesssssses.",".ssssssssss.","..sssrrsss..","...ssssss...","..oooooooo..",".oooowwoooo.",".oooooooooo."]};
+const WHO={K:["老K","資深交易員・導覽員"],A:["小安","新手投資人"],J:["阿傑","半導體工程師・台股股民"]};
+function sprite(k,sz=56){const m=SPR[k];let r="";m.forEach((row,y)=>[...row].forEach((ch,x)=>{if(PAL[ch])r+=`<rect x="${x}" y="${y}" width="1.02" height="1.02" fill="${PAL[ch]}"/>`}));return `<svg viewBox="0 0 12 12" width="${sz}" height="${sz}" shape-rendering="crispEdges" style="display:inline-block">${r}</svg>`}
+function R(x,y,w,h,f){return `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${f}"/>`}
+function stars(seed,n=14){let r="",v=seed;for(let i=0;i<n;i++){v=(v*9301+49297)%233280;r+=R(v%96,(v>>3)%14,1,1,"#ffffff"+(i%2?"aa":"66"))}return r}
+const SCN={
+ trade:()=>R(0,0,96,40,"#141b2b")+[4,26,48,70].map((x,i)=>R(x,6,20,13,"#0b0f18")+R(x+1,7,18,11,"#0f2238")+`<polyline points="${x+2},${9+i%2} ${x+6},${10} ${x+10},${12+i%2} ${x+14},${14} ${x+18},${16}" fill="none" stroke="#eb6834" stroke-width=".8"/>`).join("")+R(0,28,96,12,"#2a2f3a")+R(0,28,96,1,"#3a4150")+R(10,23,30,5,"#3a4150")+R(56,23,30,5,"#3a4150"),
+ ipo:()=>R(0,0,96,40,"#1a1430")+stars(7)+R(30,8,36,22,"#d9d4c7")+[32,39,46,53,60].map(x=>R(x,12,3,18,"#b9b2a2")).join("")+R(28,6,40,3,"#c9c2b2")+R(28,30,40,2,"#9d968a")+R(0,32,96,8,"#2a2340")+[8,18,76,86,14,82].map((x,i)=>R(x,4+i*3,1,1,["#eb6834","#2a78d6","#e2b23a"][i%3])+R(x+2,6+i*3,1,1,["#e2b23a","#eb6834","#2a78d6"][i%3])).join("")+R(44,1,8,5,"#e2b23a")+R(47,0,2,1,"#e2b23a"),
+ chip:()=>R(0,0,96,40,"#0d1a14")+R(30,6,36,26,"#1c3a2c")+R(34,10,28,18,"#244d3a")+R(40,14,16,10,"#76b900")+[...Array(8)].map((_,i)=>R(32+i*4,4,1,2,"#9aa")+R(32+i*4,32,1,2,"#9aa")+R(28,8+i*3,2,1,"#9aa")+R(66,8+i*3,2,1,"#9aa")).join("")+R(0,34,96,6,"#08110d"),
+ fed:()=>R(0,0,96,40,"#1d2433")+stars(3)+R(18,10,60,22,"#cfc8b8")+R(16,8,64,3,"#bfb8a8")+[22,30,38,46,54,62,70].map(x=>R(x,12,3,18,"#e4dfd2")).join("")+R(14,32,68,3,"#a9a294")+R(0,35,96,5,"#2c3446")+R(44,4,8,4,"#bfb8a8"),
+ capitol:()=>R(0,0,96,40,"#1a2236")+stars(11)+R(36,12,24,8,"#e6e2d8")+R(40,8,16,5,"#e6e2d8")+R(44,5,8,3,"#e6e2d8")+R(47,2,2,3,"#e6e2d8")+R(14,20,68,12,"#d8d3c6")+[18,24,30,36,42,48,54,60,66,72].map(x=>R(x,22,2,10,"#efebe2")).join("")+R(0,32,96,8,"#25304a"),
+ taipei:()=>R(0,0,96,40,"#160f2a")+stars(5,18)+[[4,22,8],[14,18,10],[26,24,7],[62,20,9],[73,16,8],[84,23,10]].map(([x,y,w])=>R(x,y,w,40-y,"#2b2347")+R(x+2,y+3,1,1,"#e2b23a")+R(x+5,y+7,1,1,"#e2b23a")).join("")+[0,1,2,3,4,5,6,7].map(i=>R(43-i*0.0+0,6+i*3.5,10,3,"#3f6f8f")+R(42,9+i*3.5,12,1,"#2c5570")).join("")+R(47,1,2,5,"#9ab")+R(0,36,96,4,"#0e0a1c"),
+ archive:()=>R(0,0,96,40,"#2a1f16")+[0,1,2].map(r=>R(4,4+r*10,88,1,"#5a4330")+[...Array(22)].map((_,i)=>R(6+i*4,6+r*10-((i*7)%3),3,7-((i*5)%3)+((i*7)%3),["#7b3b2a","#3d5a73","#6b6a3a","#8a6d3b"][(i+r)%4])).join("")).join("")+R(30,32,36,8,"#4a3626")+R(36,30,24,3,"#e8dcc0"),
+ arena:()=>R(0,0,96,40,"#121826")+R(0,0,48,40,"#1d2a44")+R(48,0,48,40,"#3a1f1a")+R(10,20,20,12,"#2a78d6")+R(66,20,20,12,"#eb6834")+R(14,14,12,6,"#2a78d6")+R(70,14,12,6,"#eb6834")+R(46,4,4,30,"#e2b23a")+R(0,32,96,8,"#0b0f18"),
+ dawn:()=>R(0,0,96,40,"#1d1b3a")+R(0,14,96,8,"#4a2f5a")+R(0,22,96,6,"#b8564a")+R(0,26,96,4,"#e2b23a")+R(40,22,16,8,"#f4c95d")+R(0,30,96,10,"#14122a")+[[6,26,8],[18,24,6],[70,25,9],[84,27,7]].map(([x,y,w])=>R(x,y,w,40-y,"#0c0b1d")).join("")
+};
+const T=[
+{k:"pro",ic:"🌙",n:"收盤後的交易室",sc:"trade",go:["bear"],L:[
+ ["K","小安、阿傑，收盤了。今晚我帶你們把這個月的大事走一遍。"],
+ ["A","K 哥，我只知道最近一直跌⋯⋯台股今天又跌了 1,768 點。"],
+ ["J","我公司的股票還跌停，櫃買一天跌了 7%。"],
+ ["K","先看全貌。各指數離自己的高點跌了多少——"],
+ {card:{t:"📉 各指數距高點",l:["S&P 500　−7%","Nasdaq　−12%","台股加權　−23%","費城半導體　−34%","台股櫃買　−37%"]}},
+ ["K","看出來了嗎？越靠近晶片、越是中小型 AI 股，跌得越深。這叫「AI 硬體空頭」。"],
+ {q:["A","那 S&P 只跌 7%，是不是代表美國沒什麼事？"],o:[
+  ["對，指數沒跌多少","指數被少數超大型權值股撐著。11 月初 S&P 就有接近六成成分股，距離自己的高點跌超過兩成——底下早就是空頭了。"],
+  ["不一定，要看個股","沒錯！這叫「隱形空頭」：指數看起來還好，大部分股票已經跌深。台股也是，加權被台積電撐住，櫃買才是真實狀況。"]]},
+ ["K","今晚有八站：IPO、Nvidia、聯準會、華府、台股、歷史、多空擂台，最後是佈局。走吧。"]],
+ sum:["五大指數裡 S&P 最淺、櫃買最深","這次是「AI 硬體空頭」，越靠近晶片跌越多","指數會被權值股撐住，要看個股廣度"]},
+{k:"ipo",ic:"🔔",n:"敲鐘之夜",sc:"ipo",go:["ev","ant-ipo"],L:[
+ ["K","第一站，華爾街最大的新聞：Anthropic 今晚在 Nasdaq 掛牌，代號 ANT。"],
+ {card:{t:"！重點：Anthropic IPO",l:["定價 $83（原區間 $70–78）","募資 813 億美元，史上最大","發行股數加大到約 9.8 億股"]}},
+ ["A","定價比區間還高，代表大家搶著要？"],
+ ["K","對，需求強才會往上定價、加大發行。它的年化營收一年內從 90 億衝到 800 億美元。"],
+ ["J","可是第三季營收季增從 144% 掉到 47%⋯⋯"],
+ ["K","好眼力，這就是爭議所在。Eisman 不參與這次 IPO；Damodaran 估它約 1.45 兆，強調 IPO 是被「定價」不是被「估值」；Dan Ives 則看長線 3 兆。"],
+ {q:["K","你覺得 ANT 首日表現，會怎麼影響整個市場？"],o:[
+  ["大漲","會替 AI 情緒打一劑強心針，OpenAI 明年上市也更有底氣。但要記得，大漲之後的閉鎖期到期（通常約 180 天）常有賣壓。"],
+  ["破發","那會是 AI 信心的警訊，雲端和晶片股都會受影響。大型 IPO 破發，常出現在多頭的末段。"],
+  ["平平","代表定價剛好合理，市場會回頭看基本面——也就是「成長放緩」這件事。"]]},
+ ["K","不管哪種結果，ANT 都是 AI 情緒的溫度計。我們往下一站。"]],
+ sum:["定價高於區間、募資史上最大","成長從 144% 放緩到 47% 是主要爭議","ANT 走勢會影響 OpenAI 上市與 AI 情緒"]},
+{k:"nvda",ic:"🟩",n:"無人的執行長室",sc:"chip",go:["ev","nvda-ceo"],L:[
+ ["K","第二站，AI 之王 Nvidia。11/12 黃仁勳辭去執行長，由財務長 Kress 暫代。"],
+ {card:{t:"！重點：Nvidia 財報",l:["Q3 營收 1,158 億（預期 1,091 億）","Q4 指引 1,300 億","股價一週跌超過 13%"]}},
+ ["A","財報這麼好，股價怎麼還跌？"],
+ ["K","因為市場在替「不確定性」打折：沒有正式執行長、還有調查在跑。好財報撐不住股價，是空頭很典型的特徵。"],
+ ["J","還有 FT 那則：新加坡子公司一年入帳 1,040 億美元。"],
+ {card:{t:"！重點：新加坡子公司",l:["對外營收 1,040 億，年增 72%","獲利只有 5,300 萬美元","Nvidia 說貨大多運往別處"]}},
+ ["K","營收巨大、利潤幾乎是零，像開發票的轉運站。重點是晶片最後去了哪——美國正在追蹤中國公司在東南亞「遠端租用」算力。"],
+ {q:["A","如果美國禁止遠端租用，誰受傷最重？"],o:[
+  ["Nvidia","會受影響，但真正的大客戶——美國雲端巨頭——還在，衝擊的是其中一部分營收。"],
+  ["東南亞資料中心","他們最直接。租給中國客戶的生意可能消失，Megaspeed 就已經被 Bain 旗下的資料中心解約。"],
+  ["台灣供應鏈","伺服器、散熱、PCB 都在這條鏈上。消息一出，台股通常反應最激烈。"]]},
+ ["K","Nvidia 的接班人選和調查結果，是接下來要盯的兩件事。"]],
+ sum:["好財報撐不住股價＝市場在折價不確定性","新加坡營收大、利潤薄，關注晶片去向","遠端租用若被管，東南亞與台灣供應鏈首當其衝"]},
+{k:"fed",ic:"🏦",n:"升息的鐘聲",sc:"fed",go:["ev","fed-hike"],L:[
+ ["K","第三站，聯準會。主席是 Warsh，利率在 3.75% 到 4.00%。"],
+ {card:{t:"！重點：12 月會議",l:["升一碼機率約 93%","台北時間 12/10 凌晨 3 點公布","10 月已有兩位理事主張升息","10 月非農 +16.5 萬，遠超預期"]}},
+ ["A","不是都說會降息嗎？"],
+ ["K","那是去年的劇本。今年通膨偏熱、就業又強，市場已經從降息轉成升息循環。"],
+ ["K","歷史上 13 次大空頭，有 10 次是靠政策轉向才止跌。所以這站最重要：聯準會停手之前，底部很難確立。"],
+ {q:["J","12/10 那天，我最該看什麼？"],o:[
+  ["升不升息","幾乎確定會升，價格已經反映了。真正的驚喜只會來自「不升」或「升兩碼」。"],
+  ["點陣圖","對！看 2027 年還要升幾次。如果暗示快到尾聲，常常就是轉折點。"],
+  ["主席記者會","也很重要。2018 年鮑爾一句「自動駕駛」讓市場崩跌，隔月改口說會有耐心，市場就見底了。"]]},
+ ["K","記住：空頭的終點，通常寫在聯準會的嘴裡。"]],
+ sum:["市場已從降息轉為升息循環","12/10 重點是點陣圖與 2027 年升息次數","聯準會停手前，底部難確立"]},
+{k:"dc",ic:"🏛️",n:"國會山莊的禁建令",sc:"capitol",go:["ev","midterm"],L:[
+ ["K","第四站，華府。11/3 期中選舉，民主黨拿下參眾兩院。"],
+ ["J","選後 Nasdaq 期貨馬上跌，為什麼？"],
+ ["K","因為民主黨主張「AI 資料中心禁建令」。紐約州已暫停大型資料中心許可，德州也在審查電網。"],
+ {card:{t:"！重點：資料中心禁建令",l:["全國版預計 2027/1 新國會提案","川普握有否決權","德州約占全美 27% 資料中心容量","德州電網審查預計 12 月結束"]}},
+ ["A","那真的會通過嗎？"],
+ ["K","聯邦版本很難，總統可以否決。但州層級容易得多——光是這種不確定性，就足以壓住 AI 硬體股的估值。"],
+ {q:["K","你覺得這顆雷，什麼時候最可能引爆？"],o:[
+  ["12 月德州審查","這是最近的時間點，結果會影響全美約四分之一的資料中心容量。"],
+  ["1 月新國會","提案時會有新聞衝擊，但離真正立法還很遠。"],
+  ["不會爆","有可能。如果最後只是加強電價和環評規範，反而會變成利空出盡。"]]},
+ ["K","政策造成的下跌，往往政策一鬆就結束——2025 年關稅那次就是這樣。"]],
+ sum:["民主黨掌國會，禁建令成新變數","聯邦版難過，州層級才是重點","12 月德州審查、1 月新國會是時間點"]},
+{k:"tw",ic:"🏙️",n:"101 的不夜城",sc:"taipei",go:["bear"],L:[
+ ["K","第五站，回到台灣。今天加權收在 38,427 點，單日跌 4.4%。"],
+ ["J","可是我覺得加權根本看不出真實狀況⋯⋯"],
+ {card:{t:"！重點：台股兩個面貌",l:["加權距高點 −23%（台積電撐住）","櫃買距高點 −37%","今天櫃買單日 −7.22%","上市櫃超過 280 檔跌停"]}},
+ ["K","你說對了。台股權重太集中在台積電和 AI 供應鏈：費半一跌就被放大，外資一提款，中小型股最先被追殺。"],
+ ["A","金管會今天又出手限空了。"],
+ ["K","政府護盤通常出現在恐慌的後段，但不代表底部已經確定。"],
+ {q:["J","櫃買已經比 2022 年跌得還深，這代表什麼？"],o:[
+  ["快見底了","如果這次只是修正，中小型股的「2022 級跌幅」已經走完，下檔相對有限。"],
+  ["還會再跌","如果是 2000、2008 年那種泡沫破裂，櫃買當時跌了 76–78%，現在才走一半。"],
+  ["看不出來","很誠實。所以才要看訊號，而不是只看跌了多少。"]]},
+ ["K","台股要真的穩，要看三件事：費半止跌、外資賣超縮小、台積電守住關鍵位置。"]],
+ sum:["加權被台積電撐住，櫃買才是真實狀況","櫃買跌幅已超過 2022 年","看費半、外資、台積電三個訊號"]},
+{k:"his",ic:"📚",n:"檔案室的舊報紙",sc:"archive",go:["bear"],L:[
+ ["K","第六站，我們翻翻舊報紙。美股百年來有 13 次大空頭。"],
+ {card:{t:"！重點：歷史規律",l:["沒衰退：平均 −23%，約 4 個月見底","有衰退：平均 −41%，約 15 個月見底","13 次中 10 次靠政策轉向止跌"]}},
+ ["K","規律一：衰退決定深度。規律二：止跌靠政策轉向。規律三：底部出現時，新聞通常還很糟。"],
+ ["A","哪一次最像現在？"],
+ ["K","兩個候選。2000 年網路泡沫：科技股估值極端、聯準會升息、資本支出急砍，Nasdaq 跌了 78%。還有 2022 年：通膨升息，Nasdaq 跌 36%，但沒有衰退。"],
+ {q:["K","你覺得這次比較像哪一次？"],o:[
+  ["像 2000 年","那要特別小心：2000 年是分好幾段、跌了兩年半。要盯 AI 資本支出會不會急砍、私募信貸會不會出事。"],
+  ["像 2022 年","比較溫和的劇本：通膨見頂、聯準會停手就見底，前後大約 9 個月。"],
+  ["像 2025 關稅","政策造成的急跌，政策一退讓就結束。如果禁建令或出口規定突然鬆綁，有可能這樣 V 轉。"]]},
+ ["K","歷史不會重演，但常常押韻。"]],
+ sum:["衰退與否決定空頭深度","最可能的兩個劇本：2000 或 2022","政策轉向是最常見的止跌觸發"]},
+{k:"arena",ic:"🥊",n:"多空擂台",sc:"arena",go:["vw"],L:[
+ ["K","第七站，看看大人物怎麼說。藍色是多方，橘色是空方。"],
+ {card:{t:"▲ 多方",l:["高盛 Oppenheimer：S&P 12 個月目標 8,700","大摩 Wilson：修正進入「最後幾局」","Wilson：2027 年約 15% 上漲空間"]}},
+ {card:{t:"▼ 空方",l:["Dimon：五大風險被低估","Eisman：不參與 Anthropic IPO","Fed 官員：更多升息可能必要"]}},
+ ["A","大師們意見完全相反，我該聽誰？"],
+ ["K","不用選邊。多方講的是 12 個月以後，空方講的是眼前的風險——兩邊可能都對，只是時間不同。"],
+ {q:["K","哪一句話對你最有用？"],o:[
+  ["Wilson「最後幾局」","他的根據是六成個股已經跌超過兩成，傷害大多已反映。但「最後幾局」也可能拖很久。"],
+  ["Dimon 五大風險","這是很好的檢查清單：通膨、赤字、資產過貴、利率、地緣政治，可以一項一項觀察。"],
+  ["Eisman 不參與","他提醒的是資訊揭露和 AI 價格戰的風險，看 AI 新股時特別重要。"]]},
+ ["K","聽大師的話，要聽他的「理由」，不是只聽結論。"]],
+ sum:["多方看 12 個月後，空方看眼前","把 Dimon 五大風險當檢查清單","聽理由，不只聽結論"]},
+{k:"dawn",ic:"🌅",n:"黎明之前",sc:"dawn",go:["bear"],L:[
+ ["K","最後一站。你們最想問的：什麼時候可以買？"],
+ ["K","老實說，沒有人能抓到確切的底。但可以用「價位＋訊號」兩個條件分批。"],
+ {card:{t:"！止跌訊號",l:["⬜ 聯準會停手：尚未","🟡 VIX 衝 30–40 後回落：部分","🟡 權值股補跌：進行中","⬜ 政策利空落地：尚未","✅ 多數個股深跌：已出現","🟡 政府護盤：已出現"]}},
+ {card:{t:"！分批的例子（S&P）",l:["−10% 約 7,040：第一批","−15% 約 6,650 且 VIX>30：第二批","聯準會轉向或 −20% 約 6,255：第三批","保留三分之一給最壞劇本"]}},
+ ["J","那台股呢？"],
+ ["K","台股看費半和外資。費半止跌、外資賣超縮小、台積電守住，台股才會真的穩。"],
+ {q:["A","我該怎麼準備？"],o:[
+  ["先列好價位","很好。把價位寫下來、設好提醒，跌到時才不會被情緒帶著走。"],
+  ["等訊號再說","也可以，只是會買得比較貴——底部通常在訊號還沒全亮時就出現了。"],
+  ["先觀望","觀望也是一種選擇。把資金和時間拉長，比猜底重要。"]]},
+ ["K","今晚的導覽到這裡。記住，這是幫你理解，不是投資建議。黎明前最黑，但黎明總會來。"]],
+ sum:["用「價位＋訊號」分批，不猜底","目前訊號只亮一部分","台股看費半、外資、台積電"]}
+];
+const TS={st:-1,i:0,typing:0,full:"",pend:null,choice:null};
+function tourDone(){return LS.get("tour",{})}
+function renderTourMap(){
+  const d=tourDone(),n=T.filter(x=>d[x.k]).length,nx=T.find(x=>!d[x.k])||T[0];
+  $("#tourBox").innerHTML=`<div class="tw-hero">${SCN.trade()?`<svg viewBox="0 0 96 40" shape-rendering="crispEdges" class="tw-scene">${SCN.trade()}</svg>`:""}<div class="tw-cast">${["K","A","J"].map(k=>`<div>${sprite(k,44)}<b>${WHO[k][0]}</b><small>${WHO[k][1]}</small></div>`).join("")}</div></div>
+  <div class="card"><h2>🌙 收盤後的交易室</h2><div class="meta">資深交易員老K 帶新手小安、半導體工程師阿傑，用故事走一遍這個月的美股與台股大事。選項只會帶出說明，沒有對錯。</div>
+  <button class="btn pri" style="width:100%;margin-top:12px" data-tgo="${T.indexOf(nx)}">${n?`繼續導覽：${nx.ic} ${nx.n}`:"開始導覽"}</button><div class="meta" style="justify-content:center;margin-top:6px">已完成 ${n} / ${T.length} 站</div></div>
+  <div class="card"><h2>導覽路線</h2>${T.map((x,i)=>`<div class="tw-stop ${d[x.k]?"done":""}" data-tgo="${i}"><span class="no">${i?i:"序"}</span><span class="ic">${x.ic}</span><span class="nm">${x.n}</span><span class="ck">${d[x.k]?"✓":"›"}</span></div>`).join("")}
+  ${n?`<button class="btn" style="margin-top:10px" id="tourReset">重設進度</button>`:""}</div>`;
+}
+function tourStart(i){TS.st=i;TS.i=0;TS.choice=null;$("#tourBox").innerHTML=`<div class="tw-play"><div class="tw-top"><button class="btn" id="tourBack">← 路線</button><span>${T[i].ic} ${i?`第 ${i} 站`:"序章"}・${T[i].n}</span></div><svg viewBox="0 0 96 40" shape-rendering="crispEdges" class="tw-scene">${SCN[T[i].sc]()}</svg><div id="twCards"></div><div class="tw-dlg" id="twDlg"><div class="tw-av" id="twAv"></div><div class="tw-tx"><b id="twWho"></b><div id="twText"></div><span class="tw-more" id="twMore">▼</span></div></div><div id="twOpts"></div></div>`;tourStep();}
+function tourType(who,text){
+  $("#twAv").innerHTML=sprite(who,52);$("#twWho").textContent=WHO[who][0];
+  const el=$("#twText");TS.full=text;TS.typing=1;let n=0;$("#twMore").style.visibility="hidden";clearInterval(TS.tm);
+  TS.tm=setInterval(()=>{n+=2;el.textContent=text.slice(0,n);if(n>=text.length){clearInterval(TS.tm);TS.typing=0;$("#twMore").style.visibility="visible"}},28);
+}
+function tourStep(){
+  const S=T[TS.st];$("#twOpts").innerHTML="";
+  if(TS.pend){const p=TS.pend;TS.pend=null;tourType(p[0],p[1]);return}
+  if(TS.i>=S.L.length){tourEnd();return}
+  const L=S.L[TS.i++];
+  if(Array.isArray(L)){tourType(L[0],L[1]);return}
+  if(L.card){$("#twCards").innerHTML=`<div class="tw-card"><b>${L.card.t}</b>${L.card.l.map(x=>`<div>${esc(x)}</div>`).join("")}</div>`;$("#twCards").scrollIntoView({block:"nearest",behavior:"smooth"});tourStep();return}
+  if(L.q){tourType(L.q[0],L.q[1]);TS.choice=L;return}
+}
+function tourTap(){
+  if(TS.typing){clearInterval(TS.tm);$("#twText").textContent=TS.full;TS.typing=0;$("#twMore").style.visibility="visible";return}
+  if(TS.choice){const L=TS.choice;$("#twMore").style.visibility="hidden";$("#twOpts").innerHTML=L.o.map((o,j)=>`<button class="tw-opt" data-topt="${j}">${esc(o[0])}</button>`).join("");return}
+  tourStep();
+}
+function tourEnd(){
+  const S=T[TS.st],d=tourDone();d[S.k]=1;LS.set("tour",d);
+  const nx=TS.st+1<T.length?TS.st+1:-1;
+  $("#twDlg").outerHTML=`<div class="card tw-end"><h2>${S.ic} ${S.n}・本站重點</h2><ul class="tl">${S.sum.map(x=>`<li class="big">${esc(x)}</li>`).join("")}</ul>
+  <div class="row" style="flex-wrap:wrap;margin-top:12px"><button class="btn" data-tlink="${S.go.join("|")}">看完整資料 →</button>${nx>=0?`<button class="btn pri" data-tgo="${nx}">下一站：${T[nx].ic} ${T[nx].n}</button>`:`<button class="btn pri" id="tourBack2">🎉 完成導覽，回路線</button>`}</div></div>`;
+}
+$("#tourBox").addEventListener("click",e=>{
+  const t=e.target;
+  if(t.closest("#tourBack")||t.closest("#tourBack2")){clearInterval(TS.tm);renderTourMap();window.scrollTo(0,0);return}
+  if(t.id==="tourReset"){LS.set("tour",{});renderTourMap();return}
+  const g=t.closest("[data-tgo]");if(g){tourStart(+g.dataset.tgo);window.scrollTo(0,0);return}
+  const o=t.closest("[data-topt]");if(o){const L=TS.choice;TS.choice=null;const op=L.o[+o.dataset.topt];$("#twOpts").innerHTML=`<div class="tw-pick">你選了：${esc(op[0])}</div>`;tourType("K",op[1]);return}
+  const lk=t.closest("[data-tlink]");if(lk){const [tab,ev]=lk.dataset.tlink.split("|");if(ev){evCat="全部";renderEv();go("ev");setTimeout(()=>document.getElementById("ev-"+ev).scrollIntoView({behavior:"smooth"}),40)}else{go(tab);window.scrollTo(0,0)}return}
+  if(t.closest("#twDlg"))tourTap();
+});
+renderTourMap();
+
 renderEv();renderVw();renderBear();
 </script>
 <!-- Made by Jim Lu -->
