@@ -162,6 +162,7 @@ input[type=range]{width:100%}
 .vsteps{display:flex;gap:4px;overflow-x:auto;margin-bottom:8px}.vdot{flex:0 0 auto;font-size:12px;padding:5px 9px;border-radius:99px;border:1px solid var(--line);background:var(--bg);color:var(--muted)}.vdot.on{border-color:var(--accent);color:var(--accent);font-weight:700}.vdot.ok{background:var(--good);color:#fff;border-color:var(--good)}.vdot.part{border-color:var(--warn);color:var(--warn)}
 .vcard{background:var(--accent-soft);border-radius:14px;padding:12px 14px;margin-bottom:8px}.vtitle{font-weight:800;font-size:16px;margin-bottom:4px}.vsay{font-size:15px;line-height:1.5}.vex{font-size:12.5px;color:var(--muted);margin-top:4px}.vanch{font-size:11.5px;margin-top:6px;padding-top:6px;border-top:1px dashed var(--line);color:var(--ink)}
 #vTxt{width:100%;font-size:15px;margin:6px 0}
+#swb{position:fixed;left:6px;top:50%;transform:translate(0,-50%);width:38px;height:38px;border-radius:50%;background:var(--accent);color:#fff;font-size:28px;line-height:34px;text-align:center;opacity:0;pointer-events:none;z-index:999;transition:opacity .15s}
 </style>
 </head>
 <body>
@@ -538,7 +539,7 @@ function render(){
   const m=$('#main'),top=m.scrollTop;
   m.innerHTML=S.view==='beans'?vBeans():S.view==='analysis'?vAnalysis():S.view==='recipe'?vRecipe():vLog();m.scrollTop=top;
 }
-function route(){const v=location.hash.slice(1);const nv=['log','beans','recipe','analysis'].includes(v)?v:'log';if(nv!==S.view){S.view=nv;$('#main').scrollTop=0}render()}
+const VSTACK=[];function route(){const v=location.hash.slice(1);const nv=['log','beans','recipe','analysis'].includes(v)?v:'log';if(nv!==S.view){if(S.view&&!route._back)VSTACK.push(S.view);route._back=0;if(VSTACK.length>30)VSTACK.shift();S.view=nv;$('#main').scrollTop=0}render()}
 
 /* ---------- sheets ---------- */
 let F=null,BF=null;
@@ -1373,6 +1374,17 @@ document.addEventListener('change',ev=>{
   }
 });
 window.addEventListener('hashchange',route);
+/* 由左往右滑＝上一頁 */
+(function(){let x0=0,y0=0,t0=0,ok=false,armed=0;const ind=document.createElement('div');ind.id='swb';ind.textContent='‹';document.body.appendChild(ind);
+  const skip=el=>{for(let e=el;e&&e!==document.body;e=e.parentElement){if(e.matches&&e.matches('[data-drag],input[type=range],canvas,svg.curve'))return true;const cs=getComputedStyle(e);if(/(auto|scroll)/.test(cs.overflowX)&&e.scrollWidth>e.clientWidth+2&&e.scrollLeft>0)return true}return false};
+  document.addEventListener('touchstart',e=>{if(e.touches.length!==1){ok=false;return}const t=e.touches[0];x0=t.clientX;y0=t.clientY;t0=Date.now();ok=!skip(e.target)&&!document.querySelector('.dragging')},{passive:true});
+  document.addEventListener('touchmove',e=>{if(!ok)return;const t=e.touches[0],dx=t.clientX-x0,dy=Math.abs(t.clientY-y0);if(dy>40&&dy>dx){ok=false;ind.style.opacity=0;return}if(dx>0){ind.style.opacity=Math.min(1,dx/90);ind.style.transform='translate('+Math.min(dx/2,50)+'px,-50%)'}},{passive:true});
+  document.addEventListener('touchend',e=>{ind.style.opacity=0;ind.style.transform='';if(!ok)return;ok=false;const t=e.changedTouches[0],dx=t.clientX-x0,dy=Math.abs(t.clientY-y0);if(dx<80||dy>dx*0.5||Date.now()-t0>800)return;goBack()},{passive:true});
+  window.goBack=function(){
+    if(VW){if(REC){try{REC.stop()}catch(e){}REC=null}if(VW.i>0){VW.i--;drawVoice()}else{F={...VW.prev};VW=null;drawForm()}return}
+    if($('#sheet').classList.contains('on')){if((F||BF||GF)&&Date.now()-armed>2500){armed=Date.now();toast('再往右滑一次關閉（未存的內容會不見）');return}armed=0;closeSheet();return}
+    const v=VSTACK.pop();if(v){route._back=1;location.hash=v}};
+})();
 route();initStore();
 </script>
 <!-- Made by Jim Lu -->
