@@ -1039,7 +1039,7 @@ window.BGM=(()=>{
     <div class="newrow"><input id="tName" type="text" maxlength="12" placeholder="你的名字" autocomplete="off" enterkeyhint="go"><button class="go" id="tGo" type="button">開始</button></div>
     <div class="err" id="tErr"></div>
   </div>
-  <div class="t-foot">© 2026 Jim Lu　ver. 6.3.1</div>
+  <div class="t-foot">© 2026 Jim Lu　ver. 6.4</div>
 </div>
 <nav class="modes" aria-label="導覽"><div class="in">
   <button class="homebtn" id="homeBtn" type="button" hidden>‹ 主選單</button>
@@ -1060,12 +1060,14 @@ window.BGM=(()=>{
   <div class="hub-cards">
     <button class="hub-card" id="hubShop" style="--hc:var(--accent)"><svg class="ic" viewBox="0 0 32 32" width="34" height="34" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 13v13h22V13"/><path d="M3 13l3-7h20l3 7"/><path d="M3 13a3.25 3.25 0 0 0 6.5 0 3.25 3.25 0 0 0 6.5 0 3.25 3.25 0 0 0 6.5 0 3.25 3.25 0 0 0 6.5 0"/><path d="M13 26v-7h6v7"/></svg><b>咖啡店</b><span>生涯模式。熟客故事、好感與忠誠、尋豆師與自家烘豆、配方豆、招牌咖啡，一路拿到世界冠軍資格。</span><em id="hubShopS"></em></button>
     <button class="hub-card" id="hubComp" style="--hc:var(--you)"><svg class="ic" viewBox="0 0 32 32" width="34" height="34" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 5h12v7a6 6 0 0 1-12 0z"/><path d="M10 7H5v2a5 5 0 0 0 5 5M22 7h5v2a5 5 0 0 1-5 5"/><path d="M16 18v5M11 27h10M12.5 23h7"/></svg><b>咖啡比賽</b><span>用指定豆和其他選手同場較量，從社區咖啡節一路打上去。</span><em id="hubCompS"></em></button>
-    <button class="hub-card" id="hubLab" style="--hc:var(--want)"><svg class="ic" viewBox="0 0 32 32" width="34" height="34" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8h20l-7 9h-6z"/><path d="M13 17v2h6v-2"/><path d="M10 21h12v4a3 3 0 0 1-3 3h-6a3 3 0 0 1-3-3z"/><path d="M16 3v2"/></svg><b>咖啡實驗室</b><span>萃取模擬器，加上 4:6 沖法、顯微鏡、粉層、嗅覺斷水四堂教學。</span><em>自由練習，不花錢</em></button>
+    <button class="hub-card" id="hubLab" style="--hc:var(--want)"><svg class="ic" viewBox="0 0 32 32" width="34" height="34" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8h20l-7 9h-6z"/><path d="M13 17v2h6v-2"/><path d="M10 21h12v4a3 3 0 0 1-3 3h-6a3 3 0 0 1-3-3z"/><path d="M16 3v2"/></svg><b>咖啡實驗室</b><span>萃取模擬器，加上 4:6 沖法、顯微鏡、粉層、嗅覺斷水、水質五堂教學，每堂都有導覽員講解。</span><em>自由練習，不花錢</em></button>
+    <button class="hub-card" id="hubAcad" style="--hc:var(--gold)"><svg class="ic" viewBox="0 0 32 32" width="34" height="34" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12l13-6 13 6-13 6z"/><path d="M8 14.5V21c0 2 3.6 4 8 4s8-2 8-4v-6.5"/><path d="M29 12v8"/></svg><b>咖啡學院</b><span>沐師傅、阿萃、周院長帶你上課：導覽走過每個實驗室，課後小考，通過拿徽章，最後考畢業考。</span><em id="hubAcadS"></em></button>
   </div>
   <div class="cloudbar"><button id="gBtn" type="button"><span id="gBtnT">☁️ 開啟自動雲端存檔（Google）</span></button><span id="syncNote">只要連結一次 Google 帳號，之後沖煮紀錄、闖關進度和咖啡店存檔都會自動存到你的 Google 雲端，換手機也接得上</span></div>
   <div class="hub-foot"><button id="hubSwitch" type="button">切換玩家</button><button id="hubTitle" type="button">回到開場畫面</button></div>
 </div>
 </section>
+<section id="academyView" hidden></section>
 <section id="shopView" hidden><div class="cwrap" id="shopBox"></div></section>
 <div class="c-toast" id="cToast"></div>
 <section id="simView">
@@ -4419,12 +4421,12 @@ const $=id=>document.getElementById(id);
 const NAV=[];let curMode=null;
 function show(mode,push,noRec){if(window.BGM)BGM.set(mode==='sim'?'lab':mode==='game'&&window.GAME&&window.GAME.ctx()==='comp'?'comp':'cafe');
   if(push&&!noRec&&curMode&&curMode!==mode){NAV.push({mode:curMode,y:scrollY});if(NAV.length>30)NAV.shift();}
-  const ids={hub:'hubView',shop:'shopView',sim:'simView',game:'gameView',learn:'learnView',micro:'microView',bed:'bedView',nose:'noseView',water:'waterView'},btn={sim:'mSim',learn:'mLearn',micro:'mMicro',bed:'mBed',nose:'mNose',water:'mWater'};
+  const ids={hub:'hubView',shop:'shopView',sim:'simView',game:'gameView',learn:'learnView',micro:'microView',bed:'bedView',nose:'noseView',water:'waterView',academy:'academyView'},btn={sim:'mSim',learn:'mLearn',micro:'mMicro',bed:'mBed',nose:'mNose',water:'mWater'};
   if(!ids[mode])mode='hub';
   curMode=mode;
   Object.keys(ids).forEach(k=>{$(ids[k]).hidden=k!==mode;if(btn[k])$(btn[k]).setAttribute('aria-pressed',k===mode);});
-  $('labTabs').hidden=!btn[mode];$('homeBtn').hidden=mode==='hub';
-  $('navTitle').textContent=mode==='hub'?'手沖咖啡實驗室':mode==='shop'?'咖啡店':mode==='game'?(window.GAME&&window.GAME.ctx()==='comp'?'咖啡比賽':'客人挑戰'):'咖啡實驗室';
+  if(window.guideCheck)window.guideCheck(mode);$('labTabs').hidden=!btn[mode];$('homeBtn').hidden=mode==='hub';
+  $('navTitle').textContent=mode==='hub'?'手沖咖啡實驗室':mode==='shop'?'咖啡店':mode==='game'?(window.GAME&&window.GAME.ctx()==='comp'?'咖啡比賽':'客人挑戰'):mode==='academy'?'咖啡學院':'咖啡實驗室';
   if(mode==='hub'&&window.hubRender)window.hubRender();
   if(mode==='shop'&&window.shopRender)window.shopRender();
   if(push){try{history.replaceState(null,'','#'+mode);}catch(e){}}
@@ -4434,6 +4436,7 @@ function show(mode,push,noRec){if(window.BGM)BGM.set(mode==='sim'?'lab':mode==='
   if(mode==='micro'&&window.micRender)requestAnimationFrame(()=>window.micRender());
   if(mode==='bed'&&window.bedRender)requestAnimationFrame(()=>window.bedRender());
   if(mode==='nose'&&window.noseRender)requestAnimationFrame(()=>window.noseRender());
+  if(mode==='academy'&&window.academyRender)window.academyRender();
   if(mode==='water'&&window.waterRender)requestAnimationFrame(()=>window.waterRender());
 }
 $('mSim').onclick=()=>{show('sim',true);scrollTo(0,0);};
@@ -4453,6 +4456,7 @@ function route(){const h=location.hash||'';
   if(h==='#bed')return show('bed');
   if(h==='#nose')return show('nose');
   if(h==='#water')return show('water');
+  if(h==='#academy')return show('academy');
   if(h==='#game'||/^#level-\d+$/.test(h)){show('game');window.gameRoute&&window.gameRoute(h);return;}
   show('hub');
 }
@@ -4502,7 +4506,7 @@ addEventListener('hashchange',()=>setTimeout(upd,0));upd();setTimeout(upd,300);
 const $=id=>document.getElementById(id);
 const GCLIENT='267421312122-l2ggo7t35tqpf8ej5osqttt08ke30lr1.apps.googleusercontent.com';
 const GFILE='brewlab.json',GAPI='https://www.googleapis.com';
-const SYNC_KEYS=['brewsim-runs-v1','brewQuest.v1','brewsim-params-v1','brewLab.scoreStyle','brewCareer.v1','brewLab.player'];
+const SYNC_KEYS=['brewLab.academy','brewsim-runs-v1','brewQuest.v1','brewsim-params-v1','brewLab.scoreStyle','brewCareer.v1','brewLab.player'];
 const STAMP='brewLab.savedAt',GFLAG='brewLab.g',TOKK='brewLab.gtok';
 let gTok=null,gTokExp=0,gFileId=null,gClient=null,gOn=false,pushT=null;
 const raw=Storage.prototype.setItem;
@@ -6440,6 +6444,260 @@ try{new ResizeObserver(()=>ensure()).observe(cv);}catch(e){}
 try{new MutationObserver(()=>ensure()).observe($('waterView'),{attributes:true,attributeFilter:['hidden']});}catch(e){}
 
 apply(false);
+})();
+</script>
+<script>
+(function(){
+const $=id=>document.getElementById(id);
+/* ================= 咖啡師導覽員 ＋ 咖啡學院 ================= */
+// ---------- 角色（原創像素角色） ----------
+const PAL={K:'#2a211c',S:'#e8b98f',s:'#c99670',G:'#15110e',g:'#9fc4d8',E:'#1a1512',M:'#a4553e',W:'#ece6da',A:'#3b4a44',P:'#6b4428',L:'#f2f2ee',B:'#6aa8e8',Y:'#e8c547',O:'#ef9a5a',H:'#d6d0c6',R:'#c4513a',r:'#f0a3a0',V:'#5fae7a'};
+const SPR={
+ mu:["....KKKKKKKK....","...KKKKKKKKKK...","..KKKKKKKKKKKK..","..KKKKKKKKKKKK..","..KKSSSSSSSSKK..","..KSSSSSSSSSSK..","..SGGGGSSGGGGS..","..SGgEGGGGEgGS..","..SGGGGSSGGGGS..","..SSSSSSSSSSSS..","...SSSSssSSSS...","...SSSMMMMSSS...","....SSSSSSSS....","..WWWWAAAAWWWW..",".WWWWAAAAAAWWWW.",".WWWAAAAAAAAWWW."],
+ cui:["..P..PPPPP..P...","...PPPPPPPPPP...","..PPPPPPPPPPPP..","..PPPPPPPPPPPP..","..PPSSSSSSSSPP..","..PSSSSSSSSSSP..","..SSEESSSSEESS..","..SSEESSSSEESS..","..SSSSSSSSSSSS..","..SSOSSSSSSOSS..","...SSSSssSSSS...","...SSSMMMMSSS...","....SSSSSSSS....","..LLLLLBBLLLLL..",".LLLLLLBBLLYLLL.",".LLLLLLBBLLYLLL."],
+ zhou:["................","....HHHHHHHH....","...HHHHHHHHHH...","..HHHSSSSSSHHH..","..HHSSSSSSSSHH..","..HSSSSSSSSSSH..","..SSHHSSSSHHSS..","..SSEESSSSEESS..","..SSSSSSSSSSSS..","..SSSSSssSSSSS..","...SHHHHHHHHS...","...SSSMMMMSSS...","....SSSSSSSS....","..PPPWWRRWWPPP..",".PPPPWWRRWWPPPP.",".PPPPPWWWWPPPPP."],
+ li:["....OOOOOOOO....","...OOOOOOOOOO...","..OOOOOOOOOOOO..","..YYYYYYYYYYYY..","..KKSSSSSSSSKK..","..KSSSSSSSSSSK..","..SSSSSSSSSSSS..","..SSEESSSSEESS..","..SSEESSSSEESS..","..SrSSSSSSSSrS..","...SSSSSSSSSS...","...SSSSMMSSSS...","....SSSSSSSS....","..VVVVVVVVVVVV..",".VVVVVWVVWVVVVV.",".VVVVVVVVVVVVVV."]
+};
+const WHO={mu:{n:'沐師傅',r:'冠軍手沖師・導覽員',c:'#c9a66b'},cui:{n:'阿萃',r:'化學研究生・科學助教',c:'#86b3aa'},zhou:{n:'周院長',r:'咖啡學院院長',c:'#e2bd6a'},li:{n:'小粒',r:'新手學員',c:'#dd8458'}};
+function drawSpr(cv,k,talk){const g=cv.getContext('2d'),S=SPR[k],p=cv.width/16;g.clearRect(0,0,cv.width,cv.height);
+  S.forEach((row,y)=>{for(let x=0;x<16;x++){const ch=row[x];if(ch==='.')continue;g.fillStyle=ch==='M'&&talk?'#4a1f17':PAL[ch];g.fillRect(x*p,y*p,p,p);}});
+  if(talk){g.fillStyle='#4a1f17';const y=S.findIndex(r=>r.includes('M'));if(y>=0){const x0=S[y].indexOf('M'),x1=S[y].lastIndexOf('M');g.fillRect((x0+.5)*p,(y+1)*p,(x1-x0)*p,p*.8);}}}
+function sprCv(k,px){const c=document.createElement('canvas');c.width=c.height=16*Math.max(1,Math.round(px/16))*2;c.style.width=c.style.height=px+'px';c.className='gd-spr';drawSpr(c,k,false);return c;}
+// ---------- 導覽內容 ----------
+const TOURS={
+ sim:{view:'simView',lead:'mu',title:'模擬器：一次只改一個變因',blurb:'第一次來？我帶你認識每一個旋鈕，再沖出你的第一杯。',steps:[
+  {w:'mu',t:'我是沐師傅。這裡是整個實驗室的核心：一杯手沖從注水到入口，全部用模型算給你看。',el:'#simView h1'},
+  {w:'li',t:'師傅，滑桿好多，我要從哪裡開始調？'},
+  {w:'mu',t:'先記住一句話：一次只改一個變因。豆子和焙度先固定下來。',el:'#beanParam'},
+  {w:'mu',t:'粉水比決定濃淡。1:15 偏濃，1:16 是常見的起點，1:17 以上比較清爽。',el:'#ratio'},
+  {w:'mu',t:'水溫越高萃得越快。淺焙常用 92–96°C，深焙可以降到 85–90°C，苦味會收斂一些。',el:'#temp'},
+  {w:'mu',t:'研磨是最有力的旋鈕。磨細，表面積變大、水流變慢，萃取一口氣變多。',el:'#grind'},
+  {w:'cui',t:'補充一下：磨太細，細粉會堵住濾紙，水卡在粉層裡太久，苦澀也跟著出來。',el:'#grind'},
+  {w:'mu',t:'濾杯會改變流速。同樣的手法，換一個濾杯，滴完的時間就不一樣。',el:'#segDrip'},
+  {w:'mu',t:'設定好就按播放，看濾杯動畫裡分子怎麼被水帶出來。',el:'#play'},
+  {w:'mu',t:'沖完看這裡的評分。萃取率大約 18–22% 是理想區間，太低偏酸、太高偏苦。',el:'#scorePanel'},
+  {w:'li',t:'我上次沖出來好酸……'},
+  {w:'mu',t:'那就只做一件事：磨細一點再沖一次，兩杯都按「保存結果」，就能並排比較。',el:'#save'}]},
+ learn:{view:'learnView',lead:'mu',title:'4:6 沖法：前段調味，後段調濃度',blurb:'這是 2016 年世界手沖冠軍的方法，我帶你一段一段拆開來看。',steps:[
+  {w:'mu',t:'4:6 沖法是粕谷哲在 2016 年世界手沖冠軍賽用的方法，我們來拆解它。',el:'#learnView h1'},
+  {w:'mu',t:'總水量分成兩段：前 40% 調味道，也就是甜和酸的平衡；後 60% 調濃度。',el:'#tFirst'},
+  {w:'mu',t:'前 40% 分成兩注。改變第一注和第二注的比例，杯子的甜和酸就會跟著移動。',el:'#tFirst'},
+  {w:'li',t:'為什麼第一注少，反而比較甜？'},
+  {w:'cui',t:'這題下面有一整段，用模型把每一注帶出了什麼算給你看。',el:'h2:為什麼第一注少'},
+  {w:'mu',t:'後 60% 分幾注決定濃度。注數多、接觸時間長，比較濃；注數少，比較清爽。',el:'#tPlan'},
+  {w:'mu',t:'這兩欄會即時比較不同的分配。你動一個設定，就看哪裡變了。',el:'#tCmpA'},
+  {w:'mu',t:'調出喜歡的配方，按這裡帶到模擬器，完整沖一次。',el:'#tToSim'}]},
+ micro:{view:'microView',lead:'cui',title:'顯微鏡：一顆咖啡粉裡的旅程',blurb:'我是阿萃。我們把一顆咖啡粉放大到細胞，看風味怎麼逃出來。',steps:[
+  {w:'cui',t:'我是阿萃。這裡把一顆咖啡粉放大到細胞層級。',el:'#micCanvas'},
+  {w:'cui',t:'風味物質關在一格一格的細胞裡。熱水要先滲進去，物質再一格一格往外走，最後才被水帶走。',el:'#micCanvas'},
+  {w:'li',t:'所以磨細，就是讓它們要走的路變短？'},
+  {w:'cui',t:'沒錯！粒徑變小，要穿過的細胞層變少，所以萃得快。拉這個滑桿看看。',el:'#micGrind'},
+  {w:'cui',t:'水溫高，分子動得快、溶得多，也比較快穿出去。',el:'#micTemp'},
+  {w:'cui',t:'上面可以切換不同主題，像悶蒸、攪拌、浸泡。',el:'#micTabs'},
+  {w:'cui',t:'這張圖是各物質溶出的比例。每種物質出來的速度不一樣，所以「什麼時候停」也會改變味道。',el:'#micChart'},
+  {w:'mu',t:'懂了原理，回模擬器調參數就不用亂猜了。'}]},
+ bed:{view:'bedView',lead:'cui',title:'粉層：同一杯裡的每一格',blurb:'不是每一格咖啡粉都萃得一樣多。我們來看濾杯裡整層粉。',steps:[
+  {w:'cui',t:'這頁看的是濾杯裡整個粉層，不是單一顆粉。',el:'#bedView h1'},
+  {w:'cui',t:'先選你想比較什麼：濾杯形狀、有沒有整粉等等。',el:'#bedCmp'},
+  {w:'cui',t:'左右兩張圖是同一個時間點的粉層。顏色越深，代表那一格萃得越多。',el:'#bedCone'},
+  {w:'li',t:'兩邊顏色分布不一樣耶！'},
+  {w:'cui',t:'每一格萃多萃少，取決於流過它的水有多少、水還有多「新鮮」。形狀和佈粉都會改變水怎麼走。',el:'#bedCone'},
+  {w:'cui',t:'這張表列出每一層的萃取率。上下差太多，就是萃取不均：同一杯裡又酸又苦。',el:'#bedTbl'},
+  {w:'mu',t:'所以手沖要整粉、要注意注水位置，就是為了讓每一格萃得差不多。'}]},
+ nose:{view:'noseView',lead:'zhou',title:'嗅覺斷水：鼻子靠得住嗎？',blurb:'我杯測了三十幾年。這一課，我們來驗證「聞香斷水」到底有沒有道理。',steps:[
+  {w:'zhou',t:'我是周院長，杯測了三十幾年。這頁的題目我最喜歡：用鼻子決定斷水時機。',el:'#noseView h1'},
+  {w:'zhou',t:'先設定沖煮條件。焙度、注水方式、研磨、水溫，都會改變香氣出現的節奏。',el:'#nzRoast'},
+  {w:'zhou',t:'按這些按鈕可以直接跳到某一步，也可以按播放逐秒看。',el:'#nzSteps'},
+  {w:'cui',t:'這裡是此刻聞到的氣味。下面另一欄是此刻流進杯子的味道，兩邊不一定同步。',el:'#nzSmell'},
+  {w:'li',t:'那聞到香味變淡就斷水，對嗎？'},
+  {w:'zhou',t:'看這張表。在不同時刻斷水，杯子裡的味道差多少，一清二楚。',el:'#nzCut'},
+  {w:'zhou',t:'最後是結論。鼻子是好工具，但要記得：一直聞同一個味道會越聞越淡，這叫嗅覺疲勞。',el:'#nzVerdict'}]},
+ water:{view:'waterView',lead:'cui',title:'水質：誰抓誰',blurb:'水裡的礦物離子就像娃娃機的爪子。來看牠們各自抓走哪些風味。',steps:[
+  {w:'cui',t:'這頁是我的最愛：水裡的礦物離子，就像娃娃機的爪子。',el:'#wtCanvas'},
+  {w:'li',t:'我家都用 RO 純水沖，越乾淨越好吧？'},
+  {w:'cui',t:'換成 RO 水你看：畫面只剩水分子。牠們沒有爪子，最先溶出來的是酸，所以容易偏酸、偏薄。',el:'#wtCanvas',go:()=>preset('ro')},
+  {w:'cui',t:'換成高鎂水。綠色的鎂是力氣最大的爪子，最愛抓甜感和果香。',el:'#wtCanvas',go:()=>preset('mg')},
+  {w:'cui',t:'再換氣泡礦泉水。白色小精靈是碳酸氫根，牠不抓風味，專門在杯子裡把酸吃掉。',el:'#wtCanvas',go:()=>preset('spark')},
+  {w:'zhou',t:'所以用這種水沖，常常喝起來平淡，明亮的酸都被吃光了。',el:'#wtBars'},
+  {w:'mu',t:'建議從「推薦咖啡水」開始。換水的時候，豆子和手法都不要動，才比得出差別。',el:'#wtPreset',go:()=>preset('sca')}]}
+};
+function preset(k){const b=document.querySelector('#wtPreset [data-k="'+k+'"]');if(b)b.click();}
+// ---------- 學院課程 ----------
+const COURSES=[
+ {id:'c1',lv:'入門',n:'第一杯就上手',d:'認識模擬器的每個旋鈕，學會 4:6 沖法。',tours:['sim','learn'],quiz:[
+  {q:'咖啡偏酸、萃取不足，最直接的單一調整是？',o:['磨細一點','換一支豆子','同時改水溫和粉水比','多攪拌五次'],a:0,e:'一次只改一個變因。磨細讓萃取變多，是最有力的旋鈕。'},
+  {q:'4:6 沖法中，前 40% 的水主要在調什麼？',o:['甜和酸的平衡','濃度','水溫','香氣強度'],a:0,e:'前 40% 調味道，後 60% 調濃度。'},
+  {q:'一般認為理想的萃取率大約落在？',o:['18–22%','8–12%','30–35%','50% 以上'],a:0,e:'SCA 沖煮控制圖的理想區間大約是 18–22%。'}]},
+ {id:'c2',lv:'入門',n:'為什麼我的咖啡很酸？',d:'從水質和粉粒細胞，找出偏酸的原因。',tours:['water','micro'],quiz:[
+  {q:'用 RO 純水沖咖啡，最常見的問題是？',o:['偏酸、偏薄','太苦','太濃','完全沒差別'],a:0,e:'純水缺少礦物離子，最先溶出的酸比較突出，甜感和醇厚不足。'},
+  {q:'哪一種離子最擅長抓甜感和果香相關的分子？',o:['鎂','鈉','碳酸氫根','氯'],a:0,e:'鎂是力氣最大的爪子。'},
+  {q:'水裡碳酸氫根太多，咖啡會怎樣？',o:['酸被中和，喝起來平淡','變得更酸','變得更甜','香氣變強'],a:0,e:'碳酸氫根會中和酸，太多就把明亮的酸吃光了。'},
+  {q:'磨細為什麼萃得比較快？',o:['物質要穿過的細胞層變少','水會變熱','咖啡因變多','濾紙變薄'],a:0,e:'粒徑變小，物質離開粉粒的路變短。'}]},
+ {id:'c3',lv:'中階',n:'粉層裡發生什麼事',d:'同一杯裡，每一格咖啡粉萃得不一樣多。',tours:['bed'],quiz:[
+  {q:'粉層上下的萃取率差很多，代表什麼？',o:['萃取不均，同一杯又酸又苦','萃取很完美','水太硬','豆子太新鮮'],a:0,e:'有的格子萃不足、有的過萃，味道就會打架。'},
+  {q:'整粉的主要目的是？',o:['讓水比較均勻地流過每一格粉','把粉磨得更細','讓水降溫','增加香氣'],a:0,e:'粉層平整，水才不會專挑某條路走。'}]},
+ {id:'c4',lv:'中階',n:'用鼻子沖咖啡',d:'聞香斷水有沒有道理？用模型驗證。',tours:['nose'],quiz:[
+  {q:'一直聞同一個氣味，感受會怎樣？',o:['越來越淡','越來越強','完全不變','變成苦味'],a:0,e:'這就是嗅覺疲勞。'},
+  {q:'「聞起來苦澀」其實是？',o:['大腦把某些氣味和喝到的苦澀連在一起','鼻子裡有苦味受器','咖啡因的味道','水太燙'],a:0,e:'鼻子沒有苦味、澀味受器。'}]},
+ {id:'c5',lv:'進階',n:'畢業考',d:'通過前四堂課後解鎖。考過拿「咖啡學院畢業生」稱號。',tours:[],need:['c1','c2','c3','c4'],quiz:[
+  {q:'想知道換濾杯有沒有用，正確做法是？',o:['其他條件不動，只換濾杯','同時換濾杯和豆子','換濾杯並磨細','隨便沖，用感覺判斷'],a:0,e:'一次只改一個變因。'},
+  {q:'4:6 沖法中，後 60% 注數變多，杯子通常會？',o:['比較濃','比較酸','比較淡','沒有影響'],a:0,e:'注數多、接觸時間長，濃度上升。'},
+  {q:'SCA 建議沖咖啡用水的總硬度大約是？',o:['50–175 ppm','0 ppm','300–500 ppm','越高越好'],a:0,e:'以碳酸鈣計約 50–175 ppm。'},
+  {q:'錐形濾杯和平底濾杯比較，主要差在？',o:['水流過粉層的路徑不同','咖啡因含量','豆子產地','焙度'],a:0,e:'形狀改變水怎麼走，每一格萃取就不同。'},
+  {q:'加一點鹽讓咖啡比較好喝，主要原因是？',o:['鹹味在舌頭上壓住苦味','鈉的爪子力氣最大','鹽讓水變熱','鹽增加咖啡因'],a:0,e:'鈉的抓力很弱，主要是味覺上的效果。'}]}
+];
+const AKEY='brewLab.academy';
+function load(){try{return JSON.parse(localStorage.getItem(AKEY)||'null')||{t:{},c:{}};}catch(e){return{t:{},c:{}};}}
+function save(s){try{localStorage.setItem(AKEY,JSON.stringify(s));}catch(e){}}
+let ST=load();addEventListener('storage',()=>{ST=load();});
+const tourDone=k=>!!(load().t||{})[k];
+const coursePass=id=>!!((load().c||{})[id]||{}).pass;
+// ---------- 樣式 ----------
+const css=document.createElement('style');css.textContent=`
+.gd-spr{image-rendering:pixelated;image-rendering:crisp-edges;display:block}
+.gd-card{display:flex;gap:14px;align-items:center;background:linear-gradient(135deg,rgba(201,166,107,.13),rgba(134,179,170,.08));border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.gd-card .gd-face{flex:0 0 auto;width:60px;height:60px;border-radius:10px;background:#15110e;display:grid;place-items:center;border:1px solid var(--line)}
+.gd-card .gd-txt{flex:1;min-width:0}
+.gd-card b{display:block;font-size:14px}.gd-card b i{font-style:normal;font-weight:400;color:var(--muted);font-size:12px;margin-left:6px}
+.gd-card p{margin:2px 0 8px;font-size:13px;color:var(--muted);line-height:1.5}
+.gd-card .gd-go{background:var(--accent);color:var(--accent-ink);border:0;border-radius:999px;font:inherit;font-weight:700;font-size:13px;padding:6px 16px;cursor:pointer}
+.gd-card .gd-done{font-size:12px;color:var(--want);margin-left:8px}
+.gd-ring{position:absolute;z-index:80;pointer-events:none;border:2px solid #e2bd6a;border-radius:10px;box-shadow:0 0 0 4px rgba(226,189,106,.18),0 0 24px rgba(226,189,106,.35);transition:all .35s;animation:gdPulse 1.4s ease-in-out infinite}
+@keyframes gdPulse{50%{box-shadow:0 0 0 8px rgba(226,189,106,.08),0 0 30px rgba(226,189,106,.5)}}
+.gd-box{position:fixed;left:0;right:0;bottom:0;z-index:90;padding:0 10px calc(10px + env(safe-area-inset-bottom));pointer-events:none}
+.gd-box .in{pointer-events:auto;max-width:620px;margin:0 auto;background:rgba(26,21,18,.97);border:2px solid var(--gc,#c9a66b);border-radius:12px;padding:12px 14px 10px;box-shadow:0 10px 40px rgba(0,0,0,.55);display:grid;grid-template-columns:64px 1fr;gap:4px 12px}
+.gd-box .face{grid-row:1/3;width:64px;height:64px;background:#15110e;border-radius:8px;display:grid;place-items:center;border:1px solid #3b312a;align-self:start}
+.gd-box .nm{font-weight:700;font-size:14px;color:var(--gc)}.gd-box .nm i{font-style:normal;font-weight:400;font-size:11.5px;color:#a59887;margin-left:6px}
+.gd-box .tx{font-size:15px;line-height:1.6;color:#ece3d3;min-height:3.2em;cursor:pointer}
+.gd-box .ft{grid-column:1/3;display:flex;align-items:center;gap:8px;margin-top:6px}
+.gd-box .ft .pg{font-family:var(--f-mono);font-size:12px;color:#a59887;margin-right:auto}
+.gd-box .ft button{background:transparent;border:1px solid #3b312a;color:#ece3d3;border-radius:999px;font:inherit;font-size:13px;padding:5px 12px;cursor:pointer}
+.gd-box .ft button.pri{background:var(--gc);border-color:var(--gc);color:#1a1512;font-weight:700}
+.gd-box .ft button:disabled{opacity:.35}
+.gd-box .x{position:absolute;right:20px;margin-top:-6px;background:none;border:0;color:#a59887;font-size:18px;cursor:pointer}
+body.gd-on{padding-bottom:200px}
+#academyView .ac-wrap{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+.ac-hero{display:flex;gap:14px;align-items:center}
+.ac-hero .gd-face{width:72px;height:72px;flex:0 0 auto;border-radius:12px;background:#15110e;display:grid;place-items:center;border:1px solid var(--line)}
+.ac-cast{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.ac-cast div{text-align:center;font-size:12px;color:var(--muted)}.ac-cast div canvas{margin:0 auto 4px;background:#15110e;border-radius:8px;padding:4px}
+.ac-cast b{display:block;color:var(--ink);font-size:13px}
+.ac-prog{height:8px;border-radius:4px;background:var(--accent-soft);overflow:hidden}.ac-prog b{display:block;height:100%;background:var(--accent);transition:width .5s}
+.ac-course{display:flex;flex-direction:column;gap:8px}
+.ac-course .top{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.ac-course .lv{font-size:11px;border:1px solid var(--line);border-radius:999px;padding:1px 8px;color:var(--muted)}
+.ac-course h3{margin:0;font-family:var(--f-display);font-size:18px}
+.ac-course .st{margin-left:auto;font-size:12px;color:var(--muted)}.ac-course .st.ok{color:var(--want)}
+.ac-course p{margin:0;font-size:13px;color:var(--muted)}
+.ac-steps{display:flex;flex-wrap:wrap;gap:6px}
+.ac-steps button{background:transparent;border:1px solid var(--line);color:var(--ink);border-radius:999px;font:inherit;font-size:12.5px;padding:4px 10px;cursor:pointer}
+.ac-steps button.done{border-color:var(--want);color:var(--want)}
+.ac-steps button.quiz{border-style:dashed}
+.ac-go{align-self:flex-start;background:var(--accent);color:var(--accent-ink);border:0;border-radius:999px;font:inherit;font-weight:700;font-size:14px;padding:7px 18px;cursor:pointer}
+.ac-go:disabled{opacity:.4}
+.ac-course.locked{opacity:.6}
+.ac-quiz .q{font-size:16px;font-weight:700;margin:6px 0 10px}
+.ac-quiz .opts{display:flex;flex-direction:column;gap:8px}
+.ac-quiz .opts button{text-align:left;background:transparent;border:1px solid var(--line);color:var(--ink);border-radius:8px;font:inherit;font-size:14px;padding:10px 12px;cursor:pointer}
+.ac-quiz .opts button.ok{border-color:var(--want);background:rgba(134,179,170,.15)}
+.ac-quiz .opts button.no{border-color:var(--fail);background:rgba(217,112,95,.12)}
+.ac-say{display:flex;gap:10px;align-items:flex-start;margin-top:12px;font-size:14px;line-height:1.6}
+.ac-say canvas{flex:0 0 auto;background:#15110e;border-radius:8px}
+.ac-badge{font-size:13px;border:1px solid var(--gold);color:var(--gold);border-radius:999px;padding:2px 10px}
+`;document.head.appendChild(css);
+// ---------- 每個實驗室的導覽員卡片 ----------
+function cardFor(k){const T=TOURS[k],W=WHO[T.lead],v=$(T.view);if(!v)return;const wrap=v.querySelector('.wrap');if(!wrap)return;
+  let c=v.querySelector('.gd-card');if(!c){c=document.createElement('div');c.className='gd-card';(wrap.children[0]||wrap).after(c);}
+  c.innerHTML='<div class="gd-face"></div><div class="gd-txt"><b>'+W.n+'<i>'+W.r+'</i></b><p>'+T.blurb+'</p><button class="gd-go" type="button">'+(tourDone(k)?'再聽一次':'開始導覽')+'</button>'+(tourDone(k)?'<span class="gd-done">✓ 已完成</span>':'')+'</div>';
+  c.querySelector('.gd-face').appendChild(sprCv(T.lead,48));c.querySelector('.gd-go').onclick=()=>startTour(k);}
+function cards(){Object.keys(TOURS).forEach(cardFor);}
+// ---------- 導覽引擎 ----------
+let TR=null,ring=null,box=null,typeT=0,talkT=0,trackT=0;
+function findEl(sel,view){if(!sel)return null;if(sel.startsWith('h2:')){const t=sel.slice(3);return [...$(view).querySelectorAll('h2')].find(h=>h.textContent.includes(t))||null;}
+  let e=document.querySelector(sel);if(!e)return null;if(e.matches('input,output,select'))e=e.closest('.param')||e;return e;}
+function startTour(k,opt){endTour(true);const T=TOURS[k];if(!T)return;
+  const modeOf={simView:'sim',learnView:'learn',microView:'micro',bedView:'bed',noseView:'nose',waterView:'water'}[T.view];
+  if($(T.view).hidden&&window.appShow)window.appShow(modeOf,true);
+  TR={k,i:0,opt:opt||{}};document.body.classList.add('gd-on');
+  box=document.createElement('div');box.className='gd-box';box.innerHTML='<div class="in"><div class="face"></div><div><button class="x" aria-label="結束導覽">✕</button><div class="nm"></div></div><div class="tx"></div><div class="ft"><span class="pg"></span><button class="pv" type="button">‹ 上一步</button><button class="nx pri" type="button">下一步 ›</button></div></div>';
+  document.body.appendChild(box);const fc=sprCv('mu',56);box.querySelector('.face').appendChild(fc);box._cv=fc;
+  ring=document.createElement('div');ring.className='gd-ring';ring.hidden=true;document.body.appendChild(ring);
+  box.querySelector('.x').onclick=()=>endTour();
+  box.querySelector('.pv').onclick=()=>{if(TR.i>0){TR.i--;showStep();}};
+  box.querySelector('.nx').onclick=()=>{const tx=box.querySelector('.tx');if(tx._full&&tx.textContent!==tx._full){finishType();return;}
+    if(TR.i<T.steps.length-1){TR.i++;showStep();}else finish();};
+  box.querySelector('.tx').onclick=()=>finishType();
+  setTimeout(showStep,250);
+  const track=()=>{if(!TR)return;place();trackT=requestAnimationFrame(track);};trackT=requestAnimationFrame(track);}
+function finishType(){const tx=box&&box.querySelector('.tx');if(!tx)return;clearInterval(typeT);tx.textContent=tx._full;stopTalk();}
+function stopTalk(){clearInterval(talkT);const s=TR&&TOURS[TR.k].steps[TR.i];if(s&&box)drawSpr(box._cv,s.w,false);}
+function showStep(){if(!TR||!box)return;const T=TOURS[TR.k],s=T.steps[TR.i],W=WHO[s.w];
+  box.querySelector('.in').style.setProperty('--gc',W.c);
+  box.querySelector('.nm').innerHTML=W.n+'<i>'+W.r+'</i>';
+  box.querySelector('.pg').textContent=(TR.i+1)+' / '+T.steps.length;
+  box.querySelector('.pv').disabled=TR.i===0;
+  const last=TR.i===T.steps.length-1;box.querySelector('.nx').textContent=last?(TR.opt.course?'下一課 ›':'完成 ✓'):'下一步 ›';
+  if(s.go)try{s.go();}catch(e){}
+  const el=findEl(s.el,T.view);TR.el=el;
+  if(el){const r=el.getBoundingClientRect(),top=130,bot=innerHeight-(box.offsetHeight||190)-14,room=bot-top;
+    let y=scrollY+r.top-top;if(r.height<room)y-= (room-r.height)/2;scrollTo({top:Math.max(0,y),behavior:'smooth'});ring.hidden=false;}else ring.hidden=true;
+  const tx=box.querySelector('.tx');tx._full=s.t;tx.textContent='';let n=0;clearInterval(typeT);clearInterval(talkT);
+  let open=false;talkT=setInterval(()=>{open=!open;drawSpr(box._cv,s.w,open);},130);
+  typeT=setInterval(()=>{n+=1;tx.textContent=s.t.slice(0,n);if(n>=s.t.length){clearInterval(typeT);stopTalk();}},28);}
+function place(){if(!ring||!TR)return;const el=TR.el;if(!el||!el.isConnected||ring.hidden)return;const r=el.getBoundingClientRect();
+  ring.style.left=(r.left+scrollX-6)+'px';ring.style.top=(r.top+scrollY-6)+'px';ring.style.width=(r.width+12)+'px';ring.style.height=(r.height+12)+'px';}
+function endTour(silent){if(!TR&&!box)return;cancelAnimationFrame(trackT);clearInterval(typeT);clearInterval(talkT);
+  if(box)box.remove();if(ring)ring.remove();box=ring=null;TR=null;document.body.classList.remove('gd-on');}
+function finish(){const k=TR.k,opt=TR.opt;const s=load();s.t=s.t||{};s.t[k]=Date.now();save(s);endTour();cardFor(k);
+  if(opt.course)setTimeout(()=>continueCourse(opt.course),200);else toastMsg('導覽完成 ✓');}
+function toastMsg(t){const c=$('cToast');if(c){c.textContent=t;c.classList.add('on');setTimeout(()=>c.classList.remove('on'),1800);}}
+// ---------- 咖啡學院 ----------
+let QZ=null;
+function continueCourse(id){const C=COURSES.find(c=>c.id===id);const next=C.tours.find(k=>!tourDone(k));
+  if(next){startTour(next,{course:id});return;}
+  window.appShow('academy',true);openQuiz(id);}
+function startCourse(id){const C=COURSES.find(c=>c.id===id);if(C.need&&!C.need.every(coursePass))return;
+  if(C.tours.length&&!C.tours.every(tourDone))continueCourse(id);else{window.appShow('academy',true);openQuiz(id);}}
+function openQuiz(id){QZ={id,i:0,score:0,picked:null};renderAcademy();setTimeout(()=>{const q=document.querySelector('.ac-quiz');if(q)q.scrollIntoView({behavior:'smooth',block:'start'});},60);}
+function sayHtml(k,html){return '<div class="ac-say" data-k="'+k+'"><span class="sp"></span><div><b style="color:'+WHO[k].c+'">'+WHO[k].n+'</b><br>'+html+'</div></div>';}
+function mountSays(root){root.querySelectorAll('.ac-say').forEach(d=>{const sp=d.querySelector('.sp');if(sp&&!sp.firstChild)sp.appendChild(sprCv(d.dataset.k,44));});}
+function renderAcademy(){const box=$('academyView');if(!box)return;const S=load(),c=S.c||{};
+  const passN=COURSES.filter(C=>(c[C.id]||{}).pass).length;
+  let h='<div class="ac-wrap"><div class="ac-hero"><div class="gd-face" id="acFace"></div><div><div class="label">咖啡實驗室 · 學院</div><h1>咖啡學院</h1></div></div>';
+  h+=sayHtml('zhou','歡迎入學。每堂課由導覽員帶你走過實驗室，最後一題一題小考。四堂都過了，就來考畢業考。');
+  h+='<div class="panel"><div class="c-row" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><b>學習進度 '+passN+' / '+COURSES.length+'</b>'+((c.c5||{}).pass?'<span class="ac-badge">🎓 咖啡學院畢業生</span>':'')+'</div><div class="ac-prog"><b style="width:'+(passN/COURSES.length*100)+'%"></b></div></div>';
+  if(QZ){const C=COURSES.find(x=>x.id===QZ.id);h+='<section class="panel ac-quiz">';
+    if(QZ.i<C.quiz.length){const q=C.quiz[QZ.i];h+='<div class="label">'+C.n+' · 小考 '+(QZ.i+1)+' / '+C.quiz.length+'</div><div class="q">'+q.q+'</div><div class="opts">'+q.o.map((o,j)=>{let cl='';if(QZ.picked!=null){if(j===q.a)cl='ok';else if(j===QZ.picked)cl='no';}return '<button type="button" data-j="'+j+'" class="'+cl+'"'+(QZ.picked!=null?' disabled':'')+'>'+o+'</button>';}).join('')+'</div>';
+      if(QZ.picked!=null){const ok=QZ.picked===q.a;h+=sayHtml(ok?'zhou':'li',(ok?'答對了。':'咦，我也選錯過……')+(ok?'':'<br>周院長：')+q.e)+'<div style="margin-top:12px"><button class="ac-go" id="acNext" type="button">'+(QZ.i<C.quiz.length-1?'下一題 ›':'看成績 ›')+'</button></div>';}}
+    else{const need=Math.ceil(C.quiz.length*2/3),pass=QZ.score>=need;
+      h+='<div class="label">'+C.n+' · 成績</div><div class="q">'+QZ.score+' / '+C.quiz.length+' 題答對</div>'+sayHtml(pass?'zhou':'mu',pass?(C.id==='c5'?'恭喜畢業！從今天起，你就是「咖啡學院畢業生」。':'通過了。這堂課的徽章收好。'):'差一點。回去再聽一次導覽，一次只改一個變因，下次一定過。')+'<div style="margin-top:12px;display:flex;gap:8px"><button class="ac-go" id="acDone" type="button">回課程列表</button>'+(pass?'':'<button class="ac-go" id="acRetry" type="button" style="background:transparent;color:var(--ink);border:1px solid var(--line)">再考一次</button>')+'</div>';}
+    h+='</section>';}
+  h+='<section class="panel"><h2>登場角色</h2><div class="ac-cast">'+Object.keys(WHO).map(k=>'<div data-k="'+k+'"><span class="sp"></span><b>'+WHO[k].n+'</b>'+WHO[k].r+'</div>').join('')+'</div></section>';
+  COURSES.forEach(C=>{const cs=c[C.id]||{},locked=C.need&&!C.need.every(coursePass),done=C.tours.filter(tourDone).length;
+    h+='<section class="panel ac-course'+(locked?' locked':'')+'"><div class="top"><span class="lv">'+C.lv+'</span><h3>'+C.n+'</h3><span class="st'+(cs.pass?' ok':'')+'">'+(cs.pass?'✓ 已通過（最佳 '+cs.best+' / '+C.quiz.length+'）':locked?'🔒 完成前四堂後解鎖':cs.best!=null?'最佳 '+cs.best+' / '+C.quiz.length:'未開始')+'</span></div><p>'+C.d+'</p>';
+    h+='<div class="ac-steps">'+C.tours.map(k=>'<button type="button" data-tour="'+k+'" class="'+(tourDone(k)?'done':'')+'">'+(tourDone(k)?'✓ ':'')+WHO[TOURS[k].lead].n+'｜'+TOURS[k].title+'</button>').join('')+'<button type="button" class="quiz" data-quiz="'+C.id+'"'+(locked?' disabled':'')+'>📝 小考 '+C.quiz.length+' 題</button></div>';
+    h+='<button class="ac-go" type="button" data-start="'+C.id+'"'+(locked?' disabled':'')+'>'+(cs.pass?'再上一次':C.tours.length&&done<C.tours.length?(done?'繼續上課':'開始上課'):'開始小考')+' ›</button></section>';});
+  h+='</div>';box.innerHTML=h;
+  $('acFace').appendChild(sprCv('zhou',56));mountSays(box);box.querySelectorAll('.ac-cast [data-k]').forEach(d=>d.querySelector('.sp').appendChild(sprCv(d.dataset.k,44)));
+  box.querySelectorAll('[data-tour]').forEach(b=>b.onclick=()=>{const cid=COURSES.find(C=>C.tours.includes(b.dataset.tour)).id;startTour(b.dataset.tour,{course:cid});});
+  box.querySelectorAll('[data-quiz]').forEach(b=>b.onclick=()=>openQuiz(b.dataset.quiz));
+  box.querySelectorAll('[data-start]').forEach(b=>b.onclick=()=>{const C=COURSES.find(x=>x.id===b.dataset.start);
+    if(coursePass(C.id)&&C.tours.length){startTour(C.tours[0],{course:C.id,replay:1});}else startCourse(C.id);});
+  if(QZ){box.querySelectorAll('.ac-quiz .opts button').forEach(b=>b.onclick=()=>{if(QZ.picked!=null)return;const C=COURSES.find(x=>x.id===QZ.id);QZ.picked=+b.dataset.j;if(QZ.picked===C.quiz[QZ.i].a)QZ.score++;renderAcademy();});
+    const nx=$('acNext');if(nx)nx.onclick=()=>{QZ.i++;QZ.picked=null;if(QZ.i>=COURSES.find(x=>x.id===QZ.id).quiz.length)recordQuiz();renderAcademy();};
+    const dn=$('acDone');if(dn)dn.onclick=()=>{QZ=null;renderAcademy();scrollTo({top:0,behavior:'smooth'});};
+    const rt=$('acRetry');if(rt)rt.onclick=()=>openQuiz(QZ.id);}
+  hubEm();}
+function recordQuiz(){const C=COURSES.find(x=>x.id===QZ.id),S=load();S.c=S.c||{};const o=S.c[C.id]||{};
+  o.best=Math.max(o.best||0,QZ.score);if(QZ.score>=Math.ceil(C.quiz.length*2/3)){if(!o.pass)toastMsg(C.id==='c5'?'🎓 獲得稱號：咖啡學院畢業生':'🏅 通過「'+C.n+'」');o.pass=1;}S.c[C.id]=o;save(S);}
+function hubEm(){const e=$('hubAcadS');if(!e)return;const c=load().c||{};const n=COURSES.filter(C=>(c[C.id]||{}).pass).length;e.textContent=(c.c5||{}).pass?'🎓 已畢業':'已通過 '+n+' / '+COURSES.length+' 堂';}
+// ---------- 掛上 ----------
+window.academyRender=()=>{renderAcademy();};
+window.guideEnd=()=>endTour();
+window.guideCheck=m=>{if(!TR)return;const v={sim:'simView',learn:'learnView',micro:'microView',bed:'bedView',nose:'noseView',water:'waterView'}[m];if(v!==TOURS[TR.k].view)endTour();};
+const hb=$('hubAcad');if(hb)hb.onclick=()=>{QZ=null;window.appShow('academy',true);scrollTo(0,0);};
+cards();hubEm();
+addEventListener('popstate',()=>endTour());
 })();
 </script>
 </body>
