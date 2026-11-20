@@ -33,6 +33,13 @@ main{max-width:760px;margin:0 auto;padding:14px max(14px,env(safe-area-inset-lef
 .chip.on{background:var(--fg);color:var(--bg);border-color:var(--fg)}
 .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:14px}
 .card h2{font-size:17px;margin:0 0 2px;line-height:1.4}
+#p-bear .card>h2{cursor:pointer;position:relative;padding-right:22px}
+#p-bear .card>h2::after{content:"▾";position:absolute;right:0;top:0;color:var(--faint);font-size:14px;transition:transform .2s}
+#p-bear .card.fold>h2::after{transform:rotate(-90deg)}
+#p-bear .card.fold>*:not(h2):not(:first-child){display:none}
+#p-bear .card.fold{padding-bottom:12px}
+.foldbar{display:flex;gap:8px;justify-content:flex-end;margin:-4px 0 10px}
+.foldbar button{font:inherit;font-size:12px;padding:5px 10px;border-radius:999px;border:1px solid var(--line);background:var(--panel);color:var(--muted)}
 .meta{font-size:12px;color:var(--faint);display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .tag{font-size:11px;padding:1px 7px;border-radius:6px;background:var(--grid);color:var(--muted)}
 .tag.hot{background:var(--hl);color:var(--fg);border:1px solid var(--hlb)}
@@ -220,6 +227,7 @@ input[type=range]{width:100%;accent-color:var(--s1)}
   </section>
 
   <section class="pane" id="p-bear">
+    <div class="foldbar"><button data-fold="1">全部收合</button><button data-fold="0">全部展開</button></div>
     <div class="card">
       <h2>這次跌到哪裡了？</h2>
       <div class="meta">各自從歷史高點起算；虛線 −10% 叫修正、−20% 叫空頭（美股、台股皆為 11/19 收盤）</div>
@@ -303,7 +311,7 @@ input[type=range]{width:100%;accent-color:var(--s1)}
 <div id="tip"></div><div id="toast"></div>
 
 <script>
-const ASOF="2026-11-20 11:55";
+const ASOF="2026-11-20 13:15";
 /* ---------- 大事資料 ---------- */
 const EVENTS=[
 {id:"usd-strong",cat:"匯率",hot:1,date:"2026-11-20",title:"強勢美元：美元指數逼近 104 創 19 個月新高，台幣跌破 33、台股盤中崩逾 2,000 點",
@@ -740,6 +748,7 @@ const IXH={
 let IXK="sp";
 const NOW={y:"2026",nm:"這次 AI 修正",dd:8.2,now:1};
 const BOMBS=[
+{ic:"💧",t:"流動性賣壓：只能以跌止跌",lv:"h",lvt:"高",d:"台股這幾天的下跌，主因不是基本面，是「被迫賣」：融資追繳斷頭、股票質押等借款去槓桿，加上部分主動式 ETF 遇到贖回只能賣持股。11/19 日韓股和美股期貨都沒大跌，台股卻獨自重挫 1,768 點；國安基金盤中拉抬時，櫃買和散戶也不跟。這種賣壓不看價格，護盤只能讓它跌慢一點。要等槓桿清完、贖回停下來，價格跌到有人願意接，才會真正止住，也就是「以跌止跌」。",m:"觀察：融資餘額減幅、主動式 ETF 申贖、違約交割件數、跌停家數有沒有縮小"},
 {ic:"🏦",t:"聯準會升息循環",lv:"h",lvt:"高",d:"12/10 幾乎確定升一碼（CME 機率 96.4%），真正的風險是點陣圖顯示 2027 年還要升幾次。歷史上空頭要結束，幾乎都要等聯準會停手。",m:"引爆點：12/10 凌晨 3 點（台北）"},
 {ic:"🏗️",t:"AI 資料中心禁建令",lv:"h",lvt:"高",d:"民主黨選後喊全國暫停新建 AI 資料中心，紐約州已暫停大型資料中心許可、德州也在審查電網。這直接打到 AI 硬體需求的長期預期。但川普有否決權，聯邦版本很難過。",m:"引爆點：12/10 德州 ERCOT 公布稽核結果、12/17 PUCT 開會；1 月新國會開議提案"},
 {ic:"🔎",t:"AI 晶片的中國曝險",lv:"h",lvt:"高",d:"Nvidia 新加坡營收、東南亞遠端租用，加上 11/19 Hunterbrook 放空 AMD（指中國黑名單企業仍拿到新韌體，AMD 當天收跌 7.7%），美國對「晶片流向」的檢查正在擴大。空頭機構開始針對這個題材出手，一有調查或罰款消息就會打擊整個族群。",m:"觀察：商務部 BIS 動作、AMD 回應、其他空頭報告"},
@@ -758,6 +767,7 @@ const SIGNALS=[
 ["權值股（Nvidia 等）補跌、出現恐慌量","進行中（Nvidia 6 連跌至 146；台股 11/19 近 300 檔跌停）","neu"],
 ["融資斷頭、去槓桿","進行中（11/19 融資減約 170 億，減幅仍未達 7 月低點水準）","neu"],
 ["外資回頭買","部分（連 6 日買超櫃買，但台指期淨空單仍約 9.9 萬口）","neu"],
+["流動性賣壓出清（以跌止跌）","未（斷頭、去槓桿還在進行，國安基金拉抬時櫃買不跟）","bear"],
 ["政策利空落地（禁建令、出口規定明朗）","出口新規已公布、禁建令未","neu"],
 ["多數個股已深跌、跌勢鈍化","已出現","bull"],
 ["政府出手護盤","已出現（國安基金證實進場、八大行庫 11/19 買超 360 億；限空令 2.0 11/20 起）","bull"],
@@ -781,7 +791,7 @@ function renderBear(){
   $("#bearCards").innerHTML=BEARS.slice().reverse().map((b,k)=>`<article class="card bcard" id="bear-${BEARS.indexOf(b)}"><div class="meta"><span class="tag">${b.y}</span><span>${b.rec?"伴隨衰退":"沒有衰退"}・約 ${b.mo} 個月見底</span></div><h2>${b.nm}<span class="dd">−${b.dd}%</span></h2><div class="two"><div class="dn"><b>⬇ 下跌觸發</b>${b.dn}</div><div class="up"><b>⬆ 止跌觸發</b>${b.up}</div></div><div class="meta" style="margin-top:8px">💡 ${b.note}</div></article>`).join("");
   $("#bombs").innerHTML=BOMBS.map(b=>`<div class="bomb"><div class="ic">${b.ic}</div><div><b>${b.t}<span class="lv ${b.lv}">${b.lvt}</span></b><div style="font-size:14px">${b.d}</div><div class="m">${b.m}</div></div></div>`).join("");
   const SC={bull:"✅",neu:"🟡",bear:"⬜"};
-  $("#signals").innerHTML=SIGNALS.map(x=>`<div class="sig"><span>${SC[x[2]]}</span><span>${x[0]}</span><span class="st" style="color:var(--${x[2]==="bear"?"faint":x[2]==="bull"?"bull":"muted"})">${x[1]}</span></div>`).join("")+`<div class="meta" style="margin-top:6px">目前亮 ${SIGNALS.filter(x=>x[2]==="bull").length} 個、半亮 ${SIGNALS.filter(x=>x[2]==="neu").length} 個、未亮 ${SIGNALS.filter(x=>x[2]==="bear").length} 個（11/20 盤前）：護盤到位了，但聯準會、VIX、融資這三個關鍵還沒到位，比較像「築底中」，還不是底部完成。</div>`;
+  $("#signals").innerHTML=SIGNALS.map(x=>`<div class="sig"><span>${SC[x[2]]}</span><span>${x[0]}</span><span class="st" style="color:var(--${x[2]==="bear"?"faint":x[2]==="bull"?"bull":"muted"})">${x[1]}</span></div>`).join("")+`<div class="meta" style="margin-top:6px">目前亮 ${SIGNALS.filter(x=>x[2]==="bull").length} 個、半亮 ${SIGNALS.filter(x=>x[2]==="neu").length} 個、未亮 ${SIGNALS.filter(x=>x[2]==="bear").length} 個（11/20 盤前）：護盤到位了，但聯準會、VIX、流動性賣壓這三個關鍵還沒到位，比較像「築底中」，還不是底部完成。</div>`;
   // gauge
   const IX=[["S&P 500",8.2,"var(--s1)"],["Nasdaq",13.5,"var(--s1)"],["台股加權",26.1,"var(--bear)"],["費城半導體",35.6,"var(--bear)"],["台股櫃買",41.2,"var(--bear)"]],M=45;
   $("#nowGauge").innerHTML=`<div style="margin:14px 0 6px">`+IX.map(x=>`<div class="ix" data-tip="${x[0]}：距高點 −${x[1]}%"><span class="n">${x[0]}</span><div class="tk2"><div class="fl" style="width:${x[1]/M*100}%;background:${x[2]}"></div><i class="vl" style="left:25%"></i><i class="vl" style="left:50%"></i></div><span class="p">−${x[1]}%</span></div>`).join("")+`<div class="ixax"><i></i><div><span style="left:25%">−10%</span><span style="left:50%">−20%</span><span style="left:87%">−35%</span></div><i></i></div></div>`;
@@ -809,7 +819,7 @@ document.addEventListener("click",e=>{
   if(t.dataset.del){const m=LS.get("mine",[]);m.splice(+t.dataset.del,1);LS.set("mine",m);renderMine();renderVw();return}
   if(t.dataset.ix){IXK=t.dataset.ix;renderIx();return}
   const bx=t.closest("[data-bx]");if(bx){showBx(+bx.dataset.bx);return}
-  const bj=t.closest("[data-bj]");if(bj){NAV.push({p:"bear",y:window.scrollY});const el=document.getElementById("bear-"+bj.dataset.bj);if(el)el.scrollIntoView({behavior:"smooth",block:"center"});return}
+  const bj=t.closest("[data-bj]");if(bj){NAV.push({p:"bear",y:window.scrollY});const el=document.getElementById("bear-"+bj.dataset.bj);if(el)el.classList.remove("fold");if(el)el.scrollIntoView({behavior:"smooth",block:"center"});return}
   if(t.dataset.jump){e.preventDefault();evCat="全部";renderEv();go("ev",false,true);setTimeout(()=>document.getElementById("ev-"+t.dataset.jump).scrollIntoView({behavior:"smooth"}),30);return}
 });
 $("#shareBtn").onclick=async()=>{try{await navigator.clipboard.writeText(location.href.split("#")[0]);toast("✅ 已複製連結")}catch(x){toast("複製失敗，請手動複製網址")}};
@@ -1046,6 +1056,13 @@ function goBack(){
 }
 
 renderEv();renderVw();renderBear();
+
+/* 空頭史收合 */
+function foldKey(c){const h=c.querySelector(":scope>h2");return h?h.textContent.replace(/[−\d.%\s]+$/,"").trim().slice(0,20):""}
+function applyFold(){const st=LS.get("fold",{});document.querySelectorAll("#p-bear .card").forEach(c=>{if(!c.querySelector(":scope>h2"))return;const k=foldKey(c);const d=c.classList.contains("bcard")&&c.closest("#bearCards");c.classList.toggle("fold",k in st?st[k]:!!d)})}
+document.addEventListener("click",e=>{const h=e.target.closest("#p-bear .card>h2");if(h){const c=h.parentElement,st=LS.get("fold",{});c.classList.toggle("fold");st[foldKey(c)]=c.classList.contains("fold");LS.set("fold",st);return}
+const b=e.target.closest("[data-fold]");if(b){const v=b.dataset.fold==="1",st={};document.querySelectorAll("#p-bear .card").forEach(c=>{if(!c.querySelector(":scope>h2"))return;c.classList.toggle("fold",v);st[foldKey(c)]=v});LS.set("fold",st)}});
+applyFold();
 </script>
 <!-- Made by Jim Lu -->
 <div class="jl-sig" style="text-align:center;font-size:11px;line-height:1.4;letter-spacing:.08em;opacity:.6;padding:14px 12px;color:inherit;font-family:inherit">Made by <b style="font-weight:700">Jim Lu</b></div>
