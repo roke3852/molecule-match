@@ -1039,7 +1039,7 @@ window.BGM=(()=>{
     <div class="newrow"><input id="tName" type="text" maxlength="12" placeholder="你的名字" autocomplete="off" enterkeyhint="go"><button class="go" id="tGo" type="button">開始</button></div>
     <div class="err" id="tErr"></div>
   </div>
-  <div class="t-foot">© 2026 Jim Lu　ver. 6.6</div>
+  <div class="t-foot">© 2026 Jim Lu　ver. 6.7</div>
 </div>
 <nav class="modes" aria-label="導覽"><div class="in">
   <button class="homebtn" id="homeBtn" type="button" hidden>‹ 主選單</button>
@@ -1514,6 +1514,7 @@ window.BGM=(()=>{
     <div class="mic-chart-head"><h2>各物質溶出比例</h2><span class="label" id="micGhostLab"></span></div>
     <canvas id="micChart" aria-label="溶出比例隨時間變化"></canvas>
     <div class="mic-now" id="micNow"></div>
+    <div class="mic-rings" id="micRings"></div>
   </section>
 
   <section class="panel">
@@ -3533,7 +3534,7 @@ function micCreate(cfg){
   for(const c of cells){const th=Math.atan2(c.cy,c.cx);c.clump=c.depth>.9&&Math.sin(th-clPh)>clTh;}
   // molecules
   const mol=[];
-  cells.forEach((c,ci)=>{for(let t=0;t<MIC_T.length;t++){let k=MIC_T[t].n;while(k>0){if(rnd()<Math.min(1,k)){mol.push({t,c:ci,ox:(rnd()-.5)*.64,oy:(rnd()-.5)*.64,st:0,x:0,y:0,lip:rnd()<(MIC_LIP[MIC_T[t].id]||0),c0:ci});}k-=1;}}});
+  cells.forEach((c,ci)=>{for(let t=0;t<MIC_T.length;t++){let k=MIC_T[t].n;while(k>0){if(rnd()<Math.min(1,k)){mol.push({t,c:ci,o:ci,ox:(rnd()-.5)*.64,oy:(rnd()-.5)*.64,st:0,x:0,y:0,lip:rnd()<(MIC_LIP[MIC_T[t].id]||0),c0:ci});}k-=1;}}});
   const tot=new Array(MIC_T.length).fill(0);mol.forEach(m=>tot[m.t]++);
   const surfCells=cells.filter(c=>c.surf);
   const S={cfg,R0,Rof,n,half,vx,vy,cells,mol,tot,surfCells,Tf,t:0,dt:.5,rel:new Array(MIC_T.length).fill(0),
@@ -3636,6 +3637,8 @@ const BASE={grind:650,temp:93,bloom:40,pour:'normal',method:'po',stir:'none',see
 const TOPICS=[
  {id:'grind',name:'粒徑',A:{grind:450},B:{grind:1100},an:'細研磨 450 μm',bn:'粗研磨 1100 μm',
   text:'<p>粉粒越細，從中心到表面的路越短；被切開的外圈細胞佔整顆的比例也越高，所以物質出得快、萃得多。</p><p>粗粉的中心離表面很遠，水要比較久才滲到中心，裡面的糖和苦味大分子到最後還有很多出不來。磨細會讓萃取率上升，苦味大分子也跟著變多。</p><p>磨得太細時，細粉會在粉床裡堵住濾紙（塞水）。這裡只看單顆粉粒，看不到塞水，要看請用練習模擬器。</p>'},
+ {id:'coarsehot',name:'粗磨高溫',A:{grind:1150,temp:96},B:{grind:650,temp:92},an:'粗研磨 1150 μm＋96°C',bn:'中研磨 650 μm＋92°C',
+  text:'<p>怕酸的人常把豆子磨很粗，再用高溫沖。看右下角的圓靶：粗粉的外圈細胞被切開、泡在熱水裡，很快就被掏空，核心離表面太遠，到最後還有一大半出不來。</p><p>外圈萃到接近苦的階段，苦把酸壓下去，所以酸感變低；核心幾乎沒萃到，整杯濃度和萃取率偏低，喝起來水水的。萃取率低，不是整體萃不夠，而是同一顆粉裡外萃取不均。切到另一邊，比較中研磨時三層的差距。</p>'},
  {id:'bloom',name:'悶蒸',A:{bloom:40},B:{bloom:0},an:'悶蒸 40 秒',bn:'不悶蒸',
   text:'<p>新鮮烘焙的咖啡粉裡有很多 CO₂（畫面中的灰色小圈）。一碰到熱水，CO₂ 會大量冒出，氣泡包在粉粒表面，把水推開。</p><p>悶蒸是先用少量水讓粉吸水、把氣排掉。這段水不流動，溶出的物質堆在粉粒附近，所以萃得慢；等氣排掉再注水，水才能完整接觸粉粒。</p><p>不悶蒸直接注水，前面溶出看起來比較快，但氣泡會擋住接觸。還有一塊被 CO₂ 包住的乾粉團（顏色較淺的那一塊）很久才濕，同一顆粉粒裡外萃取不均。</p>'},
  {id:'strong',name:'強力沖刷',A:{pour:'strong'},B:{pour:'normal'},an:'強力沖刷',bn:'一般注水',
@@ -3827,12 +3830,20 @@ function drawChart(){
   g.strokeStyle=C.accent;g.lineWidth=1.5;g.beginPath();g.moveTo(X(S.t),T);g.lineTo(X(S.t),T+ph);g.stroke();
   $('micGhostLab').textContent=(ghostName?ghostName+'・':'')+'點線：油脂';
 }
+function micRings(){const el=$('micRings');if(!el||!S)return;
+  if(!S._md){S._md=Math.max(...S.cells.map(c=>c.depth))||1;}
+  const tot=[0,0,0],out=[0,0,0];
+  for(const m of S.mol){if(MIC_T[m.t].insol)continue;const b=Math.min(2,Math.floor(S.cells[m.o!=null?m.o:m.c].depth/S._md*3));tot[b]++;if(m.st!==0)out[b]++;}
+  const f=tot.map((t,i)=>t?out[i]/t:0),pc=v=>Math.round(v*100)+'%',col=v=>'rgba(201,166,107,'+(.12+.78*v).toFixed(2)+')';
+  el.innerHTML='<svg viewBox="0 0 120 120" width="96" height="96" aria-hidden="true"><circle cx="60" cy="60" r="56" fill="'+col(f[0])+'" stroke="var(--line)"/><circle cx="60" cy="60" r="37" fill="'+col(f[1])+'" stroke="var(--line)"/><circle cx="60" cy="60" r="18" fill="'+col(f[2])+'" stroke="var(--line)"/></svg>'+
+   '<div><b>粒內分層：各層已溶出</b><span>外圈 <em>'+pc(f[0])+'</em></span><span>中間 <em>'+pc(f[1])+'</em></span><span>核心 <em>'+pc(f[2])+'</em></span><small>顏色越深，代表那一層被掏空越多。外圈和核心差越多，萃取越不均。</small></div>';}
 function ui(){
   $('micClock').textContent=fmt(S.t);$('micTime').value=S.t;
   const [ph,t]=caption();$('micPhase').textContent=ph;$('micCap').textContent=t;
   const e=S.rel.map((v,i)=>v/S.tot[i]),all=micAll(S);
   $('micNow').innerHTML='<span class="all"><em>整體（水溶性）</em><b>'+Math.round(all*100)+'%</b></span>'+MIC_T.map((T,i)=>'<span><em><i style="background:var(--'+T.id+')"></i>'+T.name+'</em><b>'+Math.round(e[i]*100)+'%</b></span>').join('')+
     '<span><em>細胞吸水</em><b>'+Math.round(S.wetFrac*100)+'%</b></span><span><em>CO₂ 剩餘</em><b>'+Math.round(S.gasLeft/S.G0*100)+'%</b></span>';
+  micRings();
   drawChart();
 }
 function frame(now){
@@ -6719,6 +6730,35 @@ COURSES.splice(COURSES.findIndex(c=>c.id==='c10'),0,
   {q:'金屬濾網的杯子清晰度比較低，是因為？',o:['油脂和細粉進到杯裡','水溫太低','萃取太少','金屬會產生苦味'],a:0,e:'細粉和油讓風味變得模糊。'},
   {q:'浸泡的萃取會「自己踩煞車」，是因為？',o:['液體越來越濃，濃度差越來越小','水溫越來越高','粉越泡越細','濾紙堵住了'],a:0,e:'水量固定，越泡越接近平衡。'}]});
 
+// ---------- 為什麼喝起來水水的（粗研磨＋高溫的萃取不均） ----------
+const _rng=(id,v)=>{const e=$(id);if(!e)return;e.value=v;e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));};
+const _micPlay=()=>{setTimeout(()=>{const b=$('micPlay');if(b&&!/暫停|❚❚|pause/i.test(b.textContent+b.getAttribute('aria-label')))b.click();},500);};
+Object.assign(TOURS,{
+ watery:{view:'simView',restore:1,lead:'mu',title:'為什麼喝起來水水的？',blurb:'怕酸就磨很粗、用高溫沖？結果反而水水的。我們用模型拆給你看。',steps:[
+  {w:'li',t:'我怕酸，所以磨很粗，再用 96°C 沖。可是喝起來水水的……',el:'#grind',go:()=>{_btn('pPulse');_sel('grinderSel','');_rng('grind',1200);_rng('temp',96);}},
+  {w:'mu',t:'先看結果。控制圖上的點掉到方框的左下角：濃度偏淡，萃取率也偏低。',el:'#scorePanel'},
+  {w:'cui',t:'磨很粗，粉層阻力小，水流得快。水是「沖過去」的，沖刷大於擴散，來不及滲進粉粒中心。',el:'#grind'},
+  {w:'cui',t:'到顯微鏡看一顆粗粉。右下角那個圓靶，是這顆粉外圈、中間、核心各自溶出了多少。',v:'micro',el:'#micRings',go:()=>{_mic('coarsehot');_micPlay();}},
+  {w:'cui',t:'外圈的細胞被切開，又泡在熱水裡，很快就被掏空；核心離表面很遠，到最後還有一大半出不來。同一顆粉，裡外差很多。',v:'micro',el:'#micRings'},
+  {w:'zhou',t:'有個口訣叫「鹹、酸、甜、酒、苦」，講風味大概的出場順序。外圈已經萃到接近苦的階段，苦把酸壓下去，所以酸感變低了。',v:'micro',el:'#micRings'},
+  {w:'cui',t:'口訣裡的酸、甜、苦跟模型對得上：有機酸快、糖慢、苦味大分子最慢。「鹹」多半是礦物鹽，溶得很快；「酒」比較像處理法帶來的發酵香，不算萃取的一個階段。'},
+  {w:'mu',t:'核心幾乎沒萃到，整杯的濃度和萃取率就偏低，這就是「水水的」。萃取率低不是整體萃不夠，而是萃取不均。'},
+  {w:'li',t:'等等，粕谷哲的 10 段沖法不也是超粗研磨加 96°C？'},
+  {w:'cui',t:'好問題。在模型裡，他那套的粉粒一樣是外圈多、核心少，萃取率大約 15%，跟這杯差不多。',v:'micro',el:'#micRings',go:()=>{_mic('k10');_micPlay();}},
+  {w:'mu',t:'差別在目標。他用小量多次、擾動很低的注水，粉層不亂、細粉少、不塞水，追求的是乾淨、明亮、低苦的杯子，不是濃厚。同樣粗磨，是有意識的取捨，不是怕酸亂調。'},
+  {w:'mu',t:'所以往細調，比往粗調容易。研磨調回 650 μm、水溫 92°C，點就回到方框附近了。',v:'sim',el:'#scorePanel',go:()=>{_rng('grind',650);_rng('temp',92);}},
+  {w:'li',t:'可是磨細一點，又怕苦……'},
+  {w:'mu',t:'往細調比較容易碰到苦。先試補一點水：有時候只是太濃，加水就好。',el:'#bypassMl'},
+  {w:'mu',t:'補水之後還是苦，代表萃取率太高。這時候縮短時間，例如兩分鐘縮成一分半，苦味就會降下來。',el:'#cutoff'},
+  {w:'zhou',t:'記住順序：先往細找到甜，太濃就補水，太苦就縮時間。你的設定我會放回去。'}]}
+});
+COURSES.splice(COURSES.findIndex(c=>c.id==='c2')+1,0,{id:'c11',lv:'入門',n:'為什麼喝起來水水的？',d:'磨很粗＋高溫，為什麼酸變少卻水水的？從一顆粉的裡外分層看萃取不均。',tours:['watery'],quiz:[
+  {q:'磨很粗又用高溫沖，最容易發生什麼事？',o:['萃取不均：外圈過萃、核心沒萃到','萃取非常均勻','酸變得更多','咖啡因變多'],a:0,e:'水流快、沖刷大於擴散，粉粒裡外差很多。'},
+  {q:'為什麼這樣沖，酸感會變低？',o:['外圈萃到苦，苦把酸壓下去','高溫把酸全部分解了','粗粉裡沒有酸','水太硬'],a:0,e:'不是酸不見了，是被苦蓋過去。'},
+  {q:'喝起來「水水的」主要原因是？',o:['粉粒核心幾乎沒萃到，整杯濃度和萃取率偏低','水放太多','豆子太新鮮','濾紙太厚'],a:0,e:'萃取率低，是萃取不均造成的。'},
+  {q:'往細調之後變苦，第一步先試什麼？',o:['補一點水','再磨更細','把水溫調高','延長沖煮時間'],a:0,e:'有時候只是太濃。'},
+  {q:'補水之後還是苦，代表什麼？',o:['萃取率太高，應該縮短時間','濃度太低','應該磨更粗','水太軟'],a:0,e:'例如兩分鐘縮成一分半。'}]});
+
 const AKEY='brewLab.academy';
 function load(){try{return JSON.parse(localStorage.getItem(AKEY)||'null')||{t:{},c:{}};}catch(e){return{t:{},c:{}};}}
 function save(s){try{localStorage.setItem(AKEY,JSON.stringify(s));}catch(e){}}
@@ -6770,6 +6810,7 @@ body.gd-on{padding-bottom:200px}
 .ac-go{align-self:flex-start;background:var(--accent);color:var(--accent-ink);border:0;border-radius:999px;font:inherit;font-weight:700;font-size:14px;padding:7px 18px;cursor:pointer}
 .ac-go:disabled{opacity:.4}
 .ac-course.locked{opacity:.6}
+.mic-rings{display:flex;gap:14px;align-items:center;margin-top:12px;padding:10px 12px;border:1px solid var(--line);border-radius:10px}.mic-rings b{display:block;font-size:13px;margin-bottom:4px}.mic-rings span{display:inline-block;margin-right:12px;font-size:13px;color:var(--muted)}.mic-rings em{font-style:normal;font-family:var(--f-mono);color:var(--ink);font-size:15px}.mic-rings small{display:block;margin-top:4px;font-size:12px;color:var(--muted);line-height:1.5}
 .ac-lvh{font-family:var(--f-display);font-weight:700;font-size:15px;color:var(--accent);margin:8px 0 -6px;letter-spacing:.05em}
 .ac-quiz .q{font-size:16px;font-weight:700;margin:6px 0 10px}
 .ac-quiz .opts{display:flex;flex-direction:column;gap:8px}
@@ -6817,8 +6858,8 @@ function showStep(){if(!TR||!box)return;const T=TOURS[TR.k],s=T.steps[TR.i],W=WH
   box.querySelector('.pv').disabled=TR.i===0;
   const last=TR.i===T.steps.length-1;box.querySelector('.nx').textContent=last?(TR.opt.course?'下一課 ›':'完成 ✓'):'下一步 ›';
   const VW={sim:'simView',learn:'learnView',micro:'microView',bed:'bedView',nose:'noseView',water:'waterView'};const view=s.v?VW[s.v]:T.view;
-  if($(view).hidden&&window.appShow){TR.sw=1;window.appShow(Object.keys(VW).find(k=>VW[k]===view),true);TR.sw=0;}
-  if(s.go)try{s.go();}catch(e){}
+  let switched=false;if($(view).hidden&&window.appShow){TR.sw=1;window.appShow(Object.keys(VW).find(k=>VW[k]===view),true);TR.sw=0;switched=true;}
+  if(s.go){if(switched)setTimeout(()=>{try{s.go();}catch(e){}},400);else try{s.go();}catch(e){}}
   const el=findEl(s.el,view);TR.el=el;
   if(el){const r=el.getBoundingClientRect(),top=130,bot=innerHeight-(box.offsetHeight||190)-14,room=bot-top;
     let y=scrollY+r.top-top;if(r.height<room)y-= (room-r.height)/2;scrollTo({top:Math.max(0,y),behavior:'smooth'});ring.hidden=false;}else ring.hidden=true;
