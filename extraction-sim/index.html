@@ -1039,7 +1039,7 @@ window.BGM=(()=>{
     <div class="newrow"><input id="tName" type="text" maxlength="12" placeholder="你的名字" autocomplete="off" enterkeyhint="go"><button class="go" id="tGo" type="button">開始</button></div>
     <div class="err" id="tErr"></div>
   </div>
-  <div class="t-foot">© 2026 Jim Lu　ver. 6.3</div>
+  <div class="t-foot">© 2026 Jim Lu　ver. 6.3.1</div>
 </div>
 <nav class="modes" aria-label="導覽"><div class="in">
   <button class="homebtn" id="homeBtn" type="button" hidden>‹ 主選單</button>
@@ -6432,8 +6432,13 @@ cv.addEventListener('click',e=>{const r=cv.getBoundingClientRect(),x=e.clientX-r
   for(const o of IONS){const d=Math.hypot(o.x-x,o.y-y);if(d<bd){bd=d;best=o;}}sel=best===sel?null:best;});
 try{const sv=JSON.parse(localStorage.getItem('brewLab.water')||'null');if(sv&&sv.W){Object.assign(W,sv.W);preset=sv.preset||'';}}catch(e){}
 let inited=false;
-window.waterRender=()=>{if(!size())return;if(!inited){inited=true;apply(true);}else{makeGrounds();G.forEach(g=>g.on=true);}start();};
-let rz;addEventListener('resize',()=>{clearTimeout(rz);rz=setTimeout(()=>{if(!$('waterView').hidden&&size()){makeGrounds();}},150);});
+let tries=0;
+function ensure(){if($('waterView').hidden)return;if(!size()){if(tries++<40)setTimeout(ensure,150);return;}tries=0;
+  if(!inited){inited=true;apply(true);}else if(!G.length||G[G.length-1].x>Wd){makeGrounds();}start();}
+window.waterRender=ensure;
+try{new ResizeObserver(()=>ensure()).observe(cv);}catch(e){}
+try{new MutationObserver(()=>ensure()).observe($('waterView'),{attributes:true,attributeFilter:['hidden']});}catch(e){}
+
 apply(false);
 })();
 </script>
