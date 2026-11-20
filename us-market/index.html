@@ -303,7 +303,7 @@ input[type=range]{width:100%;accent-color:var(--s1)}
 <div id="tip"></div><div id="toast"></div>
 
 <script>
-const ASOF="2026-11-20 09:35";
+const ASOF="2026-11-20 09:50";
 /* ---------- 大事資料 ---------- */
 const EVENTS=[
 {id:"tw-1120",cat:"台股",hot:1,date:"2026-11-20",title:"台股盤中即時：加權跌破 37,000、櫃買再跌 6.6%，從高點已腰斬四成",
@@ -740,14 +740,16 @@ const BOMBS=[
 {ic:"📊",t:"已經跌了很多的股票",lv:"g",lvt:"利多",d:"約六成成分股已經跌超過 20%，摩根士丹利 Wilson 認為傷害大多已反映、修正在「最後幾局」。真正還沒跌的是少數超大型權值股。",m:"觀察：權值股是否補跌（常是最後一跌）"},
 ];
 const SIGNALS=[
-["聯準會停止升息或暗示放緩","尚未","bear"],
-["VIX 衝過 30–40 後回落","部分（11/19 收 28.4，未破 30）","neu"],
+["聯準會停止升息或暗示放緩","尚未（市場仍押 12 月升息，金價因此回落）","bear"],
+["VIX 衝過 30–40 後回落","部分（11/19 收 28.4，盤中 29.1，仍未破 30）","neu"],
 ["信用利差不再擴大","未確認","neu"],
-["權值股（Nvidia 等）補跌、出現恐慌量","進行中（Nvidia 6 連跌）","neu"],
+["權值股（Nvidia 等）補跌、出現恐慌量","進行中（Nvidia 6 連跌至 146；台股 11/19 近 300 檔跌停）","neu"],
+["融資斷頭、去槓桿","進行中（11/19 融資減約 170 億，減幅仍未達 7 月低點水準）","neu"],
+["外資回頭買","部分（連 6 日買超櫃買，但台指期淨空單仍約 9.9 萬口）","neu"],
 ["政策利空落地（禁建令、出口規定明朗）","出口新規已公布、禁建令未","neu"],
 ["多數個股已深跌、跌勢鈍化","已出現","bull"],
-["政府出手護盤（金管會限空）","已出現","neu"],
-["油價回落、通膨壓力減輕","油價有、通膨未","neu"],
+["政府出手護盤","已出現（國安基金證實進場、八大行庫 11/19 買超 360 億；限空令 2.0 11/20 起）","bull"],
+["油價回落、通膨壓力減輕","油價 11 月已跌約 2 成，通膨未降","neu"],
 ];
 function renderIx(){
   const o=IXH[IXK];
@@ -767,7 +769,7 @@ function renderBear(){
   $("#bearCards").innerHTML=BEARS.slice().reverse().map((b,k)=>`<article class="card bcard" id="bear-${BEARS.indexOf(b)}"><div class="meta"><span class="tag">${b.y}</span><span>${b.rec?"伴隨衰退":"沒有衰退"}・約 ${b.mo} 個月見底</span></div><h2>${b.nm}<span class="dd">−${b.dd}%</span></h2><div class="two"><div class="dn"><b>⬇ 下跌觸發</b>${b.dn}</div><div class="up"><b>⬆ 止跌觸發</b>${b.up}</div></div><div class="meta" style="margin-top:8px">💡 ${b.note}</div></article>`).join("");
   $("#bombs").innerHTML=BOMBS.map(b=>`<div class="bomb"><div class="ic">${b.ic}</div><div><b>${b.t}<span class="lv ${b.lv}">${b.lvt}</span></b><div style="font-size:14px">${b.d}</div><div class="m">${b.m}</div></div></div>`).join("");
   const SC={bull:"✅",neu:"🟡",bear:"⬜"};
-  $("#signals").innerHTML=SIGNALS.map(x=>`<div class="sig"><span>${SC[x[2]]}</span><span>${x[0]}</span><span class="st" style="color:var(--${x[2]==="bear"?"faint":x[2]==="bull"?"bull":"muted"})">${x[1]}</span></div>`).join("")+`<div class="meta" style="margin-top:6px">目前亮 1 個、半亮 6 個（11/19 VIX 升到 28.4 但還沒衝過 30）：還在「跌勢中」，不像底部完成。</div>`;
+  $("#signals").innerHTML=SIGNALS.map(x=>`<div class="sig"><span>${SC[x[2]]}</span><span>${x[0]}</span><span class="st" style="color:var(--${x[2]==="bear"?"faint":x[2]==="bull"?"bull":"muted"})">${x[1]}</span></div>`).join("")+`<div class="meta" style="margin-top:6px">目前亮 ${SIGNALS.filter(x=>x[2]==="bull").length} 個、半亮 ${SIGNALS.filter(x=>x[2]==="neu").length} 個、未亮 ${SIGNALS.filter(x=>x[2]==="bear").length} 個（11/20 盤前）：護盤到位了，但聯準會、VIX、融資這三個關鍵還沒到位，比較像「築底中」，還不是底部完成。</div>`;
   // gauge
   const IX=[["S&P 500",8.2,"var(--s1)"],["Nasdaq",13.5,"var(--s1)"],["台股加權",26.1,"var(--bear)"],["費城半導體",35.6,"var(--bear)"],["台股櫃買",41.2,"var(--bear)"]],M=45;
   $("#nowGauge").innerHTML=`<div style="margin:14px 0 6px">`+IX.map(x=>`<div class="ix" data-tip="${x[0]}：距高點 −${x[1]}%"><span class="n">${x[0]}</span><div class="tk2"><div class="fl" style="width:${x[1]/M*100}%;background:${x[2]}"></div><i class="vl" style="left:25%"></i><i class="vl" style="left:50%"></i></div><span class="p">−${x[1]}%</span></div>`).join("")+`<div class="ixax"><i></i><div><span style="left:25%">−10%</span><span style="left:50%">−20%</span><span style="left:87%">−35%</span></div><i></i></div></div>`;
