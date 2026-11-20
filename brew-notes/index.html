@@ -190,6 +190,13 @@ input[type=range]{width:100%}
 .tag.fl{font-size:13px;padding:4px 10px;background:var(--card)}.agbar{position:relative;height:12px;border-radius:6px;margin:10px 0 3px;background:linear-gradient(90deg,#3b2417,#7a4a2b,#b07a4a,#d9b07a,#efd9b0)}.agbar b{position:absolute;top:-4px;width:4px;height:20px;margin-left:-2px;background:var(--ink);border-radius:2px}
 .trec{line-height:1.6}.trec-p{font-size:15px;font-weight:700;margin-bottom:2px}
 .sbars{width:100%;height:auto;display:block}.sbars rect{fill:var(--muted);opacity:.45}.sbars rect.top{fill:var(--accent);opacity:1}.sbars text{font-size:10px;fill:var(--ink);font-family:var(--mono)}.sbars text.d{font-size:9px;fill:var(--muted);font-family:var(--body)}.sbars .bandr{fill:var(--good);opacity:.13}.sbars .dot{fill:var(--accent)}
+.heat{width:100%;border-collapse:separate;border-spacing:3px;font-size:13.5px}.heat thead th{font-weight:600;color:var(--muted);font-size:12px;text-align:center}
+.heat .hg{width:26px;font-size:13px;font-weight:800;color:var(--ink);background:var(--sunken);border-radius:6px;text-align:center}.heat .hg.hw{width:auto;font-size:12.5px}.heat .hl{text-align:left;font-weight:500;color:var(--muted);padding:0 4px;white-space:nowrap;width:46px}
+.heat tr.g0 td,.heat tr.g0 th{border-top:0}.heat tr.g0>*{padding-top:3px}
+.heat .hc{text-align:center;font-family:var(--mono);font-weight:700;height:28px;border-radius:6px;color:var(--ink)}
+.heat .hc.pos{background:color-mix(in srgb,var(--accent) calc(var(--a)*100%),transparent)}.heat .hc.neg{background:color-mix(in srgb,#7a5a44 calc(var(--a)*100%),transparent)}.heat .hc.hi{color:#fff}.heat .hc.na{color:var(--muted);font-weight:400;background:var(--sunken)}
+.hleg{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:11.5px;color:var(--muted);margin:6px 0 2px}.hleg i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:4px;vertical-align:-1px}.hleg i.pos{background:var(--accent)}.hleg i.neg{background:#7a5a44}
+.hn{display:flex;gap:10px;padding-top:8px;margin-top:8px;border-top:1px solid var(--line)}.hn>b{flex:0 0 auto;font-size:13px;width:34px;padding-top:3px}
 </style>
 </head>
 <body>
@@ -588,10 +595,17 @@ const VSTACK=[];function route(){const v=location.hash.slice(1);const nv=['log',
 let F=null,BF=null;
 const openSheet=h=>{$('#sheetIn').innerHTML=h;$('#sheet').classList.add('on')};
 const closeSheet=()=>{$('#sheet').classList.remove('on');F=null;BF=null;GF=null;DB=null;if(REC){try{REC.stop()}catch(e){}REC=null}VW=null;TOUR=null;try{speechSynthesis.cancel()}catch(e){}};
+const NEGK=new Set(['bitter','astr','fin_bitter','fin_astr']);
+function sensGrid(b){const T=TEMPS.filter(t=>{const x=b.temps?.[t[0]];return x&&(Object.values(x.s||{}).some(has)||(x.f||[]).length||x.n)});if(!T.length)return'';
+  const cell=(k,v)=>{if(!has(v))return'<td class="hc na">–</td>';const a=Math.max(0,Math.min(5,+v))/5;return `<td class="hc ${NEGK.has(k)?'neg':'pos'}${a>=.6?' hi':''}" style="--a:${(0.1+a*0.85).toFixed(2)}">${v}</td>`};
+  let rows='';for(const[g,items]of SC){const its=items.filter(([k])=>T.some(t=>has(b.temps[t[0]].s?.[k])));if(!its.length)continue;
+    its.forEach(([k,l],i)=>{rows+=`<tr class="${i===0?'g0':''}">${g==='整體'?'<th class="hg hw" colspan="2">整體</th>':(i===0?`<th class="hg" rowspan="${its.length}">${{嗅覺:'嗅',味覺:'味',觸覺:'觸',後韻:'韻'}[g]||g[0]}</th>`:'')+`<th class="hl">${l}</th>`}${T.map(t=>cell(k,b.temps[t[0]].s?.[k])).join('')}</tr>`})}
+  const notes=T.map(t=>{const x=b.temps[t[0]];return (x.f||[]).length||x.n?`<div class="hn"><b>${t[1]}</b><div><div class="row">${flavHtml(x.f||[])}</div>${x.n?`<div class="sub">${esc(x.n)}</div>`:''}</div></div>`:''}).join('');
+  return `<fieldset><legend>感官</legend>${rows?`<table class="heat"><thead><tr><th></th><th></th>${T.map(t=>`<th>${t[1]}</th>`).join('')}</tr></thead><tbody>${rows}</tbody></table>
+    <div class="hleg"><span><i class="pos" style="--a:.95"></i>甜、香、酸、厚、甘：越深越強</span><span><i class="neg" style="--a:.95"></i>苦、澀：越深越強</span></div>`:''}${notes}</fieldset>`}
 function detail(id){
   const b=brewById(id);if(!b)return;const bean=beanById(b.beanId);
-  const temps=TEMPS.filter(t=>b.temps?.[t[0]]&&(Object.keys(b.temps[t[0]].s||{}).length||(b.temps[t[0]].f||[]).length||b.temps[t[0]].n)).map(t=>{const x=b.temps[t[0]];
-    return `<fieldset><legend>${t[1]}</legend><div class="row">${Object.entries(x.s||{}).filter(e=>has(e[1])).map(e=>`<span class="tag mono">${SCL[e[0]]} ${e[1]}</span>`).join('')}</div><div class="row">${flavHtml(x.f||[])}</div>${x.n?`<div>${esc(x.n)}</div>`:''}</fieldset>`}).join('');
+  const temps=sensGrid(b);
   openSheet(`<div class="sheet-head"><b>${when(b.ts)}</b><button class="btn sm" data-act="close">關閉</button></div><div class="sheet-body">
     <div class="between"><div><div class="title">${esc(bean?bean.name:'已刪除的豆子')}</div><div class="sub">${has(b.restDay)?`養豆第 ${b.restDay} 天`:''}</div></div>${totBox(b)}</div>
     <fieldset><legend>參數</legend><dl class="kv mono">${PARAMS.map(p=>`<dt>${p.l}</dt><dd>${esc(fmtP(p,b[p.k]))}</dd>`).join('')}<dt>TDS</dt><dd>${b.tds??'—'}</dd><dt>萃取率</dt><dd>${has(b.ey)?b.ey+'%':'—'}</dd></dl></fieldset>
