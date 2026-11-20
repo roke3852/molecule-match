@@ -33,11 +33,14 @@ main{max-width:760px;margin:0 auto;padding:14px max(14px,env(safe-area-inset-lef
 .chip.on{background:var(--fg);color:var(--bg);border-color:var(--fg)}
 .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:14px}
 .card h2{font-size:17px;margin:0 0 2px;line-height:1.4}
-#p-bear .card>h2{cursor:pointer;position:relative;padding-right:22px}
-#p-bear .card>h2::after{content:"▾";position:absolute;right:0;top:0;color:var(--faint);font-size:14px;transition:transform .2s}
-#p-bear .card.fold>h2::after{transform:rotate(-90deg)}
+#p-bear .card>h2,#p-ev .card>h2{cursor:pointer;position:relative;padding-right:22px}
+#p-bear .card>h2::after,#p-ev .card>h2::after{content:"▾";position:absolute;right:0;top:0;color:var(--faint);font-size:14px;transition:transform .2s}
+#p-bear .card.fold>h2::after,#p-ev .card.fold>h2::after{transform:rotate(-90deg)}
 #p-bear .card.fold>*:not(h2):not(:first-child){display:none}
 #p-bear .card.fold{padding-bottom:12px}
+#p-ev .card.fold>*:not(h2):not(.meta):not(.lead){display:none}
+#p-ev .card.fold>.lead{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-bottom:0;color:var(--muted)}
+#p-ev .card.fold{padding-bottom:12px;cursor:pointer}
 .foldbar{display:flex;gap:8px;justify-content:flex-end;margin:-4px 0 10px}
 .foldbar button{font:inherit;font-size:12px;padding:5px 10px;border-radius:999px;border:1px solid var(--line);background:var(--panel);color:var(--muted)}
 .meta{font-size:12px;color:var(--faint);display:flex;gap:8px;flex-wrap:wrap;align-items:center}
@@ -200,6 +203,7 @@ input[type=range]{width:100%;accent-color:var(--s1)}
 <main>
   <section class="pane on" id="p-ev">
     <div class="chips" id="evChips"></div>
+    <div class="foldbar"><button data-evfold="1">全部收合</button><button data-evfold="0">全部展開</button></div>
     <div id="evList"></div>
   </section>
 
@@ -311,7 +315,7 @@ input[type=range]{width:100%;accent-color:var(--s1)}
 <div id="tip"></div><div id="toast"></div>
 
 <script>
-const ASOF="2026-11-20 18:10";
+const ASOF="2026-11-20 18:20";
 /* ---------- 大事資料 ---------- */
 const EVENTS=[
 {id:"usd-strong",cat:"匯率",hot:1,date:"2026-11-20",title:"強勢美元：美元指數逼近 104 創 19 個月新高，台幣跌破 33、台股盤中崩逾 2,000 點",
@@ -661,6 +665,7 @@ function renderEv(){
     ${e.tl?`<div class="fig"><div class="t">時間軸</div><ul class="tl">${e.tl.map(t=>`<li class="${t[2]?"big":""}"><span class="dt">${t[0]}</span>${esc(t[1])}</li>`).join("")}</ul></div>`:""}
     <details class="src"><summary>資料來源（${e.src.length}）</summary>${e.src.map(s=>s[1]?`<div>· <a href="${s[1]}" target="_blank" rel="noopener">${esc(s[0])}</a></div>`:`<div>· ${esc(s[0])}</div>`).join("")}</details>
   </article>`).join("");
+  applyEvFold();
 }
 /* ---------- 渲染：觀點 ---------- */
 let vwTag="全部";
@@ -845,7 +850,7 @@ document.addEventListener("click",e=>{
   if(t.dataset.ix){IXK=t.dataset.ix;renderIx();return}
   const bx=t.closest("[data-bx]");if(bx){showBx(+bx.dataset.bx);return}
   const bj=t.closest("[data-bj]");if(bj){NAV.push({p:"bear",y:window.scrollY});const el=document.getElementById("bear-"+bj.dataset.bj);if(el)el.classList.remove("fold");if(el)el.scrollIntoView({behavior:"smooth",block:"center"});return}
-  if(t.dataset.jump){e.preventDefault();evCat="全部";renderEv();go("ev",false,true);setTimeout(()=>document.getElementById("ev-"+t.dataset.jump).scrollIntoView({behavior:"smooth"}),30);return}
+  if(t.dataset.jump){e.preventDefault();evCat="全部";renderEv();go("ev",false,true);evUnfold(t.dataset.jump);setTimeout(()=>document.getElementById("ev-"+t.dataset.jump).scrollIntoView({behavior:"smooth"}),30);return}
 });
 $("#shareBtn").onclick=async()=>{try{await navigator.clipboard.writeText(location.href.split("#")[0]);toast("✅ 已複製連結")}catch(x){toast("複製失敗，請手動複製網址")}};
 /* 提示框 */
@@ -1059,7 +1064,7 @@ $("#tourBox").addEventListener("click",e=>{
   if(t.id==="tourReset"){LS.set("tour",{});renderTourMap();return}
   const g=t.closest("[data-tgo]");if(g){NAV.push({p:"tour",y:0,map:1});tourStart(+g.dataset.tgo);window.scrollTo(0,0);return}
   const o=t.closest("[data-topt]");if(o){TS.log.push(+o.dataset.topt);tourOpt(+o.dataset.topt);return}
-  const lk=t.closest("[data-tlink]");if(lk){const [tab,ev]=lk.dataset.tlink.split("|");if(ev){evCat="全部";renderEv();go("ev");setTimeout(()=>document.getElementById("ev-"+ev).scrollIntoView({behavior:"smooth"}),40)}else{go(tab);window.scrollTo(0,0)}return}
+  const lk=t.closest("[data-tlink]");if(lk){const [tab,ev]=lk.dataset.tlink.split("|");if(ev){evCat="全部";renderEv();go("ev");evUnfold(ev);setTimeout(()=>document.getElementById("ev-"+ev).scrollIntoView({behavior:"smooth"}),40)}else{go(tab);window.scrollTo(0,0)}return}
   if(t.closest("#twDlg"))tourTap();
 });
 renderTourMap();
@@ -1087,6 +1092,15 @@ function foldKey(c){const h=c.querySelector(":scope>h2");return h?h.textContent.
 function applyFold(){const st=LS.get("fold",{});document.querySelectorAll("#p-bear .card").forEach(c=>{if(!c.querySelector(":scope>h2"))return;const k=foldKey(c);const d=c.classList.contains("bcard")&&c.closest("#bearCards");c.classList.toggle("fold",k in st?st[k]:!!d)})}
 document.addEventListener("click",e=>{const h=e.target.closest("#p-bear .card>h2");if(h){const c=h.parentElement,st=LS.get("fold",{});c.classList.toggle("fold");st[foldKey(c)]=c.classList.contains("fold");LS.set("fold",st);return}
 const b=e.target.closest("[data-fold]");if(b){const v=b.dataset.fold==="1",st={};document.querySelectorAll("#p-bear .card").forEach(c=>{if(!c.querySelector(":scope>h2"))return;c.classList.toggle("fold",v);st[foldKey(c)]=v});LS.set("fold",st)}});
+
+/* 大事圖解收合：預設只展開最新一則 */
+function applyEvFold(){const st=LS.get("evfold",{});document.querySelectorAll("#evList .card").forEach((c,i)=>{const k=c.id;c.classList.toggle("fold",k in st?st[k]:i>0)})}
+function evUnfold(id){const c=document.getElementById("ev-"+id);if(!c)return;c.classList.remove("fold");const st=LS.get("evfold",{});st[c.id]=false;LS.set("evfold",st)}
+document.addEventListener("click",e=>{
+  const fb=e.target.closest("[data-evfold]");if(fb){const v=fb.dataset.evfold==="1",st={};document.querySelectorAll("#evList .card").forEach(c=>{c.classList.toggle("fold",v);st[c.id]=v});LS.set("evfold",st);return}
+  const c=e.target.closest("#evList .card");if(!c||e.target.closest("button,a,summary,[data-tip],.hit"))return;
+  const onH=e.target.closest("#evList .card>h2");if(!onH&&!c.classList.contains("fold"))return;
+  c.classList.toggle("fold");const st=LS.get("evfold",{});st[c.id]=c.classList.contains("fold");LS.set("evfold",st)});
 applyFold();
 </script>
 <!-- Made by Jim Lu -->
