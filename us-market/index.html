@@ -91,6 +91,7 @@ textarea.f{min-height:80px;resize:vertical}
 .btn.pri{background:var(--s1);color:#fff;border-color:var(--s1)}
 .empty{color:var(--faint);text-align:center;padding:24px 0;font-size:14px}
 #tip{position:fixed;z-index:20;pointer-events:none;background:var(--fg);color:var(--bg);font-size:12px;line-height:1.45;padding:6px 9px;border-radius:8px;max-width:240px;opacity:0;transition:opacity .12s}
+#swb{position:fixed;left:6px;top:50%;transform:translate(0,-50%);width:38px;height:38px;border-radius:50%;background:var(--s1);color:#fff;font-size:28px;line-height:34px;text-align:center;opacity:0;pointer-events:none;z-index:40;transition:opacity .15s}
 #toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:8px 14px;border-radius:999px;font-size:13px;opacity:0;transition:opacity .2s;z-index:30}
 .disc{font-size:11px;color:var(--faint);text-align:center;margin-top:20px}
 .hit{fill:transparent;cursor:pointer}
@@ -725,7 +726,8 @@ function ddUpd(){
 }
 $("#ddR").addEventListener("input",ddUpd);
 /* ---------- 事件 ---------- */
-function go(p){document.querySelectorAll("nav button").forEach(b=>b.setAttribute("aria-selected",b.dataset.p===p));document.querySelectorAll(".pane").forEach(x=>x.classList.toggle("on",x.id==="p-"+p));if(p==="mine")renderMine();}
+const NAV=[];function curTab(){const a=document.querySelector(".pane.on");return a?a.id.slice(2):"ev"}
+function go(p,noPush,force){const c=curTab();if(!noPush&&(c!==p||force)){NAV.push({p:c,y:window.scrollY});if(NAV.length>40)NAV.shift()}document.querySelectorAll("nav button").forEach(b=>b.setAttribute("aria-selected",b.dataset.p===p));document.querySelectorAll(".pane").forEach(x=>x.classList.toggle("on",x.id==="p-"+p));if(p==="mine")renderMine();}
 document.addEventListener("click",e=>{
   const t=e.target;
   if(t.closest("nav button")){go(t.closest("nav button").dataset.p);window.scrollTo(0,0);return}
@@ -734,8 +736,8 @@ document.addEventListener("click",e=>{
   if(t.dataset.fav){let f=LS.get("fav",[]);f=f.includes(t.dataset.fav)?f.filter(x=>x!==t.dataset.fav):[...f,t.dataset.fav];LS.set("fav",f);renderEv();toast(f.includes(t.dataset.fav)?"⭐ 已收藏":"已取消收藏");return}
   if(t.dataset.del){const m=LS.get("mine",[]);m.splice(+t.dataset.del,1);LS.set("mine",m);renderMine();renderVw();return}
   if(t.dataset.ix){IXK=t.dataset.ix;renderIx();return}
-  const bj=t.closest("[data-bj]");if(bj){const el=document.getElementById("bear-"+bj.dataset.bj);if(el)el.scrollIntoView({behavior:"smooth",block:"center"});return}
-  if(t.dataset.jump){e.preventDefault();evCat="全部";renderEv();go("ev");setTimeout(()=>document.getElementById("ev-"+t.dataset.jump).scrollIntoView({behavior:"smooth"}),30);return}
+  const bj=t.closest("[data-bj]");if(bj){NAV.push({p:"bear",y:window.scrollY});const el=document.getElementById("bear-"+bj.dataset.bj);if(el)el.scrollIntoView({behavior:"smooth",block:"center"});return}
+  if(t.dataset.jump){e.preventDefault();evCat="全部";renderEv();go("ev",false,true);setTimeout(()=>document.getElementById("ev-"+t.dataset.jump).scrollIntoView({behavior:"smooth"}),30);return}
 });
 $("#shareBtn").onclick=async()=>{try{await navigator.clipboard.writeText(location.href.split("#")[0]);toast("✅ 已複製連結")}catch(x){toast("複製失敗，請手動複製網址")}};
 /* 提示框 */
@@ -883,7 +885,7 @@ const T=[
  ["K","今晚的導覽到這裡。記住，這是幫你理解，不是投資建議。黎明前最黑，但黎明總會來。"]],
  sum:["用「價位＋訊號」分批，不猜底","目前訊號只亮一部分","台股看費半、外資、台積電"]}
 ];
-const TS={st:-1,i:0,typing:0,full:"",pend:null,choice:null};
+const TS={st:-1,i:0,typing:0,full:"",pend:null,choice:null,log:[],fast:0};
 function tourDone(){return LS.get("tour",{})}
 function renderTourMap(){
   const d=tourDone(),n=T.filter(x=>d[x.k]).length,nx=T.find(x=>!d[x.k])||T[0];
@@ -893,10 +895,10 @@ function renderTourMap(){
   <div class="card"><h2>導覽路線</h2>${T.map((x,i)=>`<div class="tw-stop ${d[x.k]?"done":""}" data-tgo="${i}"><span class="no">${i?i:"序"}</span><span class="ic">${x.ic}</span><span class="nm">${x.n}</span><span class="ck">${d[x.k]?"✓":"›"}</span></div>`).join("")}
   ${n?`<button class="btn" style="margin-top:10px" id="tourReset">重設進度</button>`:""}</div>`;
 }
-function tourStart(i){TS.st=i;TS.i=0;TS.choice=null;$("#tourBox").innerHTML=`<div class="tw-play"><div class="tw-top"><button class="btn" id="tourBack">← 路線</button><span>${T[i].ic} ${i?`第 ${i} 站`:"序章"}・${T[i].n}</span></div><svg viewBox="0 0 96 40" shape-rendering="crispEdges" class="tw-scene">${SCN[T[i].sc]()}</svg><div id="twCards"></div><div class="tw-dlg" id="twDlg"><div class="tw-av" id="twAv"></div><div class="tw-tx"><b id="twWho"></b><div id="twText"></div><span class="tw-more" id="twMore">▼</span></div></div><div id="twOpts"></div></div>`;tourStep();}
+function tourStart(i,keepLog){TS.st=i;TS.i=0;TS.choice=null;TS.pend=null;if(!keepLog)TS.log=[];clearInterval(TS.tm);$("#tourBox").innerHTML=`<div class="tw-play"><div class="tw-top"><button class="btn" id="tourBack">← 路線</button><span>${T[i].ic} ${i?`第 ${i} 站`:"序章"}・${T[i].n}</span></div><svg viewBox="0 0 96 40" shape-rendering="crispEdges" class="tw-scene">${SCN[T[i].sc]()}</svg><div id="twCards"></div><div class="tw-dlg" id="twDlg"><div class="tw-av" id="twAv"></div><div class="tw-tx"><b id="twWho"></b><div id="twText"></div><span class="tw-more" id="twMore">▼</span></div></div><div id="twOpts"></div></div>`;tourStep();}
 function tourType(who,text){
   $("#twAv").innerHTML=sprite(who,52);$("#twWho").textContent=WHO[who][0];
-  const el=$("#twText");TS.full=text;TS.typing=1;let n=0;$("#twMore").style.visibility="hidden";clearInterval(TS.tm);
+  const el=$("#twText");TS.full=text;clearInterval(TS.tm);if(TS.fast){el.textContent=text;TS.typing=0;$("#twMore").style.visibility="visible";return}TS.typing=1;let n=0;$("#twMore").style.visibility="hidden";
   TS.tm=setInterval(()=>{n+=2;el.textContent=text.slice(0,n);if(n>=text.length){clearInterval(TS.tm);TS.typing=0;$("#twMore").style.visibility="visible"}},28);
 }
 function tourStep(){
@@ -905,11 +907,19 @@ function tourStep(){
   if(TS.i>=S.L.length){tourEnd();return}
   const L=S.L[TS.i++];
   if(Array.isArray(L)){tourType(L[0],L[1]);return}
-  if(L.card){$("#twCards").innerHTML=`<div class="tw-card"><b>${L.card.t}</b>${L.card.l.map(x=>`<div>${esc(x)}</div>`).join("")}</div>`;$("#twCards").scrollIntoView({block:"nearest",behavior:"smooth"});tourStep();return}
+  if(L.card){$("#twCards").innerHTML=`<div class="tw-card"><b>${L.card.t}</b>${L.card.l.map(x=>`<div>${esc(x)}</div>`).join("")}</div>`;if(!TS.fast)$("#twCards").scrollIntoView({block:"nearest",behavior:"smooth"});tourStep();return}
   if(L.q){tourType(L.q[0],L.q[1]);TS.choice=L;return}
 }
-function tourTap(){
+function tourOpt(j){const L=TS.choice;TS.choice=null;const op=L.o[j];$("#twOpts").innerHTML=`<div class="tw-pick">你選了：${esc(op[0])}</div>`;tourType("K",op[1])}
+function tourBackStep(){
+  if(!TS.log.length){clearInterval(TS.tm);renderTourMap();window.scrollTo(0,0);toast("回到導覽路線");return}
+  const log=TS.log.slice(0,-1);TS.fast=1;tourStart(TS.st,1);TS.log=log;
+  for(const ev of log){if(ev==="t")tourTap(1);else{if(!document.querySelector("[data-topt]"))tourTap(1);tourOpt(ev)}}
+  TS.fast=0;
+}
+function tourTap(fromReplay){
   if(TS.typing){clearInterval(TS.tm);$("#twText").textContent=TS.full;TS.typing=0;$("#twMore").style.visibility="visible";return}
+  if(!fromReplay)TS.log.push("t");
   if(TS.choice){const L=TS.choice;$("#twMore").style.visibility="hidden";$("#twOpts").innerHTML=L.o.map((o,j)=>`<button class="tw-opt" data-topt="${j}">${esc(o[0])}</button>`).join("");return}
   tourStep();
 }
@@ -923,12 +933,28 @@ $("#tourBox").addEventListener("click",e=>{
   const t=e.target;
   if(t.closest("#tourBack")||t.closest("#tourBack2")){clearInterval(TS.tm);renderTourMap();window.scrollTo(0,0);return}
   if(t.id==="tourReset"){LS.set("tour",{});renderTourMap();return}
-  const g=t.closest("[data-tgo]");if(g){tourStart(+g.dataset.tgo);window.scrollTo(0,0);return}
-  const o=t.closest("[data-topt]");if(o){const L=TS.choice;TS.choice=null;const op=L.o[+o.dataset.topt];$("#twOpts").innerHTML=`<div class="tw-pick">你選了：${esc(op[0])}</div>`;tourType("K",op[1]);return}
+  const g=t.closest("[data-tgo]");if(g){NAV.push({p:"tour",y:0,map:1});tourStart(+g.dataset.tgo);window.scrollTo(0,0);return}
+  const o=t.closest("[data-topt]");if(o){TS.log.push(+o.dataset.topt);tourOpt(+o.dataset.topt);return}
   const lk=t.closest("[data-tlink]");if(lk){const [tab,ev]=lk.dataset.tlink.split("|");if(ev){evCat="全部";renderEv();go("ev");setTimeout(()=>document.getElementById("ev-"+ev).scrollIntoView({behavior:"smooth"}),40)}else{go(tab);window.scrollTo(0,0)}return}
   if(t.closest("#twDlg"))tourTap();
 });
 renderTourMap();
+
+
+/* 由左往右滑＝上一步 */
+(function(){let x0=0,y0=0,t0=0,ok=false;const ind=document.createElement("div");ind.id="swb";ind.textContent="‹";document.body.appendChild(ind);
+  const skip=el=>{for(let e=el;e&&e!==document.body;e=e.parentElement){if(e.matches&&e.matches("input,textarea,select"))return true;const cs=getComputedStyle(e);if(/(auto|scroll)/.test(cs.overflowX)&&e.scrollWidth>e.clientWidth+2&&e.scrollLeft>0)return true}return false};
+  document.addEventListener("touchstart",e=>{if(e.touches.length!==1){ok=false;return}const t=e.touches[0];x0=t.clientX;y0=t.clientY;t0=Date.now();ok=!skip(e.target)},{passive:true});
+  document.addEventListener("touchmove",e=>{if(!ok)return;const t=e.touches[0],dx=t.clientX-x0,dy=Math.abs(t.clientY-y0);if(dy>40&&dy>dx){ok=false;ind.style.opacity=0;return}if(dx>0){ind.style.opacity=Math.min(1,dx/90);ind.style.transform="translate("+Math.min(dx/2,50)+"px,-50%)"}},{passive:true});
+  document.addEventListener("touchend",e=>{ind.style.opacity=0;ind.style.transform="translate(0,-50%)";if(!ok)return;ok=false;const t=e.changedTouches[0],dx=t.clientX-x0,dy=Math.abs(t.clientY-y0);if(dx<80||dy>dx*0.5||Date.now()-t0>800)return;goBack()},{passive:true});
+})();
+function goBack(){
+  if(curTab()==="tour"&&document.querySelector("#tourBox .tw-play")){tourBackStep();return}
+  const s=NAV.pop();
+  if(!s){toast("已經是第一頁");return}
+  if(s.p==="tour"&&s.map&&curTab()==="tour"){renderTourMap();window.scrollTo(0,0);return}
+  go(s.p,true);if(s.p==="tour"&&s.map)renderTourMap();setTimeout(()=>window.scrollTo(0,s.y||0),20);
+}
 
 renderEv();renderVw();renderBear();
 </script>
