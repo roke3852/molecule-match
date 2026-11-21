@@ -158,6 +158,7 @@ main{padding:0 0 calc(80px + env(safe-area-inset-bottom))}
 .sph{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
 .sph img{width:76px;height:76px;object-fit:cover;border-radius:10px;border:1px solid var(--line);cursor:pointer}
 .sph .ld{width:76px;height:76px;border-radius:10px;background:#eee;color:#999;font-size:var(--fs-s);font-family:var(--ff-s);display:flex;align-items:center;justify-content:center}
+.fph{margin:8px 0 0 32px}
 .sph .add{height:76px;min-width:76px;padding:0 10px;border-radius:10px;border:1.5px dashed var(--line);background:#fff;font-size:var(--fs-s);font-family:var(--ff-s);font-weight:700;color:var(--sub)}
 .tip{margin-top:8px;background:#fff8e1;border-radius:10px;padding:7px 10px;font-size:var(--fs-s);font-family:var(--ff-s);color:#7a5a00}
 .acts{display:flex;gap:8px;margin-top:10px}
@@ -912,7 +913,7 @@ html.dark [style*="background:#fde2e2"]{background:#3a2422!important;color:#d9a5
   <section class="view" id="v-food">
     <div class="sec">
       <h3>🍜 依地點找美食</h3>
-      <div class="hint">依行程會經過的地方分區，每區上面標出你們哪天會在那裡。想吃的點一下打勾、可以加照片，按「網路照片」看店裡和餐點的樣子（開著家人共用時全家看得到）；點推薦餐點會放大日文給店員看。營業時間和公休日可能變動，出發前用「地圖」再確認。人均是大概值（台幣用「工具」頁的匯率換算）。</div>
+      <div class="hint">依行程會經過的地方分區，每區上面標出你們哪天會在那裡。想吃的點一下打勾、可以加照片（一次可選多張），按「網路照片」看店裡和餐點的樣子（開著家人共用時全家看得到）；點推薦餐點會放大日文給店員看。營業時間和公休日可能變動，出發前用「地圖」再確認。人均是大概值（台幣用「工具」頁的匯率換算）。</div>
       <div class="fd-f"><span>地區</span><div class="seg" id="foodSeg"></div></div>
       <div class="fd-f"><span>種類</span><div class="seg" id="foodType"></div></div>
       <div class="fd-f"><span>人均</span><div class="seg" id="foodPrice"></div></div>
@@ -1103,14 +1104,14 @@ html.dark [style*="background:#fde2e2"]{background:#3a2422!important;color:#d9a5
   <div class="acts" style="margin-top:12px"><button class="btn" id="exClose">關閉</button><button class="btn pri" id="exCopy">複製</button></div>
 </div></div>
 <div class="fam-ask" id="famAsk"><button class="x" id="famAskX" aria-label="略過">×</button><b>👋 你是哪一位？</b><div class="hint" style="margin:2px 0 0;font-size:var(--fs-s);font-family:var(--ff-s);color:var(--sub)">填個暱稱，家人就知道你加入共用了。</div><div class="addrow" style="margin-top:8px"><input id="famAskIn" maxlength="12" placeholder="例如：媽媽"><button id="famAskOk">確定</button></div></div>
-<input type="file" id="gFile" accept="image/*" style="display:none">
+<input type="file" id="gFile" accept="image/*" multiple style="display:none">
 <div class="imgov" id="imgov"><img id="imgovI" alt=""><div id="imgovT"></div><button id="imgovD"></button><span>點任意處關閉</span></div>
 <div class="swb" id="swb">‹</div>
 <div class="toast" id="toast"></div>
 
 <script>
 /* ---------- storage (safe) ---------- */
-const APPV='20261121m';
+const APPV='20261121n';
 /* 把 emoji 換成像素圖示 */
 (function(){
  const OK=new Set([0x25b6,0x1f302,0x1f321,0x1f324,0x1f326,0x1f327,0x1f328,0x1f329,0x1f32b,0x1f341,0x1f35b,0x1f35c,0x1f361,0x1f370,0x1f37d,0x1f381,0x1f384,0x1f389,0x1f38c,0x1f392,0x1f3ab,0x1f3c6,0x1f3e0,0x1f3e8,0x1f3ea,0x1f3ec,0x1f41f,0x1f44b,0x1f44d,0x1f455,0x1f466,0x1f467,0x1f468,0x1f469,0x1f46a,0x1f476,0x1f48a,0x1f4a1,0x1f4a7,0x1f4ac,0x1f4b3,0x1f4b4,0x1f4c5,0x1f4cb,0x1f4cc,0x1f4cd,0x1f4dd,0x1f4e3,0x1f4e4,0x1f4f1,0x1f4f7,0x1f4f8,0x1f50d,0x1f512,0x1f516,0x1f517,0x1f552,0x1f5a5,0x1f5bc,0x1f5d1,0x1f5d3,0x1f5e3,0x1f5fa,0x1f60c,0x1f683,0x1f684,0x1f687,0x1f68f,0x1f690,0x1f695,0x1f6b2,0x1f6b6,0x1f6c2,0x1f6c3,0x1f6cd,0x1f6ec,0x1f7e2,0x1f969,0x1f9c5,0x1f9e0,0x1f9e3,0x1f9e5,0x1f9ed,0x1f9ee,0x1f9f3,0x1f9fe,0x23f1,0x23f8,0x2600,0x2601,0x2614,0x2615,0x26a0,0x26c5,0x26c8,0x26f4,0x26f8,0x2705,0x270f,0x2728,0x2744,0x274c,0x2b50]);
@@ -2092,7 +2093,18 @@ $('#gifts').addEventListener('click',e=>{
  const zm=e.target.closest('[data-zoom]');if(zm){const id=zm.dataset.zoom,g=GIFTS.find(x=>x.id===id);$('#imgovI').src=zm.src;$('#imgovT').textContent=g.n;$('#imgovD').dataset.id=id;$('#imgovD').textContent='移除這張照片';delete $('#imgovD').dataset.arm;$('#imgov').classList.remove('ro');$('#imgov').classList.add('on');return}
  const sh=e.target.closest('[data-show]');if(sh){const g=GIFTS.find(x=>x.id===sh.dataset.show);big(g.jp+'はありますか？','請問有賣「'+g.n+'」嗎？');$('#ovJp').style.whiteSpace='normal';return}
  const r=e.target.closest('.cafe-h');if(!r)return;const id=r.parentNode.dataset.id,want=S.get('gifts',{});want[id]=!want[id];if(!want[id])delete want[id];S.set('gifts',want);drawGifts()});
-$('#gFile').onchange=e=>{const f=e.target.files[0],id=gPhotoFor;e.target.value='';if(!f||!id)return;photoFrom(f,id.startsWith('s_')?720:480,id.startsWith('s_')?.75:.8).then(u=>setGiftPhoto(id,u)).catch(()=>toast('⚠️ 這張照片讀不出來，換一張試試'))};
+function foodPhotoKeys(id){const g=S.get('gphoto',{}),b='f_'+id;return Object.keys(g).filter(k=>(k===b||k.startsWith(b+'~'))&&g[k]&&g[k].h).sort((a,c)=>(+a.split('~')[1]||0)-(+c.split('~')[1]||0))}
+function foodPhotoBox(id,ph){const ks=foodPhotoKeys(id);if(!ks.length)return '';return `<div class="sph fph">${ks.map(k=>ph[k].u?`<img src="${ph[k].u}" alt="照片" data-zoom="${k}">`:`<span class="ld">載入中…</span>`).join('')}</div>`}
+function photoTargets(id,n){
+ if(id.startsWith('s_')){const m=id.match(/^(s_.*_)(\d+)$/);if(!m)return [id];const room=Math.max(1,SPMAX-stopPhotoKeys(m[1].slice(2,-1)).length);let k=+m[2];return Array.from({length:Math.min(n,room)},()=>m[1]+(k++))}
+ if(id.startsWith('f_')){const ks=foodPhotoKeys(id.slice(2)),room=Math.max(1,SPMAX-ks.length);let mx=ks.reduce((a,k)=>Math.max(a,+k.split('~')[1]||0),ks.length?0:-1);return Array.from({length:Math.min(n,room)},()=>{mx++;return mx===0?id:id+'~'+mx})}
+ return [id]}
+function setPhotos(list){if(!list.length)return;if(list.length===1)return setGiftPhoto(list[0][0],list[0][1]);const g=S.get('gphoto',{});list.forEach(([id,u])=>g[id]={h:phash(u),u});S.set('gphoto',g);
+ const chk=S.get('gphoto',{}),ok=list.filter(([id])=>chk[id]&&chk[id].u).length;drawGifts();if(typeof drawFoods==='function')drawFoods();if(typeof renderDay==='function')renderDay(true);if(typeof simRefresh==='function')simRefresh();
+ toast(ok<list.length?`⚠️ 手機儲存空間不足，只存了 ${ok} 張`:`📷 已加上 ${ok} 張照片`)}
+$('#gFile').onchange=e=>{const fs=[...e.target.files],id=gPhotoFor;e.target.value='';if(!fs.length||!id)return;
+ const ts=photoTargets(id,fs.length),big=id.startsWith('s_');if(fs.length>ts.length)toast(`最多 ${SPMAX} 張，只加前 ${ts.length} 張`);
+ Promise.all(ts.map((t,i)=>photoFrom(fs[i],big?720:480,big?.75:.8).then(u=>[t,u]).catch(()=>null))).then(r=>{const ok=r.filter(Boolean);if(!ok.length){toast('⚠️ 照片讀不出來，換一張試試');return}setPhotos(ok)})};
 $('#imgov').addEventListener('click',e=>{if(e.target.id==='imgovD'){const b=e.target;if(b.dataset.arm){setGiftPhoto(b.dataset.id,null);$('#imgov').classList.remove('on')}else{b.dataset.arm=1;b.textContent='再按一次確定移除'}return}$('#imgov').classList.remove('on')});
 reloaders.push(drawGifts);reloaders.push(drawCafes);
 drawGifts();
@@ -2218,8 +2230,8 @@ function drawFoods(){
    ${fdHours(f)}
    ${f.m?`<div class="fd-m"><span>🍽️ 推薦：</span>${f.m.map((d,j)=>`<button data-fdish="${f.id}:${j}">${esc(d.n)}${d.p?`<i>${d.p}</i>`:''}</button>`).join('')}</div>`:''}
    ${f.tip?`<div class="gift-k">💡 ${esc(f.tip)}</div>`:''}
-   ${ph['f_'+f.id]?(ph['f_'+f.id].u?`<img class="gimg" src="${ph['f_'+f.id].u}" alt="" data-zoom="f_${f.id}">`:`<div class="gimg wait">照片下載中…</div>`):''}
-   <div class="cafe-b"><a class="btn" href="${mapUrl(f.jp)}" target="_blank" rel="noopener">📍 地圖</a><button class="btn ghost" data-fshow="${f.id}">🔍 給店員看</button><a class="btn ghost" href="https://www.google.com/search?tbm=isch&q=${encodeURIComponent(f.jp+' 福岡')}" target="_blank" rel="noopener">🖼️ 網路照片</a><button class="btn ghost" data-photo="f_${f.id}">📷 ${ph['f_'+f.id]?'換照片':'加照片'}</button></div>
+   ${foodPhotoBox(f.id,ph)}
+   <div class="cafe-b"><a class="btn" href="${mapUrl(f.jp)}" target="_blank" rel="noopener">📍 地圖</a><button class="btn ghost" data-fshow="${f.id}">🔍 給店員看</button><a class="btn ghost" href="https://www.google.com/search?tbm=isch&q=${encodeURIComponent(f.jp+' 福岡')}" target="_blank" rel="noopener">🖼️ 網路照片</a>${foodPhotoKeys(f.id).length<SPMAX?`<button class="btn ghost" data-photo="f_${f.id}">📷 ${foodPhotoKeys(f.id).length?'再加照片':'加照片'}</button>`:''}</div>
   </div>`).join('');
  });
  $('#foods').innerHTML=h||`<div class="xempty">${fWant?'這個條件下還沒有勾選的店。':'這個條件下沒有店。'}<br><button class="btn ghost" id="fdReset" style="margin-top:8px">清除篩選</button></div>`;
@@ -2234,7 +2246,7 @@ $('#foods').addEventListener('click',e=>{if(e.target.id==='fdReset'){fArea='all'
 $('#foods').addEventListener('click',e=>{
  const dd=e.target.closest('[data-fdish]');if(dd){const [id,j]=dd.dataset.fdish.split(':'),f=FOODS.find(x=>x.id===id),d=f.m[+j];big(d.jp+'をください','請給我「'+d.n+'」');$('#ovJp').style.whiteSpace='normal';return}
  const pb=e.target.closest('[data-photo]');if(pb){gPhotoFor=pb.dataset.photo;$('#gFile').click();return}
- const zm=e.target.closest('[data-zoom]');if(zm){const id=zm.dataset.zoom,f=FOODS.find(x=>'f_'+x.id===id);$('#imgovI').src=zm.src;$('#imgovT').textContent=f?f.n:'';$('#imgovD').dataset.id=id;$('#imgovD').textContent='移除這張照片';delete $('#imgovD').dataset.arm;$('#imgov').classList.remove('ro');$('#imgov').classList.add('on');return}
+ const zm=e.target.closest('[data-zoom]');if(zm){const id=zm.dataset.zoom,f=FOODS.find(x=>'f_'+x.id===id.split('~')[0]);$('#imgovI').src=zm.src;$('#imgovT').textContent=f?f.n:'';$('#imgovD').dataset.id=id;$('#imgovD').textContent='移除這張照片';delete $('#imgovD').dataset.arm;$('#imgov').classList.remove('ro');$('#imgov').classList.add('on');return}
  const sh=e.target.closest('[data-fshow]');if(sh){const f=FOODS.find(x=>x.id===sh.dataset.fshow);big(f.jp+'に行きたいです','我想去「'+f.n+'」');$('#ovJp').style.whiteSpace='normal';return}
  const r=e.target.closest('.cafe-h');if(!r)return;const id=r.parentNode.dataset.id,w=S.get('foods',{});w[id]=!w[id];if(!w[id])delete w[id];S.set('foods',w);drawFoods()});
 document.addEventListener('click',e=>{const a=e.target.closest('[data-farea]');if(!a)return;fArea=a.dataset.farea;fType='all';fWant=false;fPrice='all'});
