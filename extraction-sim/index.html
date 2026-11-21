@@ -225,6 +225,10 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
 .handbrew small{font-weight:400;font-size:12px;color:var(--muted)}
 .barscene{background:#2a1c14;border:1px solid var(--line);border-radius:12px;padding:6px 6px 0;line-height:0;overflow:hidden}
 .barscene svg{width:100%;height:auto;display:block;image-rendering:pixelated}
+.icseg{display:grid!important;grid-template-columns:repeat(auto-fit,minmax(90px,1fr));gap:8px;border:0!important;background:transparent!important;padding:0!important;overflow:visible!important}
+.icseg button{display:flex!important;flex-direction:column;align-items:center;gap:4px;border:1px solid var(--line)!important;border-radius:12px!important;background:var(--bg)!important;color:var(--ink)!important;padding:8px 4px!important;font-size:12px!important;line-height:1.25;min-height:0}
+.icseg button[aria-pressed=true]{border-color:var(--gold)!important;box-shadow:0 0 0 1px var(--gold) inset;color:var(--gold)!important}
+.icseg svg{width:48px;height:48px;image-rendering:pixelated;background:#2a1c14;border-radius:8px}
 .goldcup{margin-top:12px;border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:var(--bg)}
 .goldcup header{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
 .goldcup h3{margin:0;font-size:15px}
@@ -1156,6 +1160,7 @@ window.BGM=(()=>{
     <div class="param wide"><span class="label">沖煮方式</span><div class="seg" role="group" aria-label="沖煮方式"><button id="pPulse" aria-pressed="true">分段注水</button><button id="pCont" aria-pressed="false">一刀流</button><button id="pSwitch" aria-pressed="false">Switch／GINA</button><button id="pImm" aria-pressed="false">浸泡</button></div></div>
     <div class="param wide" id="dripParam"><span class="label">濾杯</span><div class="seg wrapseg pxseg" role="group" aria-label="濾杯" id="segDrip"><button data-v="cone" aria-pressed="true">一般錐形</button><button data-v="v60" aria-pressed="false">V60</button><button data-v="orea" aria-pressed="false">OREA</button><button data-v="origami_c" aria-pressed="false">Origami 錐形紙</button><button data-v="origami_w" aria-pressed="false">Origami 波浪紙</button><button data-v="kalita" aria-pressed="false">Kalita Wave</button><button data-v="solo" aria-pressed="false">Solo</button></div><span class="label" id="dripDesc"></span></div>
     <div class="param plan" id="planParam">
+      <div class="barscene" id="planVis" aria-hidden="true" style="margin-bottom:8px"></div>
       <div class="row"><span class="label" id="planTitle">分段注水計畫</span><output id="planOut" class="label"></output></div>
       <div class="planrow">
         <div class="stepper" role="group" aria-label="注水次數"><button id="planMinus" aria-label="減少一注">−</button><span id="planN" class="mono"></span><button id="planPlus" aria-label="增加一注">+</button></div>
@@ -1166,9 +1171,10 @@ window.BGM=(()=>{
     <div class="param" id="swModeParam" hidden><span class="label">Switch 閥門順序</span><div class="seg" role="group" aria-label="閥門順序"><button id="swCF" aria-pressed="true">先關後開</button><button id="swOF" aria-pressed="false">先開後關</button></div></div>
     <div class="param" id="swCloseParam" hidden><div class="row"><label for="swClose" class="label">Switch 關閥時間</label><output id="swCloseOut"></output></div><input id="swClose" type="range" min="0" max="180" step="5" value="30"></div>
     <div class="param" id="swParam" hidden><div class="row"><label for="swOpen" class="label">Switch 開閥時間</label><output id="swOpenOut"></output></div><input id="swOpen" type="range" min="10" max="300" step="5" value="120"></div>
-    <div class="param" id="stirPOParam"><span class="label">攪拌</span><div class="seg" role="group" aria-label="手沖攪拌" id="segPO"><button data-v="none" aria-pressed="false">不攪拌</button><button data-v="bloom" aria-pressed="true">悶蒸時攪</button><button data-v="swirl" aria-pressed="false">每注後旋轉</button></div></div>
-    <div class="param" id="filterParam"><span class="label">濾材</span><div class="seg" role="group" aria-label="濾材" id="segFilter"><button data-v="paper" aria-pressed="true">濾紙</button><button data-v="metal" aria-pressed="false">金屬濾網</button></div><small class="label" id="filterDesc"></small></div>
-    <div class="param" id="prepParam"><span class="label">注水前整粉</span><div class="seg" role="group" aria-label="注水前整粉" id="segPrep"><button data-v="wdt" aria-pressed="false">佈粉針</button><button data-v="dig" aria-pressed="false">中心挖洞</button></div><small class="label" id="prepDesc"></small></div>
+    <div class="param" id="stirPOParam"><span class="label">攪拌</span><div class="seg" role="group" aria-label="手沖攪拌" id="segPO" data-px="1"><button data-v="none" aria-pressed="false">不攪拌</button><button data-v="bloom" aria-pressed="true">悶蒸時攪</button><button data-v="swirl" aria-pressed="false">每注後旋轉</button></div></div>
+    <div class="param" id="filterParam"><span class="label">濾材</span><div class="seg" role="group" aria-label="濾材" id="segFilter" data-px="1"><button data-v="paper" aria-pressed="true">濾紙</button><button data-v="metal" aria-pressed="false">金屬濾網</button></div><small class="label" id="filterDesc"></small></div>
+    <div class="param" id="prepParam"><span class="label">注水前整粉</span><div class="seg" role="group" aria-label="注水前整粉" id="segPrep" data-px="1"><button data-v="wdt" aria-pressed="false">佈粉針</button><button data-v="dig" aria-pressed="false">中心挖洞</button></div><small class="label" id="prepDesc"></small></div>
+    <div class="param wide barscene" id="fixVis" aria-hidden="true"></div>
     <div class="param" id="cutParam"><div class="row"><label for="cutoff" class="label">提早斷水（移杯／關閥）</label><output id="cutoffOut"></output></div><input id="cutoff" type="range" min="0" max="300" step="5" value="0"></div>
     <div class="param" id="bypassParam"><div class="row"><label for="bypassMl" class="label">補水（bypass）</label><output id="bypassOut"></output></div><input id="bypassMl" type="range" min="0" max="150" step="5" value="0"></div>
     <div class="param" id="stirIMParam" hidden><span class="label">攪拌</span><div class="seg" role="group" aria-label="浸泡攪拌" id="segIM"><button data-v="none" aria-pressed="true">不攪拌</button><button data-v="once" aria-pressed="false">開頭一次</button><button data-v="min" aria-pressed="false">每分鐘</button></div></div>
@@ -2336,6 +2342,55 @@ function grindVis(){const el=$('grindVis');if(!el)return;const g=P.grind,b=curBe
     h+=TX(cx,74,n,on?'#e2bd6a':'#b59c7d',7)+TX(cx,83,u,'#7a6a58',5.5);});
   const pos=142+Math.max(0,Math.min(1,(g-300)/800))*128-1;h+=R(128,90,156,2,'#4a3a2c')+R(Math.round(Math.min(282,Math.max(128,pos))),87,3,8,'#e2bd6a')+TX(206,103,g+' μm'+(gr?'・'+gr.name.split(' ')[0]:''),'#f3e9d6',7);
   el.innerHTML='<svg viewBox="0 0 300 110" shape-rendering="crispEdges">'+h+'</svg>';}
+// ---------- 注水計畫時間軸 ----------
+const tCol=T=>{const h=Math.max(0,Math.min(1,(T-75)/25));return 'rgb('+Math.round(70+170*h)+','+Math.round(140-40*h)+','+Math.round(220-170*h)+')';};
+function planVis(){const el=$('planVis');if(!el||$('planParam').hidden)return;const sw=P.pattern==='switch';
+  const sg=planSegments(P.plan,P.planT,P.planD),end=Math.max(60,sg[sg.length-1].e+20),W=Math.round(P.dose*P.ratio);
+  const L=26,Rr=292,X=t=>L+(t/end)*(Rr-L),top=14,base=92,mx=Math.max(...sg.map(g=>g.rate),6);
+  const R=(x,y,w,h,c)=>'<rect x="'+x.toFixed(1)+'" y="'+y.toFixed(1)+'" width="'+Math.max(1,w).toFixed(1)+'" height="'+Math.max(0,h).toFixed(1)+'" fill="'+c+'"/>',TX=(x,y,t,c,sz,a)=>'<text x="'+x.toFixed(1)+'" y="'+y+'" font-size="'+(sz||6.5)+'" font-family="monospace" font-weight="700" fill="'+(c||'#f3e9d6')+'" text-anchor="'+(a||'middle')+'">'+t+'</text>';
+  let g=R(0,0,300,110,'#2a1c14')+R(L,base,Rr-L,1,'#8a5a34');
+  for(let t=0;t<=end;t+=30)g+=R(X(t),base,1,3,'#8a5a34')+TX(X(t),102,fmtT(t),'#7a6a58',5.5);
+  // 累計水量的階梯線
+  let pts='M'+X(0)+' '+base,acc=0;sg.forEach((q,i)=>{const y0=base-acc/W*(base-top);acc+=P.plan[i];const y1=base-acc/W*(base-top);pts+=' L'+X(q.s).toFixed(1)+' '+y0.toFixed(1)+' L'+X(q.e).toFixed(1)+' '+y1.toFixed(1);});
+  pts+=' L'+X(end).toFixed(1)+' '+(base-acc/W*(base-top)).toFixed(1);
+  if(sw&&P.valveWins)P.valveWins.forEach(w=>{g+=R(X(w[0]),top-4,X(Math.min(end,w[1]))-X(w[0]),base-top+4,'rgba(95,191,122,.12)');});
+  g+='<path d="'+pts+'" fill="none" stroke="#e2bd6a" stroke-width="1" stroke-dasharray="2 1.5" opacity=".55"/>'+TX(Rr,top-4,'累計 '+acc+' ml','#e2bd6a',6,'end');
+  sg.forEach((q,i)=>{const T=P.planTemp?P.planTemp[i]:P.temp,h=12+q.rate/mx*36,x=X(q.s),w=Math.max(4,X(q.e)-x),c=tCol(T);
+    // 水柱方塊：高度＝流速、寬度＝注水秒數、顏色＝水溫
+    g+=R(x,base-h,w,h,c)+R(x,base-h,w,2,'rgba(255,255,255,.35)');
+    for(let k=0;k<Math.floor(w/5);k++)g+=R(x+2+k*5,base-h+5+(k%2)*4,2,2,'rgba(255,255,255,.25)');
+    g+=TX(x+w/2,base-h-3,P.plan[i]+'ml',c,6)+TX(x+w/2,base-h-10,i?'#'+i:'悶蒸','#b59c7d',5.5);
+    if(i<sg.length-1){const gap=Math.round(sg[i+1].s-q.e);if(gap>0&&X(sg[i+1].s)-X(q.e)>14)g+=TX((X(q.e)+X(sg[i+1].s))/2,base-3,'停'+gap+'s','#7a6a58',5);}});
+  // 小水壺
+  g+=R(4,40,14,12,'#2f3338')+R(6,36,10,4,'#8a95a1')+R(18,42,4,2,'#2f3338')+R(21,38,2,5,'#2f3338')+R(1,43,3,6,'#2f3338');
+  g+=TX(L,8,'注水時間軸：高＝流速　寬＝秒數　色＝水溫','#b59c7d',6,'start');
+  el.innerHTML='<svg viewBox="0 0 300 110" shape-rendering="crispEdges">'+g+'</svg>';}
+// ---------- 攪拌、濾材、整粉的像素圖示 ----------
+const PXI={
+ none:'<rect x="3" y="9" width="10" height="4" fill="#6a4022"/><rect x="3" y="8" width="10" height="1" fill="#8a5a2e"/><rect x="2" y="13" width="12" height="1" fill="#cfe6ee"/><rect x="2" y="5" width="1" height="8" fill="#cfe6ee"/><rect x="13" y="5" width="1" height="8" fill="#cfe6ee"/>',
+ bloom:'<rect x="3" y="8" width="10" height="5" fill="#6a4022"/><rect x="4" y="7" width="3" height="1" fill="#b07a42"/><rect x="9" y="6" width="3" height="2" fill="#b07a42"/><rect x="2" y="13" width="12" height="1" fill="#cfe6ee"/><rect x="2" y="5" width="1" height="8" fill="#cfe6ee"/><rect x="13" y="5" width="1" height="8" fill="#cfe6ee"/><rect x="8" y="1" width="1" height="9" fill="#c9a66b"/><rect x="7" y="9" width="3" height="2" fill="#c9a66b"/>',
+ swirl:'<rect x="3" y="8" width="10" height="5" fill="#6a4022"/><rect x="2" y="13" width="12" height="1" fill="#cfe6ee"/><rect x="2" y="5" width="1" height="8" fill="#cfe6ee"/><rect x="13" y="5" width="1" height="8" fill="#cfe6ee"/><rect x="5" y="2" width="6" height="1" fill="#e2bd6a"/><rect x="11" y="3" width="1" height="2" fill="#e2bd6a"/><rect x="4" y="3" width="1" height="2" fill="#e2bd6a"/><rect x="5" y="5" width="2" height="1" fill="#e2bd6a"/><rect x="12" y="2" width="1" height="1" fill="#e2bd6a"/>',
+ paper:'<rect x="2" y="3" width="12" height="1" fill="#f1ece0"/><rect x="3" y="4" width="10" height="2" fill="#f1ece0"/><rect x="4" y="6" width="8" height="2" fill="#f1ece0"/><rect x="5" y="8" width="6" height="2" fill="#f1ece0"/><rect x="6" y="10" width="4" height="2" fill="#f1ece0"/><rect x="7" y="12" width="2" height="1" fill="#f1ece0"/><rect x="5" y="5" width="1" height="1" fill="#c8bfae"/><rect x="9" y="7" width="1" height="1" fill="#c8bfae"/>',
+ metal:'<rect x="2" y="3" width="12" height="1" fill="#cfd6dd"/><rect x="3" y="4" width="10" height="2" fill="#8a95a1"/><rect x="4" y="6" width="8" height="2" fill="#8a95a1"/><rect x="5" y="8" width="6" height="2" fill="#8a95a1"/><rect x="6" y="10" width="4" height="2" fill="#8a95a1"/><rect x="7" y="12" width="2" height="1" fill="#8a95a1"/><rect x="4" y="4" width="1" height="1" fill="#2f3338"/><rect x="6" y="4" width="1" height="1" fill="#2f3338"/><rect x="8" y="4" width="1" height="1" fill="#2f3338"/><rect x="10" y="4" width="1" height="1" fill="#2f3338"/><rect x="5" y="6" width="1" height="1" fill="#2f3338"/><rect x="7" y="6" width="1" height="1" fill="#2f3338"/><rect x="9" y="6" width="1" height="1" fill="#2f3338"/><rect x="6" y="8" width="1" height="1" fill="#2f3338"/><rect x="8" y="8" width="1" height="1" fill="#2f3338"/><rect x="7" y="10" width="1" height="1" fill="#2f3338"/><rect x="11" y="11" width="3" height="2" fill="#e2bd6a"/>',
+ wdt:'<rect x="3" y="10" width="10" height="4" fill="#6a4022"/><rect x="2" y="14" width="12" height="1" fill="#cfe6ee"/><rect x="6" y="1" width="5" height="3" fill="#8a5a34"/><rect x="6" y="4" width="1" height="8" fill="#cfd6dd"/><rect x="8" y="4" width="1" height="8" fill="#cfd6dd"/><rect x="10" y="4" width="1" height="8" fill="#cfd6dd"/>',
+ dig:'<rect x="3" y="9" width="10" height="5" fill="#6a4022"/><rect x="7" y="9" width="2" height="3" fill="#2a1c14"/><rect x="6" y="9" width="1" height="1" fill="#2a1c14"/><rect x="9" y="9" width="1" height="1" fill="#2a1c14"/><rect x="2" y="14" width="12" height="1" fill="#cfe6ee"/><rect x="11" y="2" width="1" height="6" fill="#c9a66b"/><rect x="10" y="7" width="3" height="1" fill="#c9a66b"/>'};
+function decorIcons(){['segPO','segFilter','segPrep'].forEach(id=>{const sg=$(id);if(!sg||sg.dataset.done)return;sg.dataset.done=1;sg.classList.add('icseg');
+  sg.querySelectorAll('button').forEach(b=>{const ic=PXI[b.dataset.v];if(ic)b.innerHTML='<svg viewBox="0 0 16 16" shape-rendering="crispEdges">'+ic+'</svg><span>'+hx(b.textContent)+'</span>';});});}
+// ---------- 斷水與補水的小場景 ----------
+function fixVis(){const el=$('fixVis');if(!el)return;if($('cutParam').hidden){el.hidden=true;return;}el.hidden=false;
+  const R=(x,y,w,h,c)=>'<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="'+c+'"/>',TX=(x,y,t,c,sz)=>'<text x="'+x+'" y="'+y+'" font-size="'+(sz||7)+'" font-family="monospace" font-weight="700" fill="'+(c||'#f3e9d6')+'" text-anchor="middle">'+t+'</text>';
+  const cut=P.cutoff>0,by=P.bypassMl>0;let g=R(0,92,300,18,'#3a2618')+R(0,90,300,3,'#8a5a34');
+  // 左：濾杯與杯子（斷水時杯子移開）
+  g+=R(38,22,44,4,'#c9a66b')+R(42,26,36,6,'#c9a66b')+R(48,32,24,6,'#c9a66b')+R(56,38,8,6,'#c9a66b')+R(44,24,32,6,'#6a4022');
+  const cx=cut?96:46;g+=R(cx,58,28,32,'rgba(220,235,240,.15)')+R(cx,60,2,30,'#cfe6ee')+R(cx+26,60,2,30,'#cfe6ee')+R(cx,88,28,2,'#cfe6ee')+R(cx+2,70,24,18,'#5a2f14');
+  if(cut){g+=R(58,46,2,3,'#5a2f14')+R(58,52,2,3,'#5a2f14')+R(50,86,20,4,'#3a2618')+TX(60,14,'移杯 '+fmtT(P.cutoff),'#e2bd6a',8)+TX(110,54,'→','#e2bd6a',10);}
+  else g+=R(59,46,2,12,'#5a2f14')+TX(60,14,'滴完為止','#b59c7d',8);
+  // 右：補熱水
+  g+=R(186,58,36,32,'rgba(220,235,240,.15)')+R(186,60,2,30,'#cfe6ee')+R(220,60,2,30,'#cfe6ee')+R(186,88,36,2,'#cfe6ee');
+  const lv=Math.min(26,14+P.bypassMl/150*12);g+=R(188,88-lv,32,lv,by?'#7a4a28':'#5a2f14');
+  if(by){g+=R(236,30,26,18,'#2f3338')+R(240,26,18,4,'#8a95a1')+R(226,36,10,3,'#2f3338')+R(222,38,4,3,'#2f3338')+R(212,42,2,20,'rgba(160,210,240,.8)')+TX(240,20,'+'+P.bypassMl+' ml','#7ec8ff',8);}
+  else g+=TX(204,20,'不補水','#b59c7d',8);
+  el.innerHTML='<svg viewBox="0 0 300 110" shape-rendering="crispEdges">'+g+'</svg>';}
 // ---------- 親手沖（借用咖啡店的沖煮動畫） ----------
 $('handBrew').onclick=()=>{if(!window.labBrewAnim){return;}
   const im=P.pattern==='immersion',sw=P.pattern==='switch',br=im?'press':sw?'switch':P.dripper;
@@ -2423,7 +2478,7 @@ function showChamp(c){const b=BEANS.find(x=>x.id===c.bean),box=$('champInfo');
   box.hidden=false;}
 function run(){
   if(!P.plan)P.plan=evenPlan(3);
-  labels(); presetTimes(); renderPlan();
+  labels(); presetTimes(); renderPlan(); try{planVis();decorIcons();fixVis();}catch(e){}
   simPO=simulate('po',pFor('po')); simIM=simulate('im',pFor('im')); renderScore();
   tMax=isIM()?simIM.end:simPO.end;
   rememberParams();
