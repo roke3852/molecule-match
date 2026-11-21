@@ -199,6 +199,7 @@ input[type=range]{width:100%}
 .hn{display:flex;gap:10px;padding-top:8px;margin-top:8px;border-top:1px solid var(--line)}.hn>b{flex:0 0 auto;font-size:13px;width:34px;padding-top:3px}
 .arow{display:flex;align-items:flex-start;gap:8px;margin:6px 0 10px}.arow>span{flex:0 0 36px;font-size:14px;color:var(--muted);padding-top:9px}.arc{flex:1;min-width:0}.arc .arn{width:100%;min-width:0;margin-top:5px;padding:7px 9px;border:1px solid var(--line);border-radius:8px;background:var(--bg);font-size:14px;color:var(--ink)}
 .aromd .heat{margin-bottom:2px}.aromd .hc{width:46px}
+.cleanrow{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;padding:9px 11px;border:1px solid var(--line);border-radius:10px;margin:6px 0;font-size:13.5px}.cleanrow.over{border-color:var(--warn);background:color-mix(in srgb,var(--warn) 10%,transparent)}.cr-t{flex:1 1 100%}.cleanrow .dirt{flex:1;min-width:120px;margin:0}
 </style>
 </head>
 <body>
@@ -1271,7 +1272,7 @@ function recipeCard(r,c,ai){
   if(!r)return'';const g=c.g;
   const rows=[['刻度',g?`${fmtG(g,r.grind)}${g.base==null?'（先到器材設定填常用刻度）':''}`:'—'],['水溫',r.temp+'°C'],['粉水',`${r.dose}g : ${r.water}g（1:${r1(r.water/r.dose)}）`],['手法',r.method],['用水',c.w?c.w.name:'—'],['目標時間',`${fmtTime(r.tl)}–${fmtTime(r.th)}`],['目標',`TDS 1.30–1.42 · 萃取率 19.5–21.5%`]];
   return `<div class="card"><div class="between"><div class="title">${esc(ai?'Claude 的建議':r.title)}</div>${r.best?`<div class="score">${rk(r.best)}<small>最佳</small></div>`:''}</div>
-    ${r.change?`<div class="pill ${r.change.includes('重現')?'good':'warn'}" style="white-space:normal">${esc(r.change)}</div>`:''}${c.g&&grinderDirt(c.g).pct>=100?`<div class="pill warn" style="white-space:normal">🧹 ${esc(c.g.name)} 已經用了 ${grinderDirt(c.g).n} 次，建議先拆開清洗，殘粉會讓風味變悶、刻度也會跑掉</div>`:''}
+    ${r.change?`<div class="pill ${r.change.includes('重現')?'good':'warn'}" style="white-space:normal">${esc(r.change)}</div>`:''}${c.g?cleanRow(c.g):''}
     <dl class="kv mono">${rows.map(x=>`<dt>${x[0]}</dt><dd>${esc(x[1])}</dd>`).join('')}</dl>
     <div class="sub mono" style="white-space:pre-line">${esc(r.pours)}</div>
     <details><summary class="sub">為什麼這樣設定</summary><ul class="sub" style="margin:6px 0;padding-left:18px">${r.why.map(w=>`<li>${esc(w)}</li>`).join('')}</ul></details>
@@ -1570,11 +1571,13 @@ function grinderDirt(g){
   return{n:used.length,load:Math.round(load*10)/10,limit,pct,c,t,why,left:Math.max(0,Math.ceil(limit-load))}}
 function dirtBar(g,small){const d=grinderDirt(g),w=Math.min(100,d.pct);
   return `<div class="dirt ${small?'sm':''}"><div class="dirt-bar"><i style="width:${w}%;background:var(--${d.c==='good'?'good':d.c==='cold'?'warn':'accent'})"></i></div><div class="dirt-t mono">${small?`${d.n} 次・${d.pct}%`:`${d.t}・用了 ${d.n} 次（${d.pct}%）`}</div></div>`}
+function cleanRow(g){const d=grinderDirt(g),over=d.pct>=100;
+  return `<div class="cleanrow ${over?'over':''}"><div class="cr-t">🧹 <b>${esc(g.name)}</b>　${over?`已用 ${d.n} 次，該拆洗了`:`拆洗後用了 ${d.n} 次・${d.pct}%`}</div>${dirtBar(g,true)}<button type="button" class="btn sm" data-act="cleaned" data-id="${esc(g.id)}">已清潔，歸零</button></div>`}
 function dirtPanel(g){const d=grinderDirt(g);
   return `<fieldset><legend>清潔狀態</legend>${dirtBar(g)}
     <div class="sub">${g.cleanAt?`上次拆洗：${iso(g.cleanAt)}`:'還沒記錄過拆洗，從第一杯開始算'}${d.pct<100?`・大約再 ${d.left} 次要拆洗`:''}</div>
     <ul class="sub" style="margin:6px 0;padding-left:18px">${d.why.map(w=>`<li>${esc(w)}</li>`).join('')}</ul>
-    <div class="row"><button type="button" class="btn sm pri" data-act="cleaned" data-id="${esc(g.id)}">今天拆開洗好了（歸零）</button></div></fieldset>`}
+    <div class="row"><button type="button" class="btn sm" data-act="cleaned" data-l="今天拆開洗好了（歸零）" data-id="${esc(g.id)}">今天拆開洗好了（歸零）</button></div></fieldset>`}
 async function aiRec(){
   const c=curSel(),r=suggest(c);if(!sampleFn||!r)return;S.aiMsg='Claude 思考中…';render();
   const hist=r.hist.slice(-8).map(x=>({日期:iso(x.ts),養豆天:x.restDay,刻度:x.grind,水溫:x.temp,粉:x.dose,水:x.water,注水段:x.pours,時間:fmtTime(x.time),TDS:x.tds,萃取率:x.ey,總分:x.score,達成:x.met,感官:TEMPS.map(t=>x.temps?.[t[0]]).filter(Boolean),風味:allFlavors(x),測試目的:x.target,筆記:x.note,下次調整:x.next}));
@@ -1654,7 +1657,8 @@ document.addEventListener('click',async ev=>{
   else if(a==='editGear')startGear(null,id);
   else if(a==='gearPreset'&&GF){Object.assign(GF,GP[GF.type][+v]);drawGear()}
   else if(a==='saveGear')saveGear();
-  else if(a==='cleaned'){const g={...gearById(id),cleanAt:Date.now()};try{await store.save('gear',g);if(GF&&GF.id===id){GF.cleanAt=g.cleanAt;drawGear()}toast('已歸零，重新開始計算')}catch(e){toast('儲存失敗')}}
+  else if(a==='cleaned'){if(el.dataset.sure!=='1'){el.dataset.sure='1';el.textContent='再按一次確認歸零';el.classList.add('pri');setTimeout(()=>{if(el.isConnected){el.dataset.sure='';el.textContent=el.dataset.l||'已清潔，歸零';el.classList.remove('pri')}},3000);return}
+    const g={...gearById(id),cleanAt:Date.now()};try{await store.save('gear',g);if(GF&&GF.id===id){GF.cleanAt=g.cleanAt;drawGear()}toast('已歸零，重新開始計算')}catch(e){toast('儲存失敗')}}
   else if(a==='gearDr'&&GF){const i=GF.drippers.indexOf(v);if(i<0)GF.drippers.push(v);else GF.drippers.splice(i,1);drawGear()}
   else if(a==='delGear'){if(confirmTap(el,'gear'+id)){await store.del('gear',id);closeSheet();toast('已刪除')}}
   else if(a==='useRec')useRec(!!el.dataset.ai);
