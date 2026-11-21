@@ -211,6 +211,7 @@ html,body{touch-action:manipulation}input,textarea,select{font-size:16px!importa
 .heat .hc.qual{background:color-mix(in srgb,var(--good) calc(var(--a)*100%),transparent)}.hleg i.qual{background:var(--good)}
 .score small{white-space:nowrap}
 .step{display:flex;align-items:center;gap:6px}.st-b{flex:0 0 52px;height:40px;font-size:22px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink)}.st-b:disabled{opacity:.3}.st-v{flex:1;text-align:center;line-height:1.15}.st-v b{font-size:18px;color:var(--muted)}.st-v.set b{color:var(--accent)}.st-v small{display:block;font-size:11px;color:var(--muted)}.st-r{flex:0 0 36px;height:40px;border:0;background:none;color:var(--muted);font-size:17px}
+.chip.warnc.on{background:var(--warn);border-color:var(--warn);color:#fff}.condf{border-color:var(--warn)}
 </style>
 </head>
 <body>
@@ -256,6 +257,11 @@ const SC=[['嗅覺',[['fa','前嗅覺'],['ra','後嗅覺']]],['味覺',[['acid',
 const SCL=Object.fromEntries(SC.flatMap(g=>g[1]));
 /* 品質（杯測式）：−1 差、0 普通、1 很好、2 傑出 */
 const QI=[['q_flavor','香氣／風味',20],['q_acid','酸／鹹',15],['q_sweet','甜／苦',20],['q_mouth','口感',15],['q_bal','平衡',15],['q_clar','清晰度',15],['q_fin','餘韻',10]];
+/* 品飲狀態：主觀感受有沒有被干擾 */
+const COND=[['ok','正常'],['nose','鼻塞／感冒'],['smell','環境有氣味'],['mouth','口腔干擾（剛吃東西、刷牙）'],['fatigue','味覺疲勞（喝太多杯）'],['tired','疲倦、沒睡好'],['rush','匆忙、沒專心']];
+const CONDL=Object.fromEntries(COND);
+const disturbed=b=>(b.cond||[]).some(c=>c!=='ok');
+const condTxt=b=>(b.cond||[]).filter(c=>c!=='ok').map(c=>CONDL[c].replace(/（.*）/,'')).join('、');
 const QL=Object.fromEntries(QI.map(x=>[x[0],x[1]])),QV=[-1,-0.5,0,0.5,1,1.5,2];
 const QW={'-1':'差','-0.5':'偏差','0':'普通','0.5':'好','1':'很好','1.5':'優異','2':'傑出'};
 const qWord=v=>QW[String(v)]||'';
@@ -442,7 +448,7 @@ function brewCard(b){
     <div class="mono bc-p">${esc(paramLine(b))}${has(b.tds)?` · TDS ${b.tds}`:''}</div>
     ${d.length?`<div class="bc-l"><span class="bc-k">變因</span><span>${esc(d.slice(0,3).map(chgTxt).join('、'))}${d.length>3?` 等 ${d.length} 項`:''}</span></div>`:base?'<div class="bc-l"><span class="bc-k">變因</span><span class="sub">同配方重現</span></div>':''}
     ${ef.length?`<div class="bc-l"><span class="bc-k">結果</span><span>${ef.map(x=>`${x.l}<b class="${x.d>0?'up':'dn'}">${x.t}</b>`).join('　')}</span></div>`:''}
-    ${fl.length||b.met?`<div class="row bc-tags">${b.met?`<span class="pill ${b.met==='yes'?'good':b.met==='part'?'warn':'muted'}">${MET[b.met]}</span>`:''}${flavHtml(fl.slice(0,4))}</div>`:''}
+    ${fl.length||b.met||disturbed(b)?`<div class="row bc-tags">${disturbed(b)?`<span class="pill warn">⚠ ${esc(condTxt(b))}</span>`:''}${b.met?`<span class="pill ${b.met==='yes'?'good':b.met==='part'?'warn':'muted'}">${MET[b.met]}</span>`:''}${flavHtml(fl.slice(0,4))}</div>`:''}
     ${nx?`<div class="bc-next">下次 → ${esc(nx)}</div>`:''}
   </button>`;
 }
@@ -543,7 +549,7 @@ function rankHtml(list){
   const L=list.map(b=>({b,t:brewTotal(b),r:rk(b)})).filter(x=>x.r!=null).sort((a,c)=>c.r-a.r);
   if(!L.length)return'<div class="card sub">還沒有可以評分的紀錄（至少要記一個溫度的感官分數）。</div>';
   return `<div class="card rank">${L.map((x,i)=>{const b=x.b;return `<div class="rk ${i===0?'top':''}" data-act="detail" data-id="${esc(b.id)}"><div class="rk-n">${i===0?'★':i+1}</div>
-    <div class="rk-m"><div class="mono" style="font-size:13px">${esc([has(b.grind)?b.grind+' 格':'',has(b.temp)?b.temp+'°':'',b.method||''].filter(Boolean).join(' · '))}</div>
+    <div class="rk-m"><div class="mono" style="font-size:13px">${disturbed(b)?'<span title="品飲受干擾">⚠ </span>':''}${esc([has(b.grind)?b.grind+' 格':'',has(b.temp)?b.temp+'°':'',b.method||''].filter(Boolean).join(' · '))}</div>
     <div class="sub">${esc(when(b.ts))}${has(b.tds)?' · TDS '+b.tds:''}${x.t?` · 高${x.t.per.hot}／中${x.t.per.warm}／常${x.t.per.room}`:''}${x.t&&x.t.conf<70?` · 資料 ${x.t.conf}%`:''}</div></div>
     <div class="score">${x.r}<small>總評</small></div></div>`}).join('')}
     <div class="sub" style="margin-top:6px">總評 0–100：三個溫度各自算分（甜感、酸甜平衡、乾淨度、厚度、香氣、回甘），再依高 ${scoreCfg().wT.hot}％／中 ${scoreCfg().wT.warm}％／常 ${scoreCfg().wT.room}％ 加權。沒記到的項目用你自己過去紀錄的中位數補上，「資料 %」越低代表補得越多。</div></div>`}
@@ -652,6 +658,7 @@ function detail(id){
   openSheet(`<div class="sheet-head"><b>${when(b.ts)}</b><button class="btn sm" data-act="close">關閉</button></div><div class="sheet-body">
     <div class="between"><div><div class="title">${esc(bean?bean.name:'已刪除的豆子')}</div><div class="sub">${has(b.restDay)?`養豆第 ${b.restDay} 天`:''}</div></div>${totBox(b)}</div>
     <fieldset><legend>參數</legend><dl class="kv mono">${PARAMS.map(p=>`<dt>${p.l}</dt><dd>${esc(fmtP(p,b[p.k]))}</dd>`).join('')}<dt>TDS</dt><dd>${b.tds??'—'}</dd><dt>萃取率</dt><dd>${has(b.ey)?b.ey+'%':'—'}</dd></dl></fieldset>
+    ${disturbed(b)?`<fieldset class="condf"><legend>品飲狀態</legend><div>⚠ ${esc(condTxt(b))}${b.condN?'：'+esc(b.condN):''}</div><div class="sub">這杯的感受可能受干擾，分數僅供參考。用相同參數再沖一次，比較準。</div><div class="row" style="margin-top:6px"><button class="btn sm pri" data-act="retest" data-id="${esc(b.id)}">相同參數重測</button></div></fieldset>`:(b.cond||[]).includes('ok')?'<div class="sub" style="margin:4px 0">品飲狀態：正常</div>':''}
     ${b.target||b.met?`<fieldset><legend>測試目的</legend><div>${esc(b.target||'')}</div>${b.met?`<div><span class="pill ${b.met==='yes'?'good':b.met==='part'?'warn':'muted'}">${MET[b.met]}</span></div>`:''}</fieldset>`:''}
     ${(b.flavors||[]).length?`<fieldset><legend>風味</legend><div class="row">${flavHtml(b.flavors)}</div></fieldset>`:''}${temps}
     ${b.note?`<fieldset><legend>整體敘述</legend><div>${esc(b.note)}</div></fieldset>`:''}${b.next?`<fieldset><legend>下次調整方向</legend><div style="white-space:pre-line">${esc(b.next)}</div></fieldset>`:''}
@@ -702,6 +709,7 @@ function drawForm(){
       ${S.canPhoto?`<div class="row"><button type="button" class="btn sm" data-act="photo">從照片讀取數字</button><span class="sub" id="photoMsg">${esc(F._photoMsg||'')}</span></div>`:''}</fieldset>
     <fieldset><legend>測試目的</legend>${base&&base.next&&!F._edit?`<div class="sub" style="white-space:pre-line">上一杯寫的調整方向：\n${esc(base.next)}</div>`:''}${ta('target','這杯要測試什麼、想沖出什麼',2,'例如 降一格到 29，看能否維持酸甜平衡並增加濃郁度')}
       <div class="seg txt">${Object.entries(MET).map(([k,l])=>`<button type="button" data-act="met" data-v="${k}" class="${F.met===k?'on':''}">${l}</button>`).join('')}</div></fieldset>
+    <fieldset><legend>品飲狀態</legend><div class="sub" style="margin-bottom:6px">喝的時候狀態如何？有干擾的話，這杯的感官分數可能不準。</div><div class="chips">${COND.map(([k,l])=>`<button type="button" class="chip ${(F.cond||[]).includes(k)?'on':''} ${k!=='ok'?'warnc':''}" data-act="cond" data-v="${k}">${l}</button>`).join('')}</div>${disturbed(F)?`<label class="f">狀況補充（選填）<input type="text" data-f="condN" data-t="str" value="${esc(F.condN||'')}" placeholder="例如：隔壁在煎魚"></label>`:''}</fieldset>
     <fieldset><legend>感官</legend><div class="seg txt"><button type="button" data-act="mode" data-v="quick" class="${F.mode==='quick'?'on':''}">快速</button><button type="button" data-act="mode" data-v="full" class="${F.mode==='full'?'on':''}">完整（分溫度）</button></div>
       <div class="grp">香氣（0 無、3 清楚、5 很強；跨豆比較）</div>${AROM.map(([k,l])=>`<div class="arow"><span>${l}</span><div class="arc">${hseg('arom',k,F.arom?.[k])}<input type="text" class="arn" data-arn="${k}" placeholder="${l}的形容（選填）" value="${esc(F.aromN?.[k]||'')}"></div></div>`).join('')}${F.dry&&!F.aromN?`<div class="sub">舊的描述：${esc(F.dry)}</div>`:''}<div class="grp">整杯總分（0–5${F.mode==='full'?'，不填就取各溫度整體分的平均':''}）</div>${hseg('score','score',F.score)}${sensory}
       <div class="grp">風味${F.mode==='full'?'（'+TEMPS.find(t=>t[0]===F._slot)[1]+'）':''}</div>
@@ -766,6 +774,7 @@ function parseLocal(txt){ // 沒有 AI 可用時，照固定的筆記格式用�
   if(P.trim())j.target=P.trim();
   const A=(txt.match(/【香氣】([^【\n]*)/)||[])[1]||'';if(A.trim()){j.dry=A.trim();j.arom={};for(const[k,re]of[['bean','(?:豆香|乾香|粉香)'],['pot','壺香'],['wet','濕香']]){const mm=A.match(new RegExp(re+'\\s*(?:是|大概|約)?\\s*(\\d+(?:\\.\\d+)?)?\\s*([^，,、；;0-9]*)'));if(mm){if(mm[1]&&+mm[1]<=5)j.arom[k]=+mm[1];const w=(mm[2]||'').replace(/^分/,'').trim();if(w){j.aromN=j.aromN||{};j.aromN[k]=w}}}}
   const V=(txt.match(/【判定與下次】([^【]*)/)||[])[1]||'';
+  {const c=[];if(/鼻塞|感冒|過敏/.test(V))c.push('nose');if(/異味|氣味|味道很重|煙|油煙|香水/.test(V))c.push('smell');if(/剛吃|吃完|刷牙|漱口|口腔/.test(V))c.push('mouth');if(/喝太多|味覺疲勞|好幾杯/.test(V))c.push('fatigue');if(/累|疲倦|沒睡/.test(V))c.push('tired');if(/匆忙|趕時間|沒專心/.test(V))c.push('rush');if(!c.length&&/狀態正常|狀況正常|正常/.test(V))c.push('ok');if(c.length)j.cond=c}
   if(V){j.met=/未達成|沒有達成|失敗/.test(V)?'no':/部分/.test(V)?'part':/達成|成功/.test(V)?'yes':undefined;const nx=V.split(/下次|下一杯/);if(nx.length>1)j.next=nx.slice(1).join('').replace(/^[，,：:\s]+/,'').trim();j.note=nx[0].trim()}
   return j;
 }
@@ -1054,8 +1063,8 @@ const VSTEPS=[
  {k:'aroma',t:'香氣',say:'豆香、濕香、壺香各幾分，加一個形容詞。用跨豆比較的尺度：你喝過最香的一支當 4–5。',ex:'「豆香 3 甜桃，濕香 2 草本，壺香 2.5 焦糖。」',
   chk:[['豆香',/豆香|乾香|粉香/],['濕香',/濕香|悶蒸|聞香/],['壺香',/壺香|液香/]]},
  {k:'hot',t:'高溫',temp:1,rg:'約 60–70°C，剛沖好稍等一下'},{k:'warm',t:'中溫',temp:1,rg:'約 45–55°C，溫溫的不燙口'},{k:'room',t:'常溫',temp:1,rg:'約 25–35°C，接近室溫'},
- {k:'verdict',t:'判定與下次',say:'這杯有沒有達成目標？下次只改一個變數，改什麼？',ex:'「部分達成，濃郁度有增加但後段苦。下次回到 30 格，第三段改繞圈。」',
-  chk:[['判定',/達成|未達成|部分|成功|失敗/],['下次',/下次|下一杯|接下來/]]}];
+ {k:'verdict',t:'判定與下次',say:'這杯有沒有達成目標？下次只改一個變數，改什麼？最後說今天狀態：正常，或鼻塞、有異味、剛吃東西、喝太多杯。',ex:'「部分達成，濃郁度有增加但後段苦。下次回到 30 格，第三段改繞圈。」',
+  chk:[['判定',/達成|未達成|部分|成功|失敗/],['下次',/下次|下一杯|接下來/],['狀態',/正常|鼻塞|感冒|味道|氣味|異味|吃|刷牙|疲勞|累|匆忙/]]}];
 const TCHK=[['甜',/甜/],['酸',/酸/],['苦',/苦/],['澀',/澀/],['厚',/厚|body|醇/i],['品質',/差|普通|好|優異|傑出/],['回甘',/回甘|尾韻|餘韻/]];
 const TSAY='依序說：甜、酸、苦、澀、厚度、回甘各幾分（0–5，可以說「三點五」），最後加一個關鍵詞。';
 const TEX='「甜 3.5，酸 3.5 柑橘，苦 0，澀 0.5，厚 2.5，回甘 1，品質：酸質很好、甜感優異、口感好、平衡很好、清晰度優異，關鍵詞：圓潤、茶感。」';
@@ -1104,7 +1113,7 @@ async function parseNote(){
   msg('解析中…');
   const sk='fa(前嗅覺),ra(後嗅覺),acid(酸),sweet(甜),bitter(苦),body(厚度),astr(澀),fin_acid(後韻酸),huigan(後韻甘),fin_bitter(後韻苦),fin_astr(後韻澀),overall(該溫度整體分)';
   const prompt=`把下面這段手沖咖啡筆記（可能是語音轉文字，數字可能是中文念法，例如「三點五」就是 3.5）整理成一個 JSON 物件，只回傳 JSON，不要其他文字。筆記沒寫的欄位填 null，不要猜。
-欄位：arom({bean:豆香/乾香/粉香分數,pot:壺香分數,wet:濕香分數}，0-5，沒提到就省略), aromN({bean,pot,wet} 各自的形容詞原文，沒提到就省略), bean(豆子名稱字串), grinder, grind(刻度數字，例如 29clix 填 29), dripper(濾杯), paper(濾紙), method(手法或注水比例，例如 60-40 繞繞中中), temp(水溫數字), dose(粉重 g), water(總注水量 g，沒寫但有分段時填各段總和), time(總時間或流乾時間，換成秒), pours(分段注水原文，一段一行), tds, ey(萃取率 %), bev(咖啡液重 g), target(這杯的測試目的), dry(壺香或乾香的描述), score(整杯總分 0-5，沒寫填 null), note(整體總結原文), next(下次調整方向原文，保留換行), met(是否達成目標：達成→"yes"、部分達成→"part"、未達成→"no"，沒提到填 null),
+欄位：cond(品飲狀態陣列，可多選：ok 正常、nose 鼻塞感冒、smell 環境有氣味、mouth 口腔干擾如剛吃東西刷牙、fatigue 味覺疲勞喝太多杯、tired 疲倦、rush 匆忙；沒提到就省略), arom({bean:豆香/乾香/粉香分數,pot:壺香分數,wet:濕香分數}，0-5，沒提到就省略), aromN({bean,pot,wet} 各自的形容詞原文，沒提到就省略), bean(豆子名稱字串), grinder, grind(刻度數字，例如 29clix 填 29), dripper(濾杯), paper(濾紙), method(手法或注水比例，例如 60-40 繞繞中中), temp(水溫數字), dose(粉重 g), water(總注水量 g，沒寫但有分段時填各段總和), time(總時間或流乾時間，換成秒), pours(分段注水原文，一段一行), tds, ey(萃取率 %), bev(咖啡液重 g), target(這杯的測試目的), dry(壺香或乾香的描述), score(整杯總分 0-5，沒寫填 null), note(整體總結原文), next(下次調整方向原文，保留換行), met(是否達成目標：達成→"yes"、部分達成→"part"、未達成→"no"，沒提到填 null),
 temps: {hot:{...}, warm:{...}, room:{...}} 分別是高溫、中溫、常溫，每個是 {s:{${sk}}, q:{q_flavor(香氣風味品質),q_acid(酸質),q_sweet(甜感品質),q_mouth(口感品質),q_bal(平衡),q_clar(清晰度/乾淨度),q_fin(餘韻品質)}, f:[風味], n:"該溫度的文字敘述原文"}，s 內分數是 0-5 的數字（可有 0.5）；q 是品質，用 −1 到 2：差 −1、偏差 −0.5、普通 0、好 0.5、很好 1、優異 1.5、傑出 2。沒寫的鍵省略。
 f 只能從這份清單選，格式是「大類」或「大類/細項」：${JSON.stringify(WHEEL)}
 rel: {acid, sweet, bitter, body} 筆記有明寫跟前一杯或另一個設定比較時，填 1(增加)、-1(減少)、0(相同)，沒寫省略。
@@ -1120,6 +1129,7 @@ function applyNote(j){
     for(const k of ['grinder','dripper','paper','method','pours','target','dry','note','next'])if(typeof j[k]==='string'&&j[k].trim()){F[k]=j[k].trim();n++}
     for(const k of ['grind','temp','dose','water','time','tds','ey','bev','score'])if(typeof j[k]==='number'){F[k]=j[k];n++;if(k==='ey')F.eyManual=true}
     if(['yes','part','no'].includes(j.met)){F.met=j.met;n++}
+    if(Array.isArray(j.cond)){const c=j.cond.filter(x=>CONDL[x]);if(c.length){F.cond=c.includes('ok')&&c.length>1?c.filter(x=>x!=='ok'):c;n++}}
     if(j.arom&&typeof j.arom==='object'){const o={};for(const[k]of AROM)if(typeof j.arom[k]==='number')o[k]=j.arom[k];if(Object.keys(o).length){F.arom={...(F.arom||{}),...o};n++}}
     if(j.aromN&&typeof j.aromN==='object'){const o={};for(const[k]of AROM)if(typeof j.aromN[k]==='string'&&j.aromN[k].trim())o[k]=j.aromN[k].trim();if(Object.keys(o).length){F.aromN={...(F.aromN||{}),...o};n++}}
     let any=false;
@@ -1153,7 +1163,7 @@ async function saveBrew(){
   if(!has(b.score)){const o=TEMPS.map(t=>b.temps?.[t[0]]?.s?.overall).filter(has);if(o.length)b.score=r1(o.reduce((a,c)=>a+c,0)/o.length)}b.restDay=restDay(beanById(b.beanId),b.ts);
   if(b.mode==='quick'&&!Object.keys(b.temps).length)b.temps={};
   ['_edit','_slot','_cat','_photoMsg','_paste','_pasteText','_parseMsg','eyManual'].forEach(k=>delete b[k]);
-  try{await store.save('brews',b);draftClear();closeSheet();toast('已儲存');if(S.view!=='log'&&S.view!=='recipe')location.hash='log'}catch(e){toast(e&&e.code==='quota_exceeded'?'儲存空間已滿，請先刪除舊紀錄':'儲存失敗，請再試一次')}
+  draftClear();try{await store.save('brews',b);draftClear();closeSheet();render();toast('已儲存');if(S.view!=='log'&&S.view!=='recipe')location.hash='log'}catch(e){toast(e&&e.code==='quota_exceeded'?'儲存空間已滿，請先刪除舊紀錄':'儲存失敗，請再試一次')}
 }
 async function readPhoto(file){
   const msg=m=>{F._photoMsg=m;const e=$('#photoMsg');if(e)e.textContent=m};
@@ -1698,6 +1708,7 @@ document.addEventListener('click',async ev=>{
   else if(a==='draftNew'){draftClear();startBrew(JSON.parse(el.dataset.o||'{}'),true)}
   else if(a==='detail')detail(id);
   else if(a==='new')startBrew({baseId:el.dataset.base,beanId:el.dataset.bean});
+  else if(a==='retest'){const b0=brewById(id);startBrew({baseId:id});if(F&&b0&&F.baseId===id){F.target=`重測：${when(b0.ts)} 那杯品飲時${condTxt(b0)}，用相同參數再確認一次`;drawForm()}}
   else if(a==='editBrew'){if(!demoBlock())startBrew({editId:id})}
   else if(a==='delBrew'){if(!demoBlock()&&confirmTap(el,'brew'+id)){await store.del('brews',id);closeSheet();toast('已刪除')}}
   else if(a==='newBean')startBean();
@@ -1762,6 +1773,7 @@ document.addEventListener('click',async ev=>{
     if(a==='mode')F.mode=v;
     else if(a==='slot')F._slot=v;
     else if(a==='met')F.met=F.met===v?null:v;
+    else if(a==='cond'){let c=(F.cond||[]).slice();if(c.includes(v))c=c.filter(x=>x!==v);else c=v==='ok'?['ok']:c.filter(x=>x!=='ok').concat(v);F.cond=c}
     else if(a==='score')F.score=cyc(F.score,+v);
     else if(a==='arom'){F.arom={...(F.arom||{})};const k=el.dataset.k,n=cyc(F.arom[k],+v);if(n==null)delete F.arom[k];else F.arom[k]=n}
     else if(a==='pasteToggle')F._paste=true;
