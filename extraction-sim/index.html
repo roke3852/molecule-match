@@ -630,6 +630,10 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
 .t46-res b{font-family:var(--f-mono);font-weight:500;font-size:18px}
 .t46-res span{font-size:12px;color:var(--muted)}
 .t46-cmp{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
+.sb-axis{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin:2px 0 6px 52px}.sb-axis span:nth-child(2){opacity:.7}
+.sb-row{display:grid;grid-template-columns:46px 1fr 70px;gap:6px;align-items:center;padding:6px 6px 0;border-radius:8px 8px 0 0}.sb-sw{display:grid;grid-template-columns:46px 1fr 70px;gap:6px;align-items:center;padding:2px 6px 6px;margin-bottom:4px;border-radius:0 0 8px 8px;font-size:11px;color:var(--muted)}.sb-row.on,.sb-sw.on{background:var(--accent-soft)}.sb-row.on .sb-l{font-weight:700}
+.sb-l{font-family:var(--f-mono);font-size:14px}.sb-tr{position:relative;height:14px;border-radius:7px;background:linear-gradient(90deg,rgba(232,127,176,.35),rgba(255,255,255,.06) 50%,rgba(232,193,74,.35))}.sb-base{position:absolute;top:-3px;bottom:-3px;border-left:1.5px dashed var(--muted)}.sb-dot{position:absolute;top:50%;width:14px;height:14px;margin:-7px 0 0 -7px;border-radius:50%;border:2px solid var(--bg)}
+.sb-d{font-size:12px;text-align:right;color:var(--muted)}.sb-sw div{height:5px;background:var(--line);border-radius:3px;overflow:hidden}.sb-sw i{display:block;height:100%;background:#e87fb0;opacity:.75}.sb-note{margin-top:6px;line-height:1.6}
 .t46-cmp h3{font-size:15px;margin:0 0 6px}
 .t46-row{display:grid;grid-template-columns:4.2em 1fr 1fr;gap:8px;align-items:center;font-size:13px;padding:3px 4px;border-radius:6px}
 .t46-row.head{color:var(--muted);font-size:12px}
@@ -4081,7 +4085,13 @@ function render(){
   $('tRes').innerHTML=[['濃度 TDS',R.tds.toFixed(2)+'%'],['萃取率',R.ey.toFixed(1)+'%'],['甜',T5(R.pf.sweet)],['酸甜傾向',T5(R.pf.balance)+(R.pf.balance<4.5?' 偏甜':R.pf.balance>5.5?' 偏酸':' 平衡')],['醇厚度',T5(R.pf.body)],['苦',T5(R.pf.bitter)]]
     .map(([k,v])=>'<div><b>'+v+'</b><span>'+k+'</span></div>').join('');
   const A=[30,50,60,70,90].map(f=>({f,r:run46(f,S.n)}));
-  $('tCmpA').innerHTML='<div class="t46-row head"><span>分配</span><span>甜</span><span>酸甜傾向（越大越酸）</span></div>'+A.map(x=>'<div class="t46-row'+(x.f===S.first?' on':'')+'"><span>'+x.f+'/'+(120-x.f)+'</span><span class="b">'+bar(x.r.pf.sweet,10)+x.r.pf.sweet.toFixed(2)+'</span><span class="b"><i style="width:'+Math.max(2,Math.min(100,x.r.pf.balance*10))*.6+'%;background:var(--acid)"></i>'+x.r.pf.balance.toFixed(2)+'</span></div>').join('');
+  {const bs=A.map(x=>x.r.pf.balance),ws=A.map(x=>x.r.pf.sweet),b0=Math.min(...bs),b1=Math.max(...bs),pad=Math.max(.05,(b1-b0)*.25),lo=b0-pad,hi=b1+pad,w0=Math.min(...ws),w1=Math.max(...ws);
+   const base=A.find(x=>x.f===60)||A[0],pos=v=>(v-lo)/(hi-lo)*100,rel=v=>w1-w0<1e-6?60:25+75*(v-w0)/(w1-w0);
+   const dTxt=x=>{if(x===base)return '基準';const d=x.r.pf.balance-base.r.pf.balance;return Math.abs(d)<.005?'≈ 基準':(d<0?'<b style="color:#e87fb0">偏甜 '+(-d).toFixed(2)+'</b>':'<b style="color:#e8c14a">偏酸 '+d.toFixed(2)+'</b>');};
+   $('tCmpA').innerHTML='<div class="sb-axis"><span style="color:#e87fb0">◀ 偏甜</span><span>和 60/60 比</span><span style="color:#e8c14a">偏酸 ▶</span></div>'+
+    A.map(x=>'<div class="sb-row'+(x.f===S.first?' on':'')+'"><span class="sb-l">'+x.f+'/'+(120-x.f)+'</span><div class="sb-tr"><i class="sb-base" style="left:'+pos(base.r.pf.balance)+'%"></i><i class="sb-dot" style="left:'+pos(x.r.pf.balance)+'%;background:'+(x.r.pf.balance<base.r.pf.balance-.005?'#e87fb0':x.r.pf.balance>base.r.pf.balance+.005?'#e8c14a':'var(--ink)')+'"></i></div><span class="sb-d">'+dTxt(x)+'</span></div>'+
+      '<div class="sb-sw'+(x.f===S.first?' on':'')+'"><span></span><div><i style="width:'+rel(x.r.pf.sweet)+'%"></i></div><span>甜 '+x.r.pf.sweet.toFixed(2)+'</span></div>').join('')+
+    '<p class="label sb-note">圓點越往左越甜、越往右越酸；虛線是 60/60。軸已經放大到這幾組的範圍，最甜和最酸只差 '+(b1-b0).toFixed(2)+' 分，喝得出來但不大。下方細條是甜感的相對高低。</p>';}
   const Bv=[1,2,3,4].map(n=>({n,r:run46(S.first,n)}));
   $('tCmpB').innerHTML='<div class="t46-row head"><span>注數</span><span>TDS</span><span>醇厚度</span></div>'+Bv.map(x=>'<div class="t46-row'+(x.n===S.n?' on':'')+'"><span>'+x.n+' 注</span><span class="b">'+bar(x.r.tds-0.8,1.0)+x.r.tds.toFixed(2)+'%</span><span class="b">'+bar(x.r.pf.body,10)+T5(x.r.pf.body)+'</span></div>').join('');
   const dT=Bv[3].r.tds-Bv[0].r.tds,a0=A[0].r,a4=A[4].r;
