@@ -210,6 +210,7 @@ html,body{touch-action:manipulation}input,textarea,select{font-size:16px!importa
 .srow.q{align-items:start}.srow.q>span{padding-top:7px}
 .heat .hc.qual{background:color-mix(in srgb,var(--good) calc(var(--a)*100%),transparent)}.hleg i.qual{background:var(--good)}
 .score small{white-space:nowrap}
+.step{display:flex;align-items:center;gap:6px}.st-b{flex:0 0 52px;height:40px;font-size:22px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink)}.st-b:disabled{opacity:.3}.st-v{flex:1;text-align:center;line-height:1.15}.st-v b{font-size:18px;color:var(--muted)}.st-v.set b{color:var(--accent)}.st-v small{display:block;font-size:11px;color:var(--muted)}.st-r{flex:0 0 36px;height:40px;border:0;background:none;color:var(--muted);font-size:17px}
 </style>
 </head>
 <body>
@@ -683,7 +684,7 @@ function drawForm(){
   const ft=flavTarget(),cat=F._cat;
   const sensory=F.mode==='full'?`<div class="seg txt">${TEMPS.map(t=>`<button type="button" data-act="slot" data-v="${t[0]}" class="${F._slot===t[0]?'on':''}">${t[1]}<small class="trg">${TRANGE[t[0]]}</small>${F.temps[t[0]]&&(Object.values(F.temps[t[0]].s).some(has)||Object.values(F.temps[t[0]].q||{}).some(has)||F.temps[t[0]].f.length)?' ✓':''}</button>`).join('')}</div>
       <div class="sub">0 無、3 中、5 強。同一格再點一次加 0.5，第三次清除。沒喝到的溫度直接跳過。</div>
-      ${F._slot!=='hot'?`<div class="relsw"><span>${RELM?'增減模式：以高溫為基準，點變化量':'直接填分數'}</span><button type="button" class="btn sm" data-act="relmode">${RELM?'改成直接填':'改成增減模式'}</button></div>`:''}
+      ${F._slot!=='hot'?`<div class="relsw"><span>${RELM?'增減模式：從高溫的分數開始，按 ＋／− 調整':'直接填分數'}</span><button type="button" class="btn sm" data-act="relmode">${RELM?'改成直接填':'改成增減模式'}</button></div>`:''}
       ${SC.map(g=>`<div class="grp">${g[0]}</div>`+g[1].map(([k,l])=>`<div class="srow"><span>${l}</span>${sRow(k)}</div>`).join('')).join('')}
       <div class="grp">品質（−1 差、0 普通、0.5 好、1 很好、1.5 優異、2 傑出）</div>${QI.map(([k,l])=>`<div class="srow q"><span>${l}</span>${qRow(k,slot().q[k],true)}</div>`).join('')}`:
     `<div class="grp">品質（−1 差、0 普通、0.5 好、1 很好、1.5 優異、2 傑出）</div>${QI.map(([k,l])=>`<div class="srow q"><span>${l}</span>${qRow(k,(F.q||{})[k],false)}</div>`).join('')}`+(base?`<div class="sub">跟上一杯（${when(base.ts)}）比</div>${REL.map(([k,l])=>`<div class="srow"><span>${l}</span><div class="seg txt">${[[-1,'↓ 少'],[0,'＝'],[1,'↑ 多']].map(o=>`<button type="button" data-act="rel" data-k="${k}" data-v="${o[0]}" class="${F.rel[k]===o[0]?'on':''}">${o[1]}</button>`).join('')}</div></div>`).join('')}`:'<div class="sub">這是這支豆子的第一杯，之後的紀錄會拿它當比較基準。</div>');
@@ -715,7 +716,8 @@ function drawForm(){
 function autoEY(){if(F.eyManual)return;if(has(F.tds)&&has(F.bev)&&has(F.dose)&&F.dose>0){F.ey=r2(F.tds*F.bev/F.dose);const e=$('#f-ey');if(e)e.value=F.ey}}
 const hseg=(act,k,val)=>`<div class="seg">${[0,1,2,3,4,5].map(i=>{const on=has(val)&&Math.floor(val)===i;return `<button type="button" data-act="${act}" data-k="${k}" data-v="${i}" class="${on?'on':''}">${on?val:i}</button>`}).join('')}</div>`;
 function hotBase(){return F&&F._slot!=='hot'&&RELM?F.temps.hot||null:null}
-const dSeg=(act,k,base,cur,lo,hi)=>{const d=has(cur)?Math.round((cur-base)*2)/2:null;return `<div class="seg dseg">${[-1,-0.5,0,0.5,1].map(x=>{const v=Math.max(lo,Math.min(hi,base+x));return `<button type="button" data-act="${act}" data-k="${k}" data-v="${x}" class="${d===x?'on':''}" ${base+x<lo-1e-9||base+x>hi+1e-9?'disabled':''}>${x===0?'＝':(x>0?'+':'−')+Math.abs(x)}</button>`}).join('')}<span class="dval mono">${base}${has(cur)?' → <b>'+cur+'</b>':''}</span></div>`};
+const dSeg=(act,k,base,cur,lo,hi)=>{const v=has(cur)?+cur:base,d=Math.round((v-base)*2)/2;
+  return `<div class="step"><button type="button" class="st-b" data-act="${act}" data-k="${k}" data-v="-0.5" ${v<=lo?'disabled':''} aria-label="減 0.5">−</button><div class="st-v ${has(cur)?'set':''}"><b class="mono">${v>0&&lo<0?'+'+v:v}</b><small>${!has(cur)?'同高溫':d===0?'＝高溫':(d>0?'+':'−')+Math.abs(d)}${lo<0&&has(cur)?' '+qWord(v):''}</small></div><button type="button" class="st-b" data-act="${act}" data-k="${k}" data-v="0.5" ${v>=hi?'disabled':''} aria-label="加 0.5">＋</button>${has(cur)?`<button type="button" class="st-r" data-act="${act}R" data-k="${k}" aria-label="清除">↺</button>`:`<button type="button" class="st-r" data-act="${act}" data-k="${k}" data-v="0" aria-label="跟高溫一樣">＝</button>`}</div>`};
 function sRow(k){const h=hotBase(),cur=slot().s[k];if(h&&has(h.s?.[k]))return dSeg('scd',k,+h.s[k],cur,0,5);return hseg('sc',k,cur)}
 function qRow(k,cur,temp){const h=temp?hotBase():null;if(h&&has(h.q?.[k]))return dSeg('qd',k,+h.q[k],cur,-1,2);
   return `<div class="seg qseg">${QV.map(v=>`<button type="button" data-act="${temp?'q':'qq'}" data-k="${k}" data-v="${v}" class="${cur===v?'on':''} ${v<0?'neg':''}">${v>0?'+'+v:v}</button>`).join('')}</div>${has(cur)?`<div class="qw">${qWord(cur)}</div>`:''}`}
@@ -1765,7 +1767,8 @@ document.addEventListener('click',async ev=>{
     else if(a==='pasteToggle')F._paste=true;
     else if(a==='parse'){parseNote();return}
     else if(a==='relmode'){RELM=!RELM;try{localStorage.setItem('bn-relmode',RELM?'rel':'direct')}catch(e){}}
-    else if(a==='scd'||a==='qd'){const sl=slot(),obj=a==='scd'?sl.s:sl.q,base=a==='scd'?+F.temps.hot.s[el.dataset.k]:+F.temps.hot.q[el.dataset.k],[lo,hi]=a==='scd'?[0,5]:[-1,2],nv=Math.max(lo,Math.min(hi,base+ +v)),k=el.dataset.k;if(obj[k]===nv)delete obj[k];else obj[k]=nv}
+    else if(a==='scd'||a==='qd'){const sl=slot(),obj=a==='scd'?sl.s:sl.q,k=el.dataset.k,base=a==='scd'?+F.temps.hot.s[k]:+F.temps.hot.q[k],[lo,hi]=a==='scd'?[0,5]:[-1,2],cur=has(obj[k])?+obj[k]:base;obj[k]=Math.max(lo,Math.min(hi,+v===0?base:cur+ +v))}
+    else if(a==='scdR'||a==='qdR'){const sl=slot();delete (a==='scdR'?sl.s:sl.q)[el.dataset.k]}
     else if(a==='q'){const q=slot().q,k=el.dataset.k;if(q[k]===+v)delete q[k];else q[k]=+v}
     else if(a==='qq'){F.q={...(F.q||{})};const k=el.dataset.k;if(F.q[k]===+v)delete F.q[k];else F.q[k]=+v}
     else if(a==='sc'){const s=slot().s,k=el.dataset.k;const n=cyc(s[k],+v);if(n==null)delete s[k];else s[k]=n}
