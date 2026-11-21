@@ -979,6 +979,10 @@ svg.dk{filter:drop-shadow(1px 0 0 #9aa3ad) drop-shadow(-1px 0 0 #9aa3ad) drop-sh
 .brew-anim .smoke{opacity:0}.brew-anim.go .smoke{animation:baSteam 1.2s ease-out 2s 3}
 </style>
 <script>
+/* iPhone 捲動時網址列收合也會觸發 resize：只有寬度真的變了才重畫，避免滑動時整頁閃一下 */
+window.onWidthResize=function(fn){let w=window.innerWidth;addEventListener('resize',function(){const nw=window.innerWidth;if(nw===w)return;w=nw;fn();});};
+</script>
+<script>
 /* ---------- 音效（Web Audio 即時合成） ---------- */
 window.SFX=(()=>{
   let ctx=null,bus,rev,nb,master,on=true,last=0,special=0,thr={};
@@ -1070,7 +1074,7 @@ window.SFX=(()=>{
 </script>
 <style>
 #sfxBtn{position:fixed;right:12px;bottom:calc(12px + env(safe-area-inset-bottom,0px));z-index:50;width:44px;height:44px;min-height:0;padding:0;border-radius:50%;display:grid;place-items:center;
-  background:color-mix(in srgb,var(--panel,#fff) 88%,transparent);border:1px solid var(--line,#ccc);color:var(--muted,#888);box-shadow:0 2px 10px rgba(0,0,0,.2);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);cursor:pointer}
+  background:var(--panel,#fff);border:1px solid var(--line,#ccc);color:var(--muted,#888);box-shadow:0 2px 10px rgba(0,0,0,.2);-webkit-transform:translateZ(0);transform:translateZ(0);cursor:pointer}
 #sfxBtn.on{color:var(--gold,var(--ink,#333))}
 </style>
 <script>
@@ -1131,7 +1135,7 @@ window.BGM=(()=>{
 </script>
 <style>
 #bgmBtn{position:fixed;right:12px;bottom:calc(64px + env(safe-area-inset-bottom,0px));z-index:50;width:44px;height:44px;min-height:0;padding:0;border-radius:50%;display:grid;place-items:center;
-  background:color-mix(in srgb,var(--panel,#fff) 88%,transparent);border:1px solid var(--line,#ccc);color:var(--muted,#888);box-shadow:0 2px 10px rgba(0,0,0,.2);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);cursor:pointer}
+  background:var(--panel,#fff);border:1px solid var(--line,#ccc);color:var(--muted,#888);box-shadow:0 2px 10px rgba(0,0,0,.2);-webkit-transform:translateZ(0);transform:translateZ(0);cursor:pointer}
 #bgmBtn.on{color:var(--gold,var(--ink,#333))}
 </style>
 
@@ -2908,7 +2912,7 @@ $('clearAll').onclick=()=>{const b=$('clearAll');
   armed=setTimeout(()=>{armed=null;b.textContent='清除全部';b.classList.remove('warn');},3000);};
 renderRuns();
 
-addEventListener('resize',draw);
+onWidthResize(draw);
 document.fonts&&document.fonts.ready.then(draw);
 // ---------- remembered parameters ----------
 const PKEY='brewsim-params-v1';
@@ -3047,7 +3051,7 @@ try{const o=JSON.parse(localStorage.getItem(PKEY)||'null');if(o&&typeof o==='obj
 try{const st=recLoad(),d=st.def&&st.list.find(r=>r.id===st.def);if(d&&!sessionStorage.getItem('brewLab.recBooted')){applyParams(JSON.parse(JSON.stringify(d.p)));sessionStorage.setItem('brewLab.recBooted','1');}}catch(e){}
 run();
 t=Math.min(75,tMax); $('scrub').value=t; draw();
-setSimTab(simTab,true);addEventListener('resize',()=>{const m=document.querySelector('.modes');document.documentElement.style.setProperty('--modesH',(m?m.offsetHeight:0)+'px');});
+setSimTab(simTab,true);onWidthResize(()=>{const m=document.querySelector('.modes'),v=(m?m.offsetHeight:0)+'px';if(document.documentElement.style.getPropertyValue('--modesH')!==v)document.documentElement.style.setProperty('--modesH',v);});
 })();
 </script>
 <script>
@@ -4379,7 +4383,7 @@ $('micTemp').onchange=e=>freeChange({temp:+e.target.value});
 [['micStir','stir',v=>v],['micMethod','method',v=>v],['micBloom','bloom',v=>+v],['micPour','pour',v=>v]].forEach(([id,k,f])=>$(id).querySelectorAll('button').forEach(b=>b.onclick=()=>freeChange({[k]:f(b.dataset.v)})));
 let inited=false;
 window.micRender=()=>{readColors();if(!size())return;if(!inited){inited=true;openTopic(TOPICS[0]);}else{draw();drawChart();}};
-addEventListener('resize',()=>{if(!$('microView')||$('microView').hidden)return;if(size()){draw();drawChart();}});
+onWidthResize(()=>{if(!$('microView')||$('microView').hidden)return;if(size()){draw();drawChart();}});
 matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change',()=>{readColors();if(S){draw();drawChart();}});
 })();
 
@@ -4631,7 +4635,7 @@ $('bedCmp').querySelectorAll('button').forEach(b=>b.onclick=()=>{stop();cmp=b.da
 $('bedPDrip').querySelectorAll('button').forEach(b=>b.onclick=()=>{stop();pdrip=b.dataset.v;$('bedPDrip').querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',x===b));build();si=runs.A.snaps.length-1;render();});
 $('bedPrep').querySelectorAll('button').forEach(b=>b.onclick=()=>{stop();if(b.dataset.v==='wdt')wdt=!wdt;else dig=!dig;b.setAttribute('aria-pressed',b.dataset.v==='wdt'?wdt:dig);build();si=runs.A.snaps.length-1;render();});
 window.bedRender=()=>{if(!inited){inited=true;build();si=runs.A.snaps.length-1;}render();};
-addEventListener('resize',()=>{if($('bedView')&&!$('bedView').hidden&&runs)render();});
+onWidthResize(()=>{if($('bedView')&&!$('bedView').hidden&&runs)render();});
 })();
 
 </script>
@@ -4929,7 +4933,7 @@ function tick(ts){if(!playing)return;const dt=last?(ts-last)/1000:0;last=ts;acc+
   if(acc>=1){const n=Math.floor(acc);acc-=n;let t=S.t+n;if(t>=R.endT){t=R.endT;playing=false;$('nzPlay').textContent='播放';}setT(t);}
   if(playing)requestAnimationFrame(tick);}
 $('nzPlay').onclick=()=>{if(playing){playing=false;$('nzPlay').textContent='播放';return;}if(S.t>=R.endT)S.t=1;playing=true;last=0;acc=0;$('nzPlay').textContent='暫停';requestAnimationFrame(tick);};
-let rz;addEventListener('resize',()=>{clearTimeout(rz);rz=setTimeout(()=>{if(R&&!$('noseView').hidden){renderChart();render();}},150);});
+let rz;onWidthResize(()=>{clearTimeout(rz);rz=setTimeout(()=>{if(R&&!$('noseView').hidden){renderChart();render();}},150);});
 window.noseRender=()=>{if(!R)run();else{renderChart();render();}};
 })();
 </script>
