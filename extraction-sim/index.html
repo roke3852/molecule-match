@@ -5099,7 +5099,7 @@ function merge(loc,rem){
     [...rcb.list,...rca.list].forEach(r=>{const o=m.get(r.id);if(!o||(r.at||0)>=(o.at||0))m.set(r.id,r);});
     const gone=[...new Set([...(rca.gone||[]),...(rcb.gone||[])])].slice(-100);
     const order=[...(N[RC].list||[]),...(O[RC].list||[])].map(r=>r.id).filter((id,i,a)=>a.indexOf(id)===i&&!gone.includes(id));
-    out[RC]={list:order.map(id=>m.get(id)).filter(Boolean),def:gone.includes(N[RC].def)?null:(N[RC].def||null),gone};}
+    out[RC]=Object.assign({},O[RC],N[RC],{list:order.map(id=>m.get(id)).filter(Boolean),def:gone.includes(N[RC].def)?null:(N[RC].def||null),gone,bnAt:Math.max(+rca.bnAt||0,+rcb.bnAt||0)});}
   /* 咖啡店存檔：每位玩家分開合併，同名的留進度比較多的那份（天數多的；一樣就看累計營收） */
   const K='brewCareer.v1',ka=loc[K],kb=rem[K];
   if(ka&&kb&&ka.players&&kb.players){const P={},prog=x=>(+x.day||0)*1e9+(+x.earned||0);
@@ -5119,9 +5119,14 @@ async function afterLogin(){
     gOn=true;ls.set(GFLAG,'1');
     if(rem&&typeof rem==='object'){
       const m=merge(snapshot(),rem);let changed=false;
-      SYNC_KEYS.forEach(k=>{if(k in m){const v=typeof m[k]==='string'?m[k]:JSON.stringify(m[k]);if(ls.get(k)!==v){ls.set(k,v);changed=true}}});
+      /* 用內容比對（欄位順序不同不算變動），避免「判定有變 → 重新載入 → 又判定有變」的循環 */
+      const canon=x=>JSON.stringify(x,(k,v)=>v&&typeof v==='object'&&!Array.isArray(v)?Object.keys(v).sort().reduce((o,kk)=>(o[kk]=v[kk],o),{}):v);
+      SYNC_KEYS.forEach(k=>{if(k in m){const v=typeof m[k]==='string'?m[k]:JSON.stringify(m[k]),old=ls.get(k);
+        if(old===v)return;let same=false;try{same=old!=null&&canon(typeof m[k]==='string'?m[k]:JSON.parse(old))===canon(m[k]);}catch(e){}
+        ls.set(k,v);if(!same)changed=true;}});
       ls.set(STAMP,String(m.savedAt));
-      if(changed){await push();try{sessionStorage.setItem(TOKK,JSON.stringify({tok:gTok,exp:gTokExp}));sessionStorage.setItem('brewLab.skipTitle','1')}catch(e){}location.reload();return}
+      let recent=false;try{recent=Date.now()-(+sessionStorage.getItem('brewLab.syncReload')||0)<60000;}catch(e){}
+      if(changed&&!recent){await push();try{sessionStorage.setItem(TOKK,JSON.stringify({tok:gTok,exp:gTokExp}));sessionStorage.setItem('brewLab.skipTitle','1');sessionStorage.setItem('brewLab.syncReload',String(Date.now()))}catch(e){}location.reload();return}
     }
     await push();
   }catch(e){note(e.message==='auth'?'Google 連線已過期，再點一次':'⚠️ 讀取 Google 雲端失敗');chip(e.message==='auth'?'wait':'err')}
