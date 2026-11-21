@@ -902,7 +902,7 @@ h1,h2,h3{letter-spacing:.02em}
 .ba-cap{font-family:var(--f-display);font-size:18px;color:#f3e9d6;letter-spacing:.06em}.ba-skip{font-size:11px;color:#a59887}
 .brew-anim .bn{opacity:0;transform:translateY(-30px)}
 .brew-anim.go .bn{animation:baDrop .55s cubic-bezier(.5,0,.8,.6) forwards}
-@keyframes baDrop{0%{opacity:0;transform:translateY(-34px)}20%{opacity:1}100%{opacity:1;transform:translateY(34px)}}
+@keyframes baDrop{0%{opacity:0;transform:translateY(-34px)}20%{opacity:1}88%{opacity:1;transform:translateY(31px)}100%{opacity:0;transform:translateY(34px)}}
 .brew-anim .crank{transform-origin:72px 40px}
 .brew-anim.go .crank{animation:baCrank .35s linear 1.05s 4}
 @keyframes baCrank{from{transform:rotate(0)}to{transform:rotate(360deg)}}
@@ -6051,7 +6051,10 @@ function brewAnim(opt,done){const SS=opt.lab||SS,LAB=!!opt.lab,AUTO=LAB&&!!(opt.
     if(br==='kalita'||br==='orea'||br==='origami_w')h+=R2(lb-3,132,botW+6,3,bp.B);
     return h;}
   function R2(x,y,w,hh,c){return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+hh+'" fill="'+c+'"/>';}
-  const beans=Array.from({length:12},(_,i)=>'<ellipse class="bn" cx="'+(70+(i%5)*6)+'" cy="'+(gy-26)+'" rx="3.4" ry="2.3" fill="'+col+'" style="animation-delay:'+(i*.05)+'s"/>').join('');
+  /* 豆子從磨豆機正上方掉進豆倉（本體最上緣），落進去就消失，不會停在半空中 */
+  const hop=(()=>{const top=Math.max(0,rows.findIndex(r=>/[^.]/.test(r))),r=rows[top]||'',L=r.search(/[^.]/),R=r.length-1-[...r].reverse().join('').search(/[^.]/);
+    return {x:18+(L+R+1)/2*8,w:Math.max(8,(R-L+1)*8-10),y:gy+top*8};})();
+  const beans=Array.from({length:12},(_,i)=>'<ellipse class="bn" cx="'+(hop.x-hop.w/2+((i*7)%12)/11*hop.w).toFixed(1)+'" cy="'+(hop.y-34-1-(i%3)*1.5).toFixed(1)+'" rx="3.4" ry="2.3" fill="'+col+'" style="animation-delay:'+(i*.05)+'s"/>').join('');
   AN.innerHTML='<div class="ba-box"><svg viewBox="0 0 300 230" width="100%" aria-hidden="true"><defs><clipPath id="baClip"><path d="'+(press?'M197 100h38v104h-38z':dpath)+'"/></clipPath></defs>'+
    '<rect x="0" y="206" width="300" height="24" fill="#2a1c14"/><rect x="0" y="204" width="300" height="3" fill="#8a5a34"/>'+'<g transform="translate(14 204) scale(.66) translate(-18 -204)">'+beans+
    '<g id="baGr"><svg x="18" y="'+gy+'" width="128" height="'+gh+'" viewBox="0 0 16 '+rows.length+'" shape-rendering="crispEdges">'+sprG(rows,gp)+'</svg>'+
