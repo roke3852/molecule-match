@@ -169,6 +169,9 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
 .mr-more{grid-column:1 / -1;display:flex;flex-wrap:wrap;gap:4px}
 .mr-more button.del{color:var(--fail);border-color:var(--fail)}
 .mr-save{display:flex;gap:6px}
+.mr-imp{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:0 0 8px}
+.mr-imp button{font:inherit;font-size:12.5px;padding:5px 12px;border-radius:999px;border:1px solid var(--gold);background:transparent;color:var(--gold);cursor:pointer;font-weight:700}
+.mr-item .fr{grid-column:1 / -1;font-size:11.5px;color:var(--gold)}
 .mr-save input{flex:1;min-width:0;font:inherit;font-size:14px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:6px 10px}
 .mr-save button{background:var(--gold);border-color:var(--gold);color:#1a1612;font-weight:700;white-space:nowrap}
 .aroma .taste{flex-basis:100%;color:var(--ink);margin-top:6px}
@@ -1182,6 +1185,7 @@ window.BGM=(()=>{
     <div class="param myrec" id="myRecParam">
       <div class="row"><span class="label">我的配方</span><output id="myRecState" class="label"></output></div>
       <div class="mr-list" id="myRecList"></div>
+      <div class="mr-imp"><button type="button" id="myRecImp">📓 從沖煮筆記帶入</button><span id="myRecImpMsg" class="label"></span></div>
       <div class="mr-save"><input id="myRecName" type="text" maxlength="24" placeholder="幫目前的設定取個名字" aria-label="配方名稱"><button type="button" id="myRecAdd">存成新配方</button></div>
     </div>
     <div class="param champ" id="champParam"><div class="row"><label for="champSel" class="label">世界手沖冠軍的沖煮手法</label><output id="champState" class="label"></output></div><button type="button" class="bpick cpick" id="champPick" aria-haspopup="dialog"></button><select id="champSel" class="beansel" hidden></select><div class="champinfo" id="champInfo" hidden></div></div>
@@ -2915,7 +2919,7 @@ function applyParams(o){
 }
 /* ===== 我的配方：把目前的整組設定存起來，下次一鍵套用 ===== */
 const RKEY='brewLab.recipes';
-function recLoad(){try{const o=JSON.parse(localStorage.getItem(RKEY)||'null');if(o&&Array.isArray(o.list))return {list:o.list,def:o.def||null,gone:o.gone||[]};}catch(e){}return {list:[],def:null,gone:[]};}
+function recLoad(){try{const o=JSON.parse(localStorage.getItem(RKEY)||'null');if(o&&Array.isArray(o.list))return {list:o.list,def:o.def||null,gone:o.gone||[],bnAt:o.bnAt||0};}catch(e){}return {list:[],def:null,gone:[]};}
 function recStore(o){try{localStorage.setItem(RKEY,JSON.stringify(o));}catch(e){}}
 function recSnap(){const o={};PFIELDS.forEach(k=>{const v=P[k];o[k]=Array.isArray(v)?JSON.parse(JSON.stringify(v)):v;});
   if((o.pattern==='pulse'||o.pattern==='switch')&&o.plan){const sg=planSegments(o.plan,o.planT,o.planD);o.planT=sg.map(g=>Math.round(g.s));o.planD=sg.map(g=>Math.round(g.e-g.s));}
@@ -2941,7 +2945,7 @@ function recRender(){
   box.innerHTML=st.list.map(r=>{const isOn=on&&on.id===r.id,isDef=st.def===r.id;
     return '<div class="mr-item'+(isOn?' on':'')+'" data-id="'+r.id+'"><div class="nm">'+r.name.replace(/[<>&]/g,'')+(isDef?'<em class="def">★ 預設</em>':'')+(isOn?'<em>使用中</em>':'')+'</div>'+
       '<div class="bt">'+(isOn?'':'<button class="pri" data-a="use">套用</button>')+'<button data-a="more" aria-label="更多">⋯</button></div>'+
-      '<div class="sm">'+recSum(r.p)+'</div>'+
+      '<div class="sm">'+recSum(r.p)+'</div>'+(r.from?'<div class="fr">📓 '+r.from.replace(/[<>&]/g,'')+'</div>':'')+
       (recOpen===r.id?'<div class="mr-more"><button data-a="def">'+(isDef?'取消預設':'★ 設為預設')+'</button>'+(isOn?'':'<button data-a="upd">用目前設定覆蓋</button>')+'<button data-a="ren">改名</button><button data-a="up">上移</button><button class="del" data-a="del">刪除</button></div>':'')+'</div>';}).join('');
   box.querySelectorAll('button').forEach(b=>b.onclick=()=>{const id=b.closest('.mr-item').dataset.id,S=recLoad(),i=S.list.findIndex(x=>x.id===id);if(i<0)return;const r=S.list[i],a=b.dataset.a;
     if(a==='use'){recOpen=null;recApply(r);return;}
@@ -2950,8 +2954,53 @@ function recRender(){
     else if(a==='upd'){r.p=recSnap();r.at=Date.now();}
     else if(a==='ren'){const n=prompt('新名字',r.name);if(!n||!n.trim())return;r.name=n.trim().slice(0,24);}
     else if(a==='up'){if(i>0){S.list.splice(i,1);S.list.splice(i-1,0,r);}}
-    else if(a==='del'){if(!confirm('刪除「'+r.name+'」？'))return;S.list.splice(i,1);S.gone=(S.gone||[]).concat(id).slice(-100);if(S.def===id)S.def=null;recOpen=null;}
+    else if(a==='del'){if(!confirm('刪除「'+r.name+'」？'))return;S.list.splice(i,1);S.gone=(S.gone||[]).concat(id,r.src?'src:'+r.src:[]).slice(-200);if(S.def===id)S.def=null;recOpen=null;}
     recStore(S);recRender();});}
+
+/* ===== 從沖煮筆記（同一個網站的 brew-notes）帶入配方 ===== */
+const BN_KEY='brewlog-v1';
+function bnGrinder(n){n=String(n||'');return /c40|comandante/i.test(n)?'c40':/zp6/i.test(n)?'zp6':/k-?ultra/i.test(n)?'kultra':/k6|kingrinder/i.test(n)?'k6':/p80|lagom/i.test(n)?'p80':/ek43/i.test(n)?'ek43':/encore/i.test(n)?'encore':null;}
+function bnDripper(n,paper){n=String(n||'')+' '+String(paper||'');return /orea/i.test(n)?'orea':/origami/i.test(n)?(/波浪|wave/i.test(n)?'origami_w':'origami_c'):/kalita|wave/i.test(n)?'kalita':/solo/i.test(n)?'solo':/v60|neo|switch/i.test(n)?'v60':'cone';}
+function bnRoast(bean){const a=bean&&+bean.agtron;if(!a)return 2;return a>=80?1:a>=67?2:a>=57?3:a>=47?4:5;}
+function bnPlan(txt,dose,water){
+  const L=String(txt||'').split(/\n+/).map(l=>l.trim()).filter(Boolean);const plan=[],planT=[],planD=[];let t=0;
+  L.forEach(l=>{const m=l.match(/(\d+(?:\.\d+)?)\s*(?:ml|g)\b/i);if(!m)return;const ml=Math.round(+m[1]);
+    const r=l.match(/(\d+(?:\.\d+)?)\s*(?:ml|g)\s*\/\s*s/i),iv=l.replace(/(\d+(?:\.\d+)?)\s*(?:ml|g)\s*\/\s*s/ig,'').match(/(\d+)\s*(?:s|秒)(?![a-z])/i);
+    const rate=r?+r[1]:4,d=Math.max(1,Math.round(ml/rate));plan.push(ml);planT.push(Math.round(t));planD.push(d);t+=iv?+iv[1]:d+15;});
+  if(plan.length<2){const W=water||Math.round(dose*16),b=Math.min(W,dose*3);return {plan:[b,W-b],planT:[0,40],planD:[Math.round(b/4),Math.round((W-b)/4)]};}
+  return {plan,planT,planD};}
+function bnToRecipe(b,beans){
+  const gid=bnGrinder(b.grinder),G=gid&&GRINDERS.find(g=>g.id===gid);let grind=650,gtxt='';
+  if(G&&G.um&&b.grind!=null&&window.GRH){let c=+b.grind;if(G.dial==='num'&&String(b.grind).includes('.'))c=Math.round(c*10);grind=Math.max(300,Math.min(1200,window.GRH.gSize(G,c)));gtxt=(gid==='c40'?'C40':gid==='zp6'?'ZP6':G.name)+' '+b.grind+(G.dial==='num'?'':' 格');}
+  const sw=/switch/i.test(b.dripper||'');const pl=bnPlan(b.pours,+b.dose||15,+b.water||0);
+  const p={filter:'paper',wdt:false,dig:false,cutoff:0,bypassMl:0,dripper:bnDripper(b.dripper,b.paper),dose:+b.dose||15,ratio:(+b.water||pl.plan.reduce((a,x)=>a+x,0))/(+b.dose||15),temp:+b.temp||92,grind,
+    roast:bnRoast(beans.find(x=>x.id===b.beanId)),pattern:sw?'switch':'pulse',plan:pl.plan,planT:pl.planT,planD:pl.planD,planTemp:null,beanId:null,valveWins:sw?[[0,50]]:null,grinder:gid,
+    swOpen:50,swMode:'closeFirst',swClose:30,steep:240,prePO:'none',preIM:'none'};
+  const dshort=String(b.dripper||'').replace(/不鏽鋼|樹脂|陶瓷|（.*?）/g,'').trim();
+  const meth=String(b.method||'').replace(/（.*?）/g,'').trim();
+  return {p,name:[meth||dshort,gtxt,(+b.temp||'')+'°C'].filter(Boolean).join('・').slice(0,24),dshort};}
+async function bnFetch(){let d=null;try{d=JSON.parse(localStorage.getItem(BN_KEY)||'null');}catch(e){}
+  if(!d||!Array.isArray(d.brews)||!d.brews.length){try{const r=await fetch('../brew-notes/inbox.json',{cache:'no-store'});if(r.ok)d=await r.json();}catch(e){}}
+  return d&&Array.isArray(d.brews)?d:null;}
+async function bnImport(auto){const msg=$('myRecImpMsg');if(!auto)msg.textContent='讀取中…';
+  const d=await bnFetch();if(!d){msg.textContent='找不到沖煮筆記的紀錄（要先在沖煮筆記 App 記過）';return 0;}
+  const beans=d.beans||[],groups=new Map();
+  d.brews.filter(b=>b&&b.pours&&!b._del).forEach(b=>{const r=bnToRecipe(b,beans),k=recKey(Object.assign({},r.p,{roast:0}));const g=groups.get(k);
+    if(!g)groups.set(k,{r,list:[b]});else g.list.push(b);});
+  const S=recLoad(),have=new Set(S.list.map(x=>x.src).filter(Boolean)),gone=new Set(S.gone||[]);let n=0;
+  [...groups.entries()].sort((a,b)=>Math.max(...b[1].list.map(x=>x.ts||0))-Math.max(...a[1].list.map(x=>x.ts||0))).forEach(([k,g])=>{
+    const src='bn:'+k.length+':'+[...k].reduce((h,c)=>(h*31+c.charCodeAt(0))>>>0,7).toString(36);if(have.has(src)||gone.has('src:'+src))return;
+    const last=g.list.reduce((a,b)=>(b.ts||0)>(a.ts||0)?b:a),dt=last.ts?new Date(last.ts):null,best=Math.max(...g.list.map(x=>+x.score||0));
+    const cnt={};g.list.forEach(x=>{const m=String(x.method||'').replace(/（.*?）/g,'').trim();cnt[m]=(cnt[m]||0)+1;});
+    const top=Object.entries(cnt).sort((x,y)=>y[1]-x[1])[0][0];let name=(top?g.r.name.replace(/^[^・]*/,top):g.r.name);
+    if(S.list.some(x=>x.name===name))name=[top,(g.r.name.split('・')[1]||'').replace(/ 格/,'格'),'悶蒸'+(g.r.p.planT[1]||0)+'秒'].filter(Boolean).join('・').slice(0,24);
+    if(S.list.some(x=>x.name===name))name=(name.slice(0,20)+' #'+(n+2));
+    S.list.push({id:'r'+Date.now().toString(36)+n,name,p:g.r.p,at:Date.now(),src,from:'沖煮筆記・'+g.r.dshort+'・沖過 '+g.list.length+' 杯'+(dt?'・最近 '+(dt.getMonth()+1)+'/'+dt.getDate():'')+(best?'・最高 '+best+' 分':'')});n++;});
+  S.bnAt=Date.now();recStore(S);recRender();
+  msg.textContent=n?'帶入 '+n+' 組配方（同樣參數的杯數合併成一組）':'沒有新的配方，沖煮筆記裡的組合都已經帶過了';return n;}
+$('myRecImp').onclick=()=>bnImport(false);
+/* 第一次用、清單還是空的：自動從沖煮筆記帶入當作預設配方 */
+setTimeout(()=>{const S=recLoad();if(!S.list.length&&!S.bnAt)bnImport(true);},400);
 $('myRecAdd').onclick=()=>{const S=recLoad(),n=($('myRecName').value.trim()||recDefaultName()).slice(0,24);
   S.list.push({id:'r'+Date.now().toString(36),name:n,p:recSnap(),at:Date.now()});recStore(S);$('myRecName').value='';recRender();};
 $('myRecName').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();$('myRecAdd').click();}});
