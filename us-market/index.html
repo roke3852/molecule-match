@@ -148,7 +148,8 @@ textarea.f{min-height:80px;resize:vertical}
 .tw-scene{width:100%;height:auto;border-radius:12px;display:block;image-rendering:pixelated;border:2px solid var(--line)}
 .tw-hero{position:relative;margin-bottom:14px}
 .tw-cast{display:flex;justify-content:space-around;margin-top:-30px;position:relative}
-.tw-cast>div{display:flex;flex-direction:column;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:6px 8px;width:31%}
+.tw-cast>div{display:flex;flex-direction:column;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:6px 4px;width:23.5%}
+.tw-daily{border:2px solid var(--hlb)}
 .tw-cast b{font-size:14px}.tw-cast small{font-size:10.5px;color:var(--faint);text-align:center;line-height:1.3}
 .tw-stop{display:grid;grid-template-columns:28px 28px 1fr 20px;align-items:center;gap:6px;padding:10px 4px;border-top:1px dashed var(--line);cursor:pointer;font-size:15px}
 .tw-stop:first-of-type{border-top:0}
@@ -905,12 +906,13 @@ document.addEventListener("pointerdown",e=>{const el=e.target.closest("[data-tip
 document.addEventListener("dblclick",e=>e.preventDefault());
 
 /* ---------- 導覽員：收盤後的交易室（文字遊戲） ---------- */
-const PAL={g:"#a7adb5",s:"#f1c27d",e:"#1d1d1d",b:"#2b2b2b",r:"#c0392b",n:"#1f3a5f",w:"#f4f4f4",t:"#c0392b",h:"#2b2321",p:"#e58fa6",c:"#2a78d6",o:"#eb6834"};
+const PAL={y:"#e2b23a",v:"#6c4bb4",g:"#a7adb5",s:"#f1c27d",e:"#1d1d1d",b:"#2b2b2b",r:"#c0392b",n:"#1f3a5f",w:"#f4f4f4",t:"#c0392b",h:"#2b2321",p:"#e58fa6",c:"#2a78d6",o:"#eb6834"};
 const SPR={
  K:["...gggggg...","..gggggggg..",".gggggggggg.",".gssssssssg.",".sbbbssbbbs.",".sbebssbebs.",".ssssssssss.","..sssrrsss..","...ssssss...","..nnnwwnnn..",".nnnnwtnnnn.",".nnnnwtnnnn."],
  A:["...hhhhhh...","..hhhhhhhh..",".hhhhhhhhhh.",".hhsssssshh.",".hssssssssh.",".hsessssesh.",".hssssssssh.",".hsssrrsssh.",".hh.ssss.hh.","..pppwwppp..",".pppppppppp.",".pppppppppp."],
+ M:["...yyyyyy...","..yyyyyyyy..",".yyyyyyyyyy.",".yyssssssyy.",".yssssssssy.",".ysessssesy.",".yssssssssy.",".yyssrrssyy.",".yy.ssss.yy.","..vvvwwvvv..",".vvvvwwvvvv.",".vvvvvvvvvv."],
  J:["..cccccccc..",".cccccccccc.",".ccccccccccc",".hssssssssh.",".ssssssssss.",".sesssssses.",".ssssssssss.","..sssrrsss..","...ssssss...","..oooooooo..",".oooowwoooo.",".oooooooooo."]};
-const WHO={K:["老K","資深交易員・導覽員"],A:["小安","新手投資人"],J:["阿傑","半導體工程師・台股股民"]};
+const WHO={M:["晨晨","每日導覽員・晨間主播"],K:["老K","資深交易員・導覽員"],A:["小安","新手投資人"],J:["阿傑","半導體工程師・台股股民"]};
 function sprite(k,sz=56){const m=SPR[k];let r="";m.forEach((row,y)=>[...row].forEach((ch,x)=>{if(PAL[ch])r+=`<rect x="${x}" y="${y}" width="1.02" height="1.02" fill="${PAL[ch]}"/>`}));return `<svg viewBox="0 0 12 12" width="${sz}" height="${sz}" shape-rendering="crispEdges" style="display:inline-block">${r}</svg>`}
 function R(x,y,w,h,f){return `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${f}"/>`}
 function stars(seed,n=14){let r="",v=seed;for(let i=0;i<n;i++){v=(v*9301+49297)%233280;r+=R(v%96,(v>>3)%14,1,1,"#ffffff"+(i%2?"aa":"66"))}return r}
@@ -923,9 +925,27 @@ const SCN={
  taipei:()=>R(0,0,96,40,"#160f2a")+stars(5,18)+[[4,22,8],[14,18,10],[26,24,7],[62,20,9],[73,16,8],[84,23,10]].map(([x,y,w])=>R(x,y,w,40-y,"#2b2347")+R(x+2,y+3,1,1,"#e2b23a")+R(x+5,y+7,1,1,"#e2b23a")).join("")+[0,1,2,3,4,5,6,7].map(i=>R(43-i*0.0+0,6+i*3.5,10,3,"#3f6f8f")+R(42,9+i*3.5,12,1,"#2c5570")).join("")+R(47,1,2,5,"#9ab")+R(0,36,96,4,"#0e0a1c"),
  archive:()=>R(0,0,96,40,"#2a1f16")+[0,1,2].map(r=>R(4,4+r*10,88,1,"#5a4330")+[...Array(22)].map((_,i)=>R(6+i*4,6+r*10-((i*7)%3),3,7-((i*5)%3)+((i*7)%3),["#7b3b2a","#3d5a73","#6b6a3a","#8a6d3b"][(i+r)%4])).join("")).join("")+R(30,32,36,8,"#4a3626")+R(36,30,24,3,"#e8dcc0"),
  arena:()=>R(0,0,96,40,"#121826")+R(0,0,48,40,"#1d2a44")+R(48,0,48,40,"#3a1f1a")+R(10,20,20,12,"#2a78d6")+R(66,20,20,12,"#eb6834")+R(14,14,12,6,"#2a78d6")+R(70,14,12,6,"#eb6834")+R(46,4,4,30,"#e2b23a")+R(0,32,96,8,"#0b0f18"),
+ studio:()=>R(0,0,96,40,"#1b2235")+stars(9,8)+R(52,4,40,22,"#0b0f18")+R(53,5,38,20,"#10233a")+`<polyline points="55,8 62,10 68,9 74,15 80,17 86,23 89,24" fill="none" stroke="#eb6834" stroke-width=".9"/>`+R(4,6,40,14,"#24304a")+R(6,8,10,2,"#e2b23a")+R(6,12,30,1,"#8a93a6")+R(6,15,24,1,"#8a93a6")+R(0,26,96,4,"#c0392b")+[4,20,36,52,68,84].map(x=>R(x,27,9,1,"#f4f4f4")).join("")+R(0,30,96,10,"#3a4150")+R(0,30,96,1,"#4a5266"),
  dawn:()=>R(0,0,96,40,"#1d1b3a")+R(0,14,96,8,"#4a2f5a")+R(0,22,96,6,"#b8564a")+R(0,26,96,4,"#e2b23a")+R(40,22,16,8,"#f4c95d")+R(0,30,96,10,"#14122a")+[[6,26,8],[18,24,6],[70,25,9],[84,27,7]].map(([x,y,w])=>R(x,y,w,40-y,"#0c0b1d")).join("")
 };
 const T=[
+/* 每日導覽：每天早上更新這一站（k 帶日期，換日後進度自動歸零） */
+{k:"daily-2026-11-21",daily:1,day:"11/21（六）",ic:"📅",n:"今日早報",sc:"studio",go:["ev","rout-1120"],L:[
+ ["M","早安！我是每日導覽員晨晨。每天早上花 3 分鐘，帶你看完昨晚的美股和台股。"],
+ {card:{t:"！昨晚收盤（11/20）",l:["S&P 500　6,910　−3.70%","Nasdaq　22,618　−5.28%","道瓊　48,147　−1.93%","費城半導體　8,409　−10.73%","台股加權（週五）　36,033　−6.23%"]}},
+ ["M","一句話：AI 殺盤全面失控。S&P 和道瓊正式跌進修正區，Nasdaq 今年的漲幅全部吐光，費半 30 檔成分股沒有一檔收紅。"],
+ ["A","一天跌 10% 也太誇張了吧？發生什麼事？"],
+ ["M","最大的引爆點是路透報導：美國 SEC 正在調查輝達的會計。輝達單日跌約 14%，收 125.53 美元、連跌 7 天，一天蒸發四、五千億美元市值。"],
+ {card:{t:"！今天的三件大事",l:["🟩 輝達傳 SEC 查會計，單日 −14%","🔔 ANT 收 88.91（−8.5%），盤中只差幾美分就破 83 承銷價","🏦 Fed 官員續放鷹，12 月升息幾乎確定"]}},
+ ["J","那台股週一怎麼辦？我已經不敢看了⋯⋯"],
+ ["M","台指期夜盤已經跌了 1,881 點，週一開盤壓力很大。要看三件事：台積電守不守得住 2,000 元、跌停家數有沒有變少、11/24 到 26 融資追繳到期後的斷頭賣壓。"],
+ {q:["M","今天你最想先搞懂哪一件？"],o:[
+  ["輝達被 SEC 查","SEC 調查不等於認定違法，很多調查最後沒有處分。但在執行長空缺、國會 12/1 作證之前，市場會先把不確定性打折。"],
+  ["ANT 會不會破發","週五最低約 83.05 美元，只比承銷價高幾美分就被買回來，代表 83 有人在接。下一個考驗是 12/15 第一批閉鎖期解禁，最多 3.03 億股可以賣。"],
+  ["這是不是底部","止跌訊號現在亮 3 個、半亮 7 個、未亮 2 個。權值股終於補跌是好事，但聯準會還沒停手、VIX 還沒回落，比較像恐慌加速段。"]]},
+ {card:{t:"！接下來要盯",l:["11/23（一）台股開盤、ANT 選擇權最快上線","11/24–26 台股融資追繳到期","12/1 黃仁勳國會閉門作證、ANT 納入 MSCI","12/10 凌晨 3 點 FOMC 利率決議"]}},
+ ["M","今天的早報就到這裡，明天早上見！想把整個月的來龍去脈搞懂，可以接著走老K 的完整導覽。"]],
+ sum:["S&P、道瓊跌進修正區，費半單日 −10.73%","輝達傳 SEC 查會計，ANT 守住 83 承銷價","台股週一看台積電 2,000、跌停家數、融資追繳"]},
 {k:"pro",ic:"🌙",n:"收盤後的交易室",sc:"trade",go:["bear"],L:[
  ["K","小安、阿傑，收盤了。今晚我帶你們把這個月的大事走一遍。"],
  ["A","K 哥，我只知道最近一直跌⋯⋯台股週五又跌了 2,394 點，美股週五 Nasdaq 重挫 5%、費半跌了快 11%！"],
@@ -1059,16 +1079,18 @@ const T=[
  sum:["用「價位＋訊號」分批，不猜底","目前訊號只亮一部分","台股看費半、外資、台積電"]}
 ];
 const TS={st:-1,i:0,typing:0,full:"",pend:null,choice:null,log:[],fast:0};
+function stNo(i){return i-T.slice(0,i).filter(x=>x.daily).length}
 function tourDone(){return LS.get("tour",{})}
 function renderTourMap(){
-  const d=tourDone(),n=T.filter(x=>d[x.k]).length,nx=T.find(x=>!d[x.k])||T[0];
-  $("#tourBox").innerHTML=`<div class="tw-hero">${SCN.trade()?`<svg viewBox="0 0 96 40" shape-rendering="crispEdges" class="tw-scene">${SCN.trade()}</svg>`:""}<div class="tw-cast">${["K","A","J"].map(k=>`<div>${sprite(k,44)}<b>${WHO[k][0]}</b><small>${WHO[k][1]}</small></div>`).join("")}</div></div>
+  const d=tourDone(),TM=T.filter(x=>!x.daily),n=TM.filter(x=>d[x.k]).length,nx=TM.find(x=>!d[x.k])||TM[0],DY=T.find(x=>x.daily);
+  $("#tourBox").innerHTML=`<div class="tw-hero">${SCN.trade()?`<svg viewBox="0 0 96 40" shape-rendering="crispEdges" class="tw-scene">${SCN.trade()}</svg>`:""}<div class="tw-cast">${["M","K","A","J"].map(k=>`<div>${sprite(k,44)}<b>${WHO[k][0]}</b><small>${WHO[k][1]}</small></div>`).join("")}</div></div>
+  ${DY?`<div class="card tw-daily"><h2>${DY.ic} 每日導覽・${DY.day}</h2><div class="meta">每日導覽員晨晨每天早上更新：3 分鐘看完昨晚美股、台股收盤和今天要盯的事。</div><button class="btn pri" style="width:100%;margin-top:12px" data-tgo="${T.indexOf(DY)}">${d[DY.k]?"✓ 已看完，再看一次":"開始今日導覽"}</button></div>`:""}
   <div class="card"><h2>🌙 收盤後的交易室</h2><div class="meta">資深交易員老K 帶新手小安、半導體工程師阿傑，用故事走一遍這個月的美股與台股大事。選項只會帶出說明，沒有對錯。</div>
-  <button class="btn pri" style="width:100%;margin-top:12px" data-tgo="${T.indexOf(nx)}">${n?`繼續導覽：${nx.ic} ${nx.n}`:"開始導覽"}</button><div class="meta" style="justify-content:center;margin-top:6px">已完成 ${n} / ${T.length} 站</div></div>
-  <div class="card"><h2>導覽路線</h2>${T.map((x,i)=>`<div class="tw-stop ${d[x.k]?"done":""}" data-tgo="${i}"><span class="no">${i?i:"序"}</span><span class="ic">${x.ic}</span><span class="nm">${x.n}</span><span class="ck">${d[x.k]?"✓":"›"}</span></div>`).join("")}
+  <button class="btn pri" style="width:100%;margin-top:12px" data-tgo="${T.indexOf(nx)}">${n?`繼續導覽：${nx.ic} ${nx.n}`:"開始導覽"}</button><div class="meta" style="justify-content:center;margin-top:6px">已完成 ${n} / ${TM.length} 站</div></div>
+  <div class="card"><h2>導覽路線</h2>${T.map((x,i)=>x.daily?"":`<div class="tw-stop ${d[x.k]?"done":""}" data-tgo="${i}"><span class="no">${stNo(i)?stNo(i):"序"}</span><span class="ic">${x.ic}</span><span class="nm">${x.n}</span><span class="ck">${d[x.k]?"✓":"›"}</span></div>`).join("")}
   ${n?`<button class="btn" style="margin-top:10px" id="tourReset">重設進度</button>`:""}</div>`;
 }
-function tourStart(i,keepLog){TS.st=i;TS.i=0;TS.choice=null;TS.pend=null;if(!keepLog)TS.log=[];clearInterval(TS.tm);$("#tourBox").innerHTML=`<div class="tw-play"><div class="tw-top"><button class="btn" id="tourBack">← 路線</button><span>${T[i].ic} ${i?`第 ${i} 站`:"序章"}・${T[i].n}</span></div><svg viewBox="0 0 96 40" shape-rendering="crispEdges" class="tw-scene">${SCN[T[i].sc]()}</svg><div id="twCards"></div><div class="tw-dlg" id="twDlg"><div class="tw-av" id="twAv"></div><div class="tw-tx"><b id="twWho"></b><div id="twText"></div><span class="tw-more" id="twMore">▼</span></div></div><div id="twOpts"></div></div>`;tourStep();}
+function tourStart(i,keepLog){TS.st=i;TS.i=0;TS.choice=null;TS.pend=null;if(!keepLog)TS.log=[];clearInterval(TS.tm);$("#tourBox").innerHTML=`<div class="tw-play"><div class="tw-top"><button class="btn" id="tourBack">← 路線</button><span>${T[i].ic} ${T[i].daily?"每日導覽":stNo(i)?`第 ${stNo(i)} 站`:"序章"}・${T[i].n}</span></div><svg viewBox="0 0 96 40" shape-rendering="crispEdges" class="tw-scene">${SCN[T[i].sc]()}</svg><div id="twCards"></div><div class="tw-dlg" id="twDlg"><div class="tw-av" id="twAv"></div><div class="tw-tx"><b id="twWho"></b><div id="twText"></div><span class="tw-more" id="twMore">▼</span></div></div><div id="twOpts"></div></div>`;tourStep();}
 function tourType(who,text){
   $("#twAv").innerHTML=sprite(who,52);$("#twWho").textContent=WHO[who][0];
   const el=$("#twText");TS.full=text;clearInterval(TS.tm);if(TS.fast){el.textContent=text;TS.typing=0;$("#twMore").style.visibility="visible";return}TS.typing=1;let n=0;$("#twMore").style.visibility="hidden";
