@@ -1437,8 +1437,9 @@ function endDrag(ev,cancel){if(!DR)return;const d=DR;DR=null;
 document.addEventListener('pointerup',ev=>endDrag(ev));
 document.addEventListener('pointercancel',ev=>endDrag(ev,true));
 function vRecipe(){
-  const tabs=`<div class="seg txt" style="margin:4px 0 10px"><button type="button" data-act="rTab" data-v="desk" class="${S.rtab!=='cat'?'on':''}">沖煮桌</button><button type="button" data-act="rTab" data-v="cat" class="${S.rtab==='cat'?'on':''}">器材圖鑑</button></div>`;
+  const tabs=`<div class="seg txt" style="margin:4px 0 10px"><button type="button" data-act="rTab" data-v="desk" class="${S.rtab!=='cat'?'on':''}">沖煮桌</button><button type="button" data-act="rTab" data-v="pro" class="${S.rtab==='pro'?'on':''}">名家配方</button><button type="button" data-act="rTab" data-v="cat" class="${S.rtab==='cat'?'on':''}">器材圖鑑</button></div>`;
   if(S.rtab==='cat')return tabs+catalogHtml();
+  if(S.rtab==='pro')return tabs+proHtml();
   return tabs+vDesk()}
 function vDesk(){
   if(!S.beans.length)return '<div class="card sub">先到「豆子」頁新增豆子。</div>';
@@ -1452,6 +1453,31 @@ function vDesk(){
   h+=`<h2>器材架</h2><div class="card">${shelfHtml()}</div>`;
   h+=crossHtml()+gearLib();
   return h;
+}
+/* ---------- 名家配方 ---------- */
+const PRO=[{id:'jbrc2026',title:'2026 JBrC 冠軍沖法',who:'長崎愛美（PHILOCOFFEA）',ev:'2026 日本沖煮大賽（JBrC）冠軍',bean:'Costa Rica, La Esmeralda, Washed Reposado（@sipwithshin 分享時用的豆子）',
+  dripper:'Hario V60（樹脂）',grind:'粗',temp:'90°C → 75°C',tempStart:90,dose:17.5,water:210,ratio:'1:12',time:140,method:'每 20 秒注 30ml，共 7 段，水溫逐段下降',
+  pours:[['0:00','0:20',30],['0:20','0:40',60],['0:40','1:00',90],['1:00','1:20',120],['1:20','1:40',150],['1:40','2:00',180],['2:00','2:20',210]],
+  tips:['數字是累計水量：每段都是再加 30ml，注完 210ml。','粉水比 1:12，比一般 1:15–16 濃；研磨粗，靠多段小水量把甜感帶出來。','水溫從 90°C 一路降到 75°C：前段高溫萃香氣與酸，後段低溫收尾少苦澀。在家可以不加熱、讓壺自然降溫，或後段加一點常溫水。'],
+  src:'Threads @sipwithshin（Coffee Threads）轉述的冠軍沖法'}];
+function proHtml(){
+  return `<div class="sub" style="margin-bottom:8px">比賽冠軍與名家公開的沖法。點「照這個配方記一杯」會帶入參數，沖完再記風味。</div>`+PRO.map(r=>`<div class="card">
+    <div class="between"><div><div class="title">🏆 ${esc(r.title)}</div><div class="sub">${esc(r.who)} · ${esc(r.ev)}</div></div></div>
+    <div class="sub" style="margin:6px 0">豆子：${esc(r.bean)}</div>
+    <div class="mono" style="margin:4px 0">${esc([r.dripper,'研磨 '+r.grind,r.temp,r.dose+'g : '+r.water+'ml',r.ratio,fmtTime(r.time)].join(' ・ '))}</div>
+    <table class="cmp"><tr><th>時間</th><th>這段注</th><th>累計</th></tr>${r.pours.map((x,i)=>`<tr><td class="mono">${x[0]}–${x[1]}</td><td class="mono">+${x[2]-(i?r.pours[i-1][2]:0)}ml</td><td class="mono">${x[2]}ml</td></tr>`).join('')}</table>
+    ${r.tips.map(t=>`<div class="sub">・${esc(t)}</div>`).join('')}
+    <div class="sub" style="margin-top:4px">來源：${esc(r.src)}</div>
+    <div class="row" style="margin-top:8px"><button class="btn sm pri" data-act="usePro" data-id="${esc(r.id)}">照這個配方記一杯</button></div></div>`).join('');
+}
+function usePro(id){
+  const r=PRO.find(x=>x.id===id);if(!r)return;
+  const bean=(SEL.bean&&S.beans.find(b=>b.id===SEL.bean))||S.beans.find(b=>!b.archived);
+  startBrew({beanId:bean?bean.id:undefined});
+  const d=gear('dripper').find(x=>/v60/i.test(x.name));
+  Object.assign(F,{dripper:d?d.name:'V60',temp:r.tempStart,dose:r.dose,water:r.water,method:r.title+'：'+r.method,pours:r.pours.map((x,i)=>`${x[0]} 注到 ${x[2]}g（+${x[2]-(i?r.pours[i-1][2]:0)}）`).join('\n'),time:r.time,
+    target:'試 '+r.title+'（'+r.temp+'，研磨'+r.grind+'）',baseId:null,rel:{}});
+  drawForm();
 }
 function gearLib(){
   return `<details class="card"><summary><b>管理器材</b> <span class="sub">新增、修改、換圖示</span></summary>${Object.keys(GT).map(t=>`<div class="grp">${GT[t]}</div><div class="chips">${gear(t).map(x=>`<button class="chip" data-act="editGear" data-id="${esc(x.id)}">${esc(x.name)}</button>`).join('')}<button class="chip" data-act="newGear" data-v="${t}">＋ 新增${GT[t]}</button></div>`).join('')}
@@ -1737,6 +1763,7 @@ document.addEventListener('click',async ev=>{
   else if(a==='gearDr'&&GF){const i=GF.drippers.indexOf(v);if(i<0)GF.drippers.push(v);else GF.drippers.splice(i,1);drawGear()}
   else if(a==='delGear'){if(confirmTap(el,'gear'+id)){await store.del('gear',id);closeSheet();toast('已刪除')}}
   else if(a==='useRec')useRec(!!el.dataset.ai);
+  else if(a==='usePro')usePro(el.dataset.id);
   else if(a==='aiRec')aiRec();
   else if(a==='pdf')sharePdf();
   else if(a==='beanPdf'){const b=S.beans.find(x=>x.id===id)||beans().find(x=>x.id===id);if(b)showPdf(beanCanvas(b),`豆子筆記_${safeName(shortBean(b))}.pdf`,'分享豆子 PDF')}
