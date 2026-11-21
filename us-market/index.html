@@ -939,7 +939,7 @@ const T=[
  {card:{t:"！今天的三件大事",l:["🟩 輝達傳 SEC 查會計，單日 −14%","🔔 ANT 收 88.91（−8.5%），盤中只差幾美分就破 83 承銷價","🏦 Fed 官員續放鷹，12 月升息幾乎確定"]}},
  ["J","那台股週一怎麼辦？我已經不敢看了⋯⋯"],
  ["M","台指期夜盤已經跌了 1,881 點，週一開盤壓力很大。要看三件事：台積電守不守得住 2,000 元、跌停家數有沒有變少、11/24 到 26 融資追繳到期後的斷頭賣壓。"],
- {q:["M","今天你最想先搞懂哪一件？"],o:[
+ {q:["M","今天你最想先搞懂哪一件？"],more:1,by:"M",again:"還想知道哪一件嗎？",o:[
   ["輝達被 SEC 查","SEC 調查不等於認定違法，很多調查最後沒有處分。但在執行長空缺、國會 12/1 作證之前，市場會先把不確定性打折。"],
   ["ANT 會不會破發","週五最低約 83.05 美元，只比承銷價高幾美分就被買回來，代表 83 有人在接。下一個考驗是 12/15 第一批閉鎖期解禁，最多 3.03 億股可以賣。"],
   ["這是不是底部","止跌訊號現在亮 3 個、半亮 7 個、未亮 2 個。權值股終於補跌是好事，但聯準會還沒停手、VIX 還沒回落，比較像恐慌加速段。"]]},
@@ -1078,7 +1078,7 @@ const T=[
  ["K","今晚的導覽到這裡。記住，這是幫你理解，不是投資建議。黎明前最黑，但黎明總會來。"]],
  sum:["用「價位＋訊號」分批，不猜底","目前訊號只亮一部分","台股看費半、外資、台積電"]}
 ];
-const TS={st:-1,i:0,typing:0,full:"",pend:null,choice:null,log:[],fast:0};
+const TS={st:-1,i:0,typing:0,full:"",pend:null,choice:null,again:null,used:null,log:[],fast:0};
 function stNo(i){return i-T.slice(0,i).filter(x=>x.daily).length}
 function tourDone(){return LS.get("tour",{})}
 function renderTourMap(){
@@ -1090,7 +1090,7 @@ function renderTourMap(){
   <div class="card"><h2>導覽路線</h2>${T.map((x,i)=>x.daily?"":`<div class="tw-stop ${d[x.k]?"done":""}" data-tgo="${i}"><span class="no">${stNo(i)?stNo(i):"序"}</span><span class="ic">${x.ic}</span><span class="nm">${x.n}</span><span class="ck">${d[x.k]?"✓":"›"}</span></div>`).join("")}
   ${n?`<button class="btn" style="margin-top:10px" id="tourReset">重設進度</button>`:""}</div>`;
 }
-function tourStart(i,keepLog){TS.st=i;TS.i=0;TS.choice=null;TS.pend=null;if(!keepLog)TS.log=[];clearInterval(TS.tm);$("#tourBox").innerHTML=`<div class="tw-play"><div class="tw-top"><button class="btn" id="tourBack">← 路線</button><span>${T[i].ic} ${T[i].daily?"每日導覽":stNo(i)?`第 ${stNo(i)} 站`:"序章"}・${T[i].n}</span></div><svg viewBox="0 0 96 40" shape-rendering="crispEdges" class="tw-scene">${SCN[T[i].sc]()}</svg><div id="twCards"></div><div class="tw-dlg" id="twDlg"><div class="tw-av" id="twAv"></div><div class="tw-tx"><b id="twWho"></b><div id="twText"></div><span class="tw-more" id="twMore">▼</span></div></div><div id="twOpts"></div></div>`;tourStep();}
+function tourStart(i,keepLog){TS.st=i;TS.i=0;TS.choice=null;TS.pend=null;TS.again=null;TS.used=new Map();if(!keepLog)TS.log=[];clearInterval(TS.tm);$("#tourBox").innerHTML=`<div class="tw-play"><div class="tw-top"><button class="btn" id="tourBack">← 路線</button><span>${T[i].ic} ${T[i].daily?"每日導覽":stNo(i)?`第 ${stNo(i)} 站`:"序章"}・${T[i].n}</span></div><svg viewBox="0 0 96 40" shape-rendering="crispEdges" class="tw-scene">${SCN[T[i].sc]()}</svg><div id="twCards"></div><div class="tw-dlg" id="twDlg"><div class="tw-av" id="twAv"></div><div class="tw-tx"><b id="twWho"></b><div id="twText"></div><span class="tw-more" id="twMore">▼</span></div></div><div id="twOpts"></div></div>`;tourStep();}
 function tourType(who,text){
   $("#twAv").innerHTML=sprite(who,52);$("#twWho").textContent=WHO[who][0];
   const el=$("#twText");TS.full=text;clearInterval(TS.tm);if(TS.fast){el.textContent=text;TS.typing=0;$("#twMore").style.visibility="visible";return}TS.typing=1;let n=0;$("#twMore").style.visibility="hidden";
@@ -1099,13 +1099,18 @@ function tourType(who,text){
 function tourStep(){
   const S=T[TS.st];$("#twOpts").innerHTML="";
   if(TS.pend){const p=TS.pend;TS.pend=null;tourType(p[0],p[1]);return}
+  if(TS.again){const L=TS.again;TS.again=null;tourType(L.q[0],L.again||"還想知道什麼嗎？");TS.choice=L;return}
   if(TS.i>=S.L.length){tourEnd();return}
   const L=S.L[TS.i++];
   if(Array.isArray(L)){tourType(L[0],L[1]);return}
   if(L.card){$("#twCards").innerHTML=`<div class="tw-card"><b>${L.card.t}</b>${L.card.l.map(x=>`<div>${esc(x)}</div>`).join("")}</div>`;if(!TS.fast)$("#twCards").scrollIntoView({block:"nearest",behavior:"smooth"});tourStep();return}
   if(L.q){tourType(L.q[0],L.q[1]);TS.choice=L;return}
 }
-function tourOpt(j){const L=TS.choice;TS.choice=null;const op=L.o[j];$("#twOpts").innerHTML=`<div class="tw-pick">你選了：${esc(op[0])}</div>`;tourType("K",op[1])}
+function tourOpt(j){const L=TS.choice;TS.choice=null;
+  if(j<0){$("#twOpts").innerHTML=`<div class="tw-pick">你選了：沒有了</div>`;tourStep();return}
+  const op=L.o[j];$("#twOpts").innerHTML=`<div class="tw-pick">你選了：${esc(op[0])}</div>`;
+  if(L.more){const u=TS.used.get(L)||new Set();u.add(j);TS.used.set(L,u);if(u.size<L.o.length)TS.again=L}
+  tourType(L.by||"K",op[1])}
 function tourBackStep(){
   if(!TS.log.length){clearInterval(TS.tm);renderTourMap();window.scrollTo(0,0);toast("回到導覽路線");return}
   const log=TS.log.slice(0,-1);TS.fast=1;tourStart(TS.st,1);TS.log=log;
@@ -1115,7 +1120,7 @@ function tourBackStep(){
 function tourTap(fromReplay){
   if(TS.typing){clearInterval(TS.tm);$("#twText").textContent=TS.full;TS.typing=0;$("#twMore").style.visibility="visible";return}
   if(!fromReplay)TS.log.push("t");
-  if(TS.choice){const L=TS.choice;$("#twMore").style.visibility="hidden";$("#twOpts").innerHTML=L.o.map((o,j)=>`<button class="tw-opt" data-topt="${j}">${esc(o[0])}</button>`).join("");return}
+  if(TS.choice){const L=TS.choice,u=(L.more&&TS.used.get(L))||new Set();$("#twMore").style.visibility="hidden";$("#twOpts").innerHTML=L.o.map((o,j)=>u.has(j)?"":`<button class="tw-opt" data-topt="${j}">${esc(o[0])}</button>`).join("")+(u.size?`<button class="tw-opt" data-topt="-1">沒有了，繼續 →</button>`:"");return}
   tourStep();
 }
 function tourEnd(){
