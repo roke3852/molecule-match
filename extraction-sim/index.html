@@ -6964,6 +6964,10 @@ const css=document.createElement('style');css.textContent=`
 .gd-card p{margin:2px 0 8px;font-size:13px;color:var(--muted);line-height:1.5}
 .gd-card .gd-go{background:var(--accent);color:var(--accent-ink);border:0;border-radius:999px;font:inherit;font-weight:700;font-size:13px;padding:6px 16px;cursor:pointer}
 .gd-more{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;align-items:center}.gd-more span{font-size:12px;color:var(--muted)}.gd-more button{background:transparent;border:1px solid var(--line);color:var(--ink);border-radius:999px;font:inherit;font-size:12px;padding:3px 10px;cursor:pointer}.gd-more button.done{border-color:var(--want);color:var(--want)}
+.gd-card{position:relative}.gd-card .gd-tg{position:absolute;right:8px;top:8px;background:transparent;border:1px solid var(--line);color:var(--muted);border-radius:999px;font:inherit;font-size:12px;padding:3px 10px;cursor:pointer}
+.gd-card .gd-txt{padding-right:56px}
+.gd-card.min{align-items:center;padding:8px 12px;cursor:pointer}.gd-card.min .gd-face{width:40px;height:40px}.gd-card.min .gd-face canvas{width:32px!important;height:32px!important}
+.gd-card.min p,.gd-card.min .gd-more,.gd-card.min .gd-go,.gd-card.min .gd-done{display:none}.gd-card .gd-sum{display:none;font-size:12px;color:var(--muted);margin-top:2px}.gd-card.min .gd-sum{display:block}.gd-card.min .gd-tg{top:50%;transform:translateY(-50%)}
 .gd-card .gd-done{font-size:12px;color:var(--want);margin-left:8px}
 .gd-ring{position:absolute;z-index:80;pointer-events:none;border:2px solid #e2bd6a;border-radius:10px;box-shadow:0 0 0 4px rgba(226,189,106,.18),0 0 24px rgba(226,189,106,.35);transition:all .35s;animation:gdPulse 1.4s ease-in-out infinite}
 @keyframes gdPulse{50%{box-shadow:0 0 0 8px rgba(226,189,106,.08),0 0 30px rgba(226,189,106,.5)}}
@@ -7013,10 +7017,13 @@ body.gd-on{padding-bottom:200px}
 // ---------- 每個實驗室的導覽員卡片 ----------
 function cardFor(k){const v0=TOURS[k]&&TOURS[k].view;const ks=Object.keys(TOURS).filter(x=>TOURS[x].view===v0);const main=ks[0],T=TOURS[main],W=WHO[T.lead],v=$(T.view);if(!v)return;const wrap=v.querySelector('.wrap');if(!wrap)return;
   let c=v.querySelector('.gd-card');if(!c){c=document.createElement('div');c.className='gd-card';(wrap.children[0]||wrap).after(c);}
-  const more=ks.slice(1);
-  c.innerHTML='<div class="gd-face"></div><div class="gd-txt"><b>'+W.n+'<i>'+W.r+'</i></b><p>'+T.blurb+'</p><button class="gd-go" type="button" data-t="'+main+'">'+(tourDone(main)?'再聽一次':'開始導覽')+'</button>'+(tourDone(main)?'<span class="gd-done">✓ 已完成</span>':'')+
+  const more=ks.slice(1),nDone=ks.filter(x=>tourDone(x)).length,ck='gd-min-'+T.view;let mn=null;try{mn=localStorage.getItem(ck);}catch(e){}
+  const isMin=mn==null?tourDone(main):mn==='1';c.classList.toggle('min',isMin);
+  c.innerHTML='<button type="button" class="gd-tg" aria-expanded="'+(!isMin)+'">'+(isMin?'展開 ▾':'收合 ▴')+'</button><div class="gd-face"></div><div class="gd-txt"><b>'+W.n+'<i>'+W.r+'</i></b><span class="gd-sum">導覽 '+ks.length+' 篇・已完成 '+nDone+'</span><p>'+T.blurb+'</p><button class="gd-go" type="button" data-t="'+main+'">'+(tourDone(main)?'再聽一次':'開始導覽')+'</button>'+(tourDone(main)?'<span class="gd-done">✓ 已完成</span>':'')+
    (more.length?'<div class="gd-more"><span>更多導覽：</span>'+more.map(x=>'<button type="button" data-t="'+x+'" class="'+(tourDone(x)?'done':'')+'">'+(tourDone(x)?'✓ ':'')+WHO[TOURS[x].lead].n+'｜'+TOURS[x].title+'</button>').join('')+'</div>':'')+'</div>';
-  c.querySelector('.gd-face').appendChild(sprCv(T.lead,48));c.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>startTour(b.dataset.t));}
+  c.querySelector('.gd-face').appendChild(sprCv(T.lead,48));c.querySelectorAll('[data-t]').forEach(b=>b.onclick=e=>{e.stopPropagation();startTour(b.dataset.t);});
+  const tg=()=>{const m=!c.classList.contains('min');try{localStorage.setItem(ck,m?'1':'0');}catch(e){}cardFor(k);};
+  c.querySelector('.gd-tg').onclick=e=>{e.stopPropagation();tg();};c.onclick=()=>{if(c.classList.contains('min'))tg();};}
 function cards(){const seen={};Object.keys(TOURS).forEach(k=>{if(!seen[TOURS[k].view]){seen[TOURS[k].view]=1;cardFor(k);}});}
 
 // ---------- 導覽引擎 ----------
