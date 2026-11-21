@@ -4,7 +4,7 @@
 <meta name="robots" content="noindex, nofollow, noarchive">
 <meta charset="utf-8">
 <meta name="author" content="Jim Lu">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>沖煮筆記</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;700&display=swap" rel="stylesheet">
@@ -200,6 +200,9 @@ input[type=range]{width:100%}
 .arow{display:flex;align-items:flex-start;gap:8px;margin:6px 0 10px}.arow>span{flex:0 0 36px;font-size:14px;color:var(--muted);padding-top:9px}.arc{flex:1;min-width:0}.arc .arn{width:100%;min-width:0;margin-top:5px;padding:7px 9px;border:1px solid var(--line);border-radius:8px;background:var(--bg);font-size:14px;color:var(--ink)}
 .aromd .heat{margin-bottom:2px}.aromd .hc{width:46px}
 .cleanrow{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;padding:9px 11px;border:1px solid var(--line);border-radius:10px;margin:6px 0;font-size:13.5px}.cleanrow.over{border-color:var(--warn);background:color-mix(in srgb,var(--warn) 10%,transparent)}.cr-t{flex:1 1 100%}.cleanrow .dirt{flex:1;min-width:120px;margin:0}
+html,body{touch-action:manipulation}input,textarea,select{font-size:16px!important}
+.trg{display:block;font-size:10.5px;font-weight:400;opacity:.75;line-height:1.2}.vtitle .trg{display:inline;margin-left:8px;font-size:12px}
+.draftbar{display:flex;align-items:center;gap:8px;padding:10px 12px;margin-bottom:10px;border:1px solid var(--accent);border-radius:12px;background:var(--accent-soft)}.draftbar span{flex:1;font-weight:700;font-size:14px}.draftbar small{font-weight:400;color:var(--muted)}
 </style>
 </head>
 <body>
@@ -241,7 +244,7 @@ function toast(m){const t=$('#toast');t.textContent=m;t.style.display='block';cl
 /* ---------- vocabulary ---------- */
 const PARAMS=[{k:'grinder',l:'磨豆機'},{k:'grind',l:'刻度'},{k:'dripper',l:'濾杯'},{k:'paper',l:'濾紙'},{k:'kettle',l:'注水壺'},{k:'h2o',l:'用水'},{k:'method',l:'手法'},{k:'temp',l:'水溫',u:'°C'},{k:'dose',l:'粉重',u:'g'},{k:'water',l:'注水',u:'g'},{k:'pours',l:'注水段'},{k:'time',l:'時間'}];
 const fmtP=(p,v)=>!has(v)?'—':p.k==='time'?fmtTime(v):p.k==='pours'?String(v).split('\n').join(' / '):v+(p.u||'');
-const SC=[['嗅覺',[['fa','前嗅覺'],['ra','後嗅覺']]],['味覺',[['acid','酸'],['sweet','甜'],['bitter','苦']]],['觸覺',[['body','厚度'],['astr','澀感']]],['後韻',[['fin_acid','酸'],['huigan','甘'],['fin_bitter','苦'],['fin_astr','澀']]],['整體',[['overall','整體']]]];
+const SC=[['嗅覺',[['fa','前嗅覺'],['ra','後嗅覺']]],['味覺',[['acid','酸'],['sweet','甜'],['bitter','苦']]],['觸覺',[['body','厚度'],['astr','澀感'],['clean','乾淨度']]],['後韻',[['fin_acid','酸'],['huigan','甘'],['fin_bitter','苦'],['fin_astr','澀']]],['整體',[['overall','整體']]]];
 const SCL=Object.fromEntries(SC.flatMap(g=>g[1]));
 const REL=[['acid','酸'],['sweet','甜'],['bitter','苦'],['body','厚度']];
 const TEMPS=[['hot','高溫'],['warm','中溫'],['room','常溫']];
@@ -433,7 +436,8 @@ const demoBanner=()=>isDemo()?'<div class="banner">以下是範例資料，不�
 function vLog(){
   const bs=brews(),ready=beans().filter(b=>beanStatus(b).c==='good');
   const wk=bs.filter(b=>b.ts>Date.now()-7*DAY),top=wk.map(rk).filter(x=>x!=null).sort((a,b)=>b-a)[0];
-  return demoBanner()+`<div class="tiles"><div class="tile"><b>${wk.length}</b><span>近 7 天杯數</span></div><div class="tile"><b>${top??'—'}</b><span>近 7 天最佳總評</span></div><div class="tile"><b>${ready.length}</b><span>適飲期的豆子</span></div></div>
+  const dr=draftGet();
+  return demoBanner()+(dr?`<div class="draftbar"><span>📝 有一杯還沒記完<br><small>${esc(draftLabel(dr))}</small></span><button class="btn sm" data-act="draftDrop">捨棄</button><button class="btn sm pri" data-act="draftGo">接著記</button></div>`:'')+`<div class="tiles"><div class="tile"><b>${wk.length}</b><span>近 7 天杯數</span></div><div class="tile"><b>${top??'—'}</b><span>近 7 天最佳總評</span></div><div class="tile"><b>${ready.length}</b><span>適飲期的豆子</span></div></div>
   <h2>沖煮紀錄</h2>${bs.length?bs.map(brewCard).join(''):'<div class="card sub">還沒有紀錄。按下方「＋ 記一杯」開始。</div>'}`;
 }
 /* ---------- 風味曲線：養豆期往上爬、高峰、之後慢慢下滑 ---------- */
@@ -509,7 +513,7 @@ function brewTotal(b){
   const c=scoreCfg(),M=medians();let got=0,all=0,sum=0,ws=0;const per={};
   for(const[t]of TEMPS){const s=b.temps?.[t]?.s||{},v=k=>{all++;if(has(s[k])){got++;return+s[k]}return M[t][k]};
     const fa=v('fa'),ra=v('ra'),acid=v('acid'),sweet=v('sweet'),bitter=v('bitter'),body=v('body'),astr=v('astr'),hg=v('huigan');
-    const p={aroma:Math.min(1,((fa+ra)/2)/c.aromaFull),sweet:sweet/5,balance:1-Math.min(1,Math.abs(acid-(sweet+.25))/2),clean:1-Math.min(1,(bitter+.7*astr)/3),body:Math.min(1,body/c.bodyIdeal),finish:Math.min(1,hg/c.finishFull)};
+    const p={aroma:Math.min(1,((fa+ra)/2)/c.aromaFull),sweet:sweet/5,balance:1-Math.min(1,Math.abs(acid-(sweet+.25))/2),clean:(d=>has(s.clean)?.6*Math.min(1,+s.clean/5)+.4*d:d)(1-Math.min(1,(bitter+.7*astr)/3)),body:Math.min(1,body/c.bodyIdeal),finish:Math.min(1,hg/c.finishFull)};
     let a=0,w=0;for(const k in c.wA){a+=c.wA[k]*p[k];w+=c.wA[k]}per[t]=Math.round(a/w*100);sum+=c.wT[t]*per[t];ws+=c.wT[t]}
   return{v:Math.round(sum/ws),per,conf:Math.round(got/all*100)}}
 const rk=b=>{const t=brewTotal(b);return t?t.v:has(b.score)?Math.round(b.score*20):null};
@@ -598,7 +602,8 @@ const VSTACK=[];function route(){const v=location.hash.slice(1);const nv=['log',
 let F=null,BF=null;
 const openSheet=h=>{$('#sheetIn').innerHTML=h;$('#sheet').classList.add('on')};
 const closeSheet=()=>{$('#sheet').classList.remove('on');F=null;BF=null;GF=null;DB=null;if(REC){try{REC.stop()}catch(e){}REC=null}VW=null;TOUR=null;try{speechSynthesis.cancel()}catch(e){}};
-const AROM=[['bean','豆香'],['pot','壺香'],['wet','濕香']];
+const AROM=[['bean','豆香'],['wet','濕香'],['pot','壺香']];
+const TRANGE={hot:'約 60–70°C',warm:'約 45–55°C',room:'約 25–35°C'};
 const NEGK=new Set(['bitter','astr','fin_bitter','fin_astr']);
 function sensGrid(b){const T=TEMPS.filter(t=>{const x=b.temps?.[t[0]];return x&&(Object.values(x.s||{}).some(has)||(x.f||[]).length||x.n)});
   const cell=(k,v)=>{if(!has(v))return'<td class="hc na">–</td>';const a=Math.max(0,Math.min(5,+v))/5;return `<td class="hc ${NEGK.has(k)?'neg':'pos'}${a>=.6?' hi':''}" style="--a:${(0.1+a*0.85).toFixed(2)}">${v}</td>`};
@@ -608,7 +613,7 @@ function sensGrid(b){const T=TEMPS.filter(t=>{const x=b.temps?.[t[0]];return x&&
   const ar=AROM.filter(([k])=>has(b.arom?.[k]));
   const arH=ar.length||b.dry||b.aromN?`<div class="aromd">${ar.length?`<table class="heat"><tr><th class="hg" style="width:26px">香</th>${ar.map(([k,l])=>`<th class="hl" style="width:auto;text-align:right">${l}</th>${cell(k,b.arom[k])}`).join('')}</tr></table>`:''}${b.aromN?AROM.filter(([k])=>b.aromN[k]).map(([k,l])=>`<div class="sub" style="margin:2px 0"><b>${l}</b>　${esc(b.aromN[k])}</div>`).join(''):b.dry?`<div class="sub" style="margin:2px 0 6px">${esc(b.dry)}</div>`:''}</div>`:'';
   if(!rows&&!arH&&!notes)return'';
-  return `<fieldset><legend>感官</legend>${arH}${rows?`<table class="heat"><thead><tr><th></th><th></th>${T.map(t=>`<th>${t[1]}</th>`).join('')}</tr></thead><tbody>${rows}</tbody></table>
+  return `<fieldset><legend>感官</legend>${arH}${rows?`<table class="heat"><thead><tr><th></th><th></th>${T.map(t=>`<th>${t[1]}<small class="trg">${TRANGE[t[0]].replace('約 ','')}</small></th>`).join('')}</tr></thead><tbody>${rows}</tbody></table>
     <div class="hleg"><span><i class="pos" style="--a:.95"></i>甜、香、酸、厚、甘：越深越強</span><span><i class="neg" style="--a:.95"></i>苦、澀：越深越強</span></div>`:''}${notes}</fieldset>`}
 function detail(id){
   const b=brewById(id);if(!b)return;const bean=beanById(b.beanId);
@@ -624,12 +629,15 @@ function detail(id){
 }
 /* brew form */
 function copyParams(from){const o={};PARAMS.forEach(p=>o[p.k]=from?from[p.k]??null:null);return o}
-function startBrew({baseId,beanId,editId}={}){
+function startBrew({baseId,beanId,editId}={},force){
+  const dr=draftGet();
+  if(dr&&!force){if(editId&&dr.F.id===editId){draftResume();return}
+    openSheet(`<div class="sheet-head"><b>有一杯還沒記完</b><button class="btn sm" data-act="close">取消</button></div><div class="sheet-body"><div class="card">${esc(draftLabel(dr))}</div><div class="sub">要接著記這一杯，還是捨棄它開新的？</div></div><div class="sheet-foot"><button class="btn" data-act="draftNew" data-o='${esc(JSON.stringify({baseId,beanId,editId}))}'>捨棄，開新的</button><button class="btn pri" data-act="draftGo">接著記</button></div>`);return}
   if(isDemo()){location.hash='beans';startBean();toast('先新增你的第一支豆子');return}
   if(!S.beans.length){startBean();toast('先新增一支豆子');return}
-  if(editId){F=JSON.parse(JSON.stringify(brewById(editId)));F._edit=true;F.temps=F.temps||{};F.rel=F.rel||{};F.flavors=F.flavors||[];F._slot='warm';F.eyManual=true;drawForm();return}
+  if(editId){F=JSON.parse(JSON.stringify(brewById(editId)));F._edit=true;F.temps=F.temps||{};F.rel=F.rel||{};F.flavors=F.flavors||[];F._slot='hot';F.eyManual=true;drawForm();return}
   let base=baseId?brewById(baseId):beanId?brewsOf(beanId).slice(-1)[0]:brews()[0];
-  F={id:newId(),ts:Date.now(),beanId:beanId||(base&&beanById(base.beanId)?base.beanId:S.beans[0].id),baseId:base?base.id:null,...copyParams(base),target:base?base.target||'':'',met:null,score:null,rel:{},flavors:[],mode:'quick',temps:{},note:'',dry:'',next:'',tds:null,ey:null,bev:null,_slot:'warm'};
+  F={id:newId(),ts:Date.now(),beanId:beanId||(base&&beanById(base.beanId)?base.beanId:S.beans[0].id),baseId:base?base.id:null,...copyParams(base),target:base?base.target||'':'',met:null,score:null,rel:{},flavors:[],mode:'quick',temps:{},note:'',dry:'',next:'',tds:null,ey:null,bev:null,_slot:'hot'};
   drawForm();
 }
 function slot(){const k=F._slot;F.temps[k]=F.temps[k]||{s:{},f:[],n:''};F.temps[k].s=F.temps[k].s||{};F.temps[k].f=F.temps[k].f||[];return F.temps[k]}
@@ -643,7 +651,7 @@ function drawForm(){
   const hseg=(act,k,val)=>`<div class="seg">${[0,1,2,3,4,5].map(i=>{const on=has(val)&&Math.floor(val)===i;return `<button type="button" data-act="${act}" data-k="${k}" data-v="${i}" class="${on?'on':''}">${on?val:i}</button>`}).join('')}</div>`;
   const ta=(k,l,rows,ph='')=>`<label class="f">${l}<textarea id="f-${k}" data-f="${k}" data-t="str" rows="${rows}" placeholder="${esc(ph)}">${esc(F[k]||'')}</textarea></label>`;
   const ft=flavTarget(),cat=F._cat;
-  const sensory=F.mode==='full'?`<div class="seg txt">${TEMPS.map(t=>`<button type="button" data-act="slot" data-v="${t[0]}" class="${F._slot===t[0]?'on':''}">${t[1]}${F.temps[t[0]]&&(Object.values(F.temps[t[0]].s).some(has)||F.temps[t[0]].f.length)?' ✓':''}</button>`).join('')}</div>
+  const sensory=F.mode==='full'?`<div class="seg txt">${TEMPS.map(t=>`<button type="button" data-act="slot" data-v="${t[0]}" class="${F._slot===t[0]?'on':''}">${t[1]}<small class="trg">${TRANGE[t[0]]}</small>${F.temps[t[0]]&&(Object.values(F.temps[t[0]].s).some(has)||F.temps[t[0]].f.length)?' ✓':''}</button>`).join('')}</div>
       <div class="sub">0 無、3 中、5 強。同一格再點一次加 0.5，第三次清除。沒喝到的溫度直接跳過。</div>
       ${SC.map(g=>`<div class="grp">${g[0]}</div>`+g[1].map(([k,l])=>`<div class="srow"><span>${l}</span>${hseg('sc',k,slot().s[k])}</div>`).join('')).join('')}`:
     (base?`<div class="sub">跟上一杯（${when(base.ts)}）比</div>${REL.map(([k,l])=>`<div class="srow"><span>${l}</span><div class="seg txt">${[[-1,'↓ 少'],[0,'＝'],[1,'↑ 多']].map(o=>`<button type="button" data-act="rel" data-k="${k}" data-v="${o[0]}" class="${F.rel[k]===o[0]?'on':''}">${o[1]}</button>`).join('')}</div></div>`).join('')}`:'<div class="sub">這是這支豆子的第一杯，之後的紀錄會拿它當比較基準。</div>');
@@ -705,7 +713,7 @@ function parseLocal(txt){ // 沒有 AI 可用時，照固定的筆記格式用�
   /* 語音／一行式：關鍵字後面接數字 */
   const NUM='\\s*(?:是|大概|約)?\\s*(\\d+(?:\\.\\d+)?)';
   for(const t of ['hot','warm','room']){if(!sec[t])continue;const all=sec[t].join(' '),s=j.temps[t].s,put=(k,re)=>{if(s[k]===undefined){const v=g(all,re+NUM.replace(/\\\\/g,'\\'));if(v!==undefined&&v<=5)s[k]=v}};
-    put('sweet','甜(?:感|度)?');put('acid','酸(?:感|度|值)?');put('bitter','(?<!後)苦(?:味|感)?');put('astr','澀(?:感)?');put('body','(?:厚度?|body|醇厚)');put('huigan','(?:回甘|尾韻|餘韻)');put('fa','(?:前嗅|香氣?)')}
+    put('sweet','甜(?:感|度)?');put('clean','乾淨(?:度|感)?');put('acid','酸(?:感|度|值)?');put('bitter','(?<!後)苦(?:味|感)?');put('astr','澀(?:感)?');put('body','(?:厚度?|body|醇厚)');put('huigan','(?:回甘|尾韻|餘韻)');put('fa','(?:前嗅|香氣?)')}
   const P=(txt.match(/【參數】([^【]*)/)||[])[1]||'';if(/^【/.test(j.bean||''))j.bean=null;
   if(j.time===undefined&&(m=P.match(/(\d)\s*分\s*(\d{1,2})\s*秒?/)))j.time=+m[1]*60+ +m[2];
   if(j.time===undefined&&(m=P.match(/(\d):(\d{2})/)))j.time=+m[1]*60+ +m[2];
@@ -1000,19 +1008,19 @@ async function tourAI(id){const b=S.beans.find(x=>x.id===id);if(!b||!sampleFn)re
 const VSTEPS=[
  {k:'param',t:'參數與結果',say:'這杯只改了什麼？流乾時間、TDS、液重。和上一杯一樣的參數不用講。',ex:'「這杯只改刻度，從 30 調到 29，其他一樣。流乾 2 分 29 秒，TDS 1.29，液重 175 克。」',
   chk:[['變數',/改|換|調|一樣|相同/],['時間',/流乾|分.{0,3}秒|\d:\d\d|秒/],['TDS',/tds|濃度/i],['液重',/液重|咖啡液|克/]]},
- {k:'aroma',t:'香氣',say:'豆香、壺香、濕香各幾分，加一個形容詞。用跨豆比較的尺度：你喝過最香的一支當 4–5。',ex:'「豆香 3 甜桃，壺香 2.5 焦糖，濕香 2 草本。」',
-  chk:[['豆香',/豆香|乾香|粉香/],['壺香',/壺香|液香/],['濕香',/濕香|悶蒸|聞香/]]},
- {k:'hot',t:'高溫',temp:1},{k:'warm',t:'中溫',temp:1},{k:'room',t:'常溫',temp:1},
+ {k:'aroma',t:'香氣',say:'豆香、濕香、壺香各幾分，加一個形容詞。用跨豆比較的尺度：你喝過最香的一支當 4–5。',ex:'「豆香 3 甜桃，濕香 2 草本，壺香 2.5 焦糖。」',
+  chk:[['豆香',/豆香|乾香|粉香/],['濕香',/濕香|悶蒸|聞香/],['壺香',/壺香|液香/]]},
+ {k:'hot',t:'高溫',temp:1,rg:'約 60–70°C，剛沖好稍等一下'},{k:'warm',t:'中溫',temp:1,rg:'約 45–55°C，溫溫的不燙口'},{k:'room',t:'常溫',temp:1,rg:'約 25–35°C，接近室溫'},
  {k:'verdict',t:'判定與下次',say:'這杯有沒有達成目標？下次只改一個變數，改什麼？',ex:'「部分達成，濃郁度有增加但後段苦。下次回到 30 格，第三段改繞圈。」',
   chk:[['判定',/達成|未達成|部分|成功|失敗/],['下次',/下次|下一杯|接下來/]]}];
-const TCHK=[['甜',/甜/],['酸',/酸/],['苦',/苦/],['澀',/澀/],['厚',/厚|body|醇/i],['回甘',/回甘|尾韻|餘韻/]];
-const TSAY='依序說：甜、酸、苦、澀、厚度、回甘各幾分（0–5，可以說「三點五」），最後加一個關鍵詞。';
-const TEX='「甜 3.5，酸 3.5 柑橘，苦 0，澀 0.5，厚 2.5，回甘 1，關鍵詞：圓潤、茶感。」';
+const TCHK=[['甜',/甜/],['酸',/酸/],['苦',/苦/],['澀',/澀/],['厚',/厚|body|醇/i],['乾淨',/乾淨/],['回甘',/回甘|尾韻|餘韻/]];
+const TSAY='依序說：甜、酸、苦、澀、厚度、乾淨度、回甘各幾分（0–5，可以說「三點五」），最後加一個關鍵詞。';
+const TEX='「甜 3.5，酸 3.5 柑橘，苦 0，澀 0.5，厚 2.5，乾淨 4，回甘 1，關鍵詞：圓潤、茶感。」';
 const ANCH='0 完全沒有｜1 隱約，要找才有｜2 明顯但弱｜3 清楚、中等｜4 強、很突出｜5 是主角、非常強';
 const CN={'零':0,'〇':0,'一':1,'壹':1,'二':2,'兩':2,'三':3,'四':4,'五':5};
 function normSpoken(t){return String(t)
   .replace(/([零〇一壹二兩三四五])點([五])/g,(m,a,b)=>CN[a]+'.5').replace(/([零〇一壹二兩三四五])點([零〇一二三四五六七八九])/g,(m,a,b)=>CN[a]+'.'+({'零':0,'〇':0,'一':1,'二':2,'三':3,'四':4,'五':5,'六':6,'七':7,'八':8,'九':9}[b]))
-  .replace(/([零〇一壹二兩三四五])分?半/g,(m,a)=>CN[a]+'.5').replace(/(甜|酸|苦|澀|厚度?|回甘|豆香|壺香|乾香|濕香|粉香|香氣?|嗅)\s*(?:是|大概|約)?\s*([零〇一壹二兩三四五])(?![十百千])/g,(m,k,a)=>k+' '+CN[a])
+  .replace(/([零〇一壹二兩三四五])分?半/g,(m,a)=>CN[a]+'.5').replace(/(甜|酸|苦|澀|厚度?|乾淨度?|回甘|豆香|壺香|乾香|濕香|粉香|香氣?|嗅)\s*(?:是|大概|約)?\s*([零〇一壹二兩三四五])(?![十百千])/g,(m,k,a)=>k+' '+CN[a])
   .replace(/([0-9])\s*點\s*([0-9])/g,'$1.$2')}
 let VW=null,REC=null;
 function startVoice(){if(!F)return;VW={i:0,txt:{},prev:{...F}};drawVoice()}
@@ -1023,7 +1031,7 @@ function drawVoice(){
   const canMic=!!(window.SpeechRecognition||window.webkitSpeechRecognition);
   openSheet(`<div class="sheet-head"><b>🎤 語音記一杯</b><button class="btn sm" data-act="vClose">取消</button></div><div class="sheet-body">
     <div class="vsteps">${VSTEPS.map((s,i)=>{const t=VW.txt[s.k]||'',done=t.trim()&&vChecks(s,t).every(c=>c[1]);return `<button type="button" class="vdot ${i===VW.i?'on':''} ${done?'ok':t.trim()?'part':''}" data-act="vGo" data-v="${i}">${s.t}</button>`}).join('')}</div>
-    <div class="vcard"><div class="vtitle">${VW.i+1}／${VSTEPS.length}　${st.t}</div>
+    <div class="vcard"><div class="vtitle">${VW.i+1}／${VSTEPS.length}　${st.t}${st.rg?`<small class="trg">${st.rg}</small>`:''}</div>
       <div class="vsay">${esc(st.temp?TSAY:st.say)}</div><div class="vex">例：${esc(st.temp?TEX:st.ex)}</div>
       ${st.k==='param'&&pl?`<div class="sub">已帶入：${esc(pl)}</div>`:''}
       ${st.temp||st.k==='aroma'?`<div class="vanch">尺度　${ANCH}</div>`:''}</div>
@@ -1051,7 +1059,7 @@ async function parseNote(){
   const txt=(F._pasteText||'').trim();if(!txt){msg('先貼上筆記');return}
   if(!sampleFn){try{applyNote(parseLocal(txt))}catch(e){msg('解析失敗，請手動填寫')}return}
   msg('解析中…');
-  const sk='fa(前嗅覺),ra(後嗅覺),acid(酸),sweet(甜),bitter(苦),body(厚度),astr(澀),fin_acid(後韻酸),huigan(後韻甘),fin_bitter(後韻苦),fin_astr(後韻澀),overall(該溫度整體分)';
+  const sk='fa(前嗅覺),ra(後嗅覺),acid(酸),sweet(甜),bitter(苦),body(厚度),astr(澀),clean(乾淨度，越乾淨越高),fin_acid(後韻酸),huigan(後韻甘),fin_bitter(後韻苦),fin_astr(後韻澀),overall(該溫度整體分)';
   const prompt=`把下面這段手沖咖啡筆記（可能是語音轉文字，數字可能是中文念法，例如「三點五」就是 3.5）整理成一個 JSON 物件，只回傳 JSON，不要其他文字。筆記沒寫的欄位填 null，不要猜。
 欄位：arom({bean:豆香/乾香/粉香分數,pot:壺香分數,wet:濕香分數}，0-5，沒提到就省略), aromN({bean,pot,wet} 各自的形容詞原文，沒提到就省略), bean(豆子名稱字串), grinder, grind(刻度數字，例如 29clix 填 29), dripper(濾杯), paper(濾紙), method(手法或注水比例，例如 60-40 繞繞中中), temp(水溫數字), dose(粉重 g), water(總注水量 g，沒寫但有分段時填各段總和), time(總時間或流乾時間，換成秒), pours(分段注水原文，一段一行), tds, ey(萃取率 %), bev(咖啡液重 g), target(這杯的測試目的), dry(壺香或乾香的描述), score(整杯總分 0-5，沒寫填 null), note(整體總結原文), next(下次調整方向原文，保留換行), met(是否達成目標：達成→"yes"、部分達成→"part"、未達成→"no"，沒提到填 null),
 temps: {hot:{...}, warm:{...}, room:{...}} 分別是高溫、中溫、常溫，每個是 {s:{${sk}}, f:[風味], n:"該溫度的文字敘述原文"}，s 內分數是 0-5 的數字（可有 0.5），沒寫的鍵省略。
@@ -1086,13 +1094,22 @@ function applyNote(j){
     autoEY();F._paste=false;F._parseMsg=n?`已填入 ${n} 個欄位，請往下核對。${beanMsg}`:'筆記裡沒有找到可填的內容';drawForm();
   }
 }
+/* 記錄草稿：隨時中斷，回來可以接著記 */
+const DKEY='bn-draft';
+function draftGet(){try{const d=JSON.parse(localStorage.getItem(DKEY)||'null');return d&&d.F?d:null}catch(e){return null}}
+function draftSave(){if(!F&&!VW)return;try{const base=VW?VW.prev:F;if(!base)return;localStorage.setItem(DKEY,JSON.stringify({at:Date.now(),F:base,VW:VW?{i:VW.i,txt:VW.txt}:null}))}catch(e){}}
+function draftClear(){try{localStorage.removeItem(DKEY)}catch(e){}}
+function draftResume(){const d=draftGet();if(!d)return false;F=d.F;F.temps=F.temps||{};F.rel=F.rel||{};F.flavors=F.flavors||[];F._slot=F._slot||'hot';
+  if(d.VW){VW={i:d.VW.i||0,txt:d.VW.txt||{},prev:{...F}};drawVoice()}else drawForm();return true}
+function draftLabel(d){const b=beanById(d.F.beanId);return `${b?shortBean(b):'未選豆子'}・${new Date(d.at).toLocaleString('zh-TW',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'})}${d.F._edit?'（編輯中）':''}`}
+setInterval(draftSave,2000);document.addEventListener('visibilitychange',()=>{if(document.hidden)draftSave()});
 async function saveBrew(){
   const b={...F};if(!(b.cal>=CAL.v))b.cal=CAL.v;
   if(b.aromN){for(const k in b.aromN)if(!String(b.aromN[k]||'').trim())delete b.aromN[k];if(!Object.keys(b.aromN).length)delete b.aromN;else b.dry=AROM.filter(([k])=>b.aromN[k]).map(([k,l])=>l+' '+b.aromN[k].trim()).join('、')}
   if(!has(b.score)){const o=TEMPS.map(t=>b.temps?.[t[0]]?.s?.overall).filter(has);if(o.length)b.score=r1(o.reduce((a,c)=>a+c,0)/o.length)}b.restDay=restDay(beanById(b.beanId),b.ts);
   if(b.mode==='quick'&&!Object.keys(b.temps).length)b.temps={};
   ['_edit','_slot','_cat','_photoMsg','_paste','_pasteText','_parseMsg','eyManual'].forEach(k=>delete b[k]);
-  try{await store.save('brews',b);closeSheet();toast('已儲存');if(S.view!=='log'&&S.view!=='recipe')location.hash='log'}catch(e){toast(e&&e.code==='quota_exceeded'?'儲存空間已滿，請先刪除舊紀錄':'儲存失敗，請再試一次')}
+  try{await store.save('brews',b);draftClear();closeSheet();toast('已儲存');if(S.view!=='log'&&S.view!=='recipe')location.hash='log'}catch(e){toast(e&&e.code==='quota_exceeded'?'儲存空間已滿，請先刪除舊紀錄':'儲存失敗，請再試一次')}
 }
 async function readPhoto(file){
   const msg=m=>{F._photoMsg=m;const e=$('#photoMsg');if(e)e.textContent=m};
@@ -1631,7 +1648,10 @@ function confirmTap(el,key){if(armed===key){armed=null;return true}armed=key;el.
 document.addEventListener('click',async ev=>{
   const el=ev.target.closest('[data-act]');if(!el)return;const a=el.dataset.act,id=el.dataset.id,v=el.dataset.v;
   const demoBlock=()=>{if(isDemo()){toast('這是範例資料，先新增你的豆子');return true}return false};
-  if(a==='close')closeSheet();
+  if(a==='close'){if(F||VW){draftSave();closeSheet();toast('已暫存，回到「紀錄」可以接著記');render()}else closeSheet()}
+  else if(a==='draftGo')draftResume();
+  else if(a==='draftDrop'){draftClear();render();toast('已捨棄暫存的紀錄')}
+  else if(a==='draftNew'){draftClear();startBrew(JSON.parse(el.dataset.o||'{}'),true)}
   else if(a==='detail')detail(id);
   else if(a==='new')startBrew({baseId:el.dataset.base,beanId:el.dataset.bean});
   else if(a==='editBrew'){if(!demoBlock())startBrew({editId:id})}
@@ -1684,7 +1704,7 @@ document.addEventListener('click',async ev=>{
     if(b.frozenSince){b.frozenDays=(b.frozenDays||0)+Math.max(0,Math.floor((t-pd(b.frozenSince))/DAY));b.frozenSince=null}else b.frozenSince=iso(t);
     try{await store.save('beans',b)}catch(e){toast('儲存失敗')}}
   else if(a==='export'){const txt=JSON.stringify({app:'brewlog',v:1,beans:beans(),brews:brews()},null,1);try{await navigator.clipboard.writeText(txt);toast('已複製到剪貼簿')}catch(e){toast('無法複製，請稍後再試')}}
-  else if(a==='vClose'){if(REC){try{REC.stop()}catch(e){}REC=null}if(VW){F={...VW.prev};VW=null;drawForm()}else closeSheet()}
+  else if(a==='vClose'){if(REC){try{REC.stop()}catch(e){}REC=null}if(VW){F={...VW.prev};VW=null;drawForm();draftSave()}else closeSheet()}
   else if(a==='vGo'&&VW){if(REC){try{REC.stop()}catch(e){}REC=null}VW.i=+v;drawVoice()}
   else if(a==='vNext'&&VW){if(REC){try{REC.stop()}catch(e){}REC=null}VW.i++;drawVoice()}
   else if(a==='vPrev'&&VW){if(REC){try{REC.stop()}catch(e){}REC=null}VW.i--;drawVoice()}
@@ -1743,6 +1763,7 @@ window.addEventListener('hashchange',route);
   document.addEventListener('touchmove',e=>{if(!ok)return;const t=e.touches[0],dx=t.clientX-x0,dy=Math.abs(t.clientY-y0);if(dy>40&&dy>dx){ok=false;ind.style.opacity=0;return}if(dx>0){ind.style.opacity=Math.min(1,dx/90);ind.style.transform='translate('+Math.min(dx/2,50)+'px,-50%)'}},{passive:true});
   document.addEventListener('touchend',e=>{ind.style.opacity=0;ind.style.transform='';if(!ok)return;ok=false;const t=e.changedTouches[0],dx=t.clientX-x0,dy=Math.abs(t.clientY-y0);if(dx<80||dy>dx*0.5||Date.now()-t0>800)return;goBack()},{passive:true});
   window.goBack=function(){
+    if(F||VW){toast('記錄中不能滑動返回，要離開請按「取消」（內容會暫存）');return}
     if(TOUR){if(TOUR.i>0){TOUR.i--;drawTour()}else closeSheet();return}
     if(VW){if(REC){try{REC.stop()}catch(e){}REC=null}if(VW.i>0){VW.i--;drawVoice()}else{F={...VW.prev};VW=null;drawForm()}return}
     if($('#sheet').classList.contains('on')){if((F||BF||GF)&&Date.now()-armed>2500){armed=Date.now();toast('再往右滑一次關閉（未存的內容會不見）');return}armed=0;closeSheet();return}
