@@ -177,6 +177,16 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
 .sc-part small{grid-column:2 / -1;font-size:11px;color:var(--muted);margin-top:-5px}
 .sc-diag{margin:0;padding-left:18px;font-size:14px;display:flex;flex-direction:column;gap:4px}
 .sc-chart svg{width:100%;max-width:520px;display:block}
+.goldcup{margin-top:12px;border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:var(--bg)}
+.goldcup header{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+.goldcup h3{margin:0;font-size:15px}
+.goldcup svg{width:100%;max-width:520px;display:block;margin:4px auto 0}
+.gc-msg{font-size:14px;line-height:1.55;margin-top:4px;padding:8px 10px;border-radius:8px;background:var(--panel);border-left:4px solid var(--muted)}
+.gc-msg.in{border-left-color:var(--gold)}
+.gc-msg.in b{color:var(--gold)}
+.goldcup.win{animation:gcWin 1.2s ease-out}
+@keyframes gcWin{0%{box-shadow:0 0 0 0 var(--gold)}40%{box-shadow:0 0 0 6px var(--gold)}100%{box-shadow:0 0 0 0 transparent}}
+@media (prefers-reduced-motion:reduce){.goldcup.win{animation:none}}
 @media (max-width:420px){.sc-top{grid-template-columns:1fr}.sc-big{flex-direction:row;gap:10px;align-items:baseline}}
 .champinfo{display:flex;flex-direction:column;gap:4px;margin-top:6px;font-size:13px;line-height:1.55;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px 12px}
 .champinfo b{font-size:14px}
@@ -1145,6 +1155,12 @@ window.BGM=(()=>{
       <div class="seg speed" role="group" aria-label="播放速度"><button data-s="4" aria-pressed="false">4×</button><button data-s="10" aria-pressed="true">10×</button><button data-s="25" aria-pressed="false">25×</button></div>
     </div>
     <div class="legend" id="legend"></div>
+    <div class="goldcup" id="goldCup">
+      <header><h3>🏆 金杯目標：把這杯沖進金杯</h3><span class="label" id="gcCount"></span></header>
+      <svg id="gcChart" viewBox="0 0 340 250" role="img" aria-label="金杯圖：橫軸萃取率、縱軸濃度"></svg>
+      <div class="gc-msg" id="gcMsg">—</div>
+      <p class="label" style="margin:6px 0 0;line-height:1.5">金色方框是 SCA 金杯：萃取率 18–22%、濃度 1.15–1.35%。播放時紅點會沿著線走，空心圈是這組參數最後會落在哪；灰色小點是你保存過的杯子。評分的理想區間會依焙度微調，跟金杯不完全一樣。</p>
+    </div>
   </section>
 
   <section class="panel scorep" id="scorePanel" aria-label="沖煮評分">
@@ -1755,7 +1771,9 @@ function simulate(method,p){
   // grinder: fines extract fast (bitterness most) and migrate to the filter, raising flow resistance (stalled drawdown)
   const FE=p.fines!=null?p.fines*Math.pow(650/p.grind,.6):null;
   const FW=[1,1,1.2,.8,3,.5,.5];
-  const kb=CMP.map((c,i)=>c.k*RS.k*gf*(method==='po'?CAL.kp:1)*(FE!=null?Math.max(.85,1+(FE-.13)*FW[i]):1)), kk=new Array(N);
+  // 豆子本身的萃取速度（kx）與可溶物多寡（sx）：金杯挑戰豆用
+  const BX=p.bean?BEANS.find(b=>b.f===p.bean):null,KX=BX&&BX.kx||1,SX=BX&&BX.sx||1;
+  const kb=CMP.map((c,i)=>c.k*RS.k*KX*gf*(method==='po'?CAL.kp:1)*(FE!=null?Math.max(.85,1+(FE-.13)*FW[i]):1)), kk=new Array(N);
   let mig=0,Rf=1;
   const PERC=method==='po'&&p.pattern!=='switch';
   const DR0=PERC?(DRIPPER[p.dripper]||DRIPPER.cone):{q:1,u:1,by:0,het:.3};
@@ -1771,7 +1789,7 @@ function simulate(method,p){
   let oilX=0;
   const stirs=((method==='po'?p.stirPO:p.stirIM)||[]).slice().sort((a,b)=>a-b);
   const boost=(t,tau)=>{let b=0;for(const s of stirs){if(s>t)break;b+=Math.exp(-(t-s)/tau);}return Math.min(1,b);};
-  const S0=CMP.map((c,i)=>c.avail*RS.f[i]*grindMul(c,p.grind)*dose*(p.bean&&p.bean[i]!=null?p.bean[i]:1));
+  const S0=CMP.map((c,i)=>c.avail*RS.f[i]*grindMul(c,p.grind)*dose*SX*(p.bean&&p.bean[i]!=null?p.bean[i]:1));
   let Lz=new Array(N).fill(0);
   let S=S0.slice(), mn=new Array(N).fill(0), mb=new Array(N).fill(0), cupM=new Array(N).fill(0);
   let absorbed=0,Vb=0,cupV=0,added=0;
@@ -1899,6 +1917,12 @@ const BEANS=[
  {id:'cof_peach',price:600,region:'共同發酵',name:'水蜜桃共同發酵',sub:'哥倫比亞・水蜜桃共同發酵',roast:2,f:[1.1,1,1.25,.95,1.05,1.95,.6],clar:-2.5,tags:['水蜜桃','糖果','發酵感']},
  {id:'cof_lychee',price:650,region:'共同發酵',name:'荔枝共同發酵',sub:'哥倫比亞・荔枝玫瑰共同發酵',roast:1.5,f:[1.2,1,1.15,.95,1.05,2.0,.5],clar:-2.5,tags:['荔枝','玫瑰','發酵感']},
  {id:'cof_cinn',price:500,region:'共同發酵',name:'肉桂共同發酵',sub:'哥斯大黎加・肉桂厭氧共同發酵',roast:2.5,f:[.95,1,1.3,.95,1.05,1.7,1.15],clar:-2,tags:['肉桂','紅糖','香料']},
+ // 金杯挑戰豆：kx＝萃取速度、sx＝可溶物多寡；gold＝提示（照預設參數都進不了金杯，各要不同的沖法）
+ {id:'g_nordic',price:420,region:'金杯挑戰',lab:true,name:'北歐極淺焙肯亞',sub:'肯亞・水洗・極淺焙',roast:1,kx:.45,sx:.95,f:[1.4,1,.9,1.15,.85,1.4,.4],tags:['番茄','黑醋栗','很難萃'],gold:'豆子硬、烘得極淺，可溶物出得很慢，一般沖法會萃取不足。要磨細、水溫拉到 90°C 以上；浸泡就要泡久一點、水要很燙。'},
+ {id:'g_laneg',price:1600,region:'金杯挑戰',lab:true,name:'La Negrita 紅藝伎',sub:'哥倫比亞・厭氧日曬',roast:1.5,kx:1.5,sx:1.1,f:[1,1,1.25,.9,.9,2.3,.55],tags:['黑莓','梔子花','酒香'],gold:'厭氧發酵讓組織變鬆、可溶物又多，萃得飛快，很容易過萃。磨粗一點、水溫降一點、少攪拌；浸泡的話時間縮短。'},
+ {id:'g_rob',price:90,region:'金杯挑戰',lab:true,name:'越南羅布斯塔',sub:'越南・日曬',roast:3.5,kx:1.15,sx:1.3,f:[.7,2,.8,1.4,1.3,.4,1.2],tags:['花生','橡膠','咖啡因爆表'],gold:'可溶物多到誇張，照常沖萃取率會衝到 30% 以上。研磨要粗（650 μm 以上）、水溫 92°C 以下，兩個一起改才壓得下來。'},
+ {id:'g_dark',price:160,region:'金杯挑戰',lab:true,name:'法式深焙',sub:'巴西・深焙・出油',roast:5,kx:1.5,f:[.6,1,.8,.7,1.3,.3,1.6],tags:['煙燻','黑巧克力','很好萃'],gold:'深焙豆組織鬆脆、一碰水就出來。水溫是關鍵：92°C 以下，最好 84–88°C，再視情況磨粗。'},
+ {id:'g_old',price:120,region:'金杯挑戰',lab:true,name:'開封三個月的老豆',sub:'哥倫比亞・水洗・中焙',roast:3,sx:.8,f:[.9,1,1,1,1.1,.5,.8],tags:['紙箱味','平淡'],gold:'放太久，可溶物和香氣都變少，萃取率的天花板變低。要萃得比平常完整：水溫 84°C 以上、粉水比別太淡，才擠得進 18%。'},
  // 闖關專用：阿凱烘過頭的豆子（不在模擬器的豆單裡）
  {id:'kai',price:0,region:'特殊',hidden:true,name:'阿凱的失手豆',sub:'烘過頭的哥倫比亞',roast:4.3,f:[.8,1,1.1,.85,1.25,.4,1.35],tags:['焦苦','木質','客人自備']},
  {id:'esp',price:120,region:'配方豆',name:'義式綜合',sub:'多產區拼配',roast:5,f:[.9,1,1,1,1.15,.6,1.2],tags:['煙燻','黑巧克力']},
@@ -2465,7 +2489,54 @@ function draw(){
   if(isIM())stats('im',drawIM(),simIM,'im'); else stats('po',drawPO(),simPO,'po');
   $('clock').textContent=fmtT(t);
   charts();
+  drawGold();
 }
+// ---------- 金杯圖：沖煮時的目標 ----------
+const GOLD={ey:[18,22],tds:[1.15,1.35]};
+const inGold=c=>c&&c.ey>=GOLD.ey[0]&&c.ey<=GOLD.ey[1]&&c.tds>=GOLD.tds[0]&&c.tds<=GOLD.tds[1];
+function goldPath(sim,im){if(sim._gold)return sim._gold;const out=[];
+  for(const r of sim.rec){const c=im?cupOf(r.m,r.Vb,sim.dose,sim.S0):cupOf(r.cupM,r.cupV,sim.dose,sim.S0);if(c&&isFinite(c.tds))out.push({t:r.t,tds:c.tds,ey:c.ey});}
+  return sim._gold=out;}
+function goldAdvice(c,im){if(!c)return '還沒有咖啡液。';if(inGold(c))return '<b>進金杯了！</b>萃取率 '+c.ey.toFixed(1)+'%、濃度 '+c.tds.toFixed(2)+'%。保存起來，再試試看換一個變因還能不能留在框裡。';
+  const a=[];
+  if(c.ey<GOLD.ey[0])a.push('萃取不足（'+c.ey.toFixed(1)+'%）：磨細一點、水溫高一點'+(im?'、浸泡久一點':'、注水慢一點或多攪一次'));
+  else if(c.ey>GOLD.ey[1])a.push('過萃（'+c.ey.toFixed(1)+'%）：磨粗一點、水溫低一點'+(im?'、浸泡短一點':'、少攪拌或提早斷水'));
+  if(c.tds<GOLD.tds[0])a.push('太淡（'+c.tds.toFixed(2)+'%）：粉水比調濃一點（同樣的水多放一點粉）');
+  else if(c.tds>GOLD.tds[1])a.push('太濃（'+c.tds.toFixed(2)+'%）：粉水比調淡一點，或沖完補一點熱水（旁路加水）');
+  return '還沒進金杯：'+a.join('；')+'。一次只改一個變因，看點往哪裡跑。';}
+let gcWas=false;
+function drawGold(){const svg=$('gcChart');if(!svg||!simPO)return;
+  const im=isIM(),sim=im?simIM:simPO,path=goldPath(sim,im);
+  const X0=12,X1=28,Y0=.8,Y1=2.0,L=40,T=14,W=290,H=200;
+  const px=v=>L+(Math.max(X0,Math.min(X1,v))-X0)/(X1-X0)*W, py=v=>T+H-(Math.max(Y0,Math.min(Y1,v))-Y0)/(Y1-Y0)*H;
+  let g='';
+  for(let v=12;v<=28;v+=2)g+='<line x1="'+px(v)+'" x2="'+px(v)+'" y1="'+T+'" y2="'+(T+H)+'" stroke="var(--line)" stroke-width="'+(v%4?.5:1)+'"/>'+(v%4?'':'<text x="'+px(v)+'" y="'+(T+H+14)+'" font-size="10" text-anchor="middle" fill="var(--muted)">'+v+'%</text>');
+  for(let v=.8;v<=2.001;v+=.2)g+='<line x1="'+L+'" x2="'+(L+W)+'" y1="'+py(v)+'" y2="'+py(v)+'" stroke="var(--line)" stroke-width=".5"/><text x="'+(L-5)+'" y="'+(py(v)+3)+'" font-size="10" text-anchor="end" fill="var(--muted)">'+v.toFixed(1)+'</text>';
+  // 九宮格的區域名稱
+  const xs=[(X0+GOLD.ey[0])/2,20,(GOLD.ey[1]+X1)/2],ys=[(GOLD.tds[1]+Y1)/2,1.25,(Y0+GOLD.tds[0])/2],
+    nm=[['濃・萃取不足','濃','濃・過萃'],['萃取不足','','過萃'],['淡・萃取不足','淡','淡・過萃']];
+  g+='<rect x="'+px(GOLD.ey[0])+'" y="'+T+'" width="'+(px(GOLD.ey[1])-px(GOLD.ey[0]))+'" height="'+H+'" fill="var(--gold)" opacity=".05"/>';
+  g+='<rect x="'+L+'" y="'+py(GOLD.tds[1])+'" width="'+W+'" height="'+(py(GOLD.tds[0])-py(GOLD.tds[1]))+'" fill="var(--gold)" opacity=".05"/>';
+  nm.forEach((row,i)=>row.forEach((n,j)=>{if(n)g+='<text x="'+px(xs[j])+'" y="'+(py(ys[i])+3)+'" font-size="10" text-anchor="middle" fill="var(--muted)" opacity=".85">'+n+'</text>';}));
+  g+='<rect x="'+px(GOLD.ey[0])+'" y="'+py(GOLD.tds[1])+'" width="'+(px(GOLD.ey[1])-px(GOLD.ey[0]))+'" height="'+(py(GOLD.tds[0])-py(GOLD.tds[1]))+'" rx="3" fill="var(--gold)" fill-opacity=".22" stroke="var(--gold)" stroke-width="2"/>';
+  g+='<text x="'+px(20)+'" y="'+(py(1.25)+4)+'" font-size="11" font-weight="700" text-anchor="middle" fill="var(--gold)">金杯</text>';
+  g+='<text x="'+(L+W)+'" y="'+(T+H+28)+'" font-size="10" text-anchor="end" fill="var(--muted)">萃取率 EY</text><text x="4" y="10" font-size="10" fill="var(--muted)">TDS %</text>';
+  // 保存過的杯子
+  let nIn=0,nAll=0;
+  let RS_=[];try{RS_=runs}catch(e){}
+  RS_.forEach(r=>{const x=r.res;if(!x||x.tds==null||!x.done)return;nAll++;const ok=inGold(x);if(ok)nIn++;
+    g+='<circle cx="'+px(x.ey)+'" cy="'+py(x.tds)+'" r="3.2" fill="'+(ok?'var(--gold)':'var(--muted)')+'" opacity=".75"/><text x="'+(px(x.ey)+4)+'" y="'+(py(x.tds)-3)+'" font-size="8" fill="var(--muted)">#'+r.n+'</text>';});
+  if(path.length){const fin=path[path.length-1],now=path.filter(q=>q.t<=t+1e-6);
+    g+='<circle cx="'+px(fin.ey)+'" cy="'+py(fin.tds)+'" r="8" fill="none" stroke="var(--bitter)" stroke-width="1.5" stroke-dasharray="3 2"/>';
+    if(now.length>1)g+='<polyline points="'+now.map(q=>px(q.ey).toFixed(1)+','+py(q.tds).toFixed(1)).join(' ')+'" fill="none" stroke="var(--bitter)" stroke-width="1.8" stroke-linejoin="round" opacity=".8"/>';
+    const cur=now.length?now[now.length-1]:null,done=t>=sim.end-1e-6;
+    if(cur)g+='<circle cx="'+px(cur.ey)+'" cy="'+py(cur.tds)+'" r="6" fill="var(--bitter)" stroke="var(--panel)" stroke-width="2"/><text x="'+(px(cur.ey)+9)+'" y="'+(py(cur.tds)+4)+'" font-size="11" font-weight="700" fill="var(--ink)">'+(done?'這杯':fmtT(cur.t))+'</text>';
+    const m=$('gcMsg'),ok=inGold(fin);m.className='gc-msg'+(ok?' in':'');
+    const gb=curBean();m.innerHTML=(done?'':'<span class="label">預計落點・</span>')+goldAdvice(fin,im)+(gb&&gb.gold&&!ok?'<details style="margin-top:4px"><summary class="label">💡 這支豆子的提示</summary>'+gb.gold+'</details>':'');
+    const win=done&&ok;if(win&&!gcWas){const box=$('goldCup');box.classList.remove('win');void box.offsetWidth;box.classList.add('win');if(playing===false&&typeof SFX!=='undefined')try{SFX.p('levelup')}catch(e){}}
+    gcWas=win;}
+  $('gcCount').textContent=nAll?'保存的杯子進金杯 '+nIn+'／'+nAll:'';
+  svg.innerHTML=g;}
 // ---------- saved runs ----------
 const KEY='brewsim-runs-v1';
 let runs=[]; try{runs=JSON.parse(localStorage.getItem(KEY)||'[]')||[];}catch(e){runs=[];}
@@ -2488,7 +2559,7 @@ function save(){
   runs.push({n:seq,at:Date.now(),
     p:{dose:P.dose,ratio:P.ratio,temp:P.temp,grind:P.grind,roast:P.roast,beanId:P.beanId,grinder:P.grinder,pattern:P.pattern,dripper:P.dripper,plan:P.plan.slice(),planTemp:P.planTemp&&(P.pattern==='pulse'||P.pattern==='switch')?P.planTemp.slice():null,planSeg:planSegments(P.plan,P.planT,P.planD).map(g=>[Math.round(g.s),Math.round(g.e-g.s)]),swOpen:P.swOpen,swMode:P.swMode,swClose:P.swClose,steep:P.steep,prePO:P.prePO,preIM:P.preIM},
     res:snap(isIM()?'im':'po')});
-  persist(); renderRuns();
+  persist(); renderRuns(); drawGold();
   $('saveHint').textContent='已保存 #'+seq;
 }
 function planTxt(p){return p.plan.map((ml,i)=>(p.planSeg?ml+'ml@'+fmtT(p.planSeg[i][0])+'/'+p.planSeg[i][1]+'s':ml)+(p.planTemp?'/'+p.planTemp[i]+'°C':'')).join('、');}
@@ -2517,7 +2588,7 @@ function renderRuns(){
     const dn=(p.pattern==='pulse'||p.pattern==='cont')&&p.dripper?' · '+DRIPPER[p.dripper].name:'';
     id.innerHTML='<b>#'+r.n+' '+(METHODN[p.pattern]||'')+dn+'</b><span>'+((b=>b?b.name+'（'+b.sub+'）· '+ROAST_NAME(b.roast):ROASTN[p.roast-1])(BEANS.find(x=>x.id===p.beanId)))+' · '+p.dose+' g · 1:'+(+(+p.ratio).toFixed(1))+' · '+(p.planTemp?'各注水溫':p.temp+' °C')+' · '+p.grind+' μm'+((g=>g?'（'+g.name+(g.um?' 第 '+Math.round(p.grind/g.um)+' 格':'')+'）':'')(GRINDERS.find(x=>x.id===p.grinder)))+'<br>'+(im?'浸泡 '+fmtT(p.steep):(p.pattern==='pulse'?(p.plan?'分段 '+planTxt(p):'三注'):p.pattern==='switch'?'Switch '+(p.swMode==='openFirst'?'先開 · '+fmtT(p.swClose)+' 關 · ':'先關 · ')+fmtT(p.swOpen||120)+' 開'+(p.plan?' · '+planTxt(p):''):'一刀流'))+'</span>';
     const del=document.createElement('button');del.className='ghost del';del.textContent='刪除';del.setAttribute('aria-label','刪除 #'+r.n);
-    del.onclick=()=>{runs.splice(idx,1);persist();renderRuns();};
+    del.onclick=()=>{runs.splice(idx,1);persist();renderRuns();drawGold();};
     const use=document.createElement('button');use.className='ghost';use.textContent='套用參數';use.setAttribute('aria-label','套用 #'+r.n+' 的參數');
     use.onclick=()=>{playing=false;$('play').textContent='播放';applyParams(p);t=0;run();$('saveHint').textContent='已套用 #'+r.n+' 的參數';
       document.querySelector('.params').scrollIntoView({behavior:reduce?'auto':'smooth',block:'start'});};
@@ -2928,7 +2999,7 @@ $('backBtn').onclick=showMap;
 
 function renderChoices(){
   const bx=$('beans');bx.innerHTML='';let rg='';
-  BEANS.filter(b=>!b.hidden||((curL().rule||{}).beans||[]).includes(b.id)).forEach(b=>{if(b.region!==rg){rg=b.region;const h=document.createElement('div');h.className='region';h.textContent=rg;bx.appendChild(h);}
+  BEANS.filter(b=>(!b.hidden&&!b.lab)||((curL().rule||{}).beans||[]).includes(b.id)).forEach(b=>{if(b.region!==rg){rg=b.region;const h=document.createElement('div');h.className='region';h.textContent=rg;bx.appendChild(h);}
     const el=document.createElement('button');el.className='card';el.setAttribute('aria-pressed',O.bean===b.id);
     const lv=Math.round(b.roast);
     const L=curL(),cmp=isComp(),RB=(L.rule||{}).beans,bc=Math.round(b.price*doseOf(applyRule(L,O))/100),na=cmp?b.id!==L.bean:(RB&&!RB.includes(b.id));if(na||(!cmp&&bc+FIXED_COST>L.budget))el.classList.add('over');if(na)el.disabled=true;
@@ -5604,7 +5675,7 @@ const NEWS=['【比賽】2026 WBC 的分層萃取概念掀起話題：有烘豆�
  '【趨勢】厭氧與共同發酵豆討論度居高不下，也有老饕直呼「太像香水」。','【趨勢】淺焙風潮回溫，年輕客人指名要「像果汁的咖啡」。','【趨勢】深焙沒有過時：老派喫茶店的法蘭絨手沖又紅了起來。','【趨勢】低因咖啡銷量成長，晚上想喝咖啡的人越來越多。','【趨勢】掛耳包市場飽和，精品店開始主打「現磨現沖才是本事」。',
  '【趨勢】配方豆翻身：越來越多冠軍店推出自家招牌配方。','【趨勢】冷萃退燒，冰手沖成為今年夏天的新寵。','【趨勢】咖啡訂閱制流行，熟客每月固定收到一包店家選豆。','【趨勢】平底濾杯銷量超越錐形？器材行老闆：「兩種都要有。」','【趨勢】越來越多咖啡店把烘焙日期印在包裝正面，客人更懂得看養豆天數。',
  '【知識】水佔一杯咖啡的 98%，自來水的氯味會蓋過花香。','【知識】剛烘好的豆子排氣旺盛，淺焙建議養一到兩週再沖。','【知識】研磨越細萃取越快，但細粉太多會堵住濾紙，後段變苦。','【知識】水溫每高一度，萃取就快一點：淺焙用高溫，深焙用低溫。','【知識】悶蒸是為了讓粉排氣、均勻吸水，新鮮豆子膨脹得最明顯。',
- '【知識】金杯理論：萃取率 18–22%、濃度 1.15–1.45% 是多數人喜歡的範圍。','【知識】磨豆機的殘粉會氧化發臭，定期清潔比換刀盤更重要。','【知識】同一支豆子放涼後酸會更明顯，杯測都要熱、溫、涼各喝一次。','【知識】日曬豆甜感厚、發酵味明顯；水洗豆乾淨、酸質清楚。','【知識】粉水比 1:15 偏濃、1:17 偏淡，先固定比例再調研磨最有效率。',
+ '【知識】金杯理論：萃取率 18–22%、濃度 1.15–1.35% 是 SCA 金杯的範圍，實驗室的金杯圖就是用這個框。','【知識】磨豆機的殘粉會氧化發臭，定期清潔比換刀盤更重要。','【知識】同一支豆子放涼後酸會更明顯，杯測都要熱、溫、涼各喝一次。','【知識】日曬豆甜感厚、發酵味明顯；水洗豆乾淨、酸質清楚。','【知識】粉水比 1:15 偏濃、1:17 偏淡，先固定比例再調研磨最有效率。',
  '【知識】濾紙先用熱水沖過，可以去掉紙味並預熱濾杯。','【知識】手沖壺的水柱越細越穩，對粉床的擾動越小，杯子越乾淨。','【知識】咖啡豆怕光、怕熱、怕濕、怕氧氣，密封放陰涼處就好，不必冰。','【知識】蜜處理的「蜜」不是加蜂蜜，是保留果膠一起曬乾。','【知識】小圓豆（Peaberry）是咖啡櫻桃裡只長一顆的豆子，約佔產量的 5%。',
  '【器材】恆溫手沖壺降價，器材行老闆說最近是入手好時機。','【器材】某款手搖磨豆機推出限定配色，開賣十分鐘售完。','【器材】商用磨豆機缺貨潮：平刀刀盤交期拉長到三個月。','【器材】新款濾杯主打「不繞流」，選手試用後評價兩極。','【器材】溫度計與電子秤成為新手必備，「憑感覺」的時代過去了。',
  '【器材】烘豆機排煙法規趨嚴，小型烘豆坊紛紛加裝後燃機。','【器材】琺瑯手沖壺復古回潮，二手市場價格翻倍。','【器材】濾水器廠商推出咖啡專用濾芯，號稱礦物質比例最佳化。','【器材】金屬濾網再度流行：油脂多、口感厚，但杯底會有細粉。','【器材】聰明杯新手友善，許多咖啡教室改用它當第一堂課。',
