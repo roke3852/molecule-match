@@ -117,6 +117,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
 .ratioLive{color:var(--accent)}
 .pour input{width:100%;box-sizing:border-box;font-family:var(--f-mono);font-size:14px;padding:5px 6px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink)}
 .pour small{font-size:10px;color:var(--muted);font-family:var(--f-mono)}
+.pour .pstyle{grid-column:1 / -1;display:flex;margin:2px 0}.pour .pstyle button{flex:1;padding:5px 0;font-size:13px}
 .pour .pgap{grid-column:1 / -1;font-style:normal;font-size:11px;color:var(--muted)}
 .pour .pgap.warn{color:var(--gold);font-weight:700}
 .plan-warn{display:block;margin-top:4px;color:var(--gold);font-weight:700}
@@ -311,6 +312,28 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
 .guideln:hover{text-decoration:underline}
 
 /* 👃 嗅覺斷水 */
+.gc-hd{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}.gc-hd .seg{max-width:260px}
+.gc-cap{line-height:1.6;margin:6px 0 12px}
+.gc-io{display:grid;grid-template-columns:1fr 1fr;gap:14px}.gc-io h3{margin:0 0 6px;font-size:14px;color:var(--muted);text-align:center}
+@media (max-width:640px){.gc-io{grid-template-columns:1fr}}
+.gc-in .wide{grid-column:1 / -1}
+.gc-in{display:grid;grid-template-columns:1fr 1fr;gap:10px 12px;margin:4px 0 8px}
+.gc-in label{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--muted)}
+.gc-in label input{font:inherit;font-size:20px;font-family:var(--f-mono);color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:8px 10px;width:100%;min-width:0}
+.gc-in label{position:relative}.gc-in label em{position:absolute;right:12px;bottom:12px;font-style:normal;color:var(--muted);font-size:13px}
+.gc-auto{line-height:1.6;margin:4px 0 8px}
+.gc-btns{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.gc-btns button{font:inherit;font-size:13px;padding:7px 12px;border-radius:999px;border:1px solid var(--line);background:transparent;color:var(--ink);cursor:pointer}
+.gc-btns button:first-child{border-color:var(--gold);color:var(--gold);font-weight:700}
+.gc-big{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center}
+.gc-big div{border:1px solid var(--line);border-radius:12px;padding:10px 4px}
+.gc-big b{display:block;font-family:var(--f-mono);font-size:24px;font-weight:600}.gc-big span{font-size:12px;color:var(--muted)}
+.gc-verdict{font-size:17px;font-weight:700;margin:12px 0 4px;color:var(--fail)}.gc-verdict small{display:block;font-size:13px;font-weight:500;color:var(--muted);margin-top:2px}.gc-verdict.ok{color:var(--accent)}
+.gc-adv{margin:0;line-height:1.6;font-size:14.5px}
+.gc-steps ol{margin:10px 0 0;padding-left:20px;line-height:1.8;font-size:14px}.gc-steps li.warn{color:var(--gold)}
+.gc-chart{width:100%}
+.gc-ex{font-family:var(--f-mono);font-size:13.5px;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 12px;line-height:1.8}
+.gc-tbl td{font-family:var(--f-body);font-size:13px;line-height:1.5;vertical-align:top}.gc-tbl td:first-child{white-space:nowrap;color:var(--ink)}
 .nose-ctl{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px 18px;margin:10px 0 14px}
 .nose-ctl .param input[type=range]{width:100%}
 .nz-steps{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;margin-bottom:10px}
@@ -728,11 +751,11 @@ h1,h2,h3{letter-spacing:.02em}
 .cloudchip[data-st="wait"] i,.cloudchip[data-st="err"] i{background:var(--fail)}
 .modes .app{flex:1 1 0;min-width:0;overflow:hidden;text-overflow:ellipsis}
 .modes .in{gap:6px 7px}
-.labtabs{flex:1 0 100%;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
+.labtabs{flex:1 0 100%;display:flex;flex-wrap:wrap;gap:6px;padding-bottom:2px}
 .labtabs::-webkit-scrollbar{display:none}
 .labtabs button{flex:0 0 auto;background:var(--panel);border:1px solid var(--line);color:var(--muted);border-radius:999px;font:inherit;font-size:13px;font-weight:700;padding:6px 14px;cursor:pointer;white-space:nowrap}
 .labtabs button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
-.labtabs .sep{flex:0 0 1px;background:var(--line);margin:4px 2px}
+.labtabs .sep{display:none}
 /* --- title --- */
 #titleOv{position:fixed;inset:0;z-index:60;background:#0d1420;color:#fff;overflow:hidden;display:flex;flex-direction:column;align-items:center;cursor:pointer;-webkit-user-select:none;user-select:none;transition:opacity .45s}
 #titleOv.out{opacity:0;pointer-events:none}
@@ -1179,7 +1202,7 @@ window.BGM=(()=>{
   <button class="cloudchip" id="navCloud" type="button" data-st="off" aria-label="雲端存檔：尚未連結 Google" title="雲端存檔"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 18a4 4 0 0 1-.6-7.96A5.5 5.5 0 0 1 17 9.2 4.4 4.4 0 0 1 17.5 18z"/></svg><i></i></button>
   <div class="labtabs" id="labTabs" role="group" aria-label="咖啡實驗室分頁" hidden data-noswipe>
     <button id="mSim" aria-pressed="true">模擬器</button><span class="sep"></span>
-    <button class="teach" id="mLearn" aria-pressed="false">4:6 沖法</button><button class="teach" id="mMicro" aria-pressed="false">顯微鏡</button><button class="teach" id="mBed" aria-pressed="false">粉層</button><button class="teach" id="mNose" aria-pressed="false">嗅覺斷水</button><button class="teach" id="mWater" aria-pressed="false">水質</button>
+    <button class="teach" id="mLearn" aria-pressed="false">4:6 沖法</button><button class="teach" id="mMicro" aria-pressed="false">顯微鏡</button><button class="teach" id="mBed" aria-pressed="false">粉層</button><button class="teach" id="mNose" aria-pressed="false">嗅覺斷水</button><button class="teach" id="mWater" aria-pressed="false">水質</button><button class="teach" id="mGold" aria-pressed="false">金杯計算</button>
   </div>
 </div></nav>
 <section id="hubView" hidden>
@@ -1584,6 +1607,62 @@ window.BGM=(()=>{
   </section>
 </div>
 </section>
+<section id="goldView" hidden>
+<div class="wrap gold">
+  <div>
+    <div class="label">教學 · 金杯怎麼算</div>
+    <h1>金杯計算解析</h1>
+    <p class="lede">金杯看的是兩個數字：杯子裡的咖啡有多濃（TDS），以及咖啡粉被萃出了多少（萃取率 EY）。輸入你這杯的數字，看看它落在控制圖的哪裡、要往哪個方向調。</p>
+  </div>
+
+  <section class="panel">
+    <div class="gc-hd"><h2>沖煮控制圖</h2><div class="seg" id="gcMode" role="group" aria-label="圖表"><button data-v="classic" aria-pressed="true">經典九宮格</button><button data-v="flavor" aria-pressed="false">風味方向</button></div></div>
+    <div id="gxChart" class="gc-chart"></div>
+    <p class="label gc-cap" id="gcCap"></p>
+    <div class="gc-io">
+      <div class="gc-col"><h3>輸入</h3>
+        <div class="gc-in">
+          <label><span>粉重</span><input id="gcDose" type="number" inputmode="decimal" step="0.1" value="15"><em>g</em></label>
+          <label><span>注水量</span><input id="gcWater" type="number" inputmode="decimal" step="1" value="240"><em>g</em></label>
+          <label><span>TDS 濃度</span><input id="gcTds" type="number" inputmode="decimal" step="0.01" value="1.35"><em>%</em></label>
+          <label><span>粉吸水倍數</span><input id="gcAbs" type="number" inputmode="decimal" step="0.1" value="2.0"><em>×</em></label>
+          <label class="wide"><span>杯中咖啡重（有秤就改成實際重量）</span><input id="gcBev" type="number" inputmode="decimal" step="1" value="210"><em>g</em></label>
+        </div>
+        <div class="gc-btns"><button type="button" id="gcFromSim">帶入模擬器這一杯</button><button type="button" id="gcBevAuto">杯中重量用估算值</button></div>
+        <p class="gc-auto label" id="gcAutoNote"></p>
+      </div>
+      <div class="gc-col"><h3>結果</h3><div class="gc-out" id="gcOut"></div><div class="gc-steps" id="gcSteps"></div></div>
+    </div>
+  </section>
+
+  <section class="panel mic-notes">
+    <h2>公式一步一步看</h2>
+    <p><b>萃取率 EY ＝ TDS × 杯中咖啡重 ÷ 粉重</b></p>
+    <p>TDS 是「杯子裡每 100 g 咖啡液，有幾 g 是溶解的咖啡物質」，用折射儀量。乘上杯中咖啡重，就得到這杯總共溶了幾 g 咖啡；再除以粉重，就是咖啡粉有百分之幾跑進了杯子。</p>
+    <p class="gc-ex">例：15 g 粉、注水 240 g、杯中咖啡 210 g、TDS 1.35%<br>溶出的咖啡 ＝ 210 × 1.35% ＝ 2.84 g<br>萃取率 ＝ 2.84 ÷ 15 ＝ <b>18.9%</b></p>
+    <h3>為什麼用「杯中咖啡重」，不是注水量？</h3>
+    <p>濕的咖啡粉會吸住水，大約是粉重的 2 倍（濾紙手沖常用 2–2.2 倍）。這些水帶著溶出物留在粉裡，沒有進杯子。所以 240 g 水、15 g 粉，杯子裡大約只有 210 g。直接秤杯子最準；沒秤的話，用「注水量 − 吸水倍數 × 粉重」估算；有些 App 用 1.8 倍，差別不大，固定用同一個數字就好。</p>
+    <p>如果誤用注水量 240 g 去算，同一杯會變成 21.6%，看起來剛好在金杯裡，其實只有 18.9%。這是最常見的算錯方式。</p>
+    <h3>粉水比的斜線怎麼來的</h3>
+    <p>杯中咖啡重 ≈ 粉重 × (粉水比 − 2)，代回公式：<b>TDS ≈ 萃取率 ÷ (粉水比 − 2)</b>。粉水比固定時，TDS 和萃取率成正比，所以會畫成一條斜線。換句話說：<b>粉水比決定你走哪一條線，研磨、水溫、注水手法決定你在線上走多遠。</b></p>
+    <h3>怎麼把點移到金杯裡</h3>
+    <table class="mic-tbl gc-tbl">
+      <tr><th>問題</th><th>點的位置</th><th>先調什麼</th></tr>
+      <tr><td>又淡又萃取不足</td><td>左下</td><td>磨細一點、水溫高一點、多一點擾動（點沿著斜線往右上走）</td></tr>
+      <tr><td>萃取率剛好但太淡</td><td>正下方</td><td>少一點水（粉水比調小，換到更上面那條線）</td></tr>
+      <tr><td>萃取率剛好但太濃</td><td>正上方</td><td>多一點水，或萃完補水</td></tr>
+      <tr><td>又濃又過萃</td><td>右上</td><td>磨粗一點、水溫低一點、提早斷水</td></tr>
+      <tr><td>萃取不足但太濃</td><td>左上</td><td>磨細，同時多加水</td></tr>
+      <tr><td>過萃但太淡</td><td>右下</td><td>磨粗，同時少一點水</td></tr>
+    </table>
+    <h3>量 TDS 的注意事項</h3>
+    <p>樣本要先攪勻、放涼到室溫再滴上折射儀；有細粉的話用針筒濾片過濾。熱的、沒攪勻的樣本，讀數常常差到 0.05% 以上，換算成萃取率就差將近 1%。</p>
+    <h3>金杯只是起點</h3>
+    <p>這個範圍來自 1950 年代 Lockhart 的研究。UC Davis 咖啡中心後來用感官評測和消費者測試重做了控制圖，發現不同族群喜歡的位置並不一樣：有人偏好濃一點，有人偏好淡而高萃取。所以金杯是「多數人喝起來不會出錯」的區間，不是唯一正解；調出你自己喜歡的位置更重要。</p>
+    <p class="fine">實驗室的「評分」可以切換均衡、清爽、濃郁三種風格，方框會跟著換；這一頁固定用 SCA 經典範圍說明計算方式。</p>
+  </section>
+</div>
+</section>
 <section id="waterView" hidden>
 <div class="wrap water">
   <div>
@@ -1894,10 +1973,11 @@ var CAL={q0:.35,qn:.9,pa:4,pd:25,clogK:6,clog0:.2,chan:1,bloomTau:30,clumpK:.6,c
 function pourDisturb(method,p){
   if(method==='im')return 0;
   const dose=p.dose,W=dose*p.ratio;let list;
-  if((p.pattern==='pulse'||p.pattern==='switch')&&p.plan){const sg=planSegments(p.plan,p.planT,p.planD);list=p.plan.map((ml,i)=>[ml,sg[i].rate]);}
+  if((p.pattern==='pulse'||p.pattern==='switch')&&p.plan){const sg=planSegments(p.plan,p.planT,p.planD);list=p.plan.map((ml,i)=>[ml,sg[i].rate,p.planStyle&&p.planStyle[i]]);}
   else if(p.pattern==='switch')list=[[W,W/20]];
   else{const b=Math.min(3*dose,W);list=[[b,b/10],[W-b,(W-b)/75]];}
-  let d=0;for(const [ml,rate] of list)d+=Math.pow(ml/(3*dose),1.6)*Math.sqrt(Math.max(.5,Math.min(2,rate/4)));
+  // 每注手法：繞圈注水（預設）翻動整個粉床；中心注水只在中間小範圍注水，擾動約少三分之一
+  let d=0;for(const [ml,rate,sty] of list)d+=Math.pow(ml/(3*dose),1.6)*Math.sqrt(Math.max(.5,Math.min(2,rate/4)))*(sty==='c'?.65:1);
   d*=Math.sqrt(650/p.grind);
   return d/(d+6);
 }
@@ -1998,7 +2078,8 @@ function simulate(method,p){
     const wetU = stirred?1 : (method==='po'&&!SW) ? (added>=.5*W?1:Math.min(1,.82+prepWet)) : Math.min(1,.88+.12*t/90);
     const w=absorbed/Vg*wetU*DR.u*(1-clump)*(method==='po'?.6+.4*wg:1)*(added>=.5*W?1-hd:1);
     // thinner boundary layer around particles: stirring, and in percolation the turbulence of the incoming water (decays after a pour)
-    if(method==='po'){pAg=inflow>0?1:pAg*Math.exp(-dt/Math.max(.1,CAL.pd||.1));}
+    if(method==='po'){let ag=1;if(inflow>0&&PL&&p.planStyle){for(let k=0;k<PL.length;k++)if(t>=PL[k].s&&t<PL[k].e){if(p.planStyle[k]==='c')ag=.82;break;}}
+      pAg=inflow>0?ag:pAg*Math.exp(-dt/Math.max(.1,CAL.pd||.1));}  // 中心注水：只在中間小範圍注水，粉床翻動比繞圈少
     const kf=1+.45*sb+(method==='po'?CAL.pa*pAg:0);
     // 油脂：不溶於水，靠熱（變得好流動）和水流、攪拌的剪切力從粉粒表面帶出
     if(absorbed>0&&(Vb>0||inflow>0))oilX+=w*oilFl(T)*(.25+(method==='po'?pAg:0)+1.5*sb)*dt;
@@ -2283,7 +2364,7 @@ function poPhaseTxt(s){
   return '全部注完 · 滴濾中';}
 function evenPlan(n){const W=Math.round(P.dose*P.ratio), b=Math.min(3*P.dose,W), r=W-b, each=Math.floor(r/n/5)*5;
   const a=[b];for(let i=0;i<n;i++)a.push(i===n-1?r-each*(n-1):each);
-  P.planT=null;P.planD=null;if(P.planTemp&&P.planTemp.length!==a.length)P.planTemp=null;return a;}
+  P.planT=null;P.planD=null;if(P.planTemp&&P.planTemp.length!==a.length)P.planTemp=null;if(P.planStyle&&P.planStyle.length!==a.length)P.planStyle=null;return a;}
 function parseT(str){str=String(str).trim();let m=str.match(/^(\d+)[:：](\d{1,2})$/);if(m)return Math.min(600,+m[1]*60+ +m[2]);
   m=str.match(/^\d+$/);if(m)return Math.min(600,+str);return null;}
 function renderPlan(){
@@ -2296,6 +2377,10 @@ function renderPlan(){
       '<label for="'+id+'d">注水秒數</label><input id="'+id+'d" type="number" inputmode="numeric" min="1" max="120" step="1" value="'+Math.round(seg[i].e-seg[i].s)+'" aria-label="'+(i?'第 '+i+' 注':'悶蒸')+'倒水要花幾秒">'+'<label for="'+id+'c">水溫</label><input id="'+id+'c" type="number" inputmode="numeric" min="70" max="100" step="1" value="'+(P.planTemp?P.planTemp[i]:P.temp)+'" aria-label="'+(i?'第 '+i+' 注':'悶蒸')+'水溫 °C">'+
       '<small>'+(ml/Math.max(1,seg[i].e-seg[i].s)).toFixed(1)+' ml/s・'+fmtT(seg[i].s)+'–'+fmtT(seg[i].e)+'</small>'+
       '<em class="pgap'+(i<seg.length-1&&seg[i+1].s-seg[i].e<1?' warn':'')+'">'+(i<seg.length-1?(seg[i+1].s-seg[i].e<1?'倒完馬上接下一注，中間不停':'倒完停 '+Math.round(seg[i+1].s-seg[i].e)+' 秒再倒下一注'):'倒完開始滴濾')+'</em>';
+    {const sty=(P.planStyle&&P.planStyle[i])||'r',sd=document.createElement('div');sd.className='seg pstyle';sd.setAttribute('role','group');sd.setAttribute('aria-label',(i?'第 '+i+' 注':'悶蒸')+'注水方式');
+      sd.innerHTML='<button type="button" data-s="r" aria-pressed="'+(sty==='r')+'">繞圈</button><button type="button" data-s="c" aria-pressed="'+(sty==='c')+'">中心</button>';
+      sd.querySelectorAll('button').forEach(b=>b.onclick=()=>{if(!P.planStyle)P.planStyle=P.plan.map(()=>'r');P.planStyle[i]=b.dataset.s;if(P.planStyle.every(x=>x==='r'))P.planStyle=null;run();});
+      d.insertBefore(sd,d.querySelector('small'));}
     const [iml,it,idur,itc]=d.querySelectorAll('input');itc.addEventListener('change',e=>{const v=Math.max(70,Math.min(100,Math.round(+e.target.value||P.temp)));if(!P.planTemp)P.planTemp=P.plan.map(()=>P.temp);P.planTemp[i]=v;if(P.planTemp.every(x=>x===P.temp))P.planTemp=null;run();});
     iml.addEventListener('change',e=>{let v=Math.max(0,Math.min(400,Math.round(+e.target.value||0)));
       P.plan[i]=v;syncRatio();run();});
@@ -2472,7 +2557,7 @@ function handBrewStart(){if(!window.labBrewAnim){setSimTab('brew');t=0;$('scrub'
   const im=P.pattern==='immersion',sw=P.pattern==='switch',br=im?'press':sw?'switch':P.dripper;
   if(playing){playing=false;$('play').textContent='播放';}
   window.labBrewAnim({bean:P.beanId||'col',brewer:br,grinder:P.grinder||'c40',ratio:+(+P.ratio).toFixed(1),dose:P.dose,
-    filter:P.filter,plan:im?null:(()=>{let c=0;return planSegments(P.plan,P.planT,P.planD).map((g,i)=>{c+=P.plan[i];return {s:Math.round(g.s),e:Math.round(g.e),cum:Math.round(c),rate:g.rate};});})(),
+    filter:P.filter,plan:im?null:(()=>{let c=0;return planSegments(P.plan,P.planT,P.planD).map((g,i)=>{c+=P.plan[i];return {s:Math.round(g.s),e:Math.round(g.e),cum:Math.round(c),rate:g.rate,sty:(P.planStyle&&P.planStyle[i])||'r'};});})(),
     lab:{tools:{thermo:1,scale:1,thermos:1},last:{temp:P.planTemp&&!im?P.planTemp[0]:P.temp,grind:P.grind,stir:P.prePO==='bloom'?'bloom':'none'}}},ex=>{
     if(!ex){setSimTab('brew');t=0;$('scrub').value=0;draw();setTimeout(()=>{if(!playing)$('play').click();},300);return;}
     const o=ex.pro,n=o.plan.length;
@@ -2592,7 +2677,9 @@ function run(){
   labels(); presetTimes(); renderPlan(); try{planVis();decorIcons();fixVis();}catch(e){}
   simPO=simulate('po',pFor('po')); simIM=simulate('im',pFor('im')); renderScore();
   tMax=isIM()?simIM.end:simPO.end;
-  rememberParams();if(typeof recRender==='function')recRender();if(typeof renderChampBtn==='function')renderChampBtn();
+  rememberParams();if(typeof recRender==='function')recRender();
+  {const rf=simPO.rec[simPO.rec.length-1],tot=rf.cupM.reduce((a,b)=>a+b,0),W=(P.pattern==='pulse'||P.pattern==='switch')&&P.plan?P.plan.reduce((a,b)=>a+b,0):P.dose*P.ratio;
+   window.simNow=()=>isIM()?null:{dose:P.dose,water:W+(P.bypassMl||0),bev:rf.cupV+(P.bypassMl||0),tds:tot/(rf.cupV+(P.bypassMl||0))*100};}if(typeof renderChampBtn==='function')renderChampBtn();
   $('scrub').max=tMax; if(t>tMax)t=tMax; $('scrub').value=t;
   draw();
 }
@@ -2939,11 +3026,11 @@ onWidthResize(draw);
 document.fonts&&document.fonts.ready.then(draw);
 // ---------- remembered parameters ----------
 const PKEY='brewsim-params-v1';
-const PFIELDS=['filter','wdt','dig','cutoff','bypassMl','dripper','dose','ratio','temp','grind','roast','pattern','plan','planT','planD','planTemp','beanId','valveWins','grinder','swOpen','swMode','swClose','steep','prePO','preIM'];
+const PFIELDS=['filter','wdt','dig','cutoff','bypassMl','dripper','dose','ratio','temp','grind','roast','pattern','plan','planT','planD','planTemp','planStyle','beanId','valveWins','grinder','swOpen','swMode','swClose','steep','prePO','preIM'];
 function rememberParams(){try{const o={};PFIELDS.forEach(k=>o[k]=P[k]);localStorage.setItem(PKEY,JSON.stringify(o));}catch(e){}}
 function applyParams(o){
   PFIELDS.forEach(k=>{if(o[k]!==undefined)P[k]=Array.isArray(o[k])?o[k].slice():o[k];});
-  if(o.beanId===undefined)P.beanId=null;
+  if(o.beanId===undefined)P.beanId=null;if(o.planStyle===undefined)P.planStyle=null;
   if(o.planSeg&&o.plan){P.planT=o.planSeg.map(x=>x[0]);P.planD=o.planSeg.map(x=>x[1]);}
   if(!PAT[P.pattern])P.pattern='pulse';
   P.xPO=[];P.xIM=[];
@@ -3026,7 +3113,7 @@ function bnPlan(txt,dose,water){
      ①「60ml 4ml/s 40s」＝這注倒 60 ml、流速 4 ml/s、40 秒後倒下一注
      ②「0:40 注到 100g（+50）」＝0:40 開始、累計注到 100 g（括號是這注的量）
      ③「0:00 關閥注 45g 浸泡」「0:50 開閥，注到 245g」＝Switch */
-  const L=String(txt||'').split(/\n+/).map(l=>l.trim()).filter(Boolean);const plan=[],planT=[],planD=[];let t=0,cum=0,open=null;
+  const L=String(txt||'').split(/\n+/).map(l=>l.trim()).filter(Boolean);const plan=[],planT=[],planD=[],sty=[];let t=0,cum=0,open=null;
   const tm=l=>{const m=l.match(/^(\d+):(\d{2})/);return m?+m[1]*60+ +m[2]:null;};
   L.forEach(l=>{const st=tm(l),body=l.replace(/^\d+:\d{2}\s*/,'');
     if(/開閥/.test(body)&&st!=null&&open==null)open=st;
@@ -3037,16 +3124,20 @@ function bnPlan(txt,dose,water){
     if(ml==null||ml<=0)return;ml=Math.round(ml);
     const start=st!=null?st:t,d=Math.max(1,Math.round(ml/(rate?+rate:4)));
     const iv=st==null?(clean.match(/(\d+)\s*(?:s|秒)(?![a-z])/i)||[])[1]:null;
+    sty.push(/中心|(?:^|\s)中(?:\s|$|（)/.test(clean)&&!/繞/.test(clean)?'c':/繞/.test(clean)?'r':null);
     plan.push(ml);planT.push(Math.round(Math.max(start,planT.length?planT[planT.length-1]+planD[planD.length-1]:0)));planD.push(d);cum+=ml;
     t=st!=null?start+d+15:start+(iv?+iv:d+15);});
   if(plan.length<2){const W=water||Math.round(dose*16),b=Math.min(W,dose*3);return {plan:[b,W-b],planT:[0,40],planD:[Math.round(b/4),Math.round((W-b)/4)],open};}
-  return {plan,planT,planD,open};}
+  return {plan,planT,planD,open,sty};}
 function bnToRecipe(b,beans){
   const gid=bnGrinder(b.grinder),G=gid&&GRINDERS.find(g=>g.id===gid);let grind=650,gtxt='';
   if(G&&G.um&&b.grind!=null&&window.GRH){let c=+b.grind;if(G.dial==='num'&&String(b.grind).includes('.'))c=Math.round(c*10);grind=Math.max(300,Math.min(1200,window.GRH.gSize(G,c)));gtxt=(gid==='c40'?'C40':gid==='zp6'?'ZP6':G.name)+' '+b.grind+(G.dial==='num'?'':' 格');}
   const sw=/switch/i.test(b.dripper||'');const pl=bnPlan(b.pours,+b.dose||15,+b.water||0);
+  /* 每注的手法：注水行有寫「繞／中」就用它，沒寫就照手法名稱的「繞繞中中」逐字對應 */
+  const mseq=[...String(b.method||'').replace(/（.*?）/g,'').replace(/[^繞中]/g,'')].map(c=>c==='中'?'c':'r');
+  let planStyle=(pl.sty||[]).map((x,i)=>x||mseq[i]||'r');if(!planStyle.length||planStyle.every(x=>x==='r'))planStyle=null;
   const p={filter:'paper',wdt:false,dig:false,cutoff:0,bypassMl:0,dripper:bnDripper(b.dripper,b.paper),dose:+b.dose||15,ratio:pl.plan.reduce((a,x)=>a+x,0)/(+b.dose||15),temp:+b.temp||92,grind,
-    roast:bnRoast(beans.find(x=>x.id===b.beanId)),pattern:sw?'switch':'pulse',plan:pl.plan,planT:pl.planT,planD:pl.planD,planTemp:null,beanId:null,valveWins:sw?[[0,pl.open||50]]:null,grinder:gid,
+    roast:bnRoast(beans.find(x=>x.id===b.beanId)),pattern:sw?'switch':'pulse',plan:pl.plan,planT:pl.planT,planD:pl.planD,planTemp:null,planStyle,beanId:null,valveWins:sw?[[0,pl.open||50]]:null,grinder:gid,
     swOpen:pl.open||50,swMode:'closeFirst',swClose:30,steep:240,prePO:'none',preIM:'none'};
   const dshort=String(b.dripper||'').replace(/不鏽鋼|樹脂|陶瓷|（.*?）/g,'').trim();
   const meth=String(b.method||'').replace(/（.*?）/g,'').trim();
@@ -4978,7 +5069,7 @@ const $=id=>document.getElementById(id);
 const NAV=[];let curMode=null;
 function show(mode,push,noRec){if(window.BGM)BGM.set(mode==='sim'?'lab':mode==='game'&&window.GAME&&window.GAME.ctx()==='comp'?'comp':'cafe');
   if(push&&!noRec&&curMode&&curMode!==mode){NAV.push({mode:curMode,y:scrollY});if(NAV.length>30)NAV.shift();}
-  const ids={hub:'hubView',shop:'shopView',sim:'simView',game:'gameView',learn:'learnView',micro:'microView',bed:'bedView',nose:'noseView',water:'waterView',academy:'academyView'},btn={sim:'mSim',learn:'mLearn',micro:'mMicro',bed:'mBed',nose:'mNose',water:'mWater'};
+  const ids={hub:'hubView',shop:'shopView',sim:'simView',game:'gameView',learn:'learnView',micro:'microView',bed:'bedView',nose:'noseView',water:'waterView',gold:'goldView',academy:'academyView'},btn={sim:'mSim',learn:'mLearn',micro:'mMicro',bed:'mBed',nose:'mNose',water:'mWater',gold:'mGold'};
   if(!ids[mode])mode='hub';
   curMode=mode;
   Object.keys(ids).forEach(k=>{$(ids[k]).hidden=k!==mode;if(btn[k])$(btn[k]).setAttribute('aria-pressed',k===mode);});
@@ -4995,6 +5086,7 @@ function show(mode,push,noRec){if(window.BGM)BGM.set(mode==='sim'?'lab':mode==='
   if(mode==='nose'&&window.noseRender)requestAnimationFrame(()=>window.noseRender());
   if(mode==='academy'&&window.academyRender)window.academyRender();
   if(mode==='water'&&window.waterRender)requestAnimationFrame(()=>window.waterRender());
+  if(mode==='gold'&&window.goldRender)requestAnimationFrame(()=>window.goldRender());
 }
 $('mSim').onclick=()=>{show('sim',true);scrollTo(0,0);};
 $('homeBtn').onclick=()=>{NAV.length=0;show('hub',true);scrollTo(0,0);};
@@ -5004,6 +5096,7 @@ $('mMicro').onclick=()=>{show('micro',true);scrollTo(0,0);};
 $('mBed').onclick=()=>{show('bed',true);scrollTo(0,0);};
 $('mNose').onclick=()=>{show('nose',true);scrollTo(0,0);};
 $('mWater').onclick=()=>{show('water',true);scrollTo(0,0);};
+$('mGold').onclick=()=>{show('gold',true);scrollTo(0,0);};
 function route(){const h=location.hash||'';
   if(h==='#hub')return show('hub');
   if(h==='#shop')return show('shop');
@@ -5013,6 +5106,7 @@ function route(){const h=location.hash||'';
   if(h==='#bed')return show('bed');
   if(h==='#nose')return show('nose');
   if(h==='#water')return show('water');
+  if(h==='#gold')return show('gold');
   if(h==='#academy')return show('academy');
   if(h==='#game'||/^#level-\d+$/.test(h)){show('game');window.gameRoute&&window.gameRoute(h);return;}
   show('hub');
@@ -6068,7 +6162,7 @@ function brewAnim(opt,done){const SS=opt.lab||SS,LAB=!!opt.lab,AUTO=LAB&&!!(opt.
     (sw?'<rect x="204" y="132" width="24" height="7" fill="'+bp.A+'"/><rect id="baVI" x="228" y="133" width="10" height="4" fill="#5fbf7a"/>':'')+
     '<rect id="baDrip" x="215.2" y="134" width="1.6" height="0" fill="#7a4220" opacity="0"/><circle class="dr" cx="216" cy="142" r="1.6" fill="#5a2f14"/><circle class="dr d2" cx="216" cy="142" r="1.6" fill="#5a2f14"/>'+
     '<path d="M198 140h36v64h-36z" fill="rgba(190,225,238,.12)" stroke="#cfe6ee" stroke-width="1.5"/><rect id="baCup" x="199" y="141" width="34" height="62" fill="#3a1c0c"/>')+
-   '<g id="baAroma"></g>'+
+   '<g id="baAroma"></g>'+(AUTO?'<text id="baPS" x="150" y="40" font-size="8.5" font-weight="700" text-anchor="middle" fill="#bfe6ff" opacity=".85"></text>':'')+
    (LAB?'<text x="216" y="222" font-size="8" text-anchor="middle" fill="#a59887" font-family="monospace">'+esc((DRIPPER[br]&&DRIPPER[br].name)||(press?'法式濾壓':sw?'聰明杯':br))+(press||(opt.filter!=='metal'&&/濾紙/.test((DRIPPER[br]&&DRIPPER[br].name)||''))?'':'・'+(opt.filter==='metal'?'金屬濾網':'濾紙'))+'・'+dose+'g・'+setT+'°C</text>':'')+'</svg><div class="ba-cap">把豆子倒進 '+esc(Gd.name.replace(/（.*/,''))+'…</div><div class="ba-prog"><i></i></div><div class="ba-tip"></div>'+
    '<div class="ba-heat" hidden><div class="ba-stat"><b id="baHT">？</b><span id="baHH"></span></div><div class="ba-btns"><button type="button" id="baHeatOk" class="pri">離火，開始注水</button></div></div>'+
    '<div class="ba-pour" hidden><div class="ba-stat"><b id="baT">0:00</b><span id="baW">0 / '+target+' g</span><span id="baS">第 0 段</span><span id="baK"></span></div>'+(LAB&&opt.plan?'<div class="ba-plan" id="baPlan"></div>':'')+
@@ -6146,7 +6240,10 @@ function brewAnim(opt,done){const SS=opt.lab||SS,LAB=!!opt.lab,AUTO=LAB&&!!(opt.
         if(!warned&&clog>.8&&!press){warned=true;tip.textContent='細粉被沖到濾紙上堵住了，水下得很慢（塞水）';}if(now-lastPS>1650){SFX.p('pour');lastPS=now;}if(poured>=maxPour){setPour(false);tip.textContent='水加太多了，已經到上限';}else if(Wd>=CAPW){setPour(false);tip.textContent='快滿出來了！等水位降下來再注水';}}
       const dr=Math.max(0,Wd-2*dose);if(!press&&open&&dr>0){const d=Math.min(dr,rate/(1+1.6*clog)*Math.min(1,dr/25+.15)*g);Wd-=d;cupG+=d;}
       if(started){t+=g;if(!KT.temp)cool+=g*.03;}if(sw&&!open&&Wd>2*dose)closedT+=g;
-      kt.style.transform=pouring?'translate(4px,6px) rotate(24deg)':'';st.style.opacity=pouring?.95:0;st.style.strokeWidth=flow<4?1.6:flow<6?2.6:4.2;st.style.strokeDashoffset=(-now/10).toFixed(0);
+      let pdx=0;if(pouring){const q=AUTO?opt.plan.find(q=>poured<q.cum-.5):null,sty=q?q.sty:'r';pdx=sty==='c'?0:Math.sin(now/260)*(flat?13:10);
+        st.setAttribute('d','M'+(202+pdx).toFixed(1)+' 82 Q'+(210+pdx*.8).toFixed(1)+' 92 '+(215+pdx).toFixed(1)+' '+(press?108:102));
+        const pg=$q('baPS');if(pg)pg.textContent=sty==='c'?'中心注水':'繞圈注水';}
+      kt.style.transform=pouring?'translate('+(4+pdx*1.6).toFixed(1)+'px,6px) rotate(24deg)':'';st.style.opacity=pouring?.95:0;st.style.strokeWidth=flow<4?1.6:flow<6?2.6:4.2;st.style.strokeDashoffset=(-now/10).toFixed(0);
       const L=Math.min(1,Wd/CAPW);if(press){water.setAttribute('y',(204-104*L).toFixed(1));water.setAttribute('height',(104*L).toFixed(1));}
       else{/* 粉床先吸水變深色，多出來的水淹在粉床上方；水位、往下滴、杯子水位都跟著實際水量 */
         const bedTop=flat?123:118,free=Math.max(0,Wd-2*dose),hb=(bedTop-100)*Math.min(1,Math.pow(free/Math.max(40,target*.32),.8));
@@ -6159,6 +6256,7 @@ function brewAnim(opt,done){const SS=opt.lab||SS,LAB=!!opt.lab,AUTO=LAB&&!!(opt.
         AN.classList.toggle('dripping',dripping&&dr<8);
         const bb=$q('baBub');if(bb&&now-(bb._t||0)>140){bb._t=now;const k=started&&Wd>0?Math.exp(-t/35):0;
           bb.innerHTML=k>.08?Array.from({length:Math.round(2+6*k)},()=>'<circle cx="'+(194+Math.random()*44).toFixed(1)+'" cy="'+(bedTop-hb-.5-Math.random()*1.5).toFixed(1)+'" r="'+(.6+Math.random()*1.1).toFixed(2)+'" fill="#e8d2b0" opacity="'+(.35+.5*k).toFixed(2)+'"/>').join(''):'';}}
+      if(!pouring&&$q('baPS'))$q('baPS').textContent='';
       aromaTick(dt,now);
       $q('baT').textContent=fm(t);if(LAB&&opt.plan)planGuide();$q('baK').textContent='壺 '+Math.max(0,Math.round(kw))+' ml・'+(KT.temp?setT+'°C 恆溫':hasTh?(Tb-cool).toFixed(0)+'°C':'？°C')+(SS.tools.scale?'・流速 '+(pouring?feNow.toFixed(1):'0.0')+' g/s':'');$q('baW').textContent=Math.round(poured)+' / '+target+' g';$q('baW').className=poured>target+8?'over':poured>=target-4?'hit':'';$q('baS').textContent='第 '+segs+' 段'+(sw?'・浸泡 '+fm(closedT):'');
       if(pouring&&poured>=target&&poured-flow*g<target){setPour(false);tip.textContent='到目標水量了，等它滴完'+(press?'，再壓下濾網':'');SFX.p('hint');}
@@ -7552,5 +7650,77 @@ addEventListener('popstate',()=>endTour());
 })();
 </script>
 <script>/*offline*/if("serviceWorker"in navigator)navigator.serviceWorker.register("../sw.js",{scope:"../"}).catch(function(){});</script>
+<script>
+(function(){
+const $=id=>document.getElementById(id);
+const G={ey:[18,22],tds:[1.15,1.35]},X0=14,X1=26,Y0=.9,Y1=1.7;
+let bevAuto=true,mode='classic';
+const num=id=>{const v=parseFloat(String($(id).value).replace(',','.'));return isFinite(v)?v:0;};
+const kAbs=()=>num('gcAbs')||2;
+function estBev(){return Math.max(0,num('gcWater')-kAbs()*num('gcDose'));}
+function zoneOf(ey,tds){const ex=ey<G.ey[0]?0:ey>G.ey[1]?2:1,st=tds<G.tds[0]?0:tds>G.tds[1]?2:1;
+  const lab=[['微弱的未發展風味','未發展風味','強烈的未發展風味'],['微弱','理想的最佳平衡','強烈'],['微弱的苦味','苦味','強烈的苦味']][ex][st];
+  const adv=[
+    ['又淡又萃取不足：磨細一點、水溫高一點或多擾動，點會沿著斜線往右上走。','萃取不足：磨細一點或提高水溫，點會往右上走；走過頭再多加一點水。','萃取不足但太濃：磨細一點，同時多加一點水（換到較低的斜線）。'],
+    ['萃取率剛好但太淡：少用一點水（粉水比調小），換到上面那條斜線。','在金杯範圍裡。接下來照你自己的口味微調。','萃取率剛好但太濃：多加一點水，或萃完後補水。'],
+    ['過萃又太淡：磨粗一點，同時少用一點水。','過度萃取：磨粗一點、降低水溫、減少擾動，或提早斷水。','又濃又過萃：磨粗一點、降低水溫或提早斷水，點會沿著斜線往左下退。']][ex][st];
+  return {ex,st,label:lab,adv,gold:ex===1&&st===1};}
+function flavorOf(ey,tds){const a=ey<19?'L':ey>21?'R':'M',b=tds<1.2?'B':tds>1.4?'T':'M';
+  return {LT:'酸與柑橘味',MT:'醇厚',RT:'苦與烘焙味',LB:'甜味',MB:'清淡',RB:'茶感',LM:'酸甜明亮',RM:'偏苦、厚重',MM:'經典標準'}[a+b];}
+function render(){
+  if(bevAuto)$('gcBev').value=Math.round(estBev()*10)/10;
+  const dose=num('gcDose'),water=num('gcWater'),bev=num('gcBev'),tds=num('gcTds');
+  $('gcAutoNote').textContent=bevAuto?'杯中咖啡重是估算值：注水 '+water+' g − '+kAbs()+' × 粉重 '+dose+' g ＝ '+(Math.round(estBev()*10)/10)+' g。':'杯中咖啡重用你輸入的實際重量。';
+  if(!(dose>0&&bev>0&&tds>0)){$('gcOut').innerHTML='<p class="label">請輸入粉重、注水量和 TDS。</p>';$('gcSteps').innerHTML='';drawChart(null);return;}
+  const sol=bev*tds/100,ey=sol/dose*100,ratio=water>0?water/dose:0,eyWrong=water*tds/100/dose*100,z=zoneOf(ey,tds);
+  $('gcOut').innerHTML='<div class="gc-big"><div><b>'+ey.toFixed(1)+'%</b><span>萃取率 EY</span></div><div><b>'+tds.toFixed(2)+'%</b><span>濃度 TDS</span></div><div><b>1:'+(ratio?ratio.toFixed(1):'—')+'</b><span>粉水比</span></div></div>'+
+    '<p class="gc-verdict'+(z.gold?' ok':'')+'">'+(z.gold?'✓ ':'')+z.label+'<small>風味方向：'+flavorOf(ey,tds)+'</small></p><p class="gc-adv">'+z.adv+'</p>';
+  $('gcSteps').innerHTML='<ol><li>溶出的咖啡 ＝ 杯中咖啡 '+bev.toFixed(1)+' g × TDS '+tds.toFixed(2)+'% ＝ <b>'+sol.toFixed(2)+' g</b></li><li>萃取率 ＝ '+sol.toFixed(2)+' g ÷ 粉 '+dose+' g ＝ <b>'+ey.toFixed(1)+'%</b></li>'+
+    (water>bev+1?'<li class="warn">如果誤用注水量 '+water+' g 來算，會得到 '+eyWrong.toFixed(1)+'%，多算了 '+(eyWrong-ey).toFixed(1)+'%。</li>':'')+'</ol>';
+  drawChart({ey,tds,ratio});}
+function drawChart(pt){
+  const W=Math.max(300,Math.min(640,$('gxChart').clientWidth||340)),H=Math.round(W*.92),L=38,R=34,T=22,B=40;
+  const X=e=>L+(e-X0)/(X1-X0)*(W-L-R),Y=v=>T+(1-(v-Y0)/(Y1-Y0))*(H-T-B),k=kAbs();
+  let s='<svg viewBox="0 0 '+W+' '+H+'" width="100%" role="img" aria-label="沖煮控制圖"><defs><clipPath id="gcClip"><rect x="'+L+'" y="'+T+'" width="'+(W-L-R)+'" height="'+(H-T-B)+'"/></clipPath></defs>';
+  s+='<rect x="'+L+'" y="'+T+'" width="'+(W-L-R)+'" height="'+(H-T-B)+'" rx="6" fill="var(--bg)" stroke="var(--muted)" stroke-width="1.2"/>';
+  for(let e=X0;e<=X1;e+=1)s+='<line x1="'+X(e)+'" x2="'+X(e)+'" y1="'+T+'" y2="'+(H-B)+'" stroke="var(--line)" opacity="'+(e%2?.45:1)+'"/>'+(e%2?'':'<text x="'+X(e)+'" y="'+(H-B+16)+'" font-size="12" text-anchor="middle" fill="var(--ink)">'+e+'</text>');
+  for(let v=Y0;v<=Y1+.001;v+=.05){const m=Math.abs(v*10-Math.round(v*10))<.01;s+='<line x1="'+L+'" x2="'+(W-R)+'" y1="'+Y(v)+'" y2="'+Y(v)+'" stroke="var(--line)" opacity="'+(m?1:.45)+'"/>'+(m?'<text x="'+(L-6)+'" y="'+(Y(v)+4)+'" font-size="12" text-anchor="end" fill="var(--ink)">'+v.toFixed(1)+'</text>':'');}
+  // 粉水比斜線（TDS ≈ EY ÷ (粉水比 − 吸水倍數)），標在右邊或上方
+  s+='<g clip-path="url(#gcClip)">';const labs=[];
+  for(let r=10;r<=30;r+=(r<20?1:2)){const sl=1/(r-k);let xa=X0,ya=X0*sl,xb=X1,yb=X1*sl,top=false;
+    if(yb>Y1){yb=Y1;xb=Y1/sl;top=true;}if(ya<Y0){ya=Y0;xa=Y0/sl;}if(xa>=xb||xb<X0||ya>Y1)continue;
+    const on=pt&&pt.ratio&&Math.abs(pt.ratio-r)<.5;
+    s+='<line x1="'+X(xa)+'" y1="'+Y(ya)+'" x2="'+X(xb)+'" y2="'+Y(yb)+'" stroke="'+(on?'var(--accent)':'var(--muted)')+'" stroke-width="'+(on?1.6:.8)+'" opacity="'+(on?.95:.45)+'"/>';labs.push([r,xb,yb,top,on]);}
+  s+='</g>';
+  labs.forEach(([r,xb,yb,top,on])=>{s+=top?'<text x="'+X(xb)+'" y="'+(T-6)+'" font-size="10.5" text-anchor="middle" fill="'+(on?'var(--accent)':'var(--muted)')+'">'+r+'</text>':'<text x="'+(W-R+4)+'" y="'+(Y(yb)+4)+'" font-size="10.5" fill="'+(on?'var(--accent)':'var(--muted)')+'">'+r+'</text>';});
+  // 區域標籤
+  const zt=(x,y,t,c,sz)=>'<text x="'+X(x)+'" y="'+Y(y)+'" font-size="'+(sz||13)+'" font-weight="700" text-anchor="middle" fill="'+(c||'var(--muted)')+'" opacity=".9">'+t+'</text>';
+  if(mode==='classic'){
+    s+='<rect x="'+X(G.ey[0])+'" y="'+Y(G.tds[1])+'" width="'+(X(G.ey[1])-X(G.ey[0]))+'" height="'+(Y(G.tds[0])-Y(G.tds[1]))+'" fill="rgba(226,189,106,.16)" stroke="var(--gold)" stroke-width="1.5"/>';
+    s+=zt(16,1.55,'強烈的','var(--muted)',12)+zt(16,1.51,'未發展風味','var(--muted)',12)+zt(20,1.53,'強烈')+zt(24,1.55,'強烈的','var(--muted)',12)+zt(24,1.51,'苦味','var(--muted)',12)+
+       zt(16,1.255,'未發展風味',0,12)+zt(20,1.265,'理想的','var(--gold)',12)+zt(20,1.225,'最佳平衡','var(--gold)',12)+zt(24,1.25,'苦味')+
+       zt(16,1.02,'微弱的',0,12)+zt(16,.98,'未發展風味',0,12)+zt(20,1.0,'微弱')+zt(24,1.02,'微弱的',0,12)+zt(24,.98,'苦味',0,12);}
+  else{s+='<rect x="'+X(19)+'" y="'+Y(1.4)+'" width="'+(X(21)-X(19))+'" height="'+(Y(1.2)-Y(1.4))+'" fill="rgba(226,189,106,.12)"/>';
+    s+=zt(16.3,1.55,'酸與柑橘味','#e8c14a',14)+zt(20,1.6,'醇厚','#c98a5a',14)+zt(23.7,1.55,'苦與烘焙味','#c97a5a',14)+zt(20,1.29,'經典標準','var(--gold)',13)+
+       zt(16.3,1.03,'甜味','#e87fb0',14)+zt(20,.96,'清淡','#8ec8e6',14)+zt(23.7,1.03,'茶感','#a6b27a',14);}
+  if(pt){const cx=X(Math.max(X0,Math.min(X1,pt.ey))),cy=Y(Math.max(Y0,Math.min(Y1,pt.tds)));
+    s+='<line x1="'+cx+'" x2="'+cx+'" y1="'+cy+'" y2="'+(H-B)+'" stroke="var(--ink)" stroke-width="1.5" stroke-dasharray="4 4"/><line x1="'+L+'" x2="'+cx+'" y1="'+cy+'" y2="'+cy+'" stroke="var(--ink)" stroke-width="1.5" stroke-dasharray="4 4"/>'+
+       '<circle cx="'+cx+'" cy="'+cy+'" r="10" fill="var(--gold)" opacity=".25"/><circle cx="'+cx+'" cy="'+cy+'" r="6.5" fill="var(--gold)" stroke="var(--bg)" stroke-width="2"/>';}
+  s+='<text x="'+((L+W-R)/2)+'" y="'+(H-6)+'" font-size="12" text-anchor="middle" fill="var(--muted)">萃取率 EY (%)</text>'+
+     '<text transform="translate(11 '+((T+H-B)/2)+') rotate(-90)" font-size="12" text-anchor="middle" fill="var(--muted)">總溶解固體 TDS (%)</text></svg>';
+  $('gxChart').innerHTML=s;
+  $('gcCap').textContent=mode==='classic'?'經典九宮格（Lockhart，1950 年代）：金框是 SCA 金杯範圍，萃取率 18–22%、TDS 1.15–1.35%。斜線是粉水比（注水 g ÷ 粉 g），同一個粉水比只會落在同一條線上。':
+    '風味方向：參考 UC Davis 咖啡中心新版控制圖的研究方向，越往左上越酸、越往右上越苦，往下越清淡；左下偏甜、右下像茶。區塊是方向，不是精確邊界。';}
+['gcDose','gcWater','gcTds','gcAbs'].forEach(id=>$(id).addEventListener('input',render));
+$('gcBev').addEventListener('input',()=>{bevAuto=false;render();});
+$('gcBevAuto').onclick=()=>{bevAuto=true;render();};
+$('gcMode').querySelectorAll('button').forEach(b=>b.onclick=()=>{mode=b.dataset.v;$('gcMode').querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',x===b));render();});
+$('gcFromSim').onclick=()=>{const n=window.simNow&&window.simNow();if(!n){$('gcAutoNote').textContent='模擬器還沒有結果，先到模擬器沖一杯。';return;}
+  $('gcDose').value=n.dose;$('gcWater').value=Math.round(n.water);$('gcBev').value=Math.round(n.bev);$('gcTds').value=n.tds.toFixed(2);bevAuto=false;render();
+  $('gcAutoNote').textContent='已帶入模擬器這一杯：杯中咖啡 '+Math.round(n.bev)+' g 是模擬器算出實際滴進杯子的量（注水 '+Math.round(n.water)+' g，粉裡留住約 '+Math.round(n.water-n.bev)+' g）。';};
+let rz;if(window.onWidthResize)onWidthResize(()=>{clearTimeout(rz);rz=setTimeout(()=>{if(!$('goldView').hidden)render();},150);});
+window.goldRender=()=>render();
+})();
+</script>
 </body>
 </html>
