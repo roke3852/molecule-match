@@ -169,6 +169,18 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
 .mr-more{grid-column:1 / -1;display:flex;flex-wrap:wrap;gap:4px}
 .mr-more button.del{color:var(--fail);border-color:var(--fail)}
 .mr-save{display:flex;gap:6px}
+.mr-foot{border-top:1px solid var(--line);padding:10px 2px 2px;display:flex;flex-direction:column;gap:8px}
+.mr-foot .mr-imp{margin:0}
+.mr-card{cursor:pointer}.mr-card.ed{cursor:default}
+.mr-card .cp-ico .bdg{position:absolute;right:-6px;top:-6px;font-size:14px;line-height:1}
+.mr-card .tag{font-style:normal;font-size:10.5px;font-weight:700;border-radius:999px;padding:0 6px;margin-left:6px;vertical-align:2px;border:1px solid var(--accent);color:var(--accent)}
+.mr-card .tag.def{border-color:var(--gold);color:var(--gold)}
+.mr-card .fr{display:block;font-size:11.5px;color:var(--gold);margin-top:4px}
+.mr-card .mr-more{grid-column:1 / -1;display:flex;flex-wrap:wrap;gap:4px}
+.mr-card .mr-more button{font:inherit;font-size:12.5px;padding:5px 10px;border-radius:999px;border:1px solid var(--line);background:transparent;color:var(--ink);cursor:pointer}
+.mr-card .mr-more button.pri{background:var(--accent);border-color:var(--accent);color:var(--bg);font-weight:700}
+.mr-card .mr-more button.del{color:var(--fail);border-color:var(--fail)}
+#myRecEd.on{background:var(--accent);border-color:var(--accent);color:var(--bg)}
 .mr-hd{display:flex;align-items:center;justify-content:space-between;gap:8px}
 .mr-tg{display:flex;align-items:center;gap:8px;background:transparent;border:0;color:var(--ink);font:inherit;padding:2px 0;cursor:pointer}
 .mr-tg b{font-size:15px}.mr-tg .n{font-family:var(--f-mono);font-size:12px;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:0 7px}.mr-tg i{font-style:normal;color:var(--muted)}
@@ -1199,14 +1211,9 @@ window.BGM=(()=>{
   </div>
 
   <section class="panel params" aria-label="沖煮參數" data-stab="set">
-    <div class="param myrec" id="myRecParam">
-      <div class="mr-hd" id="myRecHead"></div>
+    <div class="param champ" id="myRecParam"><div class="row"><span class="label">我的配方</span><output id="myRecCount" class="label"></output></div>
+      <button type="button" class="bpick cpick" id="myRecPick" aria-haspopup="dialog"></button>
       <div class="mr-st label" id="myRecState"></div>
-      <div id="myRecBody">
-      <div class="mr-list" id="myRecList"></div>
-      <div class="mr-imp"><button type="button" id="myRecImp">📓 從沖煮筆記帶入</button><span id="myRecImpMsg" class="label"></span></div>
-      <div class="mr-save"><input id="myRecName" type="text" maxlength="24" placeholder="幫目前的設定取個名字" aria-label="配方名稱"><button type="button" id="myRecAdd">存成新配方</button></div>
-      </div>
     </div>
     <div class="param champ" id="champParam"><div class="row"><label for="champSel" class="label">世界手沖冠軍的沖煮手法</label><output id="champState" class="label"></output></div><button type="button" class="bpick cpick" id="champPick" aria-haspopup="dialog"></button><select id="champSel" class="beansel" hidden></select><div class="champinfo" id="champInfo" hidden></div></div>
     <div class="param wide" id="beanParam"><div class="row"><label for="beanSel" class="label">咖啡豆（依產區）</label><output id="beanOut" class="label"></output></div><button type="button" class="bpick" id="beanPick" aria-haspopup="dialog"></button><select id="beanSel" class="beansel" hidden></select></div>
@@ -1339,6 +1346,11 @@ window.BGM=(()=>{
   <p class="fine" data-stab="learn">模型說明：有機酸與綠原酸的速度、溫度與研磨反應依《咖啡香味的科學》表 31–33（出處 JCO Seneory）校正：以浸泡、94°C、一般粒度（設為 650 μm，粗 1000 μm、細 400 μm）、5 分鐘為基準，擬合 1 / 14 分鐘、70 / 100°C、粗 / 細研磨的相對濃度，誤差多在 3% 內。書中數值未標單位，此處當作 mg/L 對照。表 31 印刷時欄位錯開一列，已依表 32、33 的 94°C／5 分鐘欄位對齊後使用。其他成分無實測，依書中圖 63 的快慢順序（味道成分快、香氣居中、高分子苦味慢）設定。每類分子以一階擴散描述，速率 ∝ 擴散常數 × (粉粒內濃度 − 周圍液體濃度)。擴散常數隨溫度呈指數變化（大分子對溫度更敏感），並隨粒徑縮小而增加；粉粒吸水約為粉重 2 倍。濾杯流速依液面高度與粒徑估算。浸泡時把液體分成「粉粒周圍的一層」與「其餘液體」，兩者靠自然對流緩慢交換；攪拌會暫時加快交換、讓粉粒外的邊界層變薄，並讓未濕透的粉團完整吸水，效果在十幾秒內衰減。香氣分子以一階揮發描述：散失速率 ∝ 揮發常數 × 液體中香氣量，隨水溫升高而增加，注水時與攪拌後暫時加快，杯中因溫度較低只算 35%。濾杯以三個係數描述：流出速度倍率（V60 1.35×、OREA 1.2×）、粉床被水均勻穿過的比例（錐形 95%、V60 90%、OREA 100%），以及沿濾紙壁繞過粉床直接流進杯中的旁流比例（錐形 4%、V60 7%、OREA 1.5%）。烘焙度依淺、中、深三個參考點內插：調整各類分子的可溶量（酸與綠原酸隨烘焙遞減、苦味大分子遞增、糖類在中焙最高），並讓深焙的整體萃取速度較快。各類分子的可溶量與速率為教學用的近似值，用來比較趨勢，不是精確的化學測量。手沖另外計入：手沖壺降溫（每秒 0.025°C）與粉床散熱、悶蒸排氣期間的低效接觸與水流失、隨水位增加的濾杯側壁繞流。喝起來的甜感依糖的濃度、醇厚度依濃度與類黑素，酸感會被甜與醇厚度緩衝。流速、注水攪動與手沖萃取係數以 2016–2025 世界手沖冠軍配方校正：讓各配方的滴濾時間接近比賽實際時間、萃取率落在約 19% 附近。評分的理想區間參考 SCA 沖煮控制圖（EY 18–22%），濃度上限放寬到 1.55% 以涵蓋冠軍杯；風味平衡的界線也以冠軍杯在模型中的表現為準。</p>
 </div>
 </section>
+<div class="bp-ov" id="mrOv" hidden role="dialog" aria-modal="true" aria-label="我的配方"><div class="bp-sh"><div class="bp-hd"><h3>我的配方</h3><div style="display:flex;gap:6px"><button type="button" id="myRecEd">編輯</button><button type="button" id="mrClose">關閉</button></div></div>
+  <div class="bp-ls" id="myRecList"></div>
+  <div class="mr-foot"><div class="mr-imp"><button type="button" id="myRecImp">📓 從沖煮筆記帶入</button><span id="myRecImpMsg" class="label"></span></div>
+  <div class="mr-save"><input id="myRecName" type="text" maxlength="24" placeholder="幫目前的設定取個名字" aria-label="配方名稱"><button type="button" id="myRecAdd">存成新配方</button></div></div>
+</div></div>
 <div class="bp-ov" id="cpOv" hidden role="dialog" aria-modal="true" aria-label="選冠軍沖法"><div class="bp-sh"><div class="bp-hd"><h3>照冠軍的方法沖</h3><button type="button" id="cpClose">關閉</button></div><div class="bp-ls" id="cpLs"></div></div></div>
 <div class="bp-ov" id="bpOv" hidden role="dialog" aria-modal="true" aria-label="選咖啡豆"><div class="bp-sh"><div class="bp-hd"><h3>選一支豆子</h3><button type="button" id="bpClose">關閉</button></div><div class="bp-rg" id="bpRg"></div><div class="bp-ls" id="bpLs"></div></div></div>
 <div class="bp-ov" id="gpOv" hidden role="dialog" aria-modal="true" aria-label="選磨豆機"><div class="bp-sh"><div class="bp-hd"><h3>選一台磨豆機</h3><button type="button" id="gpClose">關閉</button></div><p class="label" style="margin:0 4px 8px">細粉越多，萃得越快、越容易苦，後段也容易塞水。</p><div class="gp-ls" id="gpLs"></div></div></div>
@@ -2959,35 +2971,46 @@ function recSum(o){
 function recApply(r){recLast=r.id;applyParams(JSON.parse(JSON.stringify(r.p)));run();if($('champSel'))$('champSel').value='';renderChampBtn();}
 function recDefaultName(){const dr=DRIPPER[P.dripper]?DRIPPER[P.dripper].name:'';return (dr||METHODN[P.pattern]||'配方')+' '+P.dose+'g '+P.temp+'°C';}
 let recEdit=false,recLast=null;
-const recFold=v=>{try{if(v===undefined)return localStorage.getItem('brewLab.recFold')!=='0';localStorage.setItem('brewLab.recFold',v?'1':'0');}catch(e){return true;}};
+function mrIco(r,isDef){const p=r.p,sp=window.labSpr?(window.labSpr(p.pattern==='switch'?'switch':p.pattern==='immersion'?'press':p.dripper,0,40)||window.labSpr(p.dripper,0,40)):'';
+  return '<div class="cp-ico">'+sp+'<span class="bdg">'+(isDef?'★':r.from?'📓':'')+'</span><span class="yr">'+p.dose+'g</span></div>';}
+function mrChips(p){const W=(p.pattern==='pulse'||p.pattern==='switch')&&p.plan?p.plan.reduce((a,b)=>a+b,0):Math.round(p.dose*p.ratio);
+  const G=p.grinder&&GRINDERS.find(g=>g.id===p.grinder),gd=G&&G.um&&window.GRH?G.name.replace(/^(Comandante|1Zpresso|Option-O|Mahlkönig|Baratza|Kingrinder)\s*/,'').replace(/ MK4| Special/,'')+' '+window.GRH.gDial(G,p.grind).replace('刻度 ',''):p.grind+' μm';
+  return '<div class="cp-chips"><i>'+W+' g・1:'+(W/p.dose).toFixed(1)+'</i><i>'+(p.planTemp?Math.min(...p.planTemp)+'–'+Math.max(...p.planTemp)+'°C':p.temp+'°C')+'</i><i>'+gd+'</i><i>'+(p.pattern==='switch'?'Switch 閥門':p.pattern==='immersion'?'浸泡':p.pattern==='cont'?'一刀流':(p.plan?p.plan.length-1:0)+' 注')+'</i>'+(p.cutoff?'<i>斷水 '+fmtT(p.cutoff)+'</i>':'')+'</div>';}
+function mrTimeline(p){return (p.pattern==='pulse'||p.pattern==='switch')&&p.plan&&p.plan.length?cpTimeline(Object.assign({},p,{plan:p.plan,planT:p.planT,planD:p.planD})):'';}
 function recRender(){
-  const box=$('myRecList');if(!box)return;const st=recLoad(),cur=recKey(recSnap());
-  const on=st.list.find(r=>recKey(r.p)===cur),fold=recFold()&&!recEdit;
+  const st=recLoad(),cur=recKey(recSnap()),on=st.list.find(r=>recKey(r.p)===cur);
   const last=recLast&&st.list.find(r=>r.id===recLast),dirty=last&&!on;
-  $('myRecHead').innerHTML='<button type="button" class="mr-tg" id="myRecTg" aria-expanded="'+!fold+'"><b>我的配方</b><span class="n">'+st.list.length+'</span><i>'+(fold?'▸':'▾')+'</i></button>'+
-    (st.list.length?'<button type="button" class="mr-ed'+(recEdit?' on':'')+'" id="myRecEd">'+(recEdit?'完成':'編輯')+'</button>':'');
-  $('myRecState').innerHTML=dirty?'<span class="mr-dirty">「'+hx(last.name)+'」已修改　<button type="button" data-a="save">儲存修改</button><button type="button" data-a="revert">還原</button></span>':
-    (st.list.length?(on?'使用中：<b>'+hx(on.name)+'</b>':'目前的設定還沒存'):'');
+  /* 頁面上：一顆按鈕＋已修改提示 */
+  const btn=$('myRecPick');if(btn){const r=on||last;
+    btn.innerHTML=r?mrIco(r,st.def===r.id)+'<div class="cp-tx"><b>'+hx(r.name)+'</b><small>'+(on?'使用中':'已修改，還沒存')+'・'+hx((DRIPPER[r.p.dripper]||{}).name||'')+'</small></div><span class="label">▾</span>':
+      '<div class="cp-ico none">📋</div><div class="cp-tx"><b>'+(st.list.length?'目前的設定還沒存':'還沒有配方')+'</b><small>'+(st.list.length?'點這裡挑一組套用，或把目前設定存下來':'點這裡存下目前設定，或從沖煮筆記帶入')+'</small></div><span class="label">▾</span>';}
+  if($('myRecCount'))$('myRecCount').textContent=st.list.length?st.list.length+' 組':'';
+  $('myRecState').innerHTML=dirty?'<span class="mr-dirty">「'+hx(last.name)+'」已修改　<button type="button" data-a="save">儲存修改</button><button type="button" data-a="revert">還原</button></span>':'';
   $('myRecState').querySelectorAll('button').forEach(b=>b.onclick=()=>{const S=recLoad(),r=S.list.find(x=>x.id===recLast);if(!r)return;
     if(b.dataset.a==='save'){r.p=recSnap();r.at=Date.now();recStore(S);recRender();}else recApply(r);});
-  $('myRecTg').onclick=()=>{recFold(!recFold());if(recEdit)recEdit=false;recRender();};
-  if($('myRecEd'))$('myRecEd').onclick=()=>{recEdit=!recEdit;if(recEdit)recFold(false);recRender();};
-  $('myRecBody').hidden=fold;
-  if(!$('myRecName').value){$('myRecName').placeholder='例如：'+recDefaultName();}
-  if(!st.list.length){box.innerHTML='<div class="mr-empty">調好一組喜歡的設定後，在下面取個名字按「存成新配方」，之後點一下就能整組帶回來，包括豆子、磨豆機、濾杯、分段注水和每注水溫。也可以按「從沖煮筆記帶入」。</div>';return;}
-  box.innerHTML=(recEdit?'<div class="mr-tip">要改參數：先按「套用」，在下方調整後，上面會出現「儲存修改」。</div>':'')+st.list.map((r,i)=>{const isOn=on&&on.id===r.id,isDef=st.def===r.id;
-    return '<div class="mr-item'+(isOn?' on':'')+(recEdit?' ed':'')+'" data-id="'+r.id+'"><div class="nm">'+hx(r.name)+(isDef?'<em class="def">★ 預設</em>':'')+(isOn?'<em>使用中</em>':'')+'</div>'+
-      '<div class="bt">'+(isOn?'':'<button class="pri" data-a="use">套用</button>')+'</div>'+
-      '<div class="sm">'+recSum(r.p)+'</div>'+(r.from?'<div class="fr">📓 '+hx(r.from)+'</div>':'')+
+  if(!$('myRecName').value)$('myRecName').placeholder='例如：'+recDefaultName();
+  $('myRecEd').textContent=recEdit?'完成':'編輯';$('myRecEd').classList.toggle('on',recEdit);$('myRecEd').hidden=!st.list.length;
+  /* 清單頁 */
+  const box=$('myRecList');
+  if(!st.list.length){box.innerHTML='<div class="mr-empty">還沒有配方。在下面取個名字按「存成新配方」，之後點一下就能整組帶回來（豆子、磨豆機、濾杯、分段注水、每注水溫）；或按「從沖煮筆記帶入」。</div>';return;}
+  box.innerHTML=(recEdit?'<div class="mr-tip">要改參數：先關掉這頁套用配方，在模擬器調整後，按上方的「儲存修改」。</div>':'')+st.list.map((r,i)=>{const isOn=on&&on.id===r.id,isDef=st.def===r.id;
+    return '<div class="ccard mr-card'+(recEdit?' ed':'')+'" data-id="'+r.id+'" aria-pressed="'+!!isOn+'" role="button" tabindex="0">'+mrIco(r,isDef)+
+      '<div class="cp-tx"><b>'+hx(r.name)+(isDef?'<em class="tag def">★ 預設</em>':'')+(isOn?'<em class="tag">使用中</em>':'')+'</b><small>'+hx((DRIPPER[r.p.dripper]||{}).name||'')+'</small>'+mrChips(r.p)+mrTimeline(r.p)+(r.from?'<span class="fr">📓 '+hx(r.from)+'</span>':'')+'</div><span></span>'+
       (recEdit?'<div class="mr-more"><button data-a="ren">✎ 改名</button><button data-a="def">'+(isDef?'☆ 取消預設':'★ 設為預設')+'</button>'+(isOn?'':'<button data-a="upd">↻ 換成目前設定</button>')+(i?'<button data-a="up">↑ 上移</button>':'')+'<button class="del" data-a="del">🗑 刪除</button></div>':'')+'</div>';}).join('');
-  box.querySelectorAll('.mr-item button').forEach(b=>b.onclick=()=>{const id=b.closest('.mr-item').dataset.id,S=recLoad(),i=S.list.findIndex(x=>x.id===id);if(i<0)return;const r=S.list[i],a=b.dataset.a;
-    if(a==='use'){recApply(r);return;}
+  box.querySelectorAll('.mr-card').forEach(c=>c.onclick=e=>{const id=c.dataset.id,S=recLoad(),i=S.list.findIndex(x=>x.id===id);if(i<0)return;const r=S.list[i],b=e.target.closest('button'),a=b&&b.dataset.a;
+    if(!a){if(recEdit)return;recApply(r);$('mrOv').hidden=true;return;}
     if(a==='def'){S.def=S.def===id?null:id;}
     else if(a==='upd'){if(!confirm('把「'+r.name+'」換成目前畫面上的設定？'))return;r.p=recSnap();r.at=Date.now();}
     else if(a==='ren'){const n=prompt('新名字',r.name);if(!n||!n.trim())return;r.name=n.trim().slice(0,24);}
     else if(a==='up'){if(i>0){S.list.splice(i,1);S.list.splice(i-1,0,r);}}
     else if(a==='del'){if(!confirm('刪除「'+r.name+'」？'))return;S.list.splice(i,1);S.gone=(S.gone||[]).concat(id,r.src?'src:'+r.src:[]).slice(-200);if(S.def===id)S.def=null;if(recLast===id)recLast=null;}
     recStore(S);recRender();});}
+function openRecSheet(){recEdit=false;recRender();$('mrOv').hidden=false;try{SFX.p('select')}catch(e){}
+  const a=$('myRecList').querySelector('[aria-pressed=true]');if(a)a.scrollIntoView({block:'center'});}
+$('myRecPick').onclick=openRecSheet;$('mrClose').onclick=()=>{$('mrOv').hidden=true;recEdit=false;recRender();};
+$('mrOv').addEventListener('click',e=>{if(e.target.id==='mrOv'){$('mrOv').hidden=true;recEdit=false;recRender();}});
+$('myRecEd').onclick=()=>{recEdit=!recEdit;recRender();};
+addEventListener('labspr',()=>recRender());
 
 /* ===== 從沖煮筆記（同一個網站的 brew-notes）帶入配方 ===== */
 const BN_KEY='brewlog-v1';
