@@ -197,7 +197,7 @@ input[type=range]{width:100%}
 .heat .hc.pos{background:color-mix(in srgb,var(--accent) calc(var(--a)*100%),transparent)}.heat .hc.neg{background:color-mix(in srgb,#7a5a44 calc(var(--a)*100%),transparent)}.heat .hc.hi{color:#fff}.heat .hc.na{color:var(--muted);font-weight:400;background:var(--sunken)}
 .hleg{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:11.5px;color:var(--muted);margin:6px 0 2px}.hleg i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:4px;vertical-align:-1px}.hleg i.pos{background:var(--accent)}.hleg i.neg{background:#7a5a44}
 .hn{display:flex;gap:10px;padding-top:8px;margin-top:8px;border-top:1px solid var(--line)}.hn>b{flex:0 0 auto;font-size:13px;width:34px;padding-top:3px}
-.arow{display:flex;align-items:center;gap:8px;margin:4px 0}.arow>span{flex:0 0 36px;font-size:14px;color:var(--muted)}.arow .seg{flex:1}
+.arow{display:flex;align-items:flex-start;gap:8px;margin:6px 0 10px}.arow>span{flex:0 0 36px;font-size:14px;color:var(--muted);padding-top:9px}.arc{flex:1;min-width:0}.arc .arn{width:100%;min-width:0;margin-top:5px;padding:7px 9px;border:1px solid var(--line);border-radius:8px;background:var(--bg);font-size:14px;color:var(--ink)}
 .aromd .heat{margin-bottom:2px}.aromd .hc{width:46px}
 </style>
 </head>
@@ -605,7 +605,7 @@ function sensGrid(b){const T=TEMPS.filter(t=>{const x=b.temps?.[t[0]];return x&&
     its.forEach(([k,l],i)=>{rows+=`<tr class="${i===0?'g0':''}">${g==='整體'?'<th class="hg hw" colspan="2">整體</th>':(i===0?`<th class="hg" rowspan="${its.length}">${{嗅覺:'嗅',味覺:'味',觸覺:'觸',後韻:'韻'}[g]||g[0]}</th>`:'')+`<th class="hl">${l}</th>`}${T.map(t=>cell(k,b.temps[t[0]].s?.[k])).join('')}</tr>`})}
   const notes=T.map(t=>{const x=b.temps[t[0]];return (x.f||[]).length||x.n?`<div class="hn"><b>${t[1]}</b><div><div class="row">${flavHtml(x.f||[])}</div>${x.n?`<div class="sub">${esc(x.n)}</div>`:''}</div></div>`:''}).join('');
   const ar=AROM.filter(([k])=>has(b.arom?.[k]));
-  const arH=ar.length||b.dry?`<div class="aromd">${ar.length?`<table class="heat"><tr><th class="hg" style="width:26px">香</th>${ar.map(([k,l])=>`<th class="hl" style="width:auto;text-align:right">${l}</th>${cell(k,b.arom[k])}`).join('')}</tr></table>`:''}${b.dry?`<div class="sub" style="margin:2px 0 6px">${esc(b.dry)}</div>`:''}</div>`:'';
+  const arH=ar.length||b.dry||b.aromN?`<div class="aromd">${ar.length?`<table class="heat"><tr><th class="hg" style="width:26px">香</th>${ar.map(([k,l])=>`<th class="hl" style="width:auto;text-align:right">${l}</th>${cell(k,b.arom[k])}`).join('')}</tr></table>`:''}${b.aromN?AROM.filter(([k])=>b.aromN[k]).map(([k,l])=>`<div class="sub" style="margin:2px 0"><b>${l}</b>　${esc(b.aromN[k])}</div>`).join(''):b.dry?`<div class="sub" style="margin:2px 0 6px">${esc(b.dry)}</div>`:''}</div>`:'';
   if(!rows&&!arH&&!notes)return'';
   return `<fieldset><legend>感官</legend>${arH}${rows?`<table class="heat"><thead><tr><th></th><th></th>${T.map(t=>`<th>${t[1]}</th>`).join('')}</tr></thead><tbody>${rows}</tbody></table>
     <div class="hleg"><span><i class="pos" style="--a:.95"></i>甜、香、酸、厚、甘：越深越強</span><span><i class="neg" style="--a:.95"></i>苦、澀：越深越強</span></div>`:''}${notes}</fieldset>`}
@@ -661,7 +661,7 @@ function drawForm(){
     <fieldset><legend>測試目的</legend>${base&&base.next&&!F._edit?`<div class="sub" style="white-space:pre-line">上一杯寫的調整方向：\n${esc(base.next)}</div>`:''}${ta('target','這杯要測試什麼、想沖出什麼',2,'例如 降一格到 29，看能否維持酸甜平衡並增加濃郁度')}
       <div class="seg txt">${Object.entries(MET).map(([k,l])=>`<button type="button" data-act="met" data-v="${k}" class="${F.met===k?'on':''}">${l}</button>`).join('')}</div></fieldset>
     <fieldset><legend>感官</legend><div class="seg txt"><button type="button" data-act="mode" data-v="quick" class="${F.mode==='quick'?'on':''}">快速</button><button type="button" data-act="mode" data-v="full" class="${F.mode==='full'?'on':''}">完整（分溫度）</button></div>
-      <div class="grp">香氣（0 無、3 清楚、5 很強；跨豆比較）</div>${AROM.map(([k,l])=>`<div class="arow"><span>${l}</span>${hseg('arom',k,F.arom?.[k])}</div>`).join('')}${inp('dry','香氣描述（選填，例如：豆香甜桃、濕香草本）','str')}<div class="grp">整杯總分（0–5${F.mode==='full'?'，不填就取各溫度整體分的平均':''}）</div>${hseg('score','score',F.score)}${sensory}
+      <div class="grp">香氣（0 無、3 清楚、5 很強；跨豆比較）</div>${AROM.map(([k,l])=>`<div class="arow"><span>${l}</span><div class="arc">${hseg('arom',k,F.arom?.[k])}<input type="text" class="arn" data-arn="${k}" placeholder="${l}的形容（選填）" value="${esc(F.aromN?.[k]||'')}"></div></div>`).join('')}${F.dry&&!F.aromN?`<div class="sub">舊的描述：${esc(F.dry)}</div>`:''}<div class="grp">整杯總分（0–5${F.mode==='full'?'，不填就取各溫度整體分的平均':''}）</div>${hseg('score','score',F.score)}${sensory}
       <div class="grp">風味${F.mode==='full'?'（'+TEMPS.find(t=>t[0]===F._slot)[1]+'）':''}</div>
       ${ft.length?`<div class="chips">${ft.map(x=>`<button type="button" class="chip on" data-act="flav" data-v="${esc(x)}">${esc(x.split('/').pop())} ✕</button>`).join('')}</div>`:''}
       <div class="chips">${Object.keys(WHEEL).map(c=>`<button type="button" class="chip ${cat===c?'open':''} ${ft.some(x=>x.split('/')[0]===c)?'has':''}" data-act="cat" data-v="${c}">${c}</button>`).join('')}</div>
@@ -712,7 +712,7 @@ function parseLocal(txt){ // 沒有 AI 可用時，照固定的筆記格式用�
   if((m=P.match(/(?:調到|改成|改到)\s*(\d+(?:\.\d+)?)\s*(?:格|clix)?/)))j.grind=+m[1];
   if((m=P.match(/(\d{2})\s*度/)))j.temp=+m[1];
   if(P.trim())j.target=P.trim();
-  const A=(txt.match(/【香氣】([^【\n]*)/)||[])[1]||'';if(A.trim()){j.dry=A.trim();j.arom={};for(const[k,re]of[['bean','(?:豆香|乾香|粉香)'],['pot','壺香'],['wet','濕香']]){const mm=A.match(new RegExp(re+'\\s*(?:是|大概|約)?\\s*(\\d+(?:\\.\\d+)?)'));if(mm&&+mm[1]<=5)j.arom[k]=+mm[1]}}
+  const A=(txt.match(/【香氣】([^【\n]*)/)||[])[1]||'';if(A.trim()){j.dry=A.trim();j.arom={};for(const[k,re]of[['bean','(?:豆香|乾香|粉香)'],['pot','壺香'],['wet','濕香']]){const mm=A.match(new RegExp(re+'\\s*(?:是|大概|約)?\\s*(\\d+(?:\\.\\d+)?)?\\s*([^，,、；;0-9]*)'));if(mm){if(mm[1]&&+mm[1]<=5)j.arom[k]=+mm[1];const w=(mm[2]||'').replace(/^分/,'').trim();if(w){j.aromN=j.aromN||{};j.aromN[k]=w}}}}
   const V=(txt.match(/【判定與下次】([^【]*)/)||[])[1]||'';
   if(V){j.met=/未達成|沒有達成|失敗/.test(V)?'no':/部分/.test(V)?'part':/達成|成功/.test(V)?'yes':undefined;const nx=V.split(/下次|下一杯/);if(nx.length>1)j.next=nx.slice(1).join('').replace(/^[，,：:\s]+/,'').trim();j.note=nx[0].trim()}
   return j;
@@ -1052,7 +1052,7 @@ async function parseNote(){
   msg('解析中…');
   const sk='fa(前嗅覺),ra(後嗅覺),acid(酸),sweet(甜),bitter(苦),body(厚度),astr(澀),fin_acid(後韻酸),huigan(後韻甘),fin_bitter(後韻苦),fin_astr(後韻澀),overall(該溫度整體分)';
   const prompt=`把下面這段手沖咖啡筆記（可能是語音轉文字，數字可能是中文念法，例如「三點五」就是 3.5）整理成一個 JSON 物件，只回傳 JSON，不要其他文字。筆記沒寫的欄位填 null，不要猜。
-欄位：arom({bean:豆香/乾香/粉香分數,pot:壺香分數,wet:濕香分數}，0-5，沒提到就省略), bean(豆子名稱字串), grinder, grind(刻度數字，例如 29clix 填 29), dripper(濾杯), paper(濾紙), method(手法或注水比例，例如 60-40 繞繞中中), temp(水溫數字), dose(粉重 g), water(總注水量 g，沒寫但有分段時填各段總和), time(總時間或流乾時間，換成秒), pours(分段注水原文，一段一行), tds, ey(萃取率 %), bev(咖啡液重 g), target(這杯的測試目的), dry(壺香或乾香的描述), score(整杯總分 0-5，沒寫填 null), note(整體總結原文), next(下次調整方向原文，保留換行), met(是否達成目標：達成→"yes"、部分達成→"part"、未達成→"no"，沒提到填 null),
+欄位：arom({bean:豆香/乾香/粉香分數,pot:壺香分數,wet:濕香分數}，0-5，沒提到就省略), aromN({bean,pot,wet} 各自的形容詞原文，沒提到就省略), bean(豆子名稱字串), grinder, grind(刻度數字，例如 29clix 填 29), dripper(濾杯), paper(濾紙), method(手法或注水比例，例如 60-40 繞繞中中), temp(水溫數字), dose(粉重 g), water(總注水量 g，沒寫但有分段時填各段總和), time(總時間或流乾時間，換成秒), pours(分段注水原文，一段一行), tds, ey(萃取率 %), bev(咖啡液重 g), target(這杯的測試目的), dry(壺香或乾香的描述), score(整杯總分 0-5，沒寫填 null), note(整體總結原文), next(下次調整方向原文，保留換行), met(是否達成目標：達成→"yes"、部分達成→"part"、未達成→"no"，沒提到填 null),
 temps: {hot:{...}, warm:{...}, room:{...}} 分別是高溫、中溫、常溫，每個是 {s:{${sk}}, f:[風味], n:"該溫度的文字敘述原文"}，s 內分數是 0-5 的數字（可有 0.5），沒寫的鍵省略。
 f 只能從這份清單選，格式是「大類」或「大類/細項」：${JSON.stringify(WHEEL)}
 rel: {acid, sweet, bitter, body} 筆記有明寫跟前一杯或另一個設定比較時，填 1(增加)、-1(減少)、0(相同)，沒寫省略。
@@ -1069,6 +1069,7 @@ function applyNote(j){
     for(const k of ['grind','temp','dose','water','time','tds','ey','bev','score'])if(typeof j[k]==='number'){F[k]=j[k];n++;if(k==='ey')F.eyManual=true}
     if(['yes','part','no'].includes(j.met)){F.met=j.met;n++}
     if(j.arom&&typeof j.arom==='object'){const o={};for(const[k]of AROM)if(typeof j.arom[k]==='number')o[k]=j.arom[k];if(Object.keys(o).length){F.arom={...(F.arom||{}),...o};n++}}
+    if(j.aromN&&typeof j.aromN==='object'){const o={};for(const[k]of AROM)if(typeof j.aromN[k]==='string'&&j.aromN[k].trim())o[k]=j.aromN[k].trim();if(Object.keys(o).length){F.aromN={...(F.aromN||{}),...o};n++}}
     let any=false;
     for(const[t]of TEMPS){const x=j.temps&&j.temps[t];if(!x)continue;const s={};
       for(const k of Object.keys(SCL))if(x.s&&typeof x.s[k]==='number')s[k]=Math.max(0,Math.min(5,Math.round(x.s[k]*2)/2));
@@ -1086,6 +1087,7 @@ function applyNote(j){
 }
 async function saveBrew(){
   const b={...F};if(!(b.cal>=CAL.v))b.cal=CAL.v;
+  if(b.aromN){for(const k in b.aromN)if(!String(b.aromN[k]||'').trim())delete b.aromN[k];if(!Object.keys(b.aromN).length)delete b.aromN;else b.dry=AROM.filter(([k])=>b.aromN[k]).map(([k,l])=>l+' '+b.aromN[k].trim()).join('、')}
   if(!has(b.score)){const o=TEMPS.map(t=>b.temps?.[t[0]]?.s?.overall).filter(has);if(o.length)b.score=r1(o.reduce((a,c)=>a+c,0)/o.length)}b.restDay=restDay(beanById(b.beanId),b.ts);
   if(b.mode==='quick'&&!Object.keys(b.temps).length)b.temps={};
   ['_edit','_slot','_cat','_photoMsg','_paste','_pasteText','_parseMsg','eyManual'].forEach(k=>delete b[k]);
@@ -1705,6 +1707,7 @@ document.addEventListener('click',async ev=>{
 });
 document.addEventListener('input',ev=>{
   const t=ev.target;
+  if(t.dataset.arn&&F){F.aromN={...(F.aromN||{}),[t.dataset.arn]:t.value};return}
   if(t.dataset.vtxt&&VW){VW.txt[t.dataset.vtxt]=t.value;const st=VSTEPS[VW.i],ck=vChecks(st,t.value);document.querySelectorAll('.vcard~.chips .chip').forEach((c,i)=>{c.classList.toggle('on',ck[i][1]);c.textContent=(ck[i][1]?'✓ ':'')+ck[i][0]});return}
   if(t.dataset.b&&BF){BF[t.dataset.b]=t.value;return}
   if(t.dataset.scfg){setScfg(t.dataset.scfg,t.value);return}
