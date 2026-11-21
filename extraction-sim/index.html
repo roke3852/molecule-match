@@ -2495,7 +2495,9 @@ function setSimTab(k,quiet){simTab=k;try{localStorage.setItem('brewLab.simTab',k
   document.querySelectorAll('#simTabs [data-st]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.st===k));
   document.querySelectorAll('#simView [data-stab]').forEach(el=>el.classList.toggle('stab-off',el.dataset.stab!==k));
   const m=document.querySelector('.modes');document.documentElement.style.setProperty('--modesH',(m?m.offsetHeight:0)+'px');
-  if(!quiet){const tb=$('simTabs');const y=tb.getBoundingClientRect().top+scrollY-(m?m.offsetHeight:0);if(scrollY>y)scrollTo({top:y});}
+  /* 分頁列是 sticky：黏住時量到的是黏住的位置，所以改量這一頁第一個區塊，換分頁一律回到這一頁的最上面 */
+  if(!quiet){const tb=$('simTabs'),first=[...document.querySelectorAll('#simView [data-stab]')].find(el=>!el.classList.contains('stab-off')&&el.offsetParent);
+    if(first){const y=Math.max(0,first.getBoundingClientRect().top+scrollY-(m?m.offsetHeight:0)-tb.offsetHeight-8);if(scrollY>y)scrollTo({top:y});}}
   dispatchEvent(new Event('resize'));if(typeof draw==='function'&&simPO)draw();}
 $('simTabs').addEventListener('click',e=>{const b=e.target.closest('[data-st]');if(b){try{SFX.p('page')}catch(x){}setSimTab(b.dataset.st);}});
 $('simView').addEventListener('click',e=>{const b=e.target.closest('[data-go]');if(b&&b.dataset.go==='brew'&&b.closest('.params')){handBrewStart();return;}if(b){setSimTab(b.dataset.go);if(b.dataset.go==='brew'&&!playing&&t<=0.01)setTimeout(()=>$('play').click(),250);}});
