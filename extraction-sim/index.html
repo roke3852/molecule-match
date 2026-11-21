@@ -1151,6 +1151,7 @@ window.BGM=(()=>{
     <div class="param"><div class="row"><label for="ratio" class="label">粉水比</label><output id="ratioOut"></output></div><input id="ratio" type="range" min="12" max="20" step="0.5" value="16"></div>
     <div class="param"><div class="row"><label for="temp" class="label">水溫</label><output id="tempOut"></output></div><input id="temp" type="range" min="70" max="100" step="1" value="92"></div>
     <div class="param wide" id="grinderParam"><div class="row"><label for="grinderSel" class="label">磨豆機</label><output id="grinderOut" class="label"></output></div><button type="button" class="bpick gpick" id="grinderPick" aria-haspopup="dialog"></button><select id="grinderSel" class="beansel" hidden></select><a class="guideln" id="glSim" hidden target="_self">🔧 這台怎麼拆洗？</a><span class="label" id="clogOut"></span></div>
+    <div class="param wide barscene" id="grindVis" aria-hidden="true"></div>
     <div class="param"><div class="row"><label for="grind" class="label">研磨粒徑</label><output id="grindOut"></output></div><input id="grind" type="range" min="300" max="1200" step="50" value="650"></div>
     <div class="param wide"><span class="label">沖煮方式</span><div class="seg" role="group" aria-label="沖煮方式"><button id="pPulse" aria-pressed="true">分段注水</button><button id="pCont" aria-pressed="false">一刀流</button><button id="pSwitch" aria-pressed="false">Switch／GINA</button><button id="pImm" aria-pressed="false">浸泡</button></div></div>
     <div class="param wide" id="dripParam"><span class="label">濾杯</span><div class="seg wrapseg pxseg" role="group" aria-label="濾杯" id="segDrip"><button data-v="cone" aria-pressed="true">一般錐形</button><button data-v="v60" aria-pressed="false">V60</button><button data-v="orea" aria-pressed="false">OREA</button><button data-v="origami_c" aria-pressed="false">Origami 錐形紙</button><button data-v="origami_w" aria-pressed="false">Origami 波浪紙</button><button data-v="kalita" aria-pressed="false">Kalita Wave</button><button data-v="solo" aria-pressed="false">Solo</button></div><span class="label" id="dripDesc"></span></div>
@@ -2187,7 +2188,7 @@ function labels(){
   if(typeof champSnap!=='undefined'&&champSnap)$('champState').textContent=champKey()===champSnap?'冠軍原始參數':'已從冠軍參數調整過';
   {const b=curBean();$('roastParam').hidden=!!b;$('beanSel').value=P.beanId||'';
    $('beanOut').textContent=b?ROAST_NAME(b.roast)+'・'+b.tags.join('、'):'用下方烘焙度滑桿';
-   if(typeof renderBeanBtn==='function'){renderBeanBtn();renderGrinderBtn();renderRSum();barScene();}}
+   if(typeof renderBeanBtn==='function'){renderBeanBtn();renderGrinderBtn();renderRSum();barScene();grindVis();}}
   $('swCloseOut').innerHTML='<span class="mono">'+fmtT(P.swClose)+'</span>';
   $('swOpenOut').innerHTML=P.valveWins?'<span class="label">依冠軍配方分段開關</span>':'<span class="mono">'+fmtT(P.swOpen)+'</span>';
   $('steepOut').innerHTML='<span class="mono">'+fmtT(P.steep)+'</span>';
@@ -2317,6 +2318,24 @@ function barScene(){const el=$('barScene');if(!el)return;const b=curBean(),col=R
   const st=T>=96?3:T>=88?2:T>=80?1:0;for(let i=0;i<st;i++)g+=R(270+i*4,30-i*6,2,4,'rgba(255,255,255,.35)')+R(272+i*4,24-i*6,2,4,'rgba(255,255,255,.25)');
   g+=TX(237,20,'水溫','#b59c7d',7);
   el.innerHTML='<svg viewBox="0 0 300 110" shape-rendering="crispEdges">'+g+'</svg>';}
+// ---------- 研磨粒徑：放大鏡下的咖啡粉 ----------
+function grindVis(){const el=$('grindVis');if(!el)return;const g=P.grind,b=curBean(),col=RCOL(b?b.roast:P.roast),gr=curGrinder(),fines=gr?gr.fines:.13;
+  let seed=7;const rnd=()=>{seed=(seed*16807)%2147483647;return seed/2147483647;};
+  const R=(x,y,w,h,c)=>'<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="'+c+'"/>',TX=(x,y,t,c,sz)=>'<text x="'+x+'" y="'+y+'" font-size="'+(sz||7)+'" font-family="monospace" font-weight="700" fill="'+(c||'#f3e9d6')+'" text-anchor="middle">'+t+'</text>';
+  const shade=(c,k)=>{const n=parseInt(c.slice(1),16),f=v=>Math.max(0,Math.min(255,Math.round(v*k)));return 'rgb('+f(n>>16)+','+f((n>>8)&255)+','+f(n&255)+')';};
+  // 放大鏡：方框裡按目前粒徑畫粉粒，細粉越多小點越多
+  let h='<rect x="6" y="6" width="104" height="98" fill="#15110e"/>';const sz=Math.max(2,Math.round(g/95));
+  for(let y=10;y<100-sz;y+=sz+1)for(let x=10;x<106-sz;x+=sz+1){if(rnd()<.18)continue;const j=Math.round((rnd()-.5)*sz*.5),w=Math.max(1,sz+j),hh=Math.max(1,sz-Math.round(rnd()*sz*.4));h+=R(x,y,w,hh,shade(col,.8+rnd()*.5));}
+  const nf=Math.round(fines*260);for(let i=0;i<nf;i++)h+=R(8+Math.round(rnd()*98),8+Math.round(rnd()*94),1,1,shade(col,1.35));
+  h+='<rect x="6" y="6" width="104" height="98" fill="none" stroke="#cfe6ee" stroke-width="2"/>'+R(96,96,18,4,'#8a5a34')+R(110,100,4,10,'#8a5a34');
+  // 參考刻度：從義式到法壓
+  const REF=[[300,'義式'],[500,'細'],[700,'中'],[900,'中粗'],[1100,'粗']];
+  REF.forEach(([u,n],i)=>{const cx=142+i*32,s2=Math.max(2,Math.round(u/95)),on=Math.abs(g-u)<=100;
+    h+=R(cx-14,24,28,40,on?'#3a2a1c':'#1e1712');for(let yy=28;yy<60-s2;yy+=s2+1)for(let xx=cx-12;xx<cx+12-s2;xx+=s2+1)if(rnd()>.25)h+=R(xx,yy,s2,s2,shade(col,.85+rnd()*.4));
+    if(on)h+='<rect x="'+(cx-14)+'" y="24" width="28" height="40" fill="none" stroke="#e2bd6a" stroke-width="1.5"/>';
+    h+=TX(cx,74,n,on?'#e2bd6a':'#b59c7d',7)+TX(cx,83,u,'#7a6a58',5.5);});
+  const pos=142+Math.max(0,Math.min(1,(g-300)/800))*128-1;h+=R(128,90,156,2,'#4a3a2c')+R(Math.round(Math.min(282,Math.max(128,pos))),87,3,8,'#e2bd6a')+TX(206,103,g+' μm'+(gr?'・'+gr.name.split(' ')[0]:''),'#f3e9d6',7);
+  el.innerHTML='<svg viewBox="0 0 300 110" shape-rendering="crispEdges">'+h+'</svg>';}
 // ---------- 親手沖（借用咖啡店的沖煮動畫） ----------
 $('handBrew').onclick=()=>{if(!window.labBrewAnim){return;}
   const im=P.pattern==='immersion',sw=P.pattern==='switch',br=im?'press':sw?'switch':P.dripper;
