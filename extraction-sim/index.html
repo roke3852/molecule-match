@@ -173,7 +173,9 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
 .mr-foot .mr-imp{margin:0}
 .mr-card{cursor:pointer}.mr-card.ed{cursor:default}
 .mr-card .cp-ico .bdg{position:absolute;right:-6px;top:-6px;font-size:14px;line-height:1}
-.mr-card .tag{font-style:normal;font-size:10.5px;font-weight:700;border-radius:999px;padding:0 6px;margin-left:6px;vertical-align:2px;border:1px solid var(--accent);color:var(--accent)}
+.ccard.mr-card{align-items:start}.ccard.mr-card .cp-ico{margin-top:6px}
+.mr-card .tags{display:flex;gap:6px;margin-bottom:4px}
+.mr-card .tag{display:inline-block;white-space:nowrap;font-style:normal;font-size:11px;font-weight:700;line-height:1.6;border-radius:999px;padding:0 8px;border:1px solid var(--accent);color:var(--accent)}
 .mr-card .tag.def{border-color:var(--gold);color:var(--gold)}
 .mr-card .fr{display:block;font-size:11.5px;color:var(--gold);margin-top:4px}
 .mr-card .mr-more{grid-column:1 / -1;display:flex;flex-wrap:wrap;gap:4px}
@@ -2995,7 +2997,7 @@ function recRender(){
   if(!st.list.length){box.innerHTML='<div class="mr-empty">還沒有配方。在下面取個名字按「存成新配方」，之後點一下就能整組帶回來（豆子、磨豆機、濾杯、分段注水、每注水溫）；或按「從沖煮筆記帶入」。</div>';return;}
   box.innerHTML=(recEdit?'<div class="mr-tip">要改參數：先關掉這頁套用配方，在模擬器調整後，按上方的「儲存修改」。</div>':'')+st.list.map((r,i)=>{const isOn=on&&on.id===r.id,isDef=st.def===r.id;
     return '<div class="ccard mr-card'+(recEdit?' ed':'')+'" data-id="'+r.id+'" aria-pressed="'+!!isOn+'" role="button" tabindex="0">'+mrIco(r,isDef)+
-      '<div class="cp-tx"><b>'+hx(r.name)+(isDef?'<em class="tag def">★ 預設</em>':'')+(isOn?'<em class="tag">使用中</em>':'')+'</b><small>'+hx((DRIPPER[r.p.dripper]||{}).name||'')+'</small>'+mrChips(r.p)+mrTimeline(r.p)+(r.from?'<span class="fr">📓 '+hx(r.from)+'</span>':'')+'</div><span></span>'+
+      '<div class="cp-tx">'+(isDef||isOn?'<div class="tags">'+(isOn?'<em class="tag">使用中</em>':'')+(isDef?'<em class="tag def">★ 預設</em>':'')+'</div>':'')+'<b>'+hx(r.name)+'</b><small>'+hx((DRIPPER[r.p.dripper]||{}).name||'')+'</small>'+mrChips(r.p)+mrTimeline(r.p)+(r.from?'<span class="fr">📓 '+hx(r.from)+'</span>':'')+'</div><span></span>'+
       (recEdit?'<div class="mr-more"><button data-a="ren">✎ 改名</button><button data-a="def">'+(isDef?'☆ 取消預設':'★ 設為預設')+'</button>'+(isOn?'':'<button data-a="upd">↻ 換成目前設定</button>')+(i?'<button data-a="up">↑ 上移</button>':'')+'<button class="del" data-a="del">🗑 刪除</button></div>':'')+'</div>';}).join('');
   box.querySelectorAll('.mr-card').forEach(c=>c.onclick=e=>{const id=c.dataset.id,S=recLoad(),i=S.list.findIndex(x=>x.id===id);if(i<0)return;const r=S.list[i],b=e.target.closest('button'),a=b&&b.dataset.a;
     if(!a){if(recEdit)return;recApply(r);$('mrOv').hidden=true;return;}
