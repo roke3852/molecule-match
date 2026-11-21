@@ -1162,7 +1162,7 @@ html.dark .ex-tot{background:var(--card)!important}
 
 <script>
 /* ---------- storage (safe) ---------- */
-const APPV='20261121r';
+const APPV='20261121s';
 /* 把 emoji 換成像素圖示 */
 (function(){
  const OK=new Set([0x25b6,0x1f302,0x1f321,0x1f324,0x1f326,0x1f327,0x1f328,0x1f329,0x1f32b,0x1f341,0x1f35b,0x1f35c,0x1f361,0x1f370,0x1f37d,0x1f381,0x1f384,0x1f389,0x1f38c,0x1f392,0x1f3ab,0x1f3c6,0x1f3e0,0x1f3e8,0x1f3ea,0x1f3ec,0x1f41f,0x1f44b,0x1f44d,0x1f455,0x1f466,0x1f467,0x1f468,0x1f469,0x1f46a,0x1f476,0x1f48a,0x1f4a1,0x1f4a7,0x1f4ac,0x1f4b3,0x1f4b4,0x1f4c5,0x1f4cb,0x1f4cc,0x1f4cd,0x1f4dd,0x1f4e3,0x1f4e4,0x1f4f1,0x1f4f7,0x1f4f8,0x1f50d,0x1f512,0x1f516,0x1f517,0x1f552,0x1f5a5,0x1f5bc,0x1f5d1,0x1f5d3,0x1f5e3,0x1f5fa,0x1f60c,0x1f683,0x1f684,0x1f687,0x1f68f,0x1f690,0x1f695,0x1f6b2,0x1f6b6,0x1f6c2,0x1f6c3,0x1f6cd,0x1f6ec,0x1f7e2,0x1f969,0x1f9c5,0x1f9e0,0x1f9e3,0x1f9e5,0x1f9ed,0x1f9ee,0x1f9f3,0x1f9fe,0x23f1,0x23f8,0x2600,0x2601,0x2614,0x2615,0x26a0,0x26c5,0x26c8,0x26f4,0x26f8,0x2705,0x270f,0x2728,0x2744,0x274c,0x2b50]);
@@ -2593,7 +2593,7 @@ const yen=n=>'¥'+Math.round(n).toLocaleString();
 function exToday(){const d=new Date(Date.now()+9*3600e3),k=(d.getUTCMonth()+1)+'/'+d.getUTCDate();return EX_DAYS.includes(k)?k:EX_DAYS[0]}
 function drawTripSpend(){const el=$('#tripSpend');if(!el)return;const E=exAll(),rate=+S.get('exRate',0.21)||0,td=exToday();let tot=0,day=0,n=0;
  for(const id in E){const x=E[id];tot+=x.a;n++;if(x.d===td)day+=x.a}
- el.innerHTML=`<span class="ic">💰</span><span class="m">累計花費 <b>${yen(tot)}</b>（約 NT$${Math.round(tot*rate).toLocaleString()}）<small>今天 ${td} ${yen(day)}（約 NT$${Math.round(day*rate).toLocaleString()}）・共 ${n} 筆・點這裡記帳</small></span><span class="go">›</span>`}
+ const pp=tot/5;el.innerHTML=`<span class="ic">💰</span><span class="m">累計花費 <b>${yen(tot)}</b>（約 NT$${Math.round(tot*rate).toLocaleString()}）<br>人均（5人）<b>${yen(pp)}</b>（約 NT$${Math.round(pp*rate).toLocaleString()}）<small>今天 ${td} ${yen(day)}（約 NT$${Math.round(day*rate).toLocaleString()}）・共 ${n} 筆・點這裡記帳</small></span><span class="go">›</span>`}
 function drawExp(){drawTripSpend();
  const E=exAll(),ids=Object.keys(E).sort((a,b)=>EX_DAYS.indexOf(E[b].d)-EX_DAYS.indexOf(E[a].d)||(E[b].o||0)-(E[a].o||0));
  const rate=+S.get('exRate',0.21)||0;let tot=0;const bc={},bd={};
