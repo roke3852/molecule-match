@@ -917,6 +917,10 @@ h1,h2,h3{letter-spacing:.02em}
 .ba-plan{display:flex;flex-wrap:wrap;gap:5px;justify-content:center;margin:2px 0 4px}.ba-plan span{font-family:var(--f-mono);font-size:12px;border:1px solid #4a3a2c;color:#a59887;border-radius:999px;padding:2px 9px}
 .ba-plan span.ok{border-color:#5fbf7a;color:#8fd9a5}.ba-plan span.now{border-color:#e2bd6a;color:#1a1512;background:#e2bd6a;font-weight:700}.ba-plan p{flex-basis:100%;margin:2px 0 0;text-align:center;font-size:13px;color:#e2bd6a}
 .brew-anim .ba-tip{font-size:14px;color:#d9bd86;min-height:1.4em;text-align:center}
+.brew-anim .ba-hold{border:2px dashed #c4a46a;border-radius:14px;padding:16px 10px;text-align:center;font-size:17px;font-weight:700;color:#f3e9d6;display:flex;flex-direction:column;gap:2px;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;touch-action:none;transition:background .15s}
+.brew-anim .ba-hold small{font-size:12.5px;font-weight:500;color:#a59887}
+.brew-anim .ba-hold.on{background:rgba(196,164,106,.22);border-style:solid}
+.brew-anim{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
 .brew-anim .ba-skip{background:transparent;border:1px solid #6b5a45;border-radius:999px;color:#a59887;font:inherit;font-size:12px;padding:5px 14px;cursor:pointer}
 .brew-anim{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 .brew-anim.beans-in .bn{animation:baDrop .55s cubic-bezier(.5,0,.8,.6) forwards}
@@ -2459,6 +2463,9 @@ function handBrewStart(){if(!window.labBrewAnim){setSimTab('brew');t=0;$('scrub'
     if(!ex){setSimTab('brew');t=0;$('scrub').value=0;draw();setTimeout(()=>{if(!playing)$('play').click();},300);return;}
     const o=ex.pro,n=o.plan.length;
     if(!n)return;
+    /* 照配方自動注水：不動你的參數；提早斷水只把「提早斷水」設成那個時間 */
+    if(ex.auto){if(!ex.autoFull){P.cutoff=Math.max(0,Math.min(+$('cutoff').max||600,ex.cutT));$('cutoff').value=P.cutoff;}
+      setSimTab('brew');t=0;$('scrub').value=0;run();draw();setTimeout(()=>{if(!playing)$('play').click();},300);return;}
     P.pattern=im?'immersion':sw?'switch':'pulse';P.ratio=Math.round(o.ratio*10)/10;
     if(!im){if(n>7){o.plan[6]=o.plan.slice(6).reduce((a,b)=>a+b,0);o.planD[6]=Math.max(1,(o.planT[n-1]+o.planD[n-1])-o.planT[6]);}P.plan=o.plan.slice(0,7);P.planT=o.planT.slice(0,7);P.planD=o.planD.slice(0,7);P.planTemp=null;if(sw&&o.valveWins)P.valveWins=o.valveWins;}
     else P.steep=o.steep;
@@ -5994,7 +6001,7 @@ function playMain(m){busy=true;SFX.p('story');const s=S();dlg({t:'主線・'+m.t
   setTimeout(()=>{const n=mainPending();if(n&&view==='lobby')playMain(n);},200);});}
 /* ---------- 動畫：倒豆、磨豆、沖煮 ---------- */
 const AN=document.createElement('div');AN.className='brew-anim';AN.hidden=true;document.body.appendChild(AN);
-function brewAnim(opt,done){const SS=opt.lab||SS,LAB=!!opt.lab;const B=beanOf(opt.bean)||{roast:3},col=roastCol(B.roast),br=opt.brewer,press=br==='press',sw=br==='switch',Gd=GRINDERS.find(g=>g.id===opt.grinder)||GRINDERS[0];
+function brewAnim(opt,done){const SS=opt.lab||SS,LAB=!!opt.lab,AUTO=LAB&&!!(opt.plan&&opt.plan.length);const B=beanOf(opt.bean)||{roast:3},col=roastCol(B.roast),br=opt.brewer,press=br==='press',sw=br==='switch',Gd=GRINDERS.find(g=>g.id===opt.grinder)||GRINDERS[0];
   if(matchMedia('(prefers-reduced-motion:reduce)').matches)return done(null);
   const kind=Gd.id==='blade'?'blade':/電動/.test(Gd.type)?'elec':'hand',rows=GS[Gd.id]||GS.c40,gh=rows.length*8,gy=204-gh,gp=Object.assign({},palOf(Gd.id),{H:null,K:null});
   const KT=opt.kettle||kettleNow(),kp=palOf(KT.id),hasTh=!!SS.tools.thermo||!!KT.th,setT=SS.last.temp;
@@ -6028,8 +6035,8 @@ function brewAnim(opt,done){const SS=opt.lab||SS,LAB=!!opt.lab;const B=beanOf(op
    (LAB?'<text x="216" y="222" font-size="8" text-anchor="middle" fill="#a59887" font-family="monospace">'+esc((DRIPPER[br]&&DRIPPER[br].name)||(press?'法式濾壓':sw?'聰明杯':br))+(press||(opt.filter!=='metal'&&/濾紙/.test((DRIPPER[br]&&DRIPPER[br].name)||''))?'':'・'+(opt.filter==='metal'?'金屬濾網':'濾紙'))+'・'+dose+'g・'+setT+'°C</text>':'')+'</svg><div class="ba-cap">把豆子倒進 '+esc(Gd.name.replace(/（.*/,''))+'…</div><div class="ba-prog"><i></i></div><div class="ba-tip"></div>'+
    '<div class="ba-heat" hidden><div class="ba-stat"><b id="baHT">？</b><span id="baHH"></span></div><div class="ba-btns"><button type="button" id="baHeatOk" class="pri">離火，開始注水</button></div></div>'+
    '<div class="ba-pour" hidden><div class="ba-stat"><b id="baT">0:00</b><span id="baW">0 / '+target+' g</span><span id="baS">第 0 段</span><span id="baK"></span></div>'+(LAB&&opt.plan?'<div class="ba-plan" id="baPlan"></div>':'')+
-   '<div class="seg ba-flow" role="group" aria-label="水流大小">'+[['3','小水流'],['5','中水流'],['8','大水流']].map(([v,n])=>'<button type="button" data-fl="'+v+'" aria-pressed="'+(v==='5')+'">'+n+'</button>').join('')+'</div>'+
-   '<div class="ba-btns"><button type="button" id="baPour" class="pri">開始注水</button>'+(sw?'<button type="button" id="baValve">關上閥門</button>':'')+'<button type="button" id="baRefill">加水</button><button type="button" id="baEnd">'+(press?'壓下濾網':'結束沖煮')+'</button></div></div>'+
+   (AUTO?'<div class="ba-hold" id="baHold">按住畫面，照配方自動注水<small>放開就暫停</small></div>':'<div class="seg ba-flow" role="group" aria-label="水流大小">'+[['3','小水流'],['5','中水流'],['8','大水流']].map(([v,n])=>'<button type="button" data-fl="'+v+'" aria-pressed="'+(v==='5')+'">'+n+'</button>').join('')+'</div>')+
+   '<div class="ba-btns">'+(AUTO?'':'<button type="button" id="baPour" class="pri">開始注水</button>')+(sw?'<button type="button" id="baValve">關上閥門</button>':'')+(AUTO?'':'<button type="button" id="baRefill">加水</button>')+'<button type="button" id="baEnd">'+(press?'壓下濾網':AUTO?'提早斷水':'結束沖煮')+'</button></div></div>'+
    '<button class="ba-skip" type="button">'+(LAB?'跳過，直接用設定好的參數模擬 ›':'自動完成 ›')+'</button></div>';
   AN.hidden=false;AN.className='brew-anim';void AN.offsetWidth;AN.classList.add('beans-in');SFX.p('beans');
   const $q=id=>AN.querySelector('#'+id),cap=AN.querySelector('.ba-cap'),tip=AN.querySelector('.ba-tip'),bar=AN.querySelector('.ba-prog i'),pbox=AN.querySelector('.ba-pour');
@@ -6037,14 +6044,14 @@ function brewAnim(opt,done){const SS=opt.lab||SS,LAB=!!opt.lab;const B=beanOf(op
   if(cup){cup.style.transformBox='fill-box';cup.style.transformOrigin='50% 100%';cup.style.transform='scaleY(0)';}
   kt.style.transformBox='fill-box';kt.style.transformOrigin='35% 60%';st.style.opacity=0;
   let stage='beans',prog=0,hold=false,ang=0,last=performance.now(),raf=0,lastS=0,ended=false;
-  let feNow=0,Tb=setT,cool=0,kw=Math.max(60,KT.cap-120);const hbox=AN.querySelector('.ba-heat');if(KT.id==='pot'){const b3=AN.querySelector('[data-fl="3"]');b3.disabled=true;b3.style.opacity=.3;}
+  let feNow=0,Tb=setT,cool=0,kw=Math.max(60,KT.cap-120);const hbox=AN.querySelector('.ba-heat');if(KT.id==='pot'){const b3=AN.querySelector('[data-fl="3"]');if(b3){b3.disabled=true;b3.style.opacity=.3;}}
   let pouring=false,flow=5,t=0,started=false,poured=0,Wd=0,cupG=0,segs=0,lastStop=-99,open=true,closedT=0,lastPS=0,clog=0,warned=false;const PLG=[],VW=[];
   const fm=x=>Math.floor(x/60)+':'+String(Math.floor(x%60)).padStart(2,'0');
   function toGrind(){stage='grind';cap.textContent='磨豆・'+fmtGrind(Gd,grind).split('・')[0];tip.textContent=kind==='hand'?'按住或連點畫面，轉動把手':kind==='blade'?'按住畫面，按下砍豆機':'按住畫面，啟動磨豆機';}
   function toHeat(){stage='heat';hold=false;grG.removeAttribute('transform');bar.parentNode.hidden=true;hbox.hidden=false;Tb=60+Math.random()*8;cap.textContent='煮水・目標 '+setT+'°C（'+KT.name+'）';tip.textContent=hasTh?'溫度計會顯示水溫，到了就離火':'沒有溫度計，只能看泡泡猜水溫（器材行有賣溫度計和恆溫壺）';}
   function toPour(){hbox.hidden=true;stage='pour';hold=false;grG.removeAttribute('transform');bar.parentNode.hidden=true;pbox.hidden=false;cap.textContent='注水・目標 '+target+' g（1 : '+opt.ratio+'）';
-    tip.textContent=press?'注水後等咖啡浸泡，時間到了再壓下濾網':sw?'關上閥門可以浸泡，打開閥門才會滴濾':'小水流擾動少、杯子乾淨；大水流翻動粉床、萃得多，但細粉容易堵住濾紙';}
-  function setPour(v){if(v&&poured>=maxPour)return;if(v&&kw<=0){tip.textContent='壺裡沒水了，先按「加水」';return;}if(v&&Wd>=CAPW-4){tip.textContent='快滿出來了！等水位降下來再注水';return;}pouring=v;bPour.textContent=v?'停止注水':(started?'繼續注水':'開始注水');bPour.classList.toggle('stop',v);
+    tip.textContent=AUTO?(sw?'按住畫面照配方注水；閥門自己控制':'水量、流速、每注的開始時間都照配方，你只要按住'):press?'注水後等咖啡浸泡，時間到了再壓下濾網':sw?'關上閥門可以浸泡，打開閥門才會滴濾':'小水流擾動少、杯子乾淨；大水流翻動粉床、萃得多，但細粉容易堵住濾紙';}
+  function setPour(v){if(v&&poured>=maxPour)return;if(v&&kw<=0){tip.textContent='壺裡沒水了，先按「加水」';return;}if(v&&Wd>=CAPW-4){tip.textContent='快滿出來了！等水位降下來再注水';return;}pouring=v;if(bPour){bPour.textContent=v?'停止注水':(started?'繼續注水':'開始注水');bPour.classList.toggle('stop',v);}
     if(v){started=true;if(t-lastStop>3||!segs){segs++;}const L=PLG[PLG.length-1];if(!L||t-L.e>2)PLG.push({s:t,ml:0,e:t,T:Tb});SFX.p('pour');lastPS=performance.now();}else{lastStop=t;PLG[PLG.length-1].e=t;}}
   let pgLast='';
   function planGuide(){const el=$q('baPlan');if(!el)return;const PL=opt.plan;let k=PL.findIndex(q=>poured<q.cum-3);if(k<0)k=PL.length;
@@ -6056,7 +6063,7 @@ function brewAnim(opt,done){const SS=opt.lab||SS,LAB=!!opt.lab;const B=beanOf(op
     VW.forEach(w=>{if(w[1]==null)w[1]=Math.round(t);});
     const pro={mode:'pro',dose,ratio:tot/dose,dpat:'pulse',plan,planT:segsL.map(x=>Math.round(x.s)),planD:segsL.map(x=>Math.max(1,Math.round(x.e-x.s))),temp:segsL.length?Math.round(segsL[0].T):setT,planTemp:segsL.map(x=>Math.round(x.T)),stirP:st?'bloom':'none',stirI:st?'once':'none',
       steep:press?Math.max(60,Math.min(600,Math.round(t))):240,swMode:'closeFirst',swOpen:120,swClose:30,valveWins:sw?(VW.length?VW:[[0,1]]):null};
-    return {pro,txt:'你的手法：'+plan.length+' 段・'+tot+' g（1 : '+(tot/dose).toFixed(1)+'）・'+fm(t)+(sw?'・浸泡 '+fm(closedT):'')};}
+    return {pro,auto:AUTO,autoFull:AUTO&&poured>=target-3,cutT:Math.round(t),txt:'你的手法：'+plan.length+' 段・'+tot+' g（1 : '+(tot/dose).toFixed(1)+'）・'+fm(t)+(sw?'・浸泡 '+fm(closedT):'')};}
   function finish(auto){if(ended)return;ended=true;stage='done';cancelAnimationFrame(raf);pouring=false;st.style.opacity=0;kt.style.transform='';cap.textContent=LAB?'完成！回模擬器看有沒有進金杯':'完成，端給客人！';tip.textContent='';
     if(cup)cup.style.transform='scaleY('+(auto?.85:Math.min(1,cupG/270)).toFixed(2)+')';if(pl)pl.style.transform='translateY(90px)';
     const ex=auto||!started||poured<dose*6?null:result();SFX.p('pass');setTimeout(()=>close(ex),700);}
@@ -6070,9 +6077,18 @@ function brewAnim(opt,done){const SS=opt.lab||SS,LAB=!!opt.lab;const B=beanOf(op
       if(arm){const x=82+32*Math.cos(ang);arm.setAttribute('x2',x.toFixed(1));knob.setAttribute('x',(x-6).toFixed(1));knob.setAttribute('height',(18-4*Math.sin(ang)).toFixed(1));}
       bar.style.width=Math.min(100,prog*100)+'%';if(prog>=1){if(KT.temp)toPour();else toHeat();}}
     else if(stage==='heat'){Tb=Math.min(100,Tb+dt*(Tb<94?5.5:2));$q('baHT').textContent=hasTh?Tb.toFixed(0)+'°C':'？°C';$q('baHH').textContent=Tb<75?'壺底冒出小泡泡':Tb<86?'泡泡變多，開始有聲音':Tb<95?'大泡泡一串串往上衝':'大滾沸騰！';}
-    else if(stage==='pour'){const sc=(!pouring&&poured>=target-2)||(press&&!pouring&&started)?16:6,g=dt*sc;
+    else if(stage==='pour'){
+      /* 實驗室＋配方：按住才走時間，依配方自動開關水流；全部倒完後自動等它滴完 */
+      let allIn=false;
+      if(AUTO){const PL=opt.plan,k=PL.findIndex(q=>poured<q.cum-.5),q=k<0?null:PL[k];allIn=!q;
+        if(kw<=1)kw=KT.cap;
+        const want=hold&&q&&t>=q.s-.05;if(q)flow=Math.max(.5,q.rate);
+        if(want&&!pouring)setPour(true);else if(!want&&pouring)setPour(false);
+        if(pouring&&q&&poured>=q.cum-.05)setPour(false);
+        const hb=$q('baHold');if(hb){hb.classList.toggle('on',hold&&!allIn);hb.hidden=allIn;}}
+      const sc=(!pouring&&poured>=target-2)||(press&&!pouring&&started)?16:6,g=(AUTO&&!hold&&!allIn)?0:dt*sc;
       if(pouring&&kw<=0){setPour(false);tip.textContent='壺裡沒水了，先按「加水」';}
-      if(pouring){const fe=flow*(KT.id==='pot'?1.35:1)*Math.max(.3,1+Math.sin(now/170)*(1-KT.stab)*.9+(Math.random()-.5)*(1-KT.stab)*.8),a=fe*g;feNow=fe;kw-=a;poured+=a;Wd+=a;const L=PLG[PLG.length-1];L.ml+=a;L.e=t;clog+=(flow>=8?1:flow>=5?.35:.1)*Gd.fines*Math.pow(700/grind,1.5)*a/60;
+      if(pouring){const fe=flow*(KT.id==='pot'?1.35:1)*(AUTO?1:Math.max(.3,1+Math.sin(now/170)*(1-KT.stab)*.9+(Math.random()-.5)*(1-KT.stab)*.8));let a=fe*g;if(AUTO){const q=opt.plan.find(q=>poured<q.cum-.5);if(q)a=Math.min(a,q.cum-poured);}feNow=fe;kw-=a;poured+=a;Wd+=a;const L=PLG[PLG.length-1];L.ml+=a;L.e=t;clog+=(flow>=8?1:flow>=5?.35:.1)*Gd.fines*Math.pow(700/grind,1.5)*a/60;
         if(!warned&&clog>.8&&!press){warned=true;tip.textContent='細粉被沖到濾紙上堵住了，水下得很慢（塞水）';}if(now-lastPS>1650){SFX.p('pour');lastPS=now;}if(poured>=maxPour){setPour(false);tip.textContent='水加太多了，已經到上限';}else if(Wd>=CAPW){setPour(false);tip.textContent='快滿出來了！等水位降下來再注水';}}
       const dr=Math.max(0,Wd-2*dose);if(!press&&open&&dr>0){const d=Math.min(dr,rate/(1+1.6*clog)*Math.min(1,dr/25+.15)*g);Wd-=d;cupG+=d;}
       if(started){t+=g;if(!KT.temp)cool+=g*.03;}if(sw&&!open&&Wd>2*dose)closedT+=g;
@@ -6084,13 +6100,13 @@ function brewAnim(opt,done){const SS=opt.lab||SS,LAB=!!opt.lab;const B=beanOf(op
       if(!press&&started&&!pouring&&poured>=target-2&&dr<1&&open){finish();return;}}
     raf=requestAnimationFrame(loop);}
   const up=()=>{hold=false;};
-  AN.onpointerdown=e=>{if(e.target.closest('button'))return;if(stage==='grind'){e.preventDefault();hold=true;if(kind==='hand'){prog+=.04;ang+=.7;SFX.p('grind');}}};
+  AN.onpointerdown=e=>{if(e.target.closest('button'))return;if(stage==='grind'){e.preventDefault();hold=true;if(kind==='hand'){prog+=.04;ang+=.7;SFX.p('grind');}}else if(stage==='pour'&&AUTO){e.preventDefault();hold=true;started=true;}};
   addEventListener('pointerup',up);addEventListener('pointercancel',up);
-  bPour.onclick=()=>{if(stage==='pour')setPour(!pouring);};
+  if(bPour)bPour.onclick=()=>{if(stage==='pour')setPour(!pouring);};
   AN.querySelectorAll('[data-fl]').forEach(b=>b.setAttribute('aria-pressed',+b.dataset.fl===flow));AN.querySelectorAll('[data-fl]').forEach(b=>b.onclick=()=>{flow=+b.dataset.fl;AN.querySelectorAll('[data-fl]').forEach(x=>x.setAttribute('aria-pressed',x===b));});
   if(bValve)bValve.onclick=()=>{open=!open;if(!open)VW.push([Math.round(t),null]);else if(VW.length)VW[VW.length-1][1]=Math.round(t);bValve.textContent=open?'關上閥門':'打開閥門';bValve.classList.toggle('stop',!open);vi.setAttribute('fill',open?'#5fbf7a':'#d9705f');vi.setAttribute('x',open?228:222);SFX.p('tick');};
   $q('baHeatOk').onclick=()=>{if(stage!=='heat')return;Tb=Math.round(Tb);SFX.p('tick');toPour();};
-  $q('baRefill').onclick=()=>{if(stage!=='pour')return;if(pouring)setPour(false);kw=KT.cap;if(started)t+=KT.temp?20:12;if(!KT.temp&&!SS.tools.thermos)Tb-=4;lastStop=t;tip.textContent=KT.temp?'加滿水了，等它回到 '+setT+'°C（花了 20 秒）':''+(SS.tools.thermos?'保溫瓶的水夠熱，水溫沒掉（花了 12 秒）':'加了熱水瓶的水，水溫掉了一點（花了 12 秒）');SFX.p('pour');};
+  if($q('baRefill'))$q('baRefill').onclick=()=>{if(stage!=='pour')return;if(pouring)setPour(false);kw=KT.cap;if(started)t+=KT.temp?20:12;if(!KT.temp&&!SS.tools.thermos)Tb-=4;lastStop=t;tip.textContent=KT.temp?'加滿水了，等它回到 '+setT+'°C（花了 20 秒）':''+(SS.tools.thermos?'保溫瓶的水夠熱，水溫沒掉（花了 12 秒）':'加了熱水瓶的水，水溫掉了一點（花了 12 秒）');SFX.p('pour');};
   bEnd.onclick=()=>{if(stage!=='pour')return;if(!started){tip.textContent='還沒注水呢';return;}finish();};
   AN.querySelector('.ba-skip').onclick=()=>finish(true);
   setTimeout(()=>{if(!ended){toGrind();last=performance.now();raf=requestAnimationFrame(loop);}},900);}
