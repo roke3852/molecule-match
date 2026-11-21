@@ -771,6 +771,21 @@ html.dark [style*="background:#e9f4ec"]{background:#263027!important;border-colo
 html.dark [style*="background:#eef3f8"]{background:#252b31!important;color:#a7bccf!important}
 html.dark [style*="background:#d9eaf3"]{background:#252d33!important}
 html.dark [style*="background:#fde2e2"]{background:#3a2422!important;color:#d9a59c!important}
+
+.ex-tot{background:#fdf1e7;border-radius:12px;padding:12px;margin:4px 0 10px;font-family:var(--ff-b);line-height:1.7}
+.ex-tot .big{font-size:28px;color:var(--maple)}
+.ex-tot .sub2{color:var(--sub);font-size:var(--fs-s);font-family:var(--ff-s)}
+.ex-bar{display:flex;align-items:center;gap:8px;margin:5px 0;font-size:15px;font-family:var(--ff-b)}
+.ex-bar .l{width:76px;flex:none}.ex-bar .t{flex:1;height:12px;background:var(--line);border-radius:6px;overflow:hidden}
+.ex-bar .t i{display:block;height:100%;background:var(--maple)}.ex-bar .v{width:84px;text-align:right;flex:none;color:var(--sub);font-family:var(--ff-s)}
+.ex-day{margin:12px 0 2px;font-family:var(--ff-b);color:var(--sub);display:flex;justify-content:space-between}
+.ex-row{display:flex;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line);font-size:16px;font-family:var(--ff-b)}
+.ex-row .ic{font-size:20px;flex:none}.ex-row .m{flex:1;min-width:0}.ex-row .m small{display:block;color:var(--sub);font-size:var(--fs-s);font-family:var(--ff-s)}
+.ex-row .a{flex:none;font-weight:bold}.ex-row .del{color:#b9a99b;font-size:16px;background:none;border:0;padding:4px 6px}
+.ex-row .del.arm{color:#c0392b}
+.ex-form select,.ex-form input{font-size:16px}
+.ex-form .r{display:flex;gap:6px;margin:6px 0}.ex-form .r>*{flex:1;min-width:0}
+html.dark .ex-tot{background:var(--card)!important}
 </style>
 </head>
 <body>
@@ -952,6 +967,26 @@ html.dark [style*="background:#fde2e2"]{background:#3a2422!important;color:#d9a5
   </section>
 
   <!-- 退稅 -->
+  <section class="view" id="v-money">
+    <div class="sec">
+      <h3>💰 旅費記帳</h3>
+      <div class="hint">每花一筆就記一下。開著家人共用時全家一起記，誰記的都看得到。</div>
+      <div id="exSum"></div>
+    </div>
+    <div class="sec ex-form">
+      <h3>＋ 記一筆</h3>
+      <div class="seg" id="exCat"></div>
+      <div class="r"><select id="exDate"></select><select id="exPay"><option value="cash">💴 現金</option><option value="card">💳 刷卡</option><option value="ic">🚃 IC 卡</option><option value="app">📱 App 支付</option></select></div>
+      <div class="r"><input id="exItem" maxlength="30" placeholder="項目（例如：牛腸鍋晚餐）"></div>
+      <div class="r"><input id="exAmt" type="number" inputmode="numeric" placeholder="金額 ¥"><input id="exWho" maxlength="10" placeholder="誰付的（可空白）"></div>
+      <div class="acts"><button class="btn pri" id="exAdd">記一筆</button></div>
+    </div>
+    <div class="sec">
+      <h3>📒 明細</h3>
+      <div id="exList"></div>
+      <div class="hint" style="margin-top:10px">台幣匯率（1 日圓 ＝ ? 台幣）：<input id="exRate" type="number" inputmode="decimal" step="0.001" style="max-width:90px"></div>
+    </div>
+  </section>
   <section class="view" id="v-tax">
     <div class="sec">
       <h3>🧾 退稅互動教學</h3>
@@ -1113,7 +1148,7 @@ html.dark [style*="background:#fde2e2"]{background:#3a2422!important;color:#d9a5
 
 <script>
 /* ---------- storage (safe) ---------- */
-const APPV='20261121p';
+const APPV='20261121q';
 /* 把 emoji 換成像素圖示 */
 (function(){
  const OK=new Set([0x25b6,0x1f302,0x1f321,0x1f324,0x1f326,0x1f327,0x1f328,0x1f329,0x1f32b,0x1f341,0x1f35b,0x1f35c,0x1f361,0x1f370,0x1f37d,0x1f381,0x1f384,0x1f389,0x1f38c,0x1f392,0x1f3ab,0x1f3c6,0x1f3e0,0x1f3e8,0x1f3ea,0x1f3ec,0x1f41f,0x1f44b,0x1f44d,0x1f455,0x1f466,0x1f467,0x1f468,0x1f469,0x1f46a,0x1f476,0x1f48a,0x1f4a1,0x1f4a7,0x1f4ac,0x1f4b3,0x1f4b4,0x1f4c5,0x1f4cb,0x1f4cc,0x1f4cd,0x1f4dd,0x1f4e3,0x1f4e4,0x1f4f1,0x1f4f7,0x1f4f8,0x1f50d,0x1f512,0x1f516,0x1f517,0x1f552,0x1f5a5,0x1f5bc,0x1f5d1,0x1f5d3,0x1f5e3,0x1f5fa,0x1f60c,0x1f683,0x1f684,0x1f687,0x1f68f,0x1f690,0x1f695,0x1f6b2,0x1f6b6,0x1f6c2,0x1f6c3,0x1f6cd,0x1f6ec,0x1f7e2,0x1f969,0x1f9c5,0x1f9e0,0x1f9e3,0x1f9e5,0x1f9ed,0x1f9ee,0x1f9f3,0x1f9fe,0x23f1,0x23f8,0x2600,0x2601,0x2614,0x2615,0x26a0,0x26c5,0x26c8,0x26f4,0x26f8,0x2705,0x270f,0x2728,0x2744,0x274c,0x2b50]);
@@ -2521,9 +2556,45 @@ $('#txLog').onclick=e=>{const d=e.target.closest('[data-txd]');if(!d)return;cons
 reloaders.push(()=>{if(currentView()==='tax')drawTxLog()});
 drawCards();drawTax();
 
+/* ---------- 旅費記帳 ---------- */
+const EX_CAT=[['food','🍜','餐飲'],['move','🚃','交通'],['shop','🛍️','購物'],['fun','🎟️','門票'],['stay','🏨','住宿'],['etc','📦','其他']];
+const EX_PAY={cash:'💴 現金',card:'💳 刷卡',ic:'🚃 IC 卡',app:'📱 App 支付'};
+const EX_DAYS=['11/21','11/22','11/23','11/24','11/25','11/26','11/27','11/28'],EX_WK=['六','日','一','二','三','四','五','六'];
+let exCat='food',exArm=null;
+const exAll=()=>S.get('exp',null)||{};
+const yen=n=>'¥'+Math.round(n).toLocaleString();
+function exToday(){const d=new Date(Date.now()+9*3600e3),k=(d.getUTCMonth()+1)+'/'+d.getUTCDate();return EX_DAYS.includes(k)?k:EX_DAYS[0]}
+function drawExp(){
+ const E=exAll(),ids=Object.keys(E).sort((a,b)=>EX_DAYS.indexOf(E[b].d)-EX_DAYS.indexOf(E[a].d)||(E[b].o||0)-(E[a].o||0));
+ const rate=+S.get('exRate',0.21)||0;let tot=0;const bc={},bd={};
+ ids.forEach(id=>{const x=E[id];tot+=x.a;bc[x.c]=(bc[x.c]||0)+x.a;bd[x.d]=(bd[x.d]||0)+x.a});
+ const mx=Math.max(1,...Object.values(bc));
+ $('#exSum').innerHTML=`<div class="ex-tot">目前總花費 <span class="big">${yen(tot)}</span><br><span class="sub2">約 NT$${Math.round(tot*rate).toLocaleString()}・大人 5 人平均 ${yen(tot/5)}（約 NT$${Math.round(tot*rate/5).toLocaleString()}）・共 ${ids.length} 筆</span></div>`+
+  (tot?EX_CAT.filter(c=>bc[c[0]]).map(c=>`<div class="ex-bar"><span class="l">${c[1]} ${c[2]}</span><span class="t"><i style="width:${bc[c[0]]/mx*100}%"></i></span><span class="v">${yen(bc[c[0]])}</span></div>`).join(''):'');
+ $('#exCat').innerHTML=EX_CAT.map(c=>`<button class="${c[0]===exCat?'on':''}" data-exc="${c[0]}">${c[1]} ${c[2]}</button>`).join('');
+ const ds=$('#exDate');if(!ds.options.length){ds.innerHTML=EX_DAYS.map((d,i)=>`<option value="${d}">${d}（${EX_WK[i]}）</option>`).join('');ds.value=exToday()}
+ const rt=$('#exRate');if(document.activeElement!==rt)rt.value=rate;
+ let h='',cur=null;
+ ids.forEach(id=>{const x=E[id],c=EX_CAT.find(c=>c[0]===x.c)||EX_CAT[5];
+  if(x.d!==cur){cur=x.d;h+=`<div class="ex-day"><span>${x.d}（${EX_WK[EX_DAYS.indexOf(x.d)]||''}）</span><span>${yen(bd[x.d])}</span></div>`}
+  h+=`<div class="ex-row"><span class="ic">${c[1]}</span><span class="m">${esc(x.t)}<small>${EX_PAY[x.p]||''}${x.w?'・'+esc(x.w)+' 付':''}${x.n?'・'+esc(x.n):''}</small></span><span class="a">${yen(x.a)}</span><button class="del${exArm===id?' arm':''}" data-exd="${id}" aria-label="刪除">${exArm===id?'確定刪除':'×'}</button></div>`});
+ $('#exList').innerHTML=h||'<div class="xempty">還沒有紀錄。</div>'}
+$('#exCat').onclick=e=>{const b=e.target.closest('[data-exc]');if(!b)return;exCat=b.dataset.exc;drawExp()};
+$('#exAdd').onclick=()=>{const t=$('#exItem').value.trim(),a=Math.round(+$('#exAmt').value);
+ if(!t||!(a>0)){toast('請填項目和金額');return}
+ const E=exAll(),id='e'+Date.now().toString(36)+Math.random().toString(36).slice(2,5);
+ E[id]={d:$('#exDate').value,c:exCat,t:t.slice(0,30),a,p:$('#exPay').value,w:$('#exWho').value.trim().slice(0,10),o:Date.now()};
+ S.set('exp',E);$('#exItem').value='';$('#exAmt').value='';$('#exItem').blur();$('#exAmt').blur();drawExp();toast('已記下 '+yen(a))};
+$('#exList').onclick=e=>{const d=e.target.closest('[data-exd]');if(!d)return;const id=d.dataset.exd;
+ if(exArm!==id){exArm=id;drawExp();setTimeout(()=>{if(exArm===id){exArm=null;drawExp()}},3000);return}
+ const E=exAll();delete E[id];S.set('exp',E);exArm=null;drawExp();toast('已刪除')};
+$('#exRate').onchange=()=>{const r=+$('#exRate').value;if(r>0&&r<1){S.set('exRate',r);drawExp()}};
+reloaders.push(()=>{if(currentView()==='money')drawExp()});
+drawExp();
+
 /* ---------- routing ---------- */
-const VIEWS=['trip','map','sim','xmas','list','food','coffee','gift','shop','card','tax','chat','tools'];
-const GROUPS={trip:[['trip','🗓️ 每日行程'],['map','🗺️ 地圖'],['sim','▶️ 模擬'],['xmas','🎄 聖誕']],buy:[['food','🍜 美食'],['coffee','☕ 咖啡'],['gift','🎁 伴手禮'],['shop','🛍️ 百元店'],['card','💳 刷卡'],['tax','🧾 退稅']],list:[['list','']],chat:[['chat','']],tools:[['tools','']]};
+const VIEWS=['trip','map','sim','xmas','list','food','coffee','gift','shop','card','tax','money','chat','tools'];
+const GROUPS={trip:[['trip','🗓️ 每日行程'],['map','🗺️ 地圖'],['sim','▶️ 模擬'],['xmas','🎄 聖誕']],buy:[['food','🍜 美食'],['coffee','☕ 咖啡'],['gift','🎁 伴手禮'],['shop','🛍️ 百元店'],['card','💳 刷卡'],['tax','🧾 退稅'],['money','💰 記帳']],list:[['list','']],chat:[['chat','']],tools:[['tools','']]};
 const groupOf=v=>Object.keys(GROUPS).find(g=>GROUPS[g].some(x=>x[0]===v));
 function currentView(){const h=location.hash.slice(1);return VIEWS.includes(h)?h:'trip'}
 function route(){const v=currentView();VIEWS.forEach(x=>$('#v-'+x).classList.toggle('on',x===v));
@@ -2531,13 +2602,13 @@ function route(){const v=currentView();VIEWS.forEach(x=>$('#v-'+x).classList.tog
  document.querySelectorAll('nav a').forEach(a=>{a.classList.toggle('on',a.dataset.g===g);if(a.dataset.g===g&&g==='buy')a.setAttribute('href','#'+v)});
  const sn=$('#subnav');sn.classList.toggle('on',sub.length>1);sn.innerHTML=sub.length>1?sub.map(x=>`<a href="#${x[0]}" class="${x[0]===v?'on':''}">${x[1]}</a>`).join(''):'';
  $('#todayBtn').classList.toggle('on',v==='trip'&&ti>=0&&ti<8&&curDay!==ti);window.scrollTo(0,0);
- if(v==='map')drawMap();if(v==='trip'&&!editing)renderDay(true);if(v==='gift')drawGifts();if(v==='shop')drawShops();if(v==='xmas')drawXmas();if(v==='sim')drawSim();else simStop();if(v==='food')drawFoods();if(v==='card')drawCards();if(v==='tax')drawTax();if(v==='coffee')drawCafes();if(v==='chat'&&window.FS)FS.chatOpen()}
+ if(v==='map')drawMap();if(v==='trip'&&!editing)renderDay(true);if(v==='gift')drawGifts();if(v==='shop')drawShops();if(v==='xmas')drawXmas();if(v==='sim')drawSim();else simStop();if(v==='food')drawFoods();if(v==='card')drawCards();if(v==='tax')drawTax();if(v==='money')drawExp();if(v==='coffee')drawCafes();if(v==='chat'&&window.FS)FS.chatOpen()}
 window.addEventListener('hashchange',route);
 
 /* ---------- family sync (Firebase Realtime Database, REST + 串流) ---------- */
 const FB_URL='https://molecule-match-default-rtdb.asia-southeast1.firebasedatabase.app';
 const FS=(function(){
- const KEYS=['done','cafes','shops','xmas','gifts','foods','gphoto','memo','savedNotes','edits','todo','pack','tax','xtabs','xlists'];
+ const KEYS=['done','cafes','shops','xmas','gifts','foods','gphoto','memo','savedNotes','edits','todo','pack','tax','xtabs','xlists','exp'];
  const raw={get(k){try{return localStorage.getItem('fuk26_'+k)}catch(e){return null}},set(k,v){try{localStorage.setItem('fuk26_'+k,v)}catch(e){}},del(k){try{localStorage.removeItem('fuk26_'+k)}catch(e){}}};
  const okCode=c=>/^[A-Za-z0-9_-]{8,40}$/.test(c||'');
  const enc=k=>encodeURIComponent(k).replace(/\./g,'%2E'),dec=k=>{try{return decodeURIComponent(k)}catch(e){return k}};
@@ -2553,6 +2624,7 @@ const FS=(function(){
   else if(key==='gphoto'){for(const k in v)if(v[k]&&v[k].h)o['gp/'+k]=v[k].h}
   else if(key==='xtabs'){for(const k in v)if(v[k]&&!v[k].p)o['xt/'+k]=JSON.stringify({n:v[k].n,o:v[k].o})}
   else if(key==='xlists'){for(const k in v)if(v[k]&&!v[k].p)o['xl/'+k]=JSON.stringify({n:v[k].n,tab:v[k].tab,items:v[k].items||[],o:v[k].o})}
+  else if(key==='exp'){for(const k in v)if(v[k])o['ex/'+k]=JSON.stringify(v[k])}
   else if(key==='edits'){o['edits/v']=v.v||1;(v.days||[]).forEach((d,i)=>{o['edits/d'+i]=JSON.stringify(d)})}
   else o[key]=JSON.stringify(v);
   return o}
@@ -2563,6 +2635,7 @@ const FS=(function(){
   if(key==='savedNotes'){const o={},x=sub('notes/');for(const k in x)o[dec(k)]=String(x[k]);return o}
   if(key==='gphoto'){const o={},x=sub('gp/');for(const k in x)o[k]={h:String(x[k]),u:null};return o}
   if(key==='xtabs'||key==='xlists'){const o={},x=sub(key==='xtabs'?'xt/':'xl/');for(const k in x){try{const r=JSON.parse(x[k]);if(r&&typeof r.n==='string')o[k]=r}catch(e){}}return o}
+  if(key==='exp'){const o={},x=sub('ex/');for(const k in x){try{const r=JSON.parse(x[k]);if(r&&r.a>0)o[k]=r}catch(e){}}return o}
   if(key==='edits'){const x=sub('edits/d');if(!Object.keys(x).length)return null;
    return{v:+E['edits/v']||BASEV,days:DAYS.map((_,i)=>{try{const d=JSON.parse(x[i]);if(d&&Array.isArray(d.stops))return d}catch(e){}return baseDay(i)})}}
   try{const a=JSON.parse(E[key]);return Array.isArray(a)?a:null}catch(e){return null}}
@@ -2755,6 +2828,9 @@ const FS=(function(){
 })();
 
 renderChips();renderDay();route();loadWx(false);FS.init();
+(function(){if(S.get('exSeed1121',0))return;const E=exAll();let ch=0;if(!E.e1121motsu){E.e1121motsu={d:'11/21',c:'food',t:'元祖もつ鍋 楽天地 薬院店（晚餐）',a:26880,p:'cash',w:'',n:'5大2小',o:Date.parse('2026-11-21T21:50:00+09:00')};ch=1}
+ if(!E.e1121taxi){E.e1121taxi={d:'11/21',c:'move',t:'GO 計程車：博多青木 → 渡辺通3丁目',a:4420,p:'app',w:'呂明翰',n:'GO Pay 19:16',o:Date.parse('2026-11-21T19:16:00+09:00')};ch=1}
+ if(ch)S.set('exp',E);S.set('exSeed1121',1);drawExp()})();
 setInterval(()=>{if(!editing&&currentView()==='trip'&&curDay===ti&&document.activeElement.id!=='memo')renderDay(true)},60000);
 </script>
 <!-- Made by Jim Lu -->
