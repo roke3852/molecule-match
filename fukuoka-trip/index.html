@@ -587,6 +587,27 @@ nav a.on::before{left:calc(50% - 32px)!important;top:12px!important;margin-top:0
 .aiacts{display:flex;gap:8px;margin-top:8px}
 .aiacts .btn{font-size:var(--fs-s);font-family:var(--ff-s);padding:6px 8px}
 
+
+.fd-h{margin:8px 6px 0 32px;font-family:var(--ff-b);min-width:0}
+.fd-h summary{list-style:none;display:flex;align-items:center;gap:8px;cursor:pointer;flex-wrap:wrap}.fd-h summary::-webkit-details-marker{display:none}
+.fd-h .st{font-size:var(--fs-s);font-weight:700;padding:2px 8px;border-radius:999px;white-space:nowrap}
+.fd-h .st.ok{background:color-mix(in srgb,var(--green) 18%,transparent);color:var(--green)}
+.fd-h .st.warn{background:color-mix(in srgb,var(--gold) 22%,transparent);color:#a8741a}
+.fd-h .st.off{background:color-mix(in srgb,var(--sub) 16%,transparent);color:var(--sub)}
+html.dark .fd-h .st.warn{color:var(--gold)}
+.fd-h .fd-wk{font-size:12px;color:var(--sub);white-space:nowrap}.fd-h[open] .fd-wk{visibility:hidden}
+.fd-hs{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.fd-hs em{font-style:normal;font-size:var(--fs-s);color:var(--sub)}
+.fd-bar{position:relative;height:10px;background:color-mix(in srgb,var(--sub) 14%,transparent);border-radius:3px;overflow:hidden;flex:1}
+.fd-bar.mini{flex:1 1 60px;min-width:50px}
+.fd-bar i{position:absolute;top:0;bottom:0;background:var(--green);border-radius:2px}
+.fd-bar b{position:absolute;top:-2px;bottom:-2px;width:2px;margin-left:-1px;background:var(--maple)}
+.fd-bar.cl{background:repeating-linear-gradient(45deg,color-mix(in srgb,var(--sub) 10%,transparent) 0 4px,transparent 4px 8px)}.fd-bar.cl em{position:absolute;left:6px;top:-3px;font-size:11px;font-style:normal;color:var(--sub)}
+.fd-hr,.fd-ax{display:grid;grid-template-columns:18px 1fr 116px;gap:6px;align-items:center;font-size:12px;margin-top:4px}
+.fd-hr span{color:var(--sub)}.fd-hr .tx{font-size:11px;line-height:1.2}
+.fd-hr.td span{color:var(--ink);font-weight:700}.fd-hr.td .fd-bar{outline:1.5px solid var(--maple);outline-offset:1px}
+.fd-ax div{position:relative;height:12px}.fd-ax i{position:absolute;font-style:normal;font-size:10px;color:var(--sub);transform:translateX(-50%)}
+.fd-ax i:nth-child(1){left:4.17%}.fd-ax i:nth-child(2){left:29.17%}.fd-ax i:nth-child(3){left:54.17%}.fd-ax i:nth-child(4){left:79.17%}.fd-ax i:nth-child(5){left:91.67%}
+.fd-hn{font-size:12px;color:var(--ink);margin-top:6px}.fd-hn.sub{color:var(--sub);font-size:11px;margin-top:4px}
 /* ===== 工具頁分頁 ===== */
 .tooltabs{padding:10px 14px 0!important}.tooltabs a{cursor:pointer;user-select:none;-webkit-user-select:none}
 #v-tools .sec[data-tt]:not(.tt-on){display:none}
@@ -896,6 +917,7 @@ html.dark [style*="background:#fde2e2"]{background:#3a2422!important;color:#d9a5
       <div class="fd-f"><span>種類</span><div class="seg" id="foodType"></div></div>
       <div class="fd-f"><span>人均</span><div class="seg" id="foodPrice"></div></div>
       <label class="fd-sw"><input type="checkbox" id="foodWant"><i></i>只看已勾選的</label>
+      <label class="fd-sw"><input type="checkbox" id="foodOpen"><i></i>只看現在營業中</label>
       <div id="foods"></div>
     </div>
   </section>
@@ -2094,7 +2116,6 @@ const FOODS=[
  {id:'h_hiro',pr:[6000,10000],m:[{n:'水炊鍋全餐',jp:'水炊きコース'},{n:'自家製冰淇淋',jp:'自家製アイス'}],a:'hotel',n:'博多水炊鍋 Hiro',jp:'博多水たき ひろ',t:'水炊鍋',d:'飯店走約 2 分鐘，安靜精緻的水炊鍋全餐，分五道上菜，有包廂。適合安排一餐全家好好吃。',tip:'週二公休；可在 Google 地圖上直接訂位。週末中午也有營業。'},
  {id:'h_umeyama',pr:[1000,2000],m:[{n:'烤魚定食',jp:'焼き魚定食'},{n:'生魚片拼盤',jp:'刺身盛り合わせ'},{n:'炸雞',jp:'唐揚げ'}],a:'hotel',n:'梅山鐵平食堂',jp:'梅山鉄平食堂',t:'定食',d:'就在飯店旁邊，走 1 分鐘。魚很新鮮的家常定食，價格實在，當地人也排隊。',tip:'週三公休，營業到 21:00；沒有英文菜單，用「給店員看」點菜。開店時段人多要排。',kid:1},
  {id:'h_fishman',pr:[3000,6000],m:[{n:'階梯生魚片拼盤',jp:'階段刺身盛り'},{n:'現煎玉子燒',jp:'だし巻き卵'},{n:'爐端燒烤魚',jp:'炉端焼き'}],a:'hotel',n:'博多爐端 Fishman',jp:'博多炉端 魚男 フィッシュマン',t:'海鮮',d:'在今泉，飯店走約 7 分鐘。超人氣海鮮爐端燒，玉子燒在桌邊現煎，小孩很愛看；可用 QR code 點餐、有英文。',tip:'非常熱門，幾乎一定要先訂位（Tabelog）；午餐 11:00–14:30 也開。'},
- {id:'h_kanetora',pr:[1200,2000],m:[{n:'濃厚沾麵',jp:'濃厚つけ麺'},{n:'明太子沾麵',jp:'明太つけ麺'},{n:'叉燒飯',jp:'豚めし'}],a:'hotel',n:'沾麵 兼虎',jp:'つけ麺 兼虎 本店',t:'沾麵',d:'飯店往西北走約 7 分鐘，福岡最有名的沾麵店之一，麵Q湯濃。早上 9:40 就開，適合當早午餐。',tip:'常要排 30～45 分鐘，全員到齊才能入列；用餐限時約 30 分鐘。'},
  {id:'ikkousha',pr:[1000,1500],m:[{n:'泡系豚骨拉麵',jp:'泡系とんこつラーメン'},{n:'溏心蛋',jp:'味玉'},{n:'煎餃',jp:'餃子'}],a:'hakata',n:'博多一幸舍',jp:'博多一幸舎 総本店',t:'拉麵',d:'湯頭表面有一層細泡的濃郁豚骨拉麵，博多站步行可到，晚上也開。',tip:'豚骨味較濃，怕腥的人先點小碗或加大蒜。'},
  {id:'menkaido',pr:[1000,1500],m:[{n:'各家招牌豚骨拉麵',jp:'おすすめのとんこつラーメン'},{n:'加麵',jp:'替え玉'}],a:'hakata',n:'博多拉麵街道',jp:'博多めん街道',t:'拉麵',d:'博多站內一整層都是拉麵店，各家口味一次比較，不用出車站。',tip:'就在車站裡，適合抵達當晚或玩累的晚上。',kid:1},
  {id:'maedaya',pr:[1500,5000],pn:'午餐約 ¥1,500–3,000，晚餐約 ¥4,000–5,000',m:[{n:'牛腸鍋（味噌）',jp:'もつ鍋 みそ味'},{n:'牛腸鍋（醬油）',jp:'もつ鍋 しょうゆ味'},{n:'收尾：強棒麵',jp:'〆のちゃんぽん麺'},{n:'芝麻鯖魚',jp:'ごまさば'},{n:'自家製明太子',jp:'自家製明太子'}],a:'hakata',n:'博多牛腸鍋 前田屋 博多店',jp:'博多もつ鍋 前田屋 博多店',t:'牛腸鍋',d:'只用國產和牛小腸，臭味少，不太敢吃內臟的人也能接受。博多店每天中午就開。',tip:'很難排，建議先預約；有兒童友善座位。',kid:1},
@@ -2144,22 +2165,45 @@ const FOODS=[
  {id:'kotorii',pr:[800,1500],m:[{n:'抹茶套餐',jp:'抹茶セット'},{n:'和風甜點',jp:'和スイーツ'}],a:'dazaifu',n:'小鳥居茶房',jp:'小鳥居茶房',t:'咖啡',d:'太宰府小巷裡的和風茶房，安靜好坐，逛完參道人潮後休息喝茶吃甜點。',tip:'',kid:1,u:1},
  {id:'tenzan',pr:[300,800],m:[{n:'草莓最中',jp:'いちご最中'},{n:'草莓大福',jp:'いちご大福'}],a:'dazaifu',n:'天山 本店（草莓最中・大福）',jp:'天山 本店',t:'甜點',d:'太宰府的和菓子店，把整顆草莓包進最中或大福，紅豆的甜和草莓的酸很搭，是參道上的人氣點心。',tip:'',kid:1,u:1}
 ];
-let fArea='all',fType='all',fWant=false,fPrice='all';
+let fArea='all',fType='all',fWant=false,fPrice='all',fOpen=false;
 const FTYPES=[['noodle','🍜 拉麵・麵',['拉麵','沾麵','烏龍麵']],['meat','🥩 燒肉・肉・鍋',['燒肉','牛腸鍋','豬排','水炊鍋','燒鳥']],['sea','🐟 海鮮・壽司',['海鮮','鰻魚','明太子']],['meal','🍛 定食・咖哩',['定食','燒咖哩']],['sweet','🍰 甜點・麵包',['甜點','麵包']],['snack','🍡 小吃・咖啡',['小吃','咖啡','商場']]];
 const fRate=()=>+S.get('rate',0.21)||0.21;
 const FPR=[['all','全部'],['p1','¥1,500 以下'],['p2','¥1,500–3,000'],['p3','¥3,000 以上']];
 const fPriceOf=f=>!f.pr?'':f.pr[1]<=1500?'p1':f.pr[0]>=3000?'p3':(f.pr[0]+f.pr[1])/2<=3000?'p2':'p3';
 const fTypeOf=f=>(FTYPES.find(t=>t[2].includes(f.t))||FTYPES[5])[0];
 function areaHits(a){const out=[];DAYS.forEach((_,i)=>{const ms=D(i).stops.filter(s=>a.kw.some(k=>stopText(s).includes(k)));if(ms.length)out.push({i,s:ms.find(s=>MEALRX.test(s.n))||ms[0]})});return out}
+
+/* ---------- 營業時間 ---------- */
+const FHOURS={"h_rakutenchi":{"w":["11:30-24:00","11:30-24:00","11:30-24:00","11:30-24:00","11:30-24:00","11:30-24:00","11:30-24:00"]},"h_daruma":{"w":["7:00-28:30","7:00-28:30","7:00-28:30","7:00-28:30","7:00-28:30","7:00-28:30","7:00-28:30"],"n":"本週為特別營業時間；平常 11:30–翌2:00"},"h_ichimujin":{"w":["11:00-23:30","11:00-23:30","11:00-23:30","11:00-23:30","11:00-23:30","11:00-23:30","11:00-23:30"]},"h_matsushita":{"w":["12:00-14:00,17:00-24:00","12:00-14:00,17:00-24:00","12:00-14:00,17:00-24:00","12:00-14:00,17:00-24:00","12:00-14:00,17:00-24:00","12:00-14:00,17:00-24:00","12:00-14:00,17:00-24:00"]},"h_hiro":{"w":["11:00-15:00,17:30-23:00","","17:30-23:00","17:30-23:00","17:30-23:00","11:00-15:00,17:30-23:00","11:00-15:00,17:30-23:00"],"n":"週二公休；11/23 國定假日中午也開"},"h_umeyama":{"w":["11:30-21:00","11:30-21:00","","11:30-21:00","11:30-21:00","11:30-21:00","11:30-21:00"]},"h_fishman":{"w":["11:00-14:30,16:30-23:00","11:00-14:30,16:30-23:00","11:00-14:30,16:30-23:00","11:00-14:30,16:30-23:00","11:00-14:30,16:30-23:00","11:00-14:30,16:30-23:00","11:00-14:30,16:30-23:00"]},"ikkousha":{"w":["11:00-23:30","11:00-23:30","11:00-23:30","11:00-23:30","11:00-23:30","11:00-23:30","11:00-21:00"]},"menkaido":{"w":["10:00-23:00","10:00-23:00","10:00-23:00","10:00-23:00","10:00-23:00","10:00-23:00","10:00-23:00"]},"maedaya":{"w":["11:00-14:30,17:00-24:00","11:00-14:30,17:00-24:00","11:00-14:30,17:00-24:00","11:00-14:30,17:00-24:00","11:00-14:30,17:00-24:00","11:00-14:30,17:00-24:00","11:00-14:30,17:00-24:00"]},"rakutenchi":{"w":["17:00-25:00","17:00-25:00","17:00-25:00","17:00-25:00","17:00-25:00","17:00-25:00","17:00-25:00"]},"ichiran":{"w":["0:00-24:00","0:00-24:00","0:00-24:00","0:00-24:00","0:00-24:00","0:00-24:00","0:00-24:00"]},"mentaiju":{"w":["7:00-22:30","7:00-22:30","7:00-22:30","7:00-22:30","7:00-22:30","7:00-22:30","7:00-22:30"]},"hyoutan":{"w":["11:30-15:00,17:00-20:30","11:30-15:00,17:00-20:30","11:30-15:00,17:00-20:30","11:30-15:00,17:00-20:30","11:30-15:00,17:00-20:30","11:30-15:00,17:00-21:00","11:30-15:00,17:00-20:30"]},"hirao":{"w":["10:30-20:00","10:30-20:00","10:30-20:00","10:30-20:00","10:30-20:00","10:30-20:00","10:30-20:00"]},"shinshin":{"w":["11:00-27:00","11:00-27:00","","11:00-27:00","11:00-27:00","11:00-27:00","11:00-27:00"],"n":"週三公休"},"yatai":{"w":["18:00-24:00","18:00-24:00","18:00-24:00","18:00-24:00","18:00-24:00","18:00-24:00","18:00-24:00"],"n":"各攤不同，大約傍晚 5～6 點開到午夜；下雨或颱風可能不擺"},"zenzai":{"w":["11:00-18:00","","","","11:00-18:00","11:00-18:00","11:00-18:00"],"n":"平常只開週五～週日；11/23 國定假日加開"},"kasanoya":{"w":["9:00-18:00","9:00-18:00","9:00-18:00","9:00-18:00","9:00-18:00","9:00-18:00","9:00-18:00"]},"sbdaz":{"w":["8:00-20:00","8:00-20:00","8:00-20:00","8:00-20:00","8:00-20:00","8:00-20:00","8:00-20:00"]},"yufumabushi":{"w":["10:30-19:00","10:30-19:00","10:30-19:00","10:30-19:00","10:30-19:00","10:30-19:00","10:30-19:00"]},"korokke":{"w":["9:00-17:30","9:00-17:30","9:00-17:30","9:00-17:30","9:00-17:30","9:00-18:00","9:00-18:00"]},"milch":{"w":["10:30-17:30","10:30-17:30","10:30-17:30","10:30-17:30","10:30-17:30","10:30-17:30","10:30-17:30"]},"izumi":{"w":["11:00-15:00","11:00-15:00","11:00-15:00","","11:00-15:00","11:00-15:00","11:00-15:00"],"n":"週四公休；賣完提早打烊"},"cucuchi":{"w":["10:00-17:30","10:00-17:00","10:00-17:00","10:00-17:00","10:00-17:00","10:00-17:30","10:00-17:30"]},"yufuburger":{"w":["11:00-17:00","11:00-17:00","11:00-17:00","11:00-17:00","11:00-17:00","11:00-17:00","11:00-17:00"]},"purindora":{"w":["10:00-17:00","10:00-17:00","10:00-17:00","10:00-17:00","10:00-17:00","10:00-17:00","10:00-17:00"]},"bspeak":{"w":["10:00-17:00","10:00-17:00","10:00-17:00","10:00-17:00","10:00-17:00","10:00-17:00","10:00-17:00"],"n":"蛋糕卷常常下午就賣完"},"telato":{"w":["10:30-16:30","10:30-16:30","10:30-16:30","10:30-16:30","10:30-16:30","10:30-16:30","10:30-16:30"]},"karato":{"w":["7:00-15:30","","7:00-15:30","7:00-15:30","8:00-15:30","8:00-15:30","7:00-15:30"],"n":"市場時間；壽司攤「活きいき馬關街」只在週五～週日與國定假日 10:00 左右開始"},"bearfruits":{"w":["11:00-20:30","11:00-20:30","11:00-20:30","11:00-20:30","11:00-21:30","11:00-21:30","11:00-20:30"]},"curryhonpo":{"w":["11:00-20:00","11:00-20:00","11:00-20:00","11:00-20:00","11:00-20:00","11:00-20:00","11:00-20:00"]},"mooon":{"w":["11:00-17:00","11:00-17:00","11:00-17:00","11:00-17:00","11:00-17:00","11:00-17:30","11:00-17:30"]},"sukesan":{"w":["0:00-24:00","0:00-24:00","0:00-24:00","0:00-24:00","0:00-24:00","0:00-24:00","0:00-24:00"]},"fullfull":{"w":["10:00-19:00","","10:00-19:00","10:00-19:00","10:00-19:00","10:00-19:00","10:00-19:00"],"n":"週二公休；開店前就排隊"},"sashisu":{"w":["11:00-23:00","11:00-23:00","11:00-23:00","11:00-23:00","11:00-23:00","11:00-23:00","11:00-23:00"]},"daco":{"w":["8:00-20:00","8:00-20:00","8:00-20:00","8:00-20:00","8:00-20:00","8:00-20:00","8:00-20:00"]},"daitoen":{"w":["11:30-23:00","11:30-23:00","11:30-23:00","11:30-14:30,16:00-23:00","11:30-23:00","11:30-23:00","11:30-23:00"]},"nikuichi":{"w":["16:00-24:00","16:00-24:00","16:00-24:00","16:00-24:00","16:00-24:00","16:00-24:00","16:00-24:00"]},"yamasho":{"w":["11:00-22:30","11:00-22:30","11:00-22:30","11:00-22:30","11:00-22:30","11:00-22:30","11:00-22:30"]},"yasohachi":{"w":["17:00-24:00","17:00-24:00","17:00-24:00","17:00-24:00","17:00-24:00","14:00-24:00","14:00-24:00"]},"jiichiro":{"w":["10:00-20:00","10:00-20:00","10:00-20:00","10:00-20:00","10:00-20:00","10:00-20:00","10:00-20:00"],"n":"依大丸福岡天神店營業時間（約 10:00–20:00）"},"nunu":{"w":null,"n":"冷凍炸雞，在機場、車站伴手禮店或販賣機買，依各店時間"},"taihou":{"w":["10:30-22:00","10:30-22:00","10:30-22:00","10:30-22:00","10:30-22:00","10:30-22:00","10:30-22:00"]},"kanetora":{"w":["9:40-22:00","9:40-22:00","9:40-22:00","9:40-22:00","9:40-22:00","9:40-22:00","9:40-22:00"]},"gennai":{"w":["10:30-15:00,17:00-21:00","10:30-15:00,17:00-21:00","10:30-15:00,17:00-21:00","10:30-15:00,17:00-21:00","10:30-15:00,17:00-21:00","10:30-15:00,17:00-21:00","10:30-15:00,17:00-21:00"]},"yumeippo":{"w":["11:00-14:00,18:00-22:00","11:00-14:00,18:00-22:00","11:00-14:00,18:00-22:00","11:00-14:00,18:00-22:00","11:00-14:00,18:00-22:00","11:00-14:00,18:00-22:00","11:00-14:00,18:00-22:00"]},"wakaba":{"w":["10:30-14:30,17:00-20:45","10:30-14:30,17:00-20:45","10:30-14:30,17:00-20:45","10:30-14:30,17:00-20:45","10:30-14:30,17:00-20:45","10:30-14:30,17:00-20:45","10:30-14:30,17:00-19:45"]},"mina":{"w":["10:00-20:00","10:00-20:00","10:00-20:00","10:00-20:00","10:00-20:00","10:00-20:00","10:00-20:00"]},"fukuyadaz":{"w":["9:30-17:30","9:30-17:30","9:30-17:30","9:30-17:30","9:30-17:30","9:30-17:30","9:30-17:30"]},"fukutarodaz":{"w":["9:00-17:00","9:00-17:00","9:00-17:00","9:00-17:00","9:00-17:00","9:00-17:00","9:00-17:00"]},"kaigen":{"w":["10:00-16:00","10:00-16:00","10:00-16:00","10:00-16:00","10:00-16:00","10:00-16:00","10:00-16:00"]},"danbo":{"w":["10:30-19:00","10:30-19:00","10:30-19:00","10:30-19:00","10:30-19:00","10:30-19:00","10:30-19:00"]},"kotorii":{"w":["11:00-17:00","11:00-17:00","11:00-17:00","11:00-17:00","11:00-17:00","11:00-17:00","11:00-17:00"]},"tenzan":{"w":["10:00-17:00","10:00-17:00","10:00-17:00","10:00-17:00","10:00-17:00","10:00-17:00","10:00-17:00"]}};
+const WKN=['一','二','三','四','五','六','日'];
+function jstNow(){const d=new Date(Date.now()+9*3600e3);return {dow:(d.getUTCDay()+6)%7,min:d.getUTCHours()*60+d.getUTCMinutes()}}
+const hm=t=>{const[a,b]=t.split(':');return +a*60+(+b||0)};
+const fmtM=m=>{m=((m%1440)+1440)%1440;return Math.floor(m/60)+':'+String(m%60).padStart(2,'0')};
+const segsOf=str=>!str?[]:str.split(',').map(x=>x.split('-').map(hm));
+function fStat(f){const H=FHOURS[f.id];if(!H||!H.w)return null;const{dow,min}=jstNow();
+ const today=segsOf(H.w[dow]),y=segsOf(H.w[(dow+6)%7]).filter(g=>g[1]>1440).map(g=>[0,g[1]-1440]);
+ if(H.w[dow]==='0:00-24:00')return{o:1,t:'24 小時營業',c:'ok'};
+ for(const g of y.concat(today))if(min>=g[0]&&min<g[1]){const left=g[1]-min;return{o:1,t:(left<=60?'快打烊・':'營業中・')+fmtM(g[1])+' 關',c:left<=60?'warn':'ok'}}
+ const nx=today.find(g=>g[0]>min);if(nx)return{o:0,t:'休息中・'+fmtM(nx[0])+' 開',c:'off'};
+ return{o:0,t:today.length?'今天已打烊':'今天公休',c:'off'}}
+function hBar(str,now){const S0=300,S1=1740,pct=m=>((Math.min(Math.max(m,S0),S1)-S0)/(S1-S0)*100).toFixed(2);
+ let h=segsOf(str).map(g=>{const a=g[0]<S0&&g[1]<=S0?g[0]+1440:g[0],b=g[0]<S0&&g[1]<=S0?g[1]+1440:g[1];if(b<=S0)return '';return `<i style="left:${pct(a)}%;width:${(pct(b)-pct(a)).toFixed(2)}%"></i>`}).join('');
+ if(now!=null){const m=now<S0?now+1440:now;h+=`<b style="left:${pct(m)}%"></b>`}return h}
+function fdHours(f){const H=FHOURS[f.id];if(!H)return '';
+ if(!H.w)return `<div class="fd-h"><div class="fd-hs"><span class="st off">🕒 營業時間</span><em>${esc(H.n)}</em></div></div>`;
+ const st=fStat(f),{dow,min}=jstNow();
+ const rows=H.w.map((w,i)=>`<div class="fd-hr${i===dow?' td':''}"><span>${WKN[i]}</span><div class="fd-bar${w?'':' cl'}">${w?hBar(w,i===dow?min:null):'<em>公休</em>'}</div><span class="tx">${w?w==='0:00-24:00'?'24 小時':w.split(',').map(x=>x.split('-').map(t=>fmtM(hm(t))).join('–')).join('、'):'公休'}</span></div>`).join('');
+ return `<details class="fd-h"><summary><span class="st ${st.c}">${st.o?'🟢':'⚪'} ${st.t}</span><span class="fd-bar mini">${hBar(H.w[dow],min)}</span><span class="fd-wk">一週 ▾</span></summary>
+  <div class="fd-ax"><span></span><div><i>6</i><i>12</i><i>18</i><i>24</i><i>翌3</i></div><span></span></div>${rows}${H.n?`<div class="fd-hn">📌 ${esc(H.n)}</div>`:''}<div class="fd-hn sub">以日本時間計算；資料來自 Google 地圖（2026/11/21），出發前再確認。</div></details>`}
 function drawFoods(){
  const want=S.get('foods',{}),ph=S.get('gphoto',{});
- const okP=f=>fPrice==='all'||fPriceOf(f)===fPrice,okA0=f=>fArea==='all'||f.a===fArea,okA=f=>okA0(f)&&okP(f),okT=f=>fType==='all'||fTypeOf(f)===fType,okW=f=>!fWant||want[f.id];
+ const okP=f=>fPrice==='all'||fPriceOf(f)===fPrice,okA0=f=>fArea==='all'||f.a===fArea,okA=f=>okA0(f)&&okP(f),okT=f=>fType==='all'||fTypeOf(f)===fType,okW=f=>(!fWant||want[f.id])&&(!fOpen||(fStat(f)||{}).o);
  const cP=k=>FOODS.filter(f=>okA0(f)&&okT(f)&&okW(f)&&(k==='all'||fPriceOf(f)===k)).length;
  const cA=k=>FOODS.filter(f=>(k==='all'||f.a===k)&&okP(f)&&okT(f)&&okW(f)).length,cT=k=>FOODS.filter(f=>okA(f)&&(k==='all'||fTypeOf(f)===k)&&okW(f)).length;
  $('#foodSeg').innerHTML=[['all','全部']].concat(FAREAS.map(a=>[a.k,a.n])).map(x=>{const n=cA(x[0]);return `<button class="${x[0]===fArea?'on':''}${n?'':' zero'}" data-a="${x[0]}">${x[1]} ${n}</button>`}).join('');
  $('#foodType').innerHTML=[['all','全部']].concat(FTYPES.map(t=>[t[0],t[1]])).map(x=>{const n=cT(x[0]);return `<button class="${x[0]===fType?'on':''}${n?'':' zero'}" data-t="${x[0]}">${x[1]} ${n}</button>`}).join('');
  $('#foodPrice').innerHTML=FPR.map(x=>{const n=cP(x[0]);return `<button class="${x[0]===fPrice?'on':''}${n?'':' zero'}" data-p="${x[0]}">${x[1]} ${n}</button>`}).join('');
- $('#foodWant').checked=fWant;$('#foodWant').parentNode.lastChild.textContent='只看已勾選的（'+FOODS.filter(f=>want[f.id]).length+'）';
+ $('#foodWant').checked=fWant;$('#foodOpen').checked=fOpen;$('#foodOpen').parentNode.lastChild.textContent='只看現在營業中（'+FOODS.filter(f=>(fStat(f)||{}).o).length+'）';$('#foodWant').parentNode.lastChild.textContent='只看已勾選的（'+FOODS.filter(f=>want[f.id]).length+'）';
  let h='';
  FAREAS.forEach(a=>{
   if(fArea!=='all'&&fArea!==a.k)return;
@@ -2171,6 +2215,7 @@ function drawFoods(){
    <div class="fd-tags"><span>${esc(f.t)}</span>${f.kid?'<span class="kid">👶 小孩友善</span>':''}${f.u?'<span class="mine">⭐ 你的清單</span>':''}${f.u&&!f.v?'<span class="nv">資料待確認</span>':''}</div>
    <div class="cafe-d">${esc(f.d)}</div>
    <div class="fd-p">💴 人均 ${f.pr?`<b>約 ¥${f.pr[0].toLocaleString()}–${f.pr[1].toLocaleString()}</b><span>≈ NT$${Math.round(f.pr[0]*fRate()).toLocaleString()}–${Math.round(f.pr[1]*fRate()).toLocaleString()}</span>${f.pn?`<em>${esc(f.pn)}</em>`:''}`:'<span>還不知道，查到再補</span>'}</div>
+   ${fdHours(f)}
    ${f.m?`<div class="fd-m"><span>🍽️ 推薦：</span>${f.m.map((d,j)=>`<button data-fdish="${f.id}:${j}">${esc(d.n)}${d.p?`<i>${d.p}</i>`:''}</button>`).join('')}</div>`:''}
    ${f.tip?`<div class="gift-k">💡 ${esc(f.tip)}</div>`:''}
    ${ph['f_'+f.id]?(ph['f_'+f.id].u?`<img class="gimg" src="${ph['f_'+f.id].u}" alt="" data-zoom="f_${f.id}">`:`<div class="gimg wait">照片下載中…</div>`):''}
@@ -2183,6 +2228,8 @@ $('#foodSeg').onclick=e=>{const b=e.target.closest('button');if(!b)return;fArea=
 $('#foodType').onclick=e=>{const b=e.target.closest('button');if(!b)return;fType=b.dataset.t;drawFoods()};
 $('#foodPrice').onclick=e=>{const b=e.target.closest('button');if(!b)return;fPrice=b.dataset.p;drawFoods()};
 $('#foodWant').onchange=e=>{fWant=e.target.checked;drawFoods()};
+$('#foodOpen').onchange=e=>{fOpen=e.target.checked;drawFoods()};
+setInterval(()=>{if(currentView()==='food')drawFoods()},60000);
 $('#foods').addEventListener('click',e=>{if(e.target.id==='fdReset'){fArea='all';fType='all';fWant=false;fPrice='all';drawFoods()}});
 $('#foods').addEventListener('click',e=>{
  const dd=e.target.closest('[data-fdish]');if(dd){const [id,j]=dd.dataset.fdish.split(':'),f=FOODS.find(x=>x.id===id),d=f.m[+j];big(d.jp+'をください','請給我「'+d.n+'」');$('#ovJp').style.whiteSpace='normal';return}
