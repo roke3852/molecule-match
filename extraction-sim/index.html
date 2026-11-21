@@ -208,6 +208,19 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
 .bcard[aria-pressed=true]{border-color:var(--gold);box-shadow:0 0 0 1px var(--gold) inset}
 .bcard b{display:flex;justify-content:space-between;gap:8px;font-size:15px}.bcard small{display:block;font-size:12px;color:var(--muted);margin-top:2px}
 .bcard .pr{font-family:var(--f-mono);font-weight:500;color:var(--gold);font-size:13px;white-space:nowrap}
+.gpick{grid-template-columns:52px 1fr 14px}
+.gspr{width:52px;height:52px;display:grid;place-items:center;background:#2a221c;border:1px solid var(--line);border-radius:10px;line-height:0}
+.gspr svg{image-rendering:pixelated;image-rendering:crisp-edges}
+.gp-ls{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;overflow-y:auto;padding:2px}
+.gcard{display:flex;flex-direction:column;align-items:flex-start;gap:4px;text-align:left;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:10px;color:var(--ink);font:inherit;cursor:pointer;min-width:0}
+.gcard[aria-pressed=true]{border-color:var(--gold);box-shadow:0 0 0 1px var(--gold) inset}
+.gcard .gspr{width:100%;height:76px}
+.gcard b{font-size:14px;line-height:1.3}.gcard small{font-size:12px;color:var(--muted);line-height:1.4}
+.fdots{font-size:11px;color:var(--muted);letter-spacing:.02em}.fdots i{font-style:normal;color:var(--gold)}
+.pxseg{display:grid!important;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px;border:0!important;background:transparent!important;padding:0!important;overflow:visible!important}
+.pxseg button{display:flex!important;flex-direction:column;align-items:center;gap:5px;border:1px solid var(--line)!important;border-radius:12px!important;background:var(--bg)!important;color:var(--ink)!important;padding:8px 4px!important;font-size:12px!important;line-height:1.25;text-align:center;min-height:0}
+.pxseg button[aria-pressed=true]{border-color:var(--gold)!important;box-shadow:0 0 0 1px var(--gold) inset;color:var(--gold)!important}
+.pxseg .gspr{width:56px;height:56px}
 .goldcup{margin-top:12px;border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:var(--bg)}
 .goldcup header{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
 .goldcup h3{margin:0;font-size:15px}
@@ -1132,10 +1145,10 @@ window.BGM=(()=>{
     <div class="param"><div class="row"><label for="dose" class="label">粉量</label><output id="doseOut" class="mono"></output></div><input id="dose" type="range" min="10" max="25" step="1" value="15"></div>
     <div class="param"><div class="row"><label for="ratio" class="label">粉水比</label><output id="ratioOut"></output></div><input id="ratio" type="range" min="12" max="20" step="0.5" value="16"></div>
     <div class="param"><div class="row"><label for="temp" class="label">水溫</label><output id="tempOut"></output></div><input id="temp" type="range" min="70" max="100" step="1" value="92"></div>
-    <div class="param wide" id="grinderParam"><div class="row"><label for="grinderSel" class="label">磨豆機</label><output id="grinderOut" class="label"></output></div><select id="grinderSel" class="beansel"></select><a class="guideln" id="glSim" hidden target="_self">🔧 這台怎麼拆洗？</a><span class="label" id="clogOut"></span></div>
+    <div class="param wide" id="grinderParam"><div class="row"><label for="grinderSel" class="label">磨豆機</label><output id="grinderOut" class="label"></output></div><button type="button" class="bpick gpick" id="grinderPick" aria-haspopup="dialog"></button><select id="grinderSel" class="beansel" hidden></select><a class="guideln" id="glSim" hidden target="_self">🔧 這台怎麼拆洗？</a><span class="label" id="clogOut"></span></div>
     <div class="param"><div class="row"><label for="grind" class="label">研磨粒徑</label><output id="grindOut"></output></div><input id="grind" type="range" min="300" max="1200" step="50" value="650"></div>
     <div class="param wide"><span class="label">沖煮方式</span><div class="seg" role="group" aria-label="沖煮方式"><button id="pPulse" aria-pressed="true">分段注水</button><button id="pCont" aria-pressed="false">一刀流</button><button id="pSwitch" aria-pressed="false">Switch／GINA</button><button id="pImm" aria-pressed="false">浸泡</button></div></div>
-    <div class="param wide" id="dripParam"><span class="label">濾杯</span><div class="seg wrapseg" role="group" aria-label="濾杯" id="segDrip"><button data-v="cone" aria-pressed="true">一般錐形</button><button data-v="v60" aria-pressed="false">V60</button><button data-v="orea" aria-pressed="false">OREA</button><button data-v="origami_c" aria-pressed="false">Origami 錐形紙</button><button data-v="origami_w" aria-pressed="false">Origami 波浪紙</button><button data-v="kalita" aria-pressed="false">Kalita Wave</button><button data-v="solo" aria-pressed="false">Solo</button></div><span class="label" id="dripDesc"></span></div>
+    <div class="param wide" id="dripParam"><span class="label">濾杯</span><div class="seg wrapseg pxseg" role="group" aria-label="濾杯" id="segDrip"><button data-v="cone" aria-pressed="true">一般錐形</button><button data-v="v60" aria-pressed="false">V60</button><button data-v="orea" aria-pressed="false">OREA</button><button data-v="origami_c" aria-pressed="false">Origami 錐形紙</button><button data-v="origami_w" aria-pressed="false">Origami 波浪紙</button><button data-v="kalita" aria-pressed="false">Kalita Wave</button><button data-v="solo" aria-pressed="false">Solo</button></div><span class="label" id="dripDesc"></span></div>
     <div class="param plan" id="planParam">
       <div class="row"><span class="label" id="planTitle">分段注水計畫</span><output id="planOut" class="label"></output></div>
       <div class="planrow">
@@ -1253,6 +1266,7 @@ window.BGM=(()=>{
 </div>
 </section>
 <div class="bp-ov" id="bpOv" hidden role="dialog" aria-modal="true" aria-label="選咖啡豆"><div class="bp-sh"><div class="bp-hd"><h3>選一支豆子</h3><button type="button" id="bpClose">關閉</button></div><div class="bp-rg" id="bpRg"></div><div class="bp-ls" id="bpLs"></div></div></div>
+<div class="bp-ov" id="gpOv" hidden role="dialog" aria-modal="true" aria-label="選磨豆機"><div class="bp-sh"><div class="bp-hd"><h3>選一台磨豆機</h3><button type="button" id="gpClose">關閉</button></div><p class="label" style="margin:0 4px 8px">細粉越多，萃得越快、越容易苦，後段也容易塞水。</p><div class="gp-ls" id="gpLs"></div></div></div>
 <section id="learnView" hidden>
 <div class="wrap t46">
   <div>
@@ -2167,7 +2181,7 @@ function labels(){
   if(typeof champSnap!=='undefined'&&champSnap)$('champState').textContent=champKey()===champSnap?'冠軍原始參數':'已從冠軍參數調整過';
   {const b=curBean();$('roastParam').hidden=!!b;$('beanSel').value=P.beanId||'';
    $('beanOut').textContent=b?ROAST_NAME(b.roast)+'・'+b.tags.join('、'):'用下方烘焙度滑桿';
-   if(typeof renderBeanBtn==='function'){renderBeanBtn();renderRSum();}}
+   if(typeof renderBeanBtn==='function'){renderBeanBtn();renderGrinderBtn();renderRSum();}}
   $('swCloseOut').innerHTML='<span class="mono">'+fmtT(P.swClose)+'</span>';
   $('swOpenOut').innerHTML=P.valveWins?'<span class="label">依冠軍配方分段開關</span>':'<span class="mono">'+fmtT(P.swOpen)+'</span>';
   $('steepOut').innerHTML='<span class="mono">'+fmtT(P.steep)+'</span>';
@@ -2261,6 +2275,19 @@ $('beanPick').onclick=openBeanSheet;$('bpClose').onclick=()=>{$('bpOv').hidden=t
 $('bpOv').addEventListener('click',e=>{if(e.target.id==='bpOv'){$('bpOv').hidden=true;return;}
   const rg=e.target.closest('[data-rg]');if(rg){bpRegion=rg.dataset.rg;renderBeanSheet();return;}
   const c=e.target.closest('[data-bean]');if(c){const sel=$('beanSel');sel.value=c.dataset.bean;sel.dispatchEvent(new Event('change'));$('bpOv').hidden=true;renderBeanBtn();}});
+// ---------- 像素風選磨豆機（跟咖啡店器材架同一套圖） ----------
+const gSpr=(id,sz)=>window.labSpr&&id?window.labSpr(id,0,sz):'<span style="font-size:'+Math.round(sz*.6)+'px;line-height:1">'+(id?'⚙️':'🎚️')+'</span>';
+const fDots=f=>{const n=Math.max(1,Math.min(5,Math.round((f-.04)/.065)));return '<span class="fdots">細粉 <i>'+'●'.repeat(n)+'</i>'+'○'.repeat(5-n)+'</span>';};
+function renderGrinderBtn(){const g=curGrinder(),el=$('grinderPick');if(!el)return;
+  el.innerHTML='<div class="gspr">'+gSpr(g&&g.id,40)+'</div><div><b><span>'+(g?hx(g.name):'不指定磨豆機')+'</span></b><small>'+(g?hx(g.type):'直接用下方滑桿設定粒徑')+'</small>'+(g?fDots(g.fines):'')+'</div><span class="label">▾</span>';}
+function openGrinderSheet(){const cur=P.grinder||'';
+  $('gpLs').innerHTML='<button class="gcard" data-gr="" aria-pressed="'+(!cur)+'"><div class="gspr">'+gSpr(null,56)+'</div><b>不指定</b><small>直接設定粒徑，不算細粉與塞水</small></button>'+
+    GRINDERS.map(g=>'<button class="gcard" data-gr="'+g.id+'" aria-pressed="'+(cur===g.id)+'"><div class="gspr">'+gSpr(g.id,64)+'</div><b>'+hx(g.name)+'</b><small>'+hx(g.type)+'</small>'+fDots(g.fines)+(g.um?'<small>每格約 '+g.um+' μm</small>':'')+'</button>').join('');
+  $('gpOv').hidden=false;try{SFX.p('select')}catch(e){}}
+function decorDrip(){if(!window.labSpr)return;$('segDrip').querySelectorAll('button').forEach(b=>{if(b.dataset.px)return;b.dataset.px=1;const n=b.textContent;b.innerHTML='<span class="gspr">'+window.labSpr(b.dataset.v,0,44)+'</span><span>'+hx(n)+'</span>';});}
+$('grinderPick').onclick=openGrinderSheet;addEventListener('labspr',()=>{renderGrinderBtn();decorDrip();});$('gpClose').onclick=()=>{$('gpOv').hidden=true;};
+$('gpOv').addEventListener('click',e=>{if(e.target.id==='gpOv'){$('gpOv').hidden=true;return;}
+  const c=e.target.closest('[data-gr]');if(c){const sel=$('grinderSel');sel.value=c.dataset.gr;sel.dispatchEvent(new Event('change'));$('gpOv').hidden=true;renderGrinderBtn();}});
 // ---------- 模擬器分頁 ----------
 let simTab='set';try{simTab=localStorage.getItem('brewLab.simTab')||'set';}catch(e){}
 function setSimTab(k,quiet){simTab=k;try{localStorage.setItem('brewLab.simTab',k);}catch(e){}
@@ -5550,6 +5577,7 @@ function sprG(rows,pal){let h='';rows.forEach((r,y)=>{let x=0;while(x<r.length){
 const isDark=h=>{if(!h||h[0]!=='#')return false;const v=parseInt(h.slice(1),16);return ((v>>16)*.3+((v>>8)&255)*.59+(v&255)*.11)<85;};
 function spr(id,i,size){const rows=GS[id];if(!rows)return '';const n=rows.length,sz=size||38,pal=palOf(id,i);return '<svg'+(isDark(pal.A)?' class="dk"':'')+' viewBox="0 '+(n-16)+' 16 16" width="'+sz+'" height="'+sz+'" shape-rendering="crispEdges" aria-hidden="true">'+sprG(rows,pal)+'</svg>';}
 const icoBrewer=(id,i)=>spr(id,i),icoGrinder=(g,i)=>spr(g.id,i),icoRoaster=id=>spr(id||S().roaster||'pan');
+window.labSpr=spr;setTimeout(()=>{try{window.dispatchEvent(new Event('labspr'))}catch(e){}},0);
 function daySkin(day,id){const L=SK[id];if(!L||L.length<2)return 0;if(hsh(day*53+idn(id)*5)<.45)return 0;const w=L.map((v,i)=>i?(v[4]>=1.3?.3:1):0),tot=w.reduce((a,b)=>a+b,0);let x=hsh(day*29+idn(id))*tot;for(let i=1;i<L.length;i++){x-=w[i];if(x<=0)return i;}return L.length-1;}
 /* 研磨刻度：依每台磨豆機的實際格數顯示 */
 function fmtGrind(Gd,um){if(!Gd.um)return grindName(um)+'（'+um+' μm・無段）';const n=Math.round((um-(Gd.z||0))/Gd.um);let t;
