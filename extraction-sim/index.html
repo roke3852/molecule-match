@@ -177,6 +177,37 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
 .sc-part small{grid-column:2 / -1;font-size:11px;color:var(--muted);margin-top:-5px}
 .sc-diag{margin:0;padding-left:18px;font-size:14px;display:flex;flex-direction:column;gap:4px}
 .sc-chart svg{width:100%;max-width:520px;display:block}
+.stabs{position:sticky;top:var(--modesH,0px);z-index:4;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;background:var(--bg);padding:8px 0;margin:0 0 4px;border-bottom:1px solid var(--line)}
+.stabs::-webkit-scrollbar{display:none}
+.stabs button{flex:1 0 auto;border:1px solid var(--line);background:transparent;color:var(--muted);border-radius:999px;padding:7px 14px;font:inherit;font-size:14px;font-weight:600;cursor:pointer;white-space:nowrap}
+.stabs button[aria-pressed=true]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.stab-off{display:none!important}
+.snext{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;margin-top:4px}
+.snext button{border:1px solid var(--accent);background:var(--accent);color:var(--accent-ink);border-radius:999px;padding:9px 18px;font:inherit;font-weight:700;cursor:pointer}
+.snext button.gh{background:transparent;color:var(--accent)}
+.rsum{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:13px;color:var(--muted);border:1px dashed var(--line);border-radius:10px;padding:8px 10px}
+.rsum b{color:var(--ink);font-weight:600}
+.rsum button{flex:none;border:1px solid var(--line);background:transparent;color:var(--accent);border-radius:999px;padding:5px 12px;font:inherit;font-size:13px;cursor:pointer}
+.bpick{display:grid;grid-template-columns:52px 1fr 14px;gap:12px;align-items:center;width:100%;text-align:left;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:8px 12px;color:var(--ink);font:inherit;cursor:pointer}
+.bpick b{display:flex;justify-content:space-between;gap:8px;font-size:16px}.bpick small{display:block;font-size:12px;color:var(--muted);margin-top:2px}
+.bpick .pr{font-family:var(--f-mono);font-weight:500;color:var(--gold);font-size:13px;white-space:nowrap}
+.bpick .jar span,.bpick .jar small,.bcard .jar span,.bcard .jar small{display:none}
+.btags{display:flex;gap:5px;flex-wrap:wrap;margin-top:5px}.btags i{font-style:normal;font-size:11px;border:1px solid var(--line);border-radius:999px;padding:1px 8px;color:var(--gold)}
+.btags i.gc{background:var(--gold);color:#1a1512;border-color:var(--gold);font-weight:700}
+.bp-ov{position:fixed;inset:0;z-index:72;background:rgba(10,8,6,.6);display:flex;align-items:flex-end;justify-content:center}
+.bp-ov[hidden]{display:none}
+.bp-sh{background:var(--panel);width:100%;max-width:640px;max-height:86vh;border-radius:18px 18px 0 0;display:flex;flex-direction:column;padding:12px 12px calc(12px + env(safe-area-inset-bottom,0px));animation:tPop .2s ease-out}
+.bp-hd{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:2px 4px 8px}.bp-hd h3{margin:0;font-size:17px}
+.bp-hd button{border:1px solid var(--line);background:transparent;color:var(--ink);border-radius:999px;padding:5px 14px;font:inherit;cursor:pointer}
+.bp-rg{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding:0 2px 8px}.bp-rg::-webkit-scrollbar{display:none}
+.bp-rg button{flex:none;border:1px solid var(--line);background:transparent;color:var(--muted);border-radius:999px;padding:4px 12px;font:inherit;font-size:13px;cursor:pointer}
+.bp-rg button[aria-pressed=true]{border-color:var(--gold);color:var(--gold)}
+.bp-ls{overflow-y:auto;display:flex;flex-direction:column;gap:8px;padding:2px}
+.bp-ls h4{margin:8px 4px 0;font-size:12px;color:var(--muted);font-weight:600;letter-spacing:.05em}
+.bcard{display:grid;grid-template-columns:52px 1fr;gap:12px;align-items:center;text-align:left;width:100%;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:10px 12px;color:var(--ink);font:inherit;cursor:pointer}
+.bcard[aria-pressed=true]{border-color:var(--gold);box-shadow:0 0 0 1px var(--gold) inset}
+.bcard b{display:flex;justify-content:space-between;gap:8px;font-size:15px}.bcard small{display:block;font-size:12px;color:var(--muted);margin-top:2px}
+.bcard .pr{font-family:var(--f-mono);font-weight:500;color:var(--gold);font-size:13px;white-space:nowrap}
 .goldcup{margin-top:12px;border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:var(--bg)}
 .goldcup header{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
 .goldcup h3{margin:0;font-size:15px}
@@ -1085,15 +1116,18 @@ window.BGM=(()=>{
 <div class="c-toast" id="cToast"></div>
 <section id="simView">
 <div class="wrap">
-  <div>
+  <div class="stabs" id="simTabs" role="tablist" aria-label="模擬器分頁" data-noswipe>
+    <button data-st="set" aria-pressed="true">① 備豆與參數</button><button data-st="brew" aria-pressed="false">② 沖煮・金杯</button><button data-st="score" aria-pressed="false">③ 評分與圖表</button><button data-st="runs" aria-pressed="false">④ 紀錄</button><button data-st="learn" aria-pressed="false">⑤ 原理</button>
+  </div>
+  <div data-stab="set">
     <div class="label">手沖實驗筆記 · 擴散萃取模型</div>
     <h1>注水與浸泡，分子怎麼走出咖啡粉</h1>
     <p class="lede">選一種沖法、調好參數後按播放，看各類分子怎麼離開咖啡粉。手沖持續用新鮮的水沖刷粉床，濃度差一直很大；浸泡把水和粉關在一起，液體越來越濃，萃取就越來越慢。想比較不同沖法，就各自按「保存結果」，在下方並排對照。</p>
   </div>
 
-  <section class="panel params" aria-label="沖煮參數">
+  <section class="panel params" aria-label="沖煮參數" data-stab="set">
     <div class="param champ" id="champParam"><div class="row"><label for="champSel" class="label">世界手沖冠軍的沖煮手法</label><output id="champState" class="label"></output></div><select id="champSel" class="beansel"></select><div class="champinfo" id="champInfo" hidden></div></div>
-    <div class="param wide" id="beanParam"><div class="row"><label for="beanSel" class="label">咖啡豆（依產區）</label><output id="beanOut" class="label"></output></div><select id="beanSel" class="beansel"></select></div>
+    <div class="param wide" id="beanParam"><div class="row"><label for="beanSel" class="label">咖啡豆（依產區）</label><output id="beanOut" class="label"></output></div><button type="button" class="bpick" id="beanPick" aria-haspopup="dialog"></button><select id="beanSel" class="beansel" hidden></select></div>
     <div class="param" id="roastParam"><div class="row"><label for="roast" class="label">烘焙度</label><output id="roastOut"></output></div><input id="roast" type="range" min="1" max="5" step="1" value="3"></div>
     <div class="param"><div class="row"><label for="dose" class="label">粉量</label><output id="doseOut" class="mono"></output></div><input id="dose" type="range" min="10" max="25" step="1" value="15"></div>
     <div class="param"><div class="row"><label for="ratio" class="label">粉水比</label><output id="ratioOut"></output></div><input id="ratio" type="range" min="12" max="20" step="0.5" value="16"></div>
@@ -1120,9 +1154,11 @@ window.BGM=(()=>{
     <div class="param" id="bypassParam"><div class="row"><label for="bypassMl" class="label">補水（bypass）</label><output id="bypassOut"></output></div><input id="bypassMl" type="range" min="0" max="150" step="5" value="0"></div>
     <div class="param" id="stirIMParam" hidden><span class="label">攪拌</span><div class="seg" role="group" aria-label="浸泡攪拌" id="segIM"><button data-v="none" aria-pressed="true">不攪拌</button><button data-v="once" aria-pressed="false">開頭一次</button><button data-v="min" aria-pressed="false">每分鐘</button></div></div>
     <div class="param" id="steepParam" hidden><div class="row"><label for="steep" class="label">浸泡時間</label><output id="steepOut"></output></div><input id="steep" type="range" min="60" max="900" step="15" value="240"></div>
+    <div class="param wide snext"><button type="button" data-go="brew">開始沖煮 ›</button></div>
   </section>
 
-  <section class="panel" style="display:flex;flex-direction:column;gap:14px">
+  <section class="panel" style="display:flex;flex-direction:column;gap:14px" data-stab="brew">
+    <div class="rsum"><span id="rSum">—</span><button type="button" data-go="set">✎ 調整</button></div>
     <div class="stage">
       <div class="brewer" id="brewPO">
         <header><h2 id="poTitle">注水滲濾</h2><div class="r"><span class="label" id="poPhase">—</span><button class="stirbtn" id="stirPO">攪拌一下</button></div></header>
@@ -1159,11 +1195,12 @@ window.BGM=(()=>{
       <header><h3>🏆 金杯目標：把這杯沖進金杯</h3><span class="label" id="gcCount"></span></header>
       <svg id="gcChart" viewBox="0 0 340 250" role="img" aria-label="金杯圖：橫軸萃取率、縱軸濃度"></svg>
       <div class="gc-msg" id="gcMsg">—</div>
+      <div class="snext" style="margin-top:8px"><button type="button" class="gh" data-go="score">看評分 ›</button></div>
       <p class="label" style="margin:6px 0 0;line-height:1.5">金色方框是 SCA 金杯：萃取率 18–22%、濃度 1.15–1.35%。播放時紅點會沿著線走，空心圈是這組參數最後會落在哪；灰色小點是你保存過的杯子。評分的理想區間會依焙度微調，跟金杯不完全一樣。</p>
     </div>
   </section>
 
-  <section class="panel scorep" id="scorePanel" aria-label="沖煮評分">
+  <section class="panel scorep" id="scorePanel" aria-label="沖煮評分" data-stab="score">
     <div class="sc-head"><h2>這杯的評分</h2><span class="label">以沖完的整杯計算</span></div>
     <div class="param"><span class="label">評分風格</span><div class="seg" id="segStyle" role="group" aria-label="評分風格"><button data-v="auto">自動</button><button data-v="sca">均衡</button><button data-v="light">清爽型</button><button data-v="rich">濃郁型</button></div><span class="label" id="scStyleNow"></span></div>
     <div class="sc-top"><div class="sc-big"><b id="scTotal">—</b><span id="scGrade" class="label"></span></div><div class="sc-parts" id="scParts"></div></div>
@@ -1171,7 +1208,7 @@ window.BGM=(()=>{
     <div class="sc-chart"><div class="key"><span>沖煮控制圖：橫軸萃取率、縱軸濃度。方框是目前評分風格的理想區間，灰點是歷屆冠軍配方在這個模型裡的位置。</span></div><svg id="scChart" viewBox="0 0 340 230" role="img" aria-label="沖煮控制圖"></svg></div>
   </section>
 
-  <section class="charts">
+  <section class="charts" data-stab="score">
     <div class="panel chartbox">
       <h2>各類分子被帶出的比例</h2>
       <div class="key"><span>▼ 攪拌時間點</span><span>縱軸：該分子可溶總量中已離開粉粒的百分比</span></div>
@@ -1189,7 +1226,7 @@ window.BGM=(()=>{
     </div>
   </section>
 
-  <section class="panel saved" aria-label="已保存的結果">
+  <section class="panel saved" aria-label="已保存的結果" data-stab="runs">
     <div class="saved-head"><h2>保存的結果</h2><div><span class="label" id="saveHint"></span> <button class="ghost" id="clearAll" hidden>清除全部</button></div></div>
     <div class="keyrow" aria-label="組成條顏色說明"><span><i style="background:var(--acid)"></i>有機酸</span><span><i style="background:var(--caf)"></i>咖啡因</span><span><i style="background:var(--sugar)"></i>糖與甜感</span><span><i style="background:var(--cga)"></i>綠原酸</span><span><i style="background:var(--bitter)"></i>苦味大分子</span><span><i style="background:var(--fruity);border-radius:50%;width:10px;height:10px"></i>花果香</span><span><i style="background:var(--roasty);border-radius:50%;width:10px;height:10px"></i>烘焙香</span><small>色條為杯中各成分的重量占比，數字單位為 %；香氣另列杯中含量（mg）、保留比例，以及揮發到空氣中的比例</small></div>
     <div class="run-cols" id="runCols" hidden><span>沖法與參數</span><span>結果</span><span></span></div>
@@ -1197,7 +1234,7 @@ window.BGM=(()=>{
     <p class="empty" id="runsEmpty">還沒有保存的結果。調好參數、播放到想比較的時間點，按「保存結果」，這裡會多一列，記下當下的沖法、濃度、萃取率和杯中組成。換一種沖法再保存一次，就能上下對照。</p>
   </section>
 
-  <section class="panel notes">
+  <section class="panel notes" data-stab="learn">
     <div><h3>為什麼酸先出來</h3><p>有機酸和綠原酸是最先出來的味道成分：浸泡 1 分鐘時，濃度已經有 5 分鐘時的八成五到九成。香氣成分速度居中，類黑素這類苦味大分子最慢。研磨太細，連苦味也一起帶出；太粗則味道還出得來，香氣卻萃不到。</p></div>
     <div><h3>泡太久、水太燙，酸反而變少</h3><p>浸泡到 14 分鐘，綠原酸會水解成奎尼酸和咖啡酸，綠原酸下降、奎尼酸上升，口感從澀轉向沉悶的酸苦。水溫到 100°C 時，乳酸、醋酸、檸檬酸都比 94°C 少，醋酸會揮發，其他酸也會分解。所以 94°C 左右是酸最多的位置，不是越熱越好。</p></div>
     <div><h3>注水靠「換水」維持速度</h3><p>濾杯底下一直有液體流走，粉粒周圍的水不斷被稀釋，濃度差維持在高點，所以短時間就能萃得深。研磨越細流速越慢，接觸時間被拉長，苦味大分子也會跟著增加。</p></div>
@@ -1212,9 +1249,10 @@ window.BGM=(()=>{
     <div><h3>浸泡會自己踩煞車</h3><p>水量固定，液體越濃，粉粒裡外的濃度差越小，萃取逐漸趨近平衡。好處是寬容、不易過萃；代價是同樣時間下，慢分子的比例和手沖不同，口感通常更圓、更厚。</p></div>
   </section>
 
-  <p class="fine">模型說明：有機酸與綠原酸的速度、溫度與研磨反應依《咖啡香味的科學》表 31–33（出處 JCO Seneory）校正：以浸泡、94°C、一般粒度（設為 650 μm，粗 1000 μm、細 400 μm）、5 分鐘為基準，擬合 1 / 14 分鐘、70 / 100°C、粗 / 細研磨的相對濃度，誤差多在 3% 內。書中數值未標單位，此處當作 mg/L 對照。表 31 印刷時欄位錯開一列，已依表 32、33 的 94°C／5 分鐘欄位對齊後使用。其他成分無實測，依書中圖 63 的快慢順序（味道成分快、香氣居中、高分子苦味慢）設定。每類分子以一階擴散描述，速率 ∝ 擴散常數 × (粉粒內濃度 − 周圍液體濃度)。擴散常數隨溫度呈指數變化（大分子對溫度更敏感），並隨粒徑縮小而增加；粉粒吸水約為粉重 2 倍。濾杯流速依液面高度與粒徑估算。浸泡時把液體分成「粉粒周圍的一層」與「其餘液體」，兩者靠自然對流緩慢交換；攪拌會暫時加快交換、讓粉粒外的邊界層變薄，並讓未濕透的粉團完整吸水，效果在十幾秒內衰減。香氣分子以一階揮發描述：散失速率 ∝ 揮發常數 × 液體中香氣量，隨水溫升高而增加，注水時與攪拌後暫時加快，杯中因溫度較低只算 35%。濾杯以三個係數描述：流出速度倍率（V60 1.35×、OREA 1.2×）、粉床被水均勻穿過的比例（錐形 95%、V60 90%、OREA 100%），以及沿濾紙壁繞過粉床直接流進杯中的旁流比例（錐形 4%、V60 7%、OREA 1.5%）。烘焙度依淺、中、深三個參考點內插：調整各類分子的可溶量（酸與綠原酸隨烘焙遞減、苦味大分子遞增、糖類在中焙最高），並讓深焙的整體萃取速度較快。各類分子的可溶量與速率為教學用的近似值，用來比較趨勢，不是精確的化學測量。手沖另外計入：手沖壺降溫（每秒 0.025°C）與粉床散熱、悶蒸排氣期間的低效接觸與水流失、隨水位增加的濾杯側壁繞流。喝起來的甜感依糖的濃度、醇厚度依濃度與類黑素，酸感會被甜與醇厚度緩衝。流速、注水攪動與手沖萃取係數以 2016–2025 世界手沖冠軍配方校正：讓各配方的滴濾時間接近比賽實際時間、萃取率落在約 19% 附近。評分的理想區間參考 SCA 沖煮控制圖（EY 18–22%），濃度上限放寬到 1.55% 以涵蓋冠軍杯；風味平衡的界線也以冠軍杯在模型中的表現為準。</p>
+  <p class="fine" data-stab="learn">模型說明：有機酸與綠原酸的速度、溫度與研磨反應依《咖啡香味的科學》表 31–33（出處 JCO Seneory）校正：以浸泡、94°C、一般粒度（設為 650 μm，粗 1000 μm、細 400 μm）、5 分鐘為基準，擬合 1 / 14 分鐘、70 / 100°C、粗 / 細研磨的相對濃度，誤差多在 3% 內。書中數值未標單位，此處當作 mg/L 對照。表 31 印刷時欄位錯開一列，已依表 32、33 的 94°C／5 分鐘欄位對齊後使用。其他成分無實測，依書中圖 63 的快慢順序（味道成分快、香氣居中、高分子苦味慢）設定。每類分子以一階擴散描述，速率 ∝ 擴散常數 × (粉粒內濃度 − 周圍液體濃度)。擴散常數隨溫度呈指數變化（大分子對溫度更敏感），並隨粒徑縮小而增加；粉粒吸水約為粉重 2 倍。濾杯流速依液面高度與粒徑估算。浸泡時把液體分成「粉粒周圍的一層」與「其餘液體」，兩者靠自然對流緩慢交換；攪拌會暫時加快交換、讓粉粒外的邊界層變薄，並讓未濕透的粉團完整吸水，效果在十幾秒內衰減。香氣分子以一階揮發描述：散失速率 ∝ 揮發常數 × 液體中香氣量，隨水溫升高而增加，注水時與攪拌後暫時加快，杯中因溫度較低只算 35%。濾杯以三個係數描述：流出速度倍率（V60 1.35×、OREA 1.2×）、粉床被水均勻穿過的比例（錐形 95%、V60 90%、OREA 100%），以及沿濾紙壁繞過粉床直接流進杯中的旁流比例（錐形 4%、V60 7%、OREA 1.5%）。烘焙度依淺、中、深三個參考點內插：調整各類分子的可溶量（酸與綠原酸隨烘焙遞減、苦味大分子遞增、糖類在中焙最高），並讓深焙的整體萃取速度較快。各類分子的可溶量與速率為教學用的近似值，用來比較趨勢，不是精確的化學測量。手沖另外計入：手沖壺降溫（每秒 0.025°C）與粉床散熱、悶蒸排氣期間的低效接觸與水流失、隨水位增加的濾杯側壁繞流。喝起來的甜感依糖的濃度、醇厚度依濃度與類黑素，酸感會被甜與醇厚度緩衝。流速、注水攪動與手沖萃取係數以 2016–2025 世界手沖冠軍配方校正：讓各配方的滴濾時間接近比賽實際時間、萃取率落在約 19% 附近。評分的理想區間參考 SCA 沖煮控制圖（EY 18–22%），濃度上限放寬到 1.55% 以涵蓋冠軍杯；風味平衡的界線也以冠軍杯在模型中的表現為準。</p>
 </div>
 </section>
+<div class="bp-ov" id="bpOv" hidden role="dialog" aria-modal="true" aria-label="選咖啡豆"><div class="bp-sh"><div class="bp-hd"><h3>選一支豆子</h3><button type="button" id="bpClose">關閉</button></div><div class="bp-rg" id="bpRg"></div><div class="bp-ls" id="bpLs"></div></div></div>
 <section id="learnView" hidden>
 <div class="wrap t46">
   <div>
@@ -2128,7 +2166,8 @@ function labels(){
   $('roastOut').innerHTML='<span class="label">'+['極淺焙','淺焙','中焙','中深焙','深焙'][P.roast-1]+'</span>';
   if(typeof champSnap!=='undefined'&&champSnap)$('champState').textContent=champKey()===champSnap?'冠軍原始參數':'已從冠軍參數調整過';
   {const b=curBean();$('roastParam').hidden=!!b;$('beanSel').value=P.beanId||'';
-   $('beanOut').textContent=b?ROAST_NAME(b.roast)+'・'+b.tags.join('、'):'用下方烘焙度滑桿';}
+   $('beanOut').textContent=b?ROAST_NAME(b.roast)+'・'+b.tags.join('、'):'用下方烘焙度滑桿';
+   if(typeof renderBeanBtn==='function'){renderBeanBtn();renderRSum();}}
   $('swCloseOut').innerHTML='<span class="mono">'+fmtT(P.swClose)+'</span>';
   $('swOpenOut').innerHTML=P.valveWins?'<span class="label">依冠軍配方分段開關</span>':'<span class="mono">'+fmtT(P.swOpen)+'</span>';
   $('steepOut').innerHTML='<span class="mono">'+fmtT(P.steep)+'</span>';
@@ -2202,6 +2241,38 @@ function syncGrindSlider(){const gr=curGrinder(),el=$('grind');
     h+='<option value="'+b.id+'">'+b.name+'｜'+b.sub+'｜'+ROAST_NAME(b.roast)+'｜NT$'+b.price+'/100g</option>';});
   sel.innerHTML=h+'</optgroup>';
   sel.addEventListener('change',e=>{P.beanId=e.target.value||null;run();});})();
+// ---------- 圖形化選豆（參考咖啡店的儲豆櫃） ----------
+const RCOL=r=>['#c99a5e','#b07a42','#8a5a2e','#6a4022','#4a2a16','#2e1a0e'][Math.max(0,Math.min(5,Math.round(r)))];
+const hx=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const bJar=b=>'<div class="jar'+(b&&b.lab?' sg':'')+'"><div class="glass"><i style="height:'+(b?70:18)+'%;background:'+(b?RCOL(b.roast):'repeating-linear-gradient(90deg,#c99a5e 0 6px,#6a4022 6px 12px)')+'"></i>'+(b&&b.lab?'<em>金</em>':'')+'</div></div>';
+const bTags=b=>'<div class="btags">'+(b.lab?'<i class="gc">金杯挑戰</i>':'')+b.tags.map(t=>'<i>'+hx(t)+'</i>').join('')+'</div>';
+function renderBeanBtn(){const b=curBean(),el=$('beanPick');if(!el)return;
+  el.innerHTML=bJar(b)+'<div><b><span>'+(b?hx(b.name):'不指定豆子')+'</span>'+(b?'<span class="pr">NT$'+b.price+'</span>':'')+'</b><small>'+(b?hx(b.sub)+'・'+ROAST_NAME(b.roast):'自己用烘焙度滑桿決定')+'</small>'+(b?bTags(b):'')+'</div><span class="label">▾</span>';}
+let bpRegion='';
+function renderBeanSheet(){const list=BEANS.filter(b=>!b.hidden),rgs=[...new Set(list.map(b=>b.region))].sort((a,b)=>(a==='金杯挑戰')-(b==='金杯挑戰'));
+  $('bpRg').innerHTML=('<button data-rg="" aria-pressed="'+(!bpRegion)+'">全部</button>'+rgs.map(r=>'<button data-rg="'+hx(r)+'" aria-pressed="'+(bpRegion===r)+'">'+(r==='金杯挑戰'?'🏆 ':'')+hx(r)+'</button>').join(''));
+  let h='';if(!bpRegion)h+='<button class="bcard" data-bean="" aria-pressed="'+(!P.beanId)+'">'+bJar(null)+'<div><b><span>不指定豆子</span></b><small>自己用烘焙度滑桿決定焙度</small></div></button>';
+  (bpRegion?[bpRegion]:rgs).forEach(r=>{h+='<h4>'+(r==='金杯挑戰'?'🏆 ':'')+hx(r)+(r==='金杯挑戰'?'：照預設參數都進不了金杯，每支要不同沖法':'')+'</h4>';
+    list.filter(b=>b.region===r).forEach(b=>{h+='<button class="bcard" data-bean="'+b.id+'" aria-pressed="'+(P.beanId===b.id)+'">'+bJar(b)+'<div><b><span>'+hx(b.name)+'</span><span class="pr">NT$'+b.price+'<small style="display:inline">/100g</small></span></b><small>'+hx(b.sub)+'・'+ROAST_NAME(b.roast)+'</small>'+bTags(b)+'</div></button>';});});
+  $('bpLs').innerHTML=h;}
+function openBeanSheet(){renderBeanSheet();$('bpOv').hidden=false;try{SFX.p('select')}catch(e){}
+  const on=$('bpLs').querySelector('[aria-pressed=true]');if(on)on.scrollIntoView({block:'center'});}
+$('beanPick').onclick=openBeanSheet;$('bpClose').onclick=()=>{$('bpOv').hidden=true;};
+$('bpOv').addEventListener('click',e=>{if(e.target.id==='bpOv'){$('bpOv').hidden=true;return;}
+  const rg=e.target.closest('[data-rg]');if(rg){bpRegion=rg.dataset.rg;renderBeanSheet();return;}
+  const c=e.target.closest('[data-bean]');if(c){const sel=$('beanSel');sel.value=c.dataset.bean;sel.dispatchEvent(new Event('change'));$('bpOv').hidden=true;renderBeanBtn();}});
+// ---------- 模擬器分頁 ----------
+let simTab='set';try{simTab=localStorage.getItem('brewLab.simTab')||'set';}catch(e){}
+function setSimTab(k,quiet){simTab=k;try{localStorage.setItem('brewLab.simTab',k);}catch(e){}
+  document.querySelectorAll('#simTabs [data-st]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.st===k));
+  document.querySelectorAll('#simView [data-stab]').forEach(el=>el.classList.toggle('stab-off',el.dataset.stab!==k));
+  const m=document.querySelector('.modes');document.documentElement.style.setProperty('--modesH',(m?m.offsetHeight:0)+'px');
+  if(!quiet){const tb=$('simTabs');const y=tb.getBoundingClientRect().top+scrollY-(m?m.offsetHeight:0);if(scrollY>y)scrollTo({top:y});}
+  dispatchEvent(new Event('resize'));if(typeof draw==='function'&&simPO)draw();}
+$('simTabs').addEventListener('click',e=>{const b=e.target.closest('[data-st]');if(b){try{SFX.p('page')}catch(x){}setSimTab(b.dataset.st);}});
+$('simView').addEventListener('click',e=>{const b=e.target.closest('[data-go]');if(b){setSimTab(b.dataset.go);if(b.dataset.go==='brew'&&!playing&&t<=0.01)setTimeout(()=>$('play').click(),250);}});
+window.simReveal=el=>{const w=el&&el.closest&&el.closest('#simView [data-stab]');if(w&&w.classList.contains('stab-off'))setSimTab(w.dataset.stab,true);};
+function renderRSum(){const b=curBean(),im=isIM();$('rSum').innerHTML='<b>'+(b?hx(b.name):ROAST_NAME(P.roast)+'（自選）')+'</b>・'+P.dose+' g・1:'+(+(+P.ratio).toFixed(1))+'・'+(P.planTemp&&!im?P.planTemp[0]+'→'+P.planTemp[P.planTemp.length-1]:P.temp)+'°C・'+P.grind+' μm・'+METHODN[P.pattern];}
 let scoreStyle='auto';try{scoreStyle=localStorage.getItem('brewLab.scoreStyle')||'auto';}catch(e){}
 function styleFor(roast){return scoreStyle!=='auto'?scoreStyle:roast<=2.5?'light':roast>=4?'rich':'sca';}
 let CHAMP_PTS=null;
@@ -2629,6 +2700,7 @@ function applyParams(o){
 try{const o=JSON.parse(localStorage.getItem(PKEY)||'null');if(o&&typeof o==='object')applyParams(o);}catch(e){}
 run();
 t=Math.min(75,tMax); $('scrub').value=t; draw();
+setSimTab(simTab,true);addEventListener('resize',()=>{const m=document.querySelector('.modes');document.documentElement.style.setProperty('--modesH',(m?m.offsetHeight:0)+'px');});
 })();
 </script>
 <script>
@@ -6949,7 +7021,7 @@ function showStep(){if(!TR||!box)return;const T=TOURS[TR.k],s=T.steps[TR.i],W=WH
   const VW={sim:'simView',learn:'learnView',micro:'microView',bed:'bedView',nose:'noseView',water:'waterView'};const view=s.v?VW[s.v]:T.view;
   let switched=false;if($(view).hidden&&window.appShow){TR.sw=1;window.appShow(Object.keys(VW).find(k=>VW[k]===view),true);TR.sw=0;switched=true;}
   if(s.go){if(switched)setTimeout(()=>{try{s.go();}catch(e){}},400);else try{s.go();}catch(e){}}
-  const el=findEl(s.el,view);TR.el=el;
+  const el=findEl(s.el,view);TR.el=el;if(el&&window.simReveal)window.simReveal(el);
   if(el){const r=el.getBoundingClientRect(),top=130,bot=innerHeight-(box.offsetHeight||190)-14,room=bot-top;
     let y=scrollY+r.top-top;if(r.height<room)y-= (room-r.height)/2;scrollTo({top:Math.max(0,y),behavior:'smooth'});ring.hidden=false;}else ring.hidden=true;
   const txt=typeof s.t==='function'?s.t():s.t;const tx=box.querySelector('.tx');tx._full=txt;tx.textContent='';let n=0;clearInterval(typeT);clearInterval(talkT);
