@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="robots" content="noindex,nofollow">
+<title>咖啡記憶卡</title>
+<style>
+:root{--bg:#f6f1ea;--card:#fffdf9;--ink:#2b2119;--mute:#7a6a5c;--line:#e6dccf;--acc:#8a4b2a;--acc2:#c8793f;--ok:#3f7d4e;--okbg:#e6f1e7;--bad:#b0402f;--badbg:#f8e3df;--chip:#efe6da}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;touch-action:manipulation}
+button{font:inherit;color:inherit;touch-action:manipulation;cursor:pointer}
+.wrap{max-width:560px;margin:0 auto;padding:18px 16px 40px}
+header{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:14px}
+h1{font-size:22px;margin:0;letter-spacing:.5px}
+h1 small{display:block;font-size:12px;color:var(--mute);font-weight:400;letter-spacing:0;margin-top:2px}
+.icon{border:1px solid var(--line);background:var(--card);border-radius:10px;padding:7px 10px;font-size:13px}
+.hero{background:linear-gradient(135deg,#5a2f1b,#8a4b2a 60%,#c8793f);color:#fff7ee;border-radius:18px;padding:18px;margin-bottom:16px}
+.hero .n{font-size:40px;font-weight:700;line-height:1}
+.hero .row{display:flex;gap:18px;align-items:flex-end;margin:6px 0 14px}
+.hero .lab{font-size:12px;opacity:.85}
+.hero .go{width:100%;border:0;border-radius:12px;padding:14px;font-size:17px;font-weight:700;background:#fff7ee;color:#5a2f1b}
+.hero .go:disabled{opacity:.55}
+.hero .sub{font-size:12px;opacity:.85;margin-top:8px;text-align:center}
+h2{font-size:15px;margin:20px 0 8px;color:var(--mute);font-weight:600}
+.deck{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-bottom:8px}
+.deck .em{font-size:22px;width:30px;text-align:center}
+.deck .info{flex:1;min-width:0}
+.deck .t{font-weight:600;font-size:15px}
+.deck .s{font-size:12px;color:var(--mute);margin-top:2px}
+.bar{height:6px;background:var(--chip);border-radius:3px;margin-top:6px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--acc2);border-radius:3px}
+.sw{width:46px;height:28px;border-radius:14px;background:#d9cdbf;border:0;position:relative;flex:none;transition:.2s}
+.sw::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;transition:.2s;box-shadow:0 1px 2px #0003}
+.sw[aria-pressed=true]{background:var(--acc)}
+.sw[aria-pressed=true]::after{left:21px}
+.set{display:flex;align-items:center;justify-content:space-between;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-bottom:8px;font-size:14px}
+.step{display:flex;align-items:center;gap:10px}
+.step button{width:32px;height:32px;border-radius:8px;border:1px solid var(--line);background:var(--chip)}
+.top{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.top .x{border:0;background:none;font-size:22px;padding:4px 8px;color:var(--mute)}
+.prog{flex:1;height:8px;background:var(--chip);border-radius:4px;overflow:hidden}
+.prog i{display:block;height:100%;background:var(--acc2);transition:width .3s}
+.cnt{font-size:13px;color:var(--mute);min-width:44px;text-align:right}
+.q{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px;margin-bottom:12px}
+.tag{display:inline-block;font-size:11px;padding:3px 8px;border-radius:999px;background:var(--chip);color:var(--acc);font-weight:600;margin-bottom:10px}
+.tag.new{background:#fde9c8;color:#8a5a0a}
+.ask{font-size:13px;color:var(--mute);margin-bottom:6px}
+.ask.solo{font-size:18px;color:var(--ink);font-weight:600;line-height:1.5;margin:0}
+.prompt{font-size:17px;line-height:1.6}
+.prompt .flv{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+.prompt .flv span{background:#f3e7d8;border-radius:8px;padding:4px 9px;font-size:15px}
+.prompt dl{margin:8px 0 0;display:grid;grid-template-columns:auto 1fr;gap:4px 10px;font-size:14px}
+.prompt dt{color:var(--mute)}.prompt dd{margin:0}
+.opts{display:grid;gap:8px}
+.opt{text-align:left;background:var(--card);border:1.5px solid var(--line);border-radius:14px;padding:13px 14px;font-size:15px;line-height:1.45}
+.opt.ok{border-color:var(--ok);background:var(--okbg)}
+.opt.bad{border-color:var(--bad);background:var(--badbg)}
+.opt:disabled{opacity:1}
+.fb{margin-top:12px;border-radius:14px;padding:14px;font-size:14px;line-height:1.6}
+.fb.ok{background:var(--okbg)}.fb.bad{background:var(--badbg)}
+.fb b{display:block;font-size:15px;margin-bottom:4px}
+.next{width:100%;margin-top:12px;border:0;border-radius:12px;padding:14px;font-size:16px;font-weight:700;background:var(--acc);color:#fff}
+.done{text-align:center;padding:30px 10px}
+.done .big{font-size:56px}
+.done .sc{font-size:28px;font-weight:700;margin:8px 0}
+.done p{color:var(--mute);font-size:14px}
+.miss{text-align:left;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-top:16px;font-size:14px}
+.miss li{margin:4px 0}
+.sheet{position:fixed;inset:0;background:#0006;display:none;align-items:flex-end;justify-content:center;z-index:9}
+.sheet.on{display:flex}
+.sheet .in{background:var(--bg);width:100%;max-width:560px;border-radius:18px 18px 0 0;padding:18px 16px 28px}
+.sheet textarea{width:100%;height:90px;border:1px solid var(--line);border-radius:10px;padding:8px;font-size:12px;font-family:monospace}
+.sheet .btns{display:flex;gap:8px;margin-top:10px}
+.sheet .btns button{flex:1;border:1px solid var(--line);background:var(--card);border-radius:10px;padding:11px}
+.sheet .btns .pri{background:var(--acc);color:#fff;border:0}
+#toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);background:#2b2119;color:#fff;padding:10px 16px;border-radius:10px;font-size:14px;opacity:0;transition:.25s;pointer-events:none;z-index:10}
+#toast.on{opacity:1}
+.sig{text-align:center;color:var(--mute);font-size:12px;margin-top:28px;letter-spacing:1px}
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+<div class="sheet" id="sheet"><div class="in">
+ <h3 style="margin:0 0 6px">備份進度</h3>
+ <p style="font-size:13px;color:var(--mute);margin:0 0 10px">進度只存在這台裝置。複製備份碼存起來，換手機時貼回來就能接著背。</p>
+ <textarea id="code"></textarea>
+ <div class="btns"><button id="cp">複製備份碼</button><button id="im" class="pri">貼上後匯入</button></div>
+ <div class="btns"><button id="close">關閉</button></div>
+</div></div>
+<div id="toast"></div>
+<script>
+const D={"origins":[{"zh":"衣索比亞","en":"Ethiopia","c":"非洲","alt":"1,700–2,300 m","vars":"原生種（Heirloom／74110、74112 等）","proc":"水洗、日曬","fl":["茉莉花","柑橘","莓果","紅茶感"]},{"zh":"肯亞","en":"Kenya","c":"非洲","alt":"1,500–2,100 m","vars":"SL28、SL34、Ruiru 11、Batian","proc":"肯亞式水洗（雙重發酵）","fl":["黑醋栗","番茄","烏梅","明亮酸質"]},{"zh":"盧安達","en":"Rwanda","c":"非洲","alt":"1,500–2,000 m","vars":"紅波旁","proc":"水洗為主","fl":["紅茶","紅蘋果","柑橘","焦糖"]},{"zh":"巴拿馬","en":"Panama","c":"中南美","alt":"1,400–2,000 m","vars":"藝伎、卡杜艾、鐵比卡","proc":"水洗、日曬、厭氧","fl":["茉莉","佛手柑","水蜜桃","蜂蜜"]},{"zh":"哥倫比亞","en":"Colombia","c":"中南美","alt":"1,200–2,200 m","vars":"卡杜拉、卡斯提優、粉紅波旁、藝伎","proc":"水洗；近年厭氧與特殊發酵興盛","fl":["焦糖","紅蘋果","柑橘","均衡"]},{"zh":"瓜地馬拉","en":"Guatemala","c":"中南美","alt":"1,300–2,000 m","vars":"波旁、卡杜拉、帕卡瑪拉、藝伎","proc":"水洗為主","fl":["可可","堅果","柑橘","煙燻感"]},{"zh":"哥斯大黎加","en":"Costa Rica","c":"中南美","alt":"1,200–1,900 m","vars":"卡杜拉、卡杜艾、薇拉沙奇、藝伎","proc":"蜜處理、水洗、日曬","fl":["蜂蜜","杏桃","柑橘","乾淨甜感"]},{"zh":"巴西","en":"Brazil","c":"中南美","alt":"800–1,300 m","vars":"黃波旁、新世界、卡杜艾","proc":"日曬、去皮日曬","fl":["堅果","巧克力","低酸","厚實"]},{"zh":"印尼","en":"Indonesia","c":"亞太","alt":"1,100–1,600 m","vars":"鐵比卡、Ateng、Tim Tim","proc":"濕剝法（Giling Basah）","fl":["草本","杉木","香料","厚重低酸"]},{"zh":"葉門","en":"Yemen","c":"亞太","alt":"1,500–2,500 m","vars":"古老地方品種（Udaini、Dawairi、Jaadi）","proc":"傳統日曬","fl":["酒香","果乾","香料","巧克力"]},{"zh":"台灣","en":"Taiwan","c":"亞太","alt":"600–1,400 m","vars":"鐵比卡、SL34、藝伎","proc":"水洗、蜜處理、日曬、厭氧","fl":["茶感","蔗糖","柑橘","花香"]},{"zh":"牙買加","en":"Jamaica","c":"中南美","alt":"900–1,700 m","vars":"鐵比卡","proc":"水洗","fl":["溫和","乾淨","堅果","均衡"]},{"zh":"夏威夷","en":"Hawaii","c":"亞太","alt":"150–900 m","vars":"可娜鐵比卡","proc":"水洗","fl":["堅果","奶油","紅糖","柔和酸"]}],"vars":[{"zh":"鐵比卡","en":"Typica","g":"鐵比卡系","from":"衣索比亞 → 葉門 → 爪哇 → 傳遍全球","fl":["清甜","乾淨","柔和酸"],"d":"最古老的栽培品種之一，許多品種的祖先。樹高、頂葉常呈古銅色，產量低、易染葉鏽病。藍山、可娜都是鐵比卡的名產地。"},{"zh":"象豆","en":"Maragogipe","g":"鐵比卡系","from":"巴西巴伊亞州","fl":["溫和","花香","輕盈"],"d":"鐵比卡的巨型突變種，葉、果、豆都特別大，產量低。是帕卡瑪拉的親本之一。"},{"zh":"波旁","en":"Bourbon","g":"波旁系","from":"葉門 → 留尼旺島（舊稱波旁島）","fl":["甜感","圓潤","焦糖"],"d":"與鐵比卡並列兩大古老品系。豆形較圓、甜度高，有紅、黃、橘等果色。盧安達、薩爾瓦多、巴西都很常見。"},{"zh":"卡杜拉","en":"Caturra","g":"波旁系","from":"巴西米納斯吉拉斯","fl":["明亮酸","柑橘","中等醇厚"],"d":"20 世紀初發現的波旁矮種突變。植株矮、可密植、產量高，是中美洲與哥倫比亞的主力，也是許多混種的親本。"},{"zh":"尖身波旁","en":"Laurina / Bourbon Pointu","g":"波旁系","from":"留尼旺島","fl":["細緻","甜","低苦"],"d":"波旁的突變種，豆形尖長，咖啡因含量約只有一般阿拉比卡的一半，是天然低因品種。"},{"zh":"SL28／SL34","en":"SL28 / SL34","g":"波旁系","from":"肯亞 Scott 農業實驗室（1930 年代）","fl":["黑醋栗","烏梅","強烈酸質"],"d":"SL 是 Scott Laboratories 的縮寫。SL28 耐旱、風味出眾；SL34 適應高海拔多雨環境。兩者是肯亞風味的核心。"},{"zh":"卡杜艾","en":"Catuaí","g":"混種","from":"巴西 IAC 育種","fl":["堅果","甜","均衡"],"d":"新世界（Mundo Novo）× 卡杜拉。矮株、高產、果實不易被風雨打落，有紅、黃兩種果色，巴西與中美洲廣泛種植。"},{"zh":"帕卡瑪拉","en":"Pacamara","g":"混種","from":"薩爾瓦多","fl":["複雜果酸","熱帶水果","草本"],"d":"帕卡斯（Pacas，波旁矮種突變）× 象豆。豆子非常大，風味複雜多變，常見於瓜地馬拉與薩爾瓦多的競賽批次。"},{"zh":"卡蒂莫","en":"Catimor","g":"混種","from":"葡萄牙育種","fl":["厚實","草本","較高苦味"],"d":"卡杜拉 × 提摩混種（Timor Hybrid，阿拉比卡與羅布斯塔的天然雜交）。帶有羅布斯塔基因，抗葉鏽病、高產，風味通常較粗獷。"},{"zh":"藝伎／瑰夏","en":"Geisha / Gesha","g":"衣索比亞系","from":"衣索比亞 Gesha 森林 → 坦尚尼亞 → 哥斯大黎加 → 巴拿馬","fl":["茉莉花","佛手柑","水蜜桃","蜂蜜"],"d":"1930 年代在衣索比亞西南部採集，輾轉傳到中美洲，原本因抗病被引進。2004 年翡翠莊園在 Best of Panama 以它奪冠，從此成為最昂貴的品種。豆形細長，高海拔才有典型花香。"},{"zh":"衣索比亞原生種","en":"Ethiopian Landrace (Heirloom)","g":"衣索比亞系","from":"衣索比亞","fl":["花香","柑橘","莓果"],"d":"成千上萬野生與地方品種的統稱。吉馬農業研究中心（JARC）選育的 74110、74112、74158 等編號品種，是古吉、耶加雪菲常見的品種。"},{"zh":"粉紅波旁","en":"Pink Bourbon","g":"衣索比亞系","from":"哥倫比亞薇拉","fl":["花香","粉紅葡萄柚","甜"],"d":"果實成熟時呈粉橘色。名字雖有波旁，但基因研究顯示它更接近衣索比亞原生種，所以帶花香與明亮果酸。"},{"zh":"希爪","en":"Sidra","g":"衣索比亞系","from":"厄瓜多","fl":["花香","紅色水果","葡萄酒感"],"d":"來源說法不一，基因上接近衣索比亞原生種。甜度高、果香濃，近年在世界咖啡大賽中很常見。"},{"zh":"Wush Wush","en":"Wush Wush","g":"衣索比亞系","from":"衣索比亞西南部","fl":["熱帶水果","香料","花香"],"d":"以發源地命名的衣索比亞地方品種，後來被引進哥倫比亞種植，產量低、風味濃郁奔放。"},{"zh":"尤金諾伊狄絲","en":"Coffea eugenioides","g":"其他物種","from":"東非高地","fl":["極高甜感","低酸","穀物甜"],"d":"不是阿拉比卡，而是它的親本之一（另一個是羅布斯塔）。咖啡因低、苦味極低、甜感突出，產量非常少。"},{"zh":"羅布斯塔","en":"Coffea canephora (Robusta)","g":"其他物種","from":"中西非","fl":["厚重","麥茶","苦"],"d":"另一個咖啡物種，也是阿拉比卡的親本之一。耐熱抗病、咖啡因約為阿拉比卡的兩倍，常用於義式配方與即溶咖啡；近年也有精品等級的羅布斯塔。"}],"farms":[{"zh":"翡翠莊園","en":"Hacienda La Esmeralda","c":"巴拿馬","loc":"波奎特","d":"Peterson 家族經營。2004 年以藝伎在 Best of Panama 奪冠，開啟藝伎時代；依地塊與海拔分成不同系列批次販售。","t":["藝伎","水洗／日曬"]},{"zh":"艾利達莊園","en":"Elida Estate","c":"巴拿馬","loc":"波奎特 Alto Quiel","d":"Lamastus 家族經營，部分園區位於巴魯火山國家公園內，海拔極高。Best of Panama 常勝軍，多次刷新競標價紀錄。","t":["藝伎","厭氧慢乾日曬"]},{"zh":"九十+ 藝伎莊園","en":"Ninety Plus Gesha Estates","c":"巴拿馬","loc":"沃肯","d":"Joseph Brodsky 創立，在森林遮蔭下種植藝伎，以獨家發酵處理與風味導向的批次命名聞名，世界賽選手愛用。","t":["藝伎","創新處理"]},{"zh":"黛博拉莊園","en":"Finca Deborah","c":"巴拿馬","loc":"沃肯","d":"Jamison Savage 創立，海拔約 1,900 m 以上。以碳浸漬（CM）與氮氣發酵等精密控制的處理法著稱。","t":["藝伎","碳浸漬"]},{"zh":"茵赫特莊園","en":"Finca El Injerto","c":"瓜地馬拉","loc":"薇薇特南果","d":"Aguirre 家族經營，瓜地馬拉卓越杯（COE）多次冠軍，帕卡瑪拉與摩卡小圓豆批次很有名。","t":["帕卡瑪拉","水洗"]},{"zh":"聖費麗莎莊園","en":"Finca Santa Felisa","c":"瓜地馬拉","loc":"阿卡特南果","d":"百年家族莊園，由 Meneses 家族經營，以藝伎與多樣化的實驗性發酵批次著稱。","t":["藝伎","實驗發酵"]},{"zh":"天堂莊園","en":"Finca El Paraíso","c":"哥倫比亞","loc":"考卡 Piendamó","d":"Diego Bermúdez 經營，以「熱衝擊」（thermal shock）雙重厭氧處理聞名，風味像荔枝、玫瑰、水蜜桃般強烈。","t":["卡斯提優","熱衝擊厭氧"]},{"zh":"棕櫚樹與大嘴鳥","en":"La Palma y El Tucán","c":"哥倫比亞","loc":"昆迪納馬卡 Zipacón","d":"推動「鄰居與作物」計畫，收購周邊小農果實集中處理；以乳酸發酵等處理法與生態友善種植聞名。","t":["藝伎／希爪","乳酸發酵","合作社"]},{"zh":"希望莊園","en":"Café Granja La Esperanza","c":"哥倫比亞","loc":"考卡山谷","d":"旗下有 Cerro Azul、Las Margaritas、Potosí 等園區。很早就把巴拿馬藝伎帶回哥倫比亞種植，競賽常客。","t":["藝伎","多園區"]},{"zh":"迪維索莊園","en":"Finca El Diviso","c":"哥倫比亞","loc":"薇拉 Pitalito","d":"Lasso 家族的年輕一代經營，以希爪、Ombligon 等品種搭配精密厭氧發酵，近年在世界咖啡師大賽中受到矚目。","t":["希爪","厭氧"]},{"zh":"達特拉莊園","en":"Daterra Coffee","c":"巴西","loc":"喜拉朵 Patrocínio","d":"巴西精品咖啡與永續農業的標竿，大規模但精細管理，以研究、分級與實驗批次（Masterpieces）聞名。","t":["多品種","日曬／厭氧"]},{"zh":"拉斯拉哈斯","en":"Las Lajas Micromill","c":"哥斯大黎加","loc":"中央谷地 Sabanilla de Alajuela","d":"Chacón 家族經營的有機微型處理廠，是哥斯大黎加蜜處理與日曬的先驅，「黑蜜」「Perla Negra」等批次很知名。","t":["卡杜拉／卡杜艾","蜜處理","微處理廠"]},{"zh":"藝伎村","en":"Gesha Village Coffee Estate","c":"衣索比亞","loc":"Bench Maji（近 Gesha 森林）","d":"Adam Overton 與 Rachel Samuel 於 2011 年創立，在藝伎品種的發源地附近建立莊園，種植從當地森林選出的藝伎。","t":["藝伎","日曬／水洗"]},{"zh":"卡永山莊園","en":"Kayon Mountain Coffee Farm","c":"衣索比亞","loc":"古吉 Shakiso","d":"衣索比亞少見的私人莊園，Ismael Hassen Aredo 家族經營，自己種植、自己處理，日曬批次常帶草莓、藍莓與花香。","t":["原生種","日曬／水洗"]},{"zh":"班奇馬吉瑰夏莊園","en":"Bench Maji Gesha Farm","c":"衣索比亞","loc":"班奇馬吉","d":"台灣豆單常見的班奇馬吉藝伎莊園，海拔約 1,900–2,100 m，多為棚架日曬，風味偏熱帶水果與酒香。地圖只能定位到所在區域。","t":["藝伎","日曬"]},{"zh":"飛雀處理站","en":"Fair Trade Station（Bench Maji）","c":"衣索比亞","loc":"班奇馬吉（今 Bench Sheko 一帶）","d":"台灣烘豆商常譯「飛雀」，其實是處理站而不是單一莊園：收購周邊農民的咖啡果實集中處理。位在藝伎品種的故鄉班奇馬吉，海拔約 2,360 m，藝伎有水洗與日曬批次，常見茉莉、柑橘、芒果、紅茶調。地圖只能定位到所在區域。","t":["藝伎","水洗／日曬","處理站"]},{"zh":"露西處理站","en":"Lucy Station（Bench Maji）","c":"衣索比亞","loc":"班奇馬吉 Gesha 地區","d":"同樣位於班奇馬吉的 Gesha 地區，海拔約 2,280 m，啟用不到十年，以「露西藝伎」打響名號，常見日曬與厭氧日曬批次。地圖只能定位到所在區域。","t":["藝伎","日曬／厭氧","處理站"]},{"zh":"詹森莊園","en":"Janson Coffee Farm","c":"巴拿馬","loc":"沃肯","d":"Janson 家族經營，位於巴魯火山西側的沃肯。藝伎批次在 Best of Panama 名列前茅，以乾淨、精準的處理著稱。","t":["藝伎","水洗／日曬"]},{"zh":"哈特曼莊園","en":"Hartmann Estate","c":"巴拿馬","loc":"聖克拉拉 Renacimiento","d":"Hartmann 家族經營，莊園緊鄰森林保護區，以生態與鳥類多樣性聞名，除藝伎外也有多種品種與處理法。","t":["藝伎／多品種","日曬／水洗"]},{"zh":"卡門莊園","en":"Carmen Estate","c":"巴拿馬","loc":"沃肯 Paso Ancho","d":"Carlos Aguilera 經營，種植海拔高，卡杜艾與藝伎都很受歡迎，風味以乾淨、明亮見長。","t":["藝伎／卡杜艾","水洗"]},{"zh":"瑪瑪卡特莊園","en":"Finca Mama Cata","c":"巴拿馬","loc":"波奎特","d":"Garrido 家族經營的波奎特老牌莊園，藝伎與日曬批次在台灣很常見。","t":["藝伎","日曬／水洗"]},{"zh":"蕾莉達莊園","en":"Finca Lérida","c":"巴拿馬","loc":"波奎特 Alto Quiel","d":"波奎特歷史悠久的咖啡莊園，園區也經營民宿與步道，是賞鳥與咖啡觀光的熱門地點。","t":["藝伎／卡杜拉","水洗"]},{"zh":"蘇菲亞莊園","en":"Finca Sophia","c":"巴拿馬","loc":"沃肯 Nueva Suiza","d":"種植在非常高的海拔（約 2,000 m 以上），冷涼氣候讓藝伎成熟極慢，批次風味細緻、量少價高。","t":["藝伎","水洗／日曬"]},{"zh":"阿布莊園","en":"Abu Coffee","c":"巴拿馬","loc":"波奎特","d":"波奎特的精品藝伎莊園，近年在 Best of Panama 與競標中表現亮眼。","t":["藝伎","日曬／水洗"]},{"zh":"蒙特布蘭科莊園","en":"Finca Monteblanco","c":"哥倫比亞","loc":"薇拉 San Adolfo","d":"Rodrigo Sánchez 經營，以紫色卡杜拉（Purple Caturra）與各式發酵實驗聞名，世界賽選手愛用。","t":["紫卡杜拉／藝伎","發酵實驗"]},{"zh":"無瑕莊園","en":"Finca Inmaculada","c":"哥倫比亞","loc":"考卡山谷","d":"以收集稀有品種聞名，例如尤金諾伊狄絲、尖身波旁（Laurina）、蘇丹汝媚（Sudan Rume），常出現在比賽與高價批次。","t":["稀有品種","水洗"]},{"zh":"米蘭莊園","en":"Finca Milán","c":"哥倫比亞","loc":"金迪奧 Calarcá","d":"與處理商 Cofinet 合作，專做酵母、厭氧、酒桶等控制發酵批次，風味濃烈有特色。","t":["希爪／藝伎","特殊發酵"]},{"zh":"索娜拉莊園","en":"Hacienda Sonora","c":"哥斯大黎加","loc":"中央谷地 Poás 火山","d":"Diego Guardia 經營，位於波阿斯火山山腰，以日曬與蜜處理見長，莊園用自己的小型水力發電。","t":["薇拉沙奇／藝伎","日曬／蜜處理"]},{"zh":"藍火山莊園","en":"Volcán Azul","c":"哥斯大黎加","loc":"西部谷地","d":"Kahle 家族經營的百年莊園，位於西部谷地，藝伎與各式蜜處理批次在台灣很常見。","t":["藝伎／卡杜艾","蜜處理"]},{"zh":"米塔莊園","en":"La Minita","c":"哥斯大黎加","loc":"塔拉珠","d":"塔拉珠的老牌莊園，很早就以可追溯、嚴格分級的「莊園咖啡」概念打開國際市場。","t":["卡杜拉／卡杜艾","水洗"]},{"zh":"蘇科洛莊園","en":"Finca El Socorro","c":"瓜地馬拉","loc":"帕倫西亞","d":"Juan Diego de la Cerda 經營，多次在瓜地馬拉卓越杯奪得佳績，藝伎與帕卡瑪拉批次很受矚目。","t":["藝伎／帕卡瑪拉","水洗"]},{"zh":"庇里牛斯莊園","en":"Finca Los Pirineos","c":"薩爾瓦多","loc":"烏蘇盧坦 Tecapa 火山","d":"Baraona 家族經營，種植多種稀有品種並做各式處理實驗，是薩爾瓦多精品咖啡的代表莊園。","t":["多品種","水洗／日曬／蜜處理"]},{"zh":"塔吉西莊園","en":"Finca Takesi","c":"玻利維亞","loc":"雲加斯","d":"位於安地斯山東坡的雲加斯，種植海拔約 2,000–2,600 m，是全世界海拔最高的咖啡園之一。","t":["藝伎／鐵比卡","水洗"]},{"zh":"卡瑞米庫依處理站","en":"Karimikui Factory","c":"肯亞","loc":"基里尼亞加","d":"隸屬 Rungeto 合作社的處理站，收購周邊小農的果實，以肯亞式水洗處理，常見 AA、AB 批次。地圖只能定位到所在區域。","t":["SL28／SL34","肯亞式水洗","處理站"]},{"zh":"嘉通博亞處理站","en":"Gatomboya Factory","c":"肯亞","loc":"尼耶利","d":"尼耶利的知名處理站，隸屬 Barichu 合作社，黑醋栗與番茄般的酸質鮮明。地圖只能定位到所在區域。","t":["SL28／SL34","肯亞式水洗","處理站"]},{"zh":"奇安巴拉處理站","en":"Kiamabara Factory","c":"肯亞","loc":"尼耶利","d":"尼耶利的處理站，隸屬 Mugaga 合作社，多次出現在高分 AA 批次中。地圖只能定位到所在區域。","t":["SL28／SL34","肯亞式水洗","處理站"]},{"zh":"果丁丁處理站","en":"Gotiti","c":"衣索比亞","loc":"耶加雪菲 Gedeb","d":"位於耶加雪菲南端的 Gedeb，台灣豆單常見「果丁丁」，水洗帶花香、柑橘，日曬帶莓果與熱帶水果。地圖只能定位到所在區域。","t":["原生種","水洗／日曬","處理站"]},{"zh":"孔加處理站","en":"Konga","c":"衣索比亞","loc":"耶加雪菲","d":"耶加雪菲的經典處理站，由當地合作社經營，水洗批次花香與檸檬調清楚，是認識耶加雪菲的入門款。地圖只能定位到所在區域。","t":["原生種","水洗／日曬","處理站"]},{"zh":"艾瑞佳處理站","en":"Aricha","c":"衣索比亞","loc":"耶加雪菲","d":"耶加雪菲的知名處理站，日曬批次以濃郁藍莓、草莓果香出名。地圖只能定位到所在區域。","t":["原生種","日曬／水洗","處理站"]},{"zh":"布穀阿貝兒處理站","en":"Buku Abel","c":"衣索比亞","loc":"古吉 罕貝拉","d":"位在古吉的罕貝拉，海拔高，水洗與日曬批次乾淨甜美，也有藝伎批次。地圖只能定位到所在區域。","t":["原生種／藝伎","水洗／日曬","處理站"]},{"zh":"邦貝處理站","en":"Bombe","c":"衣索比亞","loc":"西達瑪 Bensa","d":"位在西達瑪的 Bensa，靠近 Bombe 山，高海拔帶來明亮果酸與花香，日曬與厭氧批次都很常見。地圖只能定位到所在區域。","t":["原生種","日曬／水洗","處理站"]},{"zh":"胡耶山水洗站","en":"Huye Mountain Coffee","c":"盧安達","loc":"南方省 胡耶","d":"David Rubanzangabo 創立，收購胡耶山周邊小農的果實，是盧安達知名度最高的水洗站之一，批次常帶紅茶、紅蘋果與柑橘調。","t":["紅波旁","水洗／日曬","處理站"]},{"zh":"吉特西水洗站","en":"Gitesi Washing Station","c":"盧安達","loc":"西方省 卡龍基（基伏湖畔）","d":"位在基伏湖東岸的山坡，湖水調節氣候，水洗批次酸質明亮、果香乾淨。地圖只能定位到所在區域。","t":["紅波旁","水洗","處理站"]},{"zh":"坎祖水洗站","en":"Kanzu Washing Station","c":"盧安達","loc":"西方省 尼亞馬舍克","d":"尼亞馬舍克高海拔的水洗站，收購周邊小農的波旁，風味甜美帶花香與莓果調。地圖只能定位到所在區域。","t":["紅波旁","水洗","處理站"]},{"zh":"赫札水洗站","en":"Heza Washing Station","c":"蒲隆地","loc":"卡揚扎","d":"Long Miles Coffee Project 經營的水洗站之一，和周邊小農密切合作、做到山丘（hill）層級的可追溯。蒲隆地與盧安達結構相似，幾乎都是小農。地圖只能定位到所在區域。","t":["紅波旁","水洗／日曬","處理站"]},{"zh":"布克耶水洗站","en":"Bukeye Washing Station","c":"蒲隆地","loc":"穆蘭維亞","d":"同樣由 Long Miles Coffee Project 經營，是他們最早成立的水洗站，批次以紅茶、紅色水果與花香見長。地圖只能定位到所在區域。","t":["紅波旁","水洗","處理站"]},{"zh":"舒瑪瓦微處理廠","en":"Sumava de Lourdes","c":"哥斯大黎加","loc":"西部谷地 Naranjo","d":"Francisco Mena 經營的微處理廠，自有園區也做各式處理實驗，藝伎、薇拉沙奇的蜜處理與日曬批次在台灣很常見。","t":["藝伎／薇拉沙奇","蜜處理／日曬","微處理廠"]},{"zh":"唐梅友微處理廠","en":"Don Mayo Micromill","c":"哥斯大黎加","loc":"塔拉珠 León Cortés","d":"Bolaños 家族經營，塔拉珠微處理廠革命的代表之一，多次在哥斯大黎加卓越杯得獎。中文譯名各家不一。","t":["卡杜拉／卡杜艾／藝伎","水洗／蜜處理","微處理廠"]},{"zh":"坎德里拉微處理廠","en":"La Candelilla","c":"哥斯大黎加","loc":"塔拉珠","d":"Sánchez 家族的兄弟們共同經營，自種自處理，也開放參觀，是塔拉珠微處理廠的老字號。中文譯名各家不一。","t":["卡杜拉／卡杜艾","水洗／蜜處理","微處理廠"]},{"zh":"瓦哈娜莊園","en":"Wahana Estate","c":"印尼","loc":"北蘇門答臘 Sidikalang","d":"蘇門答臘少見的大型單一莊園，除了傳統濕剝，也做日曬、水洗與單一品種批次。","t":["Rasuna／Longberry","多種處理"]},{"zh":"鄒築園","en":"Zou Zhou Yuan","c":"台灣","loc":"嘉義阿里山 樂野","d":"方政倫經營，台灣精品咖啡代表人物之一，多次在國內生豆評鑑獲獎，藝伎與各式處理法批次都很受歡迎。","t":["藝伎／SL34","多種處理"]},{"zh":"卓武山咖啡農場","en":"Zhuo-Wu Coffee Farm","c":"台灣","loc":"嘉義阿里山","d":"許峻榮經營，阿里山的知名莊園，藝伎批次在國內外競標中屢獲佳績。","t":["藝伎","水洗／日曬"]},{"zh":"嵩岳咖啡莊園","en":"Songyue Coffee","c":"台灣","loc":"雲林古坑 石壁","d":"郭章盛經營，位於古坑高海拔的石壁地區，是台灣咖啡評鑑的常勝莊園。","t":["鐵比卡／藝伎","蜜處理"]},{"zh":"格林威爾農場","en":"Greenwell Farms","c":"夏威夷","loc":"可娜 Kealakekua","d":"1850 年創立的可娜老牌農場，可參觀導覽，了解可娜咖啡從採收到處理的流程。","t":["可娜鐵比卡","水洗"]},{"zh":"克里夫頓山莊園","en":"Clifton Mount Estate","c":"牙買加","loc":"藍山 Newcastle","d":"藍山歷史最悠久且仍在運作的莊園之一，海拔約 1,300 m，是藍山咖啡的代表。","t":["鐵比卡","水洗"]}],"procs":[{"zh":"日曬","en":"Natural","sum":"整顆果實帶皮曬乾，果肉的糖分與發酵風味留在豆子裡：莓果、熱帶水果、酒香，甜感與厚度高，但乾淨度較難控制。最古老、最省水的方法，常見於衣索比亞、巴西、葉門。"},{"zh":"水洗","en":"Washed","sum":"先去掉果皮果肉，再靠發酵把果膠分解洗掉，風味最能反映品種與產地本身：酸質明亮、乾淨、花香與柑橘調清楚。需要大量用水。肯亞、哥倫比亞、中美洲的主流。"},{"zh":"蜜處理","en":"Honey","sum":"去皮後「保留果膠」直接乾燥，介於水洗與日曬之間：甜感、稠度比水洗高，又比日曬乾淨。果膠留得越多、乾燥越慢，顏色越深、發酵感越重。哥斯大黎加發揚光大。"},{"zh":"濕剝","en":"Wet-hulled","sum":"印尼蘇門答臘的傳統做法（Giling Basah）。因為氣候潮濕，趁豆子還濕軟就脫去羊皮層再曬，乾燥時間大幅縮短。帶來草本、杉木、泥土調與厚重口感，酸質低；生豆呈深綠色，容易出現裂開的「羊蹄豆」。"},{"zh":"厭氧／碳浸漬","en":"Anaerobic / Carbonic Maceration","sum":"把果實或去皮豆放進密封容器，在缺氧環境下發酵，由不同的微生物族群主導，產生強烈的熱帶水果、酒香、肉桂、乳酸感。碳浸漬（CM）借自葡萄酒：整顆果實入桶並灌入二氧化碳。風味誇張、辨識度高，但控制不好容易有過度發酵的味道。"},{"zh":"共同發酵","en":"Co-fermentation（哥倫比亞）","sum":"把咖啡果實或去皮的豆子，和其他材料一起放進密封槽發酵，讓外來的糖、酸、香氣與微生物進到豆子裡。哥倫比亞是目前共同發酵產量最大、能見度最高的國家，巴拿馬、哥斯大黎加、巴西也有生產者跟進。代表人物有天堂莊園的 Diego Bermúdez、Granja Paraíso 92 的 Wilton Benítez，以及米蘭莊園背後的 Cofinet。"}],"gear":[{"n":"Comandante C40 MK4","b":"Comandante・德國","cat":"磨豆機","sub":"手搖","d":"手沖界的參考基準，許多比賽配方直接以「C40 幾格」標示刻度。","sp":[["刀盤","39mm 錐刀，高氮不鏽鋼 Nitro Blade"],["調整","內調段數，每格約 30 微米"],["粉倉","玻璃罐"]],"f":"風味均衡、甜感與厚度兼具，細粉帶來層次。"},{"n":"1Zpresso ZP6 Special","b":"1Zpresso・台灣","cat":"磨豆機","sub":"手搖","d":"專為手沖設計的錐刀，以細粉少、乾淨度高聞名。","sp":[["刀盤","48mm 七角錐刀"],["調整","上方外調，每格約 22 微米"],["用途","手沖專用，不適合義式"]],"f":"清晰明亮、茶感、風味分離度接近平刀。"},{"n":"1Zpresso K-Ultra","b":"1Zpresso・台灣","cat":"磨豆機","sub":"手搖","d":"手沖與義式都能應付的全能型手搖磨。","sp":[["刀盤","48mm 錐刀"],["調整","外調環，每格約 20 微米"],["特色","可折疊手把、磁吸粉杯"]],"f":"均衡偏明亮，甜感好。"},{"n":"1Zpresso J-Ultra","b":"1Zpresso・台灣","cat":"磨豆機","sub":"手搖","d":"為義式調校的手搖磨，刻度極細。","sp":[["刀盤","48mm 錐刀（義式向）"],["調整","外調環，每格約 8 微米"],["用途","義式為主"]],"f":"醇厚、質地濃稠，適合濃縮。"},{"n":"Kinu M47 Classic","b":"Kinu・德國","cat":"磨豆機","sub":"手搖","d":"全金屬機身、無段微調的義式向手搖磨。","sp":[["刀盤","47mm 錐刀"],["調整","無段式"],["機身","不鏽鋼，重量扎實"]],"f":"濃縮口感厚實、穩定。"},{"n":"Timemore 栗子 C3","b":"Timemore 泰摩・中國","cat":"磨豆機","sub":"手搖","d":"入門價位就有金屬刀盤與雙軸承的手搖磨。","sp":[["刀盤","38mm S2C 錐刀"],["調整","內調段數"],["機身","鋁合金"]],"f":"均衡、好上手。"},{"n":"Baratza Encore","b":"Baratza・美國","cat":"磨豆機","sub":"家用電動","d":"歐美最常被推薦的入門電動磨，零件好買、可自行維修。","sp":[["刀盤","40mm 錐刀"],["調整","40 段"],["用途","手沖、法壓、美式機"]],"f":"均衡、口感偏厚。"},{"n":"Fellow Ode Gen 2","b":"Fellow・美國","cat":"磨豆機","sub":"家用電動","d":"專為手沖設計的家用平刀磨，不做義式。","sp":[["刀盤","64mm 平刀"],["調整","31 段"],["特色","單份研磨、可換其他 64mm 刀盤"]],"f":"乾淨、清晰，甜感佳。"},{"n":"Fuji Royal R-220 小富士","b":"富士珈機・日本","cat":"磨豆機","sub":"家用電動","d":"日本自家烘焙店櫃台常見的經典機，有鬼齒與平刀（cut）兩種版本。","sp":[["刀盤","鬼齒 或 平刀"],["調整","段數旋鈕"],["機身","鑄造機身，馬達低速有力"]],"f":"鬼齒版甜感高、圓潤飽滿。"},{"n":"Niche Zero","b":"Niche・英國","cat":"磨豆機","sub":"家用電動","d":"帶起「單份研磨、零殘粉」風潮的家用機。","sp":[["刀盤","63mm 錐刀（Mazzer Kony 規格）"],["調整","無段式"],["用途","義式與手沖可快速切換"]],"f":"濃縮醇厚、巧克力調明顯。"},{"n":"Eureka Mignon Specialita","b":"Eureka・義大利","cat":"磨豆機","sub":"家用電動","d":"體積小、聲音安靜的家用義式定量磨。","sp":[["刀盤","55mm 平刀"],["調整","無段式微調"],["特色","觸控定時出粉"]],"f":"濃縮均衡、甜感乾淨。"},{"n":"Option-O Lagom P64","b":"Option-O・澳洲","cat":"磨豆機","sub":"商用／旗艦","d":"家用旗艦級單份研磨平刀磨，可換多種 64mm 刀盤。","sp":[["刀盤","64mm 平刀（可選 SSP 等）"],["調整","無段式"],["特色","可變轉速、低殘粉"]],"f":"依刀盤而定，可從厚實調到極乾淨。"},{"n":"Mahlkönig EK43","b":"Mahlkönig・德國","cat":"磨豆機","sub":"商用／旗艦","d":"原本是商用大量研磨機，2013 年前後因咖啡師比賽被用來磨濃縮而成為精品咖啡館象徵。","sp":[["刀盤","98mm 平刀"],["調整","無段旋鈕"],["定位","吧台單品、杯測、零售研磨"]],"f":"均勻度極高、乾淨透亮、萃取率高。"},{"n":"Mazzer Super Jolly","b":"Mazzer・義大利","cat":"磨豆機","sub":"商用／旗艦","d":"耐操的商用義式磨經典，二手市場流通量大。","sp":[["刀盤","64mm 平刀"],["調整","無段式"],["定位","中小型咖啡館義式"]],"f":"傳統義式的厚實與均衡。"},{"n":"Hario V60","b":"Hario・日本","cat":"濾杯與沖煮","sub":"錐形","d":"60 度錐角、螺旋肋骨與單一大孔，是全世界最普及的手沖濾杯。","sp":[["結構","60° 錐形，螺旋長肋骨"],["出水","單一大孔"],["材質","樹脂、陶瓷、玻璃、金屬"]],"f":"明亮、乾淨、層次清楚。"},{"n":"Kono 名門","b":"珈琲サイフオン・日本","cat":"濾杯與沖煮","sub":"錐形","d":"錐形濾杯的先驅。肋骨只做在下半部，上半部濾紙貼壁，水只能往下走。","sp":[["結構","錐形，短直肋骨"],["出水","單一大孔，流速偏慢"],["材質","樹脂"]],"f":"厚實圓潤、甜感集中。"},{"n":"Origami 摺紙濾杯","b":"Origami・日本","cat":"濾杯與沖煮","sub":"錐形","d":"20 道摺紋形成排氣通道，可用錐形濾紙也可用波浪濾紙。2019 年世界沖煮賽冠軍使用後聲名大噪。","sp":[["結構","錐形，20 道深摺紋"],["濾紙","錐形或波浪皆可"],["材質","美濃燒陶瓷、樹脂"]],"f":"流速快、乾淨通透；換波浪濾紙則更甜。"},{"n":"Chemex","b":"Chemex・美國","cat":"濾杯與沖煮","sub":"錐形","d":"1941 年由化學家設計的一體式玻璃壺，專用濾紙特別厚。","sp":[["結構","濾杯與下壺一體"],["濾紙","厚質專用濾紙"],["容量","3 至 10 杯"]],"f":"非常乾淨、油脂少、茶感。"},{"n":"Kalita Wave","b":"Kalita・日本","cat":"濾杯與沖煮","sub":"平底","d":"平底三孔搭配波浪濾紙，以穩定著稱。","sp":[["結構","平底，三個小孔"],["濾紙","波浪（蛋糕）濾紙"],["材質","不鏽鋼、玻璃、陶瓷"]],"f":"甜感高、均衡飽滿。"},{"n":"April Brewer","b":"April・丹麥","cat":"濾杯與沖煮","sub":"平底","d":"由丹麥烘豆商設計的平底濾杯，主打簡單的兩段式注水。","sp":[["結構","平底，底部多孔"],["濾紙","波浪濾紙"],["材質","玻璃、樹脂"]],"f":"乾淨、甜、酸質柔和。"},{"n":"Orea","b":"Orea・英國","cat":"濾杯與沖煮","sub":"平底","d":"底部開口極大的平底濾杯，阻力幾乎全由濾紙與粉床決定。","sp":[["結構","平底，大開口底座"],["濾紙","波浪或平底專用濾紙"],["特色","流速快，可細研磨"]],"f":"高萃取、清晰、甜感明確。"},{"n":"Melitta 扇形濾杯","b":"Melitta・德國","cat":"濾杯與沖煮","sub":"扇形","d":"1908 年發明濾紙滴濾法的品牌。單一小孔，倒水後交給濾杯控制流速。","sp":[["結構","扇形（梯形），直肋骨"],["出水","單一小孔"],["材質","樹脂、陶瓷"]],"f":"濃厚、醇度高、苦甜平衡。"},{"n":"Clever 聰明濾杯","b":"台灣設計","cat":"濾杯與沖煮","sub":"浸泡／混合","d":"台灣發明的浸泡式濾杯。底部活塞閥在放上杯子時才打開。","sp":[["結構","扇形杯身，底部活塞閥"],["濾紙","扇形濾紙"],["方式","浸泡後過濾"]],"f":"圓潤、甜、杯杯一致。"},{"n":"Hario Switch","b":"Hario・日本","cat":"濾杯與沖煮","sub":"浸泡／混合","d":"V60 玻璃濾杯加上開關閥，浸泡與滴濾可以自由組合。","sp":[["結構","V60 錐形加球閥底座"],["濾紙","V60 錐形濾紙"],["方式","浸泡、滴濾或混合"]],"f":"前段滴濾取香氣，後段浸泡補甜感。"},{"n":"法式濾壓壺","b":"通用器具","cat":"濾杯與沖煮","sub":"浸泡／混合","d":"粗研磨浸泡約四分鐘後，用金屬濾網下壓分離。","sp":[["過濾","金屬濾網"],["研磨","粗"],["特色","保留咖啡油脂"]],"f":"醇厚、油脂感明顯，有些微細粉。"},{"n":"AeroPress 愛樂壓","b":"AeroPress・美國","cat":"濾杯與沖煮","sub":"加壓／其他","d":"2005 年問世的針筒式沖煮器，浸泡後用手壓出。輕巧耐摔，有自己的世界大賽。","sp":[["方式","浸泡加手動加壓"],["濾材","圓形濾紙或金屬濾片"],["玩法","正放、倒置皆可"]],"f":"乾淨又有厚度，配方變化極多。"},{"n":"虹吸壺 Siphon","b":"通用器具","cat":"濾杯與沖煮","sub":"加壓／其他","d":"加熱下壺產生蒸氣壓把水推到上壺，熄火後咖啡被吸回下壺。","sp":[["方式","高溫浸泡，真空回吸"],["濾材","濾布或濾紙"],["熱源","酒精燈、瓦斯、鹵素燈"]],"f":"香氣奔放、溫度高、口感乾淨。"},{"n":"摩卡壺 Moka Pot","b":"Bialetti・義大利","cat":"濾杯與沖煮","sub":"加壓／其他","d":"1933 年誕生的爐上咖啡壺，利用下壺蒸氣壓把熱水推過粉層。","sp":[["壓力","約 1 至 2 bar"],["研磨","比義式略粗"],["熱源","瓦斯爐或電爐"]],"f":"濃郁、苦甜，接近濃縮但沒有厚 crema。"},{"n":"HIROIA Samantha II","b":"HIROIA・台灣（Hario 合資）","cat":"濾杯與沖煮","sub":"自動手沖機","d":"商用智慧手沖機，把水溫、注水段數、每段水量與流速存成配方，按一下就自動分段注水到 V60，每杯都一樣。台灣研發，Cama、黑沃等連鎖店都在用。","sp":[["流速","15 段可調，控制攪動與沖煮時間"],["可設定","水溫、注水段數與每段時間"],["隨附","Hario V60 Drip Decanter（VDD）"],["商用功能","自動補水、恆溫、WiFi 雲端配方"]],"f":"重現性高，風味取決於配方與研磨，適合穩定呈現淺焙藝伎。"},{"n":"Gaggia Classic","b":"Gaggia・義大利","cat":"義式咖啡機","sub":"單鍋爐／即熱","d":"1991 年推出至今的入門經典，使用商用規格 58mm 把手，改裝社群龐大。","sp":[["加熱","單鍋爐"],["把手","58mm"],["幫浦","振動式"]],"f":"基本功能齊全，改裝空間大（加 PID、調壓）。"},{"n":"Rancilio Silvia","b":"Rancilio・義大利","cat":"義式咖啡機","sub":"單鍋爐／即熱","d":"以商用零件打造的家用單鍋爐機，耐用度高。","sp":[["加熱","單鍋爐（黃銅）"],["把手","58mm"],["蒸氣","力道強"]],"f":"蒸氣強、機身扎實，溫度需靠手法掌握。"},{"n":"Breville Bambino Plus","b":"Breville・澳洲","cat":"義式咖啡機","sub":"單鍋爐／即熱","d":"即熱式小型機，開機約 3 秒可萃取，並有自動打奶功能。","sp":[["加熱","即熱式 ThermoJet"],["把手","54mm"],["特色","自動奶泡、預浸"]],"f":"快速方便、體積小。"},{"n":"Breville Barista Express","b":"Breville・澳洲","cat":"義式咖啡機","sub":"單鍋爐／即熱","d":"內建磨豆機的一體機，一台完成研磨到萃取。","sp":[["加熱","即熱式"],["把手","54mm"],["磨豆","內建錐刀磨"]],"f":"不必另購磨豆機，學習曲線平緩。"},{"n":"Rocket Appartamento","b":"Rocket・義大利","cat":"義式咖啡機","sub":"熱交換 HX","d":"為公寓廚房設計的小型 HX 機，側板圓孔是招牌外觀。","sp":[["加熱","熱交換鍋爐"],["沖煮頭","E61"],["幫浦","振動式"]],"f":"可同時萃取與打奶，經典 E61 手感。"},{"n":"Lelit Bianca","b":"Lelit・義大利","cat":"義式咖啡機","sub":"雙鍋爐","d":"E61 沖煮頭上加裝流量撥桿，家用機中少見能手動控制流量的機型。","sp":[["加熱","雙鍋爐 PID"],["沖煮頭","E61 加流量控制撥桿"],["幫浦","迴轉式"]],"f":"可玩長預浸與變壓萃取，適合淺焙濃縮。"},{"n":"La Marzocco Linea Mini","b":"La Marzocco・義大利","cat":"義式咖啡機","sub":"雙鍋爐","d":"把咖啡館的 Linea Classic 縮小搬回家。","sp":[["加熱","雙鍋爐 PID"],["沖煮頭","整合式沖煮頭"],["幫浦","迴轉式"]],"f":"溫度穩定、蒸氣強，手感接近商用機。"},{"n":"La Marzocco Linea Micra","b":"La Marzocco・義大利","cat":"義式咖啡機","sub":"雙鍋爐","d":"比 Linea Mini 更小的雙鍋爐機，熱機快。","sp":[["加熱","雙鍋爐"],["把手","58mm"],["特色","體積小、熱機迅速"]],"f":"小廚房也放得下的商用血統。"},{"n":"Decent DE1","b":"Decent Espresso","cat":"義式咖啡機","sub":"雙鍋爐","d":"用平板即時顯示並控制壓力、流量與溫度曲線，可以模仿各種機型的萃取方式。","sp":[["加熱","即熱式加混水控溫"],["控制","平板軟體，曲線可分享"],["特色","即時壓力與流量圖"]],"f":"把萃取變成看得見的資料。"},{"n":"La Pavoni Europiccola","b":"La Pavoni・義大利","cat":"義式咖啡機","sub":"拉霸","d":"1961 年問世的家用拉霸機，鍍鉻外型幾十年沒大改。","sp":[["加壓","手動拉桿"],["加熱","小型鍋爐"],["把手","約 51mm"]],"f":"壓力全靠手感，連續出杯會過熱。"},{"n":"Flair 58","b":"Flair・美國","cat":"義式咖啡機","sub":"拉霸","d":"沒有鍋爐的手壓機，沖煮頭可電熱預熱，使用標準 58mm 粉杯。","sp":[["加壓","手動拉桿"],["熱水","另外煮水倒入"],["把手","58mm"]],"f":"壓力表即時回饋，可做各種壓力曲線。"},{"n":"Cafelat Robot","b":"Cafelat","cat":"義式咖啡機","sub":"拉霸","d":"完全不用電的雙臂手壓機，結構簡單好清理。","sp":[["加壓","雙臂手壓"],["熱水","另外煮水倒入"],["特色","免預熱、全金屬"]],"f":"簡單直接，濃縮品質意外地高。"},{"n":"La Marzocco Linea PB","b":"La Marzocco・義大利","cat":"義式咖啡機","sub":"商用","d":"精品咖啡館最常見的吧台機之一。","sp":[["加熱","雙鍋爐，飽和式沖煮頭"],["幫浦","迴轉式"],["定位","多沖煮頭商用機"]],"f":"連續出杯溫度穩定、耐用。"},{"n":"Victoria Arduino Black Eagle","b":"Victoria Arduino・義大利","cat":"義式咖啡機","sub":"商用","d":"曾是世界咖啡師大賽的指定用機，可用內建電子秤依出液重量停止萃取。","sp":[["加熱","各沖煮頭獨立控溫"],["特色","Gravimetric 重量控制"],["定位","比賽與旗艦店"]],"f":"以重量取代時間或流量，杯杯一致。"},{"n":"Slayer Espresso","b":"Slayer・美國","cat":"義式咖啡機","sub":"商用","d":"用針閥限制流量做長時間低流速預浸，帶起流量控制的風潮。","sp":[["控制","針閥預浸加撥桿"],["加熱","雙鍋爐加沖煮頭獨立鍋爐"],["定位","精品咖啡館"]],"f":"淺焙濃縮也能做出甜感與厚度。"},{"n":"全自動咖啡機","b":"Jura、De’Longhi 等","cat":"義式咖啡機","sub":"全自動","d":"按一個鍵完成磨豆、填壓、萃取與清洗，內部有可動的沖煮模組。","sp":[["操作","一鍵出杯"],["磨豆","內建"],["保養","需定期除垢與清洗沖煮器"]],"f":"方便優先，風味可調整範圍有限。"},{"n":"手網與陶鍋","b":"通用器具","cat":"烘焙設備","sub":"手動器具","d":"在瓦斯爐上搖晃烘焙，能直接看到顏色變化、聽到一爆聲。","sp":[["批量","約 50 至 100g"],["熱源","瓦斯爐"],["控制","全靠手與感官"]],"f":"成本最低，是理解烘焙階段最直接的方法。"},{"n":"Gene Café CBR-101","b":"Genesis・韓國","cat":"烘焙設備","sub":"家用","d":"斜軸旋轉的玻璃烘焙筒，整個過程都看得見。","sp":[["批量","約 250g"],["加熱","電熱熱風"],["控制","溫度與時間旋鈕"]],"f":"均勻、乾淨，操作直覺。"},{"n":"Behmor","b":"Behmor・美國","cat":"烘焙設備","sub":"家用","d":"外型像烤箱的家用電熱滾筒機，內建抑煙設計。","sp":[["批量","最多約 450g"],["加熱","石英電熱管"],["控制","預設程式加手動"]],"f":"適合中淺焙，批量大。"},{"n":"Hottop","b":"Hottop・台灣","cat":"烘焙設備","sub":"家用","d":"台灣製的家用電熱滾筒機，有觀景窗與冷卻盤，可接電腦記錄曲線。","sp":[["批量","約 250g"],["加熱","電熱滾筒"],["控制","火力與風門可調"]],"f":"操作邏輯接近商用滾筒機。"},{"n":"Aillio Bullet R1","b":"Aillio・台灣生產","cat":"烘焙設備","sub":"家用","d":"用電磁感應加熱滾筒的 1 公斤機，搭配 RoasTime 軟體記錄與重播曲線。","sp":[["批量","最多 1kg"],["加熱","電磁感應（IH）"],["感測","紅外線豆溫感測"]],"f":"反應快、可重現，家用到小量接單都夠用。"},{"n":"Ikawa","b":"Ikawa・英國","cat":"烘焙設備","sub":"樣品機","d":"用 App 設定曲線的流體床樣品機，生豆商與莊園常用來評估樣品。","sp":[["批量","約 50 至 100g"],["加熱","電熱流體床"],["控制","App 曲線，可分享"]],"f":"同一條曲線在任何地方都能重現。"},{"n":"Kaffelogic Nano 7","b":"Kaffelogic・紐西蘭","cat":"烘焙設備","sub":"樣品機","d":"桌上型流體床機，依設定曲線自動控制。","sp":[["批量","約 50 至 120g"],["加熱","電熱流體床"],["控制","曲線檔可編輯"]],"f":"小批量、乾淨、容易重複。"},{"n":"Stronghold S7","b":"Stronghold・韓國","cat":"烘焙設備","sub":"店用／工廠","d":"直立式電熱烘豆機，結合熱風與鹵素燈，可自動重播儲存的曲線。","sp":[["批量","約 850g"],["加熱","電熱熱風加鹵素"],["特色","自動重現、不需瓦斯"]],"f":"乾淨明亮，店內安裝門檻低。"},{"n":"楊家飛馬 800N","b":"楊家機器・台灣","cat":"烘焙設備","sub":"店用／工廠","d":"台灣自家烘焙店常見的 1 公斤瓦斯機。","sp":[["批量","約 1kg"],["加熱","瓦斯"],["型式","半熱風／直火"]],"f":"結構單純、維修方便。"},{"n":"Fuji Royal R-101／R-103","b":"富士珈機・日本","cat":"烘焙設備","sub":"店用／工廠","d":"日本自家烘焙店的標準配備，可選直火或半熱風。","sp":[["批量","1kg／3kg"],["加熱","瓦斯"],["型式","直火或半熱風"]],"f":"直火版香氣濃厚，是日式深焙的代表。"},{"n":"Probat","b":"Probat・德國","cat":"烘焙設備","sub":"店用／工廠","d":"1868 年創立的烘豆機品牌，鑄鐵滾筒蓄熱好，老機型在收藏市場很搶手。","sp":[["批量","1kg 到工廠級"],["加熱","瓦斯"],["型式","半熱風，鑄鐵滾筒"]],"f":"厚實、甜感高、穩定。"},{"n":"Giesen","b":"Giesen・荷蘭","cat":"烘焙設備","sub":"店用／工廠","d":"鑄鐵機身，可精細調整滾筒轉速與風壓，曾是世界烘豆大賽的指定用機。","sp":[["批量","1kg 到工廠級"],["加熱","瓦斯"],["特色","風壓與轉速可調"]],"f":"可調參數多，風味塑造空間大。"},{"n":"Diedrich","b":"Diedrich・美國","cat":"烘焙設備","sub":"店用／工廠","d":"使用紅外線燃燒器的滾筒機，加熱柔和均勻。","sp":[["批量","1kg 到工廠級"],["加熱","瓦斯紅外線燃燒器"],["型式","半熱風"]],"f":"乾淨、甜感清楚。"},{"n":"Loring","b":"Loring・美國","cat":"烘焙設備","sub":"店用／工廠","d":"單一燃燒器同時負責加熱與處理煙氣，熱風循環使用，相當省燃料。","sp":[["批量","7kg 到工廠級"],["加熱","瓦斯，全熱風循環"],["特色","免外加後燃機"]],"f":"乾淨、明亮、重現性極高。"}],"prin":[{"cat":"磨豆機","label":"錐刀","h":"錐刀 Conical Burr","p":"錐形內刀在環形外刀中旋轉，豆子靠重力由上往下被碾碎。轉速低、發熱少，手搖磨豆機幾乎都用這種結構。"},{"cat":"磨豆機","label":"平刀","h":"平刀 Flat Burr","p":"兩片平行刀盤相對，豆子從中心進入，被離心力甩向外圈逐步切細。需要較高轉速與馬力。"},{"cat":"磨豆機","label":"鬼齒","h":"鬼齒 Ghost Burr","p":"刀盤上佈滿凸起的齒丘，用輾壓與剪切的方式磨碎。源自日本的磨豆機傳統，顆粒形狀偏圓潤。"},{"cat":"濾杯與沖煮","label":"錐形","h":"錐形濾杯","p":"粉層集中在中央、深度大，底部一個大孔。流速主要由注水手法與研磨度控制，自由度最高。"},{"cat":"濾杯與沖煮","label":"平底","h":"平底濾杯","p":"粉床平坦、厚度一致，水流均勻通過。多數搭配波浪濾紙，濾紙不貼壁，保溫與流速都穩定。"},{"cat":"濾杯與沖煮","label":"扇形","h":"扇形（梯形）濾杯","p":"底部是一條線而非一個點，出水孔小。水在濾杯內停留較久，帶一點浸泡效果。"},{"cat":"濾杯與沖煮","label":"浸泡","h":"浸泡與混合式","p":"先用閥門把水留住，讓粉水充分接觸，再開閥過濾。萃取均勻，幾乎不受注水手法影響。"},{"cat":"義式咖啡機","label":"單鍋爐","h":"單鍋爐 Single Boiler","p":"一個鍋爐負責煮咖啡與打蒸氣。兩種溫度不同，所以要切換並等待升降溫。"},{"cat":"義式咖啡機","label":"熱交換","h":"熱交換 Heat Exchanger","p":"鍋爐維持蒸氣溫度，一條管路穿過鍋爐，冷水流經時被加熱成萃取用水。"},{"cat":"義式咖啡機","label":"雙鍋爐","h":"雙鍋爐 Dual Boiler","p":"萃取與蒸氣各有一個鍋爐，各自由 PID 控溫，互不干擾。"},{"cat":"義式咖啡機","label":"拉霸","h":"拉霸 Lever","p":"不用電動幫浦，靠手臂或彈簧推動活塞加壓。壓力曲線由操作者決定。"},{"cat":"義式咖啡機","label":"即熱式","h":"即熱式 Thermoblock","p":"水流經加熱模組時瞬間升溫，不需要儲水鍋爐，開機幾秒就能使用。"},{"cat":"烘焙設備","label":"直火","h":"直火式","p":"滾筒上有孔洞，火焰的熱與輻射直接接觸豆子。升溫反應快，對火力很敏感。"},{"cat":"烘焙設備","label":"半熱風","h":"半熱風式","p":"火焰加熱實心滾筒，同時把熱空氣從後方抽進滾筒。傳導與對流並用，是最普遍的設計。"},{"cat":"烘焙設備","label":"熱風","h":"熱風式","p":"燃燒室與滾筒分開，幾乎完全靠熱空氣加熱豆子。升溫快而均勻。"},{"cat":"烘焙設備","label":"流體床","h":"流體床式","p":"沒有滾筒，熱風從下方把豆子吹起來翻滾。批次小、速度快，適合樣品烘焙。"}]};
+/* ---------- 今日菜單：阿里山藝伎＋哥倫比亞 ---------- */
+const MENU=[
+ {zh:"特富野 豆御香藝伎莊園",short:"豆御香",alt:"1200 m",proc:"蜜處理",note:"T219 藝伎國際競標批次",fl:["花香","紅糖","柑橘","萊姆","烏龍茶"]},
+ {zh:"特富野 皇家藝伎莊園",short:"皇家藝伎",alt:"1200 m",proc:"蜜處理",note:"菜單第 1 名，Best of Taiwan 2026 Winner",fl:["橙花","蜂蜜","甘草"]},
+ {zh:"七彩琉璃咖啡莊園",short:"七彩琉璃",alt:"1200 m",proc:"蜜處理",note:"菜單第 2 名",fl:["花香","甜橙","栗子","香草"]},
+ {zh:"仙井咖啡莊園",short:"仙井",alt:"1200 m",proc:"水洗",note:"菜單第 3 名",fl:["焦糖","仙草","蜜香紅茶"]},
+ {zh:"哥倫比亞 娜玲瓏 花境處理站",short:"Nariño 花境",alt:"2300 m",proc:"水洗",note:"哥倫比亞 Nariño",fl:["薰衣草","佛手柑","伯爵茶"]}
+];
+const DECKS=[
+ {id:"menu",em:"🏔️",name:"阿里山藝伎盲測",desc:"今天菜單上的 5 支藝伎"},
+ {id:"origin",em:"🌍",name:"產地",desc:"風味、海拔、代表品種"},
+ {id:"var",em:"🌱",name:"品種",desc:"品系、來源、特色"},
+ {id:"farm",em:"🏡",name:"莊園",desc:"國家與事蹟"},
+ {id:"proc",em:"💧",name:"處理法",desc:"日曬、水洗、蜜處理…"},
+ {id:"gear",em:"⚙️",name:"器材偵探",desc:"看規格猜器材、品牌產地"},
+ {id:"prin",em:"🔬",name:"器材原理",desc:"錐刀、平刀、鍋爐、烘焙…"}
+];
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+function mask(txt,names){let t=String(txt);names.filter(Boolean).sort((a,b)=>b.length-a.length).forEach(n=>{if(n.length<2)return;t=t.split(n).join("＿＿")});return t}
+const flv=a=>`<div class="flv">${a.map(x=>`<span>${esc(x)}</span>`).join("")}</div>`;
+/* ---------- 產生卡片 ---------- */
+const CARDS=[];
+function add(deck,id,ask,prompt,answer,pool,explain){CARDS.push({deck,id:deck+":"+id,ask,prompt,answer,pool,explain})}
+MENU.forEach(m=>{
+ add("menu","fl-"+m.short,"這是哪一支豆子的風味？",flv(m.fl)+`<dl><dt>處理</dt><dd>${m.proc}</dd><dt>海拔</dt><dd>${m.alt}</dd></dl>`,m.zh,MENU.map(x=>x.zh),`${m.zh}：${m.fl.join("、")}。${m.note}。`);
+ add("menu","pr-"+m.short,`「${m.zh}」的處理法是？`,"",m.proc,["蜜處理","水洗","日曬","厭氧"],`${m.zh} 是${m.proc}，風味 ${m.fl.join("、")}。`);
+});
+add("menu","alt","菜單上四支阿里山藝伎的海拔大約是？","",
+ "1200 m",["1200 m","2300 m","1800 m","600 m"],"阿里山這幾支都在 1200 m，以藝伎來說偏低，風味偏甜感與茶感；哥倫比亞 Nariño 那支則在 2300 m。");
+D.origins.forEach(o=>{
+ add("origin","fl-"+o.zh,"哪個產地？",flv(o.fl)+`<dl><dt>海拔</dt><dd>${esc(o.alt)}</dd><dt>處理</dt><dd>${esc(o.proc)}</dd></dl>`,o.zh,D.origins.map(x=>x.zh),`${o.zh}（${o.en}，${o.c}）：${o.fl.join("、")}。代表品種：${o.vars}。`);
+ add("origin","var-"+o.zh,`「${o.zh}」的代表品種是？`,"",o.vars,D.origins.map(x=>x.vars),`${o.zh} 海拔 ${o.alt}，處理法以${o.proc}為主。`);
+});
+D.vars.forEach(v=>{
+ add("var","d-"+v.zh,"這是哪個品種？",esc(mask(v.d,[v.zh,v.en]))+flv(v.fl),v.zh,D.vars.map(x=>x.zh),`${v.zh}（${v.en}），${v.g}。來源：${v.from}。`);
+ add("var","g-"+v.zh,`「${v.zh}」屬於哪個品系？`,"",v.g,[...new Set(D.vars.map(x=>x.g))],`${v.zh}：${v.d}`);
+});
+D.farms.forEach(f=>{
+ add("farm","c-"+f.zh,`「${f.zh}」（${f.en}）在哪個國家？`,"",f.c,[...new Set(D.farms.map(x=>x.c))],`${f.zh}位於${f.c} ${f.loc||""}。${f.d}`);
+ add("farm","d-"+f.zh,"這是哪個莊園？",esc(mask(f.d,[f.zh,f.en,f.zh.replace(/莊園|處理站|水洗站|微處理廠|農場$/,"")]))+`<dl><dt>國家</dt><dd>${esc(f.c)}</dd></dl>`,f.zh,D.farms.filter(x=>x.c===f.c).map(x=>x.zh).concat(D.farms.map(x=>x.zh)),`${f.zh}（${f.en}），${f.c} ${f.loc||""}。`);
+});
+D.procs.forEach(p=>{
+ add("proc","s-"+p.zh,"這是哪一種處理法？",esc(mask(p.sum,[p.zh,p.en,...p.zh.split("／")])),p.zh,D.procs.map(x=>x.zh),`${p.zh}（${p.en}）：${p.sum}`);
+});
+D.gear.forEach(g=>{
+ const brand=g.b.split(/[・、（]/)[0].trim();
+ const names=[g.n,brand,...g.n.split(" ").filter(w=>w.length>2)];
+ const sp=g.sp.map(r=>`<dt>${esc(r[0])}</dt><dd>${esc(mask(r[1],names))}</dd>`).join("");
+ add("gear","d-"+g.n,`這是哪個${g.cat==="濾杯與沖煮"?"沖煮器具":g.cat}？`,esc(mask(g.d,names))+`<dl>${sp}</dl>`,g.n,D.gear.filter(x=>x.cat===g.cat).map(x=>x.n),`${g.n}（${g.b}，${g.sub}）。${g.f||""}`);
+ if(!/通用器具|設計|Jura/.test(g.b))add("gear","b-"+g.n,`「${g.n}」的品牌產地是？`,"",g.b,D.gear.filter(x=>!/通用器具|設計/.test(x.b)).map(x=>x.b),`${g.n}：${g.d}`);
+});
+D.prin.forEach(p=>{
+ add("prin",p.cat+"-"+p.label,`這是哪一種${p.cat}結構／原理？`,esc(mask(p.p,[p.label,p.h,...p.h.split(" ")])),p.h,D.prin.filter(x=>x.cat===p.cat).map(x=>x.h),`${p.h}：${p.p}`);
+});
+/* ---------- 儲存 ---------- */
+const store={get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+const ST=store.get("cr-state",{cards:{},decks:Object.fromEntries(DECKS.map(d=>[d.id,true])),newPerDay:10,days:{},newDone:{}});
+DECKS.forEach(d=>{if(!(d.id in ST.decks))ST.decks[d.id]=true});
+const save=()=>store.set("cr-state",ST);
+const today=()=>{const d=new Date();return Math.floor((d.getTime()-d.getTimezoneOffset()*60000)/864e5)};
+const IV=[0,1,3,7,14,30,60,120];
+const isNew=c=>!ST.cards[c.id];
+const isDue=c=>ST.cards[c.id]&&ST.cards[c.id].due<=today();
+function newLeft(){return Math.max(0,ST.newPerDay-(ST.newDone[today()]||0))}
+function buildSession(){
+ const on=CARDS.filter(c=>ST.decks[c.deck]);
+ const due=on.filter(isDue).sort((a,b)=>ST.cards[a.id].due-ST.cards[b.id].due).slice(0,30);
+ let fresh=on.filter(isNew);
+ // 依牌組輪流挑新卡，菜單牌組優先
+ const by={};fresh.forEach(c=>(by[c.deck]=by[c.deck]||[]).push(c));
+ const order=DECKS.map(d=>d.id).filter(id=>by[id]);const pick=[];let n=newLeft();
+ while(n>0&&order.some(id=>by[id].length)){for(const id of order){if(n<=0)break;if(by[id].length){pick.push(by[id].shift());n--}}}
+ const all=due.concat(pick);
+ for(let i=all.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[all[i],all[j]]=[all[j],all[i]]}
+ return all;
+}
+function streak(){let s=0,d=today();if(!ST.days[d])d--;while(ST.days[d]){s++;d--}return s}
+/* ---------- 畫面 ---------- */
+const $=s=>document.querySelector(s);
+let S=null;
+function toast(t){const e=$("#toast");e.textContent=t;e.classList.add("on");clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove("on"),1600)}
+function home(){
+ S=null;
+ const on=CARDS.filter(c=>ST.decks[c.deck]);
+ const due=on.filter(isDue).length,nl=Math.min(newLeft(),on.filter(isNew).length);
+ const total=due+nl;
+ $("#app").innerHTML=`
+ <header><h1>咖啡記憶卡<small>豆子 × 器材，每天背一點</small></h1><div style="display:flex;gap:6px"><button class="icon" data-act="share">🔗 分享</button><button class="icon" data-act="backup">☁ 備份</button></div></header>
+ <div class="hero">
+  <div class="row"><div><div class="n">${total}</div><div class="lab">今日待背</div></div><div><div class="n" style="font-size:26px">${due}</div><div class="lab">複習</div></div><div><div class="n" style="font-size:26px">${nl}</div><div class="lab">新卡</div></div><div style="margin-left:auto;text-align:right"><div class="n" style="font-size:26px">🔥${streak()}</div><div class="lab">連續天數</div></div></div>
+  <button class="go" data-act="start" ${total?"":"disabled"}>${total?"開始今天的複習":"今天都背完了 ☕"}</button>
+  <div class="sub">${total?"答錯的卡會在這一輪最後再出一次，明天也會再出現":"明天再來，或在下面多開一點新卡"}</div>
+ </div>
+ <h2>牌組</h2>
+ ${DECKS.map(d=>{const cs=CARDS.filter(c=>c.deck===d.id);const learned=cs.filter(c=>ST.cards[c.id]).length;const mast=cs.filter(c=>ST.cards[c.id]&&ST.cards[c.id].box>=3).length;
+  return `<div class="deck"><div class="em">${d.em}</div><div class="info"><div class="t">${d.name}</div><div class="s">${d.desc}・已學 ${learned}/${cs.length}・熟記 ${mast}</div><div class="bar"><i style="width:${cs.length?mast/cs.length*100:0}%"></i></div></div><button class="sw" data-act="deck" data-v="${d.id}" aria-pressed="${!!ST.decks[d.id]}" aria-label="${d.name}"></button></div>`}).join("")}
+ <h2>設定</h2>
+ <div class="set"><span>每天新卡數</span><div class="step"><button data-act="np" data-v="-5">−</button><b>${ST.newPerDay}</b><button data-act="np" data-v="5">＋</button></div></div>
+ <div class="set"><span>多背一輪新卡（今天）</span><button class="icon" data-act="more">＋10 張</button></div>
+ <div class="sig">Made by Jim Lu</div>`;
+}
+function start(){const q=buildSession();if(!q.length){toast("目前沒有要背的卡");return}S={q,i:0,right:0,wrong:[],answered:false,retry:new Set()};card()}
+function opts(c){
+ const pool=[...new Set(c.pool.filter(x=>x!==c.answer))];
+ for(let i=pool.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[pool[i],pool[j]]=[pool[j],pool[i]]}
+ // 莊園題優先同國家
+ const o=[c.answer,...pool.slice(0,3)];
+ for(let i=o.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[o[i],o[j]]=[o[j],o[i]]}
+ return o;
+}
+function card(){
+ const c=S.q[S.i];S.answered=false;S.opts=opts(c);
+ const d=DECKS.find(x=>x.id===c.deck);
+ $("#app").innerHTML=`
+ <div class="top"><button class="x" data-act="home" aria-label="離開">✕</button><div class="prog"><i style="width:${S.i/S.q.length*100}%"></i></div><div class="cnt">${S.i+1}/${S.q.length}</div></div>
+ <div class="q"><span class="tag ${isNew(c)?"new":""}">${d.em} ${d.name}${isNew(c)?"・新卡":""}</span>
+  <div class="ask ${c.prompt?"":"solo"}">${esc(c.ask)}</div>${c.prompt?`<div class="prompt">${c.prompt}</div>`:""}</div>
+ <div class="opts">${S.opts.map((o,i)=>`<button class="opt" data-act="pick" data-v="${i}">${esc(o)}</button>`).join("")}</div>
+ <div id="after"></div>`;
+}
+function pick(i){
+ if(S.answered)return;S.answered=true;
+ const c=S.q[S.i],ok=S.opts[i]===c.answer,t=today();
+ document.querySelectorAll(".opt").forEach((b,k)=>{b.disabled=true;if(S.opts[k]===c.answer)b.classList.add("ok");else if(k===i)b.classList.add("bad")});
+ const firstTime=!S.retry.has(c.id);
+ if(firstTime){
+  const st=ST.cards[c.id];
+  if(!st){ST.newDone[t]=(ST.newDone[t]||0)+1}
+  let box=st?st.box:0;
+  box=ok?Math.min(box+1,IV.length-1):Math.max(1,Math.floor(box/2));
+  ST.cards[c.id]={box,due:t+(ok?IV[box]:1)};
+  if(ok)S.right++;else{S.wrong.push(c);S.retry.add(c.id);S.q.push(c)}
+  ST.days[t]=1;save();
+ }
+ $("#after").innerHTML=`<div class="fb ${ok?"ok":"bad"}"><b>${ok?"答對了":"答案是："+esc(c.answer)}</b>${esc(c.explain)}</div><button class="next" data-act="next">${S.i+1<S.q.length?"下一題":"看結果"}</button>`;
+ $("#after").scrollIntoView({behavior:"smooth",block:"nearest"});
+}
+function next(){S.i++;if(S.i<S.q.length)card();else done()}
+function done(){
+ const n=S.q.length-S.wrong.length,pct=n?Math.round(S.right/n*100):0;
+ $("#app").innerHTML=`<div class="done"><div class="big">${pct>=80?"🏆":pct>=50?"☕":"🌱"}</div><div class="sc">${S.right} / ${n}</div><p>答對率 ${pct}%・連續 ${streak()} 天</p>
+ ${S.wrong.length?`<div class="miss"><b>今天答錯的</b><ul>${S.wrong.map(c=>`<li>${esc(c.answer)}</li>`).join("")}</ul><div style="color:var(--mute);font-size:12px">明天會再出現</div></div>`:""}
+ <button class="next" data-act="home">回首頁</button></div>`;
+}
+document.addEventListener("click",e=>{
+ const b=e.target.closest("[data-act]");if(!b)return;const a=b.dataset.act,v=b.dataset.v;
+ if(a==="start")start();
+ else if(a==="home")home();
+ else if(a==="pick")pick(+v);
+ else if(a==="next")next();
+ else if(a==="deck"){ST.decks[v]=!ST.decks[v];save();home()}
+ else if(a==="np"){ST.newPerDay=Math.max(0,Math.min(50,ST.newPerDay+ +v));save();home()}
+ else if(a==="more"){const t=today();ST.newDone[t]=(ST.newDone[t]||0)-10;save();home();toast("今天多開 10 張新卡")}
+ else if(a==="share"){navigator.clipboard.writeText(location.href.split("#")[0]).then(()=>toast("已複製連結"),()=>toast("無法複製，請從網址列複製"))}
+ else if(a==="backup"){$("#code").value=btoa(unescape(encodeURIComponent(JSON.stringify(ST))));$("#sheet").classList.add("on")}
+});
+$("#close").onclick=()=>$("#sheet").classList.remove("on");
+$("#cp").onclick=()=>navigator.clipboard.writeText($("#code").value).then(()=>toast("已複製備份碼"),()=>toast("請長按文字框手動複製"));
+$("#im").onclick=()=>{try{const o=JSON.parse(decodeURIComponent(escape(atob($("#code").value.trim()))));if(!o.cards)throw 0;Object.assign(ST,o);save();$("#sheet").classList.remove("on");home();toast("已匯入進度")}catch(e){toast("備份碼格式不對")}};
+let lastT=0;document.addEventListener("touchend",e=>{const n=Date.now();if(n-lastT<300)e.preventDefault();lastT=n},{passive:false});
+home();
+</script>
+<script>/*offline*/if("serviceWorker"in navigator)navigator.serviceWorker.register("../sw.js",{scope:"../"}).catch(function(){});</script>
+</body>
+</html>

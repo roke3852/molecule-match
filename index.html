@@ -87,6 +87,7 @@ footer{margin-top:28px;font-size:12px;color:var(--mute);text-align:center;line-h
     <div>
       <h1>Roke 的 App</h1>
       <div class="sub">點一下打開・☆ 加入最愛・🔗 複製連結・長按可拖曳排序</div>
+      <div class="sub" id="offline" style="margin-top:-8px;font-size:13px"></div>
     </div>
     <button class="refresh" id="refreshBtn" aria-label="重新整理"><span class="r">↻</span>更新</button>
   </div>
@@ -117,7 +118,7 @@ footer{margin-top:28px;font-size:12px;color:var(--mute);text-align:center;line-h
   <footer>按右上角「↻ 更新」會重新抓這頁和所有 App 的最新版。<br>長按卡片可拖曳排序；按「編輯」可換分類（只記在這台裝置）。<br>新增或更新 App：在這頁的 APPS 清單加一行或改 ver / updated（日期＋時間）/ note。<br>版本號一變，首頁就會在那個 App 上顯示「新版」。<br><span id="hubVer"></span></footer>
 </main>
 <script>
-const HUB_VER = "2.4";
+const HUB_VER = "2.5";
 /* 分類：App 的 cat 填這裡的 id；順序就是分類標籤與分組的順序 */
 const CATS = [
   { id:"coffee", name:"咖啡", icon:"☕" },
@@ -158,7 +159,8 @@ const APPS = [
   { path:"coffee-terroir/",     name:"咖啡風土圖鑑",   desc:"產地、品種、莊園介紹（附 Google Maps），處理法與烘豆互動教學，咖啡知識消消樂", icon:"🌍", color:"#f4ede2", cat:"coffee", tag:"咖啡", ver:"1.12", updated:"2026-11-17 13:55", note:"新增名字自動雲端存檔：輸入名字（可設 4 位數密碼）後，消消樂、配方挑戰星星與烘焙紀錄自動上傳，換裝置輸入同名即可接續" },
   { path:"grinder-guide/",      name:"磨豆機拆裝教學", desc:"C40、ZP6 Special 拆解與組合，一步一步圖解＋限時挑戰", icon:"🔧", color:"#e8e2d8", cat:"coffee", tag:"咖啡", ver:"1.3", updated:"2026-11-15 23:45", note:"挑戰加入固定、旋轉方向與轉三下的動作；C40 可選固定搖柄或固定三爪" },
   { path:"bean-hunter/",        name:"咖啡尋豆師",     desc:"尋豆師模擬遊戲：飛產地、參訪莊園、杯測、驗豆、議價、競標；主線故事、莊園與客戶對話、病蟲害、生涯升級與生豆圖鑑；背景音樂與音效", icon:"🧭", color:"#dfe9dc", cat:"coffee", tag:"遊戲", ver:"1.4", updated:"2026-11-17 23:30", note:"新增由左向右滑回上一頁（莊園→產地→地圖，也能關掉教學、生涯頁、訂單）；左下角「訂單」按鈕隨時可查看訂單與採購進度" },
-  { path:"gear-atlas/",         name:"咖啡器材圖鑑",   desc:"磨豆機、濾杯、義式咖啡機、烘焙設備：原理圖解、58 項代表器材、並排比較、小測驗、自訂照片", icon:"⚙️", color:"#e3e8ee", cat:"coffee", tag:"咖啡", ver:"1.3", updated:"2026-11-17 01:15", note:"新增 Google 雲端同步：收藏、照片與測驗紀錄存到自己的雲端硬碟，換手機也看得到" },
+  { path:"gear-atlas/",         name:"咖啡器材圖鑑",   desc:"磨豆機、濾杯、義式咖啡機、烘焙設備：原理圖解、59 項代表器材、並排比較、小測驗、自訂照片", icon:"⚙️", color:"#e3e8ee", cat:"coffee", tag:"咖啡", ver:"1.4", updated:"2026-11-21 14:25", note:"濾杯與沖煮新增「自動手沖機」分類：HIROIA Samantha II 智慧手沖機" },
+  { path:"coffee-recall/",      name:"咖啡記憶卡",     desc:"每天抽卡複習咖啡知識：阿里山藝伎盲測、產地、品種、莊園、處理法、器材偵探與原理，共 314 張卡，答錯隔天再出", icon:"🃏", color:"#f3e7d8", cat:"coffee", tag:"咖啡", ver:"1.0", updated:"2026-11-21 14:25", note:"新 App：間隔重複複習，題庫來自咖啡風土圖鑑與咖啡器材圖鑑" },
   { path:"smell-training/",     name:"嗅覺練習日誌",   desc:"香氣材料嗅覺練習與紀錄", icon:"👃", color:"#fce7f3", cat:"coffee", tag:"練習", ver:"1.0", updated:"2026-11-14 10:17" },
   { path:"yoshi-combos/",       name:"耀西連招手冊",   desc:"任天堂明星大亂鬥 耀西連招整理", icon:"🦖", color:"#d9f99d", cat:"game", tag:"遊戲", ver:"1.0", updated:"2026-11-14 10:17" },
   { path:"us-market/",          name:"美股大事圖解", desc:"美股重大資訊圖解：Anthropic IPO、Nvidia 換帥與新加坡營收、聯準會升息、期中選舉；美股歷史空頭與佈局時機分析；各大機構與知名分析師近期發言、多空比例、接下來要盯的日子；可收藏與自己新增紀錄", icon:"📰", color:"#dbe8f8", cat:"invest", tag:"投資", ver:"1.6.30", updated:"2026-11-21 14:10", note:"每日導覽：選完一題會再問「還想知道哪一件」，可繼續選或按沒有了" },
@@ -515,5 +517,13 @@ render();
 </script>
 <!-- Made by Jim Lu -->
 <div class="jl-sig" style="text-align:center;font-size:11px;line-height:1.4;letter-spacing:.08em;opacity:.6;padding:14px 12px;color:inherit;font-family:inherit">Made by <b style="font-weight:700">Jim Lu</b></div>
+<script>/*offline*/
+(function(){var el=document.getElementById("offline");if(!("serviceWorker"in navigator)){return}
+function show(d){if(!el)return;el.textContent=d.cached>=d.total?"📶 全部 "+d.total+" 個檔案已存到手機，沒網路也能玩":"⏳ 正在存到手機，供離線使用（"+d.cached+"/"+d.total+"）"}
+navigator.serviceWorker.addEventListener("message",function(e){if(e.data&&e.data.type==="status"){show(e.data);if(e.data.cached<e.data.total)setTimeout(ask,1500)}});
+function ask(){var c=navigator.serviceWorker.controller;if(c)c.postMessage("status")}
+navigator.serviceWorker.register("sw.js",{scope:"./"}).then(function(){return navigator.serviceWorker.ready}).then(function(){if(navigator.serviceWorker.controller)ask();else navigator.serviceWorker.addEventListener("controllerchange",ask)}).catch(function(){});
+window.addEventListener("offline",function(){if(el)el.textContent="📴 目前離線，使用存在手機裡的版本"});
+})();</script>
 </body>
 </html>
