@@ -784,16 +784,17 @@ h1,h2,h3{letter-spacing:.02em}
 .labtabs button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
 .labtabs .sep{display:none}
 /* --- title --- */
-#titleOv{position:fixed;inset:0;z-index:60;background:#0d1420;color:#fff;overflow:hidden;display:flex;flex-direction:column;align-items:center;cursor:pointer;-webkit-user-select:none;user-select:none;transition:opacity .45s}
+#titleOv{position:fixed;inset:0;z-index:60;background:#0d1420;color:#fff;overflow:hidden;display:flex;flex-direction:column;align-items:center;cursor:default;-webkit-user-select:none;user-select:none;transition:opacity .45s}
 #titleOv.out{opacity:0;pointer-events:none}
 #titleCv{position:absolute;inset:0;width:100%;height:100%;image-rendering:pixelated;image-rendering:crisp-edges}
 .t-logo{position:relative;margin-top:max(11vh,calc(env(safe-area-inset-top,0px) + 44px));text-align:center;animation:tRise 1.4s cubic-bezier(.2,.7,.2,1) .4s both;transition:transform .4s,margin .4s}
 .t-logo .en{font-family:var(--f-mono);font-style:italic;font-size:15px;letter-spacing:.08em;color:#d9bd86}
 .t-logo h1{font-family:var(--f-display);font-weight:900;font-size:clamp(32px,10.6vw,72px);line-height:1.15;letter-spacing:.08em;padding-left:.08em;margin:10px 0 12px;white-space:nowrap;color:#f3e9d6;text-shadow:0 2px 0 #0d1420,0 6px 24px rgba(13,20,32,.7)}
 .t-logo .tag{display:inline-block;font-family:var(--f-display);font-weight:500;font-size:13px;letter-spacing:.42em;padding:8px 0 0 .42em;color:#d9bd86;border-top:1px solid rgba(217,189,134,.55);min-width:60%}
-.t-start{position:absolute;left:0;right:0;top:43vh;text-align:center;font-family:var(--f-display);font-weight:500;font-size:15px;letter-spacing:.3em;padding-left:.3em;color:#f3e9d6;text-shadow:0 1px 0 #0d1420,0 0 14px rgba(13,20,32,.9);animation:tBlink 2.4s ease-in-out 2s infinite both}
+.t-start{position:absolute;left:0;right:0;margin:0 auto;width:max-content;top:43vh;text-align:center;background:rgba(13,20,32,.78);border:1.5px solid rgba(217,189,134,.9);border-radius:4px;padding:12px 22px 12px calc(22px + .3em);cursor:pointer;box-shadow:0 6px 24px rgba(0,0,0,.45);animation:tGlow 2.4s ease-in-out infinite!important;font-family:var(--f-display);font-weight:500;font-size:15px;letter-spacing:.3em;padding-left:.3em;color:#f3e9d6;text-shadow:0 1px 0 #0d1420,0 0 14px rgba(13,20,32,.9);animation:tBlink 2.4s ease-in-out 2s infinite both}
+@keyframes tGlow{0%,100%{box-shadow:0 6px 24px rgba(0,0,0,.45),0 0 0 0 rgba(217,189,134,0)}50%{box-shadow:0 6px 24px rgba(0,0,0,.45),0 0 18px 2px rgba(217,189,134,.45)}}
 .t-foot{position:absolute;left:0;right:0;bottom:max(14px,env(safe-area-inset-bottom,0px));text-align:center;font-family:var(--f-mono);font-size:11px;letter-spacing:.08em;color:rgba(243,233,214,.5)}
-#titleOv.login{cursor:default}
+#titleOv.login{cursor:default;overflow-y:auto}
 #titleOv.login .t-logo{transform:scale(.66);margin-top:max(3vh,env(safe-area-inset-top,0px))}
 #titleOv.login .t-start{display:none}
 .t-login{position:relative;width:min(88vw,380px);margin-top:2vh;background:rgba(26,21,18,.95);border:1px solid rgba(217,189,134,.7);box-shadow:0 18px 50px rgba(0,0,0,.55);border-radius:4px;padding:20px 18px;display:flex;flex-direction:column;gap:12px;animation:tPop .25s ease-out both;max-height:62vh;overflow:auto;cursor:default}
@@ -1247,7 +1248,7 @@ window.BGM=(()=>{
 <div id="titleOv" data-noswipe role="dialog" aria-label="開始畫面">
   <canvas id="titleCv" aria-hidden="true"></canvas>
   <div class="t-logo"><div class="en">Pour-over Coffee Lab</div><h1>手沖咖啡實驗室</h1><div class="tag">一杯好咖啡的冒險</div></div>
-  <div class="t-start" id="tStart">點一下畫面開始</div>
+  <button type="button" class="t-start" id="tStart">▶ 進入咖啡實驗室</button>
   <div class="t-login" id="tLogin" hidden>
     <h2>咖啡師登記</h2>
     <div class="players" id="tPlayers"></div>
@@ -1256,7 +1257,7 @@ window.BGM=(()=>{
     <div class="err" id="tErr"></div>
   </div>
   <button class="t-more" id="tMore" type="button" aria-label="咖啡宇宙：更多咖啡 App 與遊戲">咖啡宇宙</button>
-  <div class="t-foot">© 2026 Jim Lu　ver. 6.9</div>
+  <div class="t-foot">© 2026 Jim Lu　ver. 7.0</div>
 </div>
 <nav class="modes" aria-label="導覽"><div class="in">
   <button class="homebtn" id="homeBtn" type="button" hidden>‹ 主選單</button>
@@ -5551,11 +5552,7 @@ function openLogin(){ov.classList.add('login');$('tLogin').hidden=false;renderLo
 function enter(name){name=String(name||'').trim().slice(0,12);if(!name){$('tErr').textContent='請先輸入名字';return;}
   if(!DB.players[name])DB.players[name]=fresh();me=name;try{localStorage.setItem(PK,me);}catch(e){}persist();
   SFX.p('enter');endTitle();window.appShow('hub',true);scrollTo(0,0);}
-ov.addEventListener('click',e=>{if(ov.classList.contains('login'))return;
-  // 底部「咖啡宇宙」按鈕一帶是安全區：按偏了也不會開始遊戲；剛關掉咖啡宇宙的那一下也不算
-  const m=$('tMore');if(m&&m.offsetParent){const r=m.getBoundingClientRect();if(e.clientY>r.top-56)return;}
-  if(Date.now()-(window._cuClosedAt||0)<700)return;
-  jingle();openLogin();});
+$('tStart').addEventListener('click',e=>{e.stopPropagation();if(ov.classList.contains('login'))return;jingle();openLogin();});
 $('tLogin').addEventListener('click',e=>{e.stopPropagation();const b=e.target.closest('.pl');if(b)enter(b.dataset.n);});
 $('tGo').onclick=()=>enter($('tName').value);
 $('tName').addEventListener('keydown',e=>{if(e.key==='Enter')enter($('tName').value);});
@@ -8012,7 +8009,7 @@ if(window.PREF){PREF.bar('gcPref',()=>$('gxChart'));PREF.on(()=>render());
 .t-more{position:absolute;left:0;right:0;margin:0 auto;width:max-content;bottom:calc(max(14px,env(safe-area-inset-bottom,0px)) + 30px);display:flex;align-items:center;gap:8px;background:rgba(13,20,32,.72);border:1px solid rgba(217,189,134,.65);color:#f3e9d6;font-family:var(--f-display);font-weight:700;font-size:14px;letter-spacing:.18em;padding:10px 18px 10px 14px;border-radius:2px;box-shadow:0 0 0 3px rgba(13,20,32,.6),0 6px 20px rgba(0,0,0,.45);cursor:pointer;white-space:nowrap;animation:tRise 1.2s ease-out 1.2s both}
 .t-more svg{width:20px;height:20px;image-rendering:pixelated}
 .t-more small{font-family:var(--f-mono);font-size:11px;font-weight:400;letter-spacing:.05em;color:#d9bd86}
-#titleOv.login .t-more{display:none}
+@media (max-height:640px){#titleOv.login .t-more,#titleOv.login .t-foot{position:relative;bottom:auto;margin:12px auto 0;flex:none}}
 #cuOv{position:fixed;inset:0;z-index:80;background:#0d1420;color:#ece3d3;overflow-y:auto;-webkit-overflow-scrolling:touch;font-family:var(--f-body,inherit)}
 #cuOv[hidden]{display:none}
 .cu-wrap{max-width:620px;margin:0 auto;padding:calc(env(safe-area-inset-top,0px) + 14px) 14px calc(env(safe-area-inset-bottom,0px) + 30px)}
