@@ -1004,12 +1004,12 @@ function ambience(kind){
   if(!kind)return;const a=AC,g=a.createGain();g.gain.value=0.0001;g.connect(AU.mus);const nodes=[];
   const loop=(buf,type,f,q,lvl)=>{const s=a.createBufferSource();s.buffer=buf;s.loop=true;const fl=a.createBiquadFilter();fl.type=type;fl.frequency.value=f;fl.Q.value=q||.7;const gg=a.createGain();gg.gain.value=lvl;s.connect(fl);fl.connect(gg);gg.connect(g);s.start();nodes.push(s)};
   let iv=null;
-  if(kind==='rain'){loop(AU.noise,'bandpass',2500,.4,.35);loop(AU.brown,'lowpass',400,.7,.5);iv=setInterval(()=>{if(Math.random()<.6)noiseHit(g,AC.currentTime+Math.random()*.2,.03,.25,'highpass',4000+Math.random()*3000)},120)}
+  if(kind==='rain'){loop(AU.noise,'bandpass',1800,.5,.18);loop(AU.brown,'lowpass',350,.7,.35);iv=setInterval(()=>{if(Math.random()<.35)noiseHit(g,AC.currentTime+Math.random()*.2,.025,.12,'bandpass',3000+Math.random()*2000,1.5)},160)}
   if(kind==='fire'){loop(AU.brown,'lowpass',500,.7,.8);iv=setInterval(()=>{if(Math.random()<.5)noiseHit(g,AC.currentTime,.015,.5+Math.random()*.4,'bandpass',1500+Math.random()*2500,2)},140)}
   if(kind==='crickets'){loop(AU.brown,'lowpass',300,.7,.25);iv=setInterval(()=>{if(Math.random()<.55){const t=AC.currentTime,f=4200+Math.random()*600;for(let i=0;i<3;i++)voice(g,'sine',f,t+i*.05,.004,.05,.03)}},380)}
   if(kind==='crowd'){loop(AU.brown,'bandpass',600,.6,.9);loop(AU.noise,'bandpass',1200,.5,.06)}
   if(kind==='city'){loop(AU.brown,'lowpass',250,.7,.9);iv=setInterval(()=>{if(Math.random()<.08){const t=AC.currentTime;const o=a.createOscillator(),gg=a.createGain();o.frequency.setValueAtTime(380,t);o.frequency.linearRampToValueAtTime(300,t+1.5);o.connect(gg);gg.connect(g);env(gg,t,.3,.015,1.6);o.start(t);o.stop(t+2)}},1000)}
-  g.gain.setTargetAtTime(kind==='rain'?.5:.45,a.currentTime,.8);
+  g.gain.setTargetAtTime(kind==='rain'?.28:kind==='fire'?.32:.3,a.currentTime,.8);
   MU.amb={g,stop(){nodes.forEach(n=>{try{n.stop()}catch(e){}});clearInterval(iv);g.disconnect()}};
 }
 function playTheme(name){
