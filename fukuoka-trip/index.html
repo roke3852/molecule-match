@@ -1250,8 +1250,22 @@ const APPV='20261121s';
 
 (function(){function chk(){if(!/^https?:/.test(location.protocol))return;fetch(location.pathname+'?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.text():'').then(t=>{const m=t.match(/const APPV='([^']+)'/);if(!m||m[1]===APPV)return;let tried='';try{tried=sessionStorage.getItem('fukV')||''}catch(e){}if(tried===m[1])return;try{sessionStorage.setItem('fukV',m[1])}catch(e){}location.replace(location.pathname+'?v='+m[1]+location.hash)}).catch(()=>{})}
  chk();document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')chk()})})();
-const S={get(k,d){try{const v=localStorage.getItem('fuk26_'+k);return v==null?d:JSON.parse(v)}catch(e){return d}},
-         set(k,v){try{localStorage.setItem('fuk26_'+k,JSON.stringify(v))}catch(e){}if(window.famSync)famSync(k,v)}};
+/* ---------- 照片存放：IndexedDB（避免 localStorage 5MB 上限） ---------- */
+const PH={};let PHready=false,PHidb=true;
+const phDB=(()=>{let p=null;return()=>p||(p=new Promise((res,rej)=>{try{const r=indexedDB.open('fuk26_photos',1);r.onupgradeneeded=()=>r.result.createObjectStore('p');r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)}catch(e){rej(e)}}))})();
+function phPut(h,u){return phDB().then(db=>new Promise((res,rej)=>{const t=db.transaction('p','readwrite');t.objectStore('p').put(u,h);t.oncomplete=res;t.onerror=()=>rej(t.error);t.onabort=()=>rej(t.error)}))}
+function phStrip(g){const o={};for(const k in g||{}){const x=g[k];if(!x||!x.h)continue;if(x.u&&PH[x.h]!==x.u){PH[x.h]=x.u;phPut(x.h,x.u).catch(()=>{toast('⚠️ 照片空間不足，這張照片沒有存成功')})}o[k]=PHidb?{h:x.h}:{h:x.h,u:x.u||PH[x.h]||null}}return o}
+function phFill(g){if(g&&typeof g==='object')for(const k in g){const x=g[k];if(x&&x.h)x.u=PH[x.h]||x.u||null}return g}
+const S={get(k,d){try{const v=localStorage.getItem('fuk26_'+k);if(v==null)return d;const o=JSON.parse(v);return k==='gphoto'?phFill(o):o}catch(e){return d}},
+         set(k,v){try{localStorage.setItem('fuk26_'+k,JSON.stringify(k==='gphoto'?phStrip(v):v))}catch(e){}if(window.famSync)famSync(k,v)}};
+(function phInit(){
+ const done=()=>{PHready=true;setTimeout(()=>{['drawGifts','drawFoods','drawCafes'].forEach(f=>{try{window[f]&&window[f]()}catch(e){}});try{if(typeof renderDay==='function'&&!editing)renderDay(true)}catch(e){}try{window.__phSync&&window.__phSync()}catch(e){}},0)};
+ phDB().then(db=>new Promise(res=>{const t=db.transaction('p','readonly'),st=t.objectStore('p'),rq=st.openCursor();rq.onsuccess=()=>{const c=rq.result;if(c){PH[c.key]=c.value;c.continue()}else res()};rq.onerror=()=>res()}))
+ .then(async()=>{let g=null;try{g=JSON.parse(localStorage.getItem('fuk26_gphoto'))}catch(e){}
+   if(g){const legacy=Object.values(g).filter(x=>x&&x.h&&x.u);for(const x of legacy){PH[x.h]=x.u;await phPut(x.h,x.u)}
+    if(legacy.length){const o={};for(const k in g)if(g[k]&&g[k].h)o[k]={h:g[k].h};try{localStorage.setItem('fuk26_gphoto',JSON.stringify(o))}catch(e){}}}
+   done()})
+ .catch(()=>{PHidb=false;done()})})();
 const reloaders=[];
 
 /* ---------- data ---------- */
@@ -2796,7 +2810,7 @@ window.addEventListener('hashchange',route);
 const FB_URL='https://molecule-match-default-rtdb.asia-southeast1.firebasedatabase.app';
 const FS=(function(){
  const KEYS=['done','cafes','shops','xmas','gifts','foods','gphoto','memo','savedNotes','edits','todo','pack','tax','xtabs','xlists','exp'];
- const raw={get(k){try{return localStorage.getItem('fuk26_'+k)}catch(e){return null}},set(k,v){try{localStorage.setItem('fuk26_'+k,v)}catch(e){}},del(k){try{localStorage.removeItem('fuk26_'+k)}catch(e){}}};
+ const raw={get(k){try{const v=localStorage.getItem('fuk26_'+k);return k==='gphoto'&&v?JSON.stringify(phFill(JSON.parse(v))):v}catch(e){return null}},set(k,v){try{localStorage.setItem('fuk26_'+k,k==='gphoto'?JSON.stringify(phStrip(JSON.parse(v))):v)}catch(e){}},del(k){try{localStorage.removeItem('fuk26_'+k)}catch(e){}}};
  const okCode=c=>/^[A-Za-z0-9_-]{8,40}$/.test(c||'');
  const enc=k=>encodeURIComponent(k).replace(/\./g,'%2E'),dec=k=>{try{return decodeURIComponent(k)}catch(e){return k}};
  let code=null,R={},Q={},cache={},joined=false,es=null,state='off',dirty=false,sig='',flushT=null,sending=false,hidAt=0;
@@ -2892,7 +2906,7 @@ const FS=(function(){
   Q['chat/'+id]=JSON.stringify({n:myName,d:dev,t:now,m:t.slice(0,500)});saveQ();el.value='';drawChat('mine');clearTimeout(flushT);flush()}
  let upDone={},upBusy={},getBusy={},phT=null;try{(JSON.parse(raw.get('famUp'))||[]).forEach(h=>upDone[h]=1)}catch(e){}
  const purl=h=>FB_URL+'/trips/'+code+'p/'+h+'.json';
- function photoSync(){if(!code)return;let g=null;try{g=JSON.parse(raw.get('gphoto'))}catch(e){}g=g||{};let miss=false;
+ function photoSync(){if(!code||!PHready)return;let g=null;try{g=JSON.parse(raw.get('gphoto'))}catch(e){}g=g||{};let miss=false;
   for(const id in g){const x=g[id];if(!x||!x.h)continue;
    if(x.u){if(!upDone[x.h]&&!upBusy[x.h]){upBusy[x.h]=1;fetch(purl(x.h),{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(x.u)}).then(r=>{delete upBusy[x.h];if(r.ok){upDone[x.h]=1;raw.set('famUp',JSON.stringify(Object.keys(upDone)))}}).catch(()=>{delete upBusy[x.h]})}}
    else{miss=true;if(getBusy[x.h])continue;getBusy[x.h]=1;
@@ -2900,6 +2914,7 @@ const FS=(function(){
      let cur=null;try{cur=JSON.parse(raw.get('gphoto'))}catch(e){}cur=cur||{};let ch=false;for(const i in cur)if(cur[i]&&cur[i].h===x.h&&!cur[i].u){cur[i].u=d;ch=true}
      if(ch){upDone[x.h]=1;raw.set('gphoto',JSON.stringify(cur));drawGifts();drawFoods();if(typeof renderDay==='function'&&!editing)renderDay(true)}}).catch(()=>{delete getBusy[x.h]})}}
   clearTimeout(phT);if(miss)phT=setTimeout(photoSync,15000)}
+ window.__phSync=photoSync;
  function setState(st){state=st;draw()}
  async function flush(){
   if(!code||sending||!Object.keys(Q).length)return;
