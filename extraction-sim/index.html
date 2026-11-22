@@ -1257,7 +1257,7 @@ window.BGM=(()=>{
     <div class="err" id="tErr"></div>
   </div>
   <button class="t-more" id="tMore" type="button" aria-label="咖啡宇宙：更多咖啡 App 與遊戲">咖啡宇宙</button>
-  <div class="t-foot">© 2026 Jim Lu　ver. 7.1</div>
+  <div class="t-foot">© 2026 Jim Lu　ver. 7.2</div>
 </div>
 <nav class="modes" aria-label="導覽"><div class="in">
   <button class="homebtn" id="homeBtn" type="button" hidden>‹ 主選單</button>
@@ -5443,7 +5443,12 @@ async function afterLogin(){
         ls.set(k,v);if(!same)changed=true;}});
       ls.set(STAMP,String(m.savedAt));
       let recent=false;try{recent=Date.now()-(+sessionStorage.getItem('brewLab.syncReload')||0)<60000;}catch(e){}
-      if(changed&&!recent){await push();try{sessionStorage.setItem(TOKK,JSON.stringify({tok:gTok,exp:gTokExp}));sessionStorage.setItem('brewLab.skipTitle','1');sessionStorage.setItem('brewLab.syncReload',String(Date.now()))}catch(e){}location.reload();return}
+      if(changed&&!recent){await push();
+        // 開始畫面或咖啡宇宙還開著時不要重新載入（會被跳過開場、直接進實驗室），等玩家自己進去後再載入
+        const t=document.getElementById('titleOv'),cu=document.getElementById('cuOv');
+        const reload=()=>{try{sessionStorage.setItem(TOKK,JSON.stringify({tok:gTok,exp:gTokExp}));sessionStorage.setItem('brewLab.skipTitle','1');sessionStorage.setItem('brewLab.syncReload',String(Date.now()))}catch(e){}location.reload();};
+        if((t&&!t.hidden&&!t.classList.contains('out'))||(cu&&!cu.hidden)){window._syncReloadPending=reload;return}
+        reload();return}
     }
     await push();
   }catch(e){note(e.message==='auth'?'Google 連線已過期，再點一次':'⚠️ 讀取 Google 雲端失敗');chip(e.message==='auth'?'wait':'err')}
@@ -5551,7 +5556,7 @@ function renderLogin(){const names=Object.keys(DB.players).sort((a,b)=>(a===me?-
 function openLogin(){ov.classList.add('login');$('tLogin').hidden=false;renderLogin();}
 function enter(name){name=String(name||'').trim().slice(0,12);if(!name){$('tErr').textContent='請先輸入名字';return;}
   if(!DB.players[name])DB.players[name]=fresh();me=name;try{localStorage.setItem(PK,me);}catch(e){}persist();
-  SFX.p('enter');endTitle();window.appShow('hub',true);scrollTo(0,0);}
+  SFX.p('enter');endTitle();window.appShow('hub',true);scrollTo(0,0);if(window._syncReloadPending){const f=window._syncReloadPending;window._syncReloadPending=null;setTimeout(f,600);}}
 $('tStart').addEventListener('click',e=>{e.stopPropagation();if(ov.classList.contains('login'))return;jingle();openLogin();});
 $('tLogin').addEventListener('click',e=>{e.stopPropagation();const b=e.target.closest('.pl');if(b)enter(b.dataset.n);});
 $('tGo').onclick=()=>enter($('tName').value);
@@ -8037,7 +8042,7 @@ if(window.PREF){PREF.bar('gcPref',()=>$('gxChart'));PREF.on(()=>render());
 </style>
 <div id="cuOv" hidden data-noswipe role="dialog" aria-label="咖啡宇宙">
   <div class="cu-wrap">
-    <div class="cu-top"><button class="cu-x" id="cuClose" type="button">✕ 回到實驗室</button></div>
+    <div class="cu-top"><button class="cu-x" id="cuClose" type="button">✕ 關閉</button></div>
     <div class="cu-hero"><canvas id="cuCv" width="200" height="60" aria-hidden="true"></canvas>
       <div class="en">Coffee Universe</div><h2>咖啡宇宙</h2>
       <p>同一位作者做的咖啡 App 與遊戲。<br>從一顆生豆到一杯咖啡，每一站都有一個 App。</p></div>
