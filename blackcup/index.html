@@ -146,7 +146,7 @@ button{font:inherit;color:inherit;touch-action:manipulation}
 .arrsign{position:absolute;transform:translate(-50%,-50%);font-family:"DotGothic16","Noto Sans TC",sans-serif;font-size:12px;color:#f2c94c;white-space:nowrap;letter-spacing:1px}
 .arrlab{position:absolute;transform:translate(-50%,-50%);font-family:"DotGothic16","Noto Sans TC",sans-serif;font-size:11px;color:#cfe0f2;white-space:nowrap;background:rgba(14,17,22,.75);padding:1px 6px}
 .arrlab.dst{color:#fff;background:#d64545}
-.pickHit{position:absolute;width:5.5%;aspect-ratio:1;transform:translate(-50%,-50%);border-radius:50%;background:none;border:0;padding:0;cursor:pointer}
+.pickPad{position:absolute;inset:0;cursor:pointer}
 .cupHit{position:absolute;top:48%;width:15%;aspect-ratio:1;transform:translate(-50%,-50%);border-radius:50%;background:none;border:0;padding:0;cursor:default}
 .cupHit.on{cursor:pointer}
 .shelf{position:absolute;inset:6% 4% 8%;display:flex;gap:4%;align-items:flex-end;justify-content:center}
@@ -2202,15 +2202,17 @@ function actPick(g,t,A){const p=PX(g),now=performance.now();
 function playPick(n){ffwd=false;$('tFF').classList.remove('on');waiting=false;$('box').style.display='none';$('nextBtn').classList.remove('on');
   const A=S.act,cw=$('choices'),tl=$('tvLayer');A.picked=CHERRY.map(()=>0);A.bad=CHERRY.map(()=>0);A.need=CHERRY.filter(c=>c.k==='r').length;A.miss=0;
   cw.classList.add('on');tl.classList.add('click');
-  tl.insertAdjacentHTML('beforeend',CHERRY.map((c,i)=>`<button class="pickHit" data-i="${i}" style="left:${c.x/3.2}%;top:${c.y/2}%" aria-label="果實"></button>`).join(''));
+  tl.insertAdjacentHTML('beforeend','<div class="pickPad" id="pickPad"></div>');
   const say=m=>{cw.innerHTML=`<div class="cq brewq">🍒 點果實，親手摘下紅透的那幾顆</div><div class="bhint">${m}</div>`};
   say('卡洛斯：「像紅酒那種紅，才摘。」');
   const WHY={g:'卡洛斯：「綠的還沒熟，酸得像檸檬。留著。」',y:'卡洛斯：「黃的還差幾天，糖還沒進去。」',o:'卡洛斯：「半紅？再等兩天。」',p:'卡洛斯：「黑掉了，過熟。丟進去，整槽都會有酒臭味。」'};
-  tl.querySelectorAll('.pickHit').forEach(b=>b.onclick=()=>{const i=+b.dataset.i,c=CHERRY[i];if(A.picked[i])return;
-    if(c.k==='r'){A.picked[i]=performance.now();sfx('pop');b.remove();const k=A.picked.filter(x=>x).length;
-      if(k>=A.need){say('卡洛斯：「……還行。明天五點，再來。」');sfx('up');tl.querySelectorAll('.pickHit').forEach(x=>x.remove());setTimeout(()=>{if(!S||S.act!==A)return;cw.classList.remove('on');tl.classList.remove('click');showLine({s:'',t:n.t})},1500)}
+  const pad=$('pickPad');pad.onclick=e=>{const r=pad.getBoundingClientRect(),x=(e.clientX-r.left)/r.width*320,y=(e.clientY-r.top)/r.height*200;let bi=-1,bd=99;
+    CHERRY.forEach((c,k)=>{if(A.picked[k])return;const d=Math.hypot(c.x-x,c.y-y);if(d<bd){bd=d;bi=k}});if(bi>=0&&bd<12)window.pickAt(bi)};
+  window.pickAt=i=>{const c=CHERRY[i];if(A.picked[i]||A.ph==='done')return;
+    if(c.k==='r'){A.picked[i]=performance.now();sfx('pop');const k=A.picked.filter(x=>x).length;
+      if(k>=A.need){A.ph='done';say('卡洛斯：「……還行。明天五點，再來。」');sfx('up');pad.remove();setTimeout(()=>{if(!S||S.act!==A)return;cw.classList.remove('on');tl.classList.remove('click');showLine({s:'',t:n.t})},1500)}
       else say(['好，一顆。','手指輕輕一扭，果實就掉進手心。','又一顆。','樹枝刮了一下手背。','越來越順手了。'][k%5])}
-    else{A.bad[i]=performance.now();A.miss++;sfx('buzz');say(WHY[c.k]+(A.miss>=3?'<br>（提示：只摘最深的那種紅。）':''))}});
+    else{A.bad[i]=performance.now();A.miss++;sfx('buzz');say(WHY[c.k]+(A.miss>=3?'<br>（提示：只摘最深的那種紅。）':''))}};
 }
 function actJeep(g,t,A){const p=PX(g),e=(performance.now()-A.t0)/1000,arrive=Math.min(1,Math.max(0,(e-4.6)/1.4)),spd=1-arrive*.95,X=(e<4.6?e:4.6+(1-Math.pow(1-arrive,2))*1.4*.5)*90;
   const hrs=Math.min(3,Math.floor(e/1.15));const cap=document.getElementById('actCap'),txt=arrive>=1?'抵達帕洛瑪莊園':'吉普車・山路 '+(hrs+1)+' / 4 小時';if(cap&&cap.textContent!==txt)cap.textContent=txt;
