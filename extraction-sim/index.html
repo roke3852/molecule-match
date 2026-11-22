@@ -5551,7 +5551,11 @@ function openLogin(){ov.classList.add('login');$('tLogin').hidden=false;renderLo
 function enter(name){name=String(name||'').trim().slice(0,12);if(!name){$('tErr').textContent='請先輸入名字';return;}
   if(!DB.players[name])DB.players[name]=fresh();me=name;try{localStorage.setItem(PK,me);}catch(e){}persist();
   SFX.p('enter');endTitle();window.appShow('hub',true);scrollTo(0,0);}
-ov.addEventListener('click',e=>{if(ov.classList.contains('login'))return;jingle();openLogin();});
+ov.addEventListener('click',e=>{if(ov.classList.contains('login'))return;
+  // 底部「咖啡宇宙」按鈕一帶是安全區：按偏了也不會開始遊戲；剛關掉咖啡宇宙的那一下也不算
+  const m=$('tMore');if(m&&m.offsetParent){const r=m.getBoundingClientRect();if(e.clientY>r.top-56)return;}
+  if(Date.now()-(window._cuClosedAt||0)<700)return;
+  jingle();openLogin();});
 $('tLogin').addEventListener('click',e=>{e.stopPropagation();const b=e.target.closest('.pl');if(b)enter(b.dataset.n);});
 $('tGo').onclick=()=>enter($('tName').value);
 $('tName').addEventListener('keydown',e=>{if(e.key==='Enter')enter($('tName').value);});
@@ -8103,14 +8107,15 @@ if(window.PREF){PREF.bar('gcPref',()=>$('gxChart'));PREF.on(()=>render());
     raf=requestAnimationFrame(draw)}
   const ov=document.getElementById('cuOv');
   function open(){ov.hidden=false;ov.scrollTop=0;cancelAnimationFrame(raf);raf=requestAnimationFrame(draw);try{history.pushState({cu:1},'')}catch(e){}}
-  function close(){ov.hidden=true;cancelAnimationFrame(raf)}
+  function close(){ov.hidden=true;cancelAnimationFrame(raf);window._cuClosedAt=Date.now()}
   window.openCoffeeUniverse=open;
   document.getElementById('cuClose').addEventListener('click',()=>{if(history.state&&history.state.cu)history.back();else close()});
   window.addEventListener('popstate',()=>{if(!ov.hidden)close()});
   const b=document.getElementById('tMore');
   if(b){b.innerHTML=`${px('cup')}咖啡宇宙 <small>更多 App</small>`;
     b.addEventListener('click',e=>{e.stopPropagation();open()});
-    b.addEventListener('pointerdown',e=>e.stopPropagation());}
+    b.addEventListener('pointerdown',e=>e.stopPropagation());
+    ['touchstart','touchend','mousedown','mouseup'].forEach(t=>b.addEventListener(t,e=>e.stopPropagation()));}
 })();
 </script>
 
