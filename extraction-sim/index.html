@@ -1255,7 +1255,8 @@ window.BGM=(()=>{
     <div class="newrow"><input id="tName" type="text" maxlength="12" placeholder="你的名字" autocomplete="off" enterkeyhint="go"><button class="go" id="tGo" type="button">開始</button></div>
     <div class="err" id="tErr"></div>
   </div>
-  <div class="t-foot">© 2026 Jim Lu　ver. 6.7</div>
+  <button class="t-more" id="tMore" type="button" aria-label="咖啡宇宙：更多咖啡 App 與遊戲">咖啡宇宙</button>
+  <div class="t-foot">© 2026 Jim Lu　ver. 6.8</div>
 </div>
 <nav class="modes" aria-label="導覽"><div class="in">
   <button class="homebtn" id="homeBtn" type="button" hidden>‹ 主選單</button>
@@ -8002,5 +8003,116 @@ if(window.PREF){PREF.bar('gcPref',()=>$('gxChart'));PREF.on(()=>render());
     t=>drawChart(lastPt,t));}
 })();
 </script>
+<!-- 咖啡宇宙：開始畫面「更多 App」 -->
+<style>
+.t-more{position:absolute;left:0;right:0;margin:0 auto;width:max-content;bottom:calc(max(14px,env(safe-area-inset-bottom,0px)) + 30px);display:flex;align-items:center;gap:8px;background:rgba(13,20,32,.72);border:1px solid rgba(217,189,134,.65);color:#f3e9d6;font-family:var(--f-display);font-weight:700;font-size:14px;letter-spacing:.18em;padding:10px 18px 10px 14px;border-radius:2px;box-shadow:0 0 0 3px rgba(13,20,32,.6),0 6px 20px rgba(0,0,0,.45);cursor:pointer;white-space:nowrap;animation:tRise 1.2s ease-out 1.2s both}
+.t-more svg{width:20px;height:20px;image-rendering:pixelated}
+.t-more small{font-family:var(--f-mono);font-size:11px;font-weight:400;letter-spacing:.05em;color:#d9bd86}
+#titleOv.login .t-more{display:none}
+#cuOv{position:fixed;inset:0;z-index:80;background:#0d1420;color:#ece3d3;overflow-y:auto;-webkit-overflow-scrolling:touch;font-family:var(--f-body,inherit)}
+#cuOv[hidden]{display:none}
+.cu-wrap{max-width:620px;margin:0 auto;padding:calc(env(safe-area-inset-top,0px) + 14px) 14px calc(env(safe-area-inset-bottom,0px) + 30px)}
+.cu-top{position:sticky;top:0;z-index:2;display:flex;justify-content:flex-end;padding-top:env(safe-area-inset-top,0px);margin:calc(-1 * env(safe-area-inset-top,0px) - 14px) -14px 0;padding-left:14px;padding-right:14px;background:linear-gradient(#0d1420 75%,rgba(13,20,32,0))}
+.cu-x{background:rgba(13,20,32,.9);border:1px solid #3b4660;color:#f3e9d6;font:inherit;font-size:14px;padding:7px 14px;border-radius:2px;cursor:pointer;margin:8px 0}
+.cu-hero{position:relative;text-align:center;padding:6px 0 18px}
+.cu-hero canvas{width:100%;height:120px;image-rendering:pixelated;display:block;border:1px solid #2b3345}
+.cu-hero .en{font-family:var(--f-mono);font-style:italic;color:#d9bd86;font-size:13px;letter-spacing:.08em;margin-top:14px}
+.cu-hero h2{font-family:var(--f-display);font-weight:900;font-size:30px;letter-spacing:.14em;margin:4px 0 6px;color:#f3e9d6}
+.cu-hero p{margin:0;color:#a59887;font-size:13.5px;line-height:1.7}
+.cu-sec{margin:22px 0 10px;display:flex;align-items:center;gap:10px;font-family:var(--f-display);font-weight:700;font-size:16px;letter-spacing:.2em;color:#d9bd86}
+.cu-sec:after{content:"";flex:1;height:4px;background:repeating-linear-gradient(90deg,#d9bd86 0 4px,transparent 4px 8px);opacity:.45}
+.cu-card{display:block;text-decoration:none;color:inherit;background:linear-gradient(#182133,#131a28);border:1px solid #2b3345;border-radius:3px;padding:14px;margin:10px 0;box-shadow:0 3px 0 #070b12;position:relative}
+.cu-card:active{transform:translateY(2px);box-shadow:none}
+.cu-head{display:flex;gap:12px;align-items:center}
+.cu-ic{flex:none;width:62px;height:62px;border-radius:3px;display:grid;place-items:center;box-shadow:inset 0 0 0 2px rgba(0,0,0,.25)}
+.cu-ic svg{width:48px;height:48px;image-rendering:pixelated}
+.cu-name{font-family:var(--f-display);font-weight:900;font-size:18px;color:#f3e9d6;letter-spacing:.06em}
+.cu-one{font-size:12.5px;color:#d9bd86;margin-top:3px;line-height:1.5}
+.cu-desc{font-size:14px;line-height:1.8;color:#cfc4b2;margin:10px 0 8px}
+.cu-feat{display:flex;flex-wrap:wrap;gap:6px}
+.cu-feat span{font-size:12px;border:1px solid #3b4660;background:#0f1522;color:#bfc6d6;padding:3px 8px;border-radius:2px}
+.cu-go{position:absolute;right:12px;top:14px;font-size:12px;color:#d9bd86;font-family:var(--f-display);font-weight:700}
+.cu-foot{text-align:center;color:#5d6578;font-size:11px;letter-spacing:.1em;margin-top:26px;font-family:var(--f-mono)}
+</style>
+<div id="cuOv" hidden role="dialog" aria-label="咖啡宇宙">
+  <div class="cu-wrap">
+    <div class="cu-top"><button class="cu-x" id="cuClose" type="button">✕ 回到實驗室</button></div>
+    <div class="cu-hero"><canvas id="cuCv" width="200" height="60" aria-hidden="true"></canvas>
+      <div class="en">Coffee Universe</div><h2>咖啡宇宙</h2>
+      <p>同一位作者做的咖啡 App 與遊戲。<br>從一顆生豆到一杯咖啡，每一站都有一個 App。</p></div>
+    <div id="cuList"></div>
+    <div class="cu-foot">© 2026 Jim Lu ・ Coffee Universe</div>
+  </div>
+</div>
+<script>
+(function(){
+  // 像素圖示：每個字元一格，'.' 為空白
+  const PAL={k:'#1a1210',w:'#f3e9d6',c:'#e8dcc4',b:'#7a4a28',B:'#b5703a',d:'#3b2416',g:'#d9bd86',G:'#c9a24a',r:'#c8463c',R:'#8a1c1c',e:'#3f8a4f',E:'#6fbf73',u:'#3d6fb0',U:'#7fb6e0',s:'#9aa0a6',S:'#cfd6dc',n:'#5d6578',p:'#e48aa6',y:'#f2c14e',o:'#e08a2a',v:'#8e6bbf'};
+  const ICONS={
+   bean:['............','.....bbb....','...bBBBBb...','..bBBdBBBb..','..bBBdBBBb..','.bBBBdBBBb..','.bBBdBBBbss.','..bBdBBBsSSs','..bbdBBbsSSs','....bbb.sSSs','.........sss','..........ss'],
+   black:['...n..n.....','....n..n....','...n..n.....','............','.kkkkkkkk...','.kwrrrrwkkk.','.kkkkkkkk.k.','.kkkkkkkk.k.','.kkkkkkkkk..','..kkkkkk....','.gggggggg...','............'],
+   lab:['............','..sssss.....','..S...SsSS..','..S...S...S.','..sssss...S.','.wwwwwwwww..','..wcccccw...','...wcccw....','....www.....','...UUUUU....','...UbbbU....','...UUUUU....'],
+   globe:['....uuuu....','..uuEEuuuu..','.uEEEEuuuuu.','.uuEEuuuEEu.','uuuuuuuEEEEu','uuuEuuuEEEuu','uuEEEuuuEuuu','uuEEEEuuuuuu','.uuEEuuuuuu.','.uuuuuuuEuu.','..uuuuuuuu..','....uuuu....'],
+   grinder:['....ggg.....','..gGGGGGg...','...sssss....','..sSSSSSs.gg','..sSSSSSsg..','..sssssss...','..kkkkkkk...','..kbbbbbk...','..kbBBBbk...','..kbbbbbk...','..kkkkkkk...','.sssssssss..'],
+   person:['....ddd.....','...ddddd....','...dccccd...','...ckcckc...','...cccccc...','....crrc....','..ggggggg...','.gbbbbbbbg..','.gbBbbbBbg..','.gbbbbbbbg..','..bbbbbbb...','..bb...bb...'],
+   cards:['............','.rrrrr......','.rwwwr......','.rwywrUUUUU.','.rwwwrUwwwU.','.rrrrrUwGwU.','......UwwwU.','..gggggUUUU.','..gwwwg.....','..gwbwg.....','..gwwwg.....','..ggggg.....'],
+   cup:['............','.........s..','........s...','.......s....','..wwwwwwsww.','.wbbbbbbbbw.','.wbBBBBBBbw.','..wbbbbbbw..','...wwwwww...','............','.cccccccccc.','............'],
+   wrench:['.........ss.','........sSs.','.......sSs..','......sSs.ss','.....sSssSs.','....sSSSSs..','...sSs......','..sSs.......','.sSs........','sSs.........','ss..........','............'],
+   mol:['............','..rr....rr..','.rRRr..rRRr.','.rRRrnnrRRr.','..rr.nn.rr..','.....nn.....','....kkkk....','...kkkkkk...','...kkkkkk...','....kkkk....','..UU....UU..','..UU....UU..'],
+   note:['.gggggggggg.','.gccccccccg.','.gcbbbbbbcg.','.gccccccccg.','.gcbbbbbccg.','.gccccccccg.','.gcbbbbbbcg.','.gccccccccg.','.gcbbbccccg.','.gccccccRcg.','.gccccccRcg.','.gggggggggg.'],
+   chart:['............','.n..........','.n.......yy.','.n......y...','.n.yy..y....','.n.y.yy.....','.ny.........','.n....UU....','.n.UUU..UU..','.nU.......U.','.nnnnnnnnnnn','............'],
+   pin:['....rrrr....','...rRRRRr...','..rRRwwRRr..','..rRwwwwRr..','..rRwwwwRr..','..rRRwwRRr..','...rRRRRr...','....rRRr....','.....rr.....','.....rr.....','..eeeeeeee..','.eeeeeeeeee.'],
+   nose:['............','.....S......','....SUS.....','....SUS.....','...SUUUS....','...SUUUS..p.','..SUUUUUS.pp','..SUUUUUS..p','..SSSSSSS...','..ggggggg...','............','............'],
+  };
+  function px(name){const m=ICONS[name];let r='';m.forEach((row,y)=>[...row].forEach((ch,x)=>{if(ch!=='.')r+=`<rect x="${x}" y="${y}" width="1.02" height="1.02" fill="${PAL[ch]}"/>`;}));return `<svg viewBox="0 0 12 12" shape-rendering="crispEdges" aria-hidden="true">${r}</svg>`;}
+  const APPS=[
+   {g:'🎮 遊戲',items:[
+    {p:'bean-hunter',n:'咖啡尋豆師',ic:'bean',bg:'#2a3d2c',one:'飛到產地，親手找到一支好豆',d:'扮演生豆買家，飛往衣索比亞、哥倫比亞、巴拿馬等產地，走進莊園和農人聊天、杯測、驗豆、議價，最後在競標會上搶下好豆子。一路還會遇到葉鏽病、咖啡果小蠹等病蟲害。',f:['主線故事','莊園對話','杯測與驗豆','議價競標','生豆圖鑑']},
+    {p:'blackcup',n:'黑杯聽音',ic:'black',bg:'#2a1d18',one:'咖啡界的黑暗面，選錯一次就結束',d:'一個小小咖啡師的冠軍之路：換標籤的老闆、加料的生豆、被換掉的比賽用水、要紅包的評審。像素風文字遊戲，聽懂話中話、答對咖啡知識才能活下去，每個 BAD END 都附解析。',f:['7 章劇情','28 種壞結局','猜話中話','咖啡知識題','成語解析']},
+   ]},
+   {g:'📚 圖鑑與學習',items:[
+    {p:'coffee-terroir',n:'咖啡風土圖鑑',ic:'globe',bg:'#1f3350',one:'產地、品種、莊園，一杯風味的來處',d:'從產地與海拔、品種、莊園一路看下去，每個莊園都能用 Google Maps 打開。還有處理法與烘豆的互動教學、配方豆挑戰，以及咖啡知識消消樂。',f:['產地品種莊園','處理法教學','烘豆教學','配方豆挑戰','知識消消樂']},
+    {p:'gear-atlas',n:'咖啡器材圖鑑',ic:'grinder',bg:'#3a3226',one:'磨豆機、濾杯、義式機、烘豆機',d:'用原理圖解看懂每一種器材：刀盤怎麼切豆、濾杯的肋骨和出水孔差在哪。收錄 59 項代表器材，可以並排比較，也有小測驗。',f:['原理圖解','59 項器材','並排比較','小測驗']},
+    {p:'barista-guide',n:'咖啡人物誌',ic:'person',bg:'#3d2a22',one:'各國名咖啡師與台日名店',d:'世界知名咖啡師的故事，加上台灣與日本（含福岡）的咖啡名店介紹與 Google 地圖。看到喜歡的可以收藏、標記去過。',f:['人物故事','台日名店','Google 地圖','收藏與去過']},
+    {p:'coffee-recall',n:'咖啡記憶卡',ic:'cards',bg:'#3a2030',one:'每天抽幾張，把知識真的記住',d:'314 張咖啡知識卡：產地、品種、莊園、處理法、器材偵探與原理，還有阿里山藝伎盲測。答錯的卡隔天會再出現，用間隔重複把它背起來。',f:['314 張卡','每日抽卡','錯題隔天再出','盲測挑戰']},
+    {p:'cupping',n:'杯測教室',ic:'cup',bg:'#33281e',one:'像專業評審一樣喝咖啡',d:'一步一步學杯測流程：聞乾香、破渣、啜吸，再照評分表練習給分，慢慢建立自己的風味語言。',f:['杯測流程','風味評分','練習紀錄']},
+    {p:'grinder-guide',n:'磨豆機拆裝教學',ic:'wrench',bg:'#2b3345',one:'C40、ZP6 拆開再裝回去',d:'Comandante C40 與 1Zpresso ZP6 Special 的拆解和組裝，一步一步圖解；熟練之後可以挑戰限時組裝。',f:['逐步圖解','兩款手搖','限時挑戰']},
+    {p:'molecule-reactions',n:'分子反應圖鑑',ic:'mol',bg:'#1f3a33',one:'用分子模型看懂咖啡風味',d:'用球棍分子模型解釋化學反應：光合作用、水果香氣從哪來、烘豆時咖啡風味怎麼生成。',f:['分子模型','咖啡風味','水果香氣']},
+   ]},
+   {g:'📝 紀錄與工具',items:[
+    {p:'brew-notes',n:'沖煮筆記',ic:'note',bg:'#3a3020',one:'記下每一杯，找到你的甜蜜點',d:'記錄豆香、濕香與三種溫度下的風味，自動做標準化總評與排行；可以語音記一杯、推算配方、看養豆曲線和產地地圖。',f:['三溫感官','語音記錄','養豆曲線','配方推算','排行榜']},
+    {p:'brew-log',n:'沖煮紀錄 × 風味地圖',ic:'chart',bg:'#1f2a3a',one:'把參數和風味畫成圖',d:'把手沖紀錄變成圖表：控制圖、注水曲線、高溫與中常溫的風味雷達，看出哪個參數影響了哪種風味。',f:['控制圖','注水曲線','風味雷達']},
+    {p:'cafe-wishlist',n:'咖啡店口袋清單',ic:'pin',bg:'#2f2228',one:'想去的咖啡店，一張清單帶著走',d:'整理想去的咖啡店：店家介紹、必點、營業資訊、一鍵 Google 地圖導航。去過之後可以打分數、寫筆記，也能自己新增店家。',f:['店家介紹','必點推薦','地圖導航','評分筆記']},
+    {p:'smell-training',n:'嗅覺練習日誌',ic:'nose',bg:'#2d2338',one:'練鼻子，喝得出更多味道',d:'用香氣材料做嗅覺練習並記錄結果，慢慢把花香、果香、堅果、焦糖的味道記進腦子裡。',f:['香氣練習','練習紀錄']},
+   ]},
+  ];
+  const list=document.getElementById('cuList');
+  list.innerHTML=APPS.map(G=>`<div class="cu-sec">${G.g}</div>`+G.items.map(a=>`<a class="cu-card" href="../${a.p}/">
+    <div class="cu-head"><div class="cu-ic" style="background:${a.bg}">${px(a.ic)}</div><div><div class="cu-name">${a.n}</div><div class="cu-one">${a.one}</div></div></div>
+    <span class="cu-go">打開 ›</span>
+    <div class="cu-desc">${a.d}</div><div class="cu-feat">${a.f.map(x=>`<span>${x}</span>`).join('')}</div></a>`).join('')).join('');
+  // 標題列像素畫：星空＋咖啡園＋一排杯子
+  const cv=document.getElementById('cuCv'),g=cv.getContext('2d');let raf=0;
+  function draw(ms){const t=ms/1000,R=(x,y,w,h,c)=>{g.fillStyle=c;g.fillRect(x,y,w,h)};
+    const SK=['#0d1420','#141e2f','#232d40','#46404b','#86634f','#d59f5c'];for(let y=0;y<40;y++)R(0,y,200,1,SK[Math.min(5,Math.floor(Math.pow(y/40,1.6)*6))]);
+    for(let i=0;i<40;i++){const x=(i*53)%200,y=(i*29)%26;if(Math.sin(t*1.5+i)>-.3)R(x,y,1,1,i%5?'#7f8799':'#f3e9d6')}
+    for(let x=0;x<200;x++){const h=Math.round(6+4*Math.sin(x*.05+1)+2*Math.sin(x*.17));R(x,40-h,1,h,'#2b3345')}
+    R(0,40,200,20,'#141b29');for(let r=0;r<3;r++)for(let x=(r*7)%14;x<200;x+=14){R(x,43+r*5,4,2,'#3f6a4a');if((x+r)%3===0)R(x+1,43+r*5,1,1,'#c8463c')}
+    const icons=['bean','black','globe','grinder','cards','note','pin'];
+    icons.forEach((n,i)=>{const m=ICONS[n],ox=14+i*26,oy=Math.round(22+Math.sin(t*2+i)*1.5);m.forEach((row,y)=>[...row].forEach((ch,x)=>{if(ch!=='.')R(ox+x,oy+y,1,1,PAL[ch])}))});
+    raf=requestAnimationFrame(draw)}
+  const ov=document.getElementById('cuOv');
+  function open(){ov.hidden=false;ov.scrollTop=0;cancelAnimationFrame(raf);raf=requestAnimationFrame(draw);try{history.pushState({cu:1},'')}catch(e){}}
+  function close(){ov.hidden=true;cancelAnimationFrame(raf)}
+  window.openCoffeeUniverse=open;
+  document.getElementById('cuClose').addEventListener('click',()=>{if(history.state&&history.state.cu)history.back();else close()});
+  window.addEventListener('popstate',()=>{if(!ov.hidden)close()});
+  const b=document.getElementById('tMore');
+  if(b){b.innerHTML=`${px('cup')}咖啡宇宙 <small>更多 App</small>`;
+    b.addEventListener('click',e=>{e.stopPropagation();open()});
+    b.addEventListener('pointerdown',e=>e.stopPropagation());}
+})();
+</script>
+
 </body>
 </html>
