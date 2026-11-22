@@ -106,6 +106,7 @@ button{font:inherit;color:inherit;touch-action:manipulation}
 .bscale{position:absolute;left:50%;transform:translateX(-50%);top:72%;font-family:"DotGothic16",monospace;font-size:13px;color:#9cc0ea;background:#0e1116;padding:0 6px;border:1px solid #343e4c}
 .btarget{position:absolute;left:8px;top:8px;font-family:DotGothic16;font-size:12px;background:rgba(14,17,22,.9);border-left:3px solid var(--teal);padding:2px 8px}
 .actcap{position:absolute;left:50%;transform:translateX(-50%);bottom:10px;font-family:"DotGothic16","Noto Sans TC",sans-serif;font-size:14px;background:rgba(14,17,22,.9);color:#ece4d4;border-left:3px solid #d64545;padding:3px 12px;white-space:nowrap}
+.jsign{position:absolute;top:56%;transform:translateX(-50%);font-family:"DotGothic16","Noto Sans TC",sans-serif;font-size:11px;color:#2e1b11;white-space:nowrap;font-weight:700}
 /* overlays */
 .ov{position:fixed;inset:0;background:rgba(6,8,11,.86);z-index:50;display:none;align-items:center;justify-content:center;padding:16px}
 .ov.on{display:flex}
@@ -625,7 +626,7 @@ const CH=[
  L('shen','（訊息）一路平安。'),
  TV('world','TPE','NVA','plane','桃園機場，晚上十一點的紅眼班機。台北 → 洛杉磯 → 波哥大 → 內瓦。三段航程，三十二個小時。'),
  BG('farm','哥倫比亞．薇拉省 1,850m'),
- N('從內瓦機場出來，你又坐了四個小時的吉普車，在山路上顛得五臟六腑都快移位了，才終於到了帕洛瑪莊園。'),
+ {act:'jeep',s:'',t:'從內瓦機場出來，你又坐了四個小時的吉普車，在山路上顛得五臟六腑都快移位了，才終於到了帕洛瑪莊園。'},
  N('這裡海拔一千八百五十公尺，晚上冷得像台灣的合歡山。天上的星星多到你以為是有人撒了一把鹽。'),
  N('一個戴著草帽、留著鬍子的男人站在小木屋前面，雙手抱胸，看著你從吉普車上爬下來。'),
  L('carlos','又一個台灣人。'),
@@ -1477,6 +1478,7 @@ function sfx(k){if(!sound)return;const a=ac();if(!a)return;const t=a.currentTime
  if(k==='pop'){voice(S,'sine',880,t,.002,.08,.08);voice(S,'sine',1320,t+.03,.002,.05,.08)}
  if(k==='whoosh'){const s=a.createBufferSource();s.buffer=AU.noise;const f=a.createBiquadFilter();f.type='bandpass';f.Q.value=1.2;f.frequency.setValueAtTime(300,t);f.frequency.exponentialRampToValueAtTime(3000,t+.45);const g=a.createGain();s.connect(f);f.connect(g);g.connect(S);g.gain.setValueAtTime(0.0001,t);g.gain.linearRampToValueAtTime(.12,t+.2);g.gain.exponentialRampToValueAtTime(0.0001,t+.55);s.start(t);s.stop(t+.6)}
  if(k==='plane'){const s=a.createBufferSource();s.buffer=AU.brown;const f=a.createBiquadFilter();f.type='lowpass';f.frequency.setValueAtTime(200,t);f.frequency.linearRampToValueAtTime(900,t+1.2);f.frequency.linearRampToValueAtTime(300,t+2.6);const g=a.createGain();s.connect(f);f.connect(g);g.connect(S);g.gain.setValueAtTime(0.0001,t);g.gain.linearRampToValueAtTime(.6,t+1);g.gain.linearRampToValueAtTime(0.0001,t+2.8);s.start(t);s.stop(t+3)}
+ if(k==='bump'){voice(S,'sine',70,t,.005,.25,.18);noiseHit(S,t,.08,.12,'lowpass',400)}
  if(k==='slurp'){const s0=a.createBufferSource();s0.buffer=AU.noise;const f=a.createBiquadFilter();f.type='bandpass';f.Q.value=2;f.frequency.setValueAtTime(800,t);f.frequency.exponentialRampToValueAtTime(5000,t+.35);const g=a.createGain();s0.connect(f);f.connect(g);g.connect(S);g.gain.setValueAtTime(0.0001,t);g.gain.linearRampToValueAtTime(.18,t+.08);g.gain.exponentialRampToValueAtTime(0.0001,t+.4);s0.start(t);s0.stop(t+.45)}
  if(k==='pour'){noiseHit(S,t,1,.06,'bandpass',2200,.6)}
  if(k==='brush'){for(let i=0;i<3;i++)noiseHit(S,t+i*.07,.06,.09,'bandpass',3500+Math.random()*1500,1.2)}
@@ -1814,7 +1816,8 @@ BGS.brewbar=function(g,t){const p=PX(g),B=S&&S.brewUI;if(!B)return;
 
 
 /* ============ 小動畫：清理磨豆機 ============ */
-function startAct(k){S.act={k,t0:performance.now(),prev:curBg,loc:S.loc};curBg='act';$('locLabel').textContent=k==='cup'?'杯測．金穗':k==='cupfarm'?'杯測．帕洛瑪莊園':'清理磨豆機';
+function startAct(k){S.act={k,t0:performance.now(),prev:curBg,loc:S.loc};curBg='act';$('locLabel').textContent=k==='cup'?'杯測．金穗':k==='cupfarm'?'杯測．帕洛瑪莊園':k==='jeep'?'內瓦 → 帕洛瑪莊園':'清理磨豆機';
+  if(k==='jeep'){const tl=$('tvLayer');tl.innerHTML='<div class="actcap" id="actCap"></div><div class="jsign" id="jSign" hidden>帕洛瑪莊園 →</div>';tl.hidden=false;sfx('plane');[900,1700,2600,3400,4300].forEach(d=>setTimeout(()=>{if(S&&S.act)sfx('bump')},d))}
   if(k==='cup'||k==='cupfarm'){const tl=$('tvLayer');tl.innerHTML='<div class="actcap" id="actCap"></div>';tl.hidden=false;[[1300,'pour'],[1800,'pour'],[2700,'pop'],[2900,'whoosh'],[3900,'brush'],[4900,'slurp'],[5300,'slurp'],[5700,'slurp'],[6100,'slurp']].concat(k==='cupfarm'?[[6500,'up']]:[]).forEach(([d,k2])=>setTimeout(()=>{if(S&&S.act)sfx(k2)},d))}
   if(k==='clean'){[300,900,1300,1700,2100].forEach(d=>setTimeout(()=>{if(S&&S.act)sfx('brush')},d));setTimeout(()=>{if(S&&S.act)sfx('pop')},2900)}}
 function actClean(g,t,A){const p=PX(g);const e=(performance.now()-A.t0)/1000;
@@ -1888,7 +1891,31 @@ function actCup(g,t,A){const p=PX(g),e=(performance.now()-A.t0)/1000,farm=A.k===
   if(!farm&&e>=6.4){const T=Math.round(72-cool*30);p(292,70,12,100,'#f4efe4');p.frame(292,70,12,100,'#8b93a1');const h=Math.round((T-30)/50*90);p(295,166-h,6,h,T>55?'#d64545':'#6c9bd2');p.ell(298,170,7,7,T>55?'#d64545':'#6c9bd2');
     const cap2=document.getElementById('actCap');const txt='⑥ 放涼到 '+T+'°C，再喝一口……'+(cool>.85?' 香氣不見了':'');if(cap2&&cap2.textContent!==txt)cap2.textContent=txt}
   p.vig()}
-BGS.act=function(g,t){const A=S&&S.act;if(!A)return;(A.k==='cup'||A.k==='cupfarm'?actCup:actClean)(g,t,A)};
+function actJeep(g,t,A){const p=PX(g),e=(performance.now()-A.t0)/1000,arrive=Math.min(1,Math.max(0,(e-4.6)/1.4)),spd=1-arrive*.95,X=(e<4.6?e:4.6+(1-Math.pow(1-arrive,2))*1.4*.5)*90;
+  const hrs=Math.min(3,Math.floor(e/1.15));const cap=document.getElementById('actCap'),txt=arrive>=1?'抵達帕洛瑪莊園':'吉普車・山路 '+(hrs+1)+' / 4 小時';if(cap&&cap.textContent!==txt)cap.textContent=txt;
+  // 天空：黃昏到夜
+  const k=Math.min(1,e/5);for(let y=0;y<120;y++){const f=y/120;p(0,y,320,1,`rgb(${Math.round(40+f*70-k*25)},${Math.round(36+f*40-k*20)},${Math.round(64+f*20-k*10)})`)}
+  const r=R(5);for(let i=0;i<50;i++){const x=r()*320,y=r()*70;if(k>.4&&Math.sin(t*2+i)>-.3)p(x,y,1,1,'#e8e2d4')}
+  p.ell(262,28,9,9,'#e9e2c0');
+  // 遠山、中山（視差）
+  for(let x=0;x<320;x++){const w=x+X*.08,h=Math.round(70+16*Math.sin(w*.02)+8*Math.sin(w*.057));p(x,200-h-40,1,h,'#232c44')}
+  for(let x=0;x<320;x++){const w=x+X*.3,h=Math.round(46+12*Math.sin(w*.031+1)+6*Math.sin(w*.09));p(x,200-h-26,1,h,'#1b3326')}
+  for(let i=-1;i<12;i++){const x=Math.round(i*34-(X*.3)%34),y=134+Math.round(4*Math.sin((i+Math.floor(X*.3/34))*1.3));p.ell(x,y,7,5,'#2f6b3f');p(x-2,y-2,2,2,'#d64545');p(x+3,y,2,2,'#d64545')}
+  // 路
+  p(0,150,320,22,'#6b5236');p(0,150,320,2,'#86684a');for(let i=-1;i<20;i++){const x=Math.round(i*20-X%20);p(x,160,8,1,'#7d6044')}
+  p(0,172,320,28,'#2a2016');for(let i=-1;i<8;i++){const x=Math.round(i*48-X%48);p(x,140,2,12,'#bdb3a1');p(x-1,140,4,2,'#d64545')}
+  // 莊園路牌
+  const sg=document.getElementById('jSign');if(arrive>0){const sx=Math.round(330-arrive*110);p(sx,112,3,40,'#4a2e1d');p(sx-30,110,62,16,'#7a4e30');p(sx-28,112,58,12,'#ece4d4');p(sx+30,114,6,8,'#7a4e30');if(sg){sg.hidden=false;sg.style.left=(sx/320*100)+'%'}}else if(sg)sg.hidden=true;
+  // 吉普車
+  const bob=spd>.1?Math.round(Math.abs(Math.sin(t*9))*2+(Math.sin(t*3.1)>.9?2:0)):0,jx=96,jy=146-bob;
+  p(jx+4,jy-14,46,4,'#3a3f4a');p(jx+8,jy-20,14,6,'#9a8158');p(jx+24,jy-19,10,5,'#d64545');p(jx+36,jy-18,10,4,'#9a8158');
+  p(jx,jy-10,60,6,'#5a6b3a');p(jx+6,jy-9,14,5,'#8fb8d8');p(jx+24,jy-9,14,5,'#8fb8d8');p(jx+26,jy-8,4,3,'#20252e');
+  p(jx-4,jy-4,72,14,'#4d5e30');p(jx-4,jy-4,72,2,'#6b7d45');p(jx+66,jy-2,4,4,'#f0b46a');p(jx-8,jy-2,5,10,'#20252e');
+  if(k>.3){g.fillStyle='rgba(240,200,120,.14)';g.beginPath();g.moveTo(jx+70,jy);g.lineTo(jx+150,jy-14);g.lineTo(jx+150,jy+20);g.fill()}
+  [[jx+8],[jx+50]].forEach(([wx])=>{p.ell(wx,jy+12,7,7,'#0e1116');p.ell(wx,jy+12,3,3,'#8d959e');const a=t*14*spd;p(wx+Math.round(Math.cos(a)*5),jy+12+Math.round(Math.sin(a)*5),2,2,'#4d555f')});
+  if(spd>.2)for(let i=0;i<10;i++){const ph=(t*1.5+i*.1)%1;g.globalAlpha=(1-ph)*.6;p(jx-6-ph*40,jy+14-ph*10-Math.sin(i)*4,3,3,'#a88a66');g.globalAlpha=1}
+  p.vig()}
+BGS.act=function(g,t){const A=S&&S.act;if(!A)return;(A.k==='cup'||A.k==='cupfarm'?actCup:A.k==='jeep'?actJeep:actClean)(g,t,A)};
 // boot
 if(DB.last&&DB.players[DB.last])P=DB.players[DB.last];
 toTitle();
