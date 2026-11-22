@@ -659,7 +659,10 @@ html.dark .k-market{--xc:#d0705c}html.dark .k-light{--xc:#c9a25e}html.dark .k-ri
 .xmap .pin .ring{fill:color-mix(in srgb,var(--xc) 18%,transparent);stroke:var(--xc);stroke-width:2}.xmap .pin.opt .ring{stroke-dasharray:4 3;fill:none}
 .xmap .pin:not(.rec):not(.opt) .dot{opacity:.75}
 .xmap .sc{stroke:var(--ink);stroke-width:2}
-.xfar{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px}
+.xfar{display:flex;flex-direction:column;gap:5px;margin-top:8px}
+.xnear-h{font-family:var(--ff-b);font-weight:700;font-size:13px;color:var(--ink);margin-bottom:2px}
+.xfar .far{grid-template-columns:auto auto 1fr!important}.xfar .far>i{grid-row:span 2;align-self:center;font-style:normal;font-family:var(--ff-px);font-size:12px;color:var(--sub);min-width:16px;text-align:right}
+.xfar .far.opt{border-style:dashed;border-color:var(--xc)}
 .xfar .far{display:grid;grid-template-columns:auto 1fr;grid-template-rows:auto auto;column-gap:6px;text-align:left;padding:6px 8px;border:1.5px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink);font-family:var(--ff-b);cursor:pointer}
 .xfar .far b{grid-row:span 2;align-self:center;background:var(--xc);color:#fff;border:2px solid #1b1612;box-shadow:2px 2px 0 #1b1612;padding:3px 7px;font-size:15px;font-family:var(--ff-px)}.xfar .far span{font-size:12px;font-weight:700}.xfar .far em{font-style:normal;font-size:11px;color:var(--sub)}
 .xfar .far.rec{border-color:var(--xc);box-shadow:0 0 0 1.5px var(--xc)}
@@ -2427,6 +2430,12 @@ function xHoursViz(c){if(!c.s)return '';const{min}=jstNow(),ds=jstDate(),hol=xIs
  return `<div class="xh"><div class="fd-ax"><span></span><div><i>6</i><i>12</i><i>18</i><i>24</i><i>翌3</i></div><span></span></div>${c.fri!==undefined?row('五六日',c.ho,false):row('平日',c.wd,false)+row('假日',c.ho,false)}${row('今天',today||'',true)}</div>`}
 
 const XPOS={A:[33.5897,130.4207,'博多站'],B:[33.5899,130.4017,'市役所'],C:[33.5918,130.4043,'中央公園'],D:[33.5934,130.4049,'貴賓館'],E:[33.5880,130.3948,'大名'],F:[33.5913,130.4068,'中洲'],G:[33.5879,130.4012,'大丸旁'],K:[33.5852,130.4052,'渡邊通']};
+const XHOME=[33.5838,130.4040],XLL={H:[33.5933,130.3515],J:[33.5853,130.4508],I:[33.6603,130.4384],kokura:[33.8845,130.8740]};
+const XHOW={A:'七隈線 渡邊通 → 博多 約 5 分（走路約 25 分）',H:'計程車約 15 分・巴士約 25 分',J:'七隈線＋空港線約 25 分・計程車約 20 分',I:'計程車約 25 分',kokura:'到博多站，再搭新幹線約 15 分'};
+function xDist(id){const p=XPOS[id]||XLL[id];if(!p)return 9e9;const dy=(p[0]-XHOME[0])*111000,dx=(p[1]-XHOME[1])*92700;return Math.round(Math.hypot(dx,dy))}
+const xDistTxt=m=>m<1000?m+' m':(m/1000).toFixed(m<10000?1:0)+' km';
+function xHowTxt(id){const m=xDist(id),w=Math.max(1,Math.round(m*1.25/75));return w<=20?'走路約 '+w+' 分':(XHOW[id]||'')}
+const xByDist=()=>XMAS.slice().sort((a,b)=>xDist(a.id)-xDist(b.id));
 const XFAR=[['H','西 → 福岡塔・百道濱','巴士約 25 分','w'],['J','東 → 福岡機場','地鐵約 10 分','e'],['I','東北 → AEON 香椎濱','車約 25 分','ne'],['kokura','北九州 → 小倉城','新幹線約 15 分','ne']];
 function xMap(rec,opt){const W=340,H=250,L0=130.3915,L1=130.4245,A0=33.5810,A1=33.5970;
  const X=g=>((g-L0)/(L1-L0)*W).toFixed(1),Y=a=>((A1-a)/(A1-A0)*H).toFixed(1);
@@ -2444,14 +2453,14 @@ function xMap(rec,opt){const W=340,H=250,L0=130.3915,L1=130.4245,A0=33.5810,A1=3
  g+=`<text x="${X(130.4120)}" y="${+Y(33.5862)+14}" class="stt n">七隈線</text><text x="${X(130.3925)}" y="${+Y(33.5900)-5}" class="stt">空港線</text>`;
  // hotel
  g+=(()=>{const hx=+X(130.4040)-9,hy=+Y(33.5838)-8;let r=`<g class="xhtl"><rect x="${hx+2}" y="${hy+2}" width="18" height="20" fill="#1b1612"/><rect x="${hx}" y="${hy}" width="18" height="20" fill="#fbf7ef" stroke="#1b1612" stroke-width="2"/>`;for(let a=0;a<3;a++)for(let b=0;b<2;b++)r+=`<rect x="${hx+3+b*7}" y="${hy+3+a*5}" width="4" height="3" fill="#c0392b"/>`;return r+`<rect x="${hx+7}" y="${hy+15}" width="4" height="5" fill="#1b1612"/></g>`})();
- g+=`<text x="${+X(130.4040)-12}" y="${+Y(33.5838)+8}" class="stt h" text-anchor="end">飯店</text>`;
+ g+=`<text x="${+X(130.4040)-12}" y="${+Y(33.5838)+8}" class="stt h" text-anchor="end">🏨 蒙特利飯店</text>`;
  // venues
  Object.entries(XPOS).forEach(([id,p])=>{const x=+X(p[1]),y=+Y(p[0]),r=rec.includes(id),o=opt.includes(id),k=kind(id);
   const lx=id==='D'?x+16:id==='C'?x-17:id==='F'?x+16:id==='K'?x+16:id==='G'?x-17:id==='B'?x-17:x;const anc=['C','G','B'].includes(id)?'end':['D','F','K'].includes(id)?'start':'middle';const ly=['C','D','F','K','G','B'].includes(id)?y+4:y+26;
   g+=`<g class="pin k-${k}${r?' rec':''}${o?' opt':''}" data-xgo="${id}">${r||o?`<rect x="${x-15}" y="${y-15}" width="30" height="30" class="ring"/>`:''}<rect x="${x-10}" y="${y-10}" width="22" height="22" class="sh"/><rect x="${x-12}" y="${y-12}" width="22" height="22" class="dot"/><text x="${x-1}" y="${y+4}" text-anchor="middle" class="lt">${id}</text><text x="${lx}" y="${ly}" text-anchor="${anc}" class="nm">${p[2]}</text></g>`});
  // scale
  g+=`<line x1="10" y1="${H-10}" x2="${10+500/((L1-L0)*92700)*W}" y2="${H-10}" class="sc"/><text x="10" y="${H-14}" class="stt">500m ≈ 走 6 分</text><text x="${W-8}" y="16" text-anchor="end" class="stt">N ↑</text></svg>`;
- const far=XFAR.map(f=>{const c=XMAS.find(x=>x.id===f[0]);return `<button class="far k-${c.k}${rec.includes(f[0])?' rec':''}" data-xgo="${f[0]}"><b>${xLbl(c)}</b><span>${f[1]}</span><em>${f[2]}</em></button>`}).join('');
+ const far=`<div class="xnear-h">🏨 從蒙特利飯店出發・由近到遠</div>`+xByDist().map((c,i)=>`<button class="far k-${c.k}${rec.includes(c.id)?' rec':''}${opt.includes(c.id)?' opt':''}" data-xgo="${c.id}"><i>${i+1}</i><b>${xLbl(c)}</b><span>${esc(c.n)}</span><em>${xDistTxt(xDist(c.id))}・${esc(xHowTxt(c.id))}</em></button>`).join('');
  return `<div class="xmap"><div class="xmap-h">🗺️ 會場簡化地圖<span>天神・中洲・博多一帶；點字母看詳細</span></div>${g}<div class="xfar">${far}</div></div>`}
 function drawXmas(){
  const done=S.get('xmas',{}),ds=jstDate(),{min}=jstNow();
@@ -2469,9 +2478,9 @@ function drawXmas(){
  const nowOpen=XMAS.filter(c=>(xStat(c)||{}).o);
  $('#xmasPlan').innerHTML=`<div class="xnow">🕒 現在（日本時間 ${fmtM(min)}）${nowOpen.length?'開放中：'+nowOpen.map(c=>`<b class="k-${c.k}">${xLbl(c)} ${esc(c.n.replace(/（.*）/,''))}</b>`).join(''):'沒有會場開放，市集大多傍晚才開。'}</div>`+mh;
  const K={market:'🎄 市集',light:'✨ 燈飾',rink:'⛸️ 市集＋溜冰'};
- $('#xmas').innerHTML=XMAS.map(c=>{const st=xStat(c);return `<div class="cafe${done[c.id]?' on':''}" data-id="${c.id}">
+ $('#xmas').innerHTML=xByDist().map(c=>{const st=xStat(c);return `<div class="cafe${done[c.id]?' on':''}" data-id="${c.id}">
   <div class="cafe-h"><span class="box"></span><b><span class="xid k-${c.k}">${xLbl(c)}</span>${esc(c.n)}</b></div>
-  <div class="cafe-m"><span class="tag">${K[c.k]}</span>${st?`<span class="fd-h" style="margin:0;display:inline"><span class="st ${st.c}">${st.o?'🟢':'⚪'} ${st.t}</span></span>`:''}</div>
+  <div class="cafe-m"><span class="tag">${K[c.k]}</span><span class="tag">🏨 ${xDistTxt(xDist(c.id))}・${esc(xHowTxt(c.id))}</span>${st?`<span class="fd-h" style="margin:0;display:inline"><span class="st ${st.c}">${st.o?'🟢':'⚪'} ${st.t}</span></span>`:''}</div>
   ${xRange(c)}${xHoursViz(c)}
   <div class="cafe-d">${esc(c.d)}<div style="margin-top:6px;color:var(--sub)">🚇 ${esc(c.ac)}</div>${c.tip?`<div class="tip">💡 ${esc(c.tip)}</div>`:''}<div class="xdays">${XDAYS.map(d=>{const k=+d.slice(5,7)+'/'+ +d.slice(8);return `<span class="${c.days.includes(k)?'on':''}${(XREC[k]||[]).includes(c.id)?' rec':''}">${k.split('/')[1]}</span>`}).join('')}<em>行程中可去的日子（11/21–28）</em></div></div>
   <div class="cafe-b"><a class="btn" href="${mapUrl(c.jp)}" target="_blank" rel="noopener">🗺️ 地圖</a><button class="btn ghost" data-xtaxi="${c.id}">🚕 給司機看</button></div>
