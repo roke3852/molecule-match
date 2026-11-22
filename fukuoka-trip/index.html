@@ -676,6 +676,17 @@ html.dark .k-market{--xc:#d0705c}html.dark .k-light{--xc:#c9a25e}html.dark .k-ri
 .cb-rb{display:flex;align-items:center;gap:2px;font-size:11px;color:var(--sub)}.cb-rb i{width:16px;height:8px;opacity:.35}.cb-rb i.on{opacity:1;outline:2px solid var(--ink);outline-offset:1px}.cb-rb span{margin-left:6px}.cb-rb.na span{margin:0}
 .cb-tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:5px}.cb-tags em{font-style:normal;font-size:11px;padding:1px 6px;border:1px solid var(--line);border-radius:4px}.cb-tags em.p{color:var(--maple);border-color:var(--maple)}
 #cafes .cafe-b{flex-wrap:wrap}
+
+#cafes .cafe.cf{position:relative;border:2px solid var(--px);border-radius:10px;margin:0 0 18px;padding:0 0 12px;background:var(--card);box-shadow:4px 4px 0 color-mix(in srgb,var(--cc) 55%,#000);overflow:hidden}
+#cafes .cafe.cf:last-child{border-bottom:2px solid var(--px)}
+#cafes .cf .cafe-h{position:relative;padding:10px 64px 10px 10px;background:linear-gradient(90deg,color-mix(in srgb,var(--cc) 30%,var(--card)),color-mix(in srgb,var(--cc) 12%,var(--card)));border-bottom:3px solid var(--cc);margin-bottom:6px;min-height:56px}
+#cafes .cf .cafe-h::after{content:"";position:absolute;left:0;right:0;bottom:-7px;height:4px;background:repeating-linear-gradient(90deg,var(--cc) 0 6px,transparent 6px 12px);opacity:.55}
+#cafes .cf-tt{display:flex;flex-direction:column;min-width:0}#cafes .cf-tt small{font-size:11px;color:color-mix(in srgb,var(--cc) 70%,var(--ink));font-weight:700;letter-spacing:.5px}#cafes .cf-tt b{font-size:17px;line-height:1.3}
+#cafes .cf-emb{position:absolute;right:8px;top:50%;transform:translateY(-50%);width:48px;height:48px;display:grid;place-items:center;background:var(--card);border:2px solid var(--cc);box-shadow:2px 2px 0 color-mix(in srgb,var(--cc) 60%,#000)}
+#cafes .cf-emb svg{image-rendering:pixelated}
+#cafes .cf .cafe-m,#cafes .cf .cafe-d,#cafes .cf .cafe-b{margin-left:14px;margin-right:12px}#cafes .cf .cinfo,#cafes .cf .lk,#cafes .cf .sph{margin-left:14px;margin-right:12px}
+#cafes .cf .cafe-m .tag{background:color-mix(in srgb,var(--cc) 20%,transparent);color:color-mix(in srgb,var(--cc) 75%,var(--ink))}
+#cafes .cf .cinfo{border-color:color-mix(in srgb,var(--cc) 50%,var(--line))}
 /* ===== 工具頁分頁 ===== */
 .tooltabs{padding:10px 14px 0!important}.tooltabs a{cursor:pointer;user-select:none;-webkit-user-select:none}
 #v-tools .sec[data-tt]:not(.tt-on){display:none}
@@ -2014,10 +2025,16 @@ function cRoastBar(ro){if(ro==null)return '<div class="cb-rb na"><span>烘焙度
 function cafeInfo(c){const I=CINFO[c.id];if(!I)return '';const ini={rec:'REC',recr:'REC',county:'COUNTY',manu:'manu',nocoffee:'NO',filter:'FILTER'}[c.id]||'';
  return `<details class="cinfo"><summary>📖 店家故事・招牌豆 <span>${I.beans.length} 款</span></summary><ul class="cbg">${I.bg.map(x=>`<li>${esc(x)}</li>`).join('')}${I.drink?`<li>☕ ${esc(I.drink)}</li>`:''}</ul>
   <div class="cbeans">${I.beans.map(B=>`<div class="cbean">${cBag(B,ini)}<div class="cb-t"><b>${esc(B.zh)}</b><small>${esc(B.n)}</small><div class="cb-m"><span class="rg" style="--rc:${(CREG[B.r]||CREG['配方豆'])[0]}">${esc(B.r)}</span><span>${esc(B.o)}</span></div>${cRoastBar(B.ro)}<div class="cb-tags">${B.t.map(t=>`<em>${esc(t)}</em>`).join('')}${B.p?`<em class="p">${esc(B.p)}</em>`:''}</div></div></div>`).join('')}</div>${I.note?`<div class="hint" style="margin:6px 0 0">${esc(I.note)}</div>`:''}</details>`}
+const PXPAL={a:'#b9b4ad',A:'#5f5a55',m:'#b8c0c8',e:'#262222',q:'#6a4022',t:'#c9a36a',R:'#a32a1f',o:'#2a2320',w:'#fbf7ef',g:'#3f9b4f',G:'#2c6e3a',b:'#8a5a2b',p:'#c0392b',s:'#a9a29a',c:'#4a90d9',x:'#cfe8ff',r:'#d9483b',h:'#6b4a2b',y:'#f2c14e',k:'#c58b16',n:'#e86a8a',d:'#f0d27a'};
+function pxArt(rows,size){const W=rows[0].length,H=rows.length;let r='';rows.forEach((row,y)=>{[...row].forEach((ch,x)=>{if(ch!=='.')r+=`<rect x="${x}" y="${y}" width="1.02" height="1.02" fill="${PXPAL[ch]}"/>`})});
+ return `<svg viewBox="0 0 ${W} ${H}" width="${size}" height="${size}" shape-rendering="crispEdges" aria-hidden="true">${r}</svg>`}
+const CSPR={"rec": ["................", "..yyyyyyyyyyyy..", ".y.yyyyyyyyyy.y.", ".y.yyyykkyyyy.y.", ".y.yyyyyyyyyy.y.", "..yyyyyyyyyyyy..", "....yyyyyyyy....", ".....yyyyyy.....", "......yyyy......", ".......yy.......", ".......yy.......", ".....yyyyyy.....", "....oooooooo....", "....owwwwwwo....", "....oooooooo....", "................"], "recr": ["................", ".....mmmmmm.....", "......mmmm......", ".....eeeeee.....", "....eeeeeeee....", "...eemmmmmmee...", "...emmqqqqmme...", "...emqqtqqqme...", "...emmqqqqmme...", "...eemmmmmmee...", "....eeeeeeee....", "..pppppppppppp..", "..p..........p..", "..p..........p..", "..pp........pp..", "................"], "county": [".........GG.....", ".......GGggG....", "......GgggG.....", ".......GG.b.....", ".........b......", "....bbbbbb......", "...b...b..b.....", "..rr..rr..rr....", ".rnrr.rnr.rnr...", ".rrrr.rrr.rrr...", "..rr...r...r....", "................", "..GGG.......GG..", ".GgggG....GggG..", "..GGG......GG...", "................"], "manu": ["................", "..A..........A..", "..AA........AA..", "..AaA......AaA..", "..AaaAAAAAAaaA..", "..AaaaaaaaaaaA..", ".AaaeaaaaaaeaaA.", ".AaaaaaaaaaaaaA.", ".AaawwaaaawwaaA.", "..AawwwwwwwwaA..", "...AwwweewwwA...", "....AwwwwwwA....", ".....AwwwwA.....", "......AAAA......", "................", "................"], "nocoffee": ["................", "....s..s........", "...s..s.........", "....s..s........", "..eeeeeeeeee....", "..eeeeeeeeeeeee.", "..ewewwewwwee.e.", "..ewwewewewee.e.", "..eweewewewee.e.", "..ewewwewwweeee.", "..eeeeeeeeee....", "..eeeeeeeeee....", "...eeeeeeee.....", "................", "................", "................"], "filter": ["................", ".tttttttttttttt.", "..twwwwwwwwwwt..", "...twwwwwwwwt...", "....twwwwwwt....", ".....twwwwt.....", "......tttt......", "....mmmmmmmm....", ".......c........", ".......c........", "....oooooooo....", "....oqqqqqqo....", "....oqqqqqqo....", ".....oooooo.....", "................", "................"]};
+const CACC={rec:'#c9a227',recr:'#8a5a2e',county:'#2f7a66',manu:'#2c6fb5',nocoffee:'#4a4a4a',filter:'#9b6b3d'};
+const CMOT={rec:'🏆 冠軍咖啡師的店',recr:'🔥 烘豆現場',county:'🍒 產地直購',manu:'🐺 福岡精品先驅',nocoffee:'☕ 潮流周邊',filter:'💧 只做手沖'};
 function drawCafes(){
  const done=S.get('cafes',{}),ph=S.get('gphoto',{});
- $('#cafes').innerHTML=CAFES.map(c=>`<div class="cafe${done[c.id]?' on':''}" data-id="${c.id}">
-  <div class="cafe-h"><span class="box"></span><b>${esc(c.n)}</b></div>
+ $('#cafes').innerHTML=CAFES.map((c,i)=>`<div class="cafe cf${done[c.id]?' on':''}" data-id="${c.id}" style="--cc:${CACC[c.id]||'#8a5a2e'}">
+  <div class="cafe-h"><span class="box"></span><span class="cf-tt"><small>No.${i+1}・${esc(CMOT[c.id]||'')}</small><b>${esc(c.n)}</b></span><span class="cf-emb">${CSPR[c.id]?pxArt(CSPR[c.id],44):''}</span></div>
   <div class="cafe-m"><span class="tag">${esc(c.a)}</span><span class="tag">${esc(c.tag)}</span>${c.h?`<span class="cafe-t">🕒 ${esc(c.h)}</span>`:''}</div>
   <div class="cafe-d">${esc(c.d)}</div>
   ${cafeInfo(c)}
@@ -2077,9 +2094,6 @@ const XPLAN=[
  ['11/26（四）','下午在百道濱 teamLab，<b>H 福岡塔市集</b>平日 16:00 才開，小孩想溜冰可以考慮把 LaLaport 縮短。'],
  ['11/27（五）','17:30 從小倉回博多，平日 17:00 開的 <b>小倉城市集</b>可以晚一班新幹線。']
 ];
-const PXPAL={o:'#2a2320',w:'#fbf7ef',g:'#3f9b4f',G:'#2c6e3a',b:'#8a5a2b',p:'#c0392b',s:'#a9a29a',c:'#4a90d9',x:'#cfe8ff',r:'#d9483b',h:'#6b4a2b',y:'#f2c14e',k:'#c58b16',n:'#e86a8a',d:'#f0d27a'};
-function pxArt(rows,size){const W=rows[0].length,H=rows.length;let r='';rows.forEach((row,y)=>{[...row].forEach((ch,x)=>{if(ch!=='.')r+=`<rect x="${x}" y="${y}" width="1.02" height="1.02" fill="${PXPAL[ch]}"/>`})});
- return `<svg viewBox="0 0 ${W} ${H}" width="${size}" height="${size}" shape-rendering="crispEdges" aria-hidden="true">${r}</svg>`}
 const XHOL=['2026-11-23'],XDAYS=['2026-11-21','2026-11-22','2026-11-23','2026-11-24','2026-11-25','2026-11-26','2026-11-27','2026-11-28'];
 const xLbl=c=>c.id==='kokura'?'小倉':c.id;
 const jstDate=()=>{const d=new Date(Date.now()+9*3600e3);return d.toISOString().slice(0,10)};
