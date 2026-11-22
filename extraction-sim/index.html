@@ -445,6 +445,8 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
 .nz-tbl td small{display:block;font-family:var(--f-body);font-size:11px;color:var(--muted)}
 .nz-tbl td:first-child{color:var(--ink);white-space:nowrap;font-family:var(--f-body)}
 .nz-tbl td:nth-child(2),.nz-tbl th{white-space:nowrap;font-family:var(--f-body)}
+html.embed .modes,html.embed .jl-sig,html.embed #cuOv,html.embed .t-more,html.embed .gd-card{display:none!important}
+html.embed{--modesH:0px}
 </style>
 <style>
 #gameView .wrap{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
@@ -3068,6 +3070,7 @@ function drawGold(){const svg=$('gcChart');if(!svg||!simPO)return;
     const m=$('gcMsg'),ok=inGold(fin);m.className='gc-msg'+(ok?' in':'');
     const gb=curBean();m.innerHTML=(done?'':'<span class="label">預計落點・</span>')+goldAdvice(fin,im)+(gb&&gb.gold&&!ok?'<details style="margin-top:4px"><summary class="label">💡 這支豆子的提示</summary>'+gb.gold+'</details>':'');
     const win=done&&ok;if(win&&!gcWas){const box=$('goldCup');box.classList.remove('win');void box.offsetWidth;box.classList.add('win');if(playing===false&&typeof SFX!=='undefined')try{SFX.p('levelup')}catch(e){}}
+    if(done&&window.parent!==window&&/[?&]embed=1/.test(location.search)&&!sim._posted){sim._posted=1;try{window.parent.postMessage({type:'blackcup-brew',tds:+fin.tds.toFixed(2),ey:+fin.ey.toFixed(1),gold:ok},'*')}catch(e){}}
     gcWas=win;}
   $('gcCount').textContent=nAll?'保存的杯子進金杯 '+nIn+'／'+nAll:'';
   svg.innerHTML=g;}
@@ -7178,7 +7181,9 @@ function gearInfo(kind,id){const s=S(),pc=v=>Math.round(v*100)+'%';let name,sub,
   GI.hidden=false;SFX.p('select');}
 /* ---------- 啟動 ---------- */
 const h=location.hash||'';let skip=false;try{skip=sessionStorage.getItem('brewLab.skipTitle')==='1';sessionStorage.removeItem('brewLab.skipTitle');}catch(e){}
-if(me&&skip){ov.hidden=true;}
+const EMB=/[?&]embed=1/.test(location.search);
+if(EMB){document.documentElement.classList.add('embed');ov.hidden=true;window.appShow('sim');setTimeout(()=>{const b=document.querySelector('#simTabs [data-st="set"]');if(b)b.click();},50);}
+else if(me&&skip){ov.hidden=true;}
 else if(!me||h===''||h==='#title'){window.appShow('hub');startTitle();}else{ov.hidden=true;}
 window.hubRender();if(me)navWho();
 window.showTitle=startTitle;

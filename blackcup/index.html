@@ -82,6 +82,17 @@ button{font:inherit;color:inherit;touch-action:manipulation}
 .tvl.hi{color:#ece4d4;border-left-color:#d64545;font-size:13px}
 .tvl.dest{background:#d64545;color:#fff;border-left-color:#fff}
 .tvs{position:absolute;top:8px;left:8px;font-family:"DotGothic16","Noto Sans TC",sans-serif;font-size:12px;background:rgba(14,17,22,.9);border:1px solid #4a5566;color:#ece4d4;padding:2px 8px}
+#labOv{position:fixed;inset:0;z-index:95;background:#0e1116;display:flex;flex-direction:column;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+#labOv iframe{flex:1;width:100%;border:0;background:#1b1512}
+.lab-top{display:flex;align-items:center;gap:10px;padding:8px 10px;border-bottom:1px solid var(--line);background:var(--ink)}
+.lab-top>div{flex:1;min-width:0}.lab-top b{font-family:DotGothic16;font-weight:400;border-left:4px solid var(--cherry);padding-left:8px;display:block}
+.lab-top span{display:block;font-size:11px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lab-top button{background:var(--ink2);border:1px solid var(--line2);color:var(--cream);padding:7px 12px;font-family:DotGothic16;flex:none}
+.lab-res{background:var(--ink);border-top:2px solid var(--cherry);padding:10px 12px}
+.lr-t{font-family:DotGothic16;font-size:14px}.lr-t b{color:#9cc0ea;font-weight:400}.lr-t em{font-style:normal;color:var(--teal)}.lr-t i{font-style:normal;color:var(--muted)}
+.lr-b{display:flex;gap:8px;margin-top:8px}.lr-b button{flex:1;padding:10px;font-family:DotGothic16;border:1px solid var(--line2);background:var(--ink2);color:var(--cream)}.lr-b #labDone{background:var(--cherry);border-color:var(--cherry);color:#fff}
+.brewgo small{display:block;font-size:12px;color:var(--muted);margin-top:2px}.brewgo{border-color:var(--teal)}.brewgo:before{background:var(--teal)!important}
+.cq.brewq{border-left-color:var(--teal)}
 /* overlays */
 .ov{position:fixed;inset:0;background:rgba(6,8,11,.86);z-index:50;display:none;align-items:center;justify-content:center;padding:16px}
 .ov.on{display:flex}
@@ -355,6 +366,8 @@ const SEQ={
 const L=(s,t)=>({s,t}), N=t=>({s:'',t}), C=(q,o)=>({c:q,o}), BG=(b,loc)=>({bg:b,loc}), LB=l=>({lbl:l}), J=l=>({jmp:l}), IF=(f,l)=>({iff:f,go:l});
 /* 移動動畫：k='city'（台北地圖）或 'world'（飛行航線）；a→b；m=交通方式 */
 const TV=(k,a,b,m,t)=>({tv:{k,a,b,m},s:'',t});
+/* 親手沖：打開咖啡實驗室，沖完依結果接不同台詞（{T}=TDS，{E}=萃取率） */
+const BR=(t,ok,ng)=>({brew:{ok,ng},t});
 const CH=[
 {t:'序章　第一杯',sub:'白霧咖啡的雨夜',recap:'你是台北「白霧咖啡」的咖啡師。抽屜裡壓著一張台灣盃報名表——這是一切的開始。',nodes:[
  BG('cafe','台北．白霧咖啡'),
@@ -412,6 +425,7 @@ const CH=[
   {t:'磨粗一點，避免苦味跑出來。',end:'coarse'},
   {t:'水溫降到 80°C，讓酸柔和一點。',end:'coarse'},
  ]),
+ BR('想試試看嗎？打開咖啡實驗室，照你剛剛的判斷，親手沖這一杯給沈懷舟。',[['','你把杯子放到他面前。他聞了很久，喝了一口。'],['shen','……嗯。剛剛好。'],['shen','你沒量，我也嚐得出來——這杯，在金杯裡。']],[['','他喝了一口，放下杯子，沒有說話。'],['shen','……還差一點。不過方向是對的。']]),
  N('老先生把那杯慢慢喝完，在杯墊下壓了錢，還有一張名片，起身走了。'),
  N('名片是很厚的手工紙，上面只印了幾個字：「舟火焙煎所　沈懷舟」，下面是一個大稻埕的地址。'),
  L('mei','（湊過來看）沈懷舟？等一下……2014 年台灣盃的冠軍？後來被撤銷的那個？'),
@@ -498,6 +512,7 @@ const CH=[
   {t:'太淡了，再磨細一點。',end:'bitter'},
   {t:'直接加點熱水稀釋，TDS 降下來就好。',end:'dilute'},
  ]),
+ BR('沈懷舟把折射計推到你面前：「換你自己來。在實驗室裡，把一杯沖進金杯給我看。」',[['','折射計跳出數字：TDS {T}%、萃取率 {E}%。'],['shen','進框了。記住你現在手上的感覺。'],['mei','賓果！！連線了！！']],[['','折射計跳出數字：TDS {T}%、萃取率 {E}%。沒有進框。'],['shen','看數字，想想該往哪邊調。比賽前，每天沖到進框為止。'],['mei','差一點點！下次一定賓果！']]),
  N('阿梅搭最後一班捷運回家了。烘豆坊裡只剩下你和沈懷舟，還有烘豆機低低的嗡嗡聲。'),
  N('凌晨一點，你用 V60 自己練習。可是這一杯不太對勁——粉床卡住了，三分四十秒，水還積在濾杯裡下不去。'),
  L('shen','（頭也沒抬）慢了。'),
@@ -651,6 +666,7 @@ const CH=[
   {t:'衝到蘇曼桌前：「是妳換了我的水！」',end:'accuse'},
   {t:'冷靜向裁判長報告封膜異狀，申請改用大會比賽用水，並請工作人員封存原水瓶。',fx:{fame:1},r:[['','你舉手請裁判長過來，把兩個封膜顏色指給他看。'],['','裁判長皺著眉頭點點頭，請工作人員把你的水瓶裝進透明的證物袋裡，貼上封條。'],['','大會比賽用水是依照 SCA 建議範圍調配的——不是你在舟火用的那瓶 B，但夠乾淨。'],['me','（沒關係。師父說過，台下的病根，台下解決。台上，只管沖好眼前這一杯。）']]},
  ]),
+ BR('決賽第一輪，計時開始。打開咖啡實驗室，用大會的水，沖出你的比賽杯。',[['','你放下細口壺，抬頭看了一眼計時器。TDS {T}%、萃取率 {E}%。'],['','評審席上，林評審在評分表上寫了幾個字，嘴角微微動了一下。']],[['','TDS {T}%、萃取率 {E}%。比你在舟火練習時差了一點。'],['me','（沒關係，還有下一輪。穩住，穩住。）']]),
  N('第一輪結束，中場休息。你坐在後台的椅子上，手還在微微發抖。'),
  N('一個穿著深藍色西裝、頭髮梳得很整齊的中年男人端著一杯茶走了過來，在你旁邊停下。胸前的名牌寫著：「評審　林正衡」。'),
  L('lin','年輕人，剛剛的事我聽說了。處理得很冷靜，不錯。'),
@@ -837,6 +853,7 @@ const CH=[
  N('比賽第二天：決賽。'),
  N('上台前，你在後台看到一個熟悉的身影。黑色長大衣，灰色頭髮。他朝你點了點頭，什麼都沒說。'),
  N('你深吸一口氣，端出最後一杯——帕洛瑪莊園的三十公斤，你和卡洛斯，還有胡安妮塔，一起曬出來的豆子。'),
+ BR('世界賽決賽，最後一杯。打開咖啡實驗室，沖出帕洛瑪莊園的三十公斤。',[['','TDS {T}%、萃取率 {E}%。你看著杯子裡的顏色，想起薇拉省的星空。'],['su','（在台下小聲說）……漂亮。']],[['','TDS {T}%、萃取率 {E}%。不是你最好的一杯，但它是一杯誠實的咖啡。']]),
  N('評審長是花野。她慢慢喝完那杯咖啡，放下杯子，抬起頭看著你的眼睛。'),
  L('hana','在這屆賽事發生的事情之後，我必須問每一位選手同一個問題。'),
  L('hana','你的豆子，有沒有加過任何東西？'),
@@ -1455,6 +1472,7 @@ function step(){
     if(n.done){chapterDone();return}
     if(n.final){finale();return}
     if(n.c){persist();showChoice(n);return}
+    if(n.brew){persist();showBrew(n);return}
     if(n.tv){S.i++;persist();startTravel(n.tv);showLine({s:'',t:n.t});return}
     if(n.s!==undefined){S.i++;persist();showLine(n);return}
     S.i++;
@@ -1643,6 +1661,26 @@ function openSaves(mode){
 }
 $('tSave').onclick=()=>openSaves('game');
 $('mLoad').onclick=()=>{if(!hasSave()){toast('還沒有中途存檔');return}openSaves('title')};
+
+/* ============ 親手沖：嵌入咖啡實驗室 ============ */
+function musDuck(on){if(!AC||!AU.mus)return;AU.mus.gain.setTargetAtTime(on?0.0001:(music?.9:0.0001),AC.currentTime,.3)}
+function showBrew(n){ffwd=false;$('tFF').classList.remove('on');waiting=false;const cw=$('choices');
+  cw.innerHTML=`<div class="cq brewq">☕ ${linkify(fill(n.t))}</div><button class="opt brewgo" id="bGo">打開咖啡實驗室，親手沖一杯<small>調參數 → 磨豆 → 注水 → 看金杯結果；進金杯技術 +1</small></button><button class="opt" id="bSkip">先不用，讓故事繼續</button>`;
+  bindLinks(cw);$('box').style.display='none';$('nextBtn').classList.remove('on');cw.classList.add('on');
+  $('bGo').onclick=()=>{sfx('pick');openLab(n)};$('bSkip').onclick=()=>{sfx('tap');cw.classList.remove('on');S.i++;step()}}
+function openLab(n){ac();let res=null;const ov=document.createElement('div');ov.id='labOv';
+  ov.innerHTML=`<div class="lab-top"><div><b>咖啡實驗室</b><span>① 調參數 → 按「開始沖煮」→ 磨豆、注水 → ② 看完這杯</span></div><button id="labX" type="button">回到故事</button></div><iframe src="../extraction-sim/index.html?embed=1#sim" title="咖啡實驗室" allow="autoplay"></iframe><div class="lab-res" id="labRes" hidden></div>`;
+  document.body.appendChild(ov);musDuck(true);
+  const onMsg=e=>{if(!e.data||e.data.type!=='blackcup-brew')return;res=e.data;const r=document.getElementById('labRes');r.hidden=false;
+    r.innerHTML=`<div class="lr-t">這杯　TDS <b>${res.tds}%</b>・萃取率 <b>${res.ey}%</b>　${res.gold?'<em>進金杯！</em>':'<i>沒進金杯</i>'}</div><div class="lr-b"><button id="labAgain" type="button">再沖一次</button><button id="labDone" type="button">帶著這杯回到故事 ›</button></div>`;
+    document.getElementById('labDone').onclick=finish;document.getElementById('labAgain').onclick=()=>{r.hidden=true;res=null};sfx(res.gold?'win':'pop')};
+  window.addEventListener('message',onMsg);
+  function finish(){window.removeEventListener('message',onMsg);ov.remove();musDuck(false);$('choices').classList.remove('on');S.i++;
+    if(res){const B=n.brew;S.q=(res.gold?B.ok:B.ng).map(([s0,t0])=>[s0,t0.replace(/\{T\}/g,res.tds).replace(/\{E\}/g,res.ey)]);
+      S.log.push({w:'▸ 你沖了一杯',t:`TDS ${res.tds}%・萃取率 ${res.ey}%${res.gold?'（金杯）':''}`,pick:1});
+      if(res.gold){S.stats.tech=Math.min(10,S.stats.tech+1);renderStats();toast('進金杯！技術 +1');setTimeout(()=>sfx('up'),200)}}
+    persist();step()}
+  document.getElementById('labX').onclick=finish}
 // boot
 if(DB.last&&DB.players[DB.last])P=DB.players[DB.last];
 toTitle();
