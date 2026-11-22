@@ -145,6 +145,10 @@ button{font:inherit;color:inherit;touch-action:manipulation}
 .sbag .bagsvg{width:70%;filter:drop-shadow(0 4px 6px rgba(0,0,0,.6))}.sbag.sel{transform:translateY(-6px) scale(1.06)}.sbag.sel .tag{border-color:#d64545}
 .sbag .tag{margin-top:4px;background:#f4efe4;color:#2a2f3a;font-size:9px;line-height:1.35;padding:3px 5px;border:2px solid #cfc3aa;text-align:center}.sbag .tag b{display:block;font-size:10px}
 .paybox{display:flex;justify-content:space-between;font-family:DotGothic16;font-size:14px;border:1px solid var(--line2);padding:8px 10px;background:var(--ink2)}.paybox b{font-weight:400;color:#9cc0ea}
+.grow{display:flex;align-items:stretch;gap:5px}.grow>span{width:44px;flex:none;font-family:DotGothic16;font-size:12px;color:var(--muted);align-self:center}
+.gchip{flex:1;display:flex;flex-direction:column;align-items:center;gap:1px;padding:5px 2px;background:var(--ink2);border:1px solid var(--line2);color:var(--cream);min-width:0}
+.gchip svg{image-rendering:pixelated}.gchip b{font-family:DotGothic16;font-weight:400;font-size:12px;white-space:nowrap}.gchip small{font-size:9.5px;color:var(--muted);line-height:1.2;text-align:center}
+.gchip[aria-pressed="true"]{border-color:var(--teal);background:rgba(79,179,169,.15)}.gchip[aria-pressed="true"] small{color:#bfe6e1}
 /* overlays */
 .ov{position:fixed;inset:0;background:rgba(6,8,11,.86);z-index:50;display:none;align-items:center;justify-content:center;padding:16px}
 .ov.on{display:flex}
@@ -1805,9 +1809,19 @@ $('mLoad').onclick=()=>{if(!hasSave()){toast('還沒有中途存檔');return}ope
 /* ============ 親手沖（遊戲內簡易版）：選參數 → 按住磨豆 → 按住注水 → 金杯結果 ============ */
 const BGRIND={fine:['細',2],mid:['中',0],coarse:['粗',-2.2]},BTEMP={88:-1.2,92:0,96:1},BRATIO={'15':225,'16.5':247.5,'18':270},BDOSE=15;
 let BH={hold:false,raf:0,last:0};
-function brewCalc(B){const c=B.cfg,ey=c.base+BGRIND[B.g][1]+BTEMP[B.tp]*(c.tk||1)+(B.poured-240)/60,bev=Math.max(40,B.poured-2.1*BDOSE),tds=ey*BDOSE/bev;
+const GEAR={dr:[['v60','V60 錐形','流速快、乾淨明亮',-.3],['kalita','Kalita 平底','流速穩、萃取均勻',.3],['origami','Origami 摺紙','介於兩者之間',0]],
+ gr:[['c40','C40 手搖','細粉少、杯子乾淨',0],['zp6','ZP6 手搖','淺焙專用、甜感好',.3],['blade','砍豆機','粒徑不均、細粉多',-1.2]],
+ kt:[['brewista','Brewista 細口壺','水流好控制',0],['stagg','Stagg 細口壺','水流好控制',0],['plain','一般熱水壺','水柱太粗、沖亂粉床',-.8]]};
+const BEANS={'巴拿馬藝伎・淺焙':0,'衣索比亞・淺中焙':1.5,'帕洛瑪莊園・厭氧日曬':.5,'巴西喜拉朵・中深焙':2.2};
+const GEARIC={v60:'v',kalita:'k',origami:'o',c40:'c',zp6:'z',blade:'b',brewista:'B',stagg:'S',plain:'P'};
+function gearSvg(id){const P2={v60:['wwwwwwwwwwww','.wwwwwwwwww.','..wwwwwwww..','...wwwwww...','....wwww....','.....ww.....','..wwwwwwww..'],kalita:['wwwwwwwwwwww','.wwwwwwwwww.','..wwwwwwww..','..wwwwwwww..','...wwwwww...','...wwwwww...','..wwwwwwww..'],origami:['prprprprprpr','.prprprprpr.','..prprprpr..','...prprpr...','....prpr....','.....pr.....','..wwwwwwww..'],
+ c40:['....ss......','....ssggg...','..ssssss.g..','..bbbbbb....','..bwbbbb....','..bbbbbb....','..bwbbbb....'],zp6:['....ss......','....ssggg...','..ssssss.g..','..ssssss....','..sKssss....','..ssssss....','..sKssss....'],blade:['............','..KKKKKK....','..KssssK....','..KKKKKK....','..KKKKKK....','..KKrKKK....','..KKKKKK....'],
+ brewista:['....KK......','..KKKKKK....','.KKKKKKKK.KK','KKKKKKKKKK..','.KKKKKKKK...','.KKKKKKKK...','..KKKKKK....'],stagg:['....ww......','..wwwwww....','.wwwwwwww.ww','wwwwwwwwww..','.wwwwwwww...','.wwwwwwww...','..wwwwww....'],plain:['...ssss.....','..ssssss....','.ssssssss...','ssssssssss.s','ssssssssssss','.ssssssss...','.ssssssss...']}[id];
+ const C={w:'#ece4d4',p:'#e48aa6',r:'#f4d0dc',s:'#c4cad1',g:'#8d959e',b:'#7a4e30',K:'#2a2f3a',r2:'#d64545'};let h='';P2.forEach((row,y)=>[...row].forEach((ch,x)=>{if(ch!=='.')h+=`<rect x="${x}" y="${y+2}" width="1.02" height="1.02" fill="${ch==='r'&&id==='blade'?'#d64545':C[ch]}"/>`}));
+ return `<svg viewBox="0 0 12 11" width="28" height="26" shape-rendering="crispEdges" aria-hidden="true">${h}</svg>`}
+function brewCalc(B){const c=B.cfg,gd=k=>GEAR[k].find(x=>x[0]===B[k])[3],bb=(BEANS[B.bean]??0)-(BEANS[c.bean]??0),ey=c.base+bb+gd('dr')+gd('gr')+gd('kt')+BGRIND[B.g][1]+BTEMP[B.tp]*(c.tk||1)+(B.poured-240)/60,bev=Math.max(40,B.poured-2.1*BDOSE),tds=ey*BDOSE/bev;
   return {ey:Math.round(ey*10)/10,tds:Math.round(tds*100)/100}}
-function brewHint(r){const t=[];if(r.ey<18)t.push('萃取不足（偏酸、單薄）：磨細一點，或提高水溫');else if(r.ey>22)t.push('過度萃取（苦、澀）：磨粗一點，或降低水溫');
+function brewHint(r,B){const t=[];if(B){if(B.gr==='blade')t.push('砍豆機的細粉太多，杯子會濁、尾韻苦澀');if(B.kt==='plain')t.push('一般熱水壺水柱太粗，粉床被沖亂，萃取不均');if(B.bean!==B.cfg.bean)t.push('這次用的不是預定的豆子（'+B.cfg.bean+'）')}if(r.ey<18)t.push('萃取不足（偏酸、單薄）：磨細一點，或提高水溫');else if(r.ey>22)t.push('過度萃取（苦、澀）：磨粗一點，或降低水溫');
   if(r.tds>1.35)t.push('太濃：粉水比拉大，水多一點');else if(r.tds<1.15)t.push('太淡：粉水比縮小，水少一點');return t.join('；')||'酸甜平衡，剛剛好。'}
 function brewChart(r){const W=220,H=130,x=e=>20+(e-14)/12*(W-30),y=t=>H-18-(t-.9)/.8*(H-28),cx=Math.max(14,Math.min(26,r.ey)),cy=Math.max(.9,Math.min(1.7,r.tds)),ok=r.gold;
   return `<svg viewBox="0 0 ${W} ${H}" class="bchart"><rect x="20" y="10" width="${W-30}" height="${H-28}" fill="#0e1116" stroke="#343e4c"/>
@@ -1816,12 +1830,18 @@ function brewChart(r){const W=220,H=130,x=e=>20+(e-14)/12*(W-30),y=t=>H-18-(t-.9
    <circle cx="${x(cx)}" cy="${y(cy)}" r="5" fill="${ok?'#4fb3a9':'#d64545'}" stroke="#ece4d4" stroke-width="1.5"/>
    <text x="${W-10}" y="${H-4}" fill="#8b93a1" font-size="8" text-anchor="end">萃取率 →</text><text x="2" y="9" fill="#8b93a1" font-size="8">TDS</text></svg>`}
 function showBrew(n){ffwd=false;$('tFF').classList.remove('on');waiting=false;
-  const B={n,cfg:n.brew.cfg,g:'mid',tp:92,rt:'16.5',phase:'set',grind:0,poured:0,crank:0,prev:[curBg,S.loc]};S.brewUI=B;
+  const B={n,cfg:n.brew.cfg,g:'mid',tp:92,rt:'16.5',phase:'gear',dr:'v60',gr:'c40',kt:'brewista',bean:n.brew.cfg.bean,grind:0,poured:0,crank:0,prev:[curBg,S.loc]};S.brewUI=B;
   curBg='brewbar';$('locLabel').textContent='親手沖一杯';const L0=$('tvLayer');L0.innerHTML='<div class="bscale" id="bScale">0.0 g</div><div class="btarget" id="bTarget"></div>';L0.hidden=false;
   $('box').style.display='none';$('nextBtn').classList.remove('on');brewPanel()}
 function brewPanel(){const B=S.brewUI,cw=$('choices');cw.classList.add('on');
   const chips=(k,opts)=>`<div class="brow"><span>${{g:'研磨',tp:'水溫',rt:'粉水比'}[k]}</span>${opts.map(([v,lab])=>`<button class="bchip" data-k="${k}" data-v="${v}" aria-pressed="${String(B[k])===String(v)}">${lab}</button>`).join('')}</div>`;
-  if(B.phase==='set'){cw.innerHTML=`<div class="cq brewq">☕ ${linkify(fill(B.n.t))}</div><div class="bbean">${B.cfg.bean}${B.cfg.note?'・'+B.cfg.note:''}</div>`+
+  if(B.phase==='gear'){const alts=Object.keys(BEANS).filter(b=>b!==B.cfg.bean).slice(0,2),beans=[B.cfg.bean,...alts];
+    const row=(k,lab,opts)=>`<div class="grow"><span>${lab}</span>${opts.map(o=>`<button class="gchip" data-k="${k}" data-v="${o[0]}" aria-pressed="${B[k]===o[0]}">${o[3]!==undefined&&k!=='bean'?gearSvg(o[0]):''}<b>${o[1]}</b><small>${o[2]||''}</small></button>`).join('')}</div>`;
+    cw.innerHTML=`<div class="cq brewq">☕ ${linkify(fill(B.n.t))}</div><div class="bbean">先選器材和豆子</div>`+row('dr','濾杯',GEAR.dr)+row('gr','磨豆機',GEAR.gr)+row('kt','手沖壺',GEAR.kt)+
+      row('bean','豆子',beans.map(b=>[b,b.split('・')[0],b.split('・')[1]+(b===B.cfg.bean?'・這次的豆子':'')]))+`<button class="big" id="gNext">下一步：調整參數 ›</button>`;
+    cw.querySelectorAll('.gchip').forEach(b=>b.onclick=()=>{B[b.dataset.k]=b.dataset.v;sfx('tap');brewPanel()});
+    $('gNext').onclick=()=>{sfx('pick');B.phase='set';brewPanel()};return}
+  if(B.phase==='set'){cw.innerHTML=`<div class="cq brewq">☕ ${linkify(fill(B.n.t))}</div><div class="bbean">${B.bean}・${GEAR.dr.find(x=>x[0]===B.dr)[1]}・${GEAR.gr.find(x=>x[0]===B.gr)[1]}・${GEAR.kt.find(x=>x[0]===B.kt)[1]}${B.cfg.note?'<br>'+B.cfg.note:''}</div>`+
      chips('g',[['fine','細'],['mid','中'],['coarse','粗']])+chips('tp',[[88,'88°C'],[92,'92°C'],[96,'96°C']])+chips('rt',[['15','1:15'],['16.5','1:16.5'],['18','1:18']])+
      `<button class="big" id="bNext">開始磨豆 ›</button>`;
     cw.querySelectorAll('.bchip').forEach(b=>b.onclick=()=>{B[b.dataset.k]=b.dataset.k==='tp'?+b.dataset.v:b.dataset.v;sfx('tap');brewPanel()});
@@ -1836,8 +1856,8 @@ function brewPanel(){const B=S.brewUI,cw=$('choices');cw.classList.add('on');
     if(!gr)$('bDone').onclick=()=>{off();brewFinish()};
     BH.last=performance.now();cancelAnimationFrame(BH.raf);BH.raf=requestAnimationFrame(brewTick);}
   if(B.phase==='result'){const r=B.res;cw.innerHTML=`<div class="cq brewq">${r.gold?'進金杯了！':'這杯沒有進金杯'}</div>
-     <div class="bres">${brewChart(r)}<div><div class="bnum">TDS <b>${r.tds}%</b></div><div class="bnum">萃取率 <b>${r.ey}%</b></div><div class="bset">研磨 ${BGRIND[B.g][0]}・${B.tp}°C・1:${B.rt}・注水 ${Math.round(B.poured)} g</div></div></div>
-     <div class="bhint">${brewHint(r)}</div><button class="big" id="bCont">繼續故事 ›</button>`;
+     <div class="bres">${brewChart(r)}<div><div class="bnum">TDS <b>${r.tds}%</b></div><div class="bnum">萃取率 <b>${r.ey}%</b></div><div class="bset">${B.bean.split('・')[0]}・${GEAR.dr.find(x=>x[0]===B.dr)[1]}<br>研磨 ${BGRIND[B.g][0]}・${B.tp}°C・1:${B.rt}・注水 ${Math.round(B.poured)} g</div></div></div>
+     <div class="bhint">${brewHint(r,B)}</div><button class="big" id="bCont">繼續故事 ›</button>`;
     $('bCont').onclick=brewExit;}
 }
 function brewTick(now){const B=S&&S.brewUI;if(!B||(B.phase!=='grind'&&B.phase!=='pour'))return;const dt=Math.min(.05,(now-BH.last)/1000);BH.last=now;
@@ -1858,10 +1878,12 @@ BGS.brewbar=function(g,t){const p=PX(g),B=S&&S.brewUI;if(!B)return;
   // 吧台
   p(0,150,320,4,'#b07a4f');p(0,150,320,1,'#d29a6a');p(0,154,320,46,'#4a2e1d');for(let x=0;x<320;x+=24)p(x,156,1,44,'#2e1b11');
   // 手搖磨豆機
-  const gx=58;p(gx-12,98,24,52,'#7a4e30');p(gx-12,98,24,2,'#b07a4f');for(let y=104;y<148;y+=8)p(gx-12,y,24,1,'#6a4228');p(gx-10,100,3,48,'#9a6a46');
+  const gx=58;
+  if(B.gr==='blade'){const sh=B.phase==='grind'&&BH.hold?Math.round(Math.sin(t*80)):0;p(gx-14+sh,104,28,46,'#2a2f3a');p(gx-14+sh,104,28,2,'#4d555f');p(gx-12+sh,92,24,12,'rgba(143,167,184,.55)');p(gx-12+sh,90,24,3,'#4d555f');p(gx-4+sh,130,8,6,'#d64545')}
+  else{const body=B.gr==='zp6'?['#c4cad1','#e4e8ec','#a8afb6']:['#7a4e30','#b07a4f','#6a4228'];p(gx-12,98,24,52,body[0]);p(gx-12,98,24,2,body[1]);for(let y=104;y<148;y+=8)p(gx-12,y,24,1,body[2]);p(gx-10,100,3,48,body[1]);
   p(gx-13,90,26,8,'#8d959e');p(gx-13,90,26,1,'#c4cad1');p(gx-2,82,4,8,'#8d959e');
   const a=B.crank,ex=gx+Math.cos(a)*22,ey=84+Math.sin(a)*8;
-  for(let k=0;k<=10;k++){const xx=gx+(ex-gx)*k/10,yy=84+(ey-84)*k/10;p(xx-1,yy-1,3,3,'#c4cad1')}p(ex-3,ey-7,6,8,'#4a2e1d');p(ex-2,ey-7,2,8,'#6a4228');
+  for(let k=0;k<=10;k++){const xx=gx+(ex-gx)*k/10,yy=84+(ey-84)*k/10;p(xx-1,yy-1,3,3,'#c4cad1')}p(ex-3,ey-7,6,8,'#4a2e1d');p(ex-2,ey-7,2,8,'#6a4228')}
   if(B.phase==='grind'&&BH.hold)for(let i=0;i<3;i++)p(gx-14+Math.random()*28,150-Math.random()*4,1,1,'#5a3520');
   // 電子秤
   p(112,142,100,8,'#0e1116');p(112,142,100,1,'#3a4350');
@@ -1870,14 +1892,15 @@ BGS.brewbar=function(g,t){const p=PX(g),B=S&&S.brewUI;if(!B)return;
   p(sx,sy,56,32,'rgba(143,167,184,.28)');p.frame(sx,sy,56,32,'#8fa7b8');p(sx+56,sy+6,4,14,'#8fa7b8');
   if(fill>0){const h=Math.min(30,Math.round(fill*28));p(sx+1,sy+31-h,54,h,'#4a2b18');p(sx+1,sy+31-h,54,1,'#8a5a34')}
   // 濾杯＋粉床
-  for(let j=0;j<22;j++){const w=60-j*2;p(160-w/2,82+j,w,1,j===0?'#fff':'#ece4d4')}p(150,104,20,4,'#ece4d4');
+  if(B.dr==='kalita'){for(let j=0;j<22;j++){const w=Math.max(30,60-j*2);p(160-w/2,82+j,w,1,j===0?'#fff':'#ece4d4');for(let x=160-w/2+3;x<160+w/2;x+=5)p(x,82+j,1,1,'#d8ccb4')}p(146,104,28,4,'#ece4d4')}
+  else{for(let j=0;j<22;j++){const w=60-j*2;p(160-w/2,82+j,w,1,j===0?'#fff':B.dr==='origami'?'#e48aa6':'#ece4d4');if(B.dr==='origami')for(let x=160-w/2+2;x<160+w/2;x+=4)p(x,82+j,1,1,'#c86a8c')}p(150,104,20,4,B.dr==='origami'?'#e48aa6':'#ece4d4')}
   const bed=Math.round(B.grind*9);if(bed>0)for(let j=0;j<bed;j++){const w=36-j*2+ (9-bed)*0;p(160-w/2,95+(9-bed)+j,w,1,B.poured>0?'#3a2010':'#7a4a28')}
   if(B.poured>0&&B.phase!=='result'){p(146,92+(9-bed)-2,28,2,'rgba(108,155,210,.55)')}
   // 細口壺
   const pouring=B.phase==='pour'&&BH.hold;B.tilt=(B.tilt||0)+((pouring?.7:0)-(B.tilt||0))*.14;
   const ta=B.tilt,kpx=250,kpy=128-ta*100;g.save();g.translate(kpx,kpy);g.rotate(-ta);
   const q=(x,y,w,h,c)=>{g.fillStyle=c;g.fillRect(x,y,w,h)};
-  q(-20,-32,40,32,'#20252e');q(-20,-32,40,3,'#3a4350');q(-17,-28,3,24,'#3a4350');q(-6,-38,12,6,'#20252e');q(-2,-40,4,2,'#8d959e');q(20,-26,8,18,'#20252e');q(22,-24,4,14,'#11151c');
+  const KC=B.kt==='stagg'?['#e8e4da','#ffffff','#c8c2b6']:B.kt==='plain'?['#a8afb6','#d0d6dc','#8d959e']:['#20252e','#3a4350','#3a4350'];q(-20,-32,40,32,KC[0]);q(-20,-32,40,3,KC[1]);q(-17,-28,3,24,KC[2]);q(-6,-38,12,6,'#20252e');q(-2,-40,4,2,'#8d959e');q(20,-26,8,18,'#20252e');q(22,-24,4,14,'#11151c');
   for(let k=0;k<10;k++){q(-24-k*6,-25-k*2.2,6,4,'#3a4350');q(-24-k*6,-24-k*2.2,6,2,'#20252e')}
   g.restore();
   if(ta>.5){const lx=-80,ly=-44,tx=kpx+lx*Math.cos(ta)+ly*Math.sin(ta),ty=kpy-lx*Math.sin(ta)+ly*Math.cos(ta);
@@ -1902,13 +1925,13 @@ function startAct(k){S.act={k,t0:performance.now(),prev:curBg,loc:S.loc};curBg='
   if(k==='cup'||k==='cupfarm'){const tl=$('tvLayer');tl.innerHTML='<div class="actcap" id="actCap"></div>';tl.hidden=false;[[1300,'pour'],[1800,'pour'],[2700,'pop'],[2900,'whoosh'],[3900,'brush'],[4900,'slurp'],[5300,'slurp'],[5700,'slurp'],[6100,'slurp']].concat(k==='cupfarm'?[[6500,'up']]:[]).forEach(([d,k2])=>setTimeout(()=>{if(S&&S.act)sfx(k2)},d))}
   if(k==='clean'&&!S.act.play){[300,900,1300,1700,2100].forEach(d=>setTimeout(()=>{if(S&&S.act)sfx('brush')},d));setTimeout(()=>{if(S&&S.act)sfx('pop')},2900)}}
 function cleanE(A,t){if(!A.play)return (performance.now()-A.t0)/1000;const dt=(performance.now()-(A.ts||A.t0))/1000;
-  if(A.st===0)return .2+Math.sin(t*3)*.05;if(A.st===1)return Math.min(.8,dt);if(A.st===2){A.bv+=(A.brush-A.bv)*.12;return .8+A.bv*1.8}if(A.st===2.5)return 2.6;if(A.st===3)return 2.6+Math.min(.7,dt);return 3.3+dt}
+  if(A.st===0)return 0;if(A.st===1)return Math.min(.8,dt);if(A.st===2){A.bv+=(A.brush-A.bv)*.12;return .8+A.bv*1.8}if(A.st===2.5)return 2.6;if(A.st===3)return 2.6+Math.min(.7,dt);return 3.3+dt}
 function actClean(g,t,A){const p=PX(g);const e=cleanE(A,t);
   p(0,0,320,200,'#171c27');for(let x=0;x<320;x+=40)p(x,0,1,186,'#1d2330');p.glow(160,80,150,'rgba(240,180,106,.12)');
   p(0,186,320,4,'#b07a4f');p(0,186,320,1,'#d29a6a');p(0,190,320,10,'#4a2e1d');
   g.save();g.translate(160,186);g.scale(1.3,1.3);g.translate(-160,-150);
   // 阿嬤（商用磨豆機）
-  const shake=e<.5?Math.round(Math.sin(e*60)):0;const bx=124+shake;
+  const shake=A.play&&A.st===0?(Math.sin(t*2)>.3?Math.round(Math.sin(t*50)):0):e<.5&&!A.play?Math.round(Math.sin(e*60)):0;const bx=124+shake;
   p(bx-6,140,84,10,'#202834');p(bx-6,140,84,1,'#3a4350');
   p(bx,70,72,72,'#20252e');p(bx,70,72,2,'#3a4350');p(bx+4,74,4,64,'#2c323c');
   p(bx+30,112,12,10,'#8d959e');p(bx+32,122,8,4,'#4d555f');p(bx+22,128,28,10,'#3a4350');
