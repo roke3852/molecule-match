@@ -259,6 +259,15 @@ input[type=range]{width:100%;accent-color:var(--s1)}
       <div class="why"><b>一句話</b>11/20 美股大屠殺：S&P −11.6%、道瓊都跌進修正區，Nasdaq −18.1% 離空頭（−20%）只差一步。費半單日 −10.73%、30 檔成分股全跌，距高點 −42.5%，已超過櫃買（−41.9%），成為這次跌最深的指數。台股加權 −27.7% 仍被台積電撐住。這次是「AI 硬體空頭」：越靠近晶片、越是中小型 AI 概念股，跌得越深——現在連最大的權值股輝達（單日 −14%）也開始補跌。</div>
     </div>
 
+    <div class="card" id="abcCard">
+      <h2>〰️ ABC 波段測量：台股 C 波會跌到哪？</h2>
+      <div class="meta">網路流傳的波浪測距法（股友群組圖），兩種算法並列；費半 8,000 是同一群人看的美股觀察點</div>
+      <div id="abcChart" style="margin-top:10px"></div>
+      <div class="stats" id="abcStats"></div>
+      <div id="abcSox"></div>
+      <div class="why"><b>怎麼看</b>A 波：前高 49,968 跌到 37,837（−12,131 點）；B 波反彈約 6,600 點到 44,437。<br>① <strong>C＝A</strong>（艾略特常用）：C 波跌幅等於 A 波，44,437 − 12,131 ≈ 32,306。<br>② <strong>鏡像測距</strong>（群組圖算法）：B 波反彈多少，就從 A 低點再跌多少，37,837 − 6,600 ≈ 31,237。<br>只是技術推算、不是預測；同一套方法換個高點（49,968 或收盤高 49,823）結果就不同，不構成投資建議。</div>
+    </div>
+
     <div class="card">
       <h2>📉 歷史上的大空頭</h2>
       <div class="chips" id="ixChips" style="margin:8px 0 4px"></div>
@@ -909,6 +918,29 @@ function renderBear(){
   ddUpd();
 }
 const SPX_HI=7818.93, NDQ_HI=27599.79, TW_HI=49822.55, SOX_HI=14634.72, TW_NOW=27.7, SOX_NOW=42.5, OTC_HI=453.50, OTC_NOW=41.9;
+
+/* ---------- ABC 波段測量（每日更新 ABC.tw / ABC.sox / ABC.d） ---------- */
+const ABC={hi:49968,a:37837,b:44437,tw:36033.29,sox:8408.59,d:"11/20"};
+(function(){
+  const CA=ABC.b-(ABC.hi-ABC.a),MI=ABC.a-(ABC.b-ABC.a),SOXT=8000;
+  const H=250,L=12,R=W-118,top=14,bot=H-14,lo=29500,hi=51000,Y=v=>top+(bot-top)*(hi-v)/(hi-lo);
+  const X=[L,L+(R-L)*.14,L+(R-L)*.38,L+(R-L)*.56,L+(R-L)*.74,R];
+  let g=`<svg viewBox="0 0 ${W} ${H}" role="img">`;
+  const lv=[[ABC.hi,"前高","var(--faint)"],[ABC.b,"B 高","var(--faint)"],[ABC.a,"A 低","var(--faint)"],[ABC.tw,"現在","var(--s1)"],[CA,"C＝A","var(--bear)"],[MI,"鏡像","var(--bear)"]];
+  lv.forEach(([v,n,c],i)=>{const y=Y(v),dy=(i===4?-3:i===5?11:4);g+=`<line x1="${L}" x2="${R+4}" y1="${y}" y2="${y}" style="stroke:${c};opacity:.55" stroke-dasharray="4 4"/><text x="${R+8}" y="${y+dy}" font-size="11" style="fill:${c};font-family:var(--mono)">${n} ${fmt(Math.round(v))}</text>`});
+  g+=`<rect x="${L}" y="${Y(CA)}" width="${R-L}" height="${Y(MI)-Y(CA)}" style="fill:var(--bear);opacity:.12"/>`;
+  const P=[[X[0],Y(44000)],[X[1],Y(ABC.hi)],[X[2],Y(ABC.a)],[X[3],Y(ABC.b)],[X[4],Y(ABC.tw)]];
+  g+=`<path d="${P.map((p,i)=>(i?"L":"M")+p[0].toFixed(1)+" "+p[1].toFixed(1)).join("")}" fill="none" stroke-width="2.5" style="stroke:var(--fg)" stroke-linejoin="round"/>`;
+  g+=`<path d="M${X[4]} ${Y(ABC.tw)}L${X[5]-6} ${Y((CA+MI)/2)}" fill="none" stroke-width="2.5" style="stroke:var(--bear)" stroke-dasharray="5 4"/>`;
+  [["A",X[2],Y(ABC.a)+16],["B",X[3],Y(ABC.b)-8],["C",X[5]-6,Y((CA+MI)/2)+16]].forEach(([t,x,y])=>g+=`<text x="${x}" y="${y}" text-anchor="middle" font-size="13" font-weight="700" style="fill:var(--fg)">${t}</text>`);
+  g+=`<circle cx="${X[4]}" cy="${Y(ABC.tw)}" r="5.5" style="fill:var(--s1);stroke:var(--panel)" stroke-width="2"/>`;
+  $("#abcChart").innerHTML=g+"</svg>";
+  const dist=(now,t)=>now<=t?["已到達","var(--bull)"]:["−"+((1-t/now)*100).toFixed(1)+"%","var(--bear)"];
+  const st=[["距 C＝A 32,306",ABC.tw,CA,TW_HI],["距鏡像 31,237",ABC.tw,MI,TW_HI],["費半距 8,000",ABC.sox,SOXT,SOX_HI]];
+  $("#abcStats").innerHTML=st.map(([k,n,t,h])=>{const [v,c]=dist(n,t);return `<div class="stat"><div class="k">${k}</div><div class="v" style="color:${c}">${v}</div><div class="d">還要跌・距高點總跌幅 −${(100-t/h*100).toFixed(1)}%</div></div>`}).join("");
+  const sw=W-24,lo2=6000,hi2=15000,SX=v=>12+(sw-12)*(v-lo2)/(hi2-lo2);
+  $("#abcSox").innerHTML=`<div class="fig"><div class="t">費半 8,000 觀察點</div><div class="s">${`現在 ${fmt(ABC.sox)}・高點 ${fmt(SOX_HI)}（8,000 ＝ 距高點 −${(100-8000/SOX_HI*100).toFixed(1)}%）`}</div><svg viewBox="0 0 ${W} 54" role="img"><rect x="12" y="20" width="${sw-12}" height="12" rx="6" style="fill:var(--grid)"/><rect x="${SX(ABC.sox)}" y="20" width="${SX(SOX_HI)-SX(ABC.sox)}" height="12" rx="6" style="fill:var(--bear);opacity:.55"/><line x1="${SX(SOXT)}" x2="${SX(SOXT)}" y1="17" y2="40" style="stroke:var(--fg)" stroke-width="2"/><text x="${SX(SOXT)}" y="52" text-anchor="middle" font-size="11" style="fill:var(--fg)">8,000</text><circle cx="${SX(ABC.sox)}" cy="26" r="6" style="fill:var(--s1);stroke:var(--panel)" stroke-width="2"/><text x="${SX(ABC.sox)}" y="11" text-anchor="middle" font-size="11" style="fill:var(--s1);font-family:var(--mono)">${fmt(Math.round(ABC.sox))}</text><text x="${SX(SOX_HI)}" y="52" text-anchor="end" font-size="11" style="fill:var(--faint)">前高 ${fmt(Math.round(SOX_HI))}</text></svg><div class="s">依 ${ABC.d} 收盤自動計算</div></div>`;
+})();
 function ddUpd(){
   const d=+$("#ddR").value, near=BEARS.filter(b=>Math.abs(b.dd-d)<=3).map(b=>b.y+" "+b.nm);
   $("#ddOut").innerHTML=`<div class="row" style="justify-content:space-between;margin-top:6px"><b style="font:700 22px var(--mono)">−${d}%</b><span class="meta">${near.length?"差不多深："+near.join("、"):"歷史上沒有剛好這個深度的空頭"}</span></div>`;

@@ -259,6 +259,15 @@ input[type=range]{width:100%;accent-color:var(--s1)}
       <div class="why"><b>In one line</b>11/20 US stock bloodbath: S&P −11.6% and the Dow both fell into correction territory, and Nasdaq at −18.1% is one step from a bear market (−20%). SOX fell −10.73% in a single day with all 30 components down; at −42.5% from high it has passed TPEx (−41.9%) to become the hardest-hit index this time. TAIEX at −27.7% is still being held up by TSMC. This is an “AI hardware bear market”: the closer to chips and the smaller the AI-themed stock, the deeper the drop — and now even the biggest heavyweight, Nvidia (−14% in one day), is starting to catch down.</div>
     </div>
 
+    <div class="card" id="abcCard">
+      <h2>〰️ ABC wave measure: where could TAIEX’s C wave end?</h2>
+      <div class="meta">A wave-counting rule shared in investor chat groups, two methods side by side; SOX 8,000 is the US level the same group watches</div>
+      <div id="abcChart" style="margin-top:10px"></div>
+      <div class="stats" id="abcStats"></div>
+      <div id="abcSox"></div>
+      <div class="why"><b>How to read it</b>Wave A: high 49,968 down to 37,837 (−12,131 pts); wave B bounced ~6,600 pts to 44,437.<br>① <strong>C = A</strong> (classic Elliott): wave C falls as far as wave A, 44,437 − 12,131 ≈ 32,306.<br>② <strong>Mirror</strong> (the chat chart’s method): drop below the A low by as much as B bounced, 37,837 − 6,600 ≈ 31,237.<br>A technical rule of thumb, not a forecast; pick a different high (49,968 vs. closing high 49,823) and the answer moves. Not investment advice.</div>
+    </div>
+
     <div class="card">
       <h2>📉 Major bear markets in history</h2>
       <div class="chips" id="ixChips" style="margin:8px 0 4px"></div>
@@ -909,6 +918,29 @@ function renderBear(){
   ddUpd();
 }
 const SPX_HI=7818.93, NDQ_HI=27599.79, TW_HI=49822.55, SOX_HI=14634.72, TW_NOW=27.7, SOX_NOW=42.5, OTC_HI=453.50, OTC_NOW=41.9;
+
+/* ---------- ABC 波段測量（每日更新 ABC.tw / ABC.sox / ABC.d） ---------- */
+const ABC={hi:49968,a:37837,b:44437,tw:36033.29,sox:8408.59,d:"11/20"};
+(function(){
+  const CA=ABC.b-(ABC.hi-ABC.a),MI=ABC.a-(ABC.b-ABC.a),SOXT=8000;
+  const H=250,L=12,R=W-118,top=14,bot=H-14,lo=29500,hi=51000,Y=v=>top+(bot-top)*(hi-v)/(hi-lo);
+  const X=[L,L+(R-L)*.14,L+(R-L)*.38,L+(R-L)*.56,L+(R-L)*.74,R];
+  let g=`<svg viewBox="0 0 ${W} ${H}" role="img">`;
+  const lv=[[ABC.hi,"High","var(--faint)"],[ABC.b,"B high","var(--faint)"],[ABC.a,"A low","var(--faint)"],[ABC.tw,"Now","var(--s1)"],[CA,"C=A","var(--bear)"],[MI,"Mirror","var(--bear)"]];
+  lv.forEach(([v,n,c],i)=>{const y=Y(v),dy=(i===4?-3:i===5?11:4);g+=`<line x1="${L}" x2="${R+4}" y1="${y}" y2="${y}" style="stroke:${c};opacity:.55" stroke-dasharray="4 4"/><text x="${R+8}" y="${y+dy}" font-size="11" style="fill:${c};font-family:var(--mono)">${n} ${fmt(Math.round(v))}</text>`});
+  g+=`<rect x="${L}" y="${Y(CA)}" width="${R-L}" height="${Y(MI)-Y(CA)}" style="fill:var(--bear);opacity:.12"/>`;
+  const P=[[X[0],Y(44000)],[X[1],Y(ABC.hi)],[X[2],Y(ABC.a)],[X[3],Y(ABC.b)],[X[4],Y(ABC.tw)]];
+  g+=`<path d="${P.map((p,i)=>(i?"L":"M")+p[0].toFixed(1)+" "+p[1].toFixed(1)).join("")}" fill="none" stroke-width="2.5" style="stroke:var(--fg)" stroke-linejoin="round"/>`;
+  g+=`<path d="M${X[4]} ${Y(ABC.tw)}L${X[5]-6} ${Y((CA+MI)/2)}" fill="none" stroke-width="2.5" style="stroke:var(--bear)" stroke-dasharray="5 4"/>`;
+  [["A",X[2],Y(ABC.a)+16],["B",X[3],Y(ABC.b)-8],["C",X[5]-6,Y((CA+MI)/2)+16]].forEach(([t,x,y])=>g+=`<text x="${x}" y="${y}" text-anchor="middle" font-size="13" font-weight="700" style="fill:var(--fg)">${t}</text>`);
+  g+=`<circle cx="${X[4]}" cy="${Y(ABC.tw)}" r="5.5" style="fill:var(--s1);stroke:var(--panel)" stroke-width="2"/>`;
+  $("#abcChart").innerHTML=g+"</svg>";
+  const dist=(now,t)=>now<=t?["Reached","var(--bull)"]:["−"+((1-t/now)*100).toFixed(1)+"%","var(--bear)"];
+  const st=[["To C=A 32,306",ABC.tw,CA,TW_HI],["To mirror 31,237",ABC.tw,MI,TW_HI],["SOX to 8,000",ABC.sox,SOXT,SOX_HI]];
+  $("#abcStats").innerHTML=st.map(([k,n,t,h])=>{const [v,c]=dist(n,t);return `<div class="stat"><div class="k">${k}</div><div class="v" style="color:${c}">${v}</div><div class="d">further drop・total from high −${(100-t/h*100).toFixed(1)}%</div></div>`}).join("");
+  const sw=W-24,lo2=6000,hi2=15000,SX=v=>12+(sw-12)*(v-lo2)/(hi2-lo2);
+  $("#abcSox").innerHTML=`<div class="fig"><div class="t">SOX 8,000 watch level</div><div class="s">${`Now ${fmt(ABC.sox)} · high ${fmt(SOX_HI)} (8,000 = −${(100-8000/SOX_HI*100).toFixed(1)}% from high)`}</div><svg viewBox="0 0 ${W} 54" role="img"><rect x="12" y="20" width="${sw-12}" height="12" rx="6" style="fill:var(--grid)"/><rect x="${SX(ABC.sox)}" y="20" width="${SX(SOX_HI)-SX(ABC.sox)}" height="12" rx="6" style="fill:var(--bear);opacity:.55"/><line x1="${SX(SOXT)}" x2="${SX(SOXT)}" y1="17" y2="40" style="stroke:var(--fg)" stroke-width="2"/><text x="${SX(SOXT)}" y="52" text-anchor="middle" font-size="11" style="fill:var(--fg)">8,000</text><circle cx="${SX(ABC.sox)}" cy="26" r="6" style="fill:var(--s1);stroke:var(--panel)" stroke-width="2"/><text x="${SX(ABC.sox)}" y="11" text-anchor="middle" font-size="11" style="fill:var(--s1);font-family:var(--mono)">${fmt(Math.round(ABC.sox))}</text><text x="${SX(SOX_HI)}" y="52" text-anchor="end" font-size="11" style="fill:var(--faint)">High ${fmt(Math.round(SOX_HI))}</text></svg><div class="s">Auto-calculated from ${ABC.d} close</div></div>`;
+})();
 function ddUpd(){
   const d=+$("#ddR").value, near=BEARS.filter(b=>Math.abs(b.dd-d)<=3).map(b=>b.y+" "+b.nm);
   $("#ddOut").innerHTML=`<div class="row" style="justify-content:space-between;margin-top:6px"><b style="font:700 22px var(--mono)">−${d}%</b><span class="meta">${near.length?"Similar depth: "+near.join(", "):"No past bear market at exactly this depth"}</span></div>`;
