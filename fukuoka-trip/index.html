@@ -3077,7 +3077,7 @@ reloaders.push(()=>{if(currentView()==='tax')drawTxLog()});
 drawCards();drawTax();
 
 /* ---------- 旅費記帳 ---------- */
-const EX_CAT=[['food','🍜','餐飲'],['move','🚃','交通'],['shop','🛍️','購物'],['fun','🎟️','門票'],['stay','🏨','住宿'],['etc','📦','其他']];
+const EX_CAT=[['food','🍜','餐飲'],['move','🚃','交通'],['shop','🛍️','購物'],['gift','🎁','伴手禮'],['fun','🎟️','門票'],['stay','🏨','住宿'],['etc','📦','其他']];
 const EX_PAY={cash:'💴 現金',card:'💳 刷卡',ic:'🚃 IC 卡',app:'📱 App 支付'};
 const EX_DAYS=['11/21','11/22','11/23','11/24','11/25','11/26','11/27','11/28'],EX_WK=['六','日','一','二','三','四','五','六'];
 let exCat='food',exArm=null;
@@ -3098,7 +3098,7 @@ function drawExp(){drawTripSpend();
  const ds=$('#exDate');if(!ds.options.length){ds.innerHTML=EX_DAYS.map((d,i)=>`<option value="${d}">${d}（${EX_WK[i]}）</option>`).join('');ds.value=exToday()}
  const rt=$('#exRate');if(document.activeElement!==rt)rt.value=rate;const fb=$('#exFoodBud');if(document.activeElement!==fb)fb.value=+S.get('foodBudget',20000)||0;
  let h='',cur=null;
- ids.forEach(id=>{const x=E[id],c=EX_CAT.find(c=>c[0]===x.c)||EX_CAT[5];
+ ids.forEach(id=>{const x=E[id],c=EX_CAT.find(c=>c[0]===x.c)||EX_CAT[EX_CAT.length-1];
   if(x.d!==cur){cur=x.d;h+=`<div class="ex-day"><span>${x.d}（${EX_WK[EX_DAYS.indexOf(x.d)]||''}）</span><span>${yen(bd[x.d])}</span></div>`}
   h+=`<div class="ex-row"><span class="ic">${c[1]}</span><span class="m">${esc(x.t)}<small>${EX_PAY[x.p]||''}${x.w?'・'+esc(x.w)+' 付':''}${x.n?'・'+esc(x.n):''}</small></span><span class="a">${yen(x.a)}</span><button class="del${exArm===id?' arm':''}" data-exd="${id}" aria-label="刪除">${exArm===id?'確定刪除':'×'}</button></div>`});
  $('#exList').innerHTML=h||'<div class="xempty">還沒有紀錄。</div>'}
