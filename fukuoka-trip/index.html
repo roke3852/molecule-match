@@ -724,6 +724,21 @@ html.dark .k-market{--xc:#d0705c}html.dark .k-light{--xc:#c9a25e}html.dark .k-ri
 .cl-x{width:36px;height:36px;border:2px solid var(--px);background:var(--card);color:var(--ink);font-size:16px;font-weight:700;box-shadow:2px 2px 0 var(--px);cursor:pointer}
 body.cl-lock{overflow:hidden}
 body.cl-lock .ov,body.cl-lock .imgov{z-index:950}body.cl-lock .toast{z-index:960}
+
+.cupc{border:2px solid var(--px);background:var(--card);box-shadow:3px 3px 0 color-mix(in srgb,#2c6fb5 45%,#000);padding:10px;margin:10px 0;font-family:var(--ff-b)}
+.cup-top{display:flex;gap:10px;align-items:flex-start}.cup-top .bag{flex:none;filter:drop-shadow(2px 2px 0 rgba(0,0,0,.25))}
+.cup-t{flex:1;min-width:0}.cup-t small{color:var(--sub);font-size:12px}.cup-t b{display:block;font-size:17px}.cup-bn{font-size:14px;font-weight:700;color:var(--maple)}.cup-m{font-size:13px;color:var(--sub);margin-top:2px}
+.cup-tf{display:grid;grid-template-columns:1fr auto 1fr;gap:6px;align-items:center;margin-top:10px}
+.cupcol{border:2px solid var(--line);padding:6px}.cupcol .ch{font-size:12px;font-weight:700;margin-bottom:4px}
+.cr{display:flex;justify-content:space-between;align-items:center;gap:4px;font-size:12px;margin:3px 0}
+.cupbar{display:inline-flex;gap:2px}.cupbar i{width:10px;height:10px;border:1.5px solid var(--px);background:transparent}.cupbar.ed i{width:22px;height:22px;cursor:pointer}
+.cup-arrow{display:flex;flex-direction:column;align-items:center;font-size:18px;color:var(--sub)}.cup-arrow small{font-size:10px}
+.cup-ar{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px}.cup-ar em{font-style:normal;font-size:12px;padding:2px 8px;border:1.5px solid #c4708a;color:#c4708a}
+.cup-n{font-size:14px;margin-top:8px;line-height:1.5}.cup-b{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
+.cupf{display:flex;flex-direction:column;gap:10px;font-family:var(--ff-b)}.cupf label{display:flex;flex-direction:column;gap:4px;font-size:13px;font-weight:700}
+.cupf input,.cupf select,.cupf textarea{font:inherit;font-weight:400;font-size:16px;padding:8px;border:2px solid var(--px);background:var(--card);color:var(--ink)}
+.cupf-g b{font-size:13px}.cupf-g .cr{font-size:14px;margin:6px 0}
+.cupf-ar{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}.cupf-ar button{font-family:var(--ff-b);font-size:13px;padding:5px 9px;border:2px solid var(--px);background:var(--card);color:var(--ink);cursor:pointer}.cupf-ar button.on{background:#c4708a;border-color:#c4708a;color:#fff}
 /* ===== 工具頁分頁 ===== */
 .tooltabs{padding:10px 14px 0!important}.tooltabs a{cursor:pointer;user-select:none;-webkit-user-select:none}
 #v-tools .sec[data-tt]:not(.tt-on){display:none}
@@ -966,6 +981,12 @@ html.dark .ex-tot{background:var(--card)!important}
   <section class="view" id="v-coffee">
     <div class="sec cl-launch">
       <button class="cl-open" id="clOpen"><span class="ic">🗣️</span><span class="t"><b>咖啡店點單特訓</b><small id="clMini">常用句・手沖專區・選豆產生器・聽懂店員・術語・測驗・點單產生器</small></span><span class="go">開始 ›</span></button>
+    </div>
+    <div class="sec" id="cupSec">
+      <h3>📓 我的咖啡品飲紀錄</h3>
+      <div class="hint">每喝一杯就記一筆：店家、豆子、沖法，熱的和放涼後的味道各打幾分，全家同步。</div>
+      <div id="cups"></div>
+      <button class="btn pri" id="cupAdd" style="margin-top:8px">＋ 記一杯</button>
     </div>
     <div class="sec">
       <h3>☕ 福岡咖啡名店</h3>
@@ -1263,6 +1284,20 @@ html.dark .ex-tot{background:var(--card)!important}
       <div class="cl-prog" id="clProg"></div>
       <div class="seg cl-tabs" id="clTabs"><button data-cl="say">① 常用句</button><button data-cl="po">☕ 手沖專區</button><button data-cl="bean">🫘 選豆產生器</button><button data-cl="hear">② 聽懂店員</button><button data-cl="term">③ 咖啡術語</button><button data-cl="quiz">④ 小測驗</button><button data-cl="order">⑤ 點單產生器</button></div>
       <div id="clBody"></div>
+  </div></div>
+  <div class="cl-modal" id="cupModal" aria-hidden="true"><div class="cl-sheet sec">
+    <div class="cl-mh"><h3>📓 記一杯咖啡</h3><button class="cl-x" id="cupClose">✕</button></div>
+    <div class="cupf">
+      <label>店家<input id="cfS" placeholder="例：Blue Bottle Coffee"></label>
+      <label>豆子<input id="cfB" placeholder="例：衣索比亞 單品"></label>
+      <label>產區<select id="cfR"><option>非洲</option><option>中南美洲</option><option>亞洲</option><option>配方豆</option></select></label>
+      <label>沖法<input id="cfM" placeholder="例：手沖・平底濾杯＋蛋糕濾紙"></label>
+      <div class="cupf-g"><b>🔥 熱的時候</b><div id="cfHot"></div></div>
+      <div class="cupf-g"><b>🧊 放涼之後</b><div id="cfCool"></div></div>
+      <div class="cupf-g"><b>香氣</b><div class="cupf-ar" id="cfAr"></div></div>
+      <label>心得<textarea id="cfN" rows="3" placeholder="想到什麼就寫"></textarea></label>
+      <button class="btn pri" id="cfSave">儲存</button>
+    </div>
   </div></div>
 <div class="ov" id="ov"><button class="x" id="ovX">✕ 關閉</button><div class="big jp" id="ovJp"></div><div class="small" id="ovZh"></div></div>
 <div class="sheet" id="sheet"><form id="shForm" autocomplete="off">
@@ -2293,6 +2328,38 @@ function clClose(){$('#clModal').classList.remove('on');document.body.classList.
 $('#clOpen').onclick=clOpen;$('#clClose').onclick=clClose;
 $('#clModal').addEventListener('click',e=>{if(e.target.id==='clModal')clClose()});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&$('#clModal').classList.contains('on'))clClose()});
+
+/* ---------- 咖啡品飲紀錄 ---------- */
+const CUP_AX=[['ac','酸','🍋'],['sw','甜','🍯'],['bi','苦','🍫']],CUP_AR=['花香','果香','柑橘','莓果','茶感','焦糖','巧克力','堅果','香料','發酵'];
+let cupEdit=null,cupF=null;
+function cupBar(v,c){return `<span class="cupbar">${[1,2,3,4,5].map(i=>`<i class="${i<=v?'on':''}" style="${i<=v?'background:'+c:''}"></i>`).join('')}</span>`}
+const CUP_COL={ac:'#e0b02e',sw:'#d9774a',bi:'#6a4022'};
+function cupCardHtml(id,c,ph){const B={sn:(c.b||'').replace(/單品|配方/g,'').trim().slice(0,5)||'豆',r:c.r||'非洲',ro:c.ro==null?null:c.ro};
+ const col=(t,o)=>`<div class="cupcol"><div class="ch">${t}</div>${CUP_AX.map(a=>`<div class="cr"><span>${a[2]} ${a[1]}</span>${cupBar((o||{})[a[0]]||0,CUP_COL[a[0]])}</div>`).join('')}</div>`;
+ return `<div class="cupc" data-cup="${id}"><div class="cup-top">${cBag(B,(c.s||'').split(' ')[0].slice(0,8))}<div class="cup-t"><small>${esc(c.d||'')}</small><b>${esc(c.s)}</b><div class="cup-bn">${esc(c.b||'')}</div>${c.m?`<div class="cup-m">⚗️ ${esc(c.m)}</div>`:''}</div></div>
+  <div class="cup-tf">${col('🔥 熱的時候',c.hot)}<div class="cup-arrow">→<small>放涼</small></div>${col('🧊 放涼之後',c.cool)}</div>
+  ${(c.ar||[]).length?`<div class="cup-ar">${c.ar.map(a=>`<em>${esc(a)}</em>`).join('')}</div>`:''}
+  ${c.n?`<div class="cup-n">💬 ${esc(c.n)}</div>`:''}
+  ${foodPhotoBox('cup_'+id,ph)}
+  <div class="cup-b"><button class="btn ghost" data-photo="f_cup_${id}">📷 加照片</button><button class="btn ghost" data-cupedit="${id}">✏️ 修改</button></div></div>`}
+function drawCups(){const el=$('#cups');if(!el)return;const C=S.get('cups',{}),ph=S.get('gphoto',{});const ids=Object.keys(C).sort((a,b)=>(C[b].o||0)-(C[a].o||0));
+ el.innerHTML=ids.length?ids.map(id=>cupCardHtml(id,C[id],ph)).join(''):'<div class="hint">還沒有紀錄，喝完一杯就按下面的按鈕記下來。</div>'}
+function cupForm(id){const C=S.get('cups',{}),c=id?C[id]:{hot:{ac:3,sw:3,bi:2},cool:{ac:3,sw:3,bi:2},ar:[]};cupEdit=id;cupF=JSON.parse(JSON.stringify({hot:c.hot||{},cool:c.cool||{},ar:c.ar||[]}));
+ $('#cfS').value=c.s||'';$('#cfB').value=c.b||'';$('#cfR').value=c.r||'非洲';$('#cfM').value=c.m||'';$('#cfN').value=c.n||'';cupFormDraw();$('#cupModal').classList.add('on');document.body.classList.add('cl-lock')}
+function cupFormDraw(){['hot','cool'].forEach(k=>{$(k==='hot'?'#cfHot':'#cfCool').innerHTML=CUP_AX.map(a=>`<div class="cr"><span>${a[2]} ${a[1]}</span><span class="cupbar ed">${[1,2,3,4,5].map(i=>`<i data-cf="${k}.${a[0]}.${i}" class="${i<=(cupF[k][a[0]]||0)?'on':''}" style="${i<=(cupF[k][a[0]]||0)?'background:'+CUP_COL[a[0]]:''}"></i>`).join('')}</span></div>`).join('')});
+ $('#cfAr').innerHTML=CUP_AR.map(a=>`<button data-car="${a}" class="${cupF.ar.includes(a)?'on':''}">${a}</button>`).join('')}
+function cupClose(){$('#cupModal').classList.remove('on');document.body.classList.remove('cl-lock')}
+$('#cupAdd').onclick=()=>cupForm(null);$('#cupClose').onclick=cupClose;$('#cupModal').addEventListener('click',e=>{if(e.target.id==='cupModal')cupClose();
+ const c=e.target.closest('[data-cf]');if(c){const[k,a,v]=c.dataset.cf.split('.');cupF[k][a]=+v;cupFormDraw();return}
+ const r=e.target.closest('[data-car]');if(r){const a=r.dataset.car,i=cupF.ar.indexOf(a);if(i>=0)cupF.ar.splice(i,1);else cupF.ar.push(a);cupFormDraw()}});
+$('#cfSave').onclick=()=>{const sN=$('#cfS').value.trim();if(!sN){toast('請填店家');return}const C=S.get('cups',{}),id=cupEdit||('c'+Date.now().toString(36));const td=new Date(Date.now()+9*3600e3);
+ C[id]=Object.assign({},C[id]||{d:(td.getUTCMonth()+1)+'/'+td.getUTCDate(),o:Date.now()},{s:sN,b:$('#cfB').value.trim(),r:$('#cfR').value,m:$('#cfM').value.trim(),n:$('#cfN').value.trim(),hot:cupF.hot,cool:cupF.cool,ar:cupF.ar});
+ S.set('cups',C);cupClose();drawCups();toast('已記下這杯 ☕')};
+$('#cups').addEventListener('click',e=>{const pb=e.target.closest('[data-photo]');if(pb){gPhotoFor=pb.dataset.photo;$('#gFile').click();return}
+ const ed=e.target.closest('[data-cupedit]');if(ed){cupForm(ed.dataset.cupedit);return}
+ const zm=e.target.closest('[data-zoom]');if(zm){$('#imgovI').src=zm.src;$('#imgovT').textContent='';$('#imgovD').dataset.id=zm.dataset.zoom;$('#imgovD').textContent='移除這張照片';delete $('#imgovD').dataset.arm;$('#imgov').classList.remove('ro');$('#imgov').classList.add('on')}});
+reloaders.push(()=>{if(currentView()==='coffee')drawCups()});
+drawCups();
 clDraw();
 const SHOPS=[
  {id:'hbt',n:'DAISO・Standard Products・THREEPPY 博多巴士總站店',jp:'ダイソー 博多バスターミナル店',a:'博多站',b:['DAISO','Standard Products','THREEPPY'],h:'9:00–21:00・無休',d:'博多站旁、博多巴士總站 5 樓，九州最大的大創旗艦店，三個牌子在同一層。DAISO 是 100 日圓起的日用品；Standard Products 是簡約設計風的生活雜貨（多為 300 日圓起）；THREEPPY 是 300 日圓為主、粉嫩可愛的少女系雜貨和文具。',tip:'博多站走路 1 分鐘，抵達那晚或回程前都方便。'},
@@ -2696,7 +2763,7 @@ function drawFoodBud(){try{drawFoodBud0()}catch(e){}}
 function drawFoodBud0(){const el=$('#foodBud');if(!el)return;const bd=+S.get('foodBudget',20000)||0,E=S.get('exp',null)||{},d=exToday();
  let sp=0;for(const k in E)if(E[k].d===d&&E[k].c==='food')sp+=E[k].a;const left=bd-sp,pc=bd?Math.min(100,sp/bd*100):0;
  el.innerHTML=`<div class="fbud"><div class="t">🍜 今天（${d}）餐費 <b>¥${sp.toLocaleString()}</b> / 預算 ¥${bd.toLocaleString()}　${left>=0?`還剩 <b class="ok">¥${left.toLocaleString()}</b>`:`<b class="ng">超支 ¥${(-left).toLocaleString()}</b>`}</div><div class="bar"><i class="${left<0?'ng':pc>80?'w':''}" style="width:${pc}%"></i></div><div class="s">在「記帳」記下餐飲就會自動算進來・<a href="#money">改每日餐費預算</a></div></div>`}
-function drawFoods(){drawFoodBud();try{drawCafes()}catch(e){}
+function drawFoods(){drawFoodBud();try{drawCafes();drawCups()}catch(e){}
  const want=S.get('foods',{}),ph=S.get('gphoto',{});
  const okP=f=>fPrice==='all'||fPriceOf(f)===fPrice,okA0=f=>fArea==='all'||f.a===fArea,okA=f=>okA0(f)&&okP(f),okT=f=>fType==='all'||fTypeOf(f)===fType,okW=f=>(!fWant||want[f.id])&&(!fOpen||(fStat(f)||{}).o);
  const cP=k=>FOODS.filter(f=>okA0(f)&&okT(f)&&okW(f)&&(k==='all'||fPriceOf(f)===k)).length;
@@ -3066,7 +3133,7 @@ window.addEventListener('hashchange',route);
 /* ---------- family sync (Firebase Realtime Database, REST + 串流) ---------- */
 const FB_URL='https://molecule-match-default-rtdb.asia-southeast1.firebasedatabase.app';
 const FS=(function(){
- const KEYS=['done','cafes','shops','xmas','gifts','foods','gphoto','memo','savedNotes','edits','todo','pack','tax','xtabs','xlists','exp'];
+ const KEYS=['done','cafes','shops','xmas','gifts','foods','gphoto','memo','savedNotes','edits','todo','pack','tax','xtabs','xlists','exp','cups'];
  const raw={get(k){try{const v=localStorage.getItem('fuk26_'+k);return k==='gphoto'&&v?JSON.stringify(phFill(JSON.parse(v))):v}catch(e){return null}},set(k,v){try{localStorage.setItem('fuk26_'+k,k==='gphoto'?JSON.stringify(phStrip(JSON.parse(v))):v)}catch(e){}},del(k){try{localStorage.removeItem('fuk26_'+k)}catch(e){}}};
  const okCode=c=>/^[A-Za-z0-9_-]{8,40}$/.test(c||'');
  const enc=k=>encodeURIComponent(k).replace(/\./g,'%2E'),dec=k=>{try{return decodeURIComponent(k)}catch(e){return k}};
@@ -3083,6 +3150,7 @@ const FS=(function(){
   else if(key==='xtabs'){for(const k in v)if(v[k]&&!v[k].p)o['xt/'+k]=JSON.stringify({n:v[k].n,o:v[k].o})}
   else if(key==='xlists'){for(const k in v)if(v[k]&&!v[k].p)o['xl/'+k]=JSON.stringify({n:v[k].n,tab:v[k].tab,items:v[k].items||[],o:v[k].o})}
   else if(key==='exp'){for(const k in v)if(v[k])o['ex/'+k]=JSON.stringify(v[k])}
+  else if(key==='cups'){for(const k in v)if(v[k])o['cu/'+k]=JSON.stringify(v[k])}
   else if(key==='edits'){o['edits/v']=v.v||1;(v.days||[]).forEach((d,i)=>{o['edits/d'+i]=JSON.stringify(d)})}
   else o[key]=JSON.stringify(v);
   return o}
@@ -3093,6 +3161,7 @@ const FS=(function(){
   if(key==='savedNotes'){const o={},x=sub('notes/');for(const k in x)o[dec(k)]=String(x[k]);return o}
   if(key==='gphoto'){const o={},x=sub('gp/');for(const k in x)o[k]={h:String(x[k]),u:null};return o}
   if(key==='xtabs'||key==='xlists'){const o={},x=sub(key==='xtabs'?'xt/':'xl/');for(const k in x){try{const r=JSON.parse(x[k]);if(r&&typeof r.n==='string')o[k]=r}catch(e){}}return o}
+  if(key==='cups'){const o={},x=sub('cu/');for(const k in x){try{const r=JSON.parse(x[k]);if(r&&r.s)o[k]=r}catch(e){}}return o}
   if(key==='exp'){const o={},x=sub('ex/');for(const k in x){try{const r=JSON.parse(x[k]);if(r&&r.a>0)o[k]=r}catch(e){}}return o}
   if(key==='edits'){const x=sub('edits/d');if(!Object.keys(x).length)return null;
    return{v:+E['edits/v']||BASEV,days:DAYS.map((_,i)=>{try{const d=JSON.parse(x[i]);if(d&&Array.isArray(d.stops))return d}catch(e){}return baseDay(i)})}}
