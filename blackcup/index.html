@@ -65,6 +65,11 @@ button{font:inherit;color:inherit;touch-action:manipulation}
 .opt:before{content:"";position:absolute;left:11px;top:19px;width:8px;height:8px;background:var(--cherry)}
 .opt:active{border-color:var(--cherry);transform:translateY(2px);box-shadow:none}
 .danger{font-size:11px;color:var(--cherry2);font-family:"DotGothic16";text-align:center;letter-spacing:1px}
+.scene.doom canvas{filter:grayscale(.75) contrast(1.1)}
+.scene.doom:after{content:"";position:absolute;inset:0;background:radial-gradient(transparent 40%,rgba(122,31,34,.55));mix-blend-mode:multiply;pointer-events:none;animation:doomin 1.2s ease-out both}
+@keyframes doomin{from{opacity:0}to{opacity:1}}
+.box.doom{border-color:var(--cherryD);box-shadow:0 0 0 3px var(--ink),0 0 0 4px var(--cherryD)}
+.box.doom .txt.narr{color:#d9b3b3}
 /* overlays */
 .ov{position:fixed;inset:0;background:rgba(6,8,11,.86);z-index:50;display:none;align-items:center;justify-content:center;padding:16px}
 .ov.on{display:flex}
@@ -294,6 +299,42 @@ const ENDS={
  lie:{t:'一句沒有',x:'你說了「沒有」。評審翻開金穗流出的資料，第一頁就是帕洛瑪莊園的共發酵紀錄——是你自己做的。你被以「申報不實」取消成績。',w:'共發酵本身不一定違規，說謊才是。誠實揭露＋紀錄，才是你最強的武器。'},
  secret:{t:'商業機密',x:'「處理細節屬於商業機密。」評審們交換了一個眼神。在一場加料醜聞剛爆發的賽事裡，這句話等於承認。你的分數，被整齊地壓低。',w:'在信任危機中，拒絕揭露＝自證可疑。你手上明明有每天的糖度與 pH 紀錄。'},
 };
+/* ============ 結局劇情：選錯之後，先演完「後來發生了什麼」 ============ */
+ENDS.spiked2={t:'自己加的香',x:'',w:'外加香精、不申報，抽驗一驗就中。卡洛斯問「要不要多一點水果」，不是在推銷，是在看你會不會。'};
+ENDS.muddle={t:'一點點',x:'',w:'沒加卻說有，跟有加說沒有一樣糟——申報要精確。你手上明明有每天的糖度與 pH 紀錄。'};
+const SEQ={
+ fish:[['@bg','cafe_day','隔天．白霧咖啡'],['','隔天下午，網紅的鏡頭對準了你手上那罐「藝伎」。'],['','「哇——全台最便宜的藝伎！」影片上傳三天，五十萬次觀看。'],['','第四天，一則留言被頂到最上面：「我是 Q Grader。這豆形、這烘焙色，是巴西商業豆。」'],['mei','{N}……你看嚴老闆的限動。'],['','「本店咖啡師個人疏失，已處理。」——底下，標記了你的帳號。'],['yan','哎呀，年輕人做事要小心啊。你說是不是？']],
+ loud:[['yan','好啊，去啊。'],['','他笑著，眼睛還是瞇成一條線。'],['@bg','cafe_day','隔天早上'],['','隔天早上，排班表上你的名字被劃掉了。'],['mei','老闆說你「不適任」……還有，同業群組在傳一張截圖，說你偷拿店裡的豆子。'],['me','我沒有！我有……我……'],['','你翻遍手機。沒有錄音，沒有照片，沒有任何證據。'],['','台灣盃報名表上「推薦店家」那一欄，你始終沒能填上。']],
+ coarse:[['','第二杯沖好了。你先偷喝一口——更酸、更薄，像一句沒說完的話又被打斷。'],['shen','……'],['','老人從口袋掏出一張百元鈔，壓在杯墊下，起身，推門走進雨裡。'],['mei','剛剛那個阿伯，好像在哪看過耶？算了，不重要啦。'],['','很久以後你才知道，那是沈懷舟。'],['','而他，不會再來第二次。']],
+ kneel:[['yan','這才對嘛～'],['','推薦函當天就寫好了。'],['@bg','cafe','一個月後'],['','第一週，倉庫多了一袋換過標籤的「耶加雪菲」。第二週，是「巴拿馬藝伎」。'],['yan','推薦函都給你了，這點小事，你不會不幫吧？'],['','一年後，消保單位上門稽查。'],['yan','（對稽查員）豆子一直都是他在處理的，我也是今天才知道。']],
+ threat:[['yan','喔？'],['','他的笑容，第一次收了起來。'],['','那天晚上，倉庫的燈亮到凌晨。'],['','隔天，所有進貨單都換成了新的。你被叫進辦公室。'],['yan','這個月做完就好。對了——我剛發了一篇文，你看一下。'],['','「前員工因私人恩怨散布不實訊息，本店保留法律追訴權。」'],['mei','{N}……你這樣是打草驚蛇啦。']],
+ water:[['','你選了那瓶水。沖好的藝伎聞起來還行——喝下去，卻像被蓋上一層棉被。'],['shen','花呢？'],['me','可能是我的手法——'],['shen','是你的水。酸被吸掉了，花香被淹死了。'],['shen','回去吧。等你分得出水，再來。'],['','舟火焙煎所的鐵門，在你面前嘩啦一聲拉了下來。']],
+ bitter:[['','你把刻度再往細調。第二杯：萃取率 25.1%。'],['shen','……中藥。'],['mei','哇好苦！比我阿嬤的苦茶油還苦！'],['','沈懷舟默默把折射計收進抽屜。'],['shen','等你看得懂數字，再來。']],
+ dilute:[['','你往杯子裡兌了一點熱水。折射計：TDS 1.30%。漂亮。'],['me','師父，進金杯了！'],['','沈懷舟喝了一口，沒說話，把杯子推回來。'],['','你自己喝了一口。苦澀和乾澀，一點都沒少。'],['shen','你在騙折射計。騙不了舌頭。'],['shen','明天不用來了。']],
+ stir:[['','你拿起湯匙用力攪。粉床翻起來，成了一攤泥。'],['','細粉全沉到濾紙底部——水，更下不去了。'],['shen','……四分半。'],['','杯子苦得發澀。沈懷舟把濾杯整個倒進垃圾桶。'],['shen','你不是在救這杯咖啡，你是在跟它吵架。'],['shen','回去想想，塞水的病根在哪。']],
+ spiked:[['','你拿下了台灣盃。頒獎台下，周董帶頭鼓掌。'],['@bg','tokyo','東京．世界手沖盃'],['','世界賽前一週，主辦方抽驗所有選手的生豆。'],['hana','{N}選手。實驗室在你的生豆裡，驗出了外加香料成分。'],['me','不可能！這是我買的比賽批次——'],['','手機震動。金穗的官方聲明：「選手自行處理生豆，與本公司無關。」'],['hana','依規則，取消參賽資格。']],
+ spiked2:[['carlos','……好。你是老闆。'],['','你的三十公斤豆子香得驚人。只是冷掉以後，香氣像被拔掉插頭一樣消失。'],['','你拿下了台灣盃。'],['@bg','tokyo','東京．世界手沖盃'],['hana','{N}選手。你的生豆驗出外加香精。'],['','你想起卡洛斯那時的表情。他不是在問你要不要——他是在看你會不會。'],['hana','依規則，取消參賽資格。']],
+ misdiag:[['carlos','照你說的處理？……好。'],['','你建議的藥，他噴了。'],['@bg','farm','三個月後'],['','三個月後，你收到一張照片：那排樹的葉子掉光了，只剩光禿禿的枝條。'],['','照片下面只有一行西班牙文。翻譯軟體說：「你不懂樹。」'],['','之後，卡洛斯再也沒有回過你的訊息。']],
+ lowball:[['carlos','一成？'],['','他笑了，笑得很大聲。'],['carlos','金穗的人，也是這樣開場的。一成、兩成，然後說「這就是市場」。'],['','他轉身去餵雞。一隻雞走過來，啄了啄你的鞋。'],['carlos','回去吧，台灣人。市場會賣你豆子的。']],
+ bounce:[['carlos','兩千公斤？好！我推掉其他買家，全部留給你！'],['@bg','cafe','回到台灣'],['','你算了三次。兩千公斤的錢，你連零頭都付不出來。'],['me','卡洛斯，對不起，我……可能只買得起一百公斤……'],['','訊息已讀。很久，沒有回覆。'],['','那一季，帕洛瑪莊園的豆子沒有人收。工人的薪水，卡洛斯是賣了一頭牛才付清的。']],
+ flat:[['me','……大概是太緊張了吧。'],['','你深呼吸，照原計畫上場。'],['','第一杯，花香出不來。第二杯，酸被悶住。第三杯，評審皺起了眉。'],['lin','平淡，缺乏層次。'],['','名次：第九。'],['','收拾時，你在後台垃圾桶裡看見一個水瓶——跟你的一模一樣，只是封膜的顏色不同。']],
+ accuse:[['me','是妳換了我的水！'],['','全場安靜了下來。'],['su','……你有病嗎？'],['','裁判長調出監視器：蘇曼從頭到尾，沒有靠近過你的桌子。'],['lin','選手{N}，不當行為，扣分。'],['','觀眾席第二排，金穗的業務低頭喝了一口飲料。真正換水的人，連起身都不必。']],
+ bribe:[['lin','年輕人，前途無量啊。'],['','餐敘上，紅包從桌子底下滑了過去。'],['','那年，你拿下台灣盃冠軍。'],['','兩年後，「林正衡收賄案」登上新聞頭條。'],['','檢調查扣的帳本裡，第三行，寫著你的名字。']],
+ blank:[['me','呃……因為……烘得比較……不對，是品種……'],['','評審們低頭寫字。你聽見有人輕輕嘆了一口氣。'],['','「描述與理解」這一欄，你拿到了全場最低分。'],['su','（經過你身邊）連自己的杯子都說不清楚？'],['','你止步四強。']],
+ contract:[['','你簽下了名字。每個月二十萬準時入帳，你換了新的磨豆機、新的手機。'],['@bg','office','世界賽前一週'],['zhou','這是你的比賽豆。'],['','你杯測了一次。香氣炸開——冷掉之後，突然消失。'],['me','周董，這豆子我不能用。'],['zhou','合約第七條，你不能拒絕。第九條，你不能說。'],['zhou','沈懷舟當年，也是坐在這張椅子上。']],
+ bots:[['yu','三千個，今晚就上。'],['','隔天早上，你的貼文下多了三千則好評，整齊得像在排隊。'],['','第三天，有人做了一張圖表：「這三千個帳號，全是同一天註冊的。」'],['yan','（轉發）看吧，會作假的人，什麼都做得出來。'],['','你從被抹黑的人，變成了造假的人。']],
+ flame:[['','你寫了一篇三千字長文，點名嚴少華，越寫越氣，用詞越來越重。'],['','按讚很多，分享很多。你覺得出了一口氣。'],['','三天後，你收到一封存證信函。'],['','「公然侮辱、加重誹謗。」寄件人：白霧咖啡　嚴少華。'],['','你沒有證據。他有你寫的每一個字的截圖。']],
+ misread:[['me','妳是來看我笑話的吧。'],['su','……算了。'],['','她把牛皮紙袋抱回懷裡，走進雨裡。'],['@bg','tokyo','東京．世界手沖盃'],['','世界賽前一天，蘇曼被驗出生豆加料，當場除名。金穗的聲明說：「選手個人行為。」'],['','你這才明白那個牛皮紙袋裡裝的是什麼。可是它，已經進了碎紙機。']],
+ rumor:[['','你在網路上丟出一句話：「聽說某資深評審，收錢。」'],['','消息燒了三天。林正衡辭職。'],['shen','……好。'],['','他的聲音，一點也不高興。'],['','一週後，有人扒出了消息的源頭——你的小帳。「冠軍選手造謠」上了熱搜。'],['','從此，沒有人再相信沈懷舟的冤屈。因為你們用的，正是當年害他的那一招。']],
+ coward:[['shen','……也好。'],['','他沒有再說話，轉身去顧烘豆機。'],['@bg','tokyo','東京．世界手沖盃'],['','世界賽。你那一輪，評審席正中間坐的是林正衡。'],['lin','（微笑）又見面了。'],['','你的分數，低得很整齊。']],
+ late:[['hana','好。比完之後再交給我。'],['','比賽結束，你拿到第三名。然後，你交出了證據。'],['hana','……為什麼不在賽前提出？林正衡先生，已經評完你那一輪了。'],['','隔天的新聞標題：「季軍賽後爆料，是正義，還是不甘？」'],['','證據是真的。可是在所有人眼裡，它來得太晚。']],
+ mic:[['','開幕式上，你衝上舞台，搶過麥克風。'],['me','各位！這屆比賽有評審收錢——'],['','第三句話還沒說完，麥克風就被切斷了。兩名保全把你架下舞台。'],['hana','{N}選手，擾亂賽事，取消資格。'],['','你手上的牛皮紙袋掉在地上。沒有人撿起來看。']],
+ kenya:[['','你設好參數，按下計時。'],['','第一口——酸澀緊縮，像一顆沒熟的番茄。'],['me','（糟了……）'],['','評審在杯子旁寫下：「萃取不足，未表現產區特性。」'],['','指定賽成績墊底。你沒能進入決賽。']],
+ lie:[['me','沒有。'],['hana','……'],['','她翻開手上的資料夾。'],['hana','這是帕洛瑪莊園的處理紀錄。和水果共發酵——紀錄上的筆跡，是你的。'],['','全場一片嘩然。'],['hana','申報不實。取消本屆成績。']],
+ muddle:[['hana','一點點？加了什麼？'],['me','沒、沒有，我是說……'],['','評審們交換了一個眼神。你手上那本每天的糖度和 pH 紀錄，突然一點說服力都沒有了。'],['hana','選手申報前後矛盾。送驗期間，成績暫停。']],
+ secret:[['','會場安靜了三秒。'],['hana','了解。'],['','在一場加料醜聞剛爆發的比賽裡，這句話代表什麼，所有人都懂。'],['','你的分數，被整齊地壓低。']],
+};
+
 /* ============ 劇本 ============ */
 const L=(s,t)=>({s,t}), N=t=>({s:'',t}), C=(q,o)=>({c:q,o}), BG=(b,loc)=>({bg:b,loc}), LB=l=>({lbl:l}), J=l=>({jmp:l}), IF=(f,l)=>({iff:f,go:l});
 const CH=[
@@ -422,7 +463,7 @@ const CH=[
  L('carlos','隔壁的莊園，發酵槽裡丟果乾、肉桂，還有一瓶「天然」香精。歐洲買家愛死了。'),
  L('carlos','你的三十公斤，要不要也「多一點水果」？'),
  C('處理法，決定了你的杯子能不能攤在陽光下。',[
-  {t:'「要。比賽就是要香，香精不用寫在標籤上吧？」',end:'spiked',why:'這次是你自己加的。冷卻後香氣斷崖，世界賽抽驗一驗就中。'},
+  {t:'「要。比賽就是要香，香精不用寫在標籤上吧？」',end:'spiked2'},
   {t:'「和真的水果一起共發酵，但全部紀錄下來，比賽時完整揭露。」',f:'coferm',fx:{tech:1},r:[['carlos','誠實的水果。好，我喜歡。']]},
   {t:'「什麼都不加。做控溫厭氧日曬，每天量糖度和 pH，記錄下來。」',f:'clean',fx:{heart:1,tech:1},r:[['carlos','慢、麻煩、沒噱頭。……我喜歡。']]},
  ]),
@@ -579,7 +620,7 @@ const CH=[
  C('最後一個問題。',[
   {t:'「沒有。這是每一天的糖度、pH 和溫度紀錄，農人卡洛斯可以作證。」',fx:{heart:1},go:'fin'},
   {t:'「處理細節，屬於商業機密。」',end:'secret'},
-  {t:'「其實……只有一點點。」（你也不知道自己為什麼這樣說）',end:'lie',why:'沒加卻說有，跟有加卻說沒有一樣糟——申報要精確。'},
+  {t:'「其實……只有一點點。」（你也不知道自己為什麼這樣說）',end:'muddle'},
  ]),
  LB('fq_co'),
  C('最後一個問題。',[
@@ -916,7 +957,7 @@ let typing=null,waiting=false,annot=false,ffwd=false,curLine=null;
 const labels=ci=>{const m={};CH[ci].nodes.forEach((n,i)=>{if(n.lbl)m[n.lbl]=i});return m};
 function step(){
   if(!S)return;
-  if(S.q.length){const [s,t]=S.q.shift();showLine({s,t});return}
+  if(S.q.length){const [s,t,l]=S.q.shift();if(s==='@bg'){setBg(t,l);step();return}showLine({s,t});return}
   const nodes=CH[S.ch].nodes;
   while(true){
     const n=nodes[S.i];
@@ -972,6 +1013,7 @@ function pick(o){
   if(o.fx){const ch=Object.entries(o.fx).map(([k,v])=>`${{tech:'技術',fame:'名聲',heart:'良心'}[k]} ${v>0?'+':''}${v}`).join('　');toast(ch)}
   S.q=(o.r||[]).map(x=>x.slice());
   if(o.end){S.pendingEnd={id:o.end,why:o.why};
+    S.q=S.q.concat((SEQ[o.end]||[]).map(x=>x.slice()));doom(true);
     if(S.q.length){step();return}
     gameOver();return}
   S.i=o.go?labels(S.ch)[o.go]:S.i+1;persist();step();
@@ -979,11 +1021,13 @@ function pick(o){
 // patch: pending end after reaction lines
 const _step=step;step=function(){if(S&&S.pendingEnd&&!S.q.length){gameOver();return}_step()};
 
+function doom(on){document.querySelector('.scene').classList.toggle('doom',on);$('box').classList.toggle('doom',on)}
 function gameOver(){
   const {id,why}=S.pendingEnd;S.pendingEnd=null;const E=ENDS[id];sfx('fail');
   if(!P.endings.includes(id))P.endings.push(id);P.run=null;saveDB();
   const total=Object.keys(ENDS).length;
-  openCard(`<div class="tag">BAD END　${P.endings.length}/${total}</div><h3>${E.t}</h3><p>${linkify(fill(E.x))}</p><div class="why"><b style="color:#ece4d4">解析</b><br>${linkify(E.w)}${why?'<br>'+linkify(why):''}</div>
+  const got=P.endings.filter(e=>ENDS[e]).length;
+  openCard(`<div class="tag">BAD END　${got}/${total}</div><h3>${E.t}</h3><div class="why"><b style="color:#ece4d4">解析</b><br>${linkify(E.w)}${why?'<br>'+linkify(why):''}</div>
   <button class="big" id="eRetry">從本章開頭再來</button><button class="big alt" id="eTitle">回到標題</button>`,'endcard lock');
   bindLinks($('card'));
   $('eRetry').onclick=()=>{closeCard();const cs=S.chStart;startChapter(S.ch,{...cs.stats},{...cs.flags});enterGame()};
@@ -1019,7 +1063,7 @@ function finale(){
   bindLinks($('card'));$('fT').onclick=()=>{closeCard();toTitle()};
 }
 function enterGame(fresh){
-  show('game');renderStats();$('chLabel').textContent=CH[S.ch].t;
+  doom(false);show('game');renderStats();$('chLabel').textContent=CH[S.ch].t;
   // rebuild bg from nodes before i
   const nodes=CH[S.ch].nodes;let b='cafe',loc='';for(let k=0;k<S.i&&k<nodes.length;k++)if(nodes[k].bg){b=nodes[k].bg;loc=nodes[k].loc}
   if(S.i===0){const f=nodes.find(n=>n.bg);if(f){b=f.bg;loc=f.loc}}
