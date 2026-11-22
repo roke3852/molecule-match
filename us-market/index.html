@@ -275,7 +275,7 @@ input[type=range]{width:100%;accent-color:var(--s1)}
 
     <div class="card" id="scnCard">
       <h2>🧭 三種劇本：會像 2000、2008，還是 2022？</h2>
-      <div class="meta">從高點起算的跌幅路徑（關鍵轉折點連線、約略）；圓點是這次的費半與加權（11/20）</div>
+      <div class="meta">從高點起算的跌幅路徑（關鍵轉折點連線、約略）；實心圓點是這次的費半與加權、空心圈是櫃買（11/20）</div>
       <div id="scnChart" style="margin-top:10px"></div>
       <div id="scnTbl"></div>
       <div class="fig"><div class="t">反彈陷阱</div><div class="s">每次都像見底的反彈幅度</div><div id="scnRb"></div></div>
@@ -351,7 +351,7 @@ input[type=range]{width:100%;accent-color:var(--s1)}
 <div id="tip"></div><div id="toast"></div>
 
 <script>
-const ASOF="2026-11-22 16:20";
+const ASOF="2026-11-22 16:32";
 const TODAY={"d": "2026-11-22", "l": [["ev", "tw-rescue3", "大事：救市第三波 — 補上國安基金週末聲明、台股單週 −17.5%"], ["ev", "rout-1120", "大事：美股大屠殺 — 補 VIX 37、市場寬度"], ["ev", "fed-hike", "大事：聯準會 — 12 月升息機率 92%"], ["vw", "", "名人觀點：新增嘉信 Schwab（Gordon、Howard）"], ["cal", "", "接下來：感恩節週美國數據與財報"], ["bear", "", "空頭史：新增「ABC 波段測量」「三種劇本」圖卡"], ["tour", "", "導覽員：週日早報"]]}; /* 今日更新清單：每日更新時重寫 d 與 l */
 /* ---------- 大事資料 ---------- */
 const EVENTS=[
@@ -937,14 +937,14 @@ const SPX_HI=7818.93, NDQ_HI=27599.79, TW_HI=49822.55, SOX_HI=14634.72, TW_NOW=2
 
 /* ---------- 三種劇本 ---------- */
 (function(){
-  const SC=[["2000", "var(--bear)", [[0, 0], [2.4, -37], [5.7, -16], [9.3, -54], [10.5, -43], [12.8, -68], [14.4, -54], [18.4, -72], [21.8, -59], [31, -78]], ["−78%", "31 個月", "2001/1 起狂降息，救不了", "網路股獲利崩、設備商砍單", "泡沫擠完、估值回到合理"]], ["2008", "var(--neu)", [[0, 0], [2.7, -25], [6.6, -6], [12.7, -60]], ["−60%", "13 個月", "降到零利率＋QE", "全球衰退", "各國聯手救市、信用解凍"]], ["2022", "var(--s1)", [[0, 0], [5.4, -24], [7.4, -10], [9.3, -25]], ["−25%", "9 個月", "一路升息到通膨見頂", "沒有衰退、獲利撐住", "通膨見頂、Fed 放慢升息"]]],RB=[["2000/12→2001/1", "+23%"], ["2001/4→5", "+41%"], ["2001/9→2002/1", "+45%"], ["2008/1→5 台股", "+26%"], ["2022/6→8 S&P", "+17%"]],SW=[["獲利往下掉？", "還沒：Nvidia 下季指引 1,300 億美元仍成長；要盯雲端廠資本支出", "neu", "2000"], ["聯準會停手？", "還沒：12/10 幾乎確定升息，比 2022 見底時更不利", "bear", "2022"], ["信用凍結？", "還沒，但 AI 舉債、信用壓力開始浮現", "neu", "2008"]],LG=["2000 Nasdaq", "2008 台股加權", "2022 S&P 500"],DOT=["費半", "加權"],COLS=["總跌幅", "花多久見底", "聯準會", "獲利", "怎麼見底的"];
+  const SC=[["2000", "var(--bear)", [[0, 0], [2.4, -37], [5.7, -16], [9.3, -54], [10.5, -43], [12.8, -68], [14.4, -54], [18.4, -72], [21.8, -59], [31, -78]], ["−78%", "31 個月", "2001/1 起狂降息，救不了", "網路股獲利崩、設備商砍單", "泡沫擠完、估值回到合理"]], ["2008", "var(--neu)", [[0, 0], [2.7, -25], [6.6, -6], [12.7, -60]], ["−60%", "13 個月", "降到零利率＋QE", "全球衰退", "各國聯手救市、信用解凍"]], ["2022", "var(--s1)", [[0, 0], [5.4, -24], [7.4, -10], [9.3, -25]], ["−25%", "9 個月", "一路升息到通膨見頂", "沒有衰退、獲利撐住", "通膨見頂、Fed 放慢升息"]]],RB=[["2000/12→2001/1", "+23%"], ["2001/4→5", "+41%"], ["2001/9→2002/1", "+45%"], ["2008/1→5 台股", "+26%"], ["2022/6→8 S&P", "+17%"]],SW=[["獲利往下掉？", "還沒：Nvidia 下季指引 1,300 億美元仍成長；要盯雲端廠資本支出", "neu", "2000"], ["聯準會停手？", "還沒：12/10 幾乎確定升息，比 2022 見底時更不利", "bear", "2022"], ["信用凍結？", "還沒，但 AI 舉債、信用壓力開始浮現", "neu", "2008"]],LG=["2000 Nasdaq", "2008 台股加權", "2022 S&P 500"],DOT=["費半", "加權", "櫃買"],COLS=["總跌幅", "花多久見底", "聯準會", "獲利", "怎麼見底的"];
   const MO=d=>Math.max(0,(new Date(ASOF.slice(0,10))-new Date(d))/864e5/30.44),H=240,L=40,R=W-14,top=12,bot=H-26,X=m=>L+(R-L)*m/32,Y=v=>top+(bot-top)*(-v)/82;
   let g=`<svg viewBox="0 0 ${W} ${H}" role="img">`;
   [0,-20,-40,-60,-80].forEach(v=>g+=`<line x1="${L}" x2="${R}" y1="${Y(v)}" y2="${Y(v)}" style="stroke:var(--grid)"/><text x="${L-6}" y="${Y(v)+4}" text-anchor="end" font-size="10">${v}%</text>`);
   [0,6,12,18,24,30].forEach(m=>g+=`<text x="${X(m)}" y="${H-8}" text-anchor="middle" font-size="10">${m}個月</text>`);
   SC.forEach((s,i)=>{const p=s[2];g+=`<path d="${p.map((q,k)=>(k?"L":"M")+X(q[0]).toFixed(1)+" "+Y(q[1]).toFixed(1)).join("")}" fill="none" stroke-width="2.2" style="stroke:${s[1]}" stroke-linejoin="round"/>`;
     p.forEach(q=>g+=`<circle cx="${X(q[0])}" cy="${Y(q[1])}" r="2.6" style="fill:${s[1]}"/><rect class="hit" x="${X(q[0])-10}" y="${Y(q[1])-10}" width="20" height="20" data-tip="${LG[i]}｜${q[0]}個月・${q[1]}%"/>`);});
-  [[MO("2026-06-22"),-SOX_NOW,DOT[0]],[MO("2026-10-06"),-TW_NOW,DOT[1]]].forEach(([m,v,n])=>{g+=`<circle cx="${X(m)}" cy="${Y(v)}" r="6" style="fill:var(--fg);stroke:var(--panel)" stroke-width="2"/><text x="${X(m)+9}" y="${Y(v)+4}" font-size="11" font-weight="700" style="fill:var(--fg)">${n} −${Math.abs(v)}%</text>`});
+  [[MO("2026-06-22"),-SOX_NOW,DOT[0],1,6],[MO("2026-06-22"),-OTC_NOW,DOT[2],-1,9],[MO("2026-10-06"),-TW_NOW,DOT[1],1,6]].forEach(([m,v,n,side,r])=>{const ring=r>6;g+=`<circle cx="${X(m)}" cy="${Y(v)}" r="${r}" style="fill:${ring?"none":"var(--fg)"};stroke:${ring?"var(--fg)":"var(--panel)"}" stroke-width="2"/><text x="${X(m)+side*12}" y="${Y(v)+(ring?18:4)}" text-anchor="${side>0?"start":"end"}" font-size="11" font-weight="700" style="fill:var(--fg);paint-order:stroke;stroke:var(--panel);stroke-width:3px">${n} −${Math.abs(v)}%</text>`});
   $("#scnChart").innerHTML=g+"</svg>"+`<div class="legend" style="margin-top:4px">${SC.map((s,i)=>`<span><i style="background:${s[1]}"></i>${LG[i]} ${s[3][0]}</span>`).join("")}<span><i style="background:var(--fg);border-radius:50%"></i>2026</span></div>`;
   $("#scnTbl").innerHTML=`<div class="stats" style="grid-template-columns:repeat(3,1fr)">${SC.map(s=>`<div class="stat" style="border-top:3px solid ${s[1]}"><div class="k">${s[0]}</div><div class="v">${s[3][0]}</div><div class="d">${s[3][1]}</div>${s[3].slice(2).map((x,k)=>`<div class="d" style="margin-top:4px"><b style="color:var(--muted)">${COLS[k+2]}</b><br>${x}</div>`).join("")}</div>`).join("")}</div>`;
   $("#scnRb").innerHTML=hbar(RB.map(r=>[r[0],parseFloat(r[1]),r[0]+" "+r[1],r[1]]),{max:50,hl:2});
