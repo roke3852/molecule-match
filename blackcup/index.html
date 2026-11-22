@@ -122,6 +122,11 @@ button{font:inherit;color:inherit;touch-action:manipulation}
 .rtag{position:absolute;transform:translate(-50%,-130%);font-family:"DotGothic16",sans-serif;font-size:10px;color:#ece4d4;background:rgba(14,17,22,.9);border:1px solid;padding:0 4px;white-space:nowrap}.rtag.ok{border-color:#4fb3a9;color:#4fb3a9;transform:translate(-50%,40%)}
 .rlab{position:absolute;left:78%;transform:translateX(-50%);font-family:"DotGothic16",sans-serif;font-size:11px;color:#8b93a1}
 .wlab{position:absolute;top:8%;transform:translateX(-50%);font-family:"DotGothic16",sans-serif;font-size:12px;background:rgba(14,17,22,.9);color:#9cc0ea;border-left:3px solid #6c9bd2;padding:2px 8px;white-space:nowrap;display:none}.wlab.bad{color:#ff6b5e;border-left-color:#d64545}
+.fcount{position:absolute;left:50%;top:56%;transform:translateX(-50%);text-align:center;font-family:"DotGothic16",sans-serif;background:rgba(14,17,22,.92);border:1px solid #e48aa6;padding:3px 10px;z-index:5}
+.fcount small{display:block;font-size:10px;color:#e48aa6}.fcount b{font-weight:400;font-size:18px;color:#ece4d4}
+.fcard{position:absolute;display:flex;gap:6px;align-items:center;max-width:46%;background:rgba(236,228,212,.96);color:#0e1116;border-radius:6px;padding:4px 8px 4px 5px;box-shadow:0 4px 12px rgba(0,0,0,.5);font-size:10.5px;line-height:1.3;transform:rotate(var(--r));animation:fin .35s cubic-bezier(.2,1.4,.4,1) both}
+.fcard i{flex:none;width:14px;height:14px;border-radius:3px}.fcard b{display:block;font-size:10px;color:#5b6372}.fcard span{display:block}
+@keyframes fin{from{opacity:0;transform:translate(var(--fx),var(--fy)) rotate(var(--r)) scale(.6)}to{opacity:1;transform:rotate(var(--r))}}
 /* overlays */
 .ov{position:fixed;inset:0;background:rgba(6,8,11,.86);z-index:50;display:none;align-items:center;justify-content:center;padding:16px}
 .ov.on{display:flex}
@@ -775,7 +780,7 @@ const CH=[
 {t:'第四章　合約',sub:'二十萬，與一張嘴',recap:'你拿下台灣盃冠軍，取得世界賽資格。有人在你的水上動手腳，被你擋了下來。勝利之後，來敲門的，是錢。',nodes:[
  BG('home','冠軍後第二天．你的租屋處'),
  N('拿到冠軍的第二天，你的手機就沒有停過。'),
- N('雜誌要專訪、咖啡店要合作、器材品牌要寄東西給你試用。你的 IG 追蹤人數，一個晚上從八百變成兩萬三。'),
+ {act:'flood',s:'',t:'雜誌要專訪、咖啡店要合作、器材品牌要寄東西給你試用。你的 IG 追蹤人數，一個晚上從八百變成兩萬三。'},
  L('mei','（電話裡）冠軍～～冠軍大人～～你什麼時候回店裡？老闆說要幫你辦慶功宴耶！'),
  L('me','嚴老闆？他要幫我辦慶功宴？'),
  L('mei','對啊，他現在逢人就說你是「白霧培養出來的冠軍」。我聽了都想吐。'),
@@ -1500,6 +1505,7 @@ function sfx(k){if(!sound)return;const a=ac();if(!a)return;const t=a.currentTime
  if(k==='pop'){voice(S,'sine',880,t,.002,.08,.08);voice(S,'sine',1320,t+.03,.002,.05,.08)}
  if(k==='whoosh'){const s=a.createBufferSource();s.buffer=AU.noise;const f=a.createBiquadFilter();f.type='bandpass';f.Q.value=1.2;f.frequency.setValueAtTime(300,t);f.frequency.exponentialRampToValueAtTime(3000,t+.45);const g=a.createGain();s.connect(f);f.connect(g);g.connect(S);g.gain.setValueAtTime(0.0001,t);g.gain.linearRampToValueAtTime(.12,t+.2);g.gain.exponentialRampToValueAtTime(0.0001,t+.55);s.start(t);s.stop(t+.6)}
  if(k==='plane'){const s=a.createBufferSource();s.buffer=AU.brown;const f=a.createBiquadFilter();f.type='lowpass';f.frequency.setValueAtTime(200,t);f.frequency.linearRampToValueAtTime(900,t+1.2);f.frequency.linearRampToValueAtTime(300,t+2.6);const g=a.createGain();s.connect(f);f.connect(g);g.connect(S);g.gain.setValueAtTime(0.0001,t);g.gain.linearRampToValueAtTime(.6,t+1);g.gain.linearRampToValueAtTime(0.0001,t+2.8);s.start(t);s.stop(t+3)}
+ if(k==='buzz'){for(let i=0;i<3;i++)voice(S,'square',140,t+i*.07,.005,.05,.05,600)}
  if(k==='crack'){noiseHit(S,t,.025,.22,'highpass',1800+Math.random()*1500)}
  if(k==='bump'){voice(S,'sine',70,t,.005,.25,.18);noiseHit(S,t,.08,.12,'lowpass',400)}
  if(k==='slurp'){const s0=a.createBufferSource();s0.buffer=AU.noise;const f=a.createBiquadFilter();f.type='bandpass';f.Q.value=2;f.frequency.setValueAtTime(800,t);f.frequency.exponentialRampToValueAtTime(5000,t+.35);const g=a.createGain();s0.connect(f);f.connect(g);g.connect(S);g.gain.setValueAtTime(0.0001,t);g.gain.linearRampToValueAtTime(.18,t+.08);g.gain.exponentialRampToValueAtTime(0.0001,t+.4);s0.start(t);s0.stop(t+.45)}
@@ -1846,14 +1852,15 @@ BGS.brewbar=function(g,t){const p=PX(g),B=S&&S.brewUI;if(!B)return;
 
 
 /* ============ 小動畫：清理磨豆機 ============ */
-function startAct(k){S.act={k,t0:performance.now(),prev:curBg,loc:S.loc};curBg='act';if(k==='water'){const tl=$('tvLayer');tl.innerHTML='<div class="actcap" id="actCap"></div><div class="wlab" id="wl1" style="left:30%">早上：藍色封膜</div><div class="wlab bad" id="wl2" style="left:70%">現在：白色封膜</div>';tl.hidden=false;sfx('doom');setTimeout(()=>{if(S&&S.act)sfx('whoosh')},2200);setTimeout(()=>{if(S&&S.act)sfx('pop')},5000)}
+function startAct(k){S.act={k,t0:performance.now(),prev:curBg,loc:S.loc};curBg='act';if(k==='flood')startFlood();
+  if(k==='water'){const tl=$('tvLayer');tl.innerHTML='<div class="actcap" id="actCap"></div><div class="wlab" id="wl1" style="left:30%">早上：藍色封膜</div><div class="wlab bad" id="wl2" style="left:70%">現在：白色封膜</div>';tl.hidden=false;sfx('doom');setTimeout(()=>{if(S&&S.act)sfx('whoosh')},2200);setTimeout(()=>{if(S&&S.act)sfx('pop')},5000)}
   if(k==='roast'){const tl=$('tvLayer');const X=s0=>176+(s0/7)*134,Y=v=>160-(Math.min(240,v)-80)/160*116,pos=(s0,v)=>`left:${X(s0)/320*100}%;top:${Y(v)/200*100}%`;
     tl.innerHTML='<div class="actcap" id="actCap"></div><div class="rlab" style="top:17%">烘焙曲線</div>'+RFAIL.map((F,i)=>`<div class="rtag" id="rf${i}" hidden style="${pos(F.end,F.f(F.end))};border-color:${F.c}">${F.n.replace('第 ','').replace(' 鍋','')}</div>`).join('')+`<div class="rtag ok" id="rf3" hidden style="${pos(6.4,roastT(6.4))}">17 ✓</div>`;tl.hidden=false;
     RFAIL.forEach((F,i)=>setTimeout(()=>{if(S&&S.act)sfx('down')},i*1200+900));
     for(let i=0;i<12;i++)setTimeout(()=>{if(S&&S.act)sfx('crack')},3600+4330+i*130+Math.random()*80);setTimeout(()=>{if(S&&S.act)sfx('whoosh')},3600+6400);setTimeout(()=>{if(S&&S.act)sfx('up')},3600+6700)}
   if(k==='notebook'){const tl=$('tvLayer');tl.innerHTML='<div class="actcap" id="actCap"></div>';tl.hidden=false;setTimeout(()=>{if(S&&S.act)sfx('whoosh')},500)}
   if(k==='pest'){const tl=$('tvLayer');tl.innerHTML='<div class="pestl" style="left:26.5%">A 排・葉子背面</div><div class="pestl" style="left:73.5%">B 排・紅色果實</div>';tl.hidden=false;sfx('pop')}
-  $('locLabel').textContent=k==='water'?'水瓶':k==='roast'?'烘豆．第 17 鍋':k==='notebook'?'處理紀錄本':k==='pest'?'放大看看':k==='cup'?'杯測．金穗':k==='cupfarm'?'杯測．帕洛瑪莊園':k==='jeep'?'內瓦 → 帕洛瑪莊園':'清理磨豆機';
+  $('locLabel').textContent=k==='flood'?'冠軍後第二天':k==='water'?'水瓶':k==='roast'?'烘豆．第 17 鍋':k==='notebook'?'處理紀錄本':k==='pest'?'放大看看':k==='cup'?'杯測．金穗':k==='cupfarm'?'杯測．帕洛瑪莊園':k==='jeep'?'內瓦 → 帕洛瑪莊園':'清理磨豆機';
   if(k==='jeep'){const tl=$('tvLayer');tl.innerHTML='<div class="actcap" id="actCap"></div><div class="jsign" id="jSign" hidden>帕洛瑪莊園 →</div>';tl.hidden=false;sfx('plane');[900,1700,2600,3400,4300].forEach(d=>setTimeout(()=>{if(S&&S.act)sfx('bump')},d))}
   if(k==='cup'||k==='cupfarm'){const tl=$('tvLayer');tl.innerHTML='<div class="actcap" id="actCap"></div>';tl.hidden=false;[[1300,'pour'],[1800,'pour'],[2700,'pop'],[2900,'whoosh'],[3900,'brush'],[4900,'slurp'],[5300,'slurp'],[5700,'slurp'],[6100,'slurp']].concat(k==='cupfarm'?[[6500,'up']]:[]).forEach(([d,k2])=>setTimeout(()=>{if(S&&S.act)sfx(k2)},d))}
   if(k==='clean'){[300,900,1300,1700,2100].forEach(d=>setTimeout(()=>{if(S&&S.act)sfx('brush')},d));setTimeout(()=>{if(S&&S.act)sfx('pop')},2900)}}
@@ -1980,7 +1987,7 @@ function actPest(g,t,A){const p=PX(g),e=(performance.now()-A.t0)/1000,z=Math.min
     const bx=nx+16+Math.sin(t*1.5)*6,by=ny-6+Math.cos(t*1.5)*2;g.fillStyle='#1a1210';g.beginPath();g.ellipse(bx,by,4,2.6,.3,0,6.283);g.fill();p(bx-5,by-1,2,1,'#3a2a20');
     for(let k=-1;k<=1;k++){p(bx+k*2,by+2,1,2,'#1a1210');p(bx+k*2,by-3,1,2,'#1a1210')}});
   p.vig()}
-BGS.act=function(g,t){const A=S&&S.act;if(!A)return;(A.k==='water'?actWater:A.k==='roast'?actRoast:A.k==='notebook'?actNotebook:A.k==='pest'?actPest:A.k==='cup'||A.k==='cupfarm'?actCup:A.k==='jeep'?actJeep:actClean)(g,t,A)};
+BGS.act=function(g,t){const A=S&&S.act;if(!A)return;(A.k==='flood'?actFlood:A.k==='water'?actWater:A.k==='roast'?actRoast:A.k==='notebook'?actNotebook:A.k==='pest'?actPest:A.k==='cup'||A.k==='cupfarm'?actCup:A.k==='jeep'?actJeep:actClean)(g,t,A)};
 
 /* ============ 道具 ============ */
 const ITEMS={
@@ -2078,6 +2085,24 @@ function actWater(g,t,A){const p=PX(g),e=(performance.now()-A.t0)/1000,ph=e<2.2?
     bottle(p,224,60,'#ece4d4','#f4efe4',1.5,.82);
     const k=Math.min(1,(e-5)/.5);if(k>0){g.strokeStyle='#d64545';g.lineWidth=2;g.beginPath();g.arc(224,43,18*k+4,0,6.283);g.stroke();g.beginPath();g.arc(96,43,18*k+4,0,6.283);g.setLineDash([3,3]);g.strokeStyle='#6c9bd2';g.stroke();g.setLineDash([])}
     if(e>5.6){const rr=R(2);for(let i=0;i<20;i++)p(212+rr()*24,96+rr()*44,1,1,'rgba(236,228,212,.6)')}}
+  p.vig()}
+
+/* 冠軍後訊息湧入 */
+const FLOOD=[['咖啡誌','想約專訪，下週可以嗎？','#d64545'],['IG','新的追蹤者 +312','#e48aa6'],['未接來電','（02）27XX-XXXX','#4fb3a9'],['器材品牌','想寄一台新磨豆機給你試用','#6c9bd2'],
+ ['IG','@cafe.lover 提到了你','#e48aa6'],['某咖啡店','老闆想跟你談駐店合作','#f0b46a'],['LINE','阿梅：冠軍大人～～～','#7fb77e'],['電視台','晨間新聞想做一段訪問','#d64545'],
+ ['IG','新的追蹤者 +1,024','#e48aa6'],['陌生訊息','請問可以收學生嗎？','#8b93a1'],['未接來電（7）','未知號碼','#4fb3a9'],['IG','你的貼文有 4,812 個讚','#e48aa6'],
+ ['咖啡社團','有 38 篇貼文提到你','#f0b46a'],['LINE','嚴老闆：恭喜恭喜！白霧永遠是你的娘家','#7fb77e'],['IG','新的追蹤者 +5,301','#e48aa6']];
+function startFlood(){const tl=$('tvLayer');tl.innerHTML='<div class="fcount" id="fCount"><small>IG 追蹤</small><b>800</b></div>';tl.hidden=false;
+  FLOOD.forEach((f,i)=>setTimeout(()=>{if(!S||!S.act||S.act.k!=='flood')return;const d=document.createElement('div');d.className='fcard';
+    const side=i%4,x=side===0?4+Math.random()*30:side===1?52+Math.random()*30:8+Math.random()*60,y=6+((i*23)%70);
+    d.style.left=x+'%';d.style.top=y+'%';d.style.setProperty('--r',((Math.random()-.5)*8).toFixed(1)+'deg');d.style.setProperty('--fx',side===0?'-60px':side===1?'60px':'0px');d.style.setProperty('--fy',side>1?'40px':'0px');
+    d.innerHTML=`<i style="background:${f[2]}"></i><div><b>${f[0]}</b><span>${f[1]}</span></div>`;tl.appendChild(d);sfx('buzz')},300+i*240+Math.random()*80))}
+function actFlood(g,t,A){const p=PX(g),e=(performance.now()-A.t0)/1000;BGS.home(g,t);g.fillStyle='rgba(8,10,14,.6)';g.fillRect(0,0,320,200);
+  const sh=e<4.2?Math.round(Math.sin(t*60)*1.5):0,px=148+sh,py=54;
+  p(px,py,26,48,'#0e1116');p.frame(px,py,26,48,'#3a4350');p(px+2,py+4,22,38,'#6c9bd2');p(px+11,py+44,4,2,'#3a4350');p.glow(px+13,py+24,50,'rgba(108,155,210,.25)');
+  for(let k=0;k<4;k++)p(px+4,py+8+k*8,18,5,['#e48aa6','#d64545','#4fb3a9','#f0b46a'][(k+Math.floor(e*4))%4]);
+  if(e<4.2&&Math.sin(t*20)>0){p(px-6,py+10,2,8,'#ece4d4');p(px+30,py+10,2,8,'#ece4d4');p(px-10,py+14,2,4,'#ece4d4');p(px+34,py+14,2,4,'#ece4d4')}
+  const c=document.querySelector('#fCount b'),n=Math.round(800+(23000-800)*Math.min(1,Math.pow(e/4,1.6)));if(c&&c.textContent!==n.toLocaleString())c.textContent=n.toLocaleString();
   p.vig()}
 /* 筆記本動畫 */
 function actNotebook(g,t,A){const p=PX(g),e=(performance.now()-A.t0)/1000;
