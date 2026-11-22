@@ -121,6 +121,7 @@ button{font:inherit;color:inherit;touch-action:manipulation}
 @keyframes itin{from{opacity:0;transform:translate(-50%,10px) scale(.7)}to{opacity:1;transform:translateX(-50%) scale(1)}}
 .rtag{position:absolute;transform:translate(-50%,-130%);font-family:"DotGothic16",sans-serif;font-size:10px;color:#ece4d4;background:rgba(14,17,22,.9);border:1px solid;padding:0 4px;white-space:nowrap}.rtag.ok{border-color:#4fb3a9;color:#4fb3a9;transform:translate(-50%,40%)}
 .rlab{position:absolute;left:78%;transform:translateX(-50%);font-family:"DotGothic16",sans-serif;font-size:11px;color:#8b93a1}
+.wlab{position:absolute;top:8%;transform:translateX(-50%);font-family:"DotGothic16",sans-serif;font-size:12px;background:rgba(14,17,22,.9);color:#9cc0ea;border-left:3px solid #6c9bd2;padding:2px 8px;white-space:nowrap;display:none}.wlab.bad{color:#ff6b5e;border-left-color:#d64545}
 /* overlays */
 .ov{position:fixed;inset:0;background:rgba(6,8,11,.86);z-index:50;display:none;align-items:center;justify-content:center;padding:16px}
 .ov.on{display:flex}
@@ -715,7 +716,7 @@ const CH=[
  N('一個禮拜前的初賽和複賽，你都用那三十公斤的豆子，穩穩地過了關。'),
  N('五十二位選手，現在只剩下六個人。今天，是決賽。'),
  N('台灣盃手沖錦標賽，決賽日。聚光燈打在六張比賽桌上，觀眾席坐得滿滿的，還有人站在走道上。'),
- N('你把器材一樣一樣擺好：秤、濾杯、分享壺、細口壺，還有你自己帶來的那瓶水，瓶口用你早上親手貼的藍色封膜封著。'),
+ N('你把器材一樣一樣擺好：秤、濾杯、分享壺、細口壺，還有你自己帶來的那瓶水，瓶口用你早上親手貼的藍色封膜封著——這是沈懷舟教你的習慣：「自己的水，自己封。」'),
  N('隔壁桌的選手走了過來。黑色長髮，挑染了一撮紅，黑色圍裙上繡著兩個金色的字：「金穗」。'),
  L('su','你就是沈懷舟的徒弟？'),
  L('su','他有教你怎麼偷帶水嗎？聽說他很專業喔。'),
@@ -729,7 +730,7 @@ const CH=[
  N('平的、悶的，嘴巴裡還有一股像粉筆灰一樣的乾澀感。那些在舟火練了幾十次的花香和水果味，全部不見了。'),
  L('me','（不對……這不是我的杯子。豆子一樣、刻度一樣、手法一樣……那就是——）'),
  N('你低頭看水瓶。瓶口的封膜，是白色的。'),
- N('可是你早上貼的，是藍色的。'),
+ {act:'water',sticky:1,s:'',t:'可是你早上貼的，是藍色的。'},
  IF('zhou_alert','w_alert'),J('w_q'),
  LB('w_alert'),N('你抬頭往觀眾席看。第二排，金穗的業務正低著頭滑手機，嘴角好像有一點點在笑。'),
  LB('w_q'),
@@ -1832,22 +1833,27 @@ BGS.brewbar=function(g,t){const p=PX(g),B=S&&S.brewUI;if(!B)return;
   const bed=Math.round(B.grind*9);if(bed>0)for(let j=0;j<bed;j++){const w=36-j*2+ (9-bed)*0;p(160-w/2,95+(9-bed)+j,w,1,B.poured>0?'#3a2010':'#7a4a28')}
   if(B.poured>0&&B.phase!=='result'){p(146,92+(9-bed)-2,28,2,'rgba(108,155,210,.55)')}
   // 細口壺
-  const pouring=B.phase==='pour'&&BH.hold,lift=pouring?-10:0,kx=238,ky=92+lift;
-  p(kx,ky,40,32,'#20252e');p(kx,ky,40,3,'#3a4350');p(kx+3,ky+4,3,24,'#3a4350');p(kx+14,ky-6,12,6,'#20252e');p(kx+18,ky-8,4,2,'#8d959e');p(kx+40,ky+6,8,18,'#20252e');
-  for(let k=0;k<10;k++)p(kx-4-k*6,ky+8-k*2.2,6,3,'#20252e');
-  if(pouring){const tx=kx-60,ty=ky-12;for(let y=ty;y<94;y+=2)p(tx+((y+Math.floor(t*30))%4===0?1:0),y,2,2,'rgba(150,190,230,.85)');p.glow(tx,94,14,'rgba(150,190,230,.3)')}
+  const pouring=B.phase==='pour'&&BH.hold;B.tilt=(B.tilt||0)+((pouring?.7:0)-(B.tilt||0))*.14;
+  const ta=B.tilt,kpx=250,kpy=128-ta*100;g.save();g.translate(kpx,kpy);g.rotate(-ta);
+  const q=(x,y,w,h,c)=>{g.fillStyle=c;g.fillRect(x,y,w,h)};
+  q(-20,-32,40,32,'#20252e');q(-20,-32,40,3,'#3a4350');q(-17,-28,3,24,'#3a4350');q(-6,-38,12,6,'#20252e');q(-2,-40,4,2,'#8d959e');q(20,-26,8,18,'#20252e');q(22,-24,4,14,'#11151c');
+  for(let k=0;k<10;k++){q(-24-k*6,-25-k*2.2,6,4,'#3a4350');q(-24-k*6,-24-k*2.2,6,2,'#20252e')}
+  g.restore();
+  if(ta>.5){const lx=-80,ly=-44,tx=kpx+lx*Math.cos(ta)+ly*Math.sin(ta),ty=kpy-lx*Math.sin(ta)+ly*Math.cos(ta);
+    for(let y=Math.round(ty);y<94;y+=2)p(tx+((y+Math.floor(t*30))%4===0?1:0),y,2,2,'rgba(150,190,230,.85)');p.glow(tx,94,14,'rgba(150,190,230,.3)')}
   steam(p,154,80,t,B.poured>0?4:0);
   p.vig()};
 
 
 /* ============ 小動畫：清理磨豆機 ============ */
-function startAct(k){S.act={k,t0:performance.now(),prev:curBg,loc:S.loc};curBg='act';if(k==='roast'){const tl=$('tvLayer');const X=s0=>176+(s0/7)*134,Y=v=>160-(Math.min(240,v)-80)/160*116,pos=(s0,v)=>`left:${X(s0)/320*100}%;top:${Y(v)/200*100}%`;
+function startAct(k){S.act={k,t0:performance.now(),prev:curBg,loc:S.loc};curBg='act';if(k==='water'){const tl=$('tvLayer');tl.innerHTML='<div class="actcap" id="actCap"></div><div class="wlab" id="wl1" style="left:30%">早上：藍色封膜</div><div class="wlab bad" id="wl2" style="left:70%">現在：白色封膜</div>';tl.hidden=false;sfx('doom');setTimeout(()=>{if(S&&S.act)sfx('whoosh')},2200);setTimeout(()=>{if(S&&S.act)sfx('pop')},5000)}
+  if(k==='roast'){const tl=$('tvLayer');const X=s0=>176+(s0/7)*134,Y=v=>160-(Math.min(240,v)-80)/160*116,pos=(s0,v)=>`left:${X(s0)/320*100}%;top:${Y(v)/200*100}%`;
     tl.innerHTML='<div class="actcap" id="actCap"></div><div class="rlab" style="top:17%">烘焙曲線</div>'+RFAIL.map((F,i)=>`<div class="rtag" id="rf${i}" hidden style="${pos(F.end,F.f(F.end))};border-color:${F.c}">${F.n.replace('第 ','').replace(' 鍋','')}</div>`).join('')+`<div class="rtag ok" id="rf3" hidden style="${pos(6.4,roastT(6.4))}">17 ✓</div>`;tl.hidden=false;
     RFAIL.forEach((F,i)=>setTimeout(()=>{if(S&&S.act)sfx('down')},i*1200+900));
     for(let i=0;i<12;i++)setTimeout(()=>{if(S&&S.act)sfx('crack')},3600+4330+i*130+Math.random()*80);setTimeout(()=>{if(S&&S.act)sfx('whoosh')},3600+6400);setTimeout(()=>{if(S&&S.act)sfx('up')},3600+6700)}
   if(k==='notebook'){const tl=$('tvLayer');tl.innerHTML='<div class="actcap" id="actCap"></div>';tl.hidden=false;setTimeout(()=>{if(S&&S.act)sfx('whoosh')},500)}
   if(k==='pest'){const tl=$('tvLayer');tl.innerHTML='<div class="pestl" style="left:26.5%">A 排・葉子背面</div><div class="pestl" style="left:73.5%">B 排・紅色果實</div>';tl.hidden=false;sfx('pop')}
-  $('locLabel').textContent=k==='roast'?'烘豆．第 17 鍋':k==='notebook'?'處理紀錄本':k==='pest'?'放大看看':k==='cup'?'杯測．金穗':k==='cupfarm'?'杯測．帕洛瑪莊園':k==='jeep'?'內瓦 → 帕洛瑪莊園':'清理磨豆機';
+  $('locLabel').textContent=k==='water'?'水瓶':k==='roast'?'烘豆．第 17 鍋':k==='notebook'?'處理紀錄本':k==='pest'?'放大看看':k==='cup'?'杯測．金穗':k==='cupfarm'?'杯測．帕洛瑪莊園':k==='jeep'?'內瓦 → 帕洛瑪莊園':'清理磨豆機';
   if(k==='jeep'){const tl=$('tvLayer');tl.innerHTML='<div class="actcap" id="actCap"></div><div class="jsign" id="jSign" hidden>帕洛瑪莊園 →</div>';tl.hidden=false;sfx('plane');[900,1700,2600,3400,4300].forEach(d=>setTimeout(()=>{if(S&&S.act)sfx('bump')},d))}
   if(k==='cup'||k==='cupfarm'){const tl=$('tvLayer');tl.innerHTML='<div class="actcap" id="actCap"></div>';tl.hidden=false;[[1300,'pour'],[1800,'pour'],[2700,'pop'],[2900,'whoosh'],[3900,'brush'],[4900,'slurp'],[5300,'slurp'],[5700,'slurp'],[6100,'slurp']].concat(k==='cupfarm'?[[6500,'up']]:[]).forEach(([d,k2])=>setTimeout(()=>{if(S&&S.act)sfx(k2)},d))}
   if(k==='clean'){[300,900,1300,1700,2100].forEach(d=>setTimeout(()=>{if(S&&S.act)sfx('brush')},d));setTimeout(()=>{if(S&&S.act)sfx('pop')},2900)}}
@@ -1974,7 +1980,7 @@ function actPest(g,t,A){const p=PX(g),e=(performance.now()-A.t0)/1000,z=Math.min
     const bx=nx+16+Math.sin(t*1.5)*6,by=ny-6+Math.cos(t*1.5)*2;g.fillStyle='#1a1210';g.beginPath();g.ellipse(bx,by,4,2.6,.3,0,6.283);g.fill();p(bx-5,by-1,2,1,'#3a2a20');
     for(let k=-1;k<=1;k++){p(bx+k*2,by+2,1,2,'#1a1210');p(bx+k*2,by-3,1,2,'#1a1210')}});
   p.vig()}
-BGS.act=function(g,t){const A=S&&S.act;if(!A)return;(A.k==='roast'?actRoast:A.k==='notebook'?actNotebook:A.k==='pest'?actPest:A.k==='cup'||A.k==='cupfarm'?actCup:A.k==='jeep'?actJeep:actClean)(g,t,A)};
+BGS.act=function(g,t){const A=S&&S.act;if(!A)return;(A.k==='water'?actWater:A.k==='roast'?actRoast:A.k==='notebook'?actNotebook:A.k==='pest'?actPest:A.k==='cup'||A.k==='cupfarm'?actCup:A.k==='jeep'?actJeep:actClean)(g,t,A)};
 
 /* ============ 道具 ============ */
 const ITEMS={
@@ -2036,6 +2042,42 @@ function actRoast(g,t,A){const p=PX(g),E=(performance.now()-A.t0)/1000,MT=3.6,mo
   if(!mont){for(let s0=0;s0<=Math.min(e,6.4);s0+=.04)p(X(s0),Y(roastT(s0)),2,2,'#ece4d4');
     const fcT=4.33;if(e>=fcT)p.ell(X(fcT),Y(196),3,3,'#d64545');if(drop)p(X(6.4)-1,Tp,2,B-Tp,'#4fb3a9');
     const tg=document.getElementById('rf3');if(tg&&drop&&tg.hidden)tg.hidden=false}
+  p.vig()}
+
+/* 水瓶被換掉的動畫 */
+function bottle(p,x,y,cap,seal,sc,lvl){const s0=sc||1,w=Math.round(20*s0),h=Math.round(54*s0);
+  p(x-w/2,y,w,h,'rgba(170,205,230,.35)');p.frame(x-w/2,y,w,h,'#c6dcf2');p(x-w/2+1,y+Math.round(h*(1-(lvl||.82))),w-2,Math.round(h*(lvl||.82))-1,'rgba(108,155,210,.45)');
+  p(x-w/2+2,y+3,2,h-6,'rgba(255,255,255,.5)');p(x-Math.round(5*s0),y-Math.round(8*s0),Math.round(10*s0),Math.round(8*s0),'rgba(170,205,230,.5)');
+  p(x-Math.round(6*s0),y-Math.round(14*s0),Math.round(12*s0),Math.round(6*s0),cap);p(x-Math.round(7*s0),y-Math.round(9*s0),Math.round(14*s0),Math.round(4*s0),seal);
+  p(x-w/2+3,y+Math.round(h*.35),w-6,Math.round(10*s0),'#ece4d4');p(x-w/2+5,y+Math.round(h*.35)+3,w-10,1,'#8b93a1')}
+function actWater(g,t,A){const p=PX(g),e=(performance.now()-A.t0)/1000,ph=e<2.2?0:e<5?1:2;
+  const caps=['早上 06:10・你的租屋處','08:42・選手置物區（你在熱身的時候）','現在・比賽桌上'];const cap=document.getElementById('actCap');if(cap&&cap.textContent!==caps[ph])cap.textContent=caps[ph];
+  if(ph===0){p(0,0,320,200,'#3a2e22');p.dith(0,0,320,140,'#43352a',3);p(0,140,320,60,'#5a4430');p(0,140,320,2,'#7a5c40');p.glow(160,80,140,'rgba(255,220,160,.15)');
+    bottle(p,160,70,'#ece4d4','#3a2e22',1.6,.85);const u=Math.min(1,e/1.6);const sx=160-17,sy=70-14;p(sx,sy+6,Math.round(34*u),6,'#3d6fb0');p(sx,sy+6,Math.round(34*u),1,'#7fb6e0');
+    if(u<1){p(sx+Math.round(34*u)-2,sy-2,10,14,'#e8c3a0');p(sx+Math.round(34*u)+6,sy,4,10,'#d4ad88')}
+    g.fillStyle='rgba(120,80,40,.18)';g.fillRect(0,0,320,200)}
+  if(ph===1){p(0,0,320,200,'#101319');p.glow(160,90,110,'rgba(236,228,212,.12)');p(0,130,320,4,'#4a5566');p(0,134,320,6,'#2a313c');for(let x=0;x<320;x+=80)p(x,20,3,114,'#2a313c');
+    const u=Math.min(1,(e-2.2)/2.6);
+    [40,90,230,280].forEach((x,i)=>bottle(p,x,76,'#ece4d4',['#d6a24a','#4fb3a9','#c8463c','#9a8158'][i],1,.8));
+    p(146,136,28,6,'#ece4d4');p(149,138,4,2,'#d64545');
+    // 手的位置與拿著的瓶子
+    let hx,hy,carry=null,placed=null;
+    if(u<.25){hx=-20+u/.25*180;hy=56;placed='mine'}
+    else if(u<.45){const v=(u-.25)/.2;hx=160-v*200;hy=56-Math.sin(v*3.14)*20;carry='mine'}
+    else if(u<.7){const v=(u-.45)/.25;hx=-40+v*200;hy=56-Math.sin(v*3.14)*20;carry='fake'}
+    else{const v=(u-.7)/.3;hx=160-v*220;hy=56;placed='fake'}
+    if(placed==='mine'||(u<.25))bottle(p,160,76,'#ece4d4','#3d6fb0',1,.8);
+    if(placed==='fake')bottle(p,160,76,'#ece4d4','#f4efe4',1,.8);
+    if(carry)bottle(p,hx,hy+18,'#ece4d4',carry==='mine'?'#3d6fb0':'#f4efe4',1,.8);
+    p(hx-70,hy-5,64,12,'#2a2a30');p(hx-70,hy-5,64,2,'#3a3a42');p(hx-8,hy-6,14,14,'#5d656e');p(hx+4,hy-2,6,4,'#5d656e');p(hx-6,hy-6,10,2,'#8d959e');
+    if(u>.75&&Math.sin(t*10)>0){p(156,40,8,14,'#d64545');p(156,58,8,4,'#d64545')}
+    g.fillStyle='rgba(214,69,69,.05)';g.fillRect(0,0,320,200)}
+  ['wl1','wl2'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display=ph===2?'block':'none'});
+  if(ph===2){p(0,0,320,200,'#11151c');p(0,150,320,50,'#1c2230');p(0,146,320,4,'#ece4d4');p.glow(160,60,160,'rgba(236,228,212,.08)');
+    bottle(p,96,60,'#ece4d4','#3d6fb0',1.5,.82);g.globalAlpha=.6;g.fillStyle='#11151c';g.fillRect(70,30,52,112);g.globalAlpha=1;
+    bottle(p,224,60,'#ece4d4','#f4efe4',1.5,.82);
+    const k=Math.min(1,(e-5)/.5);if(k>0){g.strokeStyle='#d64545';g.lineWidth=2;g.beginPath();g.arc(224,43,18*k+4,0,6.283);g.stroke();g.beginPath();g.arc(96,43,18*k+4,0,6.283);g.setLineDash([3,3]);g.strokeStyle='#6c9bd2';g.stroke();g.setLineDash([])}
+    if(e>5.6){const rr=R(2);for(let i=0;i<20;i++)p(212+rr()*24,96+rr()*44,1,1,'rgba(236,228,212,.6)')}}
   p.vig()}
 /* 筆記本動畫 */
 function actNotebook(g,t,A){const p=PX(g),e=(performance.now()-A.t0)/1000;
