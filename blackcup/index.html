@@ -547,15 +547,34 @@ const CH=[
  L('me','（去了要說什麼？「你好，我想拜你為師」？聽起來好像武俠小說喔……）'),
  L('me','（算了，先去再說。最壞的情況，就是被趕出來而已。）'),
  TV('city','home','roast','mrt','你搭捷運從公館一路坐到北門站，再走進大稻埕的老街。迪化街的南北貨店才剛拉開鐵門。'),
+ BG('dadaocheng','大稻埕．迪化街'),
+ N('早上九點的迪化街，南北貨店的鐵門一間一間拉開。空氣裡是乾香菇、烏魚子和中藥材混在一起的味道。'),
+ N('兩旁是一整排紅磚老屋，屋頂的山牆上雕著花草和店號，有些房子已經一百多歲了。'),
+ L('me','（名片上的地址是這附近沒錯……可是 Google 地圖一直帶我在原地繞圈。）'),
+ N('你拿著名片，在同一段路上來來回回走了三趟。賣烏魚子的阿姨終於忍不住，從店裡探出頭來。'),
+ N('「少年仔，你在找啥？走三遍了喔。」'),
+ L('me','阿姨，請問「舟火焙煎所」在哪裡？'),
+ N('「舟火喔？那個不太講話的阿伯？」阿姨用下巴比了比對面兩間老屋中間的一條縫，「你自己聞，有沒有聞到？」'),
+ N('你深吸一口氣。在乾貨的味道底下，真的有一絲很淡、很暖的香味——像烤堅果，又像剛煮好的焦糖。'),
+ L('me','（是烘豆子的煙……）'),
+ BG('alley','大稻埕．無名小巷'),
+ N('你循著那股味道，側身鑽進那條只容一個人通過的小巷。兩邊的紅磚牆近得伸手就碰得到。'),
+ N('越往裡面走，香味越濃。頭頂上，一縷一縷淡淡的白煙從巷子深處飄出來。'),
+ N('巷子盡頭，一扇舊木門旁的排煙管正一陣一陣地冒著煙。門上沒有招牌，只釘著一塊巴掌大的木牌，用毛筆寫著兩個字：「舟火」。'),
+ L('me','（找到了。）'),
  BG('roast','大稻埕．舟火焙煎所'),
- N('名片上的地址，在一條連 Google 地圖都找不太到的小巷子底。'),
  N('推開木門，一股焦糖和烤堅果的香味撲過來。屋子正中間是一台老舊的直火烘豆機，滾筒的小窗透出暗紅色的光，看起來像一隻睡著的大怪獸。'),
  L('shen','門沒關。進來吧。'),
  N('沈懷舟坐在烘豆機旁邊的矮凳上，手裡拿著一根長長的取樣棒，看都沒看你一眼。'),
  L('me','沈先生你好，我是白霧咖啡的——'),
  L('shen','我知道你是誰。四百八那杯。'),
- L('shen','你來，是要推薦函吧。'),
- L('me','……是。台灣盃報名需要一份推薦，我老闆不肯寫。'),
+ L('shen','說吧，找我做什麼。'),
+ N('你從背包裡拿出那張填了一半的報名表，攤在他面前的工作檯上，指著「推薦店家／推薦人」那一欄。'),
+ L('me','我想報名台灣盃手沖錦標賽。報名表上一定要有店家或業界前輩的推薦，可是……我們老闆不肯寫。'),
+ L('me','他要我把巴西豆裝進藝伎的罐子裡，我沒照做。所以推薦函，大概拿不到了。'),
+ L('shen','……所以你昨天那包藝伎，是自己掏錢買的。'),
+ L('me','是。'),
+ N('他終於抬起頭，看了報名表很久，又看了你一眼。'),
  L('shen','推薦函我可以寫。但我寫的，評審未必買帳——你應該知道，我那頂冠軍是怎麼沒的。'),
  L('shen','外面怎麼說？'),
  C('沈懷舟在試你。你怎麼回？',[
@@ -1410,6 +1429,48 @@ function buildTvLayer(tv){const L0=document.getElementById('tvLayer');L0.innerHT
 function startTravel(tv){S.travel={...tv,t0:performance.now()};buildTvLayer(tv);const nm=tv.k==='world'?`${AIR[tv.a].n} → ${AIR[tv.b].n}`:`${PLACES[tv.a].n.split('．')[0]} → ${PLACES[tv.b].n.split('．')[0]}`;
   curBg='travel';S.bg='travel';$('locLabel').textContent=nm;sfx(tv.k==='world'?'plane':'whoosh');playTheme(tv.k==='world'?'flight':'ride')}
 
+
+/* 大稻埕街景、小巷 */
+BGS.dadaocheng=function(g,t){const p=PX(g);
+  for(let y=0;y<60;y++)p(0,y,320,1,`rgb(${150+y},${180+y*.6|0},${205+y*.3|0})`);
+  const house=(x,w,brick,trim,sign,arch)=>{p(x,30,w,122,brick);p.dith(x,30,w,122,'rgba(0,0,0,.12)',3);
+    p(x-2,26,w+4,6,trim);p(x+w/2-14,10,28,18,brick);p(x+w/2-16,8,32,3,trim);p(x+w/2-6,14,12,8,trim);p(x+w/2-4,16,8,4,brick);
+    for(let i=0;i<3;i++){const wx=x+8+i*(w-16)/3;p(wx,44,(w-16)/3-8,24,'#2a2f3a');p(wx-1,40,(w-16)/3-6,4,trim);p(wx+2,46,(w-16)/3-12,20,'#3d5a80')}
+    p(x+6,78,w-12,12,sign[0]);for(let k=0;k<4;k++)p(x+12+k*((w-24)/4),81,(w-24)/4-6,6,sign[1]);
+    p(x,94,w,4,trim);
+    for(let i=0;i<arch;i++){const ax=x+6+i*(w-12)/arch,aw=(w-12)/arch-6;p(ax,100,aw,52,'#2e2018');p(ax,98,aw,4,trim);p(ax+2,130,aw-4,22,'#5a3d27');
+      for(let k=0;k<4;k++)p(ax+4+k*(aw-8)/4,132,(aw-8)/4-2,10,['#9a8158','#c9a24a','#7a4a28','#b5523a'][(k+i)%4])}
+    p(x+10,96,6,8,'#d64545');p(x+w-16,96,6,8,'#d64545')};
+  house(0,74,'#9a4a36','#e8dcc8',['#2a1d14','#e0c080'],2);house(78,66,'#a85a40','#efe6d4',['#7a1f22','#f0d8a0'],2);
+  // 小巷縫
+  p(146,30,14,122,'#14110f');p(146,30,14,122,'rgba(0,0,0,.3)');
+  for(let k=0;k<8;k++){const ph=(t*.25+k*.125)%1;g.globalAlpha=(1-ph)*.55;p.ell(153+Math.sin(t+k)*4+ph*10,120-ph*110,3+ph*6,2+ph*3,'#e8e4dc');g.globalAlpha=1}
+  house(162,80,'#8f4434','#e8dcc8',['#2a1d14','#e8c890'],2);house(246,74,'#a0523c','#efe6d4',['#1f3a6b','#f0e0b0'],2);
+  // 街道
+  p(0,152,320,48,'#7d7a74');for(let y=156;y<200;y+=8)for(let x=(y/8%2)*10;x<320;x+=20)p(x,y,19,7,'#8a8780');p(0,152,320,3,'#5d5a55');
+  // 機車
+  p(200,168,30,10,'#d64545');p(198,176,8,8,'#1a1a1a');p(224,176,8,8,'#1a1a1a');p(214,162,10,6,'#2a2f3a');
+  p.vig()};
+BGS.alley=function(g,t){const p=PX(g);p(0,0,320,200,'#120e0c');
+  // 兩側磚牆透視
+  for(let i=0;i<14;i++){const k=i/14,xL=Math.round(150*k*k*0+150*(1-Math.pow(1-k,1.5))*0),w=0;}
+  g.fillStyle='#5a2e22';g.beginPath();g.moveTo(0,0);g.lineTo(138,60);g.lineTo(138,150);g.lineTo(0,200);g.fill();
+  g.beginPath();g.moveTo(320,0);g.lineTo(182,60);g.lineTo(182,150);g.lineTo(320,200);g.fill();
+  for(let y=0;y<200;y+=6){g.fillStyle='rgba(30,14,10,.6)';g.fillRect(0,y,138-(Math.abs(100-y)*0),1)}
+  for(let k=0;k<24;k++){const u=k/24,xl=Math.round(u*138),xr=320-xl;p(xl,Math.round(u*60),1,Math.round(200-u*110),'rgba(20,10,8,.5)');p(xr,Math.round(u*60),1,Math.round(200-u*110),'rgba(20,10,8,.5)')}
+  // 盡頭：木門＋暖光
+  p(138,60,44,90,'#2a1d14');p(146,80,28,70,'#5a3a24');p(148,82,24,66,'#6b4528');p(166,112,3,4,'#c9a24a');p.glow(160,110,60,'rgba(240,180,106,.25)');
+  p(152,70,16,8,'#d8c8a0');p(155,72,10,1,'#2a1d14');p(155,75,10,1,'#2a1d14');
+  // 排煙管＋煙
+  p(176,40,5,40,'#4d555f');p(174,38,9,3,'#5d656e');
+  for(let k=0;k<10;k++){const ph=(t*.3+k*.1)%1;g.globalAlpha=(1-ph)*.6;p.ell(178+Math.sin(t*1.3+k)*3-ph*20,36-ph*40,2+ph*8,2+ph*4,'#e8e4dc');g.globalAlpha=1}
+  // 地面
+  g.fillStyle='#3a3632';g.beginPath();g.moveTo(0,200);g.lineTo(138,150);g.lineTo(182,150);g.lineTo(320,200);g.fill();
+  for(let k=1;k<8;k++){const y=150+k*k*.8;p(138-k*k*2,y,44+k*k*4,1,'#2a2622')}
+  // 盆栽、冷氣機
+  p(24,150,18,20,'#7a4e30');p(20,134,26,18,'#2f6b3f');p(270,40,30,20,'#bdb3a1');p(274,44,22,12,'#8d959e');p(110,166,10,10,'#7a4e30');p(108,156,14,12,'#4f9a5a');
+  p.vig()};
+
 let curBg='cafe';
 const sceneCv=document.getElementById('sceneCv'),sg=sceneCv.getContext('2d');
 const titleCv=document.getElementById('titleCv'),tg=titleCv.getContext('2d');
@@ -1482,7 +1543,7 @@ const TH={
  doom:{bpm:50,ch:[[36,[48,49,55]],[36,[48,49,54]],[35,[47,48,54]],[36,[48,49,55]]],comp:'pad',bass:'long',drum:'heart',lead:0},
  finale:{bpm:80,ch:[[36,[55,59,62,64]],[45,[55,60,64,67]],[41,[57,60,64,67]],[43,[55,59,62,64]]],sc:[67,69,71,72,74,76,79],comp:'arp',bass:'long',drum:'brush',lead:.4},
 };
-const BG_THEME={beanshop:'day',home:'home',cafe:'night',cafe_day:'day',roast:'roast',roast_rain:'roast',office:'office',farm:'farm',stage:'stage',tokyo:'tokyo'};
+const BG_THEME={dadaocheng:'day',alley:'roast',beanshop:'day',home:'home',cafe:'night',cafe_day:'day',roast:'roast',roast_rain:'roast',office:'office',farm:'farm',stage:'stage',tokyo:'tokyo'};
 const MU={cur:null,next:0,beat:0,timer:null,amb:null,ambKind:null,rain:false};
 function scheduleBeat(th,t,beat){
   const spb=60/th.bpm,bar=Math.floor(beat/4)%th.ch.length,b=beat%4,[root,ch]=th.ch[bar];
