@@ -127,6 +127,18 @@ button{font:inherit;color:inherit;touch-action:manipulation}
 .fcard{position:absolute;display:flex;gap:6px;align-items:center;max-width:46%;background:rgba(236,228,212,.96);color:#0e1116;border-radius:6px;padding:4px 8px 4px 5px;box-shadow:0 4px 12px rgba(0,0,0,.5);font-size:10.5px;line-height:1.3;transform:rotate(var(--r));animation:fin .35s cubic-bezier(.2,1.4,.4,1) both}
 .fcard i{flex:none;width:14px;height:14px;border-radius:3px}.fcard b{display:block;font-size:10px;color:#5b6372}.fcard span{display:block}
 @keyframes fin{from{opacity:0;transform:translate(var(--fx),var(--fy)) rotate(var(--r)) scale(.6)}to{opacity:1;transform:rotate(var(--r))}}
+.rform{position:absolute;left:50%;top:6%;width:78%;transform:translateX(-50%) rotate(-1.5deg);background:#f4efe4;color:#2a2f3a;padding:8px 10px 6px;box-shadow:0 8px 24px rgba(0,0,0,.6);font-size:10.5px;line-height:1.35;animation:formin .6s cubic-bezier(.2,1.2,.4,1) both}
+@keyframes formin{from{transform:translate(-50%,60%) rotate(-6deg);opacity:0}}
+.rf-h{text-align:center;border-bottom:2px solid #2a2f3a;padding-bottom:3px;margin-bottom:3px}.rf-h small{display:block;font-size:9px;color:#5b6372}.rf-h b{font-family:"Noto Serif TC",serif;font-size:14px;font-weight:900;letter-spacing:2px}.rf-h span{display:block;font-size:9.5px;letter-spacing:4px}
+.rf-r{display:flex;align-items:center;gap:6px;border-bottom:1px solid #cfc3aa;padding:2px 0;position:relative;min-height:18px}.rf-r label{width:38%;font-size:10px;color:#5b6372;flex:none}
+.hw{font-style:normal;font-family:"Noto Serif TC",serif;font-size:12px;color:#1f3a6b}.hw.dim{color:#8b93a1}
+.rf-r.key{background:rgba(214,69,69,.1);outline:2px solid #d64545;outline-offset:1px;margin:3px 0;animation:keyb 1s steps(2) infinite}.rf-r.key label{color:#7a1f22;font-weight:700}.rf-r.key em{display:block;font-style:normal;font-size:9px;color:#d64545}
+.rform.done .rf-r.key{animation:none;background:rgba(79,179,169,.12);outline-color:#4fb3a9}
+@keyframes keyb{50%{outline-color:transparent}}
+.need{margin-left:auto;font-size:10px;color:#d64545;font-family:DotGothic16}
+.seal{margin-left:auto;border:2px solid #d64545;color:#d64545;font-size:8.5px;line-height:1.1;padding:1px 3px;transform:rotate(-12deg);font-weight:700;text-align:center;animation:stamp .4s .9s both}
+@keyframes stamp{from{transform:rotate(-12deg) scale(2.4);opacity:0}}
+.rf-n{font-size:8.5px;color:#7a1f22;margin-top:3px}
 /* overlays */
 .ov{position:fixed;inset:0;background:rgba(6,8,11,.86);z-index:50;display:none;align-items:center;justify-content:center;padding:16px}
 .ov.on{display:flex}
@@ -408,7 +420,7 @@ const CH=[
  BG('cafe','台北．白霧咖啡'),
  N('台北，下雨的星期四晚上。白霧咖啡離打烊還有四十分鐘，店裡只剩一桌客人在滑手機。'),
  N('你叫{N}，在這家店當咖啡師第二年了。每天開店、磨豆、沖咖啡、洗杯子、關店，日子過得跟磨豆機一樣，一圈一圈地轉。'),
- N('但吧台抽屜最裡面，壓著一張你填了一半的報名表——「台灣盃手沖錦標賽」。'),
+ {act:'form',hold:1,s:'',t:'但吧台抽屜最裡面，壓著一張你填了一半的報名表——「台灣盃手沖錦標賽」。'},
  L('me','（再兩個禮拜就截止了……推薦店家那一欄，到底要怎麼開口跟老闆講啊。）'),
  L('mei','{N}～～救命！磨豆機阿嬤又卡豆了啦，她又開始打呼了，你快去哄哄她。'),
  L('me','阿梅，那是一台磨豆機，不是妳阿嬤。而且妳每次都說它在打呼。'),
@@ -589,7 +601,7 @@ const CH=[
 ]},
 {t:'第二章　金穗',sub:'太香的豆子，與遠方的樹',recap:'沈懷舟收你為徒，教你水、數字與塞水，還幫你寫了推薦函。他說：好豆子在樹上。但在你出發之前，有人先找上了門。',nodes:[
  BG('home','公館．你的租屋處'),
- N('推薦函有了，報名表寄出去了。剩下最大的問題，是比賽要用的豆子。'),
+ {act:'form2',s:'',t:'推薦函有了，報名表寄出去了。剩下最大的問題，是比賽要用的豆子。'},
  N('你打開網路銀行看了一下存款：六萬三千二百塊。這大概是你兩年來省吃儉用的全部了。'),
  L('me','（一公斤比賽等級的藝伎，少說也要兩三萬……而且還不一定買得到。）'),
  N('前一天，台灣盃官網公布了參賽名單。你的名字在第三頁，推薦人那一欄寫著：沈懷舟。'),
@@ -1576,7 +1588,7 @@ function step(){
     if(n.c){persist();showChoice(n);return}
     if(n.brew){persist();showBrew(n);return}
     if(n.item){S.i++;giveItem(n.item);continue}
-    if(n.act){S.i++;persist();startAct(n.act);if(n.sticky)S.act.sticky=1;showLine({s:'',t:n.t});return}
+    if(n.act){S.i++;persist();startAct(n.act);if(n.sticky)S.act.sticky=1;if(n.hold)S.act.hold=n.hold;showLine({s:'',t:n.t});return}
     if(n.tv){S.i++;persist();startTravel(n.tv);showLine({s:'',t:n.t});return}
     if(n.s!==undefined){S.i++;persist();showLine(n);return}
     S.i++;
@@ -1599,7 +1611,7 @@ function showLine(n){
   tx._all=toks.map(t=>t.h).join('');
 }
 function finishType(){clearInterval(typing);typing=null;const tx=$('txt');if(tx._all!==undefined&&!ffwd)tx.innerHTML=tx._all;bindLinks(tx);$('more').style.display=annot?'none':'block';$('nextBtn').classList.toggle('on',annot)}
-function advance(){if(!waiting)return;if(typing){finishType();return}waiting=false;if(S&&S.act&&!S.act.sticky){curBg=S.act.prev;$('locLabel').textContent=S.act.loc||'';S.act=null;const tl=$('tvLayer');tl.hidden=true;tl.innerHTML=''}if(!ffwd)sfx('tap');$('nextBtn').classList.remove('on');step()}
+function advance(){if(!waiting)return;if(typing){finishType();return}waiting=false;if(S&&S.act&&S.act.hold>0){S.act.hold--}else if(S&&S.act&&!S.act.sticky){curBg=S.act.prev;$('locLabel').textContent=S.act.loc||'';S.act=null;const tl=$('tvLayer');tl.hidden=true;tl.innerHTML=''}if(!ffwd)sfx('tap');$('nextBtn').classList.remove('on');step()}
 $('box').addEventListener('click',()=>{if(annot&&!typing)return;advance()});
 $('nextBtn').addEventListener('click',()=>{if(typing){finishType();return}advance()});
 
@@ -1852,7 +1864,8 @@ BGS.brewbar=function(g,t){const p=PX(g),B=S&&S.brewUI;if(!B)return;
 
 
 /* ============ 小動畫：清理磨豆機 ============ */
-function startAct(k){S.act={k,t0:performance.now(),prev:curBg,loc:S.loc};curBg='act';if(k==='flood')startFlood();
+function startAct(k){S.act={k,t0:performance.now(),prev:curBg,loc:S.loc};curBg='act';if(k==='form'||k==='form2'){const tl=$('tvLayer');tl.innerHTML=formHTML(k==='form2');tl.hidden=false;sfx('whoosh');if(k==='form2')setTimeout(()=>{if(S&&S.act)sfx('pop')},900)}
+  if(k==='flood')startFlood();
   if(k==='pack'){const tl=$('tvLayer');tl.innerHTML='<div class="actcap" id="actCap"></div>';tl.hidden=false;[1200,2500,3800].forEach(d=>setTimeout(()=>{if(S&&S.act)sfx('pop')},d));setTimeout(()=>{if(S&&S.act)sfx('whoosh')},4400);setTimeout(()=>{if(S&&S.act)sfx('up')},5200)}
   if(k==='water'){const tl=$('tvLayer');tl.innerHTML='<div class="actcap" id="actCap"></div><div class="wlab" id="wl1" style="left:30%">早上：藍色封膜</div><div class="wlab bad" id="wl2" style="left:70%">現在：白色封膜</div>';tl.hidden=false;sfx('doom');setTimeout(()=>{if(S&&S.act)sfx('whoosh')},2200);setTimeout(()=>{if(S&&S.act)sfx('pop')},5000)}
   if(k==='roast'){const tl=$('tvLayer');const X=s0=>176+(s0/7)*134,Y=v=>160-(Math.min(240,v)-80)/160*116,pos=(s0,v)=>`left:${X(s0)/320*100}%;top:${Y(v)/200*100}%`;
@@ -1861,7 +1874,7 @@ function startAct(k){S.act={k,t0:performance.now(),prev:curBg,loc:S.loc};curBg='
     for(let i=0;i<12;i++)setTimeout(()=>{if(S&&S.act)sfx('crack')},3600+4330+i*130+Math.random()*80);setTimeout(()=>{if(S&&S.act)sfx('whoosh')},3600+6400);setTimeout(()=>{if(S&&S.act)sfx('up')},3600+6700)}
   if(k==='notebook'){const tl=$('tvLayer');tl.innerHTML='<div class="actcap" id="actCap"></div>';tl.hidden=false;setTimeout(()=>{if(S&&S.act)sfx('whoosh')},500)}
   if(k==='pest'){const tl=$('tvLayer');tl.innerHTML='<div class="pestl" style="left:26.5%">A 排・葉子背面</div><div class="pestl" style="left:73.5%">B 排・紅色果實</div>';tl.hidden=false;sfx('pop')}
-  $('locLabel').textContent=k==='pack'?'出發當天':k==='flood'?'冠軍後第二天':k==='water'?'水瓶':k==='roast'?'烘豆．第 17 鍋':k==='notebook'?'處理紀錄本':k==='pest'?'放大看看':k==='cup'?'杯測．金穗':k==='cupfarm'?'杯測．帕洛瑪莊園':k==='jeep'?'內瓦 → 帕洛瑪莊園':'清理磨豆機';
+  $('locLabel').textContent=k==='form'?'吧台抽屜':k==='form2'?'報名表・寄出前':k==='pack'?'出發當天':k==='flood'?'冠軍後第二天':k==='water'?'水瓶':k==='roast'?'烘豆．第 17 鍋':k==='notebook'?'處理紀錄本':k==='pest'?'放大看看':k==='cup'?'杯測．金穗':k==='cupfarm'?'杯測．帕洛瑪莊園':k==='jeep'?'內瓦 → 帕洛瑪莊園':'清理磨豆機';
   if(k==='jeep'){const tl=$('tvLayer');tl.innerHTML='<div class="actcap" id="actCap"></div><div class="jsign" id="jSign" hidden>帕洛瑪莊園 →</div>';tl.hidden=false;sfx('plane');[900,1700,2600,3400,4300].forEach(d=>setTimeout(()=>{if(S&&S.act)sfx('bump')},d))}
   if(k==='cup'||k==='cupfarm'){const tl=$('tvLayer');tl.innerHTML='<div class="actcap" id="actCap"></div>';tl.hidden=false;[[1300,'pour'],[1800,'pour'],[2700,'pop'],[2900,'whoosh'],[3900,'brush'],[4900,'slurp'],[5300,'slurp'],[5700,'slurp'],[6100,'slurp']].concat(k==='cupfarm'?[[6500,'up']]:[]).forEach(([d,k2])=>setTimeout(()=>{if(S&&S.act)sfx(k2)},d))}
   if(k==='clean'){[300,900,1300,1700,2100].forEach(d=>setTimeout(()=>{if(S&&S.act)sfx('brush')},d));setTimeout(()=>{if(S&&S.act)sfx('pop')},2900)}}
@@ -1988,7 +2001,7 @@ function actPest(g,t,A){const p=PX(g),e=(performance.now()-A.t0)/1000,z=Math.min
     const bx=nx+16+Math.sin(t*1.5)*6,by=ny-6+Math.cos(t*1.5)*2;g.fillStyle='#1a1210';g.beginPath();g.ellipse(bx,by,4,2.6,.3,0,6.283);g.fill();p(bx-5,by-1,2,1,'#3a2a20');
     for(let k=-1;k<=1;k++){p(bx+k*2,by+2,1,2,'#1a1210');p(bx+k*2,by-3,1,2,'#1a1210')}});
   p.vig()}
-BGS.act=function(g,t){const A=S&&S.act;if(!A)return;(A.k==='pack'?actPack:A.k==='flood'?actFlood:A.k==='water'?actWater:A.k==='roast'?actRoast:A.k==='notebook'?actNotebook:A.k==='pest'?actPest:A.k==='cup'||A.k==='cupfarm'?actCup:A.k==='jeep'?actJeep:actClean)(g,t,A)};
+BGS.act=function(g,t){const A=S&&S.act;if(!A)return;(A.k==='form'||A.k==='form2'?actForm:A.k==='pack'?actPack:A.k==='flood'?actFlood:A.k==='water'?actWater:A.k==='roast'?actRoast:A.k==='notebook'?actNotebook:A.k==='pest'?actPest:A.k==='cup'||A.k==='cupfarm'?actCup:A.k==='jeep'?actJeep:actClean)(g,t,A)};
 
 /* ============ 道具 ============ */
 const ITEMS={
@@ -2125,6 +2138,18 @@ function actPack(g,t,A){const p=PX(g),e=(performance.now()-A.t0)/1000;BGS.home(g
   if(e>5.3){const k=Math.sin(t*6)>0;p(bx+38,by-36,20,12,'rgba(14,17,22,.9)');if(k){p(bx+42,by-30,3,3,'#4fb3a9');p(bx+45,by-28,3,3,'#4fb3a9');p(bx+48,by-31,3,3,'#4fb3a9');p(bx+51,by-34,3,3,'#4fb3a9')}}
   const step=e<5.2?PACK[Math.min(2,Math.floor(Math.max(0,e-.4)/1.3))][1]:'',cap=document.getElementById('actCap'),txt=e<.4?'出發前，打包':e<4.4?'放進背包：'+step:e<5.2?'拉上拉鍊':'✓ 三樣東西，一刻都不離身';
   if(cap&&cap.textContent!==txt)cap.textContent=txt;p.vig()}
+
+/* 報名表 */
+function formHTML(done){const N0=esc(P.name);return `<div class="rform${done?' done':''}"><div class="rf-h"><small>第十二屆</small><b>台灣盃手沖錦標賽</b><span>選手報名表</span></div>
+ <div class="rf-r"><label>選手姓名</label><i class="hw">${N0}</i></div>
+ <div class="rf-r"><label>參賽組別</label><i class="hw">手沖組</i></div>
+ <div class="rf-r"><label>服務店家</label><i class="hw">白霧咖啡</i></div>
+ <div class="rf-r"><label>比賽用豆</label><i class="hw dim">${done?'（自行尋找）':'尚未決定'}</i></div>
+ <div class="rf-r key"><label>推薦店家／推薦人<em>＊必填</em></label><i class="hw">${done?'沈懷舟（舟火焙煎所）':''}</i>${done?'<span class="seal">推薦函<br>已附</span>':'<span class="need">空白</span>'}</div>
+ <div class="rf-n">＊未附店家或業界人士推薦函者，不予受理。　報名截止：${done?'<s>兩週後</s> 已寄出':'兩週後'}</div></div>`}
+function actForm(g,t,A){const p=PX(g),e=(performance.now()-A.t0)/1000;BGS[A.k==='form'?'cafe':'home'](g,t);g.fillStyle='rgba(8,10,14,.62)';g.fillRect(0,0,320,200);
+  if(A.k==='form'){const op=Math.min(1,e/.6);p(60,150-op*20,200,50,'#4a2e1d');p(60,150-op*20,200,3,'#7a4e30');p(150,162-op*20,20,4,'#c4cad1')}
+  p.vig()}
 /* 筆記本動畫 */
 function actNotebook(g,t,A){const p=PX(g),e=(performance.now()-A.t0)/1000;
   p(0,0,320,200,'#5a3d27');for(let y=0;y<200;y+=14){p(0,y,320,1,'#4a3220');p.dith(0,y+2,320,10,'#664530',4)}p.glow(160,90,160,'rgba(240,200,140,.16)');
