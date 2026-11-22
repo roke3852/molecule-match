@@ -108,6 +108,19 @@ button{font:inherit;color:inherit;touch-action:manipulation}
 .actcap{position:absolute;left:50%;transform:translateX(-50%);bottom:10px;font-family:"DotGothic16","Noto Sans TC",sans-serif;font-size:14px;background:rgba(14,17,22,.9);color:#ece4d4;border-left:3px solid #d64545;padding:3px 12px;white-space:nowrap}
 .jsign{position:absolute;top:56%;transform:translateX(-50%);font-family:"DotGothic16","Noto Sans TC",sans-serif;font-size:11px;color:#2e1b11;white-space:nowrap;font-weight:700}
 .pestl{position:absolute;bottom:6px;transform:translateX(-50%);font-family:"DotGothic16","Noto Sans TC",sans-serif;font-size:12px;background:rgba(14,17,22,.9);color:#ece4d4;border-left:3px solid #d64545;padding:2px 9px;white-space:nowrap}
+.inv{display:flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--ink2);padding:6px 8px;min-height:46px}
+.inv-h{font-family:DotGothic16;font-size:12px;color:var(--muted);writing-mode:vertical-rl;letter-spacing:2px;border-right:1px solid var(--line);padding-right:6px}
+.inv-l{display:flex;flex-wrap:wrap;gap:6px;flex:1}.inv-e{font-size:12px;color:var(--dim)}
+.inv-i{width:36px;height:36px;display:grid;place-items:center;background:var(--ink);border:1px solid var(--line2);padding:0}
+.inv-i svg{image-rendering:pixelated}.inv-i.new{border-color:var(--cherry);animation:invnew .5s ease-in-out 4}
+@keyframes invnew{50%{transform:translateY(-4px)}}
+.itempop{position:fixed;left:50%;top:22%;transform:translateX(-50%);z-index:85;display:flex;gap:12px;align-items:center;background:var(--ink);border:1px solid var(--line2);border-left:4px solid var(--cherry);padding:12px 18px 12px 14px;box-shadow:0 0 0 3px var(--ink),0 10px 30px #000;animation:itin .35s cubic-bezier(.2,1.6,.4,1) both;pointer-events:none}
+.itempop svg{image-rendering:pixelated;background:var(--ink3);border:1px solid var(--line)}
+.itempop small{display:block;font-family:DotGothic16;color:var(--cherry2);letter-spacing:2px;font-size:12px}.itempop b{font-family:DotGothic16;font-weight:400;font-size:17px;white-space:nowrap}
+.itempop.out{opacity:0;transform:translate(-50%,-10px);transition:.4s}
+@keyframes itin{from{opacity:0;transform:translate(-50%,10px) scale(.7)}to{opacity:1;transform:translateX(-50%) scale(1)}}
+.rtag{position:absolute;transform:translate(-50%,-130%);font-family:"DotGothic16",sans-serif;font-size:10px;color:#ece4d4;background:rgba(14,17,22,.9);border:1px solid;padding:0 4px;white-space:nowrap}.rtag.ok{border-color:#4fb3a9;color:#4fb3a9;transform:translate(-50%,40%)}
+.rlab{position:absolute;left:78%;transform:translateX(-50%);font-family:"DotGothic16",sans-serif;font-size:11px;color:#8b93a1}
 /* overlays */
 .ov{position:fixed;inset:0;background:rgba(6,8,11,.86);z-index:50;display:none;align-items:center;justify-content:center;padding:16px}
 .ov.on{display:flex}
@@ -232,6 +245,7 @@ button{font:inherit;color:inherit;touch-action:manipulation}
         <button class="tb" id="tSave">存檔</button>
         <button class="tb" id="tMenu">選單</button>
       </div>
+      <div class="inv"><span class="inv-h">道具</span><div class="inv-l" id="invList"></div></div>
     </div>
   </section>
 </div>
@@ -414,7 +428,7 @@ const CH=[
   {t:'「是，老闆。」照他說的裝罐。',end:'fish'},
   {t:'當著阿梅的面大聲說：「這是詐欺！我明天就去檢舉！」',end:'loud'},
   {t:'「這袋我不裝。明天網紅點的藝伎，我用自己的薪水補一包真的。」',fx:{heart:1},r:[['yan','……哎呀，年輕人真有原則。'],['','他的眼睛還是瞇著，但手上那支轉來轉去的原子筆，停了。'],['yan','好啊，你要自己出錢，我也不攔你。年輕人嘛，有理想是好事。']]},
-  {t:'嘴上說「好」，口袋裡的手機開著錄音。明天照樣端出真的藝伎。',f:'rec_yan',r:[['yan','好孩子～我就知道你懂事。'],['','他拍了拍你的肩膀，滿意地走了。'],['','你掏出手機。錄音檔長度：00:01:42。你把它存進一個叫「阿嬤」的資料夾，連阿梅都不會想點開的那種。']]},
+  {t:'嘴上說「好」，口袋裡的手機開著錄音。明天照樣端出真的藝伎。',f:'rec_yan',it:'rec',r:[['yan','好孩子～我就知道你懂事。'],['','他拍了拍你的肩膀，滿意地走了。'],['','你掏出手機。錄音檔長度：00:01:42。你把它存進一個叫「阿嬤」的資料夾，連阿梅都不會想點開的那種。']]},
  ]),
  N('打烊後，你一個人把吧台擦了三遍。擦到第三遍的時候，你才發現自己根本沒在看檯面。'),
  TV('city','cafe','home','scooter','十一點半。你騎著那台二手機車，穿過還在下雨的羅斯福路，回到公館巷子裡的頂樓加蓋。'),
@@ -443,6 +457,7 @@ const CH=[
  BR('親手沖這一杯給沈懷舟。照你剛剛的判斷調整看看。',{bean:'巴拿馬藝伎・淺焙',base:17.5},[['','你把杯子放到他面前。他聞了很久，喝了一口。'],['shen','……嗯。剛剛好。'],['shen','你沒量，我也嚐得出來——這杯，在金杯裡。']],[['','他喝了一口，放下杯子，沒有說話。'],['shen','……還差一點。不過方向是對的。']]),
  N('老先生把那杯慢慢喝完，在杯墊下壓了錢，還有一張名片，起身走了。'),
  N('名片是很厚的手工紙，上面只印了幾個字：「舟火焙煎所　沈懷舟」，下面是一個大稻埕的地址。'),
+ {item:'card'},
  L('mei','（湊過來看）沈懷舟？等一下……2014 年台灣盃的冠軍？後來被撤銷的那個？'),
  L('me','妳怎麼什麼都知道？'),
  L('mei','咖啡圈的八卦我都知道啊！聽說他當年比賽的時候，偷帶自己調的水上台，被抓到，冠軍就被拿走了。'),
@@ -558,6 +573,7 @@ const CH=[
  N('天快亮的時候，烘豆機終於安靜下來。沈懷舟從抽屜裡拿出一張信紙，用鋼筆寫了很久。'),
  N('寫完，他把信紙摺好、裝進信封，用一塊紅色的封蠟封起來，放在你手心。'),
  L('shen','推薦函。'),
+ {item:'letter'},
  L('me','師父……謝謝您。'),
  L('shen','別急著謝。台灣盃要用的豆子，你得自己去找。'),
  L('shen','好豆子不會在別人的嘴裡，也不會在別人的倉庫裡。'),
@@ -675,18 +691,20 @@ const CH=[
  N('接下來的兩個禮拜，你每天早上六點起床，量發酵槽的溫度、糖度、pH，一筆一筆寫進筆記本。'),
  N('然後把果實攤到架高的日曬床上，每兩個小時翻一次。中午太陽太大，還要拉遮陽網。'),
  N('胡安妮塔每天都跟在你後面。工人們開始叫你「雞的朋友」。'),
- N('出發那天早上，卡洛斯塞給你一本沾著泥巴的筆記本。那是你們兩個人的字跡，每天的溫度、糖度、pH，一筆都沒漏。'),
+ {act:'notebook',s:'',t:'出發那天早上，卡洛斯塞給你一本沾著泥巴的筆記本。那是你們兩個人的字跡，每天的溫度、糖度、pH，一筆都沒漏。'},
+ {item:'notebook'},
  L('carlos','這本你帶走。這是你的豆子的身分證。'),
  L('carlos','對了，有件事我想了很久，還是要跟你說。'),
  L('carlos','金穗的人，上個禮拜來過。'),
  L('carlos','他們說——你會來。'),
+ {item:'beans'},
  TV('world','NVA','TPE','plane','內瓦 → 波哥大 → 洛杉磯 → 台北。三十公斤的生豆塞在托運行李裡，你一路上醒來好幾次，就怕它不見了。'),
  {done:1}
 ]},
 {t:'第三章　台灣盃',sub:'被換掉的水',recap:'你在哥倫比亞找到卡洛斯，買下 30 公斤自己參與處理的豆子，帶回一本處理紀錄。但金穗的人，似乎早就知道你的行蹤。',nodes:[
  BG('roast','比賽前一週．舟火焙煎所'),
  N('回台灣以後，你和沈懷舟花了整整三個禮拜，替那三十公斤的豆子找烘焙曲線。'),
- N('烘深一點，水果味會被焦糖蓋過去；烘淺一點，又會有一股生青的草味。你們烘了十七鍋，才終於找到一個兩個人都點頭的曲線。'),
+ {act:'roast',s:'',t:'烘深一點，水果味會被焦糖蓋過去；烘淺一點，又會有一股生青的草味。你們烘了十七鍋，才終於找到一個兩個人都點頭的曲線。'},
  L('shen','就這鍋。'),
  L('shen','記住現在這個味道。比賽那天你緊張的時候，就想想這一杯。'),
  L('me','師父，比賽那天……你會來嗎？'),
@@ -729,7 +747,7 @@ const CH=[
  C('林評審沒有說完的那一半。',[
   {t:'「懂。我會準備一點心意。」',end:'bribe'},
   {t:'「林評審，我只會在杯子裡說話。」',fx:{heart:1},r:[['lin','呵。年輕。'],['','他沒有生氣，只是笑了一下，端著茶走了。'],['','你這才發現，自己的手心全是汗。']]},
-  {t:'微笑說「一定到」——晚上赴約，口袋裡的手機開著錄音，什麼也不給。',f:'rec_lin',fx:{fame:1},r:[['','晚上的餐敘上，林評審喝了兩杯紅酒，話說得比白天露骨多了。'],['lin','沈懷舟當年啊，就是太不懂事。這個圈子，懂事的人才走得遠。'],['','你一直笑著點頭，什麼都沒給。回家的路上，你看了一下手機：錄音檔長度，00:23:17。']]},
+  {t:'微笑說「一定到」——晚上赴約，口袋裡的手機開著錄音，什麼也不給。',f:'rec_lin',it:'rec2',fx:{fame:1},r:[['','晚上的餐敘上，林評審喝了兩杯紅酒，話說得比白天露骨多了。'],['lin','沈懷舟當年啊，就是太不懂事。這個圈子，懂事的人才走得遠。'],['','你一直笑著點頭，什麼都沒給。回家的路上，你看了一下手機：錄音檔長度，00:23:17。']]},
  ]),
  N('決賽最後一個環節：上台說明你的豆子。三位評審坐在你對面，筆尖對著評分表。'),
  IF('coferm','q_co'),
@@ -745,6 +763,7 @@ const CH=[
  N('成績公布。全場燈光暗下來，只剩一盞聚光燈。'),
  N('「本屆台灣盃手沖錦標賽，冠軍——」'),
  N('「{N}！」'),
+ {item:'trophy'},
  N('掌聲響起來的時候，你什麼都聽不到，只覺得腳底發軟。'),
  N('亞軍是蘇曼。她沒有鼓掌，只是一直盯著你桌上的那杯咖啡，看了很久很久。'),
  N('散場的時候，你在觀眾席最後一排的角落，看到一個穿著黑色長大衣的身影，正要轉身離開。'),
@@ -870,6 +889,7 @@ const CH=[
  L('shen','原來不是。我要的，是有一個人相信，那杯水是乾淨的。'),
  L('shen','……謝謝你。'),
  L('su','出貨單、採購單，全部都給你們。'),
+ {item:'docs'},
  L('su','還有——我跟你們一起去東京。這一次，我想用自己的名字站在台上。'),
  IF('rec_lin','ev_lin'),J('ev_end'),
  LB('ev_lin'),N('你拿出手機，按下播放。那段 23 分 17 秒的錄音裡，林正衡帶著醉意的聲音在小小的烘豆坊裡迴盪：「沈懷舟當年啊，就是太不懂事。」'),N('沈懷舟閉上眼睛。很久，很久，都沒有說話。'),
@@ -1479,6 +1499,7 @@ function sfx(k){if(!sound)return;const a=ac();if(!a)return;const t=a.currentTime
  if(k==='pop'){voice(S,'sine',880,t,.002,.08,.08);voice(S,'sine',1320,t+.03,.002,.05,.08)}
  if(k==='whoosh'){const s=a.createBufferSource();s.buffer=AU.noise;const f=a.createBiquadFilter();f.type='bandpass';f.Q.value=1.2;f.frequency.setValueAtTime(300,t);f.frequency.exponentialRampToValueAtTime(3000,t+.45);const g=a.createGain();s.connect(f);f.connect(g);g.connect(S);g.gain.setValueAtTime(0.0001,t);g.gain.linearRampToValueAtTime(.12,t+.2);g.gain.exponentialRampToValueAtTime(0.0001,t+.55);s.start(t);s.stop(t+.6)}
  if(k==='plane'){const s=a.createBufferSource();s.buffer=AU.brown;const f=a.createBiquadFilter();f.type='lowpass';f.frequency.setValueAtTime(200,t);f.frequency.linearRampToValueAtTime(900,t+1.2);f.frequency.linearRampToValueAtTime(300,t+2.6);const g=a.createGain();s.connect(f);f.connect(g);g.connect(S);g.gain.setValueAtTime(0.0001,t);g.gain.linearRampToValueAtTime(.6,t+1);g.gain.linearRampToValueAtTime(0.0001,t+2.8);s.start(t);s.stop(t+3)}
+ if(k==='crack'){noiseHit(S,t,.025,.22,'highpass',1800+Math.random()*1500)}
  if(k==='bump'){voice(S,'sine',70,t,.005,.25,.18);noiseHit(S,t,.08,.12,'lowpass',400)}
  if(k==='slurp'){const s0=a.createBufferSource();s0.buffer=AU.noise;const f=a.createBiquadFilter();f.type='bandpass';f.Q.value=2;f.frequency.setValueAtTime(800,t);f.frequency.exponentialRampToValueAtTime(5000,t+.35);const g=a.createGain();s0.connect(f);f.connect(g);g.connect(S);g.gain.setValueAtTime(0.0001,t);g.gain.linearRampToValueAtTime(.18,t+.08);g.gain.exponentialRampToValueAtTime(0.0001,t+.4);s0.start(t);s0.stop(t+.45)}
  if(k==='pour'){noiseHit(S,t,1,.06,'bandpass',2200,.6)}
@@ -1502,7 +1523,8 @@ function openCard(html,cls){if(!/endcard|goodcard/.test(cls||''))sfx('open');con
 function closeCard(){$('ov').classList.remove('on')}
 $('ov').addEventListener('click',e=>{if(e.target.id==='ov'&&!$('card').classList.contains('lock'))closeCard()});
 function esc(s){return s.replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'})[c])}
-function renderStats(){const s=S?S.stats:{tech:0,fame:0,heart:0};
+function renderStats(){try{renderInv()}catch(e){}
+const s=S?S.stats:{tech:0,fame:0,heart:0};
  const m=[['技術','tech','#6c9bd2'],['名聲','fame','#ece4d4'],['良心','heart','#4fb3a9']];
  $('stats').innerHTML=m.map(([n,k,c])=>`<div class="stat">${n}<div class="bar">${('<i style="width:10%;background:'+c+'"></i>').repeat(Math.max(0,Math.min(10,s[k])))}</div></div>`).join('');}
 
@@ -1546,6 +1568,7 @@ function step(){
     if(n.final){finale();return}
     if(n.c){persist();showChoice(n);return}
     if(n.brew){persist();showBrew(n);return}
+    if(n.item){S.i++;giveItem(n.item);continue}
     if(n.act){S.i++;persist();startAct(n.act);if(n.sticky)S.act.sticky=1;showLine({s:'',t:n.t});return}
     if(n.tv){S.i++;persist();startTravel(n.tv);showLine({s:'',t:n.t});return}
     if(n.s!==undefined){S.i++;persist();showLine(n);return}
@@ -1589,7 +1612,7 @@ function pick(o){endAct();
   sfx('pick');$('choices').classList.remove('on');
   S.log.push({w:'▸ 你選擇',t:fill(o.t),pick:1});
   if(o.fx)for(const k in o.fx)S.stats[k]=Math.max(0,Math.min(10,S.stats[k]+o.fx[k]));
-  if(o.f)S.flags[o.f]=1;renderStats();
+  if(o.f)S.flags[o.f]=1;if(o.it)giveItem(o.it);renderStats();
   if(o.fx){const vs=Object.values(o.fx);setTimeout(()=>sfx(vs.some(v=>v<0)?'down':'up'),180)}
   if(o.fx){const ch=Object.entries(o.fx).map(([k,v])=>`${{tech:'技術',fame:'名聲',heart:'良心'}[k]} ${v>0?'+':''}${v}`).join('　');toast(ch)}
   S.q=(o.r||[]).map(x=>x.slice());
@@ -1818,8 +1841,13 @@ BGS.brewbar=function(g,t){const p=PX(g),B=S&&S.brewUI;if(!B)return;
 
 
 /* ============ 小動畫：清理磨豆機 ============ */
-function startAct(k){S.act={k,t0:performance.now(),prev:curBg,loc:S.loc};curBg='act';if(k==='pest'){const tl=$('tvLayer');tl.innerHTML='<div class="pestl" style="left:26.5%">A 排・葉子背面</div><div class="pestl" style="left:73.5%">B 排・紅色果實</div>';tl.hidden=false;sfx('pop')}
-  $('locLabel').textContent=k==='pest'?'放大看看':k==='cup'?'杯測．金穗':k==='cupfarm'?'杯測．帕洛瑪莊園':k==='jeep'?'內瓦 → 帕洛瑪莊園':'清理磨豆機';
+function startAct(k){S.act={k,t0:performance.now(),prev:curBg,loc:S.loc};curBg='act';if(k==='roast'){const tl=$('tvLayer');const X=s0=>176+(s0/7)*134,Y=v=>160-(Math.min(240,v)-80)/160*116,pos=(s0,v)=>`left:${X(s0)/320*100}%;top:${Y(v)/200*100}%`;
+    tl.innerHTML='<div class="actcap" id="actCap"></div><div class="rlab" style="top:17%">烘焙曲線</div>'+RFAIL.map((F,i)=>`<div class="rtag" id="rf${i}" hidden style="${pos(F.end,F.f(F.end))};border-color:${F.c}">${F.n.replace('第 ','').replace(' 鍋','')}</div>`).join('')+`<div class="rtag ok" id="rf3" hidden style="${pos(6.4,roastT(6.4))}">17 ✓</div>`;tl.hidden=false;
+    RFAIL.forEach((F,i)=>setTimeout(()=>{if(S&&S.act)sfx('down')},i*1200+900));
+    for(let i=0;i<12;i++)setTimeout(()=>{if(S&&S.act)sfx('crack')},3600+4330+i*130+Math.random()*80);setTimeout(()=>{if(S&&S.act)sfx('whoosh')},3600+6400);setTimeout(()=>{if(S&&S.act)sfx('up')},3600+6700)}
+  if(k==='notebook'){const tl=$('tvLayer');tl.innerHTML='<div class="actcap" id="actCap"></div>';tl.hidden=false;setTimeout(()=>{if(S&&S.act)sfx('whoosh')},500)}
+  if(k==='pest'){const tl=$('tvLayer');tl.innerHTML='<div class="pestl" style="left:26.5%">A 排・葉子背面</div><div class="pestl" style="left:73.5%">B 排・紅色果實</div>';tl.hidden=false;sfx('pop')}
+  $('locLabel').textContent=k==='roast'?'烘豆．第 17 鍋':k==='notebook'?'處理紀錄本':k==='pest'?'放大看看':k==='cup'?'杯測．金穗':k==='cupfarm'?'杯測．帕洛瑪莊園':k==='jeep'?'內瓦 → 帕洛瑪莊園':'清理磨豆機';
   if(k==='jeep'){const tl=$('tvLayer');tl.innerHTML='<div class="actcap" id="actCap"></div><div class="jsign" id="jSign" hidden>帕洛瑪莊園 →</div>';tl.hidden=false;sfx('plane');[900,1700,2600,3400,4300].forEach(d=>setTimeout(()=>{if(S&&S.act)sfx('bump')},d))}
   if(k==='cup'||k==='cupfarm'){const tl=$('tvLayer');tl.innerHTML='<div class="actcap" id="actCap"></div>';tl.hidden=false;[[1300,'pour'],[1800,'pour'],[2700,'pop'],[2900,'whoosh'],[3900,'brush'],[4900,'slurp'],[5300,'slurp'],[5700,'slurp'],[6100,'slurp']].concat(k==='cupfarm'?[[6500,'up']]:[]).forEach(([d,k2])=>setTimeout(()=>{if(S&&S.act)sfx(k2)},d))}
   if(k==='clean'){[300,900,1300,1700,2100].forEach(d=>setTimeout(()=>{if(S&&S.act)sfx('brush')},d));setTimeout(()=>{if(S&&S.act)sfx('pop')},2900)}}
@@ -1946,7 +1974,84 @@ function actPest(g,t,A){const p=PX(g),e=(performance.now()-A.t0)/1000,z=Math.min
     const bx=nx+16+Math.sin(t*1.5)*6,by=ny-6+Math.cos(t*1.5)*2;g.fillStyle='#1a1210';g.beginPath();g.ellipse(bx,by,4,2.6,.3,0,6.283);g.fill();p(bx-5,by-1,2,1,'#3a2a20');
     for(let k=-1;k<=1;k++){p(bx+k*2,by+2,1,2,'#1a1210');p(bx+k*2,by-3,1,2,'#1a1210')}});
   p.vig()}
-BGS.act=function(g,t){const A=S&&S.act;if(!A)return;(A.k==='pest'?actPest:A.k==='cup'||A.k==='cupfarm'?actCup:A.k==='jeep'?actJeep:actClean)(g,t,A)};
+BGS.act=function(g,t){const A=S&&S.act;if(!A)return;(A.k==='roast'?actRoast:A.k==='notebook'?actNotebook:A.k==='pest'?actPest:A.k==='cup'||A.k==='cupfarm'?actCup:A.k==='jeep'?actJeep:actClean)(g,t,A)};
+
+/* ============ 道具 ============ */
+const ITEMS={
+ card:{n:'沈懷舟的名片',d:'很厚的手工紙，只印著「舟火焙煎所　沈懷舟」和大稻埕的地址。',ic:['............','.wwwwwwwwww.','.wccccccccw.','.wcrrcccccw.','.wcrrcbbbcw.','.wccccccccw.','.wcbbbbbbcw.','.wcbbbbcccw.','.wccccccccw.','.wwwwwwwwww.','............','............']},
+ rec:{n:'錄音檔「阿嬤」',d:'嚴老闆要你換標籤的那段話，1 分 42 秒。存在一個叫「阿嬤」的資料夾裡。',ic:['...kkkkkk...','..kssssssk..','..ksuuuusk..','..ksurruusk.','..ksuuuusk..','..ksuruusk..','..ksuuuusk..','..kssssssk..','..ksskkssk..','..kssssssk..','...kkkkkk...','............']},
+ letter:{n:'推薦函',d:'沈懷舟用鋼筆寫了很久，再用紅色封蠟封起來的台灣盃推薦函。',ic:['............','.cccccccccc.','.cwwwwwwwwc.','.cwcwwwwcwc.','.cwwcwwcwwc.','.cwwwrrwwwc.','.cwwrRRrwwc.','.cwwwrrwwwc.','.cwwwwwwwwc.','.cccccccccc.','............','............']},
+ notebook:{n:'處理紀錄本',d:'沾著泥巴的筆記本，你和卡洛斯兩個人的字跡：每天的溫度、糖度、pH，一筆都沒漏。這是豆子的身分證。',ic:['............','..bbbbbbbb..','.bBBBBBBBBb.','.bBdBBBBdBb.','.bBBBwwBBBb.','.bBBBwwBBBb.','.bBdBBBBBBb.','.bBBBBBdBBb.','.bBBBBBBBBb.','..bbbbbbbb..','..wwwwwwww..','............']},
+ beans:{n:'帕洛瑪的 30 公斤生豆',d:'你和卡洛斯一起處理、一起曬出來的豆子。冷了還是香的。',ic:['............','...gggggg...','..gGGGGGGg..','.gGGGGGGGGg.','.gGGwwwwGGg.','.gGGwrrwGGg.','.gGGwwwwGGg.','.gGGGGGGGGg.','.gGGGGGGGGg.','..gggggggg..','............','............']},
+ trophy:{n:'台灣盃冠軍獎盃',d:'台灣盃手沖錦標賽的冠軍獎盃。底座刻著你的名字。',ic:['............','.y.yyyyyy.y.','.y.yYYYYy.y.','..yyYYYYyy..','....yYYy....','.....yy.....','.....yy.....','....yyyy....','...kkkkkk...','...kwwwwk...','...kkkkkk...','............']},
+ rec2:{n:'錄音檔（餐敘）',d:'林評審在餐敘上說的話，23 分 17 秒。「沈懷舟當年，就是太不懂事。」',ic:['...kkkkkk...','..kssssssk..','..ksuuuusk..','..ksuyyusk..','..ksuuuusk..','..ksuyuusk..','..ksuuuusk..','..kssssssk..','..ksskkssk..','..kssssssk..','...kkkkkk...','............']},
+ docs:{n:'金穗出貨單',d:'蘇曼偷偷影印的金穗出貨單和香精採購單。',ic:['............','..wwwwwww...','..wcccccww..','..wcbbbcccw.','..wccccccw..','..wcbbbbcw..','..wccccccw..','..wcbbcrrw..','..wcccrrrw..','..wwwwwwww..','............','............']},
+};
+const IPAL={k:'#1a1210',w:'#f4efe4',c:'#ece4d4',b:'#5a3520',B:'#8a5a34',d:'#3a2a1a',r:'#d64545',R:'#7a1f22',s:'#8d959e',u:'#6c9bd2',y:'#f0b46a',Y:'#ffd98a',g:'#6e5a3c',G:'#9a8158'};
+function icoSvg(id,sz){const m=ITEMS[id].ic;let r='';m.forEach((row,y)=>[...row].forEach((ch,x)=>{if(ch!=='.')r+=`<rect x="${x}" y="${y}" width="1.02" height="1.02" fill="${IPAL[ch]}"/>`}));return `<svg viewBox="0 0 12 12" width="${sz}" height="${sz}" shape-rendering="crispEdges" aria-hidden="true">${r}</svg>`}
+function giveItem(id){if(!S||!ITEMS[id]||S.flags['it_'+id])return;S.flags['it_'+id]=1;renderInv();sfx('win');
+  const d=document.createElement('div');d.className='itempop';d.innerHTML=`${icoSvg(id,56)}<div><small>獲得道具</small><b>${ITEMS[id].n}</b></div>`;document.body.appendChild(d);
+  setTimeout(()=>d.classList.add('out'),2000);setTimeout(()=>d.remove(),2500);S.log.push({w:'▸ 獲得道具',t:ITEMS[id].n,pick:1});const b=document.querySelector(`#invList [data-it="${id}"]`);if(b){b.classList.add('new');setTimeout(()=>b.classList.remove('new'),2500)}}
+function renderInv(){const L0=document.getElementById('invList');if(!L0)return;const ids=S?Object.keys(S.flags).filter(k=>k.startsWith('it_')).map(k=>k.slice(3)).filter(k=>ITEMS[k]):[];
+  L0.innerHTML=ids.length?ids.map(id=>`<button class="inv-i" data-it="${id}" aria-label="${ITEMS[id].n}">${icoSvg(id,26)}</button>`).join(''):'<span class="inv-e">還沒有道具</span>';
+  L0.querySelectorAll('.inv-i').forEach(b=>b.onclick=e=>{e.stopPropagation();const it=ITEMS[b.dataset.it];popup(b,`<b>${it.n}</b><br>${it.d}`)})}
+
+/* 烘豆動畫（參考咖啡風土圖鑑的烘豆教學：轉黃 150°C、一爆 196°C、下豆）：先快速看三鍋失敗，再看成功的第 17 鍋 */
+function roastT(e){const u=Math.min(1,e/6.2);return 95+(208-95)*(1-Math.pow(1-u,1.6))}
+const RFAIL=[
+ {n:'第 3 鍋',c:'#d64545',end:5.2,f:s=>95+(238-95)*(1-Math.pow(1-Math.min(1,s/5.2),2.4)),why:'火太大：升溫太快、衝過二爆 → 焦苦、煙味'},
+ {n:'第 9 鍋',c:'#e0a050',end:6.4,f:s=>s<4.2?roastT(s*1.05):Math.min(201,roastT(4.41)+(s-4.2)*1.2),why:'一爆後火收太多：曲線平掉 → 烤焙感、平淡'},
+ {n:'第 12 鍋',c:'#6c9bd2',end:4.3,f:s=>roastT(s),why:'還沒到一爆就下豆 → 生青草味、尖酸'}];
+function beanCol(T){const k=Math.min(1.2,Math.max(0,(T-95)/113)),lerp=(a,b,u)=>Math.round(a+(b-a)*u);
+  const st=k<.45?[[122,140,90],[214,180,90],k/.45]:k<.85?[[214,180,90],[150,90,50],(k-.45)/.4]:k<=1?[[150,90,50],[105,60,32],(k-.85)/.15]:[[105,60,32],[35,22,16],Math.min(1,(k-1)/.2)];
+  return `rgb(${lerp(st[0][0],st[1][0],st[2])},${lerp(st[0][1],st[1][1],st[2])},${lerp(st[0][2],st[1][2],st[2])})`}
+function actRoast(g,t,A){const p=PX(g),E=(performance.now()-A.t0)/1000,MT=3.6,mont=E<MT,fi=Math.min(2,Math.floor(E/1.2)),fu=Math.min(1,(E-fi*1.2)/.9);
+  const e=Math.max(0,E-MT),T=mont?RFAIL[fi].f(fu*RFAIL[fi].end):roastT(e),drop=!mont&&e>=6.4,de=Math.max(0,e-6.4);
+  const st=drop?'⑤ 下豆・冷卻':T<150?'① 脫水期':T<196?'② 梅納期・焦糖化':e<5.2?'③ 一爆！劈啪劈啪':'④ 發展期';
+  const cap=document.getElementById('actCap'),txt=mont?RFAIL[fi].n+'　'+RFAIL[fi].why:'第 17 鍋　'+st+'　豆溫 '+Math.round(T)+'°C';if(cap&&cap.textContent!==txt)cap.textContent=txt;
+  const brick=(x0,y0,w,h)=>{p(x0,y0,w,h,'#24170f');for(let y=y0-(y0%7);y<y0+h;y+=7){const o=(y/7)%2?0:9;for(let x=-9;x<320;x+=18){const xx=Math.max(x0,x+o),x2=Math.min(x0+w,x+o+17);const yy=Math.max(y0,y),y2=Math.min(y0+h,y+6);if(x2>xx&&y2>yy)p(xx,yy,x2-xx,y2-yy,'#2c1c13')}}};
+  brick(0,0,320,200);
+  // 左：滾筒視窗
+  const cx=88,cy=92,r=62;
+  if(de<=.5){p.ell(cx,cy,r+8,r+8,'#2c323a');p.ell(cx,cy,r+4,r+4,'#5d656e');p.ell(cx,cy,r,r,'#1a0e08');
+    const fl=.6+.4*Math.sin(t*6);g.fillStyle=`rgba(255,${120+40*fl|0},60,${drop?.05:.25})`;g.beginPath();g.arc(cx,cy,r,0,6.283);g.fill();
+    const col=beanCol(T);g.save();g.beginPath();g.arc(cx,cy,r,0,6.283);g.clip();
+    const nB=drop?Math.max(0,Math.round(60*(1-de/.5))):60,crack=!mont&&!drop&&T>=196&&e<5.2;
+    for(let i=0;i<nB;i++){const a=t*(drop?0:2.2)+i*.37,rad=(i%5)*9+14,bx=cx+Math.cos(a)*rad*(.9+.1*Math.sin(i)),by=cy+18+Math.sin(a)*rad*.55+(drop?de*160:0);
+      p(bx-3,by-2,6,4,col);p(bx-2,by-3,4,6,col);p(bx-1,by-1,2,1,'rgba(0,0,0,.45)');if(crack&&(i+Math.floor(t*12))%11===0){p(bx-5,by-5,2,2,'#ffe2a8');p(bx+4,by-4,2,2,'#ffe2a8')}}
+    g.restore();
+    if(mont&&fi===0&&fu>.8)for(let k2=0;k2<10;k2++){const ph=(t*1.2+k2*.1)%1;g.globalAlpha=(1-ph)*.8;p(cx-40+k2*9,cy-30-ph*50,3,3,'#555');g.globalAlpha=1}
+    if(crack)for(let k2=0;k2<6;k2++){const ph=(t*2+k2*.17)%1;g.globalAlpha=1-ph;p(cx-30+k2*12,cy-20-ph*40,2,2,'#c8b8a8');g.globalAlpha=1}}
+  else{const k3=Math.min(1,(de-.5)/.4);p.ell(cx,cy+14,70,30,'#4d555f');p.ell(cx,cy+12,66,27,'#8d959e');p.ell(cx,cy+12,60,23,'#2a1608');
+    const rr=R(3);for(let i=0;i<Math.round(260*k3);i++){const a=rr()*6.283,d=Math.sqrt(rr());p(cx+Math.cos(a)*d*56,cy+12+Math.sin(a)*d*21,3,2,rr()>.5?'#6a3c20':'#8a5030')}
+    const ang=t*1.6;g.strokeStyle='#c4cad1';g.lineWidth=2;g.beginPath();g.moveTo(cx,cy+12);g.lineTo(cx+Math.cos(ang)*56,cy+12+Math.sin(ang)*21);g.stroke();
+    for(let k2=0;k2<10;k2++){const ph=(t*.8+k2*.1)%1;g.globalAlpha=(1-ph)*.6;p(cx-45+k2*10,cy-ph*50,1,4,'#c8c8c8');g.globalAlpha=1}}
+  // 右：烘焙曲線
+  const L=176,R0=310,Tp=44,B=160,X=s0=>L+(s0/7)*(R0-L),Y=v=>B-(Math.min(240,v)-80)/160*(B-Tp);
+  p(L-6,Tp-10,R0-L+12,B-Tp+28,'rgba(14,17,22,.9)');p(L,Tp,1,B-Tp,'#4a5566');p(L,B,R0-L,1,'#4a5566');
+  [[150,'#d99a2b'],[196,'#d64545'],[224,'#5b6372']].forEach(([v,c])=>{for(let x=L;x<R0;x+=4)p(x,Y(v),2,1,c)});
+  RFAIL.forEach((F,i)=>{const done=!mont||i<fi,lim=done?F.end:(i===fi?fu*F.end:-1);if(lim<0)return;g.globalAlpha=done&&!(mont&&i===fi)?.45:1;
+    for(let s0=0;s0<=lim;s0+=.04)p(X(s0),Y(F.f(s0)),2,2,F.c);p(X(lim)-2,Y(F.f(lim))-2,4,4,F.c);g.globalAlpha=1;
+    const tag=document.getElementById('rf'+i);if(tag&&done&&tag.hidden){tag.hidden=false}});
+  if(!mont){for(let s0=0;s0<=Math.min(e,6.4);s0+=.04)p(X(s0),Y(roastT(s0)),2,2,'#ece4d4');
+    const fcT=4.33;if(e>=fcT)p.ell(X(fcT),Y(196),3,3,'#d64545');if(drop)p(X(6.4)-1,Tp,2,B-Tp,'#4fb3a9');
+    const tg=document.getElementById('rf3');if(tg&&drop&&tg.hidden)tg.hidden=false}
+  p.vig()}
+/* 筆記本動畫 */
+function actNotebook(g,t,A){const p=PX(g),e=(performance.now()-A.t0)/1000;
+  p(0,0,320,200,'#5a3d27');for(let y=0;y<200;y+=14){p(0,y,320,1,'#4a3220');p.dith(0,y+2,320,10,'#664530',4)}p.glow(160,90,160,'rgba(240,200,140,.16)');
+  const open=Math.min(1,Math.max(0,(e-.5)/.7));
+  if(open<1){const w=Math.round(110*(1-open));p(160,40,110,130,'#5a3520');p(160+110-w,40,w,130,'#8a5a34');p(160,40,4,130,'#3a2010');
+    const rr=R(4);for(let k=0;k<8;k++)p(170+rr()*90,50+rr()*110,6+rr()*8,3+rr()*5,'#4a3020');p(200,90,30,14,'#ece4d4');p(204,94,22,2,'#5a3520');p(204,98,16,2,'#5a3520')}
+  else{p(52,40,216,130,'#f0e8d6');p(52,40,216,2,'#fff');p(158,40,4,130,'#d8ccb4');p(50,38,220,2,'#8a5a34');p(50,168,220,4,'#8a5a34');
+    for(let y=58;y<164;y+=10){p(60,y,94,1,'#cfc3aa');p(166,y,94,1,'#cfc3aa')}p(84,48,1,118,'#e0a0a0');p(190,48,1,118,'#e0a0a0');
+    const rows=Math.min(20,Math.floor((e-1.2)/.12));const rr=R(9);
+    for(let k=0;k<rows;k++){const col=k<10?0:1,yy=52+(k%10)*10,x0=col?168:62;
+      p(x0,yy+2,12,3,'#3a4a6a');for(let j=0;j<3;j++){const w=8+Math.round(rr()*10);p(x0+26+j*24,yy+2,w,2,k%2?'#2a3a5a':'#4a3a2a');p(x0+26+j*24+w-2,yy+1,2,1,'#2a3a5a')}}
+    const rr2=R(12);for(let k=0;k<6;k++)p(60+rr2()*200,44+rr2()*120,4+rr2()*6,3+rr2()*3,'rgba(110,80,50,.45)');
+    if(e>2.6){const fx=226,fy=150;[[0,0],[3,-3],[-3,-3],[0,-5]].forEach(([a,b])=>p(fx+a,fy+b,2,2,'rgba(90,60,40,.7)'));[[12,-10],[15,-13],[9,-13],[12,-15]].forEach(([a,b])=>p(fx+a,fy+b,2,2,'rgba(90,60,40,.7)'))}}
+  const cap=document.getElementById('actCap'),txt=open<1?'沾著泥巴的筆記本':'處理紀錄　第 '+Math.max(1,Math.min(14,Math.floor((e-1.2)/.12*14/20)+1))+' 天';if(cap&&cap.textContent!==txt)cap.textContent=txt;
+  p.vig()}
 // boot
 if(DB.last&&DB.players[DB.last])P=DB.players[DB.last];
 toTitle();
