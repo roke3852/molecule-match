@@ -268,6 +268,16 @@ input[type=range]{width:100%;accent-color:var(--s1)}
       <div class="why"><b>How to read it</b>Wave A: high 49,968 down to 37,837 (−12,131 pts); wave B bounced ~6,600 pts to 44,437.<br>① <strong>C = A</strong> (classic Elliott): wave C falls as far as wave A, 44,437 − 12,131 ≈ 32,306.<br>② <strong>Mirror</strong> (the chat chart’s method): drop below the A low by as much as B bounced, 37,837 − 6,600 ≈ 31,237.<br>A technical rule of thumb, not a forecast; pick a different high (49,968 vs. closing high 49,823) and the answer moves. Not investment advice.</div>
     </div>
 
+    <div class="card" id="scnCard">
+      <h2>🧭 Three scripts: 2000, 2008, or 2022?</h2>
+      <div class="meta">Drawdown path from the peak (key turning points joined, approximate); dots are this time’s SOX and TAIEX (11/20)</div>
+      <div id="scnChart" style="margin-top:10px"></div>
+      <div id="scnTbl"></div>
+      <div class="fig"><div class="t">Bear-market rallies</div><div class="s">Rallies that each looked like the bottom</div><div id="scnRb"></div></div>
+      <div class="fig"><div class="t">Which one does now look like?</div><div id="scnSw"></div></div>
+      <div class="why"><b>How to read it</b>All three bear markets had convincing rebounds (+17% to +45%); only the 2022 one marked the real bottom. What separates them is not chart shape but three switches: do earnings actually fall, does the Fed stop, does credit freeze. None of the three has reached 2000 or 2008 levels yet, but the Fed is still hiking, which is worse than when 2022 bottomed. Historical comparison only, not investment advice.</div>
+    </div>
+
     <div class="card">
       <h2>📉 Major bear markets in history</h2>
       <div class="chips" id="ixChips" style="margin:8px 0 4px"></div>
@@ -919,6 +929,22 @@ function renderBear(){
 }
 const SPX_HI=7818.93, NDQ_HI=27599.79, TW_HI=49822.55, SOX_HI=14634.72, TW_NOW=27.7, SOX_NOW=42.5, OTC_HI=453.50, OTC_NOW=41.9;
 
+/* ---------- 三種劇本 ---------- */
+(function(){
+  const SC=[["2000", "var(--bear)", [[0, 0], [2.4, -37], [5.7, -16], [9.3, -54], [10.5, -43], [12.8, -68], [14.4, -54], [18.4, -72], [21.8, -59], [31, -78]], ["−78%", "31 mo", "Cut hard from Jan 2001 — didn’t help", "Dot-com profits collapsed; equipment orders cut", "Bubble fully deflated to fair value"]], ["2008", "var(--neu)", [[0, 0], [2.7, -25], [6.6, -6], [12.7, -60]], ["−60%", "13 mo", "Zero rates + QE", "Global recession", "Global rescues; credit thawed"]], ["2022", "var(--s1)", [[0, 0], [5.4, -24], [7.4, -10], [9.3, -25]], ["−25%", "9 mo", "Hiked until inflation peaked", "No recession; earnings held", "Inflation peaked; Fed slowed hikes"]]],RB=[["2000/12→2001/1", "+23%"], ["2001/4→5", "+41%"], ["2001/9→2002/1", "+45%"], ["2008/1→5 TAIEX", "+26%"], ["2022/6→8 S&P", "+17%"]],SW=[["Earnings falling?", "Not yet: Nvidia still guides $130B next quarter; watch cloud capex", "neu", "2000"], ["Fed stopped?", "No: a Dec 10 hike is nearly certain — worse than at the 2022 bottom", "bear", "2022"], ["Credit frozen?", "Not yet, but AI borrowing and credit stress are showing", "neu", "2008"]],LG=["2000 Nasdaq", "2008 TAIEX", "2022 S&P 500"],DOT=["SOX", "TAIEX"],COLS=["Total drop", "Time to bottom", "Fed", "Earnings", "What ended it"];
+  const H=240,L=40,R=W-14,top=12,bot=H-26,X=m=>L+(R-L)*m/32,Y=v=>top+(bot-top)*(-v)/82;
+  let g=`<svg viewBox="0 0 ${W} ${H}" role="img">`;
+  [0,-20,-40,-60,-80].forEach(v=>g+=`<line x1="${L}" x2="${R}" y1="${Y(v)}" y2="${Y(v)}" style="stroke:var(--grid)"/><text x="${L-6}" y="${Y(v)+4}" text-anchor="end" font-size="10">${v}%</text>`);
+  [0,6,12,18,24,30].forEach(m=>g+=`<text x="${X(m)}" y="${H-8}" text-anchor="middle" font-size="10">${m}mo</text>`);
+  SC.forEach((s,i)=>{const p=s[2];g+=`<path d="${p.map((q,k)=>(k?"L":"M")+X(q[0]).toFixed(1)+" "+Y(q[1]).toFixed(1)).join("")}" fill="none" stroke-width="2.2" style="stroke:${s[1]}" stroke-linejoin="round"/>`;
+    p.forEach(q=>g+=`<circle cx="${X(q[0])}" cy="${Y(q[1])}" r="2.6" style="fill:${s[1]}"/><rect class="hit" x="${X(q[0])-10}" y="${Y(q[1])-10}" width="20" height="20" data-tip="${LG[i]}｜${q[0]}mo・${q[1]}%"/>`);});
+  [[5,-SOX_NOW,DOT[0]],[1.5,-TW_NOW,DOT[1]]].forEach(([m,v,n])=>{g+=`<circle cx="${X(m)}" cy="${Y(v)}" r="6" style="fill:var(--fg);stroke:var(--panel)" stroke-width="2"/><text x="${X(m)+9}" y="${Y(v)+4}" font-size="11" font-weight="700" style="fill:var(--fg)">${n} −${Math.abs(v)}%</text>`});
+  $("#scnChart").innerHTML=g+"</svg>"+`<div class="legend" style="margin-top:4px">${SC.map((s,i)=>`<span><i style="background:${s[1]}"></i>${LG[i]} ${s[3][0]}</span>`).join("")}<span><i style="background:var(--fg);border-radius:50%"></i>2026</span></div>`;
+  $("#scnTbl").innerHTML=`<div class="stats" style="grid-template-columns:repeat(3,1fr)">${SC.map(s=>`<div class="stat" style="border-top:3px solid ${s[1]}"><div class="k">${s[0]}</div><div class="v">${s[3][0]}</div><div class="d">${s[3][1]}</div>${s[3].slice(2).map((x,k)=>`<div class="d" style="margin-top:4px"><b style="color:var(--muted)">${COLS[k+2]}</b><br>${x}</div>`).join("")}</div>`).join("")}</div>`;
+  $("#scnRb").innerHTML=hbar(RB.map(r=>[r[0],parseFloat(r[1]),r[0]+" "+r[1],r[1]]),{max:50,hl:2});
+  const C={bear:"var(--bear)",neu:"var(--hlb)",bull:"var(--bull)"};
+  $("#scnSw").innerHTML=SW.map(w=>`<div style="display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-top:1px dashed var(--line)"><span style="flex:none;width:10px;height:10px;border-radius:50%;margin-top:6px;background:${C[w[2]]}"></span><div><b>${w[0]}</b> <span class="tag">${w[3]}</span><div class="s" style="font-size:13px;color:var(--muted)">${w[1]}</div></div></div>`).join("");
+})();
 /* ---------- ABC 波段測量（每日更新 ABC.tw / ABC.sox / ABC.d） ---------- */
 const ABC={hi:49968,a:37837,b:44437,tw:36033.29,sox:8408.59,d:"11/20"};
 (function(){
