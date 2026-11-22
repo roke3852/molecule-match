@@ -965,7 +965,7 @@ const TH={
  night:{bpm:72,sw:.18,ch:[[38,[53,57,60,64]],[43,[53,59,64]],[36,[52,55,59,62]],[45,[55,58,61,64]]],sc:[62,64,65,67,69,72,74],comp:'jazz',bass:'walk',drum:'brush',lead:.28,amb:'rain'},
  day:{bpm:88,sw:.12,ch:[[41,[57,60,64,67]],[40,[55,59,62,67]],[38,[57,60,65,69]],[43,[53,59,62,65]]],sc:[65,67,69,72,74,76,77],comp:'jazz',bass:'walk',drum:'brush',lead:.35},
  roast:{bpm:62,ch:[[45,[55,59,60,64]],[41,[57,60,64,66]],[40,[55,59,62,67]],[40,[57,59,62,64]]],sc:[64,67,69,71,72,76],comp:'pad',bass:'long',lead:.18,amb:'fire'},
- office:{bpm:60,sw:0,ch:[[36,[51,55,59,62]],[32,[55,60,62,67]],[41,[56,60,62,65]],[43,[53,56,59,63]]],sc:[60,62,63,67,68,71],comp:'jazz',bass:'pulse',drum:'tick',lead:.12},
+ office:{bpm:60,sw:0,ch:[[36,[51,55,59,62]],[32,[55,60,62,67]],[41,[56,60,62,65]],[43,[53,56,59,63]]],sc:[60,62,63,67,68,71],comp:'tense',bass:'pulse',drum:'tick',lead:.12},
  farm:{bpm:84,ch:[[43,[55,59,62,67]],[36,[55,60,64,67]],[38,[54,57,62,66]],[40,[55,59,64,67]]],sc:[67,69,71,74,76,79],comp:'pick',bass:'long',drum:'shaker',lead:.2,amb:'crickets'},
  stage:{bpm:96,ch:[[40,[55,59,64]],[36,[55,60,64]],[45,[57,60,64]],[47,[54,57,59,63]]],sc:[64,66,67,71,72,74],comp:'stab',bass:'pulse',drum:'heart',lead:.1,amb:'crowd'},
  tokyo:{bpm:100,ch:[[41,[56,60,63,67]],[46,[56,61,65,68]],[39,[55,58,61,65]],[44,[55,60,63,67]]],sc:[65,68,70,72,75,77,80],comp:'arp',bass:'pulse',drum:'pop',lead:.22,amb:'city'},
@@ -979,6 +979,7 @@ function scheduleBeat(th,t,beat){
   const nextRoot=th.ch[(bar+1)%th.ch.length][0];
   // 伴奏
   if(th.comp==='jazz'){if(b===0)ch.forEach((n,i)=>INS.ep(n,t+i*.012,spb*1.4,.9));if(b===1&&Math.random()<.6)ch.forEach(n=>INS.ep(n,t+spb*(.5+th.sw),spb*.6,.55))}
+  if(th.comp==='tense'){if(b===0)ch.forEach(n=>INS.pad(n,t,spb*4,1.6));if(b===0||b===2)ch.forEach((n,i)=>INS.ep(n,t+i*.03,spb*1.5,1.1))}
   if(th.comp==='pad'&&b===0)ch.forEach(n=>INS.pad(n,t,spb*4,1));
   if(th.comp==='pick'){[0,1].forEach(h=>{const n=ch[(b*2+h)%ch.length]+(h&&b%2?12:0);INS.pluck(n,t+h*spb/2,spb/2,.9)})}
   if(th.comp==='stab'){if(b===0)ch.forEach(n=>INS.pad(n,t,spb*4,1.2));if(b===2||b===3)ch.forEach(n=>INS.str(n,t,spb/2,.8))}
