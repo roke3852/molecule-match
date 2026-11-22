@@ -105,6 +105,7 @@ button{font:inherit;color:inherit;touch-action:manipulation}
 .bhint{font-size:14px;line-height:1.7;border-left:3px solid var(--blue);padding-left:8px;color:#c3c9d3}
 .bscale{position:absolute;left:50%;transform:translateX(-50%);top:72%;font-family:"DotGothic16",monospace;font-size:13px;color:#9cc0ea;background:#0e1116;padding:0 6px;border:1px solid #343e4c}
 .btarget{position:absolute;left:8px;top:8px;font-family:DotGothic16;font-size:12px;background:rgba(14,17,22,.9);border-left:3px solid var(--teal);padding:2px 8px}
+.actcap{position:absolute;left:50%;transform:translateX(-50%);bottom:10px;font-family:"DotGothic16","Noto Sans TC",sans-serif;font-size:14px;background:rgba(14,17,22,.9);color:#ece4d4;border-left:3px solid #d64545;padding:3px 12px;white-space:nowrap}
 /* overlays */
 .ov{position:fixed;inset:0;background:rgba(6,8,11,.86);z-index:50;display:none;align-items:center;justify-content:center;padding:16px}
 .ov.on{display:flex}
@@ -586,7 +587,7 @@ const CH=[
  L('zhou','我算你半價。就當作，我栽培後輩。'),
  L('me','……我可以先杯測看看嗎？'),
  L('zhou','當然，當然。年輕人做事謹慎，好。'),
- N('你在他們的杯測室裡，照標準流程做了一次杯測。熱水一沖下去，香氣整個炸開——荔枝、草莓糖、玫瑰，香到讓你有點頭暈。'),
+ {act:'cup',s:'',t:'你在他們的杯測室裡，照標準流程做了一次杯測。熱水一沖下去，香氣整個炸開——荔枝、草莓糖、玫瑰，香到讓你有點頭暈。'},
  N('可是等到杯子放涼了一點，你再喝一口……那股香味，就像被人拔掉了插頭一樣，突然消失了。'),
  N('嘴巴裡最後只剩下一股說不出來的甜，很像小時候吃的那種水果口味糖果。不像水果，像「水果口味」。'),
  L('zhou','怎麼樣？好東西吧。'),
@@ -646,7 +647,16 @@ const CH=[
  L('carlos','累嗎？'),
  L('me','……累。我以前都不知道，一杯咖啡後面有這麼多人的手。'),
  L('carlos','現在你知道了。'),
- L('carlos','好。你看得懂樹，也摘過果子了。'),
+ N('那天傍晚，卡洛斯在小木屋的長桌上擺了五個杯測碗，還有一個裝著熱水的涮匙杯。'),
+ L('carlos','買豆子之前，先喝。這是我去年同一個處理槽出來的批次。'),
+ L('carlos','五杯都要喝。只要有一杯味道怪怪的，就代表那一槽有人偷懶，豆子就不能賣給你。'),
+ {act:'cupfarm',s:'',t:'你照標準流程，一杯一杯聞乾香、注水、破渣、撈渣，再一杯一杯啜吸。'},
+ N('五杯喝起來幾乎一模一樣：紅蘋果、黑糖、一點點柑橘的酸。放涼了以後，甜味反而更清楚。'),
+ L('me','（跟金穗那杯完全相反……這支豆子，冷了還是香的。）'),
+ L('carlos','怎麼樣？'),
+ L('me','五杯都很乾淨，一杯怪的都沒有。而且越涼越甜。'),
+ L('carlos','嗯。舌頭還行。'),
+ L('carlos','好。你看得懂樹，摘過果子，也喝得懂杯子了。'),
  L('carlos','那我們來談正事。你出得起多少？'),
  C('他問的是價錢嗎？',[
   {t:'「照期貨行情，再多加一成。」',end:'lowball'},
@@ -1467,6 +1477,8 @@ function sfx(k){if(!sound)return;const a=ac();if(!a)return;const t=a.currentTime
  if(k==='pop'){voice(S,'sine',880,t,.002,.08,.08);voice(S,'sine',1320,t+.03,.002,.05,.08)}
  if(k==='whoosh'){const s=a.createBufferSource();s.buffer=AU.noise;const f=a.createBiquadFilter();f.type='bandpass';f.Q.value=1.2;f.frequency.setValueAtTime(300,t);f.frequency.exponentialRampToValueAtTime(3000,t+.45);const g=a.createGain();s.connect(f);f.connect(g);g.connect(S);g.gain.setValueAtTime(0.0001,t);g.gain.linearRampToValueAtTime(.12,t+.2);g.gain.exponentialRampToValueAtTime(0.0001,t+.55);s.start(t);s.stop(t+.6)}
  if(k==='plane'){const s=a.createBufferSource();s.buffer=AU.brown;const f=a.createBiquadFilter();f.type='lowpass';f.frequency.setValueAtTime(200,t);f.frequency.linearRampToValueAtTime(900,t+1.2);f.frequency.linearRampToValueAtTime(300,t+2.6);const g=a.createGain();s.connect(f);f.connect(g);g.connect(S);g.gain.setValueAtTime(0.0001,t);g.gain.linearRampToValueAtTime(.6,t+1);g.gain.linearRampToValueAtTime(0.0001,t+2.8);s.start(t);s.stop(t+3)}
+ if(k==='slurp'){const s0=a.createBufferSource();s0.buffer=AU.noise;const f=a.createBiquadFilter();f.type='bandpass';f.Q.value=2;f.frequency.setValueAtTime(800,t);f.frequency.exponentialRampToValueAtTime(5000,t+.35);const g=a.createGain();s0.connect(f);f.connect(g);g.connect(S);g.gain.setValueAtTime(0.0001,t);g.gain.linearRampToValueAtTime(.18,t+.08);g.gain.exponentialRampToValueAtTime(0.0001,t+.4);s0.start(t);s0.stop(t+.45)}
+ if(k==='pour'){noiseHit(S,t,1,.06,'bandpass',2200,.6)}
  if(k==='brush'){for(let i=0;i<3;i++)noiseHit(S,t+i*.07,.06,.09,'bandpass',3500+Math.random()*1500,1.2)}
  if(k==='grindtick'){noiseHit(S,t,.03,.12,'bandpass',900+Math.random()*900,2)}
  if(k==='pourtick'){noiseHit(S,t,.08,.05,'bandpass',2600+Math.random()*1500,.8)}
@@ -1554,7 +1566,7 @@ function showLine(n){
   tx._all=toks.map(t=>t.h).join('');
 }
 function finishType(){clearInterval(typing);typing=null;const tx=$('txt');if(tx._all!==undefined&&!ffwd)tx.innerHTML=tx._all;bindLinks(tx);$('more').style.display=annot?'none':'block';$('nextBtn').classList.toggle('on',annot)}
-function advance(){if(!waiting)return;if(typing){finishType();return}waiting=false;if(S&&S.act){curBg=S.act.prev;$('locLabel').textContent=S.act.loc||'';S.act=null}if(!ffwd)sfx('tap');$('nextBtn').classList.remove('on');step()}
+function advance(){if(!waiting)return;if(typing){finishType();return}waiting=false;if(S&&S.act){curBg=S.act.prev;$('locLabel').textContent=S.act.loc||'';S.act=null;const tl=$('tvLayer');tl.hidden=true;tl.innerHTML=''}if(!ffwd)sfx('tap');$('nextBtn').classList.remove('on');step()}
 $('box').addEventListener('click',()=>{if(annot&&!typing)return;advance()});
 $('nextBtn').addEventListener('click',()=>{if(typing){finishType();return}advance()});
 
@@ -1802,9 +1814,10 @@ BGS.brewbar=function(g,t){const p=PX(g),B=S&&S.brewUI;if(!B)return;
 
 
 /* ============ 小動畫：清理磨豆機 ============ */
-function startAct(k){S.act={k,t0:performance.now(),prev:curBg,loc:S.loc};curBg='act';$('locLabel').textContent='清理磨豆機';
+function startAct(k){S.act={k,t0:performance.now(),prev:curBg,loc:S.loc};curBg='act';$('locLabel').textContent=k==='cup'?'杯測．金穗':k==='cupfarm'?'杯測．帕洛瑪莊園':'清理磨豆機';
+  if(k==='cup'||k==='cupfarm'){const tl=$('tvLayer');tl.innerHTML='<div class="actcap" id="actCap"></div>';tl.hidden=false;[[1300,'pour'],[1800,'pour'],[2700,'pop'],[2900,'whoosh'],[3900,'brush'],[4900,'slurp'],[5300,'slurp'],[5700,'slurp'],[6100,'slurp']].concat(k==='cupfarm'?[[6500,'up']]:[]).forEach(([d,k2])=>setTimeout(()=>{if(S&&S.act)sfx(k2)},d))}
   if(k==='clean'){[300,900,1300,1700,2100].forEach(d=>setTimeout(()=>{if(S&&S.act)sfx('brush')},d));setTimeout(()=>{if(S&&S.act)sfx('pop')},2900)}}
-BGS.act=function(g,t){const p=PX(g),A=S&&S.act;if(!A)return;const e=(performance.now()-A.t0)/1000;
+function actClean(g,t,A){const p=PX(g);const e=(performance.now()-A.t0)/1000;
   p(0,0,320,200,'#171c27');for(let x=0;x<320;x+=40)p(x,0,1,186,'#1d2330');p.glow(160,80,150,'rgba(240,180,106,.12)');
   p(0,186,320,4,'#b07a4f');p(0,186,320,1,'#d29a6a');p(0,190,320,10,'#4a2e1d');
   g.save();g.translate(160,186);g.scale(1.3,1.3);g.translate(-160,-150);
@@ -1830,6 +1843,52 @@ BGS.act=function(g,t){const p=PX(g),A=S&&S.act;if(!A)return;const e=(performance
   if(e>3.3){const k=Math.min(1,(e-3.3)/.4);[[cx-30,cy-20],[cx+34,cy-10],[cx-8,cy-34],[bx+66,90]].forEach(([x,y],i)=>{if(Math.sin(t*6+i)>-.2){p(x,y-3,1,7,'#fff');p(x-3,y,7,1,'#fff')}});
     g.globalAlpha=k;g.font='10px "DotGothic16",monospace';g.fillStyle='#c3c9d3';const zz=Math.floor(t*2)%3;g.fillText('z'.repeat(zz+1),bx+76,60-zz*4);g.globalAlpha=1}
   g.restore();p.vig()};
+
+const CUPSTEP={cup:[[0,'① 聞乾香'],[1.2,'② 注水'],[2.6,'③ 破渣・聞濕香'],[3.8,'④ 撈渣'],[4.8,'⑤ 啜吸'],[6.4,'⑥ 放涼，再喝一口……']],
+ cupfarm:[[0,'① 聞乾香'],[1.2,'② 注水'],[2.6,'③ 破渣・聞濕香'],[3.8,'④ 撈渣'],[4.8,'⑤ 啜吸，五杯都要喝'],[6.4,'⑥ 五杯一致，沒有瑕疵杯']]};
+function actCup(g,t,A){const p=PX(g),e=(performance.now()-A.t0)/1000,farm=A.k==='cupfarm';
+  const step=CUPSTEP[A.k].filter(x=>e>=x[0]).pop();const cap=document.getElementById('actCap');if(cap&&cap.textContent!==step[1])cap.textContent=step[1];
+  // 俯視杯測桌
+  p(0,0,320,200,farm?'#6b4a30':'#d8d2c4');if(farm){for(let y=0;y<200;y+=14){p(0,y,320,1,'#5a3d27');p.dith(0,y+2,320,10,'#74513a',4)}}else{p.dith(0,0,320,200,'#cfc8b8',4)}
+  p(0,0,320,10,'rgba(0,0,0,.25)');
+  // 杯測表
+  p(14,138,74,52,'#f4efe4');p(14,138,74,2,'#fff');for(let y=146;y<186;y+=6){p(20,y,40,1,'#bdb3a1');p(64,y,18,1,'#bdb3a1')}p(20,142,30,1,'#d64545');
+  // 涮匙杯
+  p.ell(282,40,18,18,'#ece4d4');p.ell(282,40,14,14,'#8fb8d8');p.ell(278,36,4,3,'#c6dcf2');
+  const N=5,cx=i=>48+i*56,cy=96,R0=22;
+  for(let i=0;i<N;i++){const x=cx(i);
+    p.ell(x+2,cy+3,R0,R0,'rgba(0,0,0,.18)');p.ell(x,cy,R0,R0,'#f4efe4');p.ell(x,cy,R0-1,R0-1,'#e8dfcf');p.ell(x,cy,R0-4,R0-4,'#fbf8f2');
+    const fillT=1.2+i*.25,filled=e>=fillT,fk=Math.min(1,Math.max(0,(e-fillT)/.3)),rr=R(i*7+3);
+    if(!filled){p.ell(x,cy,R0-6,R0-6,'#8a5a34');for(let k=0;k<60;k++){const a=rr()*6.28,d=rr()*(R0-7);p(x+Math.cos(a)*d,cy+Math.sin(a)*d,1,1,rr()>.5?'#5a3520':'#b07a4f')}}
+    else{const r=Math.round((R0-5)*(.5+.5*fk));p.ell(x,cy,r,r,'#2a1608');
+      const brk=2.6+(i===2?0:.35+Math.abs(i-2)*.12),broken=e>=brk,sk=Math.min(1,Math.max(0,(e-3.8-i*.1)/.5));
+      if(!broken){for(let k=0;k<90;k++){const a=rr()*6.28,d=Math.sqrt(rr())*(r-1);p(x+Math.cos(a)*d,cy+Math.sin(a)*d,1,1,['#8a5a34','#b07a4f','#6a4228'][k%3])}}
+      else if(sk<1){const left=1-sk;for(let k=0;k<Math.round(40*left);k++){const a=rr()*6.28,d=r*(.55+rr()*.4);p(x+Math.cos(a)*d,cy+Math.sin(a)*d,1,1,k%2?'#8a5a34':'#b07a4f')}}
+      p(x-7,cy-8,4,2,'rgba(255,255,255,.25)')}
+    // 結果標記
+    if(farm&&e>=6.4){const k=Math.min(1,(e-6.4-i*.12)/.2);if(k>0){p.ell(x,cy-R0-9,6,6,'#4fb3a9');p(x-3,cy-R0-9,2,2,'#fff');p(x-1,cy-R0-7,2,2,'#fff');p(x+1,cy-R0-9,2,2,'#fff');p(x+3,cy-R0-11,2,2,'#fff')}}
+  }
+  // 細口壺（俯視）注水
+  if(e>=1.1&&e<2.6){const i=Math.min(4,Math.floor((e-1.2)/.25)),x=cx(i);p.ell(x+30,cy-38,14,12,'#20252e');p.ell(x+30,cy-38,9,7,'#3a4350');for(let k=0;k<7;k++)p(x+18-k*3,cy-30+k*3,3,3,'#20252e');
+    for(let k=0;k<6;k++){const ph=(t*3+k*.17)%1;p(x-3+Math.cos(k*2+t*5)*ph*8,cy-3+Math.sin(k*2+t*5)*ph*8,1,1,'rgba(200,225,245,.9)')}}
+  // 杯測匙（俯視）
+  let sx=null,sy=null;
+  if(e>=2.6&&e<3.8){const u=(e-2.6)/1.2;const i=u<.45?2:Math.min(4,Math.floor((u-.45)/.14));const tgt=u<.45?2:[0,1,3,4][Math.min(3,Math.floor((u-.45)/.14))];sx=cx(tgt)+Math.sin(u*30)*3;sy=cy+4}
+  else if(e>=3.8&&e<4.8){const u=(e-3.8);sx=cx(Math.min(4,Math.floor(u*5)))+Math.sin(u*40)*6;sy=cy}
+  else if(e>=4.8&&e<6.4){const u=(e-4.8)/1.6,i=Math.min(4,Math.floor(u*5));sx=cx(i);sy=cy-(((u*5)%1)<.5?((u*5)%1)*30:(1-(u*5)%1)*30)}
+  if(sx!=null){p(sx+4,sy+2,30,3,'#c4cad1');p(sx+4,sy+2,30,1,'#fff');p.ell(sx,sy,7,5,'#c4cad1');p.ell(sx,sy,5,3,e>=4.8?'#2a1608':'#8d959e');p(sx-3,sy-2,2,1,'#fff')}
+  // 香氣
+  const cool=farm?0:Math.min(1,Math.max(0,(e-6.4)/1.2));
+  let inten=e<1.2?.3:e<2.6?.45:e<3.8?1.4:e<6.4?.8:(farm?.6:.8*(1-cool));
+  const cols=farm?['#f0b46a','#e05a6a','#d9c08a','#9ccf8a']:['#ff9ab0','#e05a6a','#f2a0c8','#ff6b9a'];
+  for(let k=0;k<Math.round(30*inten);k++){const i=k%5,ph=(t*.5+k*.073)%1,x=cx(i)+Math.cos(k*2.3)*ph*34,y=cy-ph*60+Math.sin(k*1.7)*ph*10;g.globalAlpha=(1-ph)*Math.min(1,inten);p(x,y,2,2,cols[k%4]);g.globalAlpha=1}
+  if(e>=2.6&&e<3.8)p.glow(cx(2),cy-10,70,farm?'rgba(240,180,106,.18)':'rgba(255,154,176,.28)');
+  if(e>=4.8&&e<6.4){for(let k=0;k<12;k++){const ph=(t*1.6+k*.09)%1;g.globalAlpha=1-ph;p((sx||160)+Math.cos(k*1.9)*ph*26,(sy||90)-6-ph*22,2,2,k%3?'#c8b8a8':cols[0]);g.globalAlpha=1}}
+  // 溫度計（金穗版：放涼）
+  if(!farm&&e>=6.4){const T=Math.round(72-cool*30);p(292,70,12,100,'#f4efe4');p.frame(292,70,12,100,'#8b93a1');const h=Math.round((T-30)/50*90);p(295,166-h,6,h,T>55?'#d64545':'#6c9bd2');p.ell(298,170,7,7,T>55?'#d64545':'#6c9bd2');
+    const cap2=document.getElementById('actCap');const txt='⑥ 放涼到 '+T+'°C，再喝一口……'+(cool>.85?' 香氣不見了':'');if(cap2&&cap2.textContent!==txt)cap2.textContent=txt}
+  p.vig()}
+BGS.act=function(g,t){const A=S&&S.act;if(!A)return;(A.k==='cup'||A.k==='cupfarm'?actCup:actClean)(g,t,A)};
 // boot
 if(DB.last&&DB.players[DB.last])P=DB.players[DB.last];
 toTitle();
