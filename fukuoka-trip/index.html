@@ -965,7 +965,7 @@ html.dark .ex-tot{background:var(--card)!important}
   <!-- 咖啡 -->
   <section class="view" id="v-coffee">
     <div class="sec cl-launch">
-      <button class="cl-open" id="clOpen"><span class="ic">🗣️</span><span class="t"><b>咖啡店點單特訓</b><small id="clMini">常用句・手沖專區・聽懂店員・術語・測驗・點單產生器</small></span><span class="go">開始 ›</span></button>
+      <button class="cl-open" id="clOpen"><span class="ic">🗣️</span><span class="t"><b>咖啡店點單特訓</b><small id="clMini">常用句・手沖專區・選豆產生器・聽懂店員・術語・測驗・點單產生器</small></span><span class="go">開始 ›</span></button>
     </div>
     <div class="sec">
       <h3>☕ 福岡咖啡名店</h3>
@@ -1261,7 +1261,7 @@ html.dark .ex-tot{background:var(--card)!important}
       <div class="cl-mh"><h3>🗣️ 咖啡店點單特訓</h3><button class="cl-x" id="clClose" aria-label="關閉">✕</button></div>
       <div class="hint">不會日文也沒關係：每句都能點 🔊 聽發音、🐢 慢速再聽，或 📱 放大給店員看。先練「常用句」和「聽懂店員」，再用「小測驗」驗收，最後用「點單產生器」組出你要說的整句話。</div>
       <div class="cl-prog" id="clProg"></div>
-      <div class="seg cl-tabs" id="clTabs"><button data-cl="say">① 常用句</button><button data-cl="po">☕ 手沖專區</button><button data-cl="hear">② 聽懂店員</button><button data-cl="term">③ 咖啡術語</button><button data-cl="quiz">④ 小測驗</button><button data-cl="order">⑤ 點單產生器</button></div>
+      <div class="seg cl-tabs" id="clTabs"><button data-cl="say">① 常用句</button><button data-cl="po">☕ 手沖專區</button><button data-cl="bean">🫘 選豆產生器</button><button data-cl="hear">② 聽懂店員</button><button data-cl="term">③ 咖啡術語</button><button data-cl="quiz">④ 小測驗</button><button data-cl="order">⑤ 點單產生器</button></div>
       <div id="clBody"></div>
   </div></div>
 <div class="ov" id="ov"><button class="x" id="ovX">✕ 關閉</button><div class="big jp" id="ovJp"></div><div class="small" id="ovZh"></div></div>
@@ -1291,7 +1291,7 @@ html.dark .ex-tot{background:var(--card)!important}
 
 <script>
 /* ---------- storage (safe) ---------- */
-const APPV='20261122b';
+const APPV='20261122c';
 /* 把 emoji 換成像素圖示 */
 (function(){
  const OK=new Set([0x25b6,0x1f302,0x1f321,0x1f324,0x1f326,0x1f327,0x1f328,0x1f329,0x1f32b,0x1f341,0x1f35b,0x1f35c,0x1f361,0x1f370,0x1f37d,0x1f381,0x1f384,0x1f389,0x1f38c,0x1f392,0x1f3ab,0x1f3c6,0x1f3e0,0x1f3e8,0x1f3ea,0x1f3ec,0x1f41f,0x1f44b,0x1f44d,0x1f455,0x1f466,0x1f467,0x1f468,0x1f469,0x1f46a,0x1f476,0x1f48a,0x1f4a1,0x1f4a7,0x1f4ac,0x1f4b3,0x1f4b4,0x1f4c5,0x1f4cb,0x1f4cc,0x1f4cd,0x1f4dd,0x1f4e3,0x1f4e4,0x1f4f1,0x1f4f7,0x1f4f8,0x1f50d,0x1f512,0x1f516,0x1f517,0x1f552,0x1f5a5,0x1f5bc,0x1f5d1,0x1f5d3,0x1f5e3,0x1f5fa,0x1f60c,0x1f683,0x1f684,0x1f687,0x1f68f,0x1f690,0x1f695,0x1f6b2,0x1f6b6,0x1f6c2,0x1f6c3,0x1f6cd,0x1f6ec,0x1f7e2,0x1f969,0x1f9c5,0x1f9e0,0x1f9e3,0x1f9e5,0x1f9ed,0x1f9ee,0x1f9f3,0x1f9fe,0x23f1,0x23f8,0x2600,0x2601,0x2614,0x2615,0x26a0,0x26c5,0x26c8,0x26f4,0x26f8,0x2705,0x270f,0x2728,0x2744,0x274c,0x2b50]);
@@ -2179,6 +2179,22 @@ const CL_POH=[
 ];
 const CL_PF={r:[['淺焙','浅煎り'],['中焙','中煎り'],['深焙','深煎り']],f:[['果香','フルーティー'],['花香','フローラル'],['像紅茶','紅茶のよう'],['巧克力','チョコレートのよう'],['堅果','ナッツのよう']],a:[['酸質明亮','明るい酸味'],['酸一點點','酸味控えめ'],['甜感重','甘みが強め']]};
 let clPF={r:0,f:0,a:0,t:'ホット'};
+const CL_BN={r:[['不限',''],['淺焙','浅煎り'],['中淺焙','中浅煎り'],['中焙','中煎り'],['中深焙','中深煎り'],['深焙','深煎り']],
+ o:[['不限',''],['衣索比亞','エチオピア'],['肯亞','ケニア'],['哥倫比亞','コロンビア'],['巴拿馬','パナマ'],['瓜地馬拉','グアテマラ'],['哥斯大黎加','コスタリカ'],['巴西','ブラジル'],['印尼','インドネシア']],
+ p:[['不限',''],['水洗','ウォッシュト'],['日曬','ナチュラル'],['蜜處理','ハニー'],['厭氧','アナエロビック']],
+ f:[['不限',''],['果香','フルーティーな'],['花香','フローラルな'],['莓果','ベリーのような'],['柑橘','柑橘のような'],['像紅茶','紅茶のような'],['巧克力','チョコレートのような'],['堅果','ナッツのような'],['焦糖','キャラメルのような']],
+ t:[['不限',''],['偏酸','酸味がしっかりした'],['偏甜','甘みが強い'],['平衡','バランスの良い'],['偏苦','苦味がしっかりした']],
+ n:[['只問不買',''],['100g','100グラム'],['200g','200グラム'],['300g','300グラム']],
+ g:[['整顆豆','豆のままでお願いします。'],['磨成手沖用','ハンドドリップ用に挽いてください。']]};
+let clBN={r:1,o:0,p:0,f:1,t:1,n:2,g:0};
+function clBNTxt(){const B=k=>CL_BN[k][clBN[k]];const c=[];if(clBN.o)c.push(B('o')[1]+'産');if(clBN.r)c.push(B('r')[1]);if(clBN.p)c.push(B('p')[1]);
+ let jp='豆を探しています。'+(c.length?c.join('、')+'の豆はありますか？':'おすすめの豆はありますか？');
+ if(clBN.f||clBN.t)jp+=(clBN.f?B('f')[1]+'風味で、':'')+(clBN.t?B('t')[1]:'')+'ものが好きです。';
+ if(clBN.n)jp+=B('n')[1]+'ください。'+B('g')[1];
+ const zc=[];if(clBN.o)zc.push(B('o')[0]);if(clBN.r)zc.push(B('r')[0]);if(clBN.p)zc.push(B('p')[0]);
+ let zh='我在找豆子，'+(zc.length?'有沒有'+zc.join('、')+'的豆子？':'有推薦的豆子嗎？');
+ if(clBN.f||clBN.t)zh+='我喜歡'+[clBN.f?B('f')[0]+'風味':'',clBN.t?B('t')[0]:''].filter(Boolean).join('、')+'的。';
+ if(clBN.n)zh+='請給我 '+B('n')[0]+'，'+B('g')[0]+'。';return{jp,zh}}
 function clPFTxt(){const R=CL_PF.r[clPF.r],F=CL_PF.f[clPF.f],A=CL_PF.a[clPF.a],fj=F[1]+'で';
  const jp=`シングルオリジンのハンドドリップを${clPF.t}でお願いします。${R[1]}で、${fj}、${A[1]}のものが好きです。`;
  const zh=`單品手沖（${clPF.t==='ホット'?'熱':'冰'}），我喜歡${R[0]}、${F[0]}、${A[0]}的`;return{jp,zh}}
@@ -2218,6 +2234,11 @@ function clDraw(){clProg();$('#clTabs').querySelectorAll('button').forEach(b=>b.
   <div class="clc-b"><button id="clPSay">🔊 唸給我聽</button><button id="clPSlow">🐢 慢速</button><button id="clPBig">📱 給咖啡師看</button></div></div></div>
   <h4 style="margin:14px 0 6px">🗣️ 手沖常用句</h4>`+CL_PO.map((a,i)=>clCard('p:'+i,a[0],a[1],a[2],a[3],a[4]?'💡 '+esc(a[4]):'')).join('')+
   `<h4 style="margin:14px 0 6px">🎧 聽懂咖啡師</h4>`+clHearCards(CL_POH,'q')}
+ else if(clTab==='bean'){const ch=(k,i,l)=>`<button data-bk="${k}" data-bv="${i}" class="${clBN[k]===i?'on':''}">${l}</button>`,row=(k,l)=>`<div class="clo-r"><span>${l}</span><div>${CL_BN[k].map((x,i)=>ch(k,i,x[0])).join('')}</div></div>`,O=clBNTxt();
+  B.innerHTML=`<div class="cl-flow">🫘 買豆前先選條件，組出一整句給店員看。不在意的選「不限」。</div><div class="clo">${row('r','焙度')}${row('o','產地')}${row('p','處理法')}${row('f','風味')}${row('t','傾向')}${row('n','份量')}${clBN.n?row('g','研磨'):''}
+  <div class="clo-out"><div class="zh">${esc(O.zh)}</div><div class="jp">${esc(O.jp)}</div>
+  <div class="clc-b"><button id="clBSay">🔊 唸給我聽</button><button id="clBSlow">🐢 慢速</button><button id="clBBig">📱 給店員看</button></div></div></div>
+  <div class="hint" style="margin-top:6px">💡 日本把處理法叫「精製」；店員回「〇〇はございません」就是沒有，可以改選「不限」再問一次。</div>`}
  else if(clTab==='quiz')clQuizDraw();
  else clOrderDraw()}
 function clQuizNew(){const pool=[];CL_SAY.forEach((a,i)=>pool.push({t:'zh2jp',k:'s:'+i,q:a[0],a:a[1],ro:a[2]}));CL_HEAR.forEach((a,i)=>pool.push({t:'hear',k:'h:'+i,q:a[0],a:a[2],ro:a[1]}));CL_TERM.forEach((a,i)=>pool.push({t:'term',k:'t:'+i,q:a[0],a:a[1],ro:a[2]}));CL_PO.forEach((a,i)=>pool.push({t:'zh2jp',k:'p:'+i,q:a[0],a:a[1],ro:a[2]}));CL_POH.forEach((a,i)=>pool.push({t:'hear',k:'q:'+i,q:a[0],a:a[2],ro:a[1]}));
@@ -2255,6 +2276,9 @@ $('#clBody').addEventListener('click',e=>{
  const qo=e.target.closest('[data-qo]');if(qo&&!clQ.pick){const Q=clQ.qs[clQ.i];clQ.pick=qo.dataset.qo;if(clQ.pick===Q.a){clQ.score++;clMark(Q.k)}clSay(Q.t==='hear'?Q.q:Q.a);clQuizDraw();return}
  if(e.target.id==='clNext'){clQ.i++;clQ.pick=null;clQ.played=0;clQuizDraw();return}
  if(e.target.id==='clAgain'){clQ=null;clQuizDraw();clProg();return}
+ const bk=e.target.closest('[data-bk]');if(bk){clBN[bk.dataset.bk]=+bk.dataset.bv;clDraw();return}
+ if(e.target.id==='clBSay'||e.target.id==='clBSlow'){clSay(clBNTxt().jp,'ja-JP',e.target.id==='clBSlow');return}
+ if(e.target.id==='clBBig'){const O=clBNTxt();big(O.jp,O.zh);$('#ovJp').style.whiteSpace='normal';return}
  const pk=e.target.closest('[data-pk]');if(pk){const k=pk.dataset.pk;clPF[k]=k==='t'?pk.dataset.pv:+pk.dataset.pv;clDraw();return}
  if(e.target.id==='clPSay'||e.target.id==='clPSlow'){clSay(clPFTxt().jp,'ja-JP',e.target.id==='clPSlow');return}
  if(e.target.id==='clPBig'){const O=clPFTxt();big(O.jp,O.zh);$('#ovJp').style.whiteSpace='normal';return}
