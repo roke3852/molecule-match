@@ -351,7 +351,7 @@ input[type=range]{width:100%;accent-color:var(--s1)}
 <div id="tip"></div><div id="toast"></div>
 
 <script>
-const ASOF="2026-11-22 16:07";
+const ASOF="2026-11-22 16:20";
 const TODAY={"d": "2026-11-22", "l": [["ev", "tw-rescue3", "大事：救市第三波 — 補上國安基金週末聲明、台股單週 −17.5%"], ["ev", "rout-1120", "大事：美股大屠殺 — 補 VIX 37、市場寬度"], ["ev", "fed-hike", "大事：聯準會 — 12 月升息機率 92%"], ["vw", "", "名人觀點：新增嘉信 Schwab（Gordon、Howard）"], ["cal", "", "接下來：感恩節週美國數據與財報"], ["bear", "", "空頭史：新增「ABC 波段測量」「三種劇本」圖卡"], ["tour", "", "導覽員：週日早報"]]}; /* 今日更新清單：每日更新時重寫 d 與 l */
 /* ---------- 大事資料 ---------- */
 const EVENTS=[
@@ -759,7 +759,7 @@ function renderEv(){
   const NEWC="🆕 今日更新",isT=e=>e.upd===TODAY.d&&TODAY.d===ASOF.slice(0,10),nT=EVENTS.filter(isT).length,cats=["全部",NEWC,...new Set(EVENTS.map(e=>e.cat))];
   $("#evChips").innerHTML=cats.map(c=>`<button class="chip ${c===evCat?"on":""}" data-evc="${c}">${c===NEWC?c+" "+(nT+TODAY.l.filter(x=>x[0]!=="ev").length):c}</button>`).join("");
   const fav=LS.get("fav",[]);
-  $("#evList").innerHTML=(evCat===NEWC?`<div class="card todaycard"><div style="font-size:17px;font-weight:700;margin-bottom:4px">🆕 今日更新・${TODAY.d.slice(5)}</div>${TODAY.d===ASOF.slice(0,10)?TODAY.l.map(x=>`<button class="todo" data-todo="${x[0]}|${x[1]}"><span>${esc(x[2])}</span><b>›</b></button>`).join(""):"<div class=empty>—</div>"}</div>`:"")+EVENTS.filter(e=>evCat==="全部"||(evCat===NEWC?isT(e):e.cat===evCat)).map(e=>`
+  $("#evList").innerHTML=(evCat===NEWC?`<div class="card todaycard"><div style="font-size:17px;font-weight:700;margin-bottom:4px">🆕 今日更新・${TODAY.d.slice(5)}</div>${TODAY.d===ASOF.slice(0,10)?TODAY.l.map(x=>`<button class="todo" data-todo="${x[0]}|${x[1]}"><span>${esc(x[2])}</span><b>›</b></button>`).join(""):"<div class=empty>—</div>"}${T.some(x=>x.upd)?`<button class="btn pri" style="width:100%;margin-top:10px" data-todo="tourupd|">▶ 讓導覽員帶你看今日更新</button>`:""}</div>`:"")+EVENTS.filter(e=>evCat==="全部"||(evCat===NEWC?isT(e):e.cat===evCat)).map(e=>`
   <article class="card" id="ev-${e.id}">
     <div class="meta"><span class="tag ${e.hot?"hot":""}">${e.hot?"🔥 ":""}${e.cat}</span><span>${e.date}</span>${isT(e)?`<span class="tag new">今日更新</span>`:""}<span style="margin-left:auto"><button class="star ${fav.includes(e.id)?"on":""}" data-fav="${e.id}" aria-label="收藏">${fav.includes(e.id)?"★":"☆"}</button></span></div>
     <h2>${esc(e.title)}</h2>
@@ -987,7 +987,7 @@ const NAV=[];function curTab(){const a=document.querySelector(".pane.on");return
 function go(p,noPush,force){const c=curTab();if(!noPush&&(c!==p||force)){NAV.push({p:c,y:window.scrollY});if(NAV.length>40)NAV.shift()}document.querySelectorAll("nav button").forEach(b=>b.setAttribute("aria-selected",b.dataset.p===p));document.querySelectorAll(".pane").forEach(x=>x.classList.toggle("on",x.id==="p-"+p));if(p==="mine")renderMine();}
 document.addEventListener("click",e=>{
   const t=e.target;
-  const td=t.closest("[data-todo]");if(td){const [tab,id]=td.dataset.todo.split("|");if(tab==="ev"&&id){evCat=EVENTS.find(x=>x.id===id)?evCat:evCat;go("ev",false,true);evUnfold(id);setTimeout(()=>document.getElementById("ev-"+id).scrollIntoView({behavior:"smooth"}),40)}else{go(tab);window.scrollTo(0,0)}return}
+  const td=t.closest("[data-todo]");if(td){const [tab,id]=td.dataset.todo.split("|");if(tab==="tourupd"){go("tour");tourStart(T.findIndex(x=>x.upd));window.scrollTo(0,0);return}if(tab==="ev"&&id){evCat=EVENTS.find(x=>x.id===id)?evCat:evCat;go("ev",false,true);evUnfold(id);setTimeout(()=>document.getElementById("ev-"+id).scrollIntoView({behavior:"smooth"}),40)}else{go(tab);window.scrollTo(0,0)}return}
   if(t.closest("nav button")){go(t.closest("nav button").dataset.p);window.scrollTo(0,0);return}
   if(t.dataset.evc){evCat=t.dataset.evc;renderEv();return}
   if(t.dataset.vwt){vwTag=t.dataset.vwt;renderVw();return}
@@ -1047,6 +1047,7 @@ const T=[
   {card:{t:"！接下來要盯",l:["11/23（一）台股開盤、金管會 5 項措施上路","11/24–26 台股融資追繳到期","11/25（三）晚上 PCE 通膨、Q3 GDP","12/1 黃仁勳國會閉門作證、ANT 納入 MSCI","12/10 凌晨 3 點 FOMC 利率決議"]}},
   ["M","今天的早報就到這裡，明天早上見！"]],
   sum:["週末休市，收盤數字仍是 11/20","台股上週 −17.5%，1991 年來最大週跌幅","國安基金假日證實進場；明天起全面限空，看融資追繳"]},
+{"k": "upd-2026-11-22", "daily": 1, "upd": 1, "day": "11/22", "ic": "🆕", "n": "今日更新導覽", "sc": "studio", "go": ["ev", ""], "L": [["M", "這是「今日更新導覽」：今天 App 新增和修改了哪些東西，我帶你一次走完。"], {"card": {"t": "！今天更新了 7 項", "l": ["大事：救市第三波、美股大屠殺、聯準會", "名人觀點：新增嘉信 Schwab", "接下來：感恩節週行程", "空頭史：ABC 波段測量、三種劇本", "導覽員：週日早報"]}}, ["M", "先看大事。「救市第三波」補上國安基金週末聲明：已經實彈進場；台股上週跌 17.5%，是 1991 年來最大單週跌幅。"], ["A", "美股那邊呢？"], ["M", "「美股大屠殺」補了兩個數字：VIX 週五衝到 37 以上，S&P 500 只剩 46% 成分股站在 200 日線上。「聯準會」那張則更新成 12 月升息機率 92%。"], ["M", "名人觀點新增嘉信 Schwab：Gordon 說市場進退兩難，Howard 預期這一輪還會再升兩次息，所以標成偏空。"], ["M", "「接下來」加了感恩節週行程：週二消費者信心和 Dell 財報，週三 PCE、GDP 和褐皮書，週四休市、週五半天。"], ["J", "空頭史好像多了兩張圖？"], ["M", "對。第一張「ABC 波段測量」，用波浪算台股 C 波可能跌到哪，每天早上會自動算出離目標還有多遠。"], {"card": {"t": "！ABC 目標（11/20 收盤）", "l": ["C＝A 32,306：還要跌 10.3%", "鏡像 31,237：還要跌 13.3%", "費半 8,000：還要跌 4.9%"]}}, ["K", "提醒一下，很多人都在喊 32,000。太多人盯的點位，常常會提早反彈，或先跌破再拉回，當參考區就好。"], ["M", "第二張「三種劇本」，把這次和 2000、2008、2022 年的空頭放在一起比。"], {"card": {"t": "！三個判斷開關", "l": ["獲利往下掉？還沒（對應 2000）", "聯準會停手？還沒，還在升息（對應 2022）", "信用凍結？還沒，但壓力浮現（對應 2008）"]}}, {"q": ["M", "你想先多了解哪一張？"], "more": 1, "by": "M", "again": "還想看另一張嗎？", "o": [["ABC 波段", "兩種算法差約 1,100 點：C＝A 是拿 A 波的跌幅去量，鏡像則是 B 波反彈多少、就從 A 低點再往下跌多少。都只是技術推算。"], ["三種劇本", "三次空頭都有 +17% 到 +45% 的強反彈，最後只有 2022 年那次是真底。分辨的關鍵是獲利、聯準會、信用三個開關，不是線型。"]]}, ["M", "最後，週日早報也換新了。以後每天改了什麼，都會出現在大事圖解的「🆕 今日更新」標籤和這一站。明天見！"]], "sum": ["大事：國安基金進場、VIX 37、升息機率 92%", "空頭史新增 ABC 波段與三種劇本圖卡", "接下來：感恩節週 PCE、GDP、褐皮書"]},
 {k:"pro",ic:"🌙",n:"收盤後的交易室",sc:"trade",go:["bear"],L:[
  ["K","小安、阿傑，收盤了。今晚我帶你們把這個月的大事走一遍。"],
  ["A","K 哥，我只知道最近一直跌⋯⋯台股週五又跌了 2,394 點，美股週五 Nasdaq 重挫 5%、費半跌了快 11%！"],
@@ -1183,15 +1184,16 @@ const TS={st:-1,i:0,typing:0,full:"",pend:null,choice:null,again:null,used:null,
 function stNo(i){return i-T.slice(0,i).filter(x=>x.daily).length}
 function tourDone(){return LS.get("tour",{})}
 function renderTourMap(){
-  const d=tourDone(),TM=T.filter(x=>!x.daily),n=TM.filter(x=>d[x.k]).length,nx=TM.find(x=>!d[x.k])||TM[0],DY=T.find(x=>x.daily);
+  const d=tourDone(),TM=T.filter(x=>!x.daily),n=TM.filter(x=>d[x.k]).length,nx=TM.find(x=>!d[x.k])||TM[0],DY=T.find(x=>x.daily&&!x.upd),UP=T.find(x=>x.upd);
   $("#tourBox").innerHTML=`<div class="tw-hero">${SCN.trade()?`<svg viewBox="0 0 96 40" shape-rendering="crispEdges" class="tw-scene">${SCN.trade()}</svg>`:""}<div class="tw-cast">${["M","K","A","J"].map(k=>`<div>${sprite(k,44)}<b>${WHO[k][0]}</b><small>${WHO[k][1]}</small></div>`).join("")}</div></div>
   ${DY?`<div class="card tw-daily"><h2>${DY.ic} 每日導覽・${DY.day}</h2><div class="meta">每日導覽員晨晨每天早上更新：3 分鐘看完昨晚美股、台股收盤和今天要盯的事。</div><button class="btn pri" style="width:100%;margin-top:12px" data-tgo="${T.indexOf(DY)}">${d[DY.k]?"✓ 已看完，再看一次":"開始今日導覽"}</button></div>`:""}
+  ${UP?`<div class="card tw-daily"><h2>🆕 今日更新導覽・${UP.day}</h2><div class="meta">晨晨帶你 2 分鐘看完今天 App 新增和修改了什麼。</div><button class="btn pri" style="width:100%;margin-top:12px" data-tgo="${T.indexOf(UP)}">${d[UP.k]?"✓ 已看完，再看一次":"開始"}</button></div>`:""}
   <div class="card"><h2>🌙 收盤後的交易室</h2><div class="meta">資深交易員老K 帶新手小安、半導體工程師阿傑，用故事走一遍這個月的美股與台股大事。選項只會帶出說明，沒有對錯。</div>
   <button class="btn pri" style="width:100%;margin-top:12px" data-tgo="${T.indexOf(nx)}">${n?`繼續導覽：${nx.ic} ${nx.n}`:"開始導覽"}</button><div class="meta" style="justify-content:center;margin-top:6px">已完成 ${n} / ${TM.length} 站</div></div>
   <div class="card"><h2>導覽路線</h2>${T.map((x,i)=>x.daily?"":`<div class="tw-stop ${d[x.k]?"done":""}" data-tgo="${i}"><span class="no">${stNo(i)?stNo(i):"序"}</span><span class="ic">${x.ic}</span><span class="nm">${x.n}</span><span class="ck">${d[x.k]?"✓":"›"}</span></div>`).join("")}
   ${n?`<button class="btn" style="margin-top:10px" id="tourReset">重設進度</button>`:""}</div>`;
 }
-function tourStart(i,keepLog){TS.st=i;TS.i=0;TS.choice=null;TS.pend=null;TS.again=null;TS.used=new Map();if(!keepLog)TS.log=[];clearInterval(TS.tm);$("#tourBox").innerHTML=`<div class="tw-play"><div class="tw-top"><button class="btn" id="tourBack">← 路線</button><span>${T[i].ic} ${T[i].daily?"每日導覽":stNo(i)?`第 ${stNo(i)} 站`:"序章"}・${T[i].n}</span></div><svg viewBox="0 0 96 40" shape-rendering="crispEdges" class="tw-scene">${SCN[T[i].sc]()}</svg><div id="twCards"></div><div class="tw-dlg" id="twDlg"><div class="tw-av" id="twAv"></div><div class="tw-tx"><b id="twWho"></b><div id="twText"></div><span class="tw-more" id="twMore">▼</span></div></div><div id="twOpts"></div></div>`;tourStep();}
+function tourStart(i,keepLog){TS.st=i;TS.i=0;TS.choice=null;TS.pend=null;TS.again=null;TS.used=new Map();if(!keepLog)TS.log=[];clearInterval(TS.tm);$("#tourBox").innerHTML=`<div class="tw-play"><div class="tw-top"><button class="btn" id="tourBack">← 路線</button><span>${T[i].ic} ${T[i].upd?T[i].day:T[i].daily?"每日導覽":stNo(i)?`第 ${stNo(i)} 站`:"序章"}・${T[i].n}</span></div><svg viewBox="0 0 96 40" shape-rendering="crispEdges" class="tw-scene">${SCN[T[i].sc]()}</svg><div id="twCards"></div><div class="tw-dlg" id="twDlg"><div class="tw-av" id="twAv"></div><div class="tw-tx"><b id="twWho"></b><div id="twText"></div><span class="tw-more" id="twMore">▼</span></div></div><div id="twOpts"></div></div>`;tourStep();}
 function tourType(who,text){
   $("#twAv").innerHTML=sprite(who,52);$("#twWho").textContent=WHO[who][0];
   const el=$("#twText");TS.full=text;clearInterval(TS.tm);if(TS.fast){el.textContent=text;TS.typing=0;$("#twMore").style.visibility="visible";return}TS.typing=1;let n=0;$("#twMore").style.visibility="hidden";
