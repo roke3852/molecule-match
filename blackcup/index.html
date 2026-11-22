@@ -52,7 +52,7 @@ button{font:inherit;color:inherit;touch-action:manipulation}
 .term{color:#9cc0ea;border-bottom:1px dotted var(--blue);cursor:pointer}
 .pname{color:var(--cream);font-weight:700;border-bottom:1px dotted var(--muted);cursor:pointer}
 .tools{display:flex;gap:6px;flex-wrap:wrap}
-.tb{flex:1;min-width:58px;background:var(--ink2);border:1px solid var(--line);padding:8px 4px;font-size:12.5px;color:var(--cream);font-family:"DotGothic16"}
+.tb{flex:1;min-width:48px;background:var(--ink2);border:1px solid var(--line);padding:8px 4px;font-size:12.5px;color:var(--cream);font-family:"DotGothic16"}
 .tb:active{background:var(--ink3)}
 .tb.on{border-color:var(--cherry);color:var(--cherry2)}
 .nextbtn{display:none;background:var(--cherry);color:#fff;border:none;padding:10px;font-family:"DotGothic16";font-size:15px;box-shadow:0 3px 0 var(--cherryD)}
@@ -71,6 +71,11 @@ button{font:inherit;color:inherit;touch-action:manipulation}
 .box.doom{border-color:var(--cherryD);box-shadow:0 0 0 3px var(--ink),0 0 0 4px var(--cherryD)}
 .box.doom .txt.narr{color:#d9b3b3}
 .aud{display:flex;gap:8px;width:100%;max-width:360px;margin-top:6px}
+.slot{border:1px solid var(--line);background:var(--ink);padding:10px;margin:8px 0}
+.slot-h{display:flex;justify-content:space-between;font-family:DotGothic16;font-size:13px}.slot-h b{color:var(--cream);font-weight:400;border-left:3px solid var(--cherry);padding-left:6px}.slot-h span{color:var(--muted)}
+.slot-t{margin-top:6px;font-weight:700}.slot-t small{color:var(--muted);font-weight:400;margin-left:8px;font-size:12px}
+.slot-p{font-size:13px;color:#c3c9d3;margin-top:4px;line-height:1.6}.slot-s{font-family:DotGothic16;font-size:12px;color:var(--muted);margin-top:4px}
+.slot-b{display:flex;gap:6px;margin-top:8px}.slot-b .tb{flex:0 0 auto;padding:6px 14px}
 /* overlays */
 .ov{position:fixed;inset:0;background:rgba(6,8,11,.86);z-index:50;display:none;align-items:center;justify-content:center;padding:16px}
 .ov.on{display:flex}
@@ -161,6 +166,7 @@ button{font:inherit;color:inherit;touch-action:manipulation}
       <div class="menu" id="mainMenu" style="display:none">
         <div class="press" id="hello"></div>
         <button class="big" id="mContinue">繼續故事</button>
+        <button class="big alt" id="mLoad">讀取存檔</button>
         <button class="big alt" id="mChapters">章節選擇</button>
         <button class="big alt" id="mEnds">結局圖鑑</button>
         <button class="big alt" id="mHelp">怎麼玩</button>
@@ -190,6 +196,7 @@ button{font:inherit;color:inherit;touch-action:manipulation}
         <button class="tb" id="tPpl">人物</button>
         <button class="tb" id="tGl">詞典</button>
         <button class="tb" id="tFF">快轉</button>
+        <button class="tb" id="tSave">存檔</button>
         <button class="tb" id="tMenu">選單</button>
       </div>
     </div>
@@ -1087,7 +1094,8 @@ let typing=null,waiting=false,annot=false,ffwd=false,curLine=null;
 const labels=ci=>{const m={};CH[ci].nodes.forEach((n,i)=>{if(n.lbl)m[n.lbl]=i});return m};
 function step(){
   if(!S)return;
-  if(S.q.length){const [s,t,l]=S.q.shift();if(s==='@bg'){setBg(t,l);step();return}showLine({s,t});return}
+  if(S.q.length){const [s,t,l]=S.q.shift();if(s==='@bg'){setBg(t,l);step();return}S.curQ=[s,t];showLine({s,t});return}
+  S.curQ=null;
   const nodes=CH[S.ch].nodes;
   while(true){
     const n=nodes[S.i];
@@ -1159,10 +1167,10 @@ function gameOver(){
   const total=Object.keys(ENDS).length;
   const got=P.endings.filter(e=>ENDS[e]).length;
   openCard(`<div class="tag">BAD END　${got}/${total}</div><h3>${E.t}</h3><div class="why"><b style="color:#ece4d4">解析</b><br>${linkify(E.w)}${why?'<br>'+linkify(why):''}</div>
-  <button class="big" id="eRetry">從本章開頭再來</button><button class="big alt" id="eTitle">回到標題</button>`,'endcard lock');
+  <button class="big" id="eRetry">從本章開頭再來</button>${hasSave()?'<button class="big alt" id="eLoad">讀取中途存檔</button>':''}<button class="big alt" id="eTitle">回到標題</button>`,'endcard lock');
   bindLinks($('card'));
   $('eRetry').onclick=()=>{closeCard();const cs=S.chStart;startChapter(S.ch,{...cs.stats},{...cs.flags});enterGame()};
-  $('eTitle').onclick=()=>{closeCard();toTitle()};
+  $('eTitle').onclick=()=>{closeCard();toTitle()};if($('eLoad'))$('eLoad').onclick=()=>openSaves('end');
 }
 function chapterDone(){
   sfx('win');const ci=S.ch;P.cleared=Math.max(P.cleared,ci+1);
@@ -1193,13 +1201,14 @@ function finale(){
   openCard(body+`<p class="statchg">技術 ${s.tech}　名聲 ${s.fame}　良心 ${s.heart}</p><button class="big" id="fT">回到標題</button>`,'goodcard lock');
   bindLinks($('card'));$('fT').onclick=()=>{closeCard();toTitle()};
 }
-function enterGame(fresh){
+function enterGame(fresh,rq){
   doom(false);show('game');renderStats();$('chLabel').textContent=CH[S.ch].t;
   // rebuild bg from nodes before i
   const nodes=CH[S.ch].nodes;let b='cafe',loc='';for(let k=0;k<S.i&&k<nodes.length;k++)if(nodes[k].bg){b=nodes[k].bg;loc=nodes[k].loc}
   if(S.i===0){const f=nodes.find(n=>n.bg);if(f){b=f.bg;loc=f.loc}}
   setBg(b,loc);
   if(S.i===0){openCard(`<h3>${CH[S.ch].t}</h3><p style="color:#ff6b5e;font-family:DotGothic16">${CH[S.ch].sub}</p><div class="why"><b style="color:#ece4d4">前情提要</b><br>${linkify(CH[S.ch].recap)}</div><button class="big" id="go">開始</button>`,'lock');bindLinks($('card'));$('go').onclick=()=>{closeCard();step()}}
+  else if(rq&&rq.length){S.q=rq;step()}
   else{ // resume: back up one to re-show last line
     if(S.i>0&&CH[S.ch].nodes[S.i-1].s!==undefined)S.i--;step()}
 }
@@ -1258,6 +1267,33 @@ $('mHelp').onclick=()=>openCard(`<button class="x" onclick="closeCard()">✕</bu
 $('mSwitch').onclick=()=>{P=null;DB.last='';saveDB();toTitle()};
 function audBtns(){$('aMu').textContent='♪ 音樂 '+(music?'開':'關');$('aSd').textContent='音效 '+(sound?'開':'關');$('aMu').classList.toggle('on',music);$('aSd').classList.toggle('on',sound)}
 $('aMu').onclick=()=>{ac();setMusic(!music);audBtns()};$('aSd').onclick=()=>{ac();setSound(!sound);audBtns();sfx('pick')};audBtns();
+
+/* ============ 中途存檔（每位玩家 3 格） ============ */
+function slots(){if(!P.saves)P.saves=[null,null,null];return P.saves}
+function hasSave(){return slots().some(Boolean)}
+function fmtTime(ms){const d=new Date(ms),z=n=>String(n).padStart(2,'0');return `${d.getMonth()+1}/${d.getDate()} ${z(d.getHours())}:${z(d.getMinutes())}`}
+function openSaves(mode){
+  const canSave=mode==='game'&&S&&!S.pendingEnd;
+  const sl=slots();
+  openCard(`<button class="x" onclick="closeCard()">✕</button><h3>${mode==='game'?'存檔／讀檔':'讀取存檔'}</h3>
+   ${mode==='game'&&!canSave?'<p style="color:#ff6b5e;font-size:13px">命運已經改變……這裡不能存檔。</p>':''}
+   ${sl.map((d,k)=>`<div class="slot">
+     <div class="slot-h"><b>存檔 ${k+1}</b>${d?`<span>${fmtTime(d.at)}</span>`:''}</div>
+     ${d?`<div class="slot-t">${esc(d.title)}<small>${esc(d.loc||'')}</small></div>
+       <div class="slot-p">${esc((d.preview||'').slice(0,46))}${(d.preview||'').length>46?'…':''}</div>
+       <div class="slot-s">技術 ${d.stats.tech}　名聲 ${d.stats.fame}　良心 ${d.stats.heart}</div>`:'<div class="slot-p" style="color:#5b6372">（空）</div>'}
+     <div class="slot-b">${canSave?`<button class="tb" data-sv="${k}">存到這格</button>`:''}${d?`<button class="tb on" data-ld="${k}">讀取</button>`:''}</div>
+   </div>`).join('')}
+   <p style="color:#8b93a1;font-size:12px">遊戲每一句都會自動存檔；這裡的存檔是你自己留的「回頭點」，BAD END 之後可以從這裡讀回去，不用整章重來。</p>`,mode==='end'?'lock':'');
+  document.querySelectorAll('[data-sv]').forEach(b=>b.onclick=()=>{const k=+b.dataset.sv;const d=snap();
+    d.q=(S.curQ?[S.curQ]:[]).concat(S.q||[]);d.at=Date.now();d.title=CH[S.ch].t;d.loc=S.loc||'';d.preview=(S.log[S.log.length-1]||{}).t||'';
+    sl[k]=d;saveDB();sfx('pick');toast(`已存到存檔 ${k+1}`);openSaves(mode)});
+  document.querySelectorAll('[data-ld]').forEach(b=>b.onclick=()=>{const d=JSON.parse(JSON.stringify(sl[+b.dataset.ld]));closeCard();ac();
+    const q=d.q||[];S={ch:d.ch,i:d.i,stats:d.stats,flags:d.flags,chStart:d.chStart,log:d.log||[],q:[]};P.run=snap();saveDB();toast('已讀取存檔');enterGame(false,q)});
+  if(mode==='end'){$('card').querySelector('.x').onclick=()=>{closeCard();toTitle()};const c=$('card');const back=document.createElement('button');back.className='big alt';back.textContent='回到標題';back.onclick=()=>{closeCard();toTitle()};c.appendChild(back)}
+}
+$('tSave').onclick=()=>openSaves('game');
+$('mLoad').onclick=()=>{if(!hasSave()){toast('還沒有中途存檔');return}openSaves('title')};
 // boot
 if(DB.last&&DB.players[DB.last])P=DB.players[DB.last];
 toTitle();
