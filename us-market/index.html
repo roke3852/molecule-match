@@ -49,6 +49,11 @@ main{max-width:760px;margin:0 auto;padding:14px max(14px,env(safe-area-inset-lef
 .foldbar button{font:inherit;font-size:12px;padding:5px 10px;border-radius:999px;border:1px solid var(--line);background:var(--panel);color:var(--muted)}
 .meta{font-size:12px;color:var(--faint);display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .tag{font-size:11px;padding:1px 7px;border-radius:6px;background:var(--grid);color:var(--muted)}
+.tag.new{background:var(--s1);color:#fff}
+.todaycard .todo{display:flex;width:100%;align-items:center;gap:8px;text-align:left;font:inherit;font-size:14px;color:var(--fg);background:none;border:0;border-top:1px dashed var(--line);padding:10px 2px;cursor:pointer}
+.todaycard .todo:first-of-type{border-top:0}
+.todaycard .todo span{flex:1}
+.todaycard .todo b{color:var(--s1);font-size:18px}
 .tag.hot{background:var(--hl);color:var(--fg);border:1px solid var(--hlb)}
 .lead{margin:10px 0 6px}
 .lead.short{font-size:16px;line-height:1.6;margin:8px 0 4px}
@@ -346,17 +351,18 @@ input[type=range]{width:100%;accent-color:var(--s1)}
 <div id="tip"></div><div id="toast"></div>
 
 <script>
-const ASOF="2026-11-22 16:02";
+const ASOF="2026-11-22 16:07";
+const TODAY={"d": "2026-11-22", "l": [["ev", "tw-rescue3", "大事：救市第三波 — 補上國安基金週末聲明、台股單週 −17.5%"], ["ev", "rout-1120", "大事：美股大屠殺 — 補 VIX 37、市場寬度"], ["ev", "fed-hike", "大事：聯準會 — 12 月升息機率 92%"], ["vw", "", "名人觀點：新增嘉信 Schwab（Gordon、Howard）"], ["cal", "", "接下來：感恩節週美國數據與財報"], ["bear", "", "空頭史：新增「ABC 波段測量」「三種劇本」圖卡"], ["tour", "", "導覽員：週日早報"]]}; /* 今日更新清單：每日更新時重寫 d 與 l */
 /* ---------- 大事資料 ---------- */
 const EVENTS=[
-{id:"tw-rescue3",short:"一週內第三次救市：11/23 起全面禁止平盤以下放空，國安基金假日證實已進場；但真正壓垮盤面的是融資斷頭。",cat:"台股",hot:1,date:"2026-11-21",title:"救市第三波：金管會全面禁止平盤以下放空等 5 項措施，11/23 起上路；上市融資單日斷頭 491 億",
+{id:"tw-rescue3",upd:"2026-11-22",short:"一週內第三次救市：11/23 起全面禁止平盤以下放空，國安基金假日證實已進場；但真正壓垮盤面的是融資斷頭。",cat:"台股",hot:1,date:"2026-11-21",title:"救市第三波：金管會全面禁止平盤以下放空等 5 項措施，11/23 起上路；上市融資單日斷頭 491 億",
  lead:"週六（11/21）金管會宣布 5 項穩市措施，11/23（週一）起實施：① 上市櫃股票與 TDR 的融券、借券賣出，不得低於前一日收盤價（券商、期貨商避險除外）；② 融券最低維持率從 130% 提高到 150%；③ 暫停受理認售權證上市；④ 鼓勵公司買回庫藏股，今年第 4 季到明年第 1 季的買回可計入 2026 年 ESG 評鑑；⑤ 鼓勵金融機構暫停出借股票，已出借的可提前召回或到期不續借。行政院也做出四點裁示：財政部強化企業融資、信保與國安基金力道，金管會維持交易秩序，經濟部協助產業，央行關注匯市。週末（11/21）國安基金罕見在假日喊話：證實已「實彈」進場（11/6 臨時會授權，第 10 次護盤），請投資人不要恐慌殺低，必要時會和金管會再採取措施；並列出四個基本面數字——主計總處預估今年 GDP 成長 11.05%（39 年來最高）、景氣燈號連 10 個月紅燈、1–10 月外銷訂單 9,430 億美元（+58.6%）、上市櫃 1–10 月營收 56.89 兆元已超過去年全年。本週加權累計跌 7,641.83 點（−17.5%），是 1991 年以來最大單週跌幅。",
  why:"這是一週內第三次加碼（11/19 限空令 2.0、國安基金進場、11/21 限空令 3.0），對象從「放空」擴大到「借券來源」和「公司自己買回」。但 11/20 的數字顯示，真正壓垮盤面的是融資：上市融資一天減 491 億，維持率掉到 140.4%，估計有 41.8%（約 1,821 億）的融資本金已經在 130% 追繳線以下；全市場收到追繳通知的有 6,186 戶，是前一天的兩倍。限空只能擋住空方加碼，擋不住多方被迫賣出。週一要看的是：追繳到期的斷頭賣壓有沒有出盡，高融資股能不能守住前低。另外這次跌得極快：加權 30 個交易日跌 27.7%，是 2000 年以來第 3 慘的 30 天；櫃買 −38.9%，第 2 慘。",
  stats:[["上市融資","4,352億","單日 −491 億"],["融資維持率","140.4%","前日 147.9%"],["追繳線下本金","1,821億","占融資 41.8%（估）"],["追繳通知","6,186 戶","前日 2,956 戶；64.6 億"],["加權 30 日","−27.7%","2000 年來第 3 慘"],["櫃買 30 日","−38.9%","2000 年來第 2 慘"]],
  charts:["shortBan","mgMix","mgCall","speed30"],
  tl:[["11-19","金管會限空令 2.0；國安基金證實進場"],["11-20","加權 −2,394 點；上市融資減 491 億、維持率 140.4%，追繳通知 6,186 戶",1],["11-21","金管會宣布 5 項措施（全面禁止平盤下放空、融券維持率 150%、停發認售權證、鼓勵庫藏股、暫停借券）；行政院四點裁示",1],["11-21 下午","國安基金假日聲明：已實彈進場，列 GDP 11.05%、連 10 紅燈等四點基本面，籲勿恐慌殺低",1],["11-23","5 項措施上路；追繳到期，看斷頭賣壓與高融資股能否守住前低",1]],
  src:[["經濟日報：金管會宣布 5 項措施","https://money.udn.com/money/story/5613/9893342"],["鉅亨網：單週跌 7,641 點、國安基金四點喊話","https://news.cnyes.com/news/id/6669743"],["聯合新聞網：單週跌 17.5%、國安基金已實彈護盤","https://udn.com/news/story/7251/9893830"],["統一期貨投顧：11/20 上市融資急減、追繳壓力攀升",""],["FinLab：歷次空頭從高點對齊、30 日報酬分布",""],["行政院四點裁示（截圖）",""],["歷次限空令整理表（網路流傳，未查到原始出處）",""]]},
-{id:"rout-1120",short:"輝達傳 SEC 查會計、單日 −14%，費半崩 10.7%；S&P、道瓊跌進修正區，Nasdaq 吐光今年漲幅。",cat:"大盤",hot:1,date:"2026-11-20",title:"美股大屠殺：S&P、道瓊跌進修正區，Nasdaq −5.28% 吐光今年漲幅，費半 −10.73%",
+{id:"rout-1120",upd:"2026-11-22",short:"輝達傳 SEC 查會計、單日 −14%，費半崩 10.7%；S&P、道瓊跌進修正區，Nasdaq 吐光今年漲幅。",cat:"大盤",hot:1,date:"2026-11-20",title:"美股大屠殺：S&P、道瓊跌進修正區，Nasdaq −5.28% 吐光今年漲幅，費半 −10.73%",
  lead:"週五（11/20）AI 殺盤全面失控。收盤道瓊跌 949.73 點（−1.93%）收 48,147.33；S&P 500 跌 3.70% 收 6,910.39，距 10 月高點 −11.6%，和道瓊一起進入修正區；Nasdaq 重挫 5.28% 收 22,617.73，今年漲幅全數吐回、距高點 −18.1%；費城半導體指數暴跌 10.73% 收 8,408.59，30 檔成分股全部收黑。個股：輝達 −14% 收 125.53（連 7 跌）、美光 −13.9%、AMD −13.2%、博通 −12.2%、台積電 ADR −9.48%，SanDisk、希捷、SK 海力士 ADR 也跌 12–16%。本週 S&P 跌約 8.6%、Nasdaq 跌約一成，是 2020 年 3 月以來最大單週跌幅；VIX 從週一約 20 飆到週五收盤 37 以上，是 2025 年 4 月以來最高；S&P 500 成分股只剩 46% 站在 200 日均線之上。資金湧向公債，10 年期美債殖利率降約 12 個基點到 4.93%。",
  why:"引爆點是路透報導美國 SEC 正在調查輝達的潛在會計問題，疊上 Hunterbrook 放空 AMD、Fed 官員續放鷹（費城 Fed 總裁 Paulson 主張審慎升息、理事 Cook 說通膨壓力擴散）、川普揚言對到海外蓋資料中心的美企課重稅、蘋果據報開發自主 AI 代理。BTIG 的 Krinsky 指出三大指數都已跌破 200 日均線，風險偏向下行；E*TRADE 的 Larkin 則提醒，1983 年以來 15 次修正只有 5 次演變成空頭。Dan Ives 形容是「完美風暴」，但認為 AI 建設主軸沒變。對台股來說，台指期夜盤已重挫 1,881 點，週一壓力很大。",
  stats:[["S&P 500","6,910.39","−3.70%，距高點 −11.6%"],["Nasdaq","22,617.73","−5.28%，距高點 −18.1%"],["費半","8,408.59","−10.73%，距高點 −42.5%"],["道瓊","48,147.33","−949.73 點"],["輝達","$125.53","−14%，連 7 跌"],["10 年期美債","4.93%","−12bp，資金避險"]],
@@ -447,7 +453,7 @@ const EVENTS=[
  charts:[],
  tl:[["11-16","美國商務部公布海外算力與東南亞晶片出口許可新規；中國批評是「經濟脅迫」"],["11-18","APEC 領袖會議在深圳開幕"],["11-19","川習會談與川習普三方會面，無具體成果",1],["01-10","美中貿易休戰到期"]],
  src:[["Yahoo Finance／AP：晶片與稀土僵局未變","https://finance.yahoo.com/markets/article/stalemates-over-semiconductors-and-rare-earth-minerals-appear-little-changed-as-trump-heads-home-from-china-121555352.html"],["NCUSCR：出口新規內容","https://ncuscr.substack.com/p/trump-arrives-in-shenzhen-for-trilateral"],["Outlook India：會前議題整理","https://www.outlookindia.com/international/trump-xi-shenzhen-summit-nvidia-h200-ai-chips"]]},
-{id:"fed-hike",short:"聯準會 12/10 幾乎確定升息一碼，市場從等降息變成升息循環，壓縮 AI 股評價。",cat:"聯準會",hot:1,date:"2026-11-18",title:"聯準會 12/9 幾乎確定升息一碼",
+{id:"fed-hike",upd:"2026-11-22",short:"聯準會 12/10 幾乎確定升息一碼，市場從等降息變成升息循環，壓縮 AI 股評價。",cat:"聯準會",hot:1,date:"2026-11-18",title:"聯準會 12/9 幾乎確定升息一碼",
  lead:"現任主席是 Kevin Warsh。目前利率 3.75%–4.00%，10 月會議以 10 比 2 維持不變，投反對票的 Cook 與 Hammack 都主張升息。10 月非農新增 16.5 萬人遠高於預期，紐約 Fed 總裁 Williams 說更多升息可能必要，Waller 甚至提到通膨不降可考慮一次升兩碼；達拉斯 Fed 總裁 Logan 11/10 說至少還要再升兩碼。11/19 CME FedWatch 顯示 12 月升一碼機率 96.4%，10 年期美債殖利率約 5.05%。",
  why:"市場從「降息」轉成「升息循環」，利率上升會壓縮高估值成長股（尤其 AI 股）的評價，這也是近期大盤連跌的背景之一。",
  stats:[["目前利率","3.75–4.00%",""],["12月升息一碼機率","96.4%","CME FedWatch 11/19"],["10月會議","10 : 2","2 票主張升息"],["10月非農","+16.5萬","遠高於預期"]],
@@ -750,12 +756,12 @@ const CH={
 let evCat="全部";
 const evShort=t=>{const x=t.split("。")[0];return x.length>70?x.slice(0,68)+"⋯":x+"。"};
 function renderEv(){
-  const cats=["全部",...new Set(EVENTS.map(e=>e.cat))];
-  $("#evChips").innerHTML=cats.map(c=>`<button class="chip ${c===evCat?"on":""}" data-evc="${c}">${c}</button>`).join("");
+  const NEWC="🆕 今日更新",isT=e=>e.upd===TODAY.d&&TODAY.d===ASOF.slice(0,10),nT=EVENTS.filter(isT).length,cats=["全部",NEWC,...new Set(EVENTS.map(e=>e.cat))];
+  $("#evChips").innerHTML=cats.map(c=>`<button class="chip ${c===evCat?"on":""}" data-evc="${c}">${c===NEWC?c+" "+(nT+TODAY.l.filter(x=>x[0]!=="ev").length):c}</button>`).join("");
   const fav=LS.get("fav",[]);
-  $("#evList").innerHTML=EVENTS.filter(e=>evCat==="全部"||e.cat===evCat).map(e=>`
+  $("#evList").innerHTML=(evCat===NEWC?`<div class="card todaycard"><div style="font-size:17px;font-weight:700;margin-bottom:4px">🆕 今日更新・${TODAY.d.slice(5)}</div>${TODAY.d===ASOF.slice(0,10)?TODAY.l.map(x=>`<button class="todo" data-todo="${x[0]}|${x[1]}"><span>${esc(x[2])}</span><b>›</b></button>`).join(""):"<div class=empty>—</div>"}</div>`:"")+EVENTS.filter(e=>evCat==="全部"||(evCat===NEWC?isT(e):e.cat===evCat)).map(e=>`
   <article class="card" id="ev-${e.id}">
-    <div class="meta"><span class="tag ${e.hot?"hot":""}">${e.hot?"🔥 ":""}${e.cat}</span><span>${e.date}</span><span style="margin-left:auto"><button class="star ${fav.includes(e.id)?"on":""}" data-fav="${e.id}" aria-label="收藏">${fav.includes(e.id)?"★":"☆"}</button></span></div>
+    <div class="meta"><span class="tag ${e.hot?"hot":""}">${e.hot?"🔥 ":""}${e.cat}</span><span>${e.date}</span>${isT(e)?`<span class="tag new">今日更新</span>`:""}<span style="margin-left:auto"><button class="star ${fav.includes(e.id)?"on":""}" data-fav="${e.id}" aria-label="收藏">${fav.includes(e.id)?"★":"☆"}</button></span></div>
     <h2>${esc(e.title)}</h2>
     <p class="lead short">${esc(e.short||evShort(e.lead))}</p>
     ${e.stats?`<div class="stats">${e.stats.map(s=>`<div class="stat"><div class="k">${s[0]}</div><div class="v">${s[1]}</div>${s[2]?`<div class="d">${s[2]}</div>`:""}</div>`).join("")}</div>`:""}
@@ -981,6 +987,7 @@ const NAV=[];function curTab(){const a=document.querySelector(".pane.on");return
 function go(p,noPush,force){const c=curTab();if(!noPush&&(c!==p||force)){NAV.push({p:c,y:window.scrollY});if(NAV.length>40)NAV.shift()}document.querySelectorAll("nav button").forEach(b=>b.setAttribute("aria-selected",b.dataset.p===p));document.querySelectorAll(".pane").forEach(x=>x.classList.toggle("on",x.id==="p-"+p));if(p==="mine")renderMine();}
 document.addEventListener("click",e=>{
   const t=e.target;
+  const td=t.closest("[data-todo]");if(td){const [tab,id]=td.dataset.todo.split("|");if(tab==="ev"&&id){evCat=EVENTS.find(x=>x.id===id)?evCat:evCat;go("ev",false,true);evUnfold(id);setTimeout(()=>document.getElementById("ev-"+id).scrollIntoView({behavior:"smooth"}),40)}else{go(tab);window.scrollTo(0,0)}return}
   if(t.closest("nav button")){go(t.closest("nav button").dataset.p);window.scrollTo(0,0);return}
   if(t.dataset.evc){evCat=t.dataset.evc;renderEv();return}
   if(t.dataset.vwt){vwTag=t.dataset.vwt;renderVw();return}
@@ -1259,7 +1266,7 @@ document.addEventListener("click",e=>{const h=e.target.closest("#p-bear .card>h2
 const b=e.target.closest("[data-fold]");if(b){const v=b.dataset.fold==="1",st={};document.querySelectorAll("#p-bear .card").forEach(c=>{if(!c.querySelector(":scope>h2"))return;c.classList.toggle("fold",v);st[foldKey(c)]=v});LS.set("fold",st)}});
 
 /* 大事圖解收合：預設只展開最新一則 */
-function applyEvFold(){const st=LS.get("evfold",{});document.querySelectorAll("#evList .card").forEach((c,i)=>{const k=c.id;c.classList.toggle("fold",k in st?st[k]:i>0)})}
+function applyEvFold(){const st=LS.get("evfold",{});document.querySelectorAll("#evList .card[id]").forEach((c,i)=>{const k=c.id;c.classList.toggle("fold",k in st?st[k]:i>0)})}
 function evUnfold(id){const c=document.getElementById("ev-"+id);if(!c)return;c.classList.remove("fold");const st=LS.get("evfold",{});st[c.id]=false;LS.set("evfold",st)}
 document.addEventListener("click",e=>{
   const fb=e.target.closest("[data-evfold]");if(fb){const v=fb.dataset.evfold==="1",st={};document.querySelectorAll("#evList .card").forEach(c=>{c.classList.toggle("fold",v);st[c.id]=v});LS.set("evfold",st);return}
