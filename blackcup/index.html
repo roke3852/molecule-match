@@ -149,6 +149,10 @@ button{font:inherit;color:inherit;touch-action:manipulation}
 .gchip{flex:1;display:flex;flex-direction:column;align-items:center;gap:1px;padding:5px 2px;background:var(--ink2);border:1px solid var(--line2);color:var(--cream);min-width:0}
 .gchip svg{image-rendering:pixelated}.gchip b{font-family:DotGothic16;font-weight:400;font-size:12px;white-space:nowrap}.gchip small{font-size:9.5px;color:var(--muted);line-height:1.2;text-align:center}
 .gchip[aria-pressed="true"]{border-color:var(--teal);background:rgba(79,179,169,.15)}.gchip[aria-pressed="true"] small{color:#bfe6e1}
+.money{flex:none;text-align:right;font-family:DotGothic16;font-size:15px;color:#ece4d4;border-left:1px solid var(--line);padding-left:8px;transition:color .3s}.money small{display:block;font-size:10px;color:var(--muted)}
+.money.bump{color:#f0b46a}
+.moneypop{position:fixed;left:50%;bottom:120px;transform:translateX(-50%);z-index:86;font-family:DotGothic16;background:var(--ink);border:1px solid var(--line2);padding:8px 16px;text-align:center;animation:itin .35s cubic-bezier(.2,1.6,.4,1) both;pointer-events:none}
+.moneypop small{display:block;font-size:11px;color:var(--muted)}.moneypop b{font-weight:400;font-size:20px}.moneypop.plus b{color:#4fb3a9}.moneypop.minus b{color:#ff6b5e}.moneypop.out{opacity:0;transition:.4s}
 /* overlays */
 .ov{position:fixed;inset:0;background:rgba(6,8,11,.86);z-index:50;display:none;align-items:center;justify-content:center;padding:16px}
 .ov.on{display:flex}
@@ -273,7 +277,7 @@ button{font:inherit;color:inherit;touch-action:manipulation}
         <button class="tb" id="tSave">存檔</button>
         <button class="tb" id="tMenu">選單</button>
       </div>
-      <div class="inv"><span class="inv-h">道具</span><div class="inv-l" id="invList"></div></div>
+      <div class="inv"><span class="inv-h">道具</span><div class="inv-l" id="invList"></div><div class="money" id="moneyBox"></div></div>
     </div>
   </section>
 </div>
@@ -627,7 +631,7 @@ const CH=[
 {t:'第二章　金穗',sub:'太香的豆子，與遠方的樹',recap:'沈懷舟收你為徒，教你水、數字與塞水，還幫你寫了推薦函。他說：好豆子在樹上。但在你出發之前，有人先找上了門。',nodes:[
  BG('home','公館．你的租屋處'),
  {act:'form2',s:'',t:'推薦函有了，報名表寄出去了。剩下最大的問題，是比賽要用的豆子。'},
- N('你打開網路銀行看了一下存款：六萬三千二百塊。這大概是你兩年來省吃儉用的全部了。'),
+ N('你打開網路銀行看了一下存款：六萬三千五百二十塊。這大概是你兩年來省吃儉用的全部了。'),
  L('me','（一公斤比賽等級的藝伎，少說也要兩三萬……而且還不一定買得到。）'),
  N('前一天，台灣盃官網公布了參賽名單。你的名字在第三頁，推薦人那一欄寫著：沈懷舟。'),
  N('名單公布不到一天，咖啡圈的群組就炸開了：「沈懷舟收徒弟了？」「那個被撤銷的？」'),
@@ -679,6 +683,7 @@ const CH=[
  N('你也傳了訊息給沈懷舟，說你要去哥倫比亞找豆子。他只回了一個字：「好。」'),
  BG('home','出發前夜．你的租屋處'),
  N('你訂了最便宜的機票：台北轉洛杉磯，再轉波哥大，最後搭國內線到薇拉省的首府內瓦。單程就要三十幾個小時。'),
+ {money:-31800,why:'台北⇄內瓦 來回機票'},
  N('機票錢，一口氣花掉了存款的一半。你一邊打包，一邊在心裡算剩下的錢夠不夠買豆子。'),
  L('me','（三十公斤……應該夠吧。比賽用的話，三十公斤很多了。）'),
  N('手機跳出一則訊息，是沈懷舟傳的。他平常幾乎不傳訊息。'),
@@ -736,6 +741,8 @@ const CH=[
  N('胡安妮塔每天都跟在你後面。工人們開始叫你「雞的朋友」。'),
  {act:'notebook',s:'',t:'出發那天早上，卡洛斯塞給你一本沾著泥巴的筆記本。那是你們兩個人的字跡，每天的溫度、糖度、pH，一筆都沒漏。'},
  {item:'notebook'},
+ N('你把 30 公斤豆子的錢，照合約直接匯給卡洛斯。存款幾乎見底，但你一點也不後悔。'),
+ {money:-27000,why:'30 公斤生豆（直接付給卡洛斯）'},
  L('carlos','這本你帶走。這是你的豆子的身分證。'),
  L('carlos','對了，有件事我想了很久，還是要跟你說。'),
  L('carlos','金穗的人，上個禮拜來過。'),
@@ -807,6 +814,8 @@ const CH=[
  N('「本屆台灣盃手沖錦標賽，冠軍——」'),
  N('「{N}！」'),
  {item:'trophy'},
+ N('主持人遞給你一張大大的支票板：冠軍獎金，新台幣十萬元。'),
+ {money:100000,why:'台灣盃冠軍獎金'},
  N('掌聲響起來的時候，你什麼都聽不到，只覺得腳底發軟。'),
  N('亞軍是蘇曼。她沒有鼓掌，只是一直盯著你桌上的那杯咖啡，看了很久很久。'),
  N('散場的時候，你在觀眾席最後一排的角落，看到一個穿著黑色長大衣的身影，正要轉身離開。'),
@@ -950,6 +959,7 @@ const CH=[
  N('這三樣東西，你一刻都不打算離開身邊。'),
  N('這一趟不是你一個人。沈懷舟說，他十二年沒進過比賽會場，這次要親眼看著；蘇曼也和金穗談了解約，用自己的名字報名了世界賽。'),
  N('三個人約在桃園機場第二航廈碰面。沈懷舟只帶了一個很舊的皮箱，蘇曼戴著口罩和帽子，怕被金穗的人認出來。'),
+ {money:-12000,why:'東京機票與住宿'},
  TV('world','TPE','HND','plane','桃園機場 → 東京羽田。三個小時的航程，你一直盯著窗外的雲，沒有睡著。'),
  BG('tokyo','東京．世界手沖盃'),
  N('東京，世界手沖盃。賽前兩天，雨剛停，霓虹燈在濕漉漉的柏油路上碎成一片一片的。'),
@@ -1613,6 +1623,7 @@ function step(){
     if(n.c){persist();showChoice(n);return}
     if(n.brew){persist();showBrew(n);return}
     if(n.item){S.i++;giveItem(n.item);continue}
+    if(n.money){S.i++;addMoney(n.money,n.why);continue}
     if(n.act==='buybean'){S.i++;persist();startAct('buybean');S.act.play=1;playBuy(n);return}
     if(n.act&&n.play){S.i++;persist();startAct(n.act);S.act.play=1;S.act.st=0;S.act.brush=0;S.act.bv=0;playClean(n);return}
     if(n.act){S.i++;persist();startAct(n.act);if(n.sticky)S.act.sticky=1;if(n.hold)S.act.hold=n.hold;showLine({s:'',t:n.t});return}
@@ -2051,6 +2062,14 @@ function actPest(g,t,A){const p=PX(g),e=(performance.now()-A.t0)/1000,z=Math.min
   p.vig()}
 BGS.act=function(g,t){const A=S&&S.act;if(!A)return;if(A.k==='buybean'){BGS.beanshop(g,t);return}(A.k==='form'||A.k==='form2'?actForm:A.k==='pack'?actPack:A.k==='flood'?actFlood:A.k==='water'?actWater:A.k==='roast'?actRoast:A.k==='notebook'?actNotebook:A.k==='pest'?actPest:A.k==='cup'||A.k==='cupfarm'?actCup:A.k==='jeep'?actJeep:actClean)(g,t,A)};
 
+
+/* 存款 */
+const MONEY0=[64800,63520,63520,4720,104720,104720];
+function getMoney(){if(!S)return 0;return typeof S.flags.$money==='number'?S.flags.$money:MONEY0[S.ch]||64800}
+function addMoney(d,why){S.flags.$money=getMoney()+d;renderInv();sfx(d>0?'win':'pop');
+  const el=document.createElement('div');el.className='moneypop '+(d>0?'plus':'minus');el.innerHTML=`<small>${why}</small><b>${d>0?'+':'−'} NT$${Math.abs(d).toLocaleString()}</b>`;document.body.appendChild(el);
+  setTimeout(()=>el.classList.add('out'),2000);setTimeout(()=>el.remove(),2500);S.log.push({w:'▸ 存款',t:`${why}　${d>0?'+':'−'}NT$${Math.abs(d).toLocaleString()}`,pick:1});
+  const m=document.getElementById('moneyBox');if(m){m.classList.add('bump');setTimeout(()=>m.classList.remove('bump'),900)}}
 /* ============ 道具 ============ */
 const ITEMS={
  geisha:{n:'巴拿馬藝伎 100g',d:'在永康街「山嵐豆行」用自己薪水買的競標批次藝伎，水洗、淺焙，NT$1,280。要沖給客人看看真的藝伎長什麼樣子。',ic:['....eeee....','...EEEEEE...','..eeeeeeee..','..eEEEEEEe..','..eeYYYYee..','..eeYeeYee..','..eeYYYYee..','..eeeeeeee..','..eEEEEEEe..','..eewwwwee..','..eeeeeeee..','............']},
@@ -2068,7 +2087,7 @@ function icoSvg(id,sz){const m=ITEMS[id].ic;let r='';m.forEach((row,y)=>[...row]
 function giveItem(id){if(!S||!ITEMS[id]||S.flags['it_'+id])return;S.flags['it_'+id]=1;renderInv();sfx('win');
   const d=document.createElement('div');d.className='itempop';d.innerHTML=`${icoSvg(id,56)}<div><small>獲得道具</small><b>${ITEMS[id].n}</b></div>`;document.body.appendChild(d);
   setTimeout(()=>d.classList.add('out'),2000);setTimeout(()=>d.remove(),2500);S.log.push({w:'▸ 獲得道具',t:ITEMS[id].n,pick:1});const b=document.querySelector(`#invList [data-it="${id}"]`);if(b){b.classList.add('new');setTimeout(()=>b.classList.remove('new'),2500)}}
-function renderInv(){const L0=document.getElementById('invList');if(!L0)return;const ids=S?Object.keys(S.flags).filter(k=>k.startsWith('it_')).map(k=>k.slice(3)).filter(k=>ITEMS[k]):[];
+function renderInv(){const mb=document.getElementById('moneyBox');if(mb)mb.innerHTML='<small>存款</small>NT$'+getMoney().toLocaleString();const L0=document.getElementById('invList');if(!L0)return;const ids=S?Object.keys(S.flags).filter(k=>k.startsWith('it_')).map(k=>k.slice(3)).filter(k=>ITEMS[k]):[];
   L0.innerHTML=ids.length?ids.map(id=>`<button class="inv-i" data-it="${id}" aria-label="${ITEMS[id].n}">${icoSvg(id,26)}</button>`).join(''):'<span class="inv-e">還沒有道具</span>';
   L0.querySelectorAll('.inv-i').forEach(b=>b.onclick=e=>{e.stopPropagation();const it=ITEMS[b.dataset.it];popup(b,`<b>${it.n}</b><br>${it.d}`)})}
 
@@ -2218,8 +2237,8 @@ function playBuy(n){ffwd=false;$('tFF').classList.remove('on');waiting=false;$('
   cw.classList.add('on');cw.innerHTML='<div class="cq brewq">🛍 點一包要買的豆子</div><div class="bhint">網紅要拍的是「藝伎」。</div>';
   tl.querySelectorAll('.sbag').forEach(el=>el.onclick=()=>{const b=BAGS[+el.dataset.i];sfx('tap');tl.querySelectorAll('.sbag').forEach(x=>x.classList.toggle('sel',x===el));
     if(b.id!=='geisha'){cw.innerHTML=`<div class="cq brewq">🛍 ${b.n}</div><div class="bhint">${b.id==='brazil'?'這就是倉庫裡那種豆子……要裝進藝伎罐的，就是它。':'很好喝，但它不是藝伎。網紅點的是藝伎。'}</div>`;return}
-    cw.innerHTML=`<div class="cq brewq">🛍 巴拿馬 藝伎　100g</div><div class="paybox"><div>價格 <b>NT$1,280</b></div><div>你的存款 <b id="bal">NT$64,800</b></div></div><button class="big" id="payBtn">結帳</button>`;
-    $('payBtn').onclick=()=>{sfx('pick');$('payBtn').disabled=true;let v=64800;const end=63520,iv=setInterval(()=>{v=Math.max(end,v-64);const e=$('bal');if(e)e.textContent='NT$'+v.toLocaleString();if(v<=end){clearInterval(iv);sfx('win');
+    cw.innerHTML=`<div class="cq brewq">🛍 巴拿馬 藝伎　100g</div><div class="paybox"><div>價格 <b>NT$1,280</b></div><div>你的存款 <b id="bal">NT$${getMoney().toLocaleString()}</b></div></div><button class="big" id="payBtn">結帳</button>`;
+    $('payBtn').onclick=()=>{sfx('pick');$('payBtn').disabled=true;let v=getMoney();const end=v-1280,iv=setInterval(()=>{v=Math.max(end,v-64);const e=$('bal');if(e)e.textContent='NT$'+v.toLocaleString();if(v<=end){clearInterval(iv);sfx('win');S.flags.$money=end;renderInv();
       setTimeout(()=>{tl.classList.remove('click');tl.hidden=true;tl.innerHTML='';cw.classList.remove('on');endAct();giveItem('geisha');step()},700)}},16)}})}
 BGS.beanshop=function(g,t){const p=PX(g);p(0,0,320,200,'#2e2018');p.dith(0,0,320,150,'#35251c',3);p.glow(160,40,170,'rgba(240,190,120,.18)');
   for(let r=0;r<3;r++){p(10,30+r*38,300,4,'#7a4e30');p(10,30+r*38,300,1,'#b07a4f');const rr=R(r+3);for(let i=0;i<13;i++){const x=16+i*23,c=[['#2f7a66','#215848'],['#b5523a','#8a3a28'],['#39508f','#283a6b'],['#3c3a3a','#262525'],['#a04a86','#763463']][Math.floor(rr()*5)];p(x,10+r*38,16,20,c[0]);p(x+10,10+r*38,6,20,c[1]);p(x,8+r*38,16,3,c[1]);p(x+3,18+r*38,10,7,'#f3e9d6')}}
