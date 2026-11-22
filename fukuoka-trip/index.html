@@ -710,6 +710,20 @@ html.dark .k-market{--xc:#d0705c}html.dark .k-light{--xc:#c9a25e}html.dark .k-ri
 .clo-r button{font-family:var(--ff-b);font-size:13px;padding:5px 9px;border:2px solid var(--px);background:var(--card);color:var(--ink);cursor:pointer}.clo-r button.on{background:var(--maple);border-color:var(--maple);color:#fff}
 .clo-out{border:3px double var(--maple);padding:12px;margin-top:10px;background:color-mix(in srgb,var(--maple) 6%,var(--card))}.clo-out .zh{font-size:13px;color:var(--sub)}.clo-out .jp{font-size:20px;font-weight:700;margin:6px 0;line-height:1.5}.clo-out .en{font-size:13px}
 .cl-rb{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.cl-rb button{font-family:var(--ff-b);font-size:14px;font-weight:700;padding:6px 10px;border:2px solid var(--maple);background:color-mix(in srgb,var(--maple) 14%,var(--card));color:var(--ink);box-shadow:2px 2px 0 color-mix(in srgb,var(--maple) 60%,#000);cursor:pointer}.cl-rb .pr{display:inline-flex;gap:4px;white-space:nowrap}.cl-rb button.sl{padding:6px 8px}.cl-rb button:active{transform:translate(2px,2px);box-shadow:none}
+
+.cl-launch{padding:10px!important}
+.cl-open{width:100%;display:flex;align-items:center;gap:10px;padding:10px 12px;border:2px solid var(--maple);background:color-mix(in srgb,var(--maple) 10%,var(--card));color:var(--ink);font-family:var(--ff-b);box-shadow:3px 3px 0 color-mix(in srgb,var(--maple) 55%,#000);cursor:pointer;text-align:left}
+.cl-open:active{transform:translate(2px,2px);box-shadow:none}.cl-open .ic{font-size:26px}.cl-open .t{flex:1;display:flex;flex-direction:column}.cl-open b{font-size:16px}.cl-open small{font-size:12px;color:var(--sub)}.cl-open .go{font-weight:700;color:var(--maple)}
+.cl-modal{position:fixed;inset:0;z-index:900;background:rgba(0,0,0,.55);display:none;align-items:flex-end;justify-content:center}
+.cl-modal.on{display:flex;animation:clfade .18s}
+@keyframes clfade{from{opacity:0}to{opacity:1}}
+.cl-sheet{width:100%;max-width:560px;max-height:92vh;max-height:92dvh;overflow-y:auto;-webkit-overflow-scrolling:touch;margin:0!important;border-radius:14px 14px 0 0;padding-bottom:calc(16px + env(safe-area-inset-bottom))!important;animation:clup .22s ease-out}
+@keyframes clup{from{transform:translateY(40px)}to{transform:none}}
+.cl-mh{position:sticky;top:-12px;z-index:2;display:flex;justify-content:space-between;align-items:center;background:var(--card);margin:-12px -12px 6px;padding:12px 12px 6px;border-bottom:2px solid var(--line)}
+.cl-mh h3{margin:0}
+.cl-x{width:36px;height:36px;border:2px solid var(--px);background:var(--card);color:var(--ink);font-size:16px;font-weight:700;box-shadow:2px 2px 0 var(--px);cursor:pointer}
+body.cl-lock{overflow:hidden}
+body.cl-lock .ov,body.cl-lock .imgov{z-index:950}body.cl-lock .toast{z-index:960}
 /* ===== 工具頁分頁 ===== */
 .tooltabs{padding:10px 14px 0!important}.tooltabs a{cursor:pointer;user-select:none;-webkit-user-select:none}
 #v-tools .sec[data-tt]:not(.tt-on){display:none}
@@ -950,12 +964,8 @@ html.dark .ex-tot{background:var(--card)!important}
 
   <!-- 咖啡 -->
   <section class="view" id="v-coffee">
-    <div class="sec" id="cfLearn">
-      <h3>🗣️ 咖啡店點單特訓</h3>
-      <div class="hint">不會日文也沒關係：每句都能點 🔊 聽發音、🐢 慢速再聽，或 📱 放大給店員看。先練「常用句」和「聽懂店員」，再用「小測驗」驗收，最後用「點單產生器」組出你要說的整句話。</div>
-      <div class="cl-prog" id="clProg"></div>
-      <div class="seg cl-tabs" id="clTabs"><button data-cl="say">① 常用句</button><button data-cl="hear">② 聽懂店員</button><button data-cl="term">③ 咖啡術語</button><button data-cl="quiz">④ 小測驗</button><button data-cl="order">⑤ 點單產生器</button></div>
-      <div id="clBody"></div>
+    <div class="sec cl-launch">
+      <button class="cl-open" id="clOpen"><span class="ic">🗣️</span><span class="t"><b>咖啡店點單特訓</b><small id="clMini">常用句・聽懂店員・術語・測驗・點單產生器</small></span><span class="go">開始 ›</span></button>
     </div>
     <div class="sec">
       <h3>☕ 福岡咖啡名店</h3>
@@ -1234,6 +1244,13 @@ html.dark .ex-tot{background:var(--card)!important}
   <a href="#tools" data-g="tools"><i class="pxi pxi-tools"></i>工具</a>
 </nav>
 
+  <div class="cl-modal" id="clModal" aria-hidden="true"><div class="cl-sheet sec" id="cfLearn">
+      <div class="cl-mh"><h3>🗣️ 咖啡店點單特訓</h3><button class="cl-x" id="clClose" aria-label="關閉">✕</button></div>
+      <div class="hint">不會日文也沒關係：每句都能點 🔊 聽發音、🐢 慢速再聽，或 📱 放大給店員看。先練「常用句」和「聽懂店員」，再用「小測驗」驗收，最後用「點單產生器」組出你要說的整句話。</div>
+      <div class="cl-prog" id="clProg"></div>
+      <div class="seg cl-tabs" id="clTabs"><button data-cl="say">① 常用句</button><button data-cl="hear">② 聽懂店員</button><button data-cl="term">③ 咖啡術語</button><button data-cl="quiz">④ 小測驗</button><button data-cl="order">⑤ 點單產生器</button></div>
+      <div id="clBody"></div>
+  </div></div>
 <div class="ov" id="ov"><button class="x" id="ovX">✕ 關閉</button><div class="big jp" id="ovJp"></div><div class="small" id="ovZh"></div></div>
 <div class="sheet" id="sheet"><form id="shForm" autocomplete="off">
   <h3 id="shT">編輯這一站</h3>
@@ -2134,6 +2151,7 @@ function clSay(t,lang,slow){try{if(!('speechSynthesis' in window)){toast('這台
 const clL=()=>S.get('cfLearn',{});
 function clMark(k){const L=clL();L[k]=(L[k]||0)+1;S.set('cfLearn',L)}
 function clProg(){const L=clL(),tot=CL_SAY.length+CL_HEAR.length+CL_TERM.length,got=Object.keys(L).filter(k=>L[k]>0).length;const pc=Math.round(got/tot*100);
+ {const m=$('#clMini');if(m)m.textContent=`已練 ${got} / ${tot}・${pc>=80?'可以上場了 🏅':'點開繼續練'}`}
  $('#clProg').innerHTML=`<div class="clp-t">練習進度 <b>${got}</b> / ${tot}　${pc>=80?'🏅 可以上場了！':pc>=40?'💪 快好了':'🌱 剛開始'}</div><div class="clp-b"><i style="width:${pc}%"></i></div>`}
 function clCard(k,zh,jp,ro,en,tip,isHear){const L=clL();return `<div class="clc${L[k]?' ok':''}" data-k="${k}">
  <div class="clc-zh">${L[k]?'✅ ':''}${esc(zh)}</div><div class="clc-jp">${esc(jp)}</div><div class="clc-ro">${esc(ro)}</div>${en?`<div class="clc-en">🇬🇧 ${esc(en)}</div>`:''}${tip?`<div class="clc-tip">${tip}</div>`:''}
@@ -2186,6 +2204,11 @@ $('#clBody').addEventListener('click',e=>{
  if(e.target.id==='clOBig'){const O=clOrderTxt();big(O.jp,O.zh);$('#ovJp').style.whiteSpace='normal';return}
 });
 if('speechSynthesis' in window){try{speechSynthesis.getVoices();speechSynthesis.onvoiceschanged=()=>{}}catch(e){}}
+function clOpen(){$('#clModal').classList.add('on');document.body.classList.add('cl-lock');clDraw()}
+function clClose(){$('#clModal').classList.remove('on');document.body.classList.remove('cl-lock');try{speechSynthesis.cancel()}catch(e){}}
+$('#clOpen').onclick=clOpen;$('#clClose').onclick=clClose;
+$('#clModal').addEventListener('click',e=>{if(e.target.id==='clModal')clClose()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&$('#clModal').classList.contains('on'))clClose()});
 clDraw();
 const SHOPS=[
  {id:'hbt',n:'DAISO・Standard Products・THREEPPY 博多巴士總站店',jp:'ダイソー 博多バスターミナル店',a:'博多站',b:['DAISO','Standard Products','THREEPPY'],h:'9:00–21:00・無休',d:'博多站旁、博多巴士總站 5 樓，九州最大的大創旗艦店，三個牌子在同一層。DAISO 是 100 日圓起的日用品；Standard Products 是簡約設計風的生活雜貨（多為 300 日圓起）；THREEPPY 是 300 日圓為主、粉嫩可愛的少女系雜貨和文具。',tip:'博多站走路 1 分鐘，抵達那晚或回程前都方便。'},
