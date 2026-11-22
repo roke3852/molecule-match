@@ -683,8 +683,8 @@ const CH=[
  L('me','……我可以先杯測看看嗎？'),
  L('zhou','當然，當然。年輕人做事謹慎，好。'),
  N('你在他們的杯測室裡，照標準流程做一次杯測。'),
- {act:'cup',play:1,s:'',t:'熱水一沖下去的時候，香氣整個炸開——荔枝、草莓糖、玫瑰，香到讓你有點頭暈。'},
- N('可是等到杯子放涼了一點，你再喝一口……那股香味，就像被人拔掉了插頭一樣，突然消失了。'),
+ {act:'cup',play:1,hold:2,s:'',t:'你愣住了。剛剛熱的時候，香氣整個炸開——荔枝、草莓糖、玫瑰，香到讓你有點頭暈。'},
+ N('可是放涼了一點再喝，那股香味，就像被人拔掉了插頭一樣，突然消失了。'),
  N('嘴巴裡最後只剩下一股說不出來的甜，很像小時候吃的那種水果口味糖果。不像水果，像「水果口味」。'),
  L('zhou','怎麼樣？好東西吧。'),
  L('zhou','好豆子啊，不必問太多。問多了，豆子就不香了。哈哈哈。'),
@@ -1712,7 +1712,7 @@ function step(){
     if(n.item){S.i++;giveItem(n.item);continue}
     if(n.money){S.i++;addMoney(n.money,n.why);continue}
     if(n.act==='buybean'){S.i++;persist();startAct('buybean');S.act.play=1;playBuy(n);return}
-    if(n.act&&n.play&&(n.act==='cup'||n.act==='cupfarm')){S.i++;persist();startAct(n.act);playCup(n);return}
+    if(n.act&&n.play&&(n.act==='cup'||n.act==='cupfarm')){S.i++;persist();startAct(n.act);if(n.hold)S.act.hold=n.hold;playCup(n);return}
     if(n.act==='roast'&&n.play){S.i++;persist();startAct('roast');playRoast(n);return}
     if(n.act==='pick'){S.i++;persist();startAct('pick');playPick(n);return}
     if(n.act&&n.play){S.i++;persist();startAct(n.act);S.act.play=1;S.act.st=0;S.act.brush=0;S.act.bv=0;playClean(n);return}
@@ -2096,17 +2096,17 @@ function actCup(g,t,A){const p=PX(g),now=performance.now(),farm=A.k==='cupfarm',
   if(L&&L.kind==='slp'&&la<.9){for(let k=0;k<12;k++){const ph=(la*1.4+k*.09)%1;g.globalAlpha=1-ph;p(cx(L.i)+Math.cos(k*1.9)*ph*26,cy-16-ph*22,2,2,k%3?'#c8b8a8':cols[0]);g.globalAlpha=1}}
   if(!farm&&A.ph>=5){const T=Math.round(72-cool*30);p(292,70,12,100,'#f4efe4');p.frame(292,70,12,100,'#8b93a1');const h=Math.round((T-30)/50*90);p(295,166-h,6,h,T>55?'#d64545':'#6c9bd2');p.ell(298,170,7,7,T>55?'#d64545':'#6c9bd2')}
   p.vig()}
-function cupCan(A,i){return (A.ph===1&&!A.fill[i])||(A.ph===2&&!A.brk[i])||(A.ph===4&&!A.slp[i])}
+function cupCan(A,i){return (A.ph===7)||(A.ph===1&&!A.fill[i])||(A.ph===2&&!A.brk[i])||(A.ph===4&&!A.slp[i])}
 function cupCap(A){const farm=A.k==='cupfarm',n=a=>a.filter(x=>x).length;
   if(A.ph===0)return '① 聞乾香';if(A.ph===1)return '② 注水　'+n(A.fill)+' / 5';if(A.ph===2)return '③ 破渣・聞濕香　'+n(A.brk)+' / 5';if(A.ph===3)return '④ 撈渣';
   if(A.ph===4)return '⑤ 啜吸　'+n(A.slp)+' / 5';if(farm)return '⑥ 五杯一致，沒有瑕疵杯';
-  const T=Math.round(72-Math.min(1,A.coolT?(performance.now()-A.coolT)/2400:0)*30);return A.ph===6?'⑥ '+T+'°C　香氣不見了':'⑥ 放涼中……'+T+'°C'}
+  const T=Math.round(72-Math.min(1,A.coolT?(performance.now()-A.coolT)/2400:0)*30);return A.ph===8?'⑦ '+T+'°C　香氣不見了':A.ph===7?'⑦ '+T+'°C　再喝一口':'⑥ 放涼中……'+T+'°C'}
 /* 互動杯測：一步一步、一杯一杯 */
 function playCup(n){ffwd=false;$('tFF').classList.remove('on');waiting=false;$('box').style.display='none';$('nextBtn').classList.remove('on');
   const A=S.act,cw=$('choices'),tl=$('tvLayer'),farm=A.k==='cupfarm';cw.classList.add('on');tl.classList.add('click');
   tl.insertAdjacentHTML('beforeend',[0,1,2,3,4].map(i=>`<button class="cupHit" data-i="${i}" style="left:${(48+i*56)/3.2}%" aria-label="第${i+1}杯"></button>`).join(''));
   const HINT={0:['湊近乾粉，先聞一次乾香。',farm?'紅蘋果、黑糖，很乾淨。':'甜得很直接，像糖果罐打開。'],1:['點杯子，一杯一杯注水。','熱水沖下去，粉層浮成一層殼。'],
-    2:['四分鐘到了。點杯子，用杯測匙破渣，順便湊近聞濕香。',''],3:['把浮在表面的渣撈乾淨。',''],4:[farm?'五杯都要喝：點杯子啜吸。':'點杯子，舀一匙用力啜吸。',''],5:['讓它放涼一點，再喝一口。','']};
+    2:['四分鐘到了。點杯子，用杯測匙破渣，順便湊近聞濕香。',''],3:['把浮在表面的渣撈乾淨。',''],4:[farm?'五杯都要喝：點杯子啜吸。':'點杯子，舀一匙用力啜吸。',''],5:['讓它放涼一點，再喝一口。',''],7:['放涼了。點一杯，再喝一口。','']};
   const btn={0:'👃 聞乾香',3:'🥄 撈渣（五杯一起）',5:'⏳ 等它放涼'};
   const render=(msg)=>{if(!S||S.act!==A)return;const h=HINT[A.ph]||['',''];
     cw.innerHTML=`<div class="cq brewq">☕ ${h[0]}</div><div class="bhint">${msg||'&nbsp;'}</div>`+(btn[A.ph]?`<button class="bhold" id="cBtn">${btn[A.ph]}</button>`:'');
@@ -2114,12 +2114,13 @@ function playCup(n){ffwd=false;$('tFF').classList.remove('on');waiting=false;$('
     const B=$('cBtn');if(B)B.onclick=()=>{B.disabled=true;
       if(A.ph===0){A.dry=performance.now();sfx('whoosh');setTimeout(()=>{A.ph=1;render(HINT[0][1])},1100)}
       else if(A.ph===3){A.skm=performance.now();sfx('brush');setTimeout(()=>sfx('brush'),500);setTimeout(()=>{A.ph=4;render('表面乾淨了，可以開始喝。')},1400)}
-      else if(A.ph===5){A.coolT=performance.now();sfx('tap');setTimeout(()=>{A.ph=6;sfx('down');render();finish()},2600)}}};
+      else if(A.ph===5){A.coolT=performance.now();sfx('tap');setTimeout(()=>{A.ph=7;render('溫度降到四十幾度了。')},2600)}}};
   const WET=farm?['紅蘋果。','黑糖，還有一點柑橘。','跟第一杯一樣。','一樣乾淨。','五杯都一樣。']:['荔枝！','草莓糖……','玫瑰，好濃。','香到有點頭暈。','每一杯都一樣香——香得一模一樣。'];
   const SIP=farm?['紅蘋果的酸，很明亮。','乾淨，沒有怪味。','一樣。','一樣，甜感很穩。','第五杯，也一樣乾淨。']:['好香……','荔枝、草莓糖。','很甜，甜得很直。','跟剛剛一樣。','第五杯，香氣還在。'];
   tl.querySelectorAll('.cupHit').forEach(b=>b.onclick=()=>{const i=+b.dataset.i;if(!cupCan(A,i))return;const now=performance.now();
     if(A.ph===1){A.fill[i]=now;A.last={i,kind:'pour',ts:now};sfx('pour');const k=A.fill.filter(x=>x).length;if(k===5)setTimeout(()=>{A.ph=2;render('（等待 4 分鐘……）')},700);else render(HINT[1][1])}
     else if(A.ph===2){A.brk[i]=now;A.last={i,kind:'brk',ts:now};sfx('crack');const k=A.brk.filter(x=>x).length;if(k===5)setTimeout(()=>{A.ph=3;render(WET[4])},800);else render(WET[k-1])}
+    else if(A.ph===7){A.ph=8;A.last={i,kind:'slp',ts:now};sfx('slurp');render('……');setTimeout(()=>{sfx('down');render('……香味呢？剛剛的荔枝、草莓糖、玫瑰，全都不見了。');finish()},900)}
     else if(A.ph===4){A.slp[i]=now;A.last={i,kind:'slp',ts:now};sfx('slurp');const k=A.slp.filter(x=>x).length;
       if(k===5)setTimeout(()=>{if(farm){A.ph=6;sfx('up');render('五杯一致，沒有瑕疵杯。');finish()}else{A.ph=5;render(SIP[4])}},800);else render(SIP[k-1])}});
   const finish=()=>{tl.querySelectorAll('.cupHit').forEach(b=>b.remove());setTimeout(()=>{if(!S||S.act!==A)return;cw.classList.remove('on');tl.classList.remove('click');showLine({s:'',t:n.t})},1300)};
