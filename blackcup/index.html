@@ -909,7 +909,7 @@ const CH=[
 ]},
 {t:'終章　東京',sub:'清澈的一杯',recap:'蘇曼交出了金穗的加料證據，沈懷舟放下了十二年的復仇。你帶著豆子、紀錄和證據，飛往東京的世界手沖盃。',nodes:[
  BG('home','出發當天．你的租屋處'),
- N('出發當天早上，你把那本沾著泥巴的筆記本、蘇曼給的牛皮紙袋，還有比賽用的豆子，一樣一樣放進隨身背包。'),
+ {act:'pack',s:'',t:'出發當天早上，你把那本沾著泥巴的筆記本、蘇曼給的牛皮紙袋，還有比賽用的豆子，一樣一樣放進隨身背包。'},
  N('這三樣東西，你一刻都不打算離開身邊。'),
  N('這一趟不是你一個人。沈懷舟說，他十二年沒進過比賽會場，這次要親眼看著；蘇曼也和金穗談了解約，用自己的名字報名了世界賽。'),
  N('三個人約在桃園機場第二航廈碰面。沈懷舟只帶了一個很舊的皮箱，蘇曼戴著口罩和帽子，怕被金穗的人認出來。'),
@@ -1853,6 +1853,7 @@ BGS.brewbar=function(g,t){const p=PX(g),B=S&&S.brewUI;if(!B)return;
 
 /* ============ 小動畫：清理磨豆機 ============ */
 function startAct(k){S.act={k,t0:performance.now(),prev:curBg,loc:S.loc};curBg='act';if(k==='flood')startFlood();
+  if(k==='pack'){const tl=$('tvLayer');tl.innerHTML='<div class="actcap" id="actCap"></div>';tl.hidden=false;[1200,2500,3800].forEach(d=>setTimeout(()=>{if(S&&S.act)sfx('pop')},d));setTimeout(()=>{if(S&&S.act)sfx('whoosh')},4400);setTimeout(()=>{if(S&&S.act)sfx('up')},5200)}
   if(k==='water'){const tl=$('tvLayer');tl.innerHTML='<div class="actcap" id="actCap"></div><div class="wlab" id="wl1" style="left:30%">早上：藍色封膜</div><div class="wlab bad" id="wl2" style="left:70%">現在：白色封膜</div>';tl.hidden=false;sfx('doom');setTimeout(()=>{if(S&&S.act)sfx('whoosh')},2200);setTimeout(()=>{if(S&&S.act)sfx('pop')},5000)}
   if(k==='roast'){const tl=$('tvLayer');const X=s0=>176+(s0/7)*134,Y=v=>160-(Math.min(240,v)-80)/160*116,pos=(s0,v)=>`left:${X(s0)/320*100}%;top:${Y(v)/200*100}%`;
     tl.innerHTML='<div class="actcap" id="actCap"></div><div class="rlab" style="top:17%">烘焙曲線</div>'+RFAIL.map((F,i)=>`<div class="rtag" id="rf${i}" hidden style="${pos(F.end,F.f(F.end))};border-color:${F.c}">${F.n.replace('第 ','').replace(' 鍋','')}</div>`).join('')+`<div class="rtag ok" id="rf3" hidden style="${pos(6.4,roastT(6.4))}">17 ✓</div>`;tl.hidden=false;
@@ -1860,7 +1861,7 @@ function startAct(k){S.act={k,t0:performance.now(),prev:curBg,loc:S.loc};curBg='
     for(let i=0;i<12;i++)setTimeout(()=>{if(S&&S.act)sfx('crack')},3600+4330+i*130+Math.random()*80);setTimeout(()=>{if(S&&S.act)sfx('whoosh')},3600+6400);setTimeout(()=>{if(S&&S.act)sfx('up')},3600+6700)}
   if(k==='notebook'){const tl=$('tvLayer');tl.innerHTML='<div class="actcap" id="actCap"></div>';tl.hidden=false;setTimeout(()=>{if(S&&S.act)sfx('whoosh')},500)}
   if(k==='pest'){const tl=$('tvLayer');tl.innerHTML='<div class="pestl" style="left:26.5%">A 排・葉子背面</div><div class="pestl" style="left:73.5%">B 排・紅色果實</div>';tl.hidden=false;sfx('pop')}
-  $('locLabel').textContent=k==='flood'?'冠軍後第二天':k==='water'?'水瓶':k==='roast'?'烘豆．第 17 鍋':k==='notebook'?'處理紀錄本':k==='pest'?'放大看看':k==='cup'?'杯測．金穗':k==='cupfarm'?'杯測．帕洛瑪莊園':k==='jeep'?'內瓦 → 帕洛瑪莊園':'清理磨豆機';
+  $('locLabel').textContent=k==='pack'?'出發當天':k==='flood'?'冠軍後第二天':k==='water'?'水瓶':k==='roast'?'烘豆．第 17 鍋':k==='notebook'?'處理紀錄本':k==='pest'?'放大看看':k==='cup'?'杯測．金穗':k==='cupfarm'?'杯測．帕洛瑪莊園':k==='jeep'?'內瓦 → 帕洛瑪莊園':'清理磨豆機';
   if(k==='jeep'){const tl=$('tvLayer');tl.innerHTML='<div class="actcap" id="actCap"></div><div class="jsign" id="jSign" hidden>帕洛瑪莊園 →</div>';tl.hidden=false;sfx('plane');[900,1700,2600,3400,4300].forEach(d=>setTimeout(()=>{if(S&&S.act)sfx('bump')},d))}
   if(k==='cup'||k==='cupfarm'){const tl=$('tvLayer');tl.innerHTML='<div class="actcap" id="actCap"></div>';tl.hidden=false;[[1300,'pour'],[1800,'pour'],[2700,'pop'],[2900,'whoosh'],[3900,'brush'],[4900,'slurp'],[5300,'slurp'],[5700,'slurp'],[6100,'slurp']].concat(k==='cupfarm'?[[6500,'up']]:[]).forEach(([d,k2])=>setTimeout(()=>{if(S&&S.act)sfx(k2)},d))}
   if(k==='clean'){[300,900,1300,1700,2100].forEach(d=>setTimeout(()=>{if(S&&S.act)sfx('brush')},d));setTimeout(()=>{if(S&&S.act)sfx('pop')},2900)}}
@@ -1987,7 +1988,7 @@ function actPest(g,t,A){const p=PX(g),e=(performance.now()-A.t0)/1000,z=Math.min
     const bx=nx+16+Math.sin(t*1.5)*6,by=ny-6+Math.cos(t*1.5)*2;g.fillStyle='#1a1210';g.beginPath();g.ellipse(bx,by,4,2.6,.3,0,6.283);g.fill();p(bx-5,by-1,2,1,'#3a2a20');
     for(let k=-1;k<=1;k++){p(bx+k*2,by+2,1,2,'#1a1210');p(bx+k*2,by-3,1,2,'#1a1210')}});
   p.vig()}
-BGS.act=function(g,t){const A=S&&S.act;if(!A)return;(A.k==='flood'?actFlood:A.k==='water'?actWater:A.k==='roast'?actRoast:A.k==='notebook'?actNotebook:A.k==='pest'?actPest:A.k==='cup'||A.k==='cupfarm'?actCup:A.k==='jeep'?actJeep:actClean)(g,t,A)};
+BGS.act=function(g,t){const A=S&&S.act;if(!A)return;(A.k==='pack'?actPack:A.k==='flood'?actFlood:A.k==='water'?actWater:A.k==='roast'?actRoast:A.k==='notebook'?actNotebook:A.k==='pest'?actPest:A.k==='cup'||A.k==='cupfarm'?actCup:A.k==='jeep'?actJeep:actClean)(g,t,A)};
 
 /* ============ 道具 ============ */
 const ITEMS={
@@ -2104,6 +2105,26 @@ function actFlood(g,t,A){const p=PX(g),e=(performance.now()-A.t0)/1000;BGS.home(
   if(e<4.2&&Math.sin(t*20)>0){p(px-6,py+10,2,8,'#ece4d4');p(px+30,py+10,2,8,'#ece4d4');p(px-10,py+14,2,4,'#ece4d4');p(px+34,py+14,2,4,'#ece4d4')}
   const c=document.querySelector('#fCount b'),n=Math.round(800+(23000-800)*Math.min(1,Math.pow(e/4,1.6)));if(c&&c.textContent!==n.toLocaleString())c.textContent=n.toLocaleString();
   p.vig()}
+
+/* 打包進背包 */
+function drawIco(g,id,x,y,sc){const m=ITEMS[id].ic;m.forEach((row,yy)=>[...row].forEach((ch,xx)=>{if(ch!=='.'){g.fillStyle=IPAL[ch];g.fillRect(Math.round(x+xx*sc),Math.round(y+yy*sc),Math.ceil(sc),Math.ceil(sc))}}))}
+const PACK=[['notebook','處理紀錄本'],['docs','蘇曼給的牛皮紙袋'],['beans','比賽用的豆子']];
+function actPack(g,t,A){const p=PX(g),e=(performance.now()-A.t0)/1000;BGS.home(g,t);g.fillStyle='rgba(8,10,14,.55)';g.fillRect(0,0,320,200);
+  // 桌面特寫
+  p(0,128,320,72,'#7a4e30');p(0,128,320,2,'#b07a4f');p.dith(0,132,320,68,'#6a4228',4);p.glow(160,110,150,'rgba(240,180,106,.14)');
+  // 背包
+  const bx=176,by=70,zip=Math.min(1,Math.max(0,(e-4.4)/.8));
+  p(bx,by,96,72,'#2f3a2c');p(bx,by,96,3,'#44523f');p(bx+6,by+30,84,34,'#28311f');p.frame(bx+6,by+30,84,34,'#44523f');p(bx+40,by+40,16,6,'#d64545');
+  p(bx+10,by-12,76,14,'#2f3a2c');p(bx+30,by-22,36,12,'#3a4733');p(bx+36,by-20,24,4,'#2f3a2c');
+  const open=1-zip;p(bx+8,by+2,80,Math.round(14*open),'#141a14');
+  p(bx+8,by+2,Math.round(80*zip),2,'#c4cad1');p(bx+8+Math.round(80*zip)-3,by,6,6,'#c4cad1');
+  // 物品飛進背包
+  PACK.forEach(([id],i)=>{const t0=.4+i*1.3,u=Math.min(1,Math.max(0,(e-t0)/.9));const sx=24+i*48,sy=96,tx=bx+28,ty=by+4;
+    if(u>=1)return;const x=sx+(tx-sx)*u,y=sy+(ty-sy)*u-Math.sin(u*3.14)*50,sc=4-u*1.2;g.save();
+    if(u>.85){g.globalAlpha=1-(u-.85)/.15}drawIco(g,id,x,y,sc);g.restore()});
+  if(e>5.3){const k=Math.sin(t*6)>0;p(bx+38,by-36,20,12,'rgba(14,17,22,.9)');if(k){p(bx+42,by-30,3,3,'#4fb3a9');p(bx+45,by-28,3,3,'#4fb3a9');p(bx+48,by-31,3,3,'#4fb3a9');p(bx+51,by-34,3,3,'#4fb3a9')}}
+  const step=e<5.2?PACK[Math.min(2,Math.floor(Math.max(0,e-.4)/1.3))][1]:'',cap=document.getElementById('actCap'),txt=e<.4?'出發前，打包':e<4.4?'放進背包：'+step:e<5.2?'拉上拉鍊':'✓ 三樣東西，一刻都不離身';
+  if(cap&&cap.textContent!==txt)cap.textContent=txt;p.vig()}
 /* 筆記本動畫 */
 function actNotebook(g,t,A){const p=PX(g),e=(performance.now()-A.t0)/1000;
   p(0,0,320,200,'#5a3d27');for(let y=0;y<200;y+=14){p(0,y,320,1,'#4a3220');p.dith(0,y+2,320,10,'#664530',4)}p.glow(160,90,160,'rgba(240,200,140,.16)');
