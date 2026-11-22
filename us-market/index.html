@@ -38,7 +38,9 @@ main{max-width:760px;margin:0 auto;padding:14px max(14px,env(safe-area-inset-lef
 #p-bear .card.fold>h2::after,#p-ev .card.fold>h2::after{transform:rotate(-90deg)}
 #p-bear .card.fold>*:not(h2):not(:first-child){display:none}
 #p-bear .card.fold{padding-bottom:12px}
-#p-ev .card.fold>*:not(h2):not(.meta):not(.lead){display:none}
+#p-ev .card.fold>*:not(h2):not(.meta):not(.lead):not(.stats){display:none}
+#p-ev .card.fold>.stats{margin:8px 0 0}
+#p-ev .card.fold>.stats .stat:nth-child(n+3){display:none}
 #p-ev .card.fold>.lead{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-bottom:0;color:var(--muted)}
 #p-ev .card.fold{padding-bottom:12px;cursor:pointer}
 .ltab{display:flex;flex-direction:column;gap:8px;margin-top:6px}.ltab .r{border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-size:13px;line-height:1.55}.ltab .r.now{border-color:var(--bear)}.ltab .h{display:flex;gap:8px;align-items:baseline;font-weight:700}.ltab .h small{font-weight:400;color:var(--muted)}.ltab .m{color:var(--muted)}.ltab .o{margin-top:2px}
@@ -48,6 +50,12 @@ main{max-width:760px;margin:0 auto;padding:14px max(14px,env(safe-area-inset-lef
 .tag{font-size:11px;padding:1px 7px;border-radius:6px;background:var(--grid);color:var(--muted)}
 .tag.hot{background:var(--hl);color:var(--fg);border:1px solid var(--hlb)}
 .lead{margin:10px 0 6px}
+.lead.short{font-size:16px;line-height:1.6;margin:8px 0 4px}
+details.more{margin:10px 0 4px;font-size:14px}
+details.more>summary{cursor:pointer;color:var(--s1);font-size:13px;padding:6px 0;list-style:none}
+details.more>summary::-webkit-details-marker{display:none}
+details.more>summary::before{content:"▸ "}
+details.more[open]>summary::before{content:"▾ "}
 .why{background:var(--hl);border-left:3px solid var(--hlb);padding:8px 12px;border-radius:0 8px 8px 0;font-size:14px;margin:10px 0}
 .why b{font-size:12px;color:var(--muted);display:block}
 .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin:12px 0}
@@ -193,8 +201,8 @@ input[type=range]{width:100%;accent-color:var(--s1)}
     <button class="ib" id="shareBtn" aria-label="複製連結">🔗</button>
   </div>
   <nav role="tablist">
-    <button data-p="ev" aria-selected="true">大事圖解</button>
-    <button data-p="tour" aria-selected="false">導覽員</button>
+    <button data-p="tour" aria-selected="true">導覽員</button>
+    <button data-p="ev" aria-selected="false">大事圖解</button>
     <button data-p="vw" aria-selected="false">名人觀點</button>
     <button data-p="cal" aria-selected="false">接下來</button>
     <button data-p="bear" aria-selected="false">空頭史</button>
@@ -203,13 +211,13 @@ input[type=range]{width:100%;accent-color:var(--s1)}
 </header>
 
 <main>
-  <section class="pane on" id="p-ev">
+  <section class="pane" id="p-ev">
     <div class="chips" id="evChips"></div>
     <div class="foldbar"><button data-evfold="1">全部收合</button><button data-evfold="0">全部展開</button></div>
     <div id="evList"></div>
   </section>
 
-  <section class="pane" id="p-tour"><div id="tourBox"></div></section>
+  <section class="pane on" id="p-tour"><div id="tourBox"></div></section>
 
   <section class="pane" id="p-vw">
     <div class="card">
@@ -320,124 +328,124 @@ input[type=range]{width:100%;accent-color:var(--s1)}
 const ASOF="2026-11-22 07:25";
 /* ---------- 大事資料 ---------- */
 const EVENTS=[
-{id:"tw-rescue3",cat:"台股",hot:1,date:"2026-11-21",title:"救市第三波：金管會全面禁止平盤以下放空等 5 項措施，11/23 起上路；上市融資單日斷頭 491 億",
+{id:"tw-rescue3",short:"一週內第三次救市：11/23 起全面禁止平盤以下放空，國安基金假日證實已進場；但真正壓垮盤面的是融資斷頭。",cat:"台股",hot:1,date:"2026-11-21",title:"救市第三波：金管會全面禁止平盤以下放空等 5 項措施，11/23 起上路；上市融資單日斷頭 491 億",
  lead:"週六（11/21）金管會宣布 5 項穩市措施，11/23（週一）起實施：① 上市櫃股票與 TDR 的融券、借券賣出，不得低於前一日收盤價（券商、期貨商避險除外）；② 融券最低維持率從 130% 提高到 150%；③ 暫停受理認售權證上市；④ 鼓勵公司買回庫藏股，今年第 4 季到明年第 1 季的買回可計入 2026 年 ESG 評鑑；⑤ 鼓勵金融機構暫停出借股票，已出借的可提前召回或到期不續借。行政院也做出四點裁示：財政部強化企業融資、信保與國安基金力道，金管會維持交易秩序，經濟部協助產業，央行關注匯市。週末（11/21）國安基金罕見在假日喊話：證實已「實彈」進場（11/6 臨時會授權，第 10 次護盤），請投資人不要恐慌殺低，必要時會和金管會再採取措施；並列出四個基本面數字——主計總處預估今年 GDP 成長 11.05%（39 年來最高）、景氣燈號連 10 個月紅燈、1–10 月外銷訂單 9,430 億美元（+58.6%）、上市櫃 1–10 月營收 56.89 兆元已超過去年全年。本週加權累計跌 7,641.83 點（−17.5%），是 1991 年以來最大單週跌幅。",
  why:"這是一週內第三次加碼（11/19 限空令 2.0、國安基金進場、11/21 限空令 3.0），對象從「放空」擴大到「借券來源」和「公司自己買回」。但 11/20 的數字顯示，真正壓垮盤面的是融資：上市融資一天減 491 億，維持率掉到 140.4%，估計有 41.8%（約 1,821 億）的融資本金已經在 130% 追繳線以下；全市場收到追繳通知的有 6,186 戶，是前一天的兩倍。限空只能擋住空方加碼，擋不住多方被迫賣出。週一要看的是：追繳到期的斷頭賣壓有沒有出盡，高融資股能不能守住前低。另外這次跌得極快：加權 30 個交易日跌 27.7%，是 2000 年以來第 3 慘的 30 天；櫃買 −38.9%，第 2 慘。",
  stats:[["上市融資","4,352億","單日 −491 億"],["融資維持率","140.4%","前日 147.9%"],["追繳線下本金","1,821億","占融資 41.8%（估）"],["追繳通知","6,186 戶","前日 2,956 戶；64.6 億"],["加權 30 日","−27.7%","2000 年來第 3 慘"],["櫃買 30 日","−38.9%","2000 年來第 2 慘"]],
  charts:["shortBan","mgMix","mgCall","speed30"],
  tl:[["11-19","金管會限空令 2.0；國安基金證實進場"],["11-20","加權 −2,394 點；上市融資減 491 億、維持率 140.4%，追繳通知 6,186 戶",1],["11-21","金管會宣布 5 項措施（全面禁止平盤下放空、融券維持率 150%、停發認售權證、鼓勵庫藏股、暫停借券）；行政院四點裁示",1],["11-21 下午","國安基金假日聲明：已實彈進場，列 GDP 11.05%、連 10 紅燈等四點基本面，籲勿恐慌殺低",1],["11-23","5 項措施上路；追繳到期，看斷頭賣壓與高融資股能否守住前低",1]],
  src:[["經濟日報：金管會宣布 5 項措施","https://money.udn.com/money/story/5613/9893342"],["鉅亨網：單週跌 7,641 點、國安基金四點喊話","https://news.cnyes.com/news/id/6669743"],["聯合新聞網：單週跌 17.5%、國安基金已實彈護盤","https://udn.com/news/story/7251/9893830"],["統一期貨投顧：11/20 上市融資急減、追繳壓力攀升",""],["FinLab：歷次空頭從高點對齊、30 日報酬分布",""],["行政院四點裁示（截圖）",""],["歷次限空令整理表（網路流傳，未查到原始出處）",""]]},
-{id:"rout-1120",cat:"大盤",hot:1,date:"2026-11-20",title:"美股大屠殺：S&P、道瓊跌進修正區，Nasdaq −5.28% 吐光今年漲幅，費半 −10.73%",
+{id:"rout-1120",short:"輝達傳 SEC 查會計、單日 −14%，費半崩 10.7%；S&P、道瓊跌進修正區，Nasdaq 吐光今年漲幅。",cat:"大盤",hot:1,date:"2026-11-20",title:"美股大屠殺：S&P、道瓊跌進修正區，Nasdaq −5.28% 吐光今年漲幅，費半 −10.73%",
  lead:"週五（11/20）AI 殺盤全面失控。收盤道瓊跌 949.73 點（−1.93%）收 48,147.33；S&P 500 跌 3.70% 收 6,910.39，距 10 月高點 −11.6%，和道瓊一起進入修正區；Nasdaq 重挫 5.28% 收 22,617.73，今年漲幅全數吐回、距高點 −18.1%；費城半導體指數暴跌 10.73% 收 8,408.59，30 檔成分股全部收黑。個股：輝達 −14% 收 125.53（連 7 跌）、美光 −13.9%、AMD −13.2%、博通 −12.2%、台積電 ADR −9.48%，SanDisk、希捷、SK 海力士 ADR 也跌 12–16%。本週 S&P 跌約 8.6%、Nasdaq 跌約一成，是 2020 年 3 月以來最大單週跌幅；VIX 從週一約 20 飆到週五收盤 37 以上，是 2025 年 4 月以來最高；S&P 500 成分股只剩 46% 站在 200 日均線之上。資金湧向公債，10 年期美債殖利率降約 12 個基點到 4.93%。",
  why:"引爆點是路透報導美國 SEC 正在調查輝達的潛在會計問題，疊上 Hunterbrook 放空 AMD、Fed 官員續放鷹（費城 Fed 總裁 Paulson 主張審慎升息、理事 Cook 說通膨壓力擴散）、川普揚言對到海外蓋資料中心的美企課重稅、蘋果據報開發自主 AI 代理。BTIG 的 Krinsky 指出三大指數都已跌破 200 日均線，風險偏向下行；E*TRADE 的 Larkin 則提醒，1983 年以來 15 次修正只有 5 次演變成空頭。Dan Ives 形容是「完美風暴」，但認為 AI 建設主軸沒變。對台股來說，台指期夜盤已重挫 1,881 點，週一壓力很大。",
  stats:[["S&P 500","6,910.39","−3.70%，距高點 −11.6%"],["Nasdaq","22,617.73","−5.28%，距高點 −18.1%"],["費半","8,408.59","−10.73%，距高點 −42.5%"],["道瓊","48,147.33","−949.73 點"],["輝達","$125.53","−14%，連 7 跌"],["10 年期美債","4.93%","−12bp，資金避險"]],
- charts:[],
+ charts:["rout1120"],
  tl:[["11-17","道瓊跌 848 點，S&P 跌到 7 月以來新低"],["11-19","ANT 上市日三大指數全跌逾 2%，S&P 6 連跌"],["11-20 盤前","Nasdaq-100 期貨跌逾 1%，ANT 盤前一度 −14%"],["11-20 盤中","路透：SEC 調查輝達會計；輝達、美光、AMD 盤中跌逾 13%",1],["11-20 收盤","S&P −3.70%、道瓊陷修正，Nasdaq −5.28%、費半 −10.73%",1],["11-21 凌晨","台指期夜盤重挫 1,881 點",1],["12-10","FOMC 決議：市場幾乎已計入升息一碼"]],
  src:[["鉅亨網：美股盤後（指數、個股、分析師評論）","https://news.cnyes.com/news/id/6669311"],["優分析：Nasdaq 創 2020 年來最大單週跌幅、VIX、美債","https://uanalyze.com.tw/articles/1259860684"],["三立：道瓊跌 949 點、費半重挫逾 10%","https://inews.setn.com/news/1942548"],["TradingKey：Nasdaq −5.28%、費半 30 檔全跌","https://www.tradingkey.com/analysis/stocks/us-stocks/262316111-nasdaq-falls-ai-stock-selloff-nvidia-sec-probe-tradingkey"],["Schwab：VIX 37、市場寬度、FedWatch 92%","https://www.schwab.com/learn/story/market-volatility"],["Stocktwits：Dan Ives「完美風暴」","https://stocktwits.com/news-articles/markets/equity/anthropic-s-day-two-drop-fuels-broader-tech-rout-dan-ives-points-to-perfect-storm/cNbSHWSR91O"],["民視：台指期夜盤狂殺 1,881 點","https://www.ftvnews.com.tw/news/detail/2026B21W0081"]]},
-{id:"ant-d2",cat:"IPO",hot:1,date:"2026-11-20",title:"ANT 第二天收 88.91 美元（−8.5%）：盤中低點只比 83 承銷價高幾美分，守住沒破發",
+{id:"ant-d2",short:"ANT 第二天收 88.91 美元（−8.5%），盤中只差幾美分就跌破 83 承銷價，最後守住。",cat:"IPO",hot:1,date:"2026-11-20",title:"ANT 第二天收 88.91 美元（−8.5%）：盤中低點只比 83 承銷價高幾美分，守住沒破發",
  lead:"收盤更新：ANT 週五收 88.91 美元，跌 8.5%，仍比 83 美元承銷價高約 7%。開盤 89.86，盤中最低約 83.05–83.15 美元，只比承銷價高幾美分，之後拉回；首日 9.7 美元的漲幅吐掉大半。同一天大盤崩跌：S&P −3.70%、Nasdaq −5.28%（見最上方卡片）。承銷商已全數行使 1.47 億股超額配售權，等於少了承銷商回補的護盤買盤；之後的看點是 12/1 納入 MSCI、12/15 第一批最多 3.03 億股閉鎖期解禁、12/21 依快速納入規則進入 Nasdaq-100（Bloomberg Intelligence 估追蹤基金約買 46 億美元）。以下為盤前紀錄——WSJ 台北時間 22:30 即時報導：科技股賣壓擴大，Nasdaq-100 期貨盤前跌超過 1%。Anthropic（ANT）盤前一度跌 14%，從首日收盤 97.17 美元算約到 83.6 美元，幾乎碰到 83 美元承銷價，之後跌幅收斂；市場在看它今天會不會跌破發行價。S&P 500 期貨走低，若收黑將是連續第 7 天下跌，為 2020 年疫情爆發以來首見。賣壓也擴散到亞洲與歐洲：台股本週表現是 1990 年以來最差，ASML、英飛凌早盤走低。",
  why:"首日漲 17% 沒能扭轉市場對 AI 的疑慮。Swissquote 分析師 Ipek Ozkardeskaya 的說法是：AI 建設還需要大量資金，但融資成本在上升、信用壓力開始浮現，加上晶片出口可能收緊。若 ANT 跌破 83 美元，等於首日買進的人全部套牢，承銷商得出手護盤，也會讓明年 OpenAI 等 AI 公司的 IPO 定價更保守。資金同時湧向美債避險：10 年期殖利率跌破 5%，美元在一年高點附近；金價、銅價則下跌，銅從歷史高點已跌 18%。",
  stats:[["ANT 收盤","$88.91","−8.5%，仍高於承銷價 7%"],["盤中最低","≈$83.05","離 $83 只差幾美分"],["S&P 500","恐 7 連跌","2020 年以來最長"],["10 年期美債","4.99%","跌破 5%，資金避險"],["黃金","$3,581","−2.8%"],["銅期貨","本週 −9%","距歷史高點 −18%"],["台股本週","−17.5%","1991 年來最大單週跌幅"]],
  charts:["antD2"],
  tl:[["11-19","ANT 掛牌，首筆 111.50、盤中高 115.10、低 95.05，收 97.17（+17%）"],["11-20 台股","加權重挫 6.23%，本週表現為 1990 年以來最差"],["11-20 歐股","ASML、英飛凌等 AI 概念股早盤走低"],["11-20 22:30","美股盤前：Nasdaq-100 期貨跌逾 1%，ANT 盤前一度 −14%、逼近承銷價",1],["11-20 盤中","最低約 83.05–83.15 美元，只比承銷價高幾美分",1],["11-20 收盤","收 88.91 美元（−8.5%），守住承銷價；大盤 Nasdaq −5.28%",1],["12-01","納入 MSCI 指數生效"],["12-15","第一批閉鎖期解禁，最多 3.03 億股"],["12-21","依快速納入規則進入 Nasdaq-100"]],
  src:[["優分析：ANT 收跌 8.5%","https://uanalyze.com.tw/articles/1259860684"],["鉅亨網：ANT 報價 88.91","https://news.cnyes.com/news/id/6669311"],["Yahoo（Fortune）：盤中低點 83.15、只比承銷價高 15 美分","https://finance.yahoo.com/markets/stocks/articles/anthropic-slid-just-5-cents-164439785.html"],["BigGo：開盤 89.86、超額配售、Nasdaq-100 與解禁時程","https://finance.biggo.com/news/765d6f07-42db-4549-908a-f60edb28661f"],["FinanceFeeds：盤中低 83.05、蘋果 AI 代理報導","https://financefeeds.com/anthropic-shares-fall-12-as-apple-ai-agent-report-adds-to-global-selloff/"],["WSJ Live：Anthropic Stock Slides as Tech Rout Intensifies（Ed Ballard，截圖）",""]]},
-{id:"usd-strong",cat:"匯率",hot:1,date:"2026-11-20",title:"強勢美元：美元指數逼近 104 創 19 個月新高，台幣跌破 33、台股盤中崩逾 2,000 點",
+{id:"usd-strong",short:"美元指數衝上 19 個月新高、台幣跌破 33：外資賣台股換美元，形成股匯雙殺。",cat:"匯率",hot:1,date:"2026-11-20",title:"強勢美元：美元指數逼近 104 創 19 個月新高，台幣跌破 33、台股盤中崩逾 2,000 點",
  lead:"美元指數連漲 8 個交易日、有望連 4 週上漲，11/19 盤中觸及 104，是 2025 年 4 月以來最強。推手有三個：AI 股估值恐慌讓資金躲進美元與美債、Anthropic 上市沒能提振買氣、聯準會鷹派（芝加哥 Fed Goolsbee 說通膨不會自己回到 2%），市場預期 12 月升息一碼。台幣 11/17、11/18 都曾盤中跌破 33，央行尾盤調節拉回；11/20 開盤 32.96，幾分鐘內又破 33、最低 33.04。同一天台股盤中重挫超過 2,000 點、最低約 36,222，跌破國安基金進場時的 37,837 前低，上市櫃跌停超過 250 檔。外資 11 月以來到 11/19 已賣超約 8,303 億元。",
  why:"強勢美元會形成「股匯雙殺」：資金回流美國 → 外資賣台股、匯出換美元 → 台幣貶 → 還沒走的外資怕匯損再賣。央行說沒有特定防線，做法是在尾盤「調節」把匯率拉回、讓貶值慢一點，不會硬把方向扭轉，因為每次護盤都要動用外匯存底。這也是台股這波跌得比美股深的重要原因。",
  stats:[["美元指數","≈103.9","19 個月新高、連 8 漲"],["新台幣","33.04","11/20 盤中低點"],["外資賣超","≈8,303億","11/1–11/19 累計"],["台股盤中","−2,000點+","最低約 36,222"]],
  charts:["usdLoop","bondEtf","usdMyth"],
  tl:[["11-17","台幣盤中破 33，央行與出口商拋匯，收 32.85；外資賣超 381 億"],["11-18","盤中低 33.023，央行尾盤調節，收 32.947"],["11-19","美元指數觸 104；台股跌 1,768 點；金管會宣布限空令 2.0，隔天實施"],["11-20","台幣開 32.96、盤中 33.04；台股盤中跌逾 2,000 點，跌破 37,837 前低",1]],
  src:[["經濟日報：台幣開盤破 33、兩大觀察指標","https://money.udn.com/money/story/5616/9890600"],["NOWnews：美元指數 103.91、台幣 33.038","https://www.nownews.com/news/6893939"],["經濟日報：11/18 央行尾盤調節","https://money.udn.com/money/story/5616/9887664"],["工商時報：央行與出口商穩匯","https://www.ctee.com.tw/news/20261118700093-439901"],["四季線上：美元指數 19 個月高點原因","https://www.4gtv.tv/article/2026112010000011"],["風傳媒：前低 37,837、外資賣超","https://www.storm.mg/article/11183381"],["TVBS：限空令 2.0 內容","https://tech.tvbs.com.tw/money/4053349"],["經濟日報：台積電、聯發科、日月光盤中","https://udn.com/news/story/7251/9890614"],["鉅亨網：國家隊守台積電 2,000、台幣 33","https://news.cnyes.com/news/id/6668587"]]},
-{id:"who-sells",cat:"台股",hot:1,date:"2026-11-20",title:"誰在賣台股？外資賣超一路縮小，指數卻越跌越重：換內資在砍",
+{id:"who-sells",short:"外資賣超一天比一天少，指數卻越跌越重——現在主要是融資斷頭和自營商在賣。",cat:"台股",hot:1,date:"2026-11-20",title:"誰在賣台股？外資賣超一路縮小，指數卻越跌越重：換內資在砍",
  lead:"本週外資賣超從 11/18 的 765 億，縮到 11/19 的 243 億，今天（11/20）只剩 94.13 億。但指數反而越跌越兇：11/19 跌 1,768 點、284 檔跌停，11/20 再重挫 2,393.6 點（−6.23%）收 36,033。今天三大法人賣 522 億，其中自營商賣 341 億、原本在接盤的投信也轉賣 87 億，內資合計 428 億，是外資的 4.5 倍。外資賣得少、跌得卻更多，代表主要賣壓已經從外資轉到國內：融資斷頭、自營商避險、散戶恐慌。",
  why:"這是「流動性賣壓」的典型樣子。外資賣股是主動決定，看價格、會停手；融資追繳和避險賣出是被迫的，不管價格多低都得賣，而且越跌越多人被斷頭，形成連鎖。所以國安基金和限空令只能減速，擋不住被迫賣。好處是這種賣壓有盡頭：等融資清完、避險部位調整完，賣壓會突然消失，常是短線急殺後的底部。要看的是融資餘額還在不在大減、跌停家數有沒有縮小。",
  stats:[["外資 11/18","−765億","本波單日最大"],["外資 11/19","−243億","當週最低，指數卻跌 1,768 點"],["外資 11/20","−94億","指數卻跌 2,394 點"],["內資 11/20","−428億","自營 −341、投信 −87"],["融資維持率","140.4%","前日 147.9%；純個股約 119%，已破 130 追繳線"]],
  charts:["whoFx","whoMix","whoMix2"],
  tl:[["11-16","外資賣超 702 億，三大法人合計賣 1,141 億"],["11-17","台股跌 947 點，外資賣 381 億"],["11-18","外資賣 765 億（本波最大），投信逆買 176 億，指數收紅守 4 萬"],["11-19","外資只賣 243 億，指數卻重挫 1,768 點；自營商避險賣 214 億、上市融資減 237 億",1],["11-20","外資只賣 94 億，投信轉賣 87 億、自營賣 341 億；加權重挫 2,394 點收 36,033",1],["11-20 盤後","融資維持率：大盤 140.43%（前日 147.90%），純個股約 118–120%（前日 128.31%），跌破 130% 追繳線",1],["11-24～26","追繳通知後兩個營業日內要補錢，補不出來就會被券商處分（斷頭賣出）"]],
  src:[["中央社：11/18 三大法人","https://news.cts.com.tw/cna/money/202611/202611183102488.html"],["中央社：11/19 三大法人","https://news.cts.com.tw/cna/money/202611/202611193102959.html"],["ETtoday：11/19 外資、投信、自營明細","https://finance.ettoday.net/news/3275110"],["CMoney：外資只賣 243 億，真正在賣的是誰","https://cmnews.com.tw/article/cmoney-265098a6-e486-11f1-a7dd-ce9d590fa9d1"],["時報資訊：外資 11 月累計賣超","https://www.chinatimes.com/realtimenews/20261119003476-260410"],["永豐期貨：11/20 台指期籌碼快訊（三大法人、台指 VIX）",""],["11/20 融資維持率：網路流傳整理表（未查到原始出處）",""]]},
-{id:"tw-1120",cat:"台股",hot:1,date:"2026-11-20",title:"台股收盤重挫 2,394 點（−6.23%）收 36,033：連兩天跌掉 4,162 點",
+{id:"tw-1120",short:"加權一天跌 2,394 點收 36,033，兩天跌掉 4,162 點；櫃買單月跌幅創 1995 年來紀錄。",cat:"台股",hot:1,date:"2026-11-20",title:"台股收盤重挫 2,394 點（−6.23%）收 36,033：連兩天跌掉 4,162 點",
  lead:"收盤更新：加權指數重挫 2,393.6 點（−6.23%）收 36,033.29，櫃買指數跌 22.02 點（−7.72%）收 263.31，台積電收 2,000 元（−4.76%），上市僅 16 檔上漲、1,058 檔下跌；兩天合計跌掉 4,162 點，距 10/6 高點約 −27.7%。三大法人賣超 522 億，但外資只賣 94 億，投信和自營商合計賣 428 億，賣壓主力是內資。台指 VIX 飆到 52。以下為早盤紀錄——美股週四道瓊重挫逾千點，台股週五開盤跌 780 點後一路殺低。9:15 左右，加權指數跌 1,614 點（−4.2%）到 36,813，跌破 37,000 整數關卡；櫃買指數跌 18.8 點（−6.6%）到 266.5。櫃買近一週已跌 15%、近一個月跌 28%，從 6/22 高點 453.5 算起跌掉約 41%。測試介面、光學鏡頭族群幾乎全面跌停；台積電開盤 2,035 元，台達電跌破千元。",
  why:"連兩天大跌加上融資追繳、斷頭賣壓，籌碼正在被強制清洗。金管會「限空令 2.0」今天起上路，限制放空與借券賣出，但政策不代表行情立刻反轉。中小型 AI 股跌幅已超過 2022 年空頭，接下來看台積電能不能止跌、37,000 能不能拉回、融資餘額降到哪裡。",
  stats:[["加權收盤","36,033","−6.23%，距高點 −27.7%"],["三大法人","−522億","外資 −94、投信 −87、自營 −341"],["台指 VIX","52.1","前一日 49.3"],["櫃買收盤","263.31","−7.72%，距高點 −41.9%"],["台積電","2,000元","−4.76%，守在整數關卡"],["台指期夜盤","−1,881點","美股費半崩 10.7% 後"]],
  charts:["twLive","otcMonth"],
  tl:[["11-19","加權重挫 1,768 點（史上第 7 大跌點）、櫃買 −7.22%，280 檔跌停；金管會盤後祭出限空令 2.0"],["11-19 美股","道瓊重挫逾 1,100 點，AI 股全面走弱"],["11-20 09:00","台股開盤跌 780 點，限空令 2.0 上路",1],["11-20 09:15","加權 −4.2% 失守 37,000，櫃買 −6.6% 到 266.5",1],["11-20 收盤","加權 −2,393.6 點收 36,033.29；外資只賣 94 億，投信轉賣 87 億、自營賣 341 億",1],["11-20 盤後","櫃買 11 月單月已跌 28.9%，創 1995 年有紀錄以來最大單月跌幅（超過 2008/9 的 −25.7%）",1],["11-21 凌晨","美股費半崩 10.73%、台積電 ADR −9.48%，台指期夜盤重挫 1,881 點；週一（11/23）開盤壓力大",1]],
  src:[["口袋學堂：11/20 台股收盤（加權、櫃買、台積電、漲跌家數）","https://www.pocket.tw/school/articles/article-mwomd7rf/"],["民視：台指期夜盤狂殺 1,881 點","https://www.ftvnews.com.tw/news/detail/2026B21W0081"],["游庭皓的財經皓角：櫃買單月跌 28.9%（Goodinfo 月度統計）",""],["中央社：台股開盤跌 780 點","https://www.cna.com.tw/news/afe/202611200030.aspx"],["鉅亨網：台股盤中速報","https://www.cnyes.com/twstock"],["鉅亨網：櫃買盤中速報（近一週、一月跌幅）","https://news.cnyes.com/news/id/6668253"],["TVBS：台積電、台達電開盤","https://news.tvbs.com.tw/money/4053281"],["鏡週刊：AI 概念全面潰敗","https://www.mirrormedia.mg/external/setn_1941975"],["鉅亨網：融資追繳與限空令 2.0","https://news.cnyes.com/news/id/6667659"]]},
-{id:"ant-day-mkt",cat:"大盤",hot:1,date:"2026-11-19",title:"ANT 上市日大盤收黑：三大指數全跌逾 2%，道瓊跌 1,101 點、S&P 六連跌",
+{id:"ant-day-mkt",short:"ANT 上市當天大盤反而重挫，三大指數全跌逾 2%：好消息不漲，是空頭中段的樣子。",cat:"大盤",hot:1,date:"2026-11-19",title:"ANT 上市日大盤收黑：三大指數全跌逾 2%，道瓊跌 1,101 點、S&P 六連跌",
  lead:"ANT 定價強勁，Nasdaq 盤初一度大漲 2.1%；但在等待首筆成交的近兩小時裡漲幅全部吐回，道瓊被醫療股拖累轉跌。首筆成交 111.50 美元（+34%）後市場短暫鬆口氣，接著跌勢擴大：道瓊一度重挫逾 1,000 點、S&P 500 跌約 1.5%，連跌第六天，是 2024 年 4 月以來最長的連跌。之後 ANT 探到 95 美元低點後拉回，大盤午盤一度收斂（美東 12:35 道瓊 −1.3%、S&P −0.7%），但尾盤賣壓再起，終場三大指數全跌逾 2%：道瓊 −1,101 點收 49,097（6 月以來首度跌破 5 萬點）、S&P 500 −2.02% 收 7,175.83、Nasdaq −2.25% 收 23,879.20，費半 −2.42%。VIX 升到 3 月以來最高。ANT 收 97.17 美元，仍比承銷價高 17%。",
  why:"ANT 本身表現不差，卻沒能扭轉市場對 AI 的懷疑，反而成了「賣在消息出來時」的出場點。El-Erian 的解讀是投資人得「賣別的股票騰出位子」來買這檔史上最大 IPO。好消息不漲、壞消息大跌，是空頭中段的典型現象——市場還在消化 AI 估值，還不像見底。",
  stats:[["Nasdaq 盤初","+2.1%","收盤 −2.25%"],["道瓊收盤","−1,101點","49,097，−2.19%"],["S&P 500","−2.02%","7,175.83，6 連跌"],["ANT 收盤","$97.17","+17%，低點 $95"]],
  charts:["dayPhases","dayWhy"],
  tl:[["盤前","ANT 定價高於區間，期貨與 AI 股走高"],["09:30","開盤，Nasdaq 一度 +2.1%",1],["11:00","AI 股漲幅吐回，道瓊被嬌生、默克拖累轉跌；AMD 遭 Hunterbrook 放空"],["11:30 後","ANT 首筆成交 111.50 美元，短暫反彈",1],["12:10","道瓊 −2.0%、S&P −1.4%、Nasdaq −1.3%；ANT 回落到約 102 美元"],["12:35","ANT 探 95.05 後拉回約 101；道瓊 −1.3%、S&P −0.7%、Nasdaq −0.4%"],["16:00","尾盤再殺，收盤三大指數全跌逾 2%；道瓊 −1,101 點跌破 5 萬，ANT 收 97.17",1]],
  src:[["Motley Fool：11/19 收盤","https://www.fool.com/coverage/stock-market-today/2026/11/19/stock-market-today-nov-19-dow-plunges-1-100-points-as-the-s-and-p-500-suffers-its-6th-straight-day-of-losses/"],["自由財經：美股收盤與費半","https://ec.ltn.com.tw/article/breakingnews/5647048"],["Yahoo：VIX 升到 3 月以來最高","https://finance.yahoo.com/markets/stocks/articles/p-500-nasdaq-dow-end-230105109.html"],["UPI：Nasdaq 盤初一度 +2.1% 後吐回","https://www.upi.com/Top_News/US/2026/11/19/stocks-nasdaq-anthropic-wall-street/3191795106026"],["Bloomberg：ANT 不代表 AI 警報解除、S&P 連跌","https://www.bloomberg.com/news/articles/2026-11-18/stock-market-today-dow-s-p-live-updates"],["Swissinfo（Bloomberg）：資安事件、AI 舉債疑慮","https://www.swissinfo.ch/eng/stocks-fall-as-ai-bets-wane-before-anthropic-debut%3a-markets-wrap/92404209"],["Stocktitan：嬌生、默克拖累道瓊","https://www.stocktitan.net/articles/stock-market-today-live-november-19-2026"],["Yahoo：首筆成交後跌勢加速","https://finance.yahoo.com/markets/live/stock-market-today-thursday-november-19-dow-sp-500-nasdaq-anthropic-ipo-live-141306032.html"],["Kitco（Reuters）：盤中指數、油價上漲","https://www.kitco.com/news/off-the-wire/2026-11-19/stocks-wobble-focus-anthropic-debut-oil-prices-rise"],["CNBC：Klement 跌破 200 日線就全數賣股","https://www.cnbc.com/2026/11/19/anthropic-ipo-ai-bubble-stock-market.html"],["WSJ 直播與行情截圖（台北 11/20 01:10）",""]]},
-{id:"ipo-rank",cat:"IPO",hot:1,date:"2026-11-20",title:"IPO 規模排行榜：Anthropic 募 813 億美元，是 Aramco 的 3 倍",
+{id:"ipo-rank",short:"ANT 募資 813 億美元，全球史上最大 IPO，是沙烏地阿美的 3 倍。",cat:"IPO",hot:1,date:"2026-11-20",title:"IPO 規模排行榜：Anthropic 募 813 億美元，是 Aramco 的 3 倍",
  lead:"把 Anthropic 放進歷史排行榜來看：它以 813 億美元登上全球 IPO 募資第一，超過 6 月 SpaceX 的 750 億。第 3 名 SK 海力士（今年 7 月）也只有 265 億，2019 年的沙烏地阿美 256 億、2014 年的阿里巴巴 218 億，都只有它的四分之一左右。若承銷商行使超額配售，總額還可能到 935 億；另有同步私募 260 億美元。",
  why:"錢的規模史無前例，但只賣出公司很小一部分。超大型公司 IPO 只釋出 2–7% 的股份，流通籌碼很少，價格容易被少量買盤推高，也容易在閉鎖期解禁時大跌——這是看 ANT 接下來走勢最重要的結構性因素。",
  stats:[["募資額","$813億","全球史上第 1"],["是 Aramco 的","3.2 倍","2019 年 256 億"],["前 3–10 名合計","$1,654億","ANT 約占一半"],["占公司價值","5–7.5%","依市值算法不同"]],
  charts:["ipoRank","ipoFloat","ipoNote"],
  tl:[["2014-09","阿里巴巴 218 億，當時全球最大"],["2019-12","沙烏地阿美 256 億，紀錄保持 6 年半"],["2026-06","SpaceX 750 億，一口氣打破紀錄"],["2026-07","SK 海力士在 Nasdaq 募 265 億"],["2026-11","Anthropic 813 億，再破紀錄",1]],
  src:[["Renaissance Capital：歷來最大 IPO 與估值","https://www.renaissancecapital.com/IPO-Center/Stats/Largest-Global-IPOs"],["Axios：初始市值 1.08 兆、完全稀釋約 1.5 兆","https://www.axios.com/2026/11/18/anthropic-ipo-1-trillion"],["Yahoo Finance：流通股約 132 億股","https://finance.yahoo.com/markets/stocks/articles/buy-sell-hold-anthropic-stock-130246454.html"],["Kucoin：同步私募 260 億","https://www.kucoin.com/news/flash/anthropic-kicks-off-record-81-3b-ipo-on-nasdaq-with-1-5t-valuation"],["Wikipedia：SpaceX 上市後一度腰斬","https://en.wikipedia.org/wiki/Initial_public_offering_of_SpaceX"],["Quantral：SpaceX 閉鎖期與近期股價","https://quantral.com/blog/spacex-ipo"],["Dealroom：前 25 大 IPO","https://dealroom.net/blog/biggest-ipos-of-all-time"]]},
-{id:"ant-ipo",cat:"IPO",hot:1,date:"2026-11-18",title:"Anthropic IPO 定價 83 美元，募資 813 億美元創紀錄",
+{id:"ant-ipo",short:"Anthropic 定價 83 美元、高於原區間，首日開 111.50、收 97.17（+17%），市值約 1.3 兆。",cat:"IPO",hot:1,date:"2026-11-18",title:"Anthropic IPO 定價 83 美元，募資 813 億美元創紀錄",
  lead:"Claude 的開發商 Anthropic 以每股 83 美元定價，高於原本 70–78 美元的區間，並把發行股數加大到約 9.8 億股，總募資 813 億美元，超越 SpaceX 成為史上最大 IPO。台北時間今晚在 Nasdaq 掛牌，代號 ANT。Amodei 敲響開盤鐘後，經過約兩小時的開盤競價，ANT 首筆成交 111.50 美元，比承銷價 83 美元高約 34%，也高於競價時 100–104 美元的參考價和預測市場押的首日漲 20–25%。但開盤後很快被賣，盤中最高 115.10，兩度探底、最低 95.05，美東 12:35 拉回約 101 美元（+22%），成交量已近 5 億股；終場收 97.17 美元，比承銷價高 17.1%，市值約 1.3 兆美元。同一天大盤反而重挫，三大指數全跌逾 2%。公司已簽下未來數年近 1 兆美元的算力採購承諾，Amodei 上 CNBC 表示有信心這筆投資會回本。治理上，長期利益信託（LTBT）可指派 7 席董事中的 4 席，上市後仍會保留。",
  why:"這是 AI 交易的大考：市場對 AI 越來越懷疑的時候，它能不能站穩，會直接影響明年 OpenAI 上市的定價，以及整條 AI 供應鏈（雲端、晶片）的情緒。",
  stats:[["定價","$83","區間 $70–78"],["募資","$813億","史上最大"],["發行股數","≈9.8億股","原訂 8.25 億"],["代號","ANT","Nasdaq · 11/19 掛牌"],["首筆成交","$111.50","較承銷價 +34%"],["首日收盤","$97.17","+17.1%，市值約 1.3 兆"],["算力承諾","≈$1兆","未來數年"]],
  charts:["antDay","antRange","antRaise","antRun","antVal","ipoHist"],
  tl:[["06-01","秘密遞交 S-1；前幾天才以 9,650 億美元估值完成 H 輪"],["10-26","公開 S-1，第三季營收欄位留白引起討論"],["11-02","補上第三季：營收約 170 億美元，季增 47%（Q2 季增 144%），成長放緩"],["11-10","定出 70–78 美元區間、8.25 億股"],["11-18","定價 83 美元，加大發行",1],["11-19","Nasdaq 掛牌，首筆成交 111.50 美元（+34%）",1],["11-19","開盤後回落，盤中低點 98.24；美東 12:10 約 102 美元，大盤同步下跌（道瓊 −1,008 點）"],["11-19","再探 95.05 新低後拉回，12:35 約 101 美元；大盤跌幅收斂（道瓊 −1.3%）"],["11-19","Amodei 敲開盤鐘；WSJ：初步跡象約 104 美元開出，美東中午前後開始交易；Amodei 上 CNBC 談近 1 兆算力承諾"],["11-19","收盤 97.17 美元（+17.1%），市值約 1.3 兆美元",1],["11-23","最快這天開始有選擇權交易"]],
  src:[["Finwire：收 97.17 美元","https://finwire.io/news/stock-markets-news/anthropic-ant-closes-at-9717-up-17-on-its-first-day-of-trading"],["聯合新聞網：市值約 1.3 兆","https://udn.com/news/story/6811/9890421"],["CNBC：定價 83 美元","https://www.cnbc.com/2026/11/18/anthropic-ipo-ai-offering-price.html"],["CNBC：70–78 美元區間","https://www.cnbc.com/2026/11/10/anthropic-sets-price-range-of-70-to-78-in-upcoming-ipo.html"],["CBS：估值上看 1.5 兆","https://www.cbsnews.com/news/anthropic-ipo-ai-boom-nasdaq-debut/"],["Renaissance Capital：第三季財報","https://www.renaissancecapital.com/IPO-Center/News/122533/anthropic-discloses-third-quarter-financial-results-ahead-of-multibillion"],["Futurum：營收年化走勢","https://futurumgroup.com/insights/anthropic-files-for-ipo-looking-to-beat-openai-to-the-punch/"],["Fox Business：首筆 111.50 美元","https://www.foxbusiness.com/markets/anthropic-begins-trading-nasdaq-record-breaking-ipo"],["Benzinga：開盤價","https://www.benzinga.com/markets/tech/26/11/63442044/anthropic-stock-opens-at-111-50-in-record-breaking-nasdaq-debut"],["Stocktwits：首日盤中","https://stocktwits.com/news-articles/markets/equity/anthropic-stock-jumps-38-in-nasdaq-debut-after-record-107-3-b-ipo/cNbihePR900"],["Crypto Briefing：參考價 100 美元","https://cryptobriefing.com/anthropic-shares-indicated-open-100-ipo/"],["Quartz：Nasdaq 盤初走高","https://qz.com/nasdaq-jumps-anthropic-ipo-debut-stock-111926"],["TradingKey：要看的價位與閉鎖期","https://www.tradingkey.com/analysis/stocks/us-stocks/262312732-ant-debuts-today-record-81-3-billion-ipo-83-line-to-watch-november-19-2026-tradingkey"],["Yahoo：上市日直播","https://finance.yahoo.com/technology/live/anthropic-ipo-live-company-said-to-price-stock-at-83-begin-trading-thursday-212656452.html"],["WSJ 直播：約 $104 開出、Amodei 談算力、LTBT 治理（11/19 23:28）",""]]},
-{id:"chip-lic",cat:"科技股",hot:1,date:"2026-11-20",title:"眾院公開出口許可：商務部半年核准 87.9 萬顆 AI 晶片賣中國，其中兩家被指是「空殼公司」",
+{id:"chip-lic",short:"眾院公開：商務部半年核准 87.9 萬顆 AI 晶片賣中國，還點名兩家疑似空殼公司。",cat:"科技股",hot:1,date:"2026-11-20",title:"眾院公開出口許可：商務部半年核准 87.9 萬顆 AI 晶片賣中國，其中兩家被指是「空殼公司」",
  lead:"眾院外交委員會主席 Brian Mast（共和黨）11/19 依《出口管制改革法》公開 Nvidia 和 AMD 的出口許可資料：2025 年 12 月到 2026 年 5 月，中國買家申請 340 萬顆 AI 晶片（主要是 Nvidia H200、AMD MI325X），商務部 BIS 核准超過 87.9 萬顆，約四分之一。核准對象包括阿里巴巴、騰訊等被五角大樓列為「中國軍方企業」的公司。Mast 還點名 Nvidia 申請名單裡的 Maginfra、New Matrix 是「假公司」，疑似走私前哨。",
  why:"這把「AI 晶片流向中國」從空頭報告變成國會正式調查的題材。三件事疊在一起：黃仁勳案（12/1 閉門作證）、Hunterbrook 放空 AMD（Maginfra 同時出現在兩份資料裡）、現在又公開許可清單。兩黨都在批評：民主黨批商務部把國安放一邊，共和黨主席則把資料公開、點名空殼公司。對股價的影響是「中國營收」會被打折：AMD 2025 年約 22% 營收來自中國與香港，另有約 12% 來自新加坡。要注意：許可不等於實際出貨，Nvidia 也說已停止對中國出 H200；Hunterbrook 有空頭部位，報告也承認無法證實違法出口。",
  stats:[["申請","340萬顆","2025/12–2026/5"],["核准","87.9萬顆","約 26%"],["流向軍方名單企業","超過 3 成","依前官員 McGuire 說法"],["實際出貨","不明","Nvidia：已停出 H200"]],
  charts:["licFunnel","licCo"],
  tl:[["2025-12","川普政府重新開放 H200 對中國銷售，改逐案審批"],["2026-05","資料截止：申請 340 萬顆、核准 87.9 萬顆"],["11-07","紐約時報實地走訪：New Matrix、Maginfra 註冊地址空無一人"],["11-12","黃仁勳辭職"],["11-19","眾院外委會公開許可資料，Mast 點名兩家「假公司」；同日 Hunterbrook 放空 AMD，AMD 收跌 7.7%、盤後再跌",1],["12-01","黃仁勳赴眾院三委員會閉門作證",1],["12-02","Nvidia 總法律顧問 Tim Teter 赴國會作證"]],
  src:[["Reuters（Yahoo）：眾院公布 AI 晶片許可資料","https://yahoo.com/news/politics/articles/license-information-ai-chips-sent-201033356.html"],["Quartz：核准 87.9 萬顆、Mast 點名空殼公司","https://qz.com/us-nvidia-amd-ai-chips-china-license-records-111926"],["BigGo：Nvidia 稱已停出 H200、AMD 稱合規","https://finance.biggo.com/news/a40ba7fd-81a6-446e-bbaf-8f3aedbdbf00"],["芯智訊整理（各公司核准數量、AMD 營收占比）",""]]},
-{id:"amd-short",cat:"科技股",hot:1,date:"2026-11-19",title:"空頭機構 Hunterbrook 放空 AMD：指中國黑名單企業仍拿到新韌體，股價盤中跌 8%",
+{id:"amd-short",short:"空頭機構 Hunterbrook 放空 AMD，指中國黑名單企業仍拿到新韌體；AMD 當天收跌 7.7%。",cat:"科技股",hot:1,date:"2026-11-19",title:"空頭機構 Hunterbrook 放空 AMD：指中國黑名單企業仍拿到新韌體，股價盤中跌 8%",
  lead:"Hunterbrook Capital 公開表示放空 AMD，理由是 AMD 與受美國出口管制的中國企業關係太深。報告指出：中國伺服器大廠浪潮信息（IEIT）被列入黑名單後，仍持續拿到較新的 AMD 韌體，至少整合了 6 個新版本，最近一次在 10/19；另有 3 家和浪潮相關的公司用同樣的韌體。報告也提到，AMD 超過兩成營收開票給中國與香港客戶，大部分封裝測試由通富微電持股 85% 的兩家合資公司負責。",
  why:"這和 Nvidia 新加坡營收、東南亞遠端租用是同一條主線：美國正在收緊「晶片到底流向哪裡」。若主管機關介入調查，AMD 可能面臨罰款或出貨限制；整個 AI 晶片族群的「中國曝險」也會被重新檢視。",
  stats:[["AMD 收盤","−7.7%","AMD 否認不當行為"],["2 倍做多 ETF","−16%","AMDL"],["中國＋香港營收","20%+","依開票地址"],["Hunterbrook 勝率","60%","歷來 43 份報告"]],
- charts:[],
+ charts:["amdRev"],
  tl:[["10-19","報告稱浪潮最近一次整合新版 AMD 韌體"],["11-19","Hunterbrook 公布放空，AMD 盤中一度跌約 8%",1],["11-19","收盤 −7.7%；AMD 否認有不當行為"]],
  src:[["聯合新聞網：AMD 收跌 7.7%、否認不當","https://udn.com/news/story/6811/9890421"],["Investing.com：Hunterbrook 放空 AMD","https://www.investing.com/news/stock-market-news/short-seller-hunterbrook-shorts-amd-citing-concerns-over-china-exports-5039475"],["Investing.com UK：營收與通富合資細節","https://uk.investing.com/news/stock-market-news/short-seller-hunterbrook-shorts-amd-citing-concerns-over-china-exports-4993871"],["Activ8：Hunterbrook 歷來報告與勝率","https://activ8insights.com/company/hunterbrook-media"],["行情快訊截圖（11/19 23:37）",""]]},
-{id:"nvda-ceo",cat:"科技股",hot:1,date:"2026-11-20",title:"Nvidia：傳 SEC 調查會計，股價單日 −14% 收 125.53；黃仁勳辭職後 CFO Kress 暫代",
+{id:"nvda-ceo",short:"黃仁勳辭職、財務長 Kress 暫代；又傳 SEC 查會計，股價距 10 月高點已跌約一半。",cat:"科技股",hot:1,date:"2026-11-20",title:"Nvidia：傳 SEC 調查會計，股價單日 −14% 收 125.53；黃仁勳辭職後 CFO Kress 暫代",
  lead:"黃仁勳因私人醜聞與外國情報疑慮，辭去 Nvidia 總裁、執行長與董事，結束 33 年任期。財務長 Colette Kress 兼任暫代執行長，Harvey Jones 成為公司第一位董事長。11/17 公布的財報營收 1,158 億美元、超出預期 60 多億，下季指引 1,300 億，但股價一週跌超過 13%，11/19 再跌 3.3%、連跌六天。11/20 路透引述知情人士：SEC 執法部門正在調查 Nvidia 的潛在會計問題（何時開始、涉及哪些做法不明，SEC 不評論，調查不代表認定違法），股價單日重挫約 14% 收 125.53 美元、連跌第七天，是 DeepSeek 事件以來最慘的一天，一天蒸發約 4,300–4,900 億美元市值；距 10/6 高點 239.24 已跌約 48%。Kress 在法說會上重申晶片需求，但表示對資料中心交易會更審慎。董事會說內外部人選都會考慮，尚未公布名單；獨立董事已委任前代理聯邦檢察官 Joon Kim 與 Wachtell 律所調查外國情報行動的報導。",
  why:"Nvidia 約占 S&P 500 的 6%，又是 AI 資本支出的風向球；接班不確定性加上 FBI、國會與董事會的調查，讓「好財報也撐不住股價」，連帶拖累 CoreWeave 等新雲端股。",
  stats:[["Q3 營收","$1,158億","預期 $1,091億"],["Q4 指引","$1,300億",""],["11/20 股價","$125.53","−14%，連 7 跌"],["距高點","≈−48%","10/6 收 $239.24"],["暫代執行長","Colette Kress","兼 CFO"]],
  charts:["huangProbe","nvdaBeat"],
  tl:[["11-20","WSJ 專欄作家 Greg Ip：黃仁勳案是「美國版國家資本主義」的結果；當天 NVDA 盤中 −7%、美光 −12%、高盛 −5%"],["11-08","董事會對黃仁勳啟動獨立調查"],["11-09","Ackman、馬斯克公開聲援黃仁勳；川普證實 FBI 在查；股東在聖荷西提集體訴訟"],["11-11","董事會接受辭呈（8-K 日期）"],["11-12","正式宣布，Nvidia 當天跌逾 5%",1],["11-13","董事會開始挑選遴選顧問；Altimeter 的 Gerstner 與 Atreides 的 Baker 聯名信：慢慢找接班人，不排除讓黃回任"],["11-16","CNBC 引述知情人士：董事會不考慮讓黃回任"],["11-17","財報：營收與指引都優於預期",1],["11-17","黃仁勳同意 12/1 赴眾院三委員會閉門作證"],["11-18","盤中由漲翻跌，收 −2.89%"],["11-19","再跌 3.3%，連跌第六天",1],["11-20","路透：SEC 執法部門調查 Nvidia 潛在會計問題；股價 −14% 收 125.53，連 7 跌",1],["12-01","黃仁勳國會閉門作證",1]],
  src:[["Motley Fool：SEC 傳調查會計、一天蒸發近 5,000 億","https://www.fool.com/investing/2026/11/20/nvidia-stock-plunge-wipes-out-nearly-usd500-billion-in-one-day-as-sec-reportedly-probes-its-accounting/"],["24/7 Wall St：DeepSeek 以來最慘一天","https://247wallst.com/investing/2026/11/20/nvidia-stock-plunges-12-after-reuters-reports-an-sec-probe-of-its-accounting-its-nvidias-worst-day-since-deepseek-and-it-has-lost-2-7-trillion-since-october/"],["鉅亨網：輝達收 125.53","https://news.cnyes.com/news/id/6669311"],["Forbes：同意 12/1 赴國會作證","https://www.forbes.com/sites/saradorn/2026/11/17/huang-agrees-to-testify-before-congress-on-dec-1/"],["Fortune：閉門作證、董事會傳不讓回任","https://fortune.com/2026/11/17/jensen-huang-nvidia-house-committee-return-ceo-testimony/"],["Fox News：FBI、集體訴訟、內部調查","https://www.foxnews.com/live-news/ai-news-nvidia-jensen-huang-11-10-26"],["聯合新聞網：Nvidia 6 連跌、Kress 對資料中心交易較審慎","https://udn.com/news/story/6811/9890421"],["YourStory：接班人選與調查","https://yourstory.com/2026/11/who-will-succeed-jensen-huang-race-to-find-permanent-chief-begins"],["Unite.AI：8-K 與任命","https://www.unite.ai/?p=515159"],["CNBC：財報後下跌","https://www.cnbc.com/2026/11/18/nvidia-stock-earnings.html"],["CNBC：黃仁勳離職當週盤勢","https://www.cnbc.com/2026/11/11/stock-market-today-live-updates.html"],["Gerstner／Baker 聯名信","https://letsdatascience.com/news/two-major-investors-urge-nvidia-board-to-consider-jensen-hua-a3d2550f"]]},
-{id:"nvda-sg",cat:"科技股",hot:1,date:"2026-11-18",title:"FT 獨家：Nvidia 新加坡子公司一年入帳 1,040 億美元，約占全球營收近半",
+{id:"nvda-sg",short:"Nvidia 新加坡子公司一年入帳 1,040 億美元、利潤率卻不到 0.1%：晶片最後去了哪裡成焦點。",cat:"科技股",hot:1,date:"2026-11-18",title:"FT 獨家：Nvidia 新加坡子公司一年入帳 1,040 億美元，約占全球營收近半",
  lead:"FT 看了公司帳目：Nvidia 新加坡子公司 2025 年對外營收 1,040 億美元，年增 72%；連同賣給集團內其他公司的 136 億，總營收 1,178 億，但獲利只有 5,300 萬美元。Nvidia 說新加坡多半只是開發票的地方，貨大多運到別處；同一年它把地區營收改成按「客戶總部」而不是「帳單地址」分類，新加坡就不再單獨揭露。",
  why:"新加坡營收這麼大、利潤卻這麼薄，代表它比較像「開發票的中轉站」，晶片最後去了哪裡才是重點。這剛好碰上美國在查 Megaspeed 等東南亞客戶，以及中國公司在東南亞「租用」算力的灰色地帶；11/16 美國已公布新規把這塊納入許可制（90 天後生效），Nvidia 有一塊營收會受影響。",
  stats:[["新加坡對外營收","$1,040億","2025 年，年增 72%"],["子公司總營收","$1,178億","含集團內部 136 億"],["子公司獲利","$0.53億","利潤率不到 0.1%"],["2025/7 揭露占比","22%","3 個月後不再揭露"]],
  charts:["nvdaSgFlow","nvdaSgBar"],
  tl:[["2025-07","財報仍單獨揭露新加坡，約占營收 22%"],["2025-10","改用客戶總部分類，新加坡不再單獨列出"],["2025-10","NYT 揭露 Megaspeed 疑把晶片放在馬來西亞、印尼，遠端服務中國客戶"],["2026-11","美國商務部 BIS 列清單追蹤中國公司在哪些國家「遠端租用」晶片"],["11-16","商務部新規：對新加坡等 5 國出口先進晶片、海外算力租給中國公司都要許可（90 天後生效）",1],["11-18","FT 披露新加坡子公司帳目",1]],
  src:[["The Online Citizen：FT 報導重點","https://news.theonlinecitizen.com/2026/11/18/nvidia-stops-disclosing-singapore-business-scale-after-booking-us-104bn-in-revenue-ft"],["AI Weekly：揭露方式改變","https://aiweekly.co/alerts/nvidia-singapore-unit-booked-104b-in-2025-as-breakout-dropped"],["roic.ai：Nvidia 說貨大多運往別處","https://www.roic.ai/news/nvidia-stops-disclosing-singapore-sales-as-revenue-booked-there-hits-104bn-11-17-2026"],["The Next Web：BIS 追蹤遠端租用","https://thenextweb.com/news/us-bis-review-china-remote-offshore-nvidia-chip-access"],["NYT 轉載：Megaspeed 調查","https://groups.google.com/g/i_love_taiwan/c/qrdtcLCLcKs"],["NCUSCR：11/16 出口新規","https://ncuscr.substack.com/p/trump-arrives-in-shenzhen-for-trilateral"]]},
-{id:"trump-xi",cat:"政治",hot:1,date:"2026-11-19",title:"川習深圳會面：晶片、稀土、關稅都沒有突破；美國先收緊東南亞晶片出口",
+{id:"trump-xi",short:"川習深圳會面沒有突破；美國先收緊東南亞晶片出口，1/10 貿易休戰到期。",cat:"政治",hot:1,date:"2026-11-19",title:"川習深圳會面：晶片、稀土、關稅都沒有突破；美國先收緊東南亞晶片出口",
  lead:"川普在深圳 APEC 與習近平會談，並與普丁舉行首次三方會面，氣氛友好但避開難題：晶片、稀土、關稅僵局幾乎沒變，1/10 到期的貿易休戰也沒看到延長協議。會前 11/16 美國商務部公布新規：海外資料中心要對中國等高風險國家公司大量提供算力須申請許可，出口先進晶片給總部在新加坡、馬來西亞、泰國、印尼、巴西的公司也要許可，90 天後生效。",
  why:"這等於把 Nvidia 新加坡營收、東南亞「遠端租用」的灰色地帶正式納管，也恢復限制中國取得台積電等晶圓代工產能；對 Nvidia 與台灣 AI 供應鏈是實質利空。休戰若在 1/10 沒續，關稅風險會重新浮上檯面。",
  stats:[["出口新規生效","90 天後","約 2027/2 中"],["需許可國家","新加坡等 5 國","晶片出口"],["貿易休戰到期","1/10",""],["下次川習會","12 月 G20","佛州"]],
  charts:[],
  tl:[["11-16","美國商務部公布海外算力與東南亞晶片出口許可新規；中國批評是「經濟脅迫」"],["11-18","APEC 領袖會議在深圳開幕"],["11-19","川習會談與川習普三方會面，無具體成果",1],["01-10","美中貿易休戰到期"]],
  src:[["Yahoo Finance／AP：晶片與稀土僵局未變","https://finance.yahoo.com/markets/article/stalemates-over-semiconductors-and-rare-earth-minerals-appear-little-changed-as-trump-heads-home-from-china-121555352.html"],["NCUSCR：出口新規內容","https://ncuscr.substack.com/p/trump-arrives-in-shenzhen-for-trilateral"],["Outlook India：會前議題整理","https://www.outlookindia.com/international/trump-xi-shenzhen-summit-nvidia-h200-ai-chips"]]},
-{id:"fed-hike",cat:"聯準會",hot:1,date:"2026-11-18",title:"聯準會 12/9 幾乎確定升息一碼",
+{id:"fed-hike",short:"聯準會 12/10 幾乎確定升息一碼，市場從等降息變成升息循環，壓縮 AI 股評價。",cat:"聯準會",hot:1,date:"2026-11-18",title:"聯準會 12/9 幾乎確定升息一碼",
  lead:"現任主席是 Kevin Warsh。目前利率 3.75%–4.00%，10 月會議以 10 比 2 維持不變，投反對票的 Cook 與 Hammack 都主張升息。10 月非農新增 16.5 萬人遠高於預期，紐約 Fed 總裁 Williams 說更多升息可能必要，Waller 甚至提到通膨不降可考慮一次升兩碼；達拉斯 Fed 總裁 Logan 11/10 說至少還要再升兩碼。11/19 CME FedWatch 顯示 12 月升一碼機率 96.4%，10 年期美債殖利率約 5.05%。",
  why:"市場從「降息」轉成「升息循環」，利率上升會壓縮高估值成長股（尤其 AI 股）的評價，這也是近期大盤連跌的背景之一。",
  stats:[["目前利率","3.75–4.00%",""],["12月升息一碼機率","96.4%","CME FedWatch 11/19"],["10月會議","10 : 2","2 票主張升息"],["10月非農","+16.5萬","遠高於預期"]],
  charts:["fedOdds","fedPath"],
  tl:[["10-28","維持利率，兩位理事主張升息"],["11月初","10 月非農強勁"],["11-18","會議紀錄公布，市場已把一碼升息完全反映"],["11-20","費城 Fed 總裁 Paulson 主張審慎升息、理事 Cook 說通膨壓力擴散；美股重挫，10 年期殖利率反降到 4.93%"],["11-20 收盤後","CME FedWatch：12 月升息機率 92%（略低於前一日 96.4%），明年 6 月前升兩碼以上機率逾 8 成"],["12-10","台北時間凌晨 3 點公布決議（附點陣圖）",1]],
  src:[["聯合新聞網：FedWatch 96.4%","https://udn.com/news/story/6811/9890421"],["Schwab：FedWatch 92%、Howard 看再升兩次","https://www.schwab.com/learn/story/market-volatility"],["Newsquawk：Logan 至少再升兩碼","https://www.newsquawk.com/headlines/feds-logan-2026-voter-says-that-it-is-clear-that-the-fed-needs-at-least-two-more-25bps-rate-hikes-may-be-possible-to-raise-interest-rates-more-rapidly-this-winter-than-the-us-central-bank-has-done-so-far"],["Polymarket：Fed 利率","https://polymarket.com/dashboards/fed-rates"],["Kalshi：12 月決議","https://kalshi.com/markets/kxfeddecision/fed-meeting/kxfeddecision-26dec"],["Forbes：12 月會議展望","https://www.forbes.com/sites/simonmoore/2026/11/09/what-to-expect-from-the-feds-december-meeting/"],["Coinpedia：Waller 談升兩碼","https://coinpedia.org/news/fomc-minutes-today-fed-rate-hike-clues-put-crypto-on-alert/"]]},
-{id:"mkt",cat:"大盤",date:"2026-11-18",title:"道瓊兩天跌掉 1,400 點，S&P 500 跌到 7 月以來新低",
+{id:"mkt",short:"道瓊兩天跌掉 1,400 點，S&P 500 跌到 7 月以來新低。",cat:"大盤",date:"2026-11-18",title:"道瓊兩天跌掉 1,400 點，S&P 500 跌到 7 月以來新低",
  lead:"11/17 道瓊重挫 848 點，S&P 500 收 7,340.53，是 7 月下旬以來最低；當天因 CNN 報導情報單位機密網路當機，盤中一度跌破千點。11/18 Nvidia 財報行情熄火，S&P 連跌第五天，道瓊再跌 561 點。",
  why:"AI 股、Nvidia 接班、升息預期三件事疊在一起；但上週三大指數才剛創 8 月以來最佳單週，波動非常大。",
  stats:[["道瓊 11/17","50,759","−1.64%"],["S&P 11/17","7,340.53","7 月以來最低"],["道瓊 11/18","−561點","−1.11%"]],
  charts:["dow"],
  src:[["CNBC：11/17 盤勢","https://www.cnbc.com/2026/11/16/stock-market-today-live-updates.html"],["Stocktitan：11/18 收盤","https://stocktitan.net/articles/stock-market-today-live-november-18-2026"],["Bloomberg：11/18 Markets Wrap","https://www.bloomberg.com/news/articles/2026-11-17/stock-market-today-dow-s-p-live-updates"]]},
-{id:"midterm",cat:"政治",date:"2026-11-03",title:"期中選舉：民主黨同時拿下參眾兩院",
+{id:"midterm",short:"民主黨同時拿下參眾兩院，華府從共和黨全面執政變成分治。",cat:"政治",date:"2026-11-03",title:"期中選舉：民主黨同時拿下參眾兩院",
  lead:"民主黨贏得超乎預期的參眾兩院多數，華府從共和黨全面執政變成分治。選後隔天美股開高。",
  why:"分治通常代表較少政策衝擊；歷史上期中選舉後 12 個月 S&P 平均報酬不錯，但 Trump 的稅收與支出議程推進會更難。",
  stats:[["眾議院","民主黨","翻盤"],["參議院","民主黨","翻盤"]],
  charts:[],
  src:[["Al Jazeera：選後美股上漲","https://www.aljazeera.com/economy/2026/11/4/us-markets-rise-as-democrats-sweep-midterm-elections"],["Funds Society：分治的影響","https://www.fundssociety.com/en/news/mercados/the-blue-wave-leaves-a-divided-government-implications-and-market-reactions/"]]},
-{id:"openai",cat:"IPO",date:"2026-08-19",title:"OpenAI：目標 2027 年上市",
+{id:"openai",short:"OpenAI 已秘密遞件，目標 2027 年上市、估值上看 1 兆美元。",cat:"IPO",date:"2026-08-19",title:"OpenAI：目標 2027 年上市",
  lead:"OpenAI 6/8 已秘密遞交 S-1，但財務長 Sarah Friar 8 月對員工說公司會在 2027 年成為上市公司，也可能更早；總裁 Brockman 也說 2027 年會準備好。顧問曾提出兩條路：等到 2027 年爭取 1 兆美元估值，或早點上市接受較低價格。",
  why:"Anthropic 先上市等於幫 OpenAI 試水溫——ANT 掛牌後的表現，會決定 OpenAI 能不能拿到 1 兆美元等級的估值。",
  stats:[["秘密遞件","6/8",""],["目標","2027",""],["期望估值","≈$1兆","媒體報導"]],
@@ -594,6 +602,8 @@ function line(pts,{yfmt=v=>v,ymin,ymax,unit="",area=true}={}){ // pts: [label,va
 const IPORK=[["Anthropic","2026",813.4,13770],["SpaceX","2026",750,17450],["SK 海力士","2026",265.1,10860],["沙烏地阿美","2019",256,17070],["阿里巴巴","2014",217.7,1750],["軟銀電信","2018",213.5,640],["NTT Docomo","1998",180.9,760],["Visa","2008",178.6,340],["友邦保險 AIA","2010",178.2,310],["Enel","1999",164.5,550],["Facebook","2012",160.1,0],["通用汽車","2010",157.7,0],["工商銀行 H 股","2006",139.6,0],["德國電信","1996",130.3,0],["Rivian","2021",119.3,0]];
 const IPOH=[["Google",2004,18.0,-17.0],["Mastercard",2006,17.9,-13.1],["Visa",2008,28.4,-52.1],["Tesla",2010,40.5,-38.5],["GM",2010,3.6,-49.4],["LinkedIn",2011,109.4,-46.3],["Meta",2012,0.6,-53.6],["Twitter",2013,72.7,-58.4],["Alibaba",2014,38.1,-48.9],["Shopify",2015,51.1,-52.1],["Snap",2017,44.0,-56.3],["Spotify",2018,12.9,-45.6],["Lyft",2019,8.7,-79.5],["Zoom",2019,72.2,-39.7],["Pinterest",2019,28.4,-70.1],["Beyond Meat",2019,163.0,-77.0],["Uber",2019,-7.6,-68.0],["Saudi Aramco",2019,10.0,-26.8],["Snowflake",2020,111.6,-51.7],["Palantir",2020,31.0,-52.9],["DoorDash",2020,85.8,-47.5],["Airbnb",2020,112.8,-39.2],["Roblox",2021,54.4,-69.3],["Coupang",2021,40.7,-65.5],["Coinbase",2021,31.3,-58.8],["Robinhood",2021,-8.4,-90.2],["Rivian",2021,29.1,-88.0],["Arm",2023,24.7,-42.6],["Instacart",2023,12.3,-33.4],["Reddit",2024,48.4,-52.4],["CoreWeave",2025,0.0,-64.8],["Circle",2025,168.5,-80.9],["Chime",2025,37.4,-55.7],["Figma",2025,250.0,-86.2],["Klarna",2025,14.6,-73.2],["SpaceX",2026,19.2,-42.0]];
 const CH={
+ rout1120:()=>({t:"11/20 一天跌多少",s:"晶片股跌幅是大盤的 3–4 倍（%）",b:hbar([["輝達",14,"−14%，連 7 跌"],["美光",13.9],["AMD",13.2],["博通",12.2],["費城半導體",10.73,"30 檔全黑"],["台積電 ADR",9.48],["Nasdaq",5.28],["S&P 500",3.70],["道瓊",1.93]].map(r=>[r[0],r[1],r[2],"−"+r[1]+"%"]),{hl:4})}),
+ amdRev:()=>({t:"AMD 營收從哪裡來",s:"2025 年依開票地址（%）",b:hbar([["中國＋香港",22,"約 22%"],["新加坡",12,"約 12%"],["其他地區",66,"約 66%"]].map(r=>[r[0],r[1],r[2],"≈"+r[1]+"%"]),{hl:0,max:70})}),
  antRange:()=>{const L=24,R=W-24,lo=60,hi=90,X=v=>L+(R-L)*(v-lo)/(hi-lo);
    let g=`<svg viewBox="0 0 ${W} 110" role="img"><line x1="${L}" x2="${R}" y1="60" y2="60" style="stroke:var(--line)" stroke-width="2"/>`;
    [60,65,70,75,80,85,90].forEach(v=>g+=`<line x1="${X(v)}" x2="${X(v)}" y1="56" y2="64" style="stroke:var(--faint)"/><text x="${X(v)}" y="82" text-anchor="middle" font-size="11">$${v}</text>`);
@@ -717,6 +727,7 @@ const CH={
 
 /* ---------- 渲染：大事 ---------- */
 let evCat="全部";
+const evShort=t=>{const x=t.split("。")[0];return x.length>70?x.slice(0,68)+"⋯":x+"。"};
 function renderEv(){
   const cats=["全部",...new Set(EVENTS.map(e=>e.cat))];
   $("#evChips").innerHTML=cats.map(c=>`<button class="chip ${c===evCat?"on":""}" data-evc="${c}">${c}</button>`).join("");
@@ -725,11 +736,11 @@ function renderEv(){
   <article class="card" id="ev-${e.id}">
     <div class="meta"><span class="tag ${e.hot?"hot":""}">${e.hot?"🔥 ":""}${e.cat}</span><span>${e.date}</span><span style="margin-left:auto"><button class="star ${fav.includes(e.id)?"on":""}" data-fav="${e.id}" aria-label="收藏">${fav.includes(e.id)?"★":"☆"}</button></span></div>
     <h2>${esc(e.title)}</h2>
-    <p class="lead">${esc(e.lead)}</p>
+    <p class="lead short">${esc(e.short||evShort(e.lead))}</p>
     ${e.stats?`<div class="stats">${e.stats.map(s=>`<div class="stat"><div class="k">${s[0]}</div><div class="v">${s[1]}</div>${s[2]?`<div class="d">${s[2]}</div>`:""}</div>`).join("")}</div>`:""}
-    <div class="why"><b>為什麼重要</b>${esc(e.why)}</div>
     ${(e.charts||[]).map(c=>{const r=CH[c]();return `<div class="fig"><div class="t">${r.t}</div><div class="s">${r.s}</div>${r.b}</div>`}).join("")}
-    ${e.tl?`<div class="fig"><div class="t">時間軸</div><ul class="tl">${e.tl.map(t=>`<li class="${t[2]?"big":""}"><span class="dt">${t[0]}</span>${esc(t[1])}</li>`).join("")}</ul></div>`:""}
+    ${e.tl?(()=>{const b=e.tl.filter(t=>t[2]).slice(-4),li=t=>`<li class="${t[2]?"big":""}"><span class="dt">${t[0]}</span>${esc(t[1])}</li>`;return `<div class="fig"><div class="t">時間軸・關鍵節點</div><ul class="tl">${(b.length?b:e.tl.slice(-3)).map(li).join("")}</ul>${e.tl.length>b.length?`<details class="more"><summary>完整時間軸（${e.tl.length} 則）</summary><ul class="tl">${e.tl.map(li).join("")}</ul></details>`:""}</div>`})():""}
+    <details class="more"><summary>📖 詳細說明與為什麼重要</summary><p class="lead">${esc(e.lead)}</p><div class="why"><b>為什麼重要</b>${esc(e.why)}</div></details>
     <details class="src"><summary>資料來源（${e.src.length}）</summary>${e.src.map(s=>s[1]?`<div>· <a href="${s[1]}" target="_blank" rel="noopener">${esc(s[0])}</a></div>`:`<div>· ${esc(s[0])}</div>`).join("")}</details>
   </article>`).join("");
   applyEvFold();
@@ -906,7 +917,7 @@ function ddUpd(){
 }
 $("#ddR").addEventListener("input",ddUpd);
 /* ---------- 事件 ---------- */
-const NAV=[];function curTab(){const a=document.querySelector(".pane.on");return a?a.id.slice(2):"ev"}
+const NAV=[];function curTab(){const a=document.querySelector(".pane.on");return a?a.id.slice(2):"tour"}
 function go(p,noPush,force){const c=curTab();if(!noPush&&(c!==p||force)){NAV.push({p:c,y:window.scrollY});if(NAV.length>40)NAV.shift()}document.querySelectorAll("nav button").forEach(b=>b.setAttribute("aria-selected",b.dataset.p===p));document.querySelectorAll(".pane").forEach(x=>x.classList.toggle("on",x.id==="p-"+p));if(p==="mine")renderMine();}
 document.addEventListener("click",e=>{
   const t=e.target;
