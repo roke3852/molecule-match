@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>黑杯聽音</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Noto+Serif+TC:wght@500;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0d0907;--panel:#1a120d;--panel2:#241812;--line:#5a3b26;--gold:#d9a441;--gold2:#f1cf7d;
+  --cream:#efe3cf;--muted:#a8927a;--red:#c8463c;--green:#7fb77e;--blue:#7aa6c8;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--cream);font-family:"Noto Sans TC",system-ui,sans-serif;touch-action:manipulation;overscroll-behavior:none}
+body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+button{font:inherit;color:inherit;touch-action:manipulation}
+.px{font-family:"DotGothic16","Noto Sans TC",monospace}
+#app{max-width:560px;margin:0 auto;min-height:100%;display:flex;flex-direction:column;position:relative}
+/* top ornamental frame */
+.frame{position:sticky;top:0;z-index:20;background:linear-gradient(#140d09,#1c130e);border-bottom:2px solid var(--line);box-shadow:0 2px 0 #000, inset 0 -1px 0 #7a5233}
+.frame:before{content:"";display:block;height:4px;background:repeating-linear-gradient(90deg,var(--gold) 0 6px,transparent 6px 10px,#7a5233 10px 14px,transparent 14px 18px);opacity:.7}
+.frame-in{display:flex;align-items:center;gap:8px;padding:6px 10px}
+.frame .ttl{font-family:"DotGothic16";color:var(--gold2);letter-spacing:2px;font-size:15px;white-space:nowrap}
+.frame .ch{font-size:11px;color:var(--muted);flex:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.stats{display:flex;gap:6px}
+.stat{display:flex;flex-direction:column;align-items:center;font-size:9px;color:var(--muted);font-family:"DotGothic16"}
+.bar{width:38px;height:6px;background:#000;border:1px solid #4a3020;display:flex}
+.bar i{display:block;height:100%}
+.screen{display:none;flex:1;flex-direction:column}
+.screen.on{display:flex}
+/* scene */
+.scene{position:relative;width:100%;aspect-ratio:16/10;background:#000;overflow:hidden;border-bottom:2px solid var(--line)}
+.scene canvas{width:100%;height:100%;image-rendering:pixelated;display:block}
+.portrait{position:absolute;bottom:0;left:6px;width:34%;max-width:170px;aspect-ratio:1;image-rendering:pixelated;filter:drop-shadow(0 0 6px rgba(0,0,0,.8));transition:opacity .2s,transform .2s}
+.portrait.hide{opacity:0;transform:translateY(8px)}
+.loc{position:absolute;top:6px;right:8px;font-family:"DotGothic16";font-size:11px;background:rgba(0,0,0,.55);border:1px solid #6b4a33;padding:2px 8px;color:var(--gold2)}
+/* dialogue */
+.dlg{flex:1;display:flex;flex-direction:column;padding:10px 12px 8px;gap:8px;background:radial-gradient(120% 80% at 50% 0,#21160f,#0d0907)}
+.box{position:relative;border:2px solid var(--line);background:linear-gradient(#1d140e,#150e0a);padding:20px 14px 14px;min-height:140px;box-shadow:inset 0 0 0 2px #0a0604,0 0 0 2px #000;cursor:pointer}
+.box:after{content:"";position:absolute;inset:3px;border:1px dashed rgba(217,164,65,.15);pointer-events:none}
+.name{position:absolute;top:-13px;left:10px;background:var(--panel2);border:2px solid var(--gold);padding:1px 10px;font-family:"DotGothic16";font-size:14px;color:var(--gold2)}
+.name.n{display:none}
+.txt{font-size:16.5px;line-height:1.85;letter-spacing:.3px;min-height:3.6em}
+.txt.narr{color:#cdbfa9;font-family:"Noto Serif TC",serif}
+.more{position:absolute;right:10px;bottom:6px;color:var(--gold);font-size:12px;animation:blink 1s steps(2) infinite}
+@keyframes blink{50%{opacity:0}}
+.term{color:var(--gold2);border-bottom:1px dotted var(--gold);cursor:pointer}
+.pname{color:#9fd0ff;border-bottom:1px dotted #6fa3d6;cursor:pointer}
+.tools{display:flex;gap:6px;flex-wrap:wrap}
+.tb{flex:1;min-width:58px;background:var(--panel);border:1px solid var(--line);padding:7px 4px;font-size:12.5px;color:var(--cream);font-family:"DotGothic16";box-shadow:0 2px 0 #000}
+.tb:active{transform:translateY(2px);box-shadow:none}
+.tb.on{border-color:var(--gold);color:var(--gold2)}
+.nextbtn{display:none;background:var(--gold);color:#1a0f08;border:none;padding:10px;font-family:"DotGothic16";font-size:15px;box-shadow:0 3px 0 #6b4a1a}
+.nextbtn.on{display:block}
+/* choices */
+.choices{display:none;flex-direction:column;gap:8px}
+.choices.on{display:flex}
+.cq{font-family:"DotGothic16";color:var(--gold2);font-size:14px;padding:2px 2px 4px;border-left:3px solid var(--red);padding-left:8px}
+.opt{text-align:left;background:linear-gradient(#22170f,#1a110c);border:2px solid #4f3424;padding:11px 12px;font-size:15px;line-height:1.6;box-shadow:0 3px 0 #000;position:relative}
+.opt:before{content:"▸";color:var(--gold);margin-right:6px}
+.opt:active{border-color:var(--gold);transform:translateY(2px);box-shadow:none}
+.danger{font-size:11px;color:#e78b80;font-family:"DotGothic16";text-align:center;letter-spacing:1px}
+/* overlays */
+.ov{position:fixed;inset:0;background:rgba(5,3,2,.82);z-index:50;display:none;align-items:center;justify-content:center;padding:16px}
+.ov.on{display:flex}
+.card{width:100%;max-width:520px;max-height:86vh;overflow:auto;background:linear-gradient(#21160f,#140d09);border:2px solid var(--gold);box-shadow:0 0 0 3px #000,0 0 40px rgba(217,164,65,.15);padding:16px}
+.card h3{margin:0 0 10px;font-family:"DotGothic16";color:var(--gold2);font-weight:400;font-size:19px;letter-spacing:1px}
+.card p{line-height:1.8;margin:.4em 0}
+.card .x{float:right;background:none;border:1px solid var(--line);padding:2px 10px;font-family:"DotGothic16"}
+.pill{display:inline-block;font-size:11px;border:1px solid var(--line);padding:1px 7px;margin:2px;color:var(--muted);font-family:"DotGothic16"}
+.list .it{border-bottom:1px dashed #3d2a1d;padding:10px 0;display:flex;gap:10px}
+.list .it canvas{width:56px;height:56px;image-rendering:pixelated;background:#1d140e;border:1px solid var(--line);flex:none}
+.list b{color:var(--gold2)}
+.gl dt{color:var(--gold2);font-weight:700;margin-top:10px}
+.gl dd{margin:2px 0 0;line-height:1.7;color:#dccdb6;font-size:14px}
+.log .ln{padding:6px 0;border-bottom:1px dashed #33241a;font-size:14px;line-height:1.7}
+.log .who{color:var(--gold2);font-family:"DotGothic16";margin-right:6px}
+.log .pick{color:#9fd0ff}
+/* END card */
+.endcard{border-color:var(--red)}
+.endcard .tag{font-family:"DotGothic16";color:var(--red);letter-spacing:3px;font-size:13px}
+.endcard h3{color:#f0a49b;font-size:24px}
+.endcard .why{background:#0e0806;border-left:3px solid var(--gold);padding:8px 10px;margin-top:10px;font-size:14px}
+.goodcard{border-color:var(--green)}
+.big{display:block;width:100%;margin-top:10px;background:var(--gold);color:#1a0f08;border:none;padding:12px;font-family:"DotGothic16";font-size:16px;box-shadow:0 3px 0 #6b4a1a}
+.big.alt{background:var(--panel2);color:var(--cream);border:1px solid var(--line);box-shadow:0 3px 0 #000}
+.big:active{transform:translateY(2px);box-shadow:none}
+/* title */
+#title{position:relative}
+#titleCv{position:absolute;inset:0;width:100%;height:100%;image-rendering:pixelated;opacity:.55}
+.tin{position:relative;z-index:2;padding:34px 18px 20px;display:flex;flex-direction:column;align-items:center;gap:10px;min-height:calc(100vh - 60px)}
+.logo{font-family:"DotGothic16";font-size:52px;letter-spacing:8px;color:var(--gold2);text-shadow:3px 3px 0 #5a2a14,6px 6px 0 #000;margin-top:24px}
+.logo2{font-family:"Noto Serif TC";color:#cbb69a;font-size:14px;letter-spacing:2px;text-align:center}
+.cup{width:96px;height:96px;image-rendering:pixelated;margin:6px 0}
+.who{width:100%;max-width:360px;background:rgba(15,9,6,.85);border:2px solid var(--line);padding:14px;margin-top:6px}
+.who h4{margin:0 0 8px;font-family:"DotGothic16";color:var(--gold2);font-weight:400}
+.who input{width:100%;padding:10px;background:#0b0705;border:1px solid var(--line);color:var(--cream);font-size:16px;font-family:inherit}
+.names{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.nm{background:var(--panel2);border:1px solid var(--gold);padding:6px 12px;font-family:"DotGothic16";font-size:14px}
+.menu{width:100%;max-width:360px;display:flex;flex-direction:column;gap:8px}
+.chs .chrow{display:flex;align-items:center;gap:10px;border:1px solid var(--line);padding:10px;margin:6px 0;background:#170f0b}
+.chrow.lock{opacity:.4}
+.chrow .n{font-family:"DotGothic16";color:var(--gold);width:44px}
+.chrow .t{flex:1}
+.chrow .t small{display:block;color:var(--muted);font-size:12px}
+.sig{font-family:"DotGothic16";font-size:11px;color:#6d5640;text-align:center;padding:12px 0 18px;letter-spacing:2px}
+.press{font-family:"DotGothic16";color:var(--gold);animation:blink 1.2s steps(2) infinite;font-size:13px}
+.toast{position:fixed;left:50%;bottom:30px;transform:translateX(-50%);background:#000;border:1px solid var(--gold);padding:8px 14px;font-size:13px;z-index:90;display:none;font-family:"DotGothic16"}
+.pop{position:fixed;z-index:80;max-width:300px;background:#120b07;border:2px solid var(--gold);padding:10px 12px;font-size:14px;line-height:1.7;box-shadow:0 6px 20px #000;display:none}
+.pop b{color:var(--gold2);font-family:"DotGothic16";font-weight:400;font-size:15px}
+.statchg{font-family:"DotGothic16";font-size:13px}
+.up{color:var(--green)}.dn{color:var(--red)}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="frame"><div class="frame-in">
+    <div class="ttl">黑杯聽音</div><div class="ch" id="chLabel">—</div>
+    <div class="stats" id="stats"></div>
+  </div></div>
+
+  <!-- TITLE -->
+  <section class="screen on" id="title">
+    <canvas id="titleCv" width="160" height="100"></canvas>
+    <div class="tin">
+      <div class="logo">黑杯聽音</div>
+      <div class="logo2">一個小小咖啡師的冠軍之路<br>── 與杯底，看不見的那層陰影 ──</div>
+      <canvas class="cup" id="cupCv" width="24" height="24"></canvas>
+      <div class="who" id="loginBox">
+        <h4>▸ 誰要入座？</h4>
+        <div class="names" id="nameList"></div>
+        <input id="nameIn" maxlength="8" placeholder="輸入你的名字（最多 8 字）" autocomplete="off">
+        <button class="big" id="loginBtn">入座</button>
+      </div>
+      <div class="menu" id="mainMenu" style="display:none">
+        <div class="press" id="hello"></div>
+        <button class="big" id="mContinue">繼續故事</button>
+        <button class="big alt" id="mChapters">章節選擇</button>
+        <button class="big alt" id="mEnds">結局圖鑑</button>
+        <button class="big alt" id="mHelp">怎麼玩</button>
+        <button class="big alt" id="mSwitch">換人入座</button>
+      </div>
+      <div class="sig">製作　Jim Lu</div>
+    </div>
+  </section>
+
+  <!-- GAME -->
+  <section class="screen" id="game">
+    <div class="scene"><canvas id="sceneCv" width="160" height="100"></canvas>
+      <canvas class="portrait hide" id="pCv" width="24" height="24"></canvas>
+      <div class="loc" id="locLabel"></div>
+    </div>
+    <div class="dlg">
+      <div class="box" id="box">
+        <div class="name" id="nameTag"></div>
+        <div class="txt" id="txt"></div>
+        <div class="more" id="more">▼</div>
+      </div>
+      <div class="choices" id="choices"></div>
+      <button class="nextbtn" id="nextBtn">下一句 ▸</button>
+      <div class="tools">
+        <button class="tb" id="tLog">回顧</button>
+        <button class="tb" id="tPpl">人物</button>
+        <button class="tb" id="tGl">詞典</button>
+        <button class="tb" id="tFF">快轉</button>
+        <button class="tb" id="tMenu">選單</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<div class="ov" id="ov"><div class="card" id="card"></div></div>
+<div class="pop" id="pop"></div>
+<div class="toast" id="toast"></div>
+
+<script>
+"use strict";
+/* ============ 人物 ============ */
+const PEOPLE={
+ me:{name:'你',role:'主角．小小咖啡師',desc:'在台北「白霧咖啡」當咖啡師第二年。抽屜裡壓著一張台灣盃手沖錦標賽報名表，夢想是站上世界的舞台。',
+   look:{skin:'#f0c6a0',hair:'#2a1d17',style:'short',cloth:'#3a3f4a',apron:'#7a5233'}},
+ mei:{name:'阿梅',alias:[],role:'白霧咖啡的同事',desc:'你的同事兼損友。拉花只會拉貓，把店裡的磨豆機叫「阿嬤」，因為它卡豆時的聲音很像她阿嬤打呼。消息靈通得莫名其妙。',
+   look:{skin:'#f3cba7',hair:'#b4602a',style:'bun',cloth:'#5b6b4a',apron:'#7a5233',blush:1}},
+ yan:{name:'嚴老闆',alias:['嚴少華'],role:'白霧咖啡老闆',desc:'嚴少華。笑起來眼睛瞇成一條線，像他算帳時的原子筆。人稱「笑面虎」——客人看到笑，員工看到虎。',
+   look:{skin:'#e8bf98',hair:'#111',style:'slick',cloth:'#2b2b33',shirt:'#c9c1b0',tie:'#8a1c1c',eyes:'smile',glass:'#c9a24a'}},
+ shen:{name:'沈懷舟',alias:['沈師父'],role:'舟火焙煎所主人',desc:'2014 年台灣盃冠軍，賽後被以「違規自備比賽用水」撤銷頭銜。從此不比賽、不解釋，在大稻埕巷底守著一台老直火烘豆機。',
+   look:{skin:'#dcb08a',hair:'#9b9b9b',style:'grey',cloth:'#151515',shirt:'#3a3a3a',beard:'#a8a8a8'}},
+ su:{name:'蘇曼',alias:[],role:'對手．金穗贊助選手',desc:'手極穩、嘴極毒的天才型選手。台灣盃上屆亞軍，身上的圍裙繡著「金穗」兩個字。',
+   look:{skin:'#f1cfb2',hair:'#141014',style:'long',streak:'#b4262c',cloth:'#1b1b1f',earring:1}},
+ zhou:{name:'周董',alias:['周金穗'],role:'金穗生豆 董事長',desc:'台灣最大的精品生豆進口商之一。說話慢、茶泡得好，手上的玉扳指比你一年的薪水還貴。',
+   look:{skin:'#e0b48c',hair:'#2b2622',style:'bald',cloth:'#3b3020',shirt:'#d8cfa8',glass:'#222',eyes:'smile'}},
+ carlos:{name:'卡洛斯',alias:[],role:'哥倫比亞薇拉省．帕洛瑪莊園主',desc:'三代種咖啡的農人。不喜歡中間商，喜歡說西班牙文的髒話跟講他的雞。',
+   look:{skin:'#a86f45',hair:'#2a1a10',style:'hat',hat:'#d9c08a',cloth:'#6a7d5a',mus:1}},
+ lin:{name:'林評審',alias:['林正衡'],role:'資深感官評審',desc:'林正衡。圈內資歷最深的評審之一，說話永遠只說一半，另一半要你自己「懂」。',
+   look:{skin:'#e6bd96',hair:'#6d6d6d',style:'slick',cloth:'#22303f',shirt:'#e4e4e4',tie:'#c9a24a',glass:'#555'}},
+ yu:{name:'小柚',alias:[],role:'咖啡網紅',desc:'三十萬追蹤的咖啡網紅。鏡頭前笑得很甜，鏡頭後算得很精。',
+   look:{skin:'#f6d3b8',hair:'#e48aa6',style:'bob',cloth:'#f2e6d8',blush:1}},
+ hana:{name:'花野',alias:['花野凜子'],role:'世界手沖盃 倫理委員會主席',desc:'花野凜子。前日本冠軍，現任賽事倫理委員會主席。以「規則只看證據」聞名。',
+   look:{skin:'#f2d2b6',hair:'#0f0f14',style:'bob',cloth:'#1f2a4a',glass:'#888'}},
+};
+/* ============ 詞典 ============ */
+const GLOSS={
+ '萃取率':'從咖啡粉裡溶進水中的物質比例。一般認為 18–22% 是好喝區間，太低偏酸薄（萃取不足），太高偏苦澀（過度萃取）。',
+ 'TDS':'總溶解固體。咖啡液的濃度，用折射計量。手沖常見目標約 1.15–1.35%。',
+ '金杯':'金杯圖：橫軸萃取率、縱軸濃度（TDS），中間那塊「萃取率 18–22%、濃度 1.15–1.35%」就是金杯區。',
+ '塞水':'注水後水排不下去、粉床泡太久，萃取過度，杯子會苦澀乾。常見原因：磨太細、細粉太多、濾杯與濾紙不合、注水太猛把細粉沖到底部。',
+ '粉床':'咖啡粉在濾杯裡鋪成的那一層。粉床是否平整，決定水會不會均勻通過。',
+ '通道效應':'水只從粉床某條「捷徑」快速通過，那條路過萃、其他地方萃不到，杯子同時苦又酸。',
+ '細粉':'研磨時產生的極細粉末，容易堵住濾紙、也容易過萃。',
+ '粉水比':'咖啡粉與水的重量比，例如 1:15 是 15 克粉配 225 克水。比例越大（1:17）越淡。',
+ '藝伎':'Geisha／Gesha，源自衣索比亞的咖啡品種，在巴拿馬聲名大噪。典型風味：茉莉花、佛手柑、蜜桃、紅茶感。價格常是一般精品豆的數倍到數十倍。',
+ '商業豆':'以量計價、品質要求較低的咖啡豆，常用於大宗烘焙與即溶。與以杯測分數分級的「精品豆」相對。',
+ 'Q Grader':'通過 CQI 認證的咖啡品質鑑定師，能以標準杯測評分。俗稱「咖啡界的品酒師」。',
+ '杯測':'用標準流程（固定粉量、研磨、水溫、時間）評估咖啡風味與瑕疵的方式。分數 80 以上通常稱為精品。',
+ '鎂離子':'水中的礦物質之一。像夾娃娃機的爪子，特別會「抓」出果酸、花香等風味分子，所以淺烘豆常愛鎂多一點的水。',
+ '碳酸氫根':'水中的緩衝物質（鹼度）。像防撞墊，會把咖啡的酸「吸掉」。太多杯子會平、悶、沒有酸質。',
+ '硬度':'水中鈣、鎂離子的總量。太軟萃不出東西，太硬容易悶、有粉筆感、也會讓機器結垢。',
+ '葉鏽病':'由咖啡駝孢鏽菌造成的病害，葉背出現橘黃色粉狀孢子斑，嚴重時整株落葉、減產。中南美洲曾大規模爆發。',
+ '咖啡果小蠹':'Coffee Berry Borer（西文 broca）。米粒大的小甲蟲，從果實頂端（果臍）鑽一個小圓孔進去產卵，吃掉種子，是全球咖啡最嚴重的蟲害之一。',
+ '炭疽病':'咖啡果實上出現深色凹陷病斑、果實變黑乾枯的真菌病害（CBD 主要見於非洲）。',
+ '厭氧':'厭氧發酵：把咖啡果或果肉放進密封槽，在缺氧環境下發酵。乳酸菌與酵母的代謝會產生酯類，帶來酒感與熱帶水果調性。',
+ '共發酵':'把咖啡和其他水果、香料一起發酵（co-fermentation）。風味強烈但爭議大：有沒有揭露、有沒有直接加香精，是精品圈最敏感的問題之一。',
+ '酯類':'酸和醇結合形成的香氣分子，很多水果香（鳳梨、香蕉、草莓）都屬於酯類。',
+ '期貨行情':'紐約阿拉比卡咖啡期貨（俗稱 C 價格）。大宗咖啡依它定價，常低於小農的生產成本。',
+ '處理法':'咖啡果採收後去除果肉、乾燥成生豆的方法：水洗、日曬、蜜處理、厭氧……決定了大部分的風味方向。',
+ 'SL28':'肯亞經典品種，以黑醋栗、番茄般的明亮酸質聞名。肯亞高海拔豆往往堅硬、密度高。',
+ '悶蒸':'第一次少量注水，讓粉排出二氧化碳、均勻濕潤，之後的萃取才穩。',
+ '倫理委員會':'賽事中處理違規、檢舉、利益衝突的獨立小組。正式書面申訴＋證據，是唯一會被受理的方式。',
+ '迴避':'評審和選手有利益關係或爭議時，退出評審該場次，避免不公。',
+ /* 成語 */
+ '魚目混珠':'拿魚的眼珠冒充珍珠。比喻以假亂真。',
+ '打草驚蛇':'本來要抓蛇，卻先打草把蛇嚇跑。比喻行事不密，讓對方先有了防備。',
+ '笑裡藏刀':'表面和善，暗中陰險。',
+ '心照不宣':'彼此心裡明白，不必說破。',
+ '投鼠忌器':'想打老鼠又怕打壞旁邊的器物。比喻想除害卻有所顧忌。',
+ '以其人之道，還治其人之身':'用對方對付人的方法，反過來對付他自己。',
+ '過河拆橋':'過了河就把橋拆掉。比喻目的達成後，就把幫過自己的人一腳踢開。',
+ '獨善其身':'只顧自己好，不管外面的事。',
+ '欲蓋彌彰':'想掩蓋，反而讓事情更明顯。',
+ '明哲保身':'明白事理的人懂得保全自己；後多指怕事、只求自保。',
+ '釜底抽薪':'把鍋底的柴抽掉。比喻從根本上解決問題。',
+ '寧為玉碎，不為瓦全':'寧可做玉器被打碎，也不做瓦器保全。比喻寧願犧牲也不苟且。',
+ '冰凍三尺，非一日之寒':'結三尺厚的冰，不是一天冷出來的。比喻事情的形成有長久的原因。',
+ '眾口鑠金':'眾人說的話，連金屬都能熔化。比喻輿論的力量大到可以混淆是非。',
+};
+/* ============ 結局 ============ */
+const ENDS={
+ fish:{t:'魚目混珠',x:'網紅影片爆紅三天後，一位 Q Grader 逐格比對豆形，指出那是巴西商業豆。嚴老闆的聲明只有一句：「本店咖啡師個人疏失，已處理。」留言區最上面，貼著你的名字。',w:'「你說是不是」不是問句，是共犯邀請。出事的時候，手沖那杯的是你，不是他。'},
+ loud:{t:'當眾拆台',x:'嚴老闆笑著說「好啊」。隔天你被以「不適任」辭退，同業群組裡多了一則「這位咖啡師曾偷店裡的豆子」。你手上沒有任何證據。報名表上的推薦店家欄，從此空白。',w:'對的事，在沒證據、沒退路時大聲說，只是把自己送上門。黑暗面第一課：先護住自己，再護住真相。'},
+ coarse:{t:'越走越急',x:'第二杯更酸、更薄。老人放下杯子，留下錢，走了。很久以後你才知道他是誰——而他不會再來第二次。',w:'酸得尖、尾韻短、單薄 ＝ 萃取不足。要讓水「慢下來」、萃更多：磨細一點、拉長時間，或提高水溫。磨粗、降溫都只會更不足。'},
+ kneel:{t:'跪著拿的推薦函',x:'你拿到了推薦函。之後每週，倉庫都多一袋換過標籤的豆子。一年後消保單位上門稽查，嚴老闆指著你：「豆子都是他在處理的。」',w:'推薦函是他的籌碼。一旦你為了它低頭，他就會一直拿它來換你的良心。'},
+ threat:{t:'打草驚蛇',x:'當晚，倉庫的進貨單全被換掉，你被辭退。隔天嚴老闆搶先發文：「前員工因私怨散布不實訊息。」你的爆料，成了他口中的報復。',w:'撂狠話＝告訴對方你要出手。他會先湮滅證據、先發制人。成語：打草驚蛇。'},
+ water:{t:'死水一杯',x:'沈懷舟喝了一口，把杯子推回來：「花香被你淹死了。回去吧。」舟火焙煎所的鐵門，在你面前拉下。',w:'淺烘藝伎靠酸與花香。碳酸氫根（鹼度）高的水會把酸「吸掉」，杯子平悶；鎂多、鹼度低的水，才抓得出花果香。'},
+ bitter:{t:'苦海無邊',x:'磨得更細，杯子苦得像中藥。沈懷舟沒有罵你，只是把折射計收進抽屜：「等你看得懂數字再來。」',w:'TDS 1.48%、萃取率 23.6%：又濃、又過萃。應該磨粗降低萃取，並把粉水比拉大讓濃度下來。'},
+ dilute:{t:'兌水的聰明',x:'加水後 TDS 回到 1.30，數字好看了，但苦澀和乾澀一點也沒少。沈懷舟：「你在騙折射計，騙不了舌頭。」',w:'加水只降濃度，不改萃取率。23.6% 的過萃苦澀還在。要從研磨、時間、溫度下手。'},
+ stir:{t:'攪局',x:'粉床被你攪成泥，細粉全沉到濾紙底，水更排不下去。四分半，杯子苦得發澀。',w:'塞水多半是細粉堵住濾紙。用力攪拌會把細粉推到底部，更塞。換厚濾紙也只會更慢。應該磨粗一點、減少細粉，注水穩定別猛沖。'},
+ spiked:{t:'加料的冠軍',x:'你拿下台灣盃。世界賽前抽驗，實驗室在生豆裡驗出外加香料成分。金穗的聲明只有一句：「選手自行處理生豆，與本公司無關。」',w:'冷卻後香氣斷崖消失、尾韻有化學甜，是外加香料的典型線索。「不必問太多」＝他知道豆子有問題，而且早就準備好讓你背。'},
+ misdiag:{t:'看錯病的人',x:'你建議的處理方式完全不對症。三個月後，那排樹的葉子掉光了。卡洛斯再也沒回你的訊息。',w:'葉背橘黃粉狀斑 ＝ 葉鏽病；果臍上米粒大小的圓孔 ＝ 咖啡果小蠹。看得懂樹，農人才會把你當自己人。'},
+ lowball:{t:'又一個中間商',x:'「一成？」卡洛斯笑了，「金穗的人也是這樣開場的。」他轉身去餵雞，再也沒看你一眼。',w:'他問的不是價錢，是「你是不是另一個中間商」。照期貨行情加一點，對小農來說仍可能低於成本。'},
+ bounce:{t:'空頭支票',x:'你回台灣才發現，兩千公斤的錢你連零頭都付不出來。卡洛斯為了等你，推掉了其他買家。那一季，帕洛瑪莊園賠掉了一整年。',w:'承諾付不起的量，比壓價更傷人。小量、透明、可以兌現，才是農人要的。'},
+ flat:{t:'被換掉的水',x:'整場比賽你的杯子都悶悶的，花香出不來。你以為是緊張，名次停在第九。後台垃圾桶裡，有一個跟你一模一樣、但封膜不同的水瓶。',w:'熱身杯突然平、悶、粉筆感，又發現水封異狀——這不是緊張，是水被換了。要冷靜回報並保存證物。'},
+ accuse:{t:'無憑無據',x:'監視器顯示蘇曼從頭到尾沒碰過你的桌子。你被判「不當行為」扣分，賽後主辦發函警告。真正換水的人，在觀眾席喝著飲料。',w:'你沒有證據是誰換的。當眾指控，只會讓真正的黑手置身事外。'},
+ bribe:{t:'心意',x:'你包了一個紅包。台灣盃你拿了冠軍。兩年後林評審收賄案爆發，帳本上第三行，是你的名字。',w:'「杯子外的事」「你懂我意思」——心照不宣的暗示，就是在要錢。給了，就一輩子是他帳本上的一行。'},
+ blank:{t:'說不出的杯子',x:'你結結巴巴說不出風味從哪來。評審在「描述與理解」欄打了極低分。你止步四強。',w:'控溫厭氧下，乳酸菌與酵母代謝產生酯類與乳酸，帶來酒感與熱帶水果。說不出原理，評審不會相信那是你掌握的風味。'},
+ contract:{t:'賣身契',x:'每個月二十萬準時入帳。世界賽前一週，金穗送來「指定比賽豆」——冷掉後香氣會突然消失的那種。合約寫著，你不能拒絕，也不能說。',w:'「指定豆」＋「封口條款」＝把你的杯子和你的嘴一起買走。沈懷舟當年，就是坐在同一張椅子上。'},
+ bots:{t:'水軍',x:'三千個帳號一夜湧進，留言整齊得像排隊。不到兩天，就有人做了圖表：「這些帳號都是同一天註冊的。」你從受害者，變成了造假的人。',w:'用假評論對抗抹黑，等於親手證明對方說的「這人會作假」。成語：欲蓋彌彰。'},
+ flame:{t:'罵戰',x:'你的長文點名嚴老闆，用詞越寫越重。三天後你收到律師函：公然侮辱、加重誹謗。你沒有證據，他有一堆截圖。',w:'情緒化點名，給了對方提告的武器。面對眾口鑠金，該做的是攤開可查證的事實，而不是比誰罵得大聲。'},
+ misread:{t:'聽不懂的話',x:'蘇曼看了你一眼，「算了。」她走進雨裡。世界賽前，她被驗出加料、當場除名，金穗把一切推給她。你手上，什麼證據都沒有。',w:'「我的豆子太香了，香到我自己都怕」——不是炫耀，是求救。她想說的是：那豆子被加了料，而她想脫身。'},
+ rumor:{t:'同一種人',x:'消息在網路上燒了三天，林評審辭職。一週後，你的帳號被扒出「造謠源頭」。沒有人再相信沈懷舟的冤屈——因為你們用的，正是當年害他的手段。',w:'以其人之道還治其人之身，聽起來痛快，代價是你變成了他們。公道要能攤在陽光下，才叫公道。'},
+ coward:{t:'獨善其身',x:'你只想好好比賽。世界賽上，林評審坐在你的評審席。你的分數，低得很整齊。',w:'不處理，不等於中立。爛掉的東西會一路爛進你的杯子裡。'},
+ late:{t:'勝者的清算',x:'你等比完才交證據。拿到名次的你，看起來像在報私仇；而且林評審，已經評完了你的那一輪。委員會：「為何不在賽前提出？」',w:'證據要在利益衝突發生前提出，並要求評審迴避。事後才交，再真也像清算。'},
+ mic:{t:'搶來的麥克風',x:'你衝上開幕式舞台，話說到第三句麥克風就被切斷。你被保全帶離，以「擾亂賽事」取消資格。證據，沒有人看。',w:'倫理委員會只受理正式書面申訴與證據。搶麥克風只會讓你的證據被當成鬧事。'},
+ kenya:{t:'沒打開的肯亞',x:'指定豆的杯子酸澀緊縮，像沒熟的番茄。指定賽成績墊底，你沒能進入決賽。',w:'高海拔、高密度的肯亞淺烘水洗豆比較難萃，通常要磨細一點、水溫拉高（約 93–96°C），才打得開黑醋栗般的酸甜。'},
+ lie:{t:'一句沒有',x:'你說了「沒有」。評審翻開金穗流出的資料，第一頁就是帕洛瑪莊園的共發酵紀錄——是你自己做的。你被以「申報不實」取消成績。',w:'共發酵本身不一定違規，說謊才是。誠實揭露＋紀錄，才是你最強的武器。'},
+ secret:{t:'商業機密',x:'「處理細節屬於商業機密。」評審們交換了一個眼神。在一場加料醜聞剛爆發的賽事裡，這句話等於承認。你的分數，被整齊地壓低。',w:'在信任危機中，拒絕揭露＝自證可疑。你手上明明有每天的糖度與 pH 紀錄。'},
+};
+/* ============ 劇本 ============ */
+const L=(s,t)=>({s,t}), N=t=>({s:'',t}), C=(q,o)=>({c:q,o}), BG=(b,loc)=>({bg:b,loc}), LB=l=>({lbl:l}), J=l=>({jmp:l}), IF=(f,l)=>({iff:f,go:l});
+const CH=[
+{t:'序章　第一杯',sub:'白霧咖啡的雨夜',recap:'你是台北「白霧咖啡」的咖啡師。抽屜裡壓著一張台灣盃報名表——這是一切的開始。',nodes:[
+ BG('cafe','台北．白霧咖啡'),
+ N('台北，雨夜。白霧咖啡打烊前四十分鐘。'),
+ N('你叫{N}，在這家店當咖啡師第二年。抽屜裡壓著一張報名表——台灣盃手沖錦標賽。'),
+ L('mei','{N}～磨豆機阿嬤又卡豆了，你去哄哄她。'),
+ L('me','……阿梅，那是一台磨豆機，不是你阿嬤。'),
+ L('mei','它卡豆的聲音跟我阿嬤打呼一模一樣，你不懂啦。'),
+ N('門上的鈴鐺響了。嚴老闆收起雨傘，笑起來眼睛瞇成一條線，像他算帳時的那支原子筆。'),
+ L('yan','兩位辛苦啦～'),
+ L('yan','{N}，明天有個網紅要來拍「全台最便宜的藝伎」。我們的藝伎呢，剛好賣完了。'),
+ L('yan','倉庫那袋巴西，你裝進藝伎的罐子。烘深一點、沖快一點，客人喝不出來的——你說是不是？'),
+ C('嚴老闆這句「你說是不是」，你怎麼回？',[
+  {t:'「是，老闆。」照他說的裝罐。',end:'fish'},
+  {t:'當著阿梅的面大聲說：「這是詐欺！我明天就去檢舉！」',end:'loud'},
+  {t:'「這袋我不裝。明天網紅點的藝伎，我用自己的薪水補一包真的。」',fx:{heart:1},r:[['yan','……哎呀，年輕人真有原則。'],['','他的眼睛還是瞇著，但手上的筆停了。']]},
+  {t:'嘴上說「好」，口袋裡的手機開著錄音。明天照樣端出真的藝伎。',f:'rec_yan',r:[['yan','好孩子～'],['','錄音檔的長度：00:01:42。你把它存進一個叫「阿嬤」的資料夾。']]},
+ ]),
+ BG('cafe_day','隔天．白霧咖啡'),
+ N('隔天，網紅沒來。倒是吧台前坐了一位灰髮、黑大衣的老人。'),
+ L('shen','今天最好的那支。'),
+ N('你沖了那包自己掏錢買的藝伎。老人聞了很久，才喝第一口。'),
+ L('shen','花香是有的。可惜酸得尖，尾巴短——你的水，走得太急了。'),
+ C('「水走得太急」是什麼意思？下一杯你怎麼調？',[
+  {t:'磨細一點，讓水流慢下來、萃取更完整。',fx:{tech:1},r:[['','第二杯，酸變圓了，尾韻拉出一段紅茶般的甜。'],['shen','嗯。這杯，像話說完了。']]},
+  {t:'磨粗一點，避免苦味跑出來。',end:'coarse'},
+  {t:'水溫降到 80°C，讓酸柔和一點。',end:'coarse',why:'降溫也會讓萃取更少，酸只會更尖更薄。'},
+ ]),
+ N('老人在杯墊下壓了一張名片就走了。名片上寫著：「舟火焙煎所　沈懷舟」。'),
+ L('mei','沈懷舟？2014 年台灣盃冠軍……後來被撤銷的那個？'),
+ L('mei','聽說他比賽偷帶自己的水耶。好可怕，水也可以作弊喔？'),
+ BG('cafe','當晚．白霧咖啡'),
+ L('yan','聽說今天有人自掏腰包請客啊～'),
+ L('yan','對了，下個月台灣盃報名，要附店家推薦函喔。我們家的推薦函，很——珍——貴——的。'),
+ C('這句話是籌碼。你怎麼接？',[
+  {t:'「老闆對不起，昨天是我不懂事，以後都聽您的。」',end:'kneel'},
+  {t:'「推薦函我自己想辦法。老闆放心，店裡的事我不會往外說——只要我手上不再出現換過標籤的豆子。」',fx:{fame:1},r:[['yan','……'],['','他第一次沒有笑。'],['yan','好啊。那就——各自珍重。']]},
+  {t:'「你不給，我就把藝伎的事 PO 上網。」',end:'threat'},
+ ]),
+ IF('rec_yan','p_rec'),J('p_end'),
+ LB('p_rec'),N('你沒說的是：「阿嬤」資料夾裡那 1 分 42 秒，也很——珍——貴——的。'),
+ LB('p_end'),
+ L('mei','你要去找那個被撤銷的冠軍喔？……幫我問他，水要怎麼作弊。'),
+ L('me','阿梅。'),
+ L('mei','開玩笑的啦！我是說，加油。'),
+ {done:1}
+]},
+{t:'第一章　舟火',sub:'被撤銷的冠軍',recap:'你拒絕了嚴老闆的換標籤詐欺，也失去了店家推薦函。拿著那張名片，你走進大稻埕巷底的舟火焙煎所。',nodes:[
+ BG('roast','大稻埕．舟火焙煎所'),
+ N('大稻埕巷底。一台老舊的直火烘豆機還有餘溫，滾筒的小窗透出暗紅的光。'),
+ L('shen','推薦函我可以寫。但我寫的，評審未必買帳——你知道我那頂冠軍是怎麼沒的。'),
+ L('shen','外面怎麼說？'),
+ C('沈懷舟在試你。你怎麼回？',[
+  {t:'「外面都說，您比賽時偷用自備的水，違規。」',r:[['shen','說得好。至少你不拍馬屁。']]},
+  {t:'「師父不可能作弊，我信您！」',f:'blind',r:[['shen','……信得太快的人，也容易被別人說服得太快。']]},
+  {t:'「我不知道真相。我只信我喝到的——您昨天那兩句話，是真的。」',f:'clear',fx:{heart:1},r:[['shen','嗯。舌頭比耳朵老實。']]},
+ ]),
+ N('他在桌上放了兩瓶水。'),
+ L('shen','A 瓶：硬度 150、碳酸氫根 120。B 瓶：硬度 70、碳酸氫根 40，鎂比鈣多。'),
+ L('shen','你的淺烘藝伎，用哪瓶？'),
+ C('選水。',[
+  {t:'B 瓶：鎂多、碳酸氫根低，酸和花香才抓得出來。',fx:{tech:1},r:[['shen','鎂離子像夾娃娃機的爪子，專抓果酸和花香；碳酸氫根像防撞墊，把酸全吸掉。記住了。']]},
+  {t:'A 瓶：礦物質多，萃得出更多東西。',end:'water'},
+  {t:'都不要，用純水（RO 水）最乾淨。',end:'water',why:'純水幾乎沒有礦物質，抓不住風味分子，杯子會空洞、尖酸。'},
+ ]),
+ N('門口傳來塑膠袋的聲音。'),
+ L('mei','打擾了～我帶鹹酥雞來慰勞！師父好！請問水要怎麼作弊——'),
+ L('me','阿梅！！'),
+ L('shen','……九層塔多一點的話，我原諒你。'),
+ N('你沖了一杯，沈懷舟用折射計量。螢幕上：TDS 1.48%，萃取率 23.6%。'),
+ L('shen','金杯圖上，你在哪？下一杯怎麼辦？'),
+ C('看懂數字。',[
+  {t:'又濃又過萃：磨粗一點降低萃取，粉水比從 1:14 拉到 1:16。',fx:{tech:1},r:[['','下一杯：TDS 1.30%，萃取率 20.4%。落在金杯正中間。'],['mei','哇，那個框框好像賓果！']]},
+  {t:'太淡了，再磨細一點。',end:'bitter'},
+  {t:'直接加點熱水稀釋，TDS 降下來就好。',end:'dilute'},
+ ]),
+ N('凌晨一點。你用 V60 練習，粉床卻卡住了——三分四十秒，水還積在濾杯裡。'),
+ L('shen','慢了。你聽見了嗎？杯子在喊苦。'),
+ C('塞水了。下一杯怎麼辦？',[
+  {t:'磨粗一點、先篩掉一點細粉；注水穩定，別往濾紙邊猛沖。',fx:{tech:1},r:[['shen','塞水不是水的錯，是細粉的錯。冰凍三尺，非一日之寒——毛病都在前面就種下了。']]},
+  {t:'拿湯匙用力攪拌粉床，讓它流下去。',end:'stir'},
+  {t:'換一張比較厚的濾紙。',end:'stir',why:'厚濾紙流速更慢，只會塞得更嚴重。'},
+ ]),
+ N('天快亮時，沈懷舟把推薦函封好，放在你手裡。'),
+ L('shen','台灣盃的豆子，你自己去找。'),
+ L('shen','好豆子不在別人的嘴裡，在樹上。'),
+ {done:1}
+]},
+{t:'第二章　金穗',sub:'太香的豆子，與遠方的樹',recap:'沈懷舟收你為徒，教你水、數字與塞水。他說：好豆子不在別人的嘴裡，在樹上。但在那之前，有人先找上了你。',nodes:[
+ BG('office','南港．金穗生豆'),
+ N('金穗生豆的會客室。整面牆的麻布袋，空氣裡是青草和穀倉的味道。'),
+ L('zhou','我是金穗的周。聽說你是沈懷舟的徒弟？哈，緣分。'),
+ L('zhou','巴拿馬藝伎，杯測 92 分，比賽批次。半價給你，算我栽培後輩。'),
+ N('你杯測了樣品。香氣炸開——荔枝、草莓糖、玫瑰。但杯子涼了以後，香味像被拔掉插頭，突然消失，尾韻留下一股化學的甜。'),
+ L('zhou','好豆子，不必問太多。問多了，豆子就不香了。'),
+ C('周董的話裡有話。你怎麼做？',[
+  {t:'「好，我買。」比賽豆半價，機會難得。',end:'spiked'},
+  {t:'「能先給我處理法紀錄和莊園批次號嗎？我習慣做功課。」',fx:{tech:1},r:[['zhou','年輕人做事細，好、好。紀錄嘛……下週給你。'],['','你知道，下週不會有紀錄。']]},
+  {t:'「周董，這豆子是不是加了什麼？」',f:'zhou_alert',fx:{fame:-1},r:[['zhou','呵呵。'],['','他倒茶的手很穩，但那一杯，沒有倒給你。']]},
+ ]),
+ BG('cafe','白霧咖啡．員工休息室'),
+ L('mei','我表哥在哥倫比亞薇拉省當咖啡導遊！他說那邊有個莊園主很怪，死都不賣給中間商。'),
+ L('mei','還有，他說那邊的雞會喝咖啡果皮茶。'),
+ L('me','後面那句我不需要知道。'),
+ L('mei','你會需要的。相信我。'),
+ BG('farm','哥倫比亞．薇拉省 1,850m'),
+ N('哥倫比亞，薇拉省。海拔一千八百五十公尺，夜裡冷得像高山上的台灣。'),
+ L('carlos','又一個台灣人。'),
+ L('carlos','上次來的那個，替「金穗」收豆。一公斤給我的錢，說是照期貨行情。行情？行情連我工人的午餐都付不起。'),
+ N('他帶你走進咖啡樹之間。有一排樹，葉背長滿橘黃色的粉；另一排的紅色果實，果臍上有米粒大的小圓孔。'),
+ L('carlos','你是咖啡師？那你說，這兩排樹生了什麼病？'),
+ C('看懂樹。',[
+  {t:'葉背橘粉是葉鏽病；果臍上的小圓孔是咖啡果小蠹。',fx:{tech:1},r:[['carlos','……喔？台灣的咖啡師會看樹。'],['','一隻雞走過來，啄了啄你的鞋。']]},
+  {t:'葉背橘粉是咖啡果小蠹的卵；果臍小孔是葉鏽病的病斑。',end:'misdiag'},
+  {t:'兩排都是炭疽病，噴同一種藥就好。',end:'misdiag'},
+ ]),
+ L('carlos','好。你看得懂樹。'),
+ L('carlos','那你出得起多少？'),
+ C('他問的是價錢嗎？',[
+  {t:'「照期貨行情，再多加一成。」',end:'lowball'},
+  {t:'「我全包！兩千公斤，價格你開！」',end:'bounce'},
+  {t:'「我只買得起一個 30 公斤的小批次。但照你算出來的成本加合理利潤直接付，合約公開，明年我還來。」',fx:{heart:1},r:[['carlos','……'],['carlos','三十公斤。哈。你是第一個跟我說「明年」的買家。']]},
+ ]),
+ L('carlos','隔壁的莊園，發酵槽裡丟果乾、肉桂，還有一瓶「天然」香精。歐洲買家愛死了。'),
+ L('carlos','你的三十公斤，要不要也「多一點水果」？'),
+ C('處理法，決定了你的杯子能不能攤在陽光下。',[
+  {t:'「要。比賽就是要香，香精不用寫在標籤上吧？」',end:'spiked',why:'這次是你自己加的。冷卻後香氣斷崖，世界賽抽驗一驗就中。'},
+  {t:'「和真的水果一起共發酵，但全部紀錄下來，比賽時完整揭露。」',f:'coferm',fx:{tech:1},r:[['carlos','誠實的水果。好，我喜歡。']]},
+  {t:'「什麼都不加。做控溫厭氧日曬，每天量糖度和 pH，記錄下來。」',f:'clean',fx:{heart:1,tech:1},r:[['carlos','慢、麻煩、沒噱頭。……我喜歡。']]},
+ ]),
+ N('出發前，卡洛斯塞給你一本沾著泥巴的筆記本：每天的溫度、糖度、pH，一筆不漏。'),
+ L('carlos','對了。金穗的人上週來過。'),
+ L('carlos','他們說——你會來。'),
+ {done:1}
+]},
+{t:'第三章　台灣盃',sub:'被換掉的水',recap:'你在哥倫比亞找到卡洛斯，買下 30 公斤自己參與處理的豆子，帶回一本處理紀錄。但金穗，似乎早就知道你的行蹤。',nodes:[
+ BG('stage','台灣盃手沖錦標賽．決賽'),
+ N('台灣盃手沖錦標賽，決賽日。聚光燈打在六張比賽桌上。'),
+ L('su','你就是沈懷舟的徒弟？'),
+ L('su','他教你偷帶水了嗎？'),
+ C('蘇曼在挑釁。',[
+  {t:'「至少我的豆子，冷了還是香的。」',f:'su_hostile',r:[['su','……'],['','她的眼神閃了一下，轉身就走。']]},
+  {t:'「妳的手很穩，我看過妳去年的影片。決賽見。」',f:'su_respect',r:[['su','……哼。']]},
+  {t:'笑一笑，不說話，繼續擦你的濾杯。',r:[['su','無聊。']]},
+ ]),
+ N('熱身杯。你喝了一口——平、悶，帶著粉筆感，花香全不見了。'),
+ N('你低頭看水瓶。封膜的顏色，跟你早上貼的不一樣。'),
+ IF('zhou_alert','w_alert'),J('w_q'),
+ LB('w_alert'),N('觀眾席第二排，金穗的業務正低頭滑手機。'),
+ LB('w_q'),
+ C('三分鐘後就要上場。',[
+  {t:'大概是太緊張了，照原計畫沖。',end:'flat'},
+  {t:'衝到蘇曼桌前：「是妳換了我的水！」',end:'accuse'},
+  {t:'冷靜向裁判長報告封膜異狀，申請改用大會比賽用水，並請工作人員封存原水瓶。',fx:{fame:1},r:[['','裁判長點頭，工作人員把你的水瓶裝進證物袋。'],['','大會比賽用水依 SCA 建議範圍調配——不是你的 B 瓶，但夠乾淨。']]},
+ ]),
+ N('中場休息。林評審端著一杯茶，在你身邊停下。'),
+ L('lin','年輕人，比賽是杯子裡的事，也是杯子外的事。'),
+ L('lin','晚上主辦有個餐敘。你懂我意思吧？'),
+ C('林評審沒有說完的那一半。',[
+  {t:'「懂。我會準備一點心意。」',end:'bribe'},
+  {t:'「林評審，我只會在杯子裡說話。」',fx:{heart:1},r:[['lin','呵。年輕。'],['','他走了。你的手心全是汗。']]},
+  {t:'微笑說「一定到」——晚上赴約，口袋裡的手機開著錄音，什麼也不給。',f:'rec_lin',fx:{fame:1},r:[['','餐敘上，他說得比白天露骨多了：「沈懷舟當年，就是太不懂事。」'],['','錄音檔的長度：00:23:17。']]},
+ ]),
+ IF('coferm','q_co'),
+ L('lin','（評審席）你的豆子是控溫厭氧日曬。為什麼喝起來會有這麼乾淨的酒感和熱帶水果？'),J('q_ans'),
+ LB('q_co'),
+ L('lin','（評審席）你的豆子和水果共發酵過。那麼，那股酒感和熱帶水果，究竟從哪裡來？'),
+ LB('q_ans'),
+ C('上台說明。',[
+  {t:'缺氧的發酵槽裡，乳酸菌和酵母代謝出酯類和乳酸；我們每天量糖度和 pH 控制節奏——紀錄在這裡。',fx:{tech:1},r:[['','你翻開那本沾著泥巴的筆記本。評審席有人停下了筆。']]},
+  {t:'因為我們烘得比較深，焦糖化帶出酒感。',end:'blank'},
+  {t:'因為品種是藝伎，天生就有酒味。',end:'blank'},
+ ]),
+ N('成績公布。'),
+ N('冠軍——{N}。'),
+ N('亞軍，蘇曼。她沒有鼓掌，但盯著你的杯子看了很久。'),
+ L('shen','（台下，對自己）……水，沒有被換成功啊。'),
+ {done:1}
+]},
+{t:'第四章　合約',sub:'二十萬，與一張嘴',recap:'你拿下台灣盃冠軍，取得世界賽資格。有人在你的水上動手腳，被你擋下。勝利之後，來敲門的，是錢。',nodes:[
+ BG('office','信義區．某會議室'),
+ N('冠軍後第三天。信義區的玻璃大樓，三十二樓。'),
+ L('yan','恭喜恭喜！白霧永遠是你的娘家喔～'),
+ L('zhou','坐。'),
+ N('桌上一份合約：三年、每月二十萬、世界賽使用「金穗指定比賽豆」、合約期間不得公開評論合作夥伴。'),
+ L('zhou','沈懷舟當年，也是坐在這張椅子上。'),
+ C('他想買的，不只是你的杯子。',[
+  {t:'簽。二十萬一個月，夠買十台磨豆機。',end:'contract'},
+  {t:'把合約撕了，丟回桌上。',f:'enemy',fx:{fame:-1},r:[['zhou','年輕人，紙撕了還能印。人撕了，就難了。']]},
+  {t:'「指定豆條款和封口條款刪掉，再加一條：所有贊助豆公開處理法。不然我不簽。」',fx:{fame:1},r:[['zhou','哈哈哈哈。'],['zhou','你，跟你師父，一模一樣。'],['','你沒有簽。但你是走著出去的，不是被請出去的。']]},
+ ]),
+ BG('cafe','三天後'),
+ N('三天後，一篇匿名長文在咖啡社團瘋傳：「台灣盃新科冠軍，曾偷拿前東家的配方與豆源。」'),
+ N('留言破千。眾口鑠金。'),
+ L('yu','嗨～我是小柚。你最近好紅喔，紅得有點燒焦。'),
+ L('yu','要不要我幫你買一點好評帳號洗一洗？三千個帳號，很便宜的。'),
+ C('網路在燒你。',[
+  {t:'「好，三千個就三千個。」',end:'bots'},
+  {t:'發一篇長文，直接點名嚴老闆造謠，罵回去。',end:'flame'},
+  {t:'公開時間軸、莊園合約、處理紀錄，不點名任何人，並邀所有人來一場公開盲測。',fx:{fame:2},f:'yu_ally',r:[['yu','……不罵人、不買帳號，還要辦盲測？'],['yu','你是我拍過最難搞的咖啡師。好吧，盲測那天我去拍。不收錢。']]},
+  {t:'把嚴老闆要你換標籤的錄音交給消保單位，網路上只說一句：「一切交給調查。」',need:'rec_yan',fx:{fame:1,heart:1},f:'yu_ally',r:[['','一週後，白霧咖啡被稽查，換標籤的進貨單一張張被翻出來。'],['','那篇匿名長文，悄悄被刪了。'],['yu','你手上有東西，卻沒拿來鬧。……我想拍你。']]},
+ ]),
+ L('mei','{N}，我看到那篇文了。我在下面留言了。'),
+ L('me','妳留了什麼？'),
+ L('mei','「他連磨豆機阿嬤都哄得好，怎麼可能偷東西。」'),
+ L('me','……謝謝。雖然這句沒有任何說服力。'),
+ {done:1}
+]},
+{t:'第五章　師父的債',sub:'太香的豆子，會說話',recap:'你拒絕了金穗的合約，挺過了抹黑。世界賽前一個月，一個雨夜，兩個人先後敲響了舟火焙煎所的門。',nodes:[
+ BG('roast_rain','雨夜．舟火焙煎所'),
+ L('shen','2014 年那場比賽，我的水是被換的。換水的，是金穗的人。'),
+ L('shen','判我「違規自備水」的，是林正衡。賽前一晚，周在飯店請他吃飯。'),
+ L('shen','我沒有證據。所以我閉嘴了十二年。'),
+ N('門被敲了三下。是蘇曼。她全身濕透，手裡抱著一個牛皮紙袋。'),
+ L('su','我的豆子太香了。'),
+ L('su','香到……我自己都怕。'),
+ C('蘇曼真正想說的是？',[
+  {t:'她在炫耀，世界賽前來示威。',end:'misread'},
+  {t:'金穗給她的比賽豆被加了料，她想脫身，但不敢一個人說。',fx:{heart:1},r:[['su','……你聽得懂。'],['su','金穗逼我用。這袋裡是他們的出貨單，還有香精的採購單。'],['su','但我一交出去，就會被說是「輸不起的亞軍」。']]},
+  {t:'她是來打探你的豆子跟參數的。',end:'misread'},
+ ]),
+ IF('su_respect','su_r'),J('su_n'),
+ LB('su_r'),L('su','台灣盃那天你說我手很穩。……那是我拿金穗的錢以後，第一次有人只說我的手。'),
+ LB('su_n'),
+ L('shen','好。這次，輪到我們。'),
+ L('shen','世界賽前一晚，周會和林在東京的飯店見面。我們不需要證據，我們只需要「故事」。'),
+ L('shen','你現在有名氣，在網路上放一句「林正衡收錢」，真假不重要——讓他先倒。以其人之道，還治其人之身。'),
+ C('師父十二年的債。',[
+  {t:'照師父說的，先放消息，讓他們嚐嚐被冤枉的滋味。',end:'rumor'},
+  {t:'「師父，我幫你討的公道，要能攤在陽光下。我們把證據交給世界賽的倫理委員會。」',go:'shen_ok'},
+  {t:'「這是你們的恩怨。我只想好好比賽。」',end:'coward'},
+ ]),
+ LB('shen_ok'),
+ IF('blind','shen_blind'),J('shen_yes'),
+ LB('shen_blind'),
+ L('shen','你說過，你信我。'),
+ L('shen','那就照我說的做。'),
+ C('你曾說「我信您」。現在呢？',[
+  {t:'「……好吧，師父說了算。」',end:'rumor'},
+  {t:'「我信您，所以不能讓您變成他們。」',fx:{heart:1},r:[['shen','……'],['','烘豆機的小窗，暗紅的光晃了一下。']]},
+ ]),
+ LB('shen_yes'),
+ L('shen','……十二年了。我一直以為，我要的是他們倒下。'),
+ L('shen','原來我要的，是有人相信那杯水是乾淨的。'),
+ L('su','出貨單、採購單，我都給你。我跟你們一起去東京。'),
+ IF('rec_lin','ev_lin'),J('ev_end'),
+ LB('ev_lin'),N('你打開手機，播出那段 23 分 17 秒的錄音。「沈懷舟當年，就是太不懂事。」沈懷舟閉上眼睛，很久沒說話。'),
+ LB('ev_end'),
+ L('mei','（從門外探頭）我剛好路過……順便問一下，東京那邊的雞也喝咖啡嗎？'),
+ L('su','……這誰？'),
+ L('me','我們的情報部長。'),
+ {done:1}
+]},
+{t:'終章　東京',sub:'清澈的一杯',recap:'蘇曼交出金穗的加料證據，沈懷舟放下了復仇。你帶著豆子、紀錄與證據，飛往東京的世界手沖盃。',nodes:[
+ BG('tokyo','東京．世界手沖盃'),
+ N('東京，世界手沖盃。霓虹在雨後的柏油路上碎成一片一片。'),
+ L('hana','我是倫理委員會的花野。聽說你們有東西要給我？'),
+ L('hana','先說清楚：委員會只看證據，不看故事。'),
+ C('證據，什麼時候交？',[
+  {t:'比完再交，免得影響比賽心情。',end:'late'},
+  {t:'現在。正式書面提交：出貨單、香精採購單、處理紀錄，並要求林評審迴避。',fx:{fame:1},r:[['hana','……書面、時間、出處，都齊了。'],['hana','林正衡先生，從現在起迴避本屆所有評審工作。金穗的參賽豆，全數送驗。']]},
+  {t:'開幕式上直接衝上台，搶麥克風公開一切。',end:'mic'},
+ ]),
+ IF('rec_lin','tk_lin'),J('tk_n'),
+ LB('tk_lin'),L('hana','這段錄音……我們會轉交調查單位。謝謝你沒有把它丟上網路。'),
+ LB('tk_n'),
+ IF('yu_ally','tk_yu'),J('tk_c'),
+ LB('tk_yu'),L('yu','（直播中）各位，這裡是東京。今天我只拍杯子，不收錢。'),
+ LB('tk_c'),
+ N('指定賽。主辦公布指定豆：肯亞 SL28，水洗，淺烘。你捏了一顆——又硬又密，像小石頭。'),
+ C('兩分鐘設定參數。',[
+  {t:'比平常磨細一點，水溫拉到 94°C，把它打開。',fx:{tech:1},r:[['','黑醋栗、紅番茄、蔗糖。杯子亮了起來。']]},
+  {t:'磨粗一點、水溫降到 85°C，避免硬豆苦澀。',end:'kenya'},
+  {t:'照你藝伎的參數，不動。',end:'kenya',why:'不同的豆子，要用不同的方法打開。'},
+ ]),
+ N('決賽。你端出最後一杯——帕洛瑪莊園的三十公斤。'),
+ N('評審長放下杯子，看著你的眼睛。'),
+ L('hana','在這屆賽事之後，我必須問每一位選手同一個問題。'),
+ L('hana','你的豆子，有沒有加過任何東西？'),
+ IF('coferm','fq_co'),
+ C('最後一個問題。',[
+  {t:'「沒有。這是每一天的糖度、pH 和溫度紀錄，農人卡洛斯可以作證。」',fx:{heart:1},go:'fin'},
+  {t:'「處理細節，屬於商業機密。」',end:'secret'},
+  {t:'「其實……只有一點點。」（你也不知道自己為什麼這樣說）',end:'lie',why:'沒加卻說有，跟有加卻說沒有一樣糟——申報要精確。'},
+ ]),
+ LB('fq_co'),
+ C('最後一個問題。',[
+  {t:'「有。和真的水果一起共發酵，沒有香精。每一天的紀錄都在這裡。」',fx:{heart:1},go:'fin'},
+  {t:'「沒有。」',end:'lie'},
+  {t:'「處理細節，屬於商業機密。」',end:'secret'},
+ ]),
+ LB('fin'),
+ N('會場安靜了三秒。'),
+ N('然後，評審長點了點頭。'),
+ {final:1}
+]},
+];
+/* ============ 狀態 / 存檔 ============ */
+const SKEY='blackcup_v1';
+let DB={players:{},last:''};
+try{DB=JSON.parse(localStorage.getItem(SKEY))||DB}catch(e){}
+function saveDB(){try{localStorage.setItem(SKEY,JSON.stringify(DB))}catch(e){}}
+let P=null; // player profile
+let S=null; // run state
+function newPlayer(n){return{name:n,cleared:0,endings:[],met:['me'],run:null,best:null}}
+function startChapter(ci,stats,flags){
+  S={ch:ci,i:0,stats:stats||{tech:2,fame:2,heart:2},flags:flags||{},log:[],q:[]};
+  S.chStart={stats:{...S.stats},flags:{...S.flags}};
+  P.run=snap();saveDB();
+}
+function snap(){return JSON.parse(JSON.stringify({ch:S.ch,i:S.i,stats:S.stats,flags:S.flags,chStart:S.chStart,log:S.log.slice(-80)}))}
+function persist(){if(!S)return;P.run=snap();saveDB()}
+
+/* ============ 像素繪圖 ============ */
+function portrait(cv,id){
+  const g=cv.getContext('2d');g.clearRect(0,0,24,24);
+  const L=PEOPLE[id].look;const p=(x,y,w,h,c)=>{g.fillStyle=c;g.fillRect(x,y,w,h)};
+  const sk=L.skin,h=L.hair;
+  // body
+  p(3,19,18,5,L.cloth);p(4,18,16,1,L.cloth);
+  if(L.shirt){p(10,18,4,3,L.shirt)}
+  if(L.tie){p(11,19,2,5,L.tie)}
+  if(L.apron){p(7,20,10,4,L.apron);p(8,18,1,2,L.apron);p(15,18,1,2,L.apron);p(9,21,6,1,'#9a6b45')}
+  // neck & head
+  p(10,16,4,2,sk);p(7,5,10,11,sk);p(6,9,1,3,sk);p(17,9,1,3,sk);
+  g.clearRect(7,15,1,1);g.clearRect(16,15,1,1);
+  p(8,15,8,1,shade(sk,-18));
+  // eyes
+  const e='#1a1210';
+  if(L.eyes==='smile'){p(8,10,3,1,e);p(13,10,3,1,e);p(8,9,1,1,e);p(15,9,1,1,e)}
+  else{p(9,10,2,2,e);p(13,10,2,2,e);p(9,10,1,1,'#fff');p(13,10,1,1,'#fff')}
+  p(9,8,2,1,shade(h,10));p(13,8,2,1,shade(h,10));
+  p(11,12,2,1,shade(sk,-30));
+  p(10,14,4,1,L.eyes==='smile'?'#7a2b25':'#a0524a');
+  if(L.blush){p(8,13,2,1,'#e79a8a');p(14,13,2,1,'#e79a8a')}
+  // hair
+  const st=L.style;
+  if(st==='short'){p(6,3,12,4,h);p(6,7,2,3,h);p(16,7,2,3,h);p(8,7,5,1,h);p(7,2,9,1,h)}
+  if(st==='bun'){p(6,3,12,4,h);p(6,7,2,4,h);p(16,7,2,4,h);p(8,7,3,1,h);p(10,0,4,3,h);p(11,1,2,1,shade(h,20))}
+  if(st==='slick'){p(7,3,10,3,h);p(6,4,2,5,h);p(16,4,2,5,h);p(12,6,4,1,h);p(8,2,8,1,h);p(9,3,3,1,shade(h,25))}
+  if(st==='grey'){p(6,3,12,3,h);p(6,6,2,7,h);p(16,6,2,7,h);p(7,2,10,1,h);p(8,6,3,1,h);p(13,6,2,1,h)}
+  if(st==='long'){p(6,3,12,4,h);p(5,6,3,13,h);p(16,6,3,13,h);p(7,7,4,1,h);p(13,7,3,1,h);p(7,2,10,1,h);if(L.streak){p(16,6,1,10,L.streak);p(13,4,3,1,L.streak)}}
+  if(st==='bob'){p(6,3,12,3,h);p(5,5,3,10,h);p(16,5,3,10,h);p(7,6,10,2,h);p(7,2,10,1,h)}
+  if(st==='bald'){p(6,7,2,4,h);p(16,7,2,4,h);p(9,5,4,1,shade(sk,15))}
+  if(st==='hat'){p(6,6,2,4,h);p(16,6,2,4,h);p(2,5,20,2,L.hat);p(6,1,12,4,L.hat);p(6,4,12,1,'#4a2e1a');p(7,2,2,1,shade(L.hat,25))}
+  if(L.beard){p(8,13,8,3,L.beard);p(7,12,1,3,L.beard);p(16,12,1,3,L.beard);p(10,14,4,1,'#7a5a4a')}
+  if(L.mus){p(9,13,6,1,h)}
+  if(L.glass){const c=L.glass;[[8],[13]].forEach(([x])=>{p(x,9,4,1,c);p(x,12,4,1,c);p(x,9,1,4,c);p(x+3,9,1,4,c)});p(12,10,1,1,c)}
+  if(L.earring){p(17,12,1,2,'#e7c35a')}
+}
+function shade(hex,amt){let c=parseInt(hex.slice(1),16);let r=(c>>16)+amt,g=((c>>8)&255)+amt,b=(c&255)+amt;
+  r=Math.max(0,Math.min(255,r));g=Math.max(0,Math.min(255,g));b=Math.max(0,Math.min(255,b));return'#'+((1<<24)+(r<<16)+(g<<8)+b).toString(16).slice(1)}
+// seeded rand
+function R(seed){let s=seed;return()=>{s=(s*9301+49297)%233280;return s/233280}}
+const BGS={
+ cafe(g,t,day){
+  const p=(x,y,w,h,c)=>{g.fillStyle=c;g.fillRect(x,y,w,h)};
+  p(0,0,160,100,day?'#3a2a20':'#20150f');
+  for(let y=0;y<60;y+=6)p(0,y,160,1,day?'#33251c':'#1a110c');
+  // window
+  p(8,10,58,40,'#2a1d14');p(10,12,54,36,day?'#8fb3c7':'#0d1828');
+  if(!day){const r=R(7);for(let i=0;i<18;i++){const x=10+((r()*54+t*0)|0),y=12+((r()*36+t*40*(0.6+r()*0.6))%36|0);p(x,y,1,3,'#3d5a7a')}
+   p(14,40,6,8,'#f2c14e');p(30,36,4,12,'#2a3b55');p(46,30,8,18,'#1c2a40');p(48,33,1,1,'#f2c14e');p(51,38,1,1,'#f2c14e')}
+  else{p(12,36,50,12,'#6d8a6a');p(20,30,10,18,'#5a6f78')}
+  p(36,12,2,36,'#2a1d14');p(10,29,54,2,'#2a1d14');
+  // menu board
+  p(78,10,36,24,'#141a14');p(77,9,38,1,'#6b4a33');p(81,14,20,1,'#d8d0b8');p(81,18,26,1,'#a8a090');p(81,22,16,1,'#a8a090');p(81,26,22,1,'#a8a090');p(104,14,6,1,'#d9a441');
+  // lamps
+  [[124],[146]].forEach(([x])=>{p(x+3,0,1,12,'#111');p(x,12,8,4,'#6b4a33');g.fillStyle='rgba(255,190,90,'+(0.14+0.03*Math.sin(t*2+x))+')';g.beginPath();g.moveTo(x-10,60);g.lineTo(x+4,16);g.lineTo(x+18,60);g.fill();p(x+2,16,4,1,'#ffd27a')});
+  // shelves
+  p(120,24,36,2,'#5a3b26');for(let i=0;i<6;i++)p(122+i*5,18,4,6,['#7a5233','#c9a24a','#3b5a4a','#8a1c1c','#d8d0b8','#7a5233'][i]);
+  // counter
+  p(0,60,160,40,'#3a2316');p(0,58,160,3,'#6b4a33');p(0,61,160,1,'#2a170e');
+  for(let x=0;x<160;x+=20)p(x,62,1,38,'#2e1b11');
+  // espresso machine
+  p(92,40,34,18,'#9aa0a6');p(92,40,34,3,'#c8ccd0');p(96,46,8,6,'#222');p(112,46,8,6,'#222');p(100,52,2,4,'#555');p(116,52,2,4,'#555');p(122,36,3,4,'#c8ccd0');
+  // grinder (阿嬤)
+  p(132,34,10,24,'#2b2b2b');p(130,28,14,7,'#8a7a5a');p(134,46,6,4,'#111');
+  // dripper set
+  p(60,50,10,2,'#e8e0d0');p(62,52,6,3,'#e8e0d0');p(61,55,8,3,'#cfd6dc');
+  // kettle
+  p(72,50,9,8,'#d9a441');p(80,49,6,1,'#d9a441');p(85,48,1,1,'#d9a441');
+ },
+ cafe_day(g,t){BGS.cafe(g,t,1)},
+ roast(g,t,rain){
+  const p=(x,y,w,h,c)=>{g.fillStyle=c;g.fillRect(x,y,w,h)};
+  p(0,0,160,100,'#1a110d');
+  for(let y=0;y<70;y+=5){const o=(y/5)%2?0:6;for(let x=-6;x<160;x+=12)p(x+o,y,11,4,'#2b1a12')}
+  // window w/ rain
+  p(10,12,30,26,'#0b1220');if(rain){const r=R(3);for(let i=0;i<14;i++){const x=10+(r()*30|0),y=12+((r()*26+t*50*(0.7+r()*0.5))%26|0);p(x,y,1,3,'#4a6a8a')}}
+  else{p(30,16,3,3,'#e8e0c0')}
+  p(24,12,1,26,'#3a2a1d');p(10,25,30,1,'#3a2a1d');
+  // roaster
+  p(62,28,44,34,'#1d1d1d');p(60,26,48,4,'#333');p(70,36,18,18,'#0e0e0e');
+  const fl=0.6+0.4*Math.sin(t*5)+0.2*Math.sin(t*13);
+  g.fillStyle=`rgba(255,${90+40*fl|0},40,${0.55+0.3*fl})`;g.fillRect(73,39,12,12);
+  p(100,10,6,18,'#2a2a2a');p(98,8,10,3,'#3a3a3a');p(90,62,10,6,'#6b4a33');p(64,62,4,12,'#111');p(100,62,4,12,'#111');
+  // cooling tray
+  p(110,58,36,6,'#5a5a5a');p(112,56,32,2,'#7a5233');
+  // sacks
+  [[8,70],[24,72],[134,70]].forEach(([x,y])=>{p(x,y,18,22,'#8a7350');p(x+2,y-2,14,3,'#6e5a3c');p(x+5,y+8,8,4,'#5a3b26')});
+  p(0,92,160,8,'#120c09');
+  // glow
+  g.fillStyle=`rgba(255,120,40,${0.06+0.04*fl})`;g.fillRect(40,20,90,70);
+ },
+ roast_rain(g,t){BGS.roast(g,t,1)},
+ office(g,t){
+  const p=(x,y,w,h,c)=>{g.fillStyle=c;g.fillRect(x,y,w,h)};
+  p(0,0,160,100,'#1a1410');
+  for(let x=0;x<160;x+=10)p(x,0,1,62,'#241b14');
+  // big window city
+  p(70,6,84,46,'#0a0f1c');const r=R(11);
+  for(let i=0;i<12;i++){const x=72+i*7,h=10+(r()*28|0);p(x,52-h,6,h,'#121a2c');for(let j=0;j<h-2;j+=3)if(r()>.45)p(x+1+(r()*4|0),52-h+1+j,1,1,r()>.8?'#f2c14e':'#c8b070')}
+  p(110,6,1,46,'#2a2016');p(70,28,84,1,'#2a2016');
+  // sacks wall
+  for(let i=0;i<3;i++)for(let j=0;j<2;j++){const x=4+i*21,y=24+j*20;p(x,y,19,18,'#8a7350');p(x+4,y+6,11,6,'#c9a24a');p(x+7,y+8,5,2,'#5a3b26')}
+  // desk
+  p(20,66,124,6,'#4a2f20');p(20,64,124,2,'#6b4a33');p(26,72,6,28,'#3a2316');p(132,72,6,28,'#3a2316');
+  p(70,58,24,6,'#e8e0d0');p(72,60,16,1,'#9a9080');p(72,62,12,1,'#9a9080');
+  // tea set
+  p(104,58,8,6,'#5a3b26');p(112,60,2,2,'#5a3b26');p(118,61,4,3,'#d8d0b8');p(124,61,4,3,'#d8d0b8');
+  g.fillStyle='rgba(220,220,220,.25)';for(let i=0;i<3;i++)g.fillRect(106+Math.sin(t*2+i)*1.5|0,52-i*3,1,2);
+  p(0,90,160,10,'#120d0a');
+ },
+ farm(g,t){
+  const p=(x,y,w,h,c)=>{g.fillStyle=c;g.fillRect(x,y,w,h)};
+  for(let y=0;y<60;y++){const k=y/60;p(0,y,160,1,`rgb(${10+k*20|0},${14+k*24|0},${34+k*30|0})`)}
+  const r=R(5);for(let i=0;i<40;i++){const x=r()*160|0,y=r()*45|0,b=0.5+0.5*Math.sin(t*2+i);g.fillStyle=`rgba(255,250,220,${0.3+0.6*b})`;g.fillRect(x,y,1,1)}
+  p(128,10,10,10,'#e9e2c0');p(131,10,7,7,'#1b2238');
+  // hills
+  g.fillStyle='#14261a';g.beginPath();g.moveTo(0,52);for(let x=0;x<=160;x+=8)g.lineTo(x,44+Math.sin(x/18)*7);g.lineTo(160,100);g.lineTo(0,100);g.fill();
+  g.fillStyle='#1c3524';g.beginPath();g.moveTo(0,64);for(let x=0;x<=160;x+=8)g.lineTo(x,58+Math.sin(x/12+2)*5);g.lineTo(160,100);g.lineTo(0,100);g.fill();
+  // coffee shrubs
+  for(let row=0;row<2;row++)for(let i=0;i<9;i++){const x=6+i*18+row*9,y=66+row*14;
+   p(x,y,12,12,row?'#244a2f':'#1f3f28');p(x+2,y-3,8,3,'#2c5a38');
+   const rr=R(i*7+row);for(let k=0;k<4;k++)p(x+1+(rr()*10|0),y+2+(rr()*8|0),2,2,rr()>.3?'#b5262c':'#d9a441');
+   if(row===0&&i<3)p(x+3,y+5,3,1,'#e08a2a');}
+  // drying bed
+  p(0,94,160,6,'#2a1d12');
+  // chicken
+  const cx=120+Math.sin(t)*6|0;p(cx,86,5,4,'#e8e0d0');p(cx+4,84,2,2,'#e8e0d0');p(cx+5,83,1,1,'#c8463c');p(cx+6,85,1,1,'#d9a441');
+ },
+ stage(g,t){
+  const p=(x,y,w,h,c)=>{g.fillStyle=c;g.fillRect(x,y,w,h)};
+  p(0,0,160,100,'#08070a');
+  p(20,6,120,12,'#2a1d14');p(22,8,116,8,'#4a1c1c');g.fillStyle='#d9a441';
+  for(let i=0;i<10;i++)p(30+i*10,11,6,2,'#d9a441');
+  // spotlights
+  [[40],[80],[120]].forEach(([x],i)=>{const a=0.12+0.05*Math.sin(t*1.5+i);g.fillStyle=`rgba(255,235,190,${a})`;g.beginPath();g.moveTo(x-3,0);g.lineTo(x+3,0);g.lineTo(x+22,70);g.lineTo(x-22,70);g.fill()});
+  // tables
+  for(let i=0;i<3;i++){const x=18+i*46;p(x,56,34,4,'#d8d0b8');p(x+2,60,2,14,'#555');p(x+30,60,2,14,'#555');
+   p(x+5,48,6,2,'#e8e0d0');p(x+6,50,4,3,'#e8e0d0');p(x+5,53,6,3,'#cfd6dc');p(x+16,50,7,6,'#2b2b2b');p(x+25,49,5,7,'#c9a24a')}
+  // audience
+  for(let i=0;i<20;i++){const x=i*8+2,y=84+(i%2)*2;p(x,y,6,6,'#141018');p(x+1,y-3,4,4,'#1c1620')}
+  p(0,92,160,8,'#0d0a10');
+ },
+ tokyo(g,t){
+  const p=(x,y,w,h,c)=>{g.fillStyle=c;g.fillRect(x,y,w,h)};
+  for(let y=0;y<70;y++){const k=y/70;p(0,y,160,1,`rgb(${20+k*30|0},${10+k*10|0},${40+k*30|0})`)}
+  const r=R(21);for(let i=0;i<14;i++){const x=i*12,h=20+(r()*40|0);p(x,70-h,11,h,'#120e1c');for(let j=2;j<h-2;j+=4)for(let k=1;k<10;k+=3)if(r()>.5)p(x+k,70-h+j,1,2,r()>.7?'#f2c14e':'#6b5a8a')}
+  const f1=Math.sin(t*7)>-.6, f2=Math.sin(t*3.3+1)>-.8;
+  if(f1){p(18,30,14,22,'#ff4f8b');p(20,32,10,18,'#2a0d1c');p(22,35,6,2,'#ff4f8b');p(22,41,6,2,'#ff4f8b');p(22,47,6,2,'#ff4f8b')}
+  if(f2){p(128,26,20,10,'#3ee0d0');p(130,28,16,6,'#0d2a2a');p(132,30,12,2,'#3ee0d0')}
+  g.fillStyle='rgba(255,79,139,.08)';g.fillRect(0,50,60,50);
+  // wet road reflection
+  p(0,70,160,30,'#0d0a14');for(let i=0;i<8;i++){g.fillStyle=`rgba(255,79,139,${0.1+0.08*Math.sin(t*2+i)})`;g.fillRect(16+i*2,72+i*3,10,1)}
+  for(let i=0;i<8;i++){g.fillStyle=`rgba(62,224,208,${0.1+0.08*Math.sin(t*2.4+i)})`;g.fillRect(126+i,72+i*3,16,1)}
+  // stage front
+  p(40,76,80,4,'#d8d0b8');p(44,80,72,20,'#1a1426');p(70,66,20,10,'#e8e0d0');p(74,62,12,4,'#e8e0d0');
+ },
+};
+let curBg='cafe';
+const sceneCv=document.getElementById('sceneCv'),sg=sceneCv.getContext('2d');
+const titleCv=document.getElementById('titleCv'),tg=titleCv.getContext('2d');
+function loop(ts){const t=ts/1000;
+  if(document.getElementById('game').classList.contains('on'))BGS[curBg](sg,t);
+  else BGS.cafe(tg,t);
+  requestAnimationFrame(loop)}
+requestAnimationFrame(loop);
+// cup logo
+(function(){const g=document.getElementById('cupCv').getContext('2d');const p=(x,y,w,h,c)=>{g.fillStyle=c;g.fillRect(x,y,w,h)};
+ p(5,9,13,10,'#e8e0d0');p(6,10,11,2,'#1a0e08');p(18,11,3,6,'#e8e0d0');p(19,12,1,4,'#20150f');p(6,19,11,1,'#b8b0a0');p(3,20,18,2,'#d9a441');
+ p(9,3,1,4,'#6d6d6d');p(12,2,1,5,'#6d6d6d');p(15,4,1,3,'#6d6d6d');p(8,14,7,3,'#cfc6b4')})();
+
+/* ============ 音效 ============ */
+let AC=null,sound=true;
+function ac(){if(!AC){try{AC=new (window.AudioContext||window.webkitAudioContext)()}catch(e){}}return AC}
+function beep(f,d,type,vol){if(!sound)return;const a=ac();if(!a)return;const o=a.createOscillator(),gn=a.createGain();o.type=type||'square';o.frequency.value=f;gn.gain.value=vol||0.025;o.connect(gn);gn.connect(a.destination);const n=a.currentTime;gn.gain.setValueAtTime(vol||0.025,n);gn.gain.exponentialRampToValueAtTime(0.0001,n+d);o.start(n);o.stop(n+d)}
+function sfx(k){if(k==='pick'){beep(660,.08);setTimeout(()=>beep(880,.1),70)}
+ if(k==='fail'){[440,370,311,220].forEach((f,i)=>setTimeout(()=>beep(f,.28,'sawtooth',.03),i*170))}
+ if(k==='win'){[523,659,784,1046].forEach((f,i)=>setTimeout(()=>beep(f,.2,'triangle',.04),i*130))}}
+
+/* ============ UI 工具 ============ */
+const $=id=>document.getElementById(id);
+function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('on',s.id===id))}
+function toast(m){const t=$('toast');t.textContent=m;t.style.display='block';clearTimeout(t._h);t._h=setTimeout(()=>t.style.display='none',1800)}
+function openCard(html,cls){const c=$('card');c.className='card '+(cls||'');c.innerHTML=html;$('ov').classList.add('on');c.scrollTop=0}
+function closeCard(){$('ov').classList.remove('on')}
+$('ov').addEventListener('click',e=>{if(e.target.id==='ov'&&!$('card').classList.contains('lock'))closeCard()});
+function esc(s){return s.replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'})[c])}
+function renderStats(){const s=S?S.stats:{tech:0,fame:0,heart:0};
+ const m=[['技術','tech','#7aa6c8'],['名聲','fame','#d9a441'],['良心','heart','#7fb77e']];
+ $('stats').innerHTML=m.map(([n,k,c])=>`<div class="stat">${n}<div class="bar">${('<i style="width:10%;background:'+c+'"></i>').repeat(Math.max(0,Math.min(10,s[k])))}</div></div>`).join('');}
+
+/* 自動連結：詞典與人名 */
+const NAMEMAP={};Object.entries(PEOPLE).forEach(([id,o])=>{if(id==='me')return;NAMEMAP[o.name]=id;(o.alias||[]).forEach(a=>NAMEMAP[a]=id)});
+const KEYS=[...Object.keys(GLOSS),...Object.keys(NAMEMAP)].sort((a,b)=>b.length-a.length);
+const KRE=new RegExp(KEYS.map(k=>k.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')).join('|'),'g');
+function tokenize(text){ // returns tokens [{h,len}]
+  const out=[];let last=0;text.replace(KRE,(m,idx)=>{
+    for(const ch of text.slice(last,idx))out.push({h:esc(ch),len:1});
+    if(GLOSS[m])out.push({h:`<span class="term" data-g="${m}">${m}</span>`,len:m.length});
+    else out.push({h:`<span class="pname" data-p="${NAMEMAP[m]}">${m}</span>`,len:m.length});
+    last=idx+m.length;return m});
+  for(const ch of text.slice(last))out.push({h:esc(ch),len:1});return out}
+function linkify(text){return tokenize(text).map(t=>t.h).join('')}
+function fill(t){return t.replace(/\{N\}/g,P.name)}
+function bindLinks(root){root.querySelectorAll('.term,.pname').forEach(el=>el.onclick=e=>{e.stopPropagation();
+  if(el.dataset.g){popup(el,`<b>${el.dataset.g}</b><br>${GLOSS[el.dataset.g]}`);}
+  else{const p=PEOPLE[el.dataset.p];popup(el,`<b>${p.name}</b>　<span style="color:#a8927a;font-size:12px">${p.role}</span><br>${P.met.includes(el.dataset.p)?p.desc:'（還沒見過這個人）'}`)}})}
+function popup(el,html){const pp=$('pop');pp.innerHTML=html;pp.style.display='block';const r=el.getBoundingClientRect();
+  const w=Math.min(300,innerWidth-20);pp.style.maxWidth=w+'px';let x=Math.min(Math.max(10,r.left-20),innerWidth-w-10);pp.style.left=x+'px';
+  const h=pp.offsetHeight;let y=r.top-h-8;if(y<10)y=r.bottom+8;pp.style.top=y+'px'}
+document.addEventListener('click',e=>{if(!e.target.closest('.term,.pname'))$('pop').style.display='none'},true);
+
+/* ============ 引擎 ============ */
+let typing=null,waiting=false,annot=false,ffwd=false,curLine=null;
+const labels=ci=>{const m={};CH[ci].nodes.forEach((n,i)=>{if(n.lbl)m[n.lbl]=i});return m};
+function step(){
+  if(!S)return;
+  if(S.q.length){const [s,t]=S.q.shift();showLine({s,t});return}
+  const nodes=CH[S.ch].nodes;
+  while(true){
+    const n=nodes[S.i];
+    if(!n){chapterDone();return}
+    if(n.bg){setBg(n.bg,n.loc);S.i++;continue}
+    if(n.lbl!==undefined){S.i++;continue}
+    if(n.jmp){S.i=labels(S.ch)[n.jmp];continue}
+    if(n.iff){S.i=S.flags[n.iff]?labels(S.ch)[n.go]:S.i+1;continue}
+    if(n.done){chapterDone();return}
+    if(n.final){finale();return}
+    if(n.c){persist();showChoice(n);return}
+    if(n.s!==undefined){S.i++;persist();showLine(n);return}
+    S.i++;
+  }
+}
+function setBg(b,loc){curBg=b;S.bg=b;S.loc=loc;$('locLabel').textContent=loc||''}
+function showLine(n){
+  $('choices').classList.remove('on');$('box').style.display='';
+  const sp=n.s;curLine=n;
+  if(sp&&!P.met.includes(sp)){P.met.push(sp);saveDB()}
+  const nt=$('nameTag');if(sp){nt.className='name';nt.textContent=sp==='me'?P.name:PEOPLE[sp].name}else nt.className='name n';
+  const pc=$('pCv');if(sp){portrait(pc,sp);pc.classList.remove('hide')}else pc.classList.add('hide');
+  const text=fill(n.t);S.log.push({w:sp?(sp==='me'?P.name:PEOPLE[sp].name):'',t:text});
+  const tx=$('txt');tx.className='txt'+(sp?'':' narr');tx.innerHTML='';$('more').style.display='none';
+  const toks=tokenize(text);let k=0;waiting=true;
+  if(ffwd){tx.innerHTML=toks.map(t=>t.h).join('');bindLinks(tx);finishType();setTimeout(advance,40);return}
+  clearInterval(typing);
+  typing=setInterval(()=>{if(k>=toks.length){finishType();return}
+    tx.insertAdjacentHTML('beforeend',toks[k].h);if(k%2===0&&toks[k].len===1&&toks[k].h.trim())beep(sp?(sp==='me'?520:sp==='shen'||sp==='zhou'?300:420):360,.03,'square',.012);k++},28);
+  tx._all=toks.map(t=>t.h).join('');
+}
+function finishType(){clearInterval(typing);typing=null;const tx=$('txt');if(tx._all!==undefined&&!ffwd)tx.innerHTML=tx._all;bindLinks(tx);$('more').style.display=annot?'none':'block';$('nextBtn').classList.toggle('on',annot)}
+function advance(){if(!waiting)return;if(typing){finishType();return}waiting=false;$('nextBtn').classList.remove('on');step()}
+$('box').addEventListener('click',()=>{if(annot&&!typing)return;advance()});
+$('nextBtn').addEventListener('click',()=>{if(typing){finishType();return}advance()});
+
+function showChoice(n){
+  ffwd=false;$('tFF').classList.remove('on');waiting=false;
+  const opts=n.o.filter(o=>!o.need||S.flags[o.need]);
+  const sh=opts.map(o=>o).sort(()=>Math.random()-.5);
+  const cw=$('choices');
+  cw.innerHTML=`<div class="cq">${linkify(fill(n.c))}</div>`+sh.map((o,i)=>`<button class="opt" data-i="${i}">${linkify(fill(o.t))}</button>`).join('')+`<div class="danger">⚠ 選錯，故事就在這裡結束</div>`;
+  bindLinks(cw);
+  cw.querySelectorAll('.opt').forEach(b=>b.onclick=e=>{if(e.target.closest('.term,.pname'))return;pick(sh[+b.dataset.i])});
+  $('box').style.display='none';$('pCv').classList.add('hide');$('nextBtn').classList.remove('on');
+  cw.classList.add('on');
+}
+function pick(o){
+  sfx('pick');$('choices').classList.remove('on');
+  S.log.push({w:'▸ 你選擇',t:fill(o.t),pick:1});
+  if(o.fx)for(const k in o.fx)S.stats[k]=Math.max(0,Math.min(10,S.stats[k]+o.fx[k]));
+  if(o.f)S.flags[o.f]=1;renderStats();
+  if(o.fx){const ch=Object.entries(o.fx).map(([k,v])=>`${{tech:'技術',fame:'名聲',heart:'良心'}[k]} ${v>0?'+':''}${v}`).join('　');toast(ch)}
+  S.q=(o.r||[]).map(x=>x.slice());
+  if(o.end){S.pendingEnd={id:o.end,why:o.why};
+    if(S.q.length){step();return}
+    gameOver();return}
+  S.i=o.go?labels(S.ch)[o.go]:S.i+1;persist();step();
+}
+// patch: pending end after reaction lines
+const _step=step;step=function(){if(S&&S.pendingEnd&&!S.q.length){gameOver();return}_step()};
+
+function gameOver(){
+  const {id,why}=S.pendingEnd;S.pendingEnd=null;const E=ENDS[id];sfx('fail');
+  if(!P.endings.includes(id))P.endings.push(id);P.run=null;saveDB();
+  const total=Object.keys(ENDS).length;
+  openCard(`<div class="tag">BAD END　${P.endings.length}/${total}</div><h3>${E.t}</h3><p>${linkify(fill(E.x))}</p><div class="why"><b style="color:#f1cf7d">解析</b><br>${linkify(E.w)}${why?'<br>'+linkify(why):''}</div>
+  <button class="big" id="eRetry">從本章開頭再來</button><button class="big alt" id="eTitle">回到標題</button>`,'endcard lock');
+  bindLinks($('card'));
+  $('eRetry').onclick=()=>{closeCard();const cs=S.chStart;startChapter(S.ch,{...cs.stats},{...cs.flags});enterGame()};
+  $('eTitle').onclick=()=>{closeCard();toTitle()};
+}
+function chapterDone(){
+  sfx('win');const ci=S.ch;P.cleared=Math.max(P.cleared,ci+1);
+  const next=CH[ci+1];
+  P.run=next?{ch:ci+1,i:0,stats:S.stats,flags:S.flags,chStart:{stats:{...S.stats},flags:{...S.flags}},log:[]}:null;saveDB();
+  openCard(`<div class="tag" style="color:#7fb77e;font-family:DotGothic16;letter-spacing:3px">CHAPTER CLEAR</div><h3>${CH[ci].t}　完</h3>
+   <p class="statchg">技術 ${S.stats.tech}　名聲 ${S.stats.fame}　良心 ${S.stats.heart}</p>
+   ${next?`<p style="color:#a8927a">下一章：${next.t}——${next.sub}</p><button class="big" id="cNext">繼續</button>`:''}<button class="big alt" id="cTitle">回到標題（已存檔）</button>`,'goodcard lock');
+  if(next)$('cNext').onclick=()=>{closeCard();startChapter(ci+1,{...S.stats},{...S.flags});enterGame(true)};
+  $('cTitle').onclick=()=>{closeCard();toTitle()};
+}
+function finale(){
+  const s=S.stats,good=s.heart>=7&&s.tech>=7;const id=good?'TRUE':'GOOD';
+  sfx('win');if(!P.endings.includes(id))P.endings.push(id);P.cleared=CH.length;P.run=null;
+  P.best=P.best==='TRUE'?'TRUE':id;saveDB();
+  const tips=[];if(s.tech<7)tips.push('技術不足 7（有些知識題可以答得更完整）');if(s.heart<7)tips.push('良心不足 7（心機路線能活下來，但杯子不夠清澈）');
+  const body=good?
+  `<div class="tag" style="color:#f1cf7d;font-family:DotGothic16;letter-spacing:3px">TRUE END</div><h3>清澈的一杯</h3>
+   <p>「世界手沖盃冠軍——台灣，${esc(P.name)}。」</p>
+   <p>三個月後，金穗生豆因外加香料與賄賂案遭起訴；林正衡的評審資格被終身撤銷。協會發出一紙更正：2014 年台灣盃冠軍，沈懷舟，恢復頭銜。</p>
+   <p>沈懷舟只說了一句：「水，終於乾了。」然後繼續烘他的豆子。</p>
+   <p>隔年，蘇曼用自己找的豆子重新報名。卡洛斯用那三十公斤的錢，買了一台新的乾燥棚——和兩隻新的雞。</p>
+   <p>阿梅把磨豆機阿嬤擦得發亮，在旁邊貼了一張紙：「世界冠軍摸過的阿嬤」。</p>`:
+  `<div class="tag" style="color:#7fb77e;font-family:DotGothic16;letter-spacing:3px">GOOD END</div><h3>第二名的光</h3>
+   <p>你拿下世界亞軍。冠軍頒獎時，鏡頭一直停在你身上——因為所有人都知道，這屆比賽之所以乾淨，是因為誰。</p>
+   <p>金穗遭到調查，林正衡退出評審圈。沈懷舟的頭銜還沒恢復，但他說：「不急。冰凍三尺，非一日之寒。」</p>
+   <p style="color:#a8927a">還差一點：${tips.join('；')}。</p>`;
+  openCard(body+`<p class="statchg">技術 ${s.tech}　名聲 ${s.fame}　良心 ${s.heart}</p><button class="big" id="fT">回到標題</button>`,'goodcard lock');
+  bindLinks($('card'));$('fT').onclick=()=>{closeCard();toTitle()};
+}
+function enterGame(fresh){
+  show('game');renderStats();$('chLabel').textContent=CH[S.ch].t;
+  // rebuild bg from nodes before i
+  const nodes=CH[S.ch].nodes;let b='cafe',loc='';for(let k=0;k<S.i&&k<nodes.length;k++)if(nodes[k].bg){b=nodes[k].bg;loc=nodes[k].loc}
+  if(S.i===0){const f=nodes.find(n=>n.bg);if(f){b=f.bg;loc=f.loc}}
+  setBg(b,loc);
+  if(S.i===0){openCard(`<h3>${CH[S.ch].t}</h3><p style="color:#d9a441">${CH[S.ch].sub}</p><div class="why" style="background:#0e0806;border-left:3px solid #d9a441;padding:8px 10px"><b style="color:#f1cf7d">前情提要</b><br>${linkify(CH[S.ch].recap)}</div><button class="big" id="go">開始</button>`,'lock');bindLinks($('card'));$('go').onclick=()=>{closeCard();step()}}
+  else{ // resume: back up one to re-show last line
+    if(S.i>0&&CH[S.ch].nodes[S.i-1].s!==undefined)S.i--;step()}
+}
+
+/* ============ 工具列 ============ */
+$('tLog').onclick=()=>{openCard(`<button class="x" onclick="closeCard()">✕</button><h3>往前回顧</h3><div class="log">${S.log.slice(-60).map(l=>`<div class="ln ${l.pick?'pick':''}">${l.w?`<span class="who">${esc(l.w)}</span>`:''}${linkify(l.t)}</div>`).join('')||'<p>還沒有對話。</p>'}</div>`);bindLinks($('card'));const c=$('card');c.scrollTop=c.scrollHeight};
+function peopleHTML(){return `<div class="list">${Object.keys(PEOPLE).filter(k=>k!=='me').map(k=>{const m=P.met.includes(k),p=PEOPLE[k];return `<div class="it"><canvas width="24" height="24" data-pp="${m?k:''}"></canvas><div><b>${m?p.name:'？？？'}</b> <span class="pill">${m?p.role:'尚未登場'}</span><div style="font-size:14px;line-height:1.7;color:#dccdb6">${m?linkify(p.desc):'在故事中遇見後解鎖。'}</div></div></div>`}).join('')}</div>`}
+function drawPP(){document.querySelectorAll('[data-pp]').forEach(c=>{if(c.dataset.pp)portrait(c,c.dataset.pp)})}
+$('tPpl').onclick=()=>{openCard(`<button class="x" onclick="closeCard()">✕</button><h3>人物</h3>${peopleHTML()}`);drawPP();bindLinks($('card'))};
+const IDIOMS=Object.keys(GLOSS).slice(Object.keys(GLOSS).indexOf('魚目混珠'));
+function glossHTML(){const idi=IDIOMS;const cof=Object.keys(GLOSS).filter(k=>!idi.includes(k));
+ return `<h4 style="color:#d9a441;font-family:DotGothic16;font-weight:400">☕ 咖啡知識</h4><dl class="gl">${cof.map(k=>`<dt>${k}</dt><dd>${GLOSS[k]}</dd>`).join('')}</dl><h4 style="color:#d9a441;font-family:DotGothic16;font-weight:400;margin-top:18px">📜 成語</h4><dl class="gl">${idi.map(k=>`<dt>${k}</dt><dd>${GLOSS[k]}</dd>`).join('')}</dl>`}
+$('tGl').onclick=()=>openCard(`<button class="x" onclick="closeCard()">✕</button><h3>詞典</h3>${glossHTML()}`);
+$('tFF').onclick=()=>{ffwd=!ffwd;$('tFF').classList.toggle('on',ffwd);if(ffwd)advance()};
+$('tMenu').onclick=()=>{openCard(`<button class="x" onclick="closeCard()">✕</button><h3>選單</h3>
+  <p><label><input type="checkbox" id="oAn" ${annot?'checked':''}> 註解模式（開啟時要按「下一句」才前進，方便點字看解析）</label></p>
+  <p><label><input type="checkbox" id="oSd" ${sound?'checked':''}> 音效</label></p>
+  <p style="color:#a8927a;font-size:13px">每一句都會自動存檔。選錯會 BAD END，可從本章開頭重來。</p>
+  <button class="big alt" id="oRe">重來本章</button><button class="big" id="oTi">存檔並回到標題</button>`);
+  $('oAn').onchange=e=>{annot=e.target.checked;try{localStorage.setItem('blackcup_an',annot?'1':'0')}catch(_){};$('nextBtn').classList.toggle('on',annot&&waiting&&!typing);$('more').style.display=annot?'none':'block'};
+  $('oSd').onchange=e=>{sound=e.target.checked};
+  $('oRe').onclick=()=>{closeCard();const cs=S.chStart;startChapter(S.ch,{...cs.stats},{...cs.flags});enterGame()};
+  $('oTi').onclick=()=>{persist();closeCard();toTitle()}};
+try{annot=localStorage.getItem('blackcup_an')==='1'}catch(e){}
+
+/* ============ 標題 / 登入 ============ */
+function renderNames(){const ns=Object.keys(DB.players);$('nameList').innerHTML=ns.length?ns.map(n=>`<button class="nm" data-n="${esc(n)}">${esc(n)}</button>`).join(''):'<span style="color:#7d6a55;font-size:13px">第一次入座？輸入名字吧。</span>';
+ $('nameList').querySelectorAll('.nm').forEach(b=>b.onclick=()=>login(b.dataset.n))}
+function login(n){n=(n||'').trim();if(!n){toast('請輸入名字');return}ac();
+ if(!DB.players[n])DB.players[n]=newPlayer(n);P=DB.players[n];DB.last=n;saveDB();toTitle()}
+$('loginBtn').onclick=()=>login($('nameIn').value);
+$('nameIn').addEventListener('keydown',e=>{if(e.key==='Enter')login(e.target.value)});
+function toTitle(){show('title');S=null;renderStats();$('chLabel').textContent=P?('入座：'+P.name):'—';
+ if(!P){$('loginBox').style.display='';$('mainMenu').style.display='none';renderNames();return}
+ $('loginBox').style.display='none';$('mainMenu').style.display='flex';
+ $('hello').textContent=`歡迎回來，${P.name}　（結局 ${P.endings.length}/${Object.keys(ENDS).length+2}）`;
+ $('mContinue').textContent=P.run?`繼續：${CH[P.run.ch].t}`:(P.cleared>=CH.length?'重新開始':(P.cleared?`開始：${CH[P.cleared].t}`:'開始故事'));}
+$('mContinue').onclick=()=>{ac();
+ if(P.run){S={...JSON.parse(JSON.stringify(P.run)),q:[]};S.log=S.log||[];enterGame()}
+ else{const ci=P.cleared>=CH.length?0:P.cleared;startChapter(ci);enterGame(true)}};
+$('mChapters').onclick=()=>{openCard(`<button class="x" onclick="closeCard()">✕</button><h3>章節選擇</h3><div class="chs">${CH.map((c,i)=>{const ok=i<=P.cleared;return `<div class="chrow ${ok?'':'lock'}" data-c="${i}"><div class="n">${i===0?'序':i===CH.length-1?'終':i}</div><div class="t">${ok?c.t:'？？？'}<small>${ok?c.sub:'通關前一章後解鎖'}</small></div>${ok?'▸':'🔒'}</div>`}).join('')}</div><p style="color:#a8927a;font-size:12px">從中間章節開始時，能力值以預設帶入，部分前章的伏筆（錄音、旗標）不會繼承。</p>`);
+ document.querySelectorAll('.chrow').forEach(r=>r.onclick=()=>{const i=+r.dataset.c;if(i>P.cleared)return;closeCard();ac();
+   const base=i===0?{tech:2,fame:2,heart:2}:{tech:2+Math.round(i*0.8),fame:2+Math.min(i,3),heart:2+Math.round(i*0.8)};startChapter(i,base,{});enterGame(true)})};
+$('mEnds').onclick=()=>{const all=[...Object.entries(ENDS).map(([k,v])=>[k,v.t,'BAD']),['GOOD','第二名的光','GOOD'],['TRUE','清澈的一杯','TRUE']];
+ openCard(`<button class="x" onclick="closeCard()">✕</button><h3>結局圖鑑　${P.endings.length}/${all.length}</h3><div class="list">${all.map(([k,t,ty])=>{const got=P.endings.includes(k);return `<div class="it" style="display:block"><span class="pill" style="color:${ty==='BAD'?'#e78b80':ty==='TRUE'?'#f1cf7d':'#7fb77e'}">${ty}</span> <b>${got?t:'？？？？'}</b>${got&&ENDS[k]?`<div style="font-size:13px;color:#cbb69a;margin-top:4px">${linkify(ENDS[k].w)}</div>`:''}</div>`}).join('')}</div>`);bindLinks($('card'))};
+$('mHelp').onclick=()=>openCard(`<button class="x" onclick="closeCard()">✕</button><h3>怎麼玩</h3>
+ <p>你是一個想成為手沖冠軍的小小咖啡師。一路上，會遇到換標籤的老闆、加料的生豆、被換掉的水、要紅包的評審……</p>
+ <p>⚠ <b style="color:#f0a49b">選錯一次，就是 BAD END。</b>每個結局都附解析，可從本章開頭重來。</p>
+ <p>📖 金色底線的字可以點開看<b>咖啡知識或成語</b>；藍色底線是<b>人名</b>。</p>
+ <p>📊 技術／名聲／良心會影響最後的結局。想看 TRUE END，技術和良心都要夠高。</p>
+ <p>🗝 有些選擇不會立刻死，但會在後面的章節回來找你。</p>
+ <p>⏩「快轉」會一路跳到下一個選擇；「註解模式」可在選單裡打開。</p>`);
+$('mSwitch').onclick=()=>{P=null;DB.last='';saveDB();toTitle()};
+// boot
+if(DB.last&&DB.players[DB.last])P=DB.players[DB.last];
+toTitle();
+</script>
+<script>/*offline*/if("serviceWorker"in navigator)navigator.serviceWorker.register("../sw.js",{scope:"../"}).catch(function(){});</script>
+</body>
+</html>
