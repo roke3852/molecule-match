@@ -682,6 +682,7 @@ html.dark .k-market{--xc:#d0705c}html.dark .k-light{--xc:#c9a25e}html.dark .k-ri
 .db-far{margin-top:6px;font-size:13px;color:var(--sub)}.db-far b{color:var(--ink)}
 .db-svg{width:100%;height:auto;display:block;margin-top:6px;background:color-mix(in srgb,var(--sea) 6%,var(--card));border:1.5px solid var(--line);shape-rendering:crispEdges;font-family:var(--ff-px)}
 .db-p{cursor:pointer}.db-p.dim{opacity:.35}.db-svg .selr{fill:none;stroke:var(--ink);stroke-width:2;stroke-dasharray:3 2}.db-h{cursor:pointer}
+.db-upd{display:block;font-size:11px;color:var(--sub);margin-top:2px}
 .db-hint{font-size:12px;color:var(--sub);margin-top:6px}.db-sel{margin-top:6px;font-size:13px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}.db-sel button{margin-left:auto;font-size:12px;padding:3px 10px;border:1.5px solid var(--line);border-radius:999px;background:var(--card);color:var(--ink)}
 .db-l li{cursor:pointer;padding:2px 4px}.db-l li.sel{background:color-mix(in srgb,var(--day) 18%,transparent);outline:1.5px solid var(--day)}
 .db-svg .riv{fill:none;stroke:color-mix(in srgb,var(--sea) 60%,var(--card));stroke-width:5;stroke-linejoin:round;shape-rendering:geometricPrecision}.db-svg .rivt{font-size:9px;fill:var(--sea);font-family:var(--ff-b)}
@@ -1623,7 +1624,8 @@ function llKm(a,b){const dy=(a[0]-b[0])*111.0,dx=(a[1]-b[1])*92.7;return Math.hy
 function dirTxt(p){const dy=p[0]-HOTEL_LL[0],dx=(p[1]-HOTEL_LL[1])*.835,a=Math.atan2(dy,dx)*180/Math.PI;const D=['東','東北','北','西北','西','西南','南','東南'];return D[Math.round(((a+360)%360)/45)%8]}
 const kmTxt=k=>k<1?Math.round(k*1000)+' m':k<10?k.toFixed(1)+' km':Math.round(k)+' km';
 let dbSel=null;const dbQ=()=>dbSel&&dbSel.d===curDay?dbSel.q:null;
-function dayBrief(i){const d=D(i),B=DBRIEF[i]||['',''];const pts=[];
+function dayAutoBrief(d){const ns=d.stops.filter(s=>!/前往|返回|抵達|出發|啟程|飯店|酒店/.test(s.n)).map(s=>s.n.replace(/【[^】]*】/g,'').replace(/（.*?）/g,'').split(/[／＋]/)[0].trim()).filter((x,i,a)=>x&&a.indexOf(x)===i);return `${d.title}：${ns.slice(0,5).join(' → ')}${ns.length>5?' …':''}。`}
+function dayBrief(i){const d=D(i),B0=DBRIEF[i]||['',''],chg=typeof dayChanged==='function'&&dayChanged(i),B=[B0[0],chg?dayAutoBrief(d):B0[1]];const pts=[];
  d.stops.forEach(s=>{const p=LL[s.q];if(!p||s.q==='Hotel Monterey Fukuoka')return;const last=pts[pts.length-1];if(last&&last.q===s.q)return;if(pts.find(x=>x.q===s.q))return;pts.push({q:s.q,p,n:s.n.replace(/【[^】]*】/g,'').replace(/（.*?）/g,'').trim()})});
  if(!pts.length)return '';
  const far=pts.reduce((a,b)=>llKm(b.p,HOTEL_LL)>llKm(a.p,HOTEL_LL)?b:a);
@@ -1650,7 +1652,7 @@ function dayBrief(i){const d=D(i),B=DBRIEF[i]||['',''];const pts=[];
  const km=llKm(far.p,HOTEL_LL),fx=+X(far.p[1]),fy=+Y(far.p[0]);
  if(km>=1)g+=`<text x="${Math.min(W-6,Math.max(6,fx))}" y="${fy-14<12?fy+24:fy-14}" text-anchor="${fx>W*.7?'end':fx<W*.3?'start':'middle'}" class="fl">最遠 ${kmTxt(km)}</text>`;
  const barKm=[.5,1,2,5,10,20,50].find(b=>b*k/111>=50)||50;g+=`<line x1="8" y1="${H-8}" x2="${8+barKm*k/111}" y2="${H-8}" class="sc"/><text x="8" y="${H-12}" class="st">${kmTxt(barKm)}</text><text x="${W-6}" y="14" text-anchor="end" class="st">N ↑</text></svg>`;
- return `<div class="dbrief"><div class="db-t"><b>${esc(B[0])}</b><span>${esc(B[1])}</span></div><div class="db-far">📍 今天最遠：<b>${esc(far.n)}</b>・在飯店${dirTxt(far.p)}方約 <b>${kmTxt(km)}</b></div>${g}${sq?`<div class="db-sel">📍 只看第 ${pts.findIndex(x=>x.q===sq)+1} 站：<b>${esc((pts.find(x=>x.q===sq)||{}).n||'')}</b><button data-dball="1">✕ 顯示全部</button></div>`:'<div class="db-hint">👆 點地圖上的數字或下面的地點，只看那一站的行程</div>'}<ol class="db-l">${pts.map((x,j)=>`<li class="${x===far?'far':''}${sq===x.q?' sel':''}" data-dbq="${esc(x.q)}"><i>${j+1}</i><span>${esc(x.n)}</span><em>${dirTxt(x.p)}・${kmTxt(llKm(x.p,HOTEL_LL))}</em></li>`).join('')}</ol></div>`}
+ return `<div class="dbrief"><div class="db-t"><b>${esc(B[0])}</b><span>${esc(B[1])}</span>${chg?'<small class="db-upd">🔄 行程有修改，簡介已依最新行程自動更新</small>':''}</div><div class="db-far">📍 今天最遠：<b>${esc(far.n)}</b>・在飯店${dirTxt(far.p)}方約 <b>${kmTxt(km)}</b></div>${g}${sq?`<div class="db-sel">📍 只看第 ${pts.findIndex(x=>x.q===sq)+1} 站：<b>${esc((pts.find(x=>x.q===sq)||{}).n||'')}</b><button data-dball="1">✕ 顯示全部</button></div>`:'<div class="db-hint">👆 點地圖上的數字或下面的地點，只看那一站的行程</div>'}<ol class="db-l">${pts.map((x,j)=>`<li class="${x===far?'far':''}${sq===x.q?' sel':''}" data-dbq="${esc(x.q)}"><i>${j+1}</i><span>${esc(x.n)}</span><em>${dirTxt(x.p)}・${kmTxt(llKm(x.p,HOTEL_LL))}</em></li>`).join('')}</ol></div>`}
 document.addEventListener('click',e=>{const a=e.target.closest('[data-dball]');if(a&&a.closest('.dbrief')){dbSel=null;renderDay();return}const q=e.target.closest('[data-dbq]');if(q&&q.closest('.dbrief')){const v=q.dataset.dbq;dbSel=dbQ()===v?null:{d:curDay,q:v};renderDay()}});
 function renderDay(keep){
  const opened=keep?[...document.querySelectorAll('.stop.open')].map(x=>x.dataset.id):[];
