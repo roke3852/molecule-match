@@ -45,6 +45,8 @@ main{max-width:760px;margin:0 auto;padding:14px max(14px,env(safe-area-inset-lef
 #p-ev .card.fold>.lead{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-bottom:0;color:var(--muted)}
 #p-ev .card.fold{padding-bottom:12px;cursor:pointer}
 .ltab{display:flex;flex-direction:column;gap:8px;margin-top:6px}.ltab .r{border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-size:13px;line-height:1.55}.ltab .r.now{border-color:var(--bear)}.ltab .h{display:flex;gap:8px;align-items:baseline;font-weight:700}.ltab .h small{font-weight:400;color:var(--muted)}.ltab .m{color:var(--muted)}.ltab .o{margin-top:2px}
+.subtabs{position:sticky;top:var(--hdr,96px);z-index:5;background:var(--bg);padding:6px 0;margin-bottom:6px}
+.subtabs .chip{font-weight:600}
 .foldbar{display:flex;gap:8px;justify-content:flex-end;margin:-4px 0 10px}
 .foldbar button{font:inherit;font-size:12px;padding:5px 10px;border-radius:999px;border:1px solid var(--line);background:var(--panel);color:var(--muted)}
 .meta{font-size:12px;color:var(--faint);display:flex;gap:8px;flex-wrap:wrap;align-items:center}
@@ -241,6 +243,7 @@ input[type=range]{width:100%;accent-color:var(--s1)}
         <div class="legend"><span><i style="background:var(--bull)"></i>▲ Bullish</span><span><i style="background:var(--neu)"></i>● Neutral</span><span><i style="background:var(--bear)"></i>▼ Bearish</span></div>
       </div>
     </div>
+    <div class="chips subtabs" id="vwSt"><button class="chip" data-vst="all">All</button><button class="chip" data-vst="bull">▲ Bullish</button><button class="chip" data-vst="neu">● Neutral</button><button class="chip" data-vst="bear">▼ Bearish</button></div>
     <div class="chips" id="vwChips"></div>
     <div id="vwList"></div>
   </section>
@@ -254,8 +257,9 @@ input[type=range]{width:100%;accent-color:var(--s1)}
   </section>
 
   <section class="pane" id="p-bear">
+    <div class="chips subtabs" id="bearSub"><button class="chip" data-bsub="now">📍 Now</button><button class="chip" data-bsub="tw">🇹🇼 Taiwan</button><button class="chip" data-bsub="hist">📜 History</button><button class="chip" data-bsub="plan">🧭 Plan</button></div>
     <div class="foldbar"><button data-fold="1">Collapse all</button><button data-fold="0">Expand all</button></div>
-    <div class="card">
+    <div data-sub="now" class="card">
       <h2>How far has it fallen?</h2>
       <div class="meta">Each measured from its all-time high; dashed lines: −10% = correction, −20% = bear market (US and Taiwan both as of 11/20 close)</div>
       <div id="nowGauge"></div>
@@ -270,7 +274,7 @@ input[type=range]{width:100%;accent-color:var(--s1)}
       <div class="why"><b>In one line</b>11/20 US stock bloodbath: S&P −11.6% and the Dow both fell into correction territory, and Nasdaq at −18.1% is one step from a bear market (−20%). SOX fell −10.73% in a single day with all 30 components down; at −42.5% from high it has passed TPEx (−41.9%) to become the hardest-hit index this time. TAIEX at −27.7% is still being held up by TSMC. This is an “AI hardware bear market”: the closer to chips and the smaller the AI-themed stock, the deeper the drop — and now even the biggest heavyweight, Nvidia (−14% in one day), is starting to catch down.</div>
     </div>
 
-    <div class="card" id="cbCard">
+    <div data-sub="now" class="card" id="cbCard">
       <h2>⚖️ Correction or bear market?</h2>
       <div class="meta">Down 10–20% is a correction, over 20% a bear market; the real difference is the cause: earnings, the economy, the Fed</div>
       <div id="cbZone" style="margin-top:10px"></div>
@@ -280,14 +284,14 @@ input[type=range]{width:100%;accent-color:var(--s1)}
       <div class="why"><b>How to read it</b>There are two layers: AI hardware and Taiwan are already in bear markets, while the broad US market is still in a correction. If the first two tripwires trip while the Fed is still hiking, it looks more like 2000 or 2022; if earnings hold and the Fed turns, it looks more like Q4 2018 — a correction that resumed the trend. Not investment advice.</div>
     </div>
 
-    <div class="card" id="vixCard">
+    <div data-sub="now" class="card" id="vixCard">
       <h2>😱 How scared is the market? VIX vs. history</h2>
       <div class="meta">VIX is Wall Street’s “fear gauge” — it rises as stocks fall faster; history shows each episode’s highest VIX close (CBOE)</div>
       <div id="vixBox" style="margin-top:10px"></div>
       <div class="why"><b>How to read it</b>37 already matches the fear peaks of 2018 and 2022 — bear markets without a recession. True financial crises (2008, 2020) push VIX above 80. Extreme fear often sits near short-term lows, but a VIX peak isn’t the market bottom: in 2022 VIX peaked at 36 in March, while stocks bottomed in October with VIX only around 33.</div>
     </div>
 
-    <div class="card" id="abcCard">
+    <div data-sub="tw" class="card" id="abcCard">
       <h2>〰️ ABC wave measure: where could TAIEX’s C wave end?</h2>
       <div class="meta">A wave-counting rule shared in investor chat groups, two methods side by side; SOX 8,000 is the US level the same group watches</div>
       <div id="abcChart" style="margin-top:10px"></div>
@@ -296,7 +300,15 @@ input[type=range]{width:100%;accent-color:var(--s1)}
       <div class="why"><b>How to read it</b>Wave A: high 49,968 down to 37,837 (−12,131 pts); wave B bounced ~6,600 pts to 44,437.<br>① <strong>C = A</strong> (classic Elliott): wave C falls as far as wave A, 44,437 − 12,131 ≈ 32,306.<br>② <strong>Mirror</strong> (the chat chart’s method): drop below the A low by as much as B bounced, 37,837 − 6,600 ≈ 31,237.<br>A technical rule of thumb, not a forecast; pick a different high (49,968 vs. closing high 49,823) and the answer moves. Not investment advice.</div>
     </div>
 
-    <div class="card" id="scnCard">
+    <div data-sub="tw" class="card" id="banCard">
+      <h2>🚫 Short-selling curbs compared: where was TAIEX vs. its moving averages?</h2>
+      <div class="meta">1-yr line = 240-day MA; 5-yr and 10-yr lines = 60- and 120-month MAs (monthly closes). Data: Yahoo Finance TAIEX history</div>
+      <div id="banTbl" style="margin-top:10px;overflow-x:auto"></div>
+      <div class="fig"><div class="t">How far the low was from the 5-yr line</div><div class="s">Lowest close within 3 months of each curb vs. the 5-yr line; latest close for this time</div><div id="banLow"></div></div>
+      <div class="why"><b>How to read it</b>In all 5 past curbs TAIEX was already below its 1-year line, and the later low usually landed near or below the 5-year line (2022 and 2025 stopped right at it; 2015 and 2020 about 12% below). Only the 2008 systemic crisis broke through the 10-year line. This time TAIEX is below the 1-year line but still ~55% above the 5-year line and double the 10-year line — the 5-year line is about 23,300, far below the 31,000–32,000 ABC targets. That doesn’t mean it must fall that far: the run-up was unusually steep, so the long averages lag and matter less than before. Not investment advice.</div>
+    </div>
+
+    <div data-sub="hist" class="card" id="scnCard">
       <h2>🧭 Three scripts: 2000, 2008, or 2022?</h2>
       <div class="meta">Drawdown path from the peak (key turning points joined, approximate); solid dots are this time’s SOX and TAIEX, the ring is TPEx (11/20)</div>
       <div id="scnChart" style="margin-top:10px"></div>
@@ -306,7 +318,7 @@ input[type=range]{width:100%;accent-color:var(--s1)}
       <div class="why"><b>How to read it</b>All three bear markets had convincing rebounds (+17% to +45%); only the 2022 one marked the real bottom. What separates them is not chart shape but three switches: do earnings actually fall, does the Fed stop, does credit freeze. None of the three has reached 2000 or 2008 levels yet, but the Fed is still hiking, which is worse than when 2022 bottomed. Historical comparison only, not investment advice.</div>
     </div>
 
-    <div class="card">
+    <div data-sub="hist" class="card">
       <h2>📉 Major bear markets in history</h2>
       <div class="chips" id="ixChips" style="margin:8px 0 4px"></div>
       <div class="meta" id="ixMeta"></div>
@@ -316,7 +328,7 @@ input[type=range]{width:100%;accent-color:var(--s1)}
       <div class="why" id="ixWhy"></div>
     </div>
 
-    <div class="card">
+    <div data-sub="hist" class="card">
       <h2>🔎 Three patterns from history</h2>
       <div class="stats" id="bearStats"></div>
       <ul class="tl" style="margin-top:4px">
@@ -326,15 +338,15 @@ input[type=range]{width:100%;accent-color:var(--s1)}
       </ul>
     </div>
 
-    <div id="bearCards"></div>
+    <div data-sub="hist" id="bearCards"></div>
 
-    <div class="card">
+    <div data-sub="now" class="card">
       <h2>💣 What hidden risks remain this time</h2>
       <div class="meta">Ranked by “how much damage it could do”; dates are known trigger points</div>
       <div id="bombs" style="margin-top:6px"></div>
     </div>
 
-    <div class="card">
+    <div data-sub="plan" class="card">
       <h2>🧭 When is it better to start buying?</h2>
       <div class="meta">No one can call the exact bottom; below is a framework built from historical patterns</div>
       <div class="fig"><div class="t">Two scenarios</div>
@@ -374,10 +386,10 @@ input[type=range]{width:100%;accent-color:var(--s1)}
 <div id="tip"></div><div id="toast"></div>
 
 <script>
-const ASOF="2026-11-22 17:04";
+const ASOF="2026-11-22 17:14";
 const VIX_NOW=37, VIX_TXT="37+", VIX_D="11/20"; /* VIX 最新收盤（每日更新） */
 const VIXH=[["2020", "COVID", 82.69], ["2008", "Fin. crisis", 80.86], ["2025", "Tariffs", 52.33], ["2011", "Downgrade", 48.0], ["1998", "LTCM", 45.74], ["2002", "Dot-com", 45.08], ["2015", "Yuan", 40.74], ["2022", "Rate hikes", 36.45], ["2018", "Q4", 36.07]];
-const TODAY={"d": "2026-11-22", "l": [["ev", "good-news", "Event: new “Good news and the bull case” card"], ["ev", "tw-rescue3", "Event: Rescue round 3 — weekend Stabilization Fund statement, TAIEX −17.5% week"], ["ev", "rout-1120", "Event: US rout — VIX 37, market breadth added"], ["ev", "fed-hike", "Event: Fed — 92% odds of a December hike"], ["vw", "", "Views: added Schwab (Gordon, Howard)"], ["cal", "", "Calendar: Thanksgiving-week US data and earnings"], ["bear", "", "Bear History: new “ABC wave” and “Three scripts” cards"], ["bear", "", "Bear History: VIX vs. past selloffs"], ["bear", "", "Bear History: new “Correction or bear market?” card"], ["tour", "", "Guide: Sunday morning brief"]]}; /* 今日更新清單：每日更新時重寫 d 與 l */
+const TODAY={"d": "2026-11-22", "l": [["ev", "good-news", "Event: new “Good news and the bull case” card"], ["ev", "tw-rescue3", "Event: Rescue round 3 — weekend Stabilization Fund statement, TAIEX −17.5% week"], ["ev", "rout-1120", "Event: US rout — VIX 37, market breadth added"], ["vw", "", "Views: bull/neutral/bear tabs, older quotes collapsed"], ["ev", "fed-hike", "Event: Fed — 92% odds of a December hike"], ["vw", "", "Views: added Schwab (Gordon, Howard)"], ["cal", "", "Calendar: Thanksgiving-week US data and earnings"], ["bear", "", "Bear History: new “ABC wave” and “Three scripts” cards"], ["bear", "", "Bear History: VIX vs. past selloffs"], ["bear", "", "Bear History: new “Correction or bear market?” card"], ["bear", "", "Bear History: short-selling curbs vs. 1/5/10-yr lines; split into four tabs"], ["tour", "", "Guide: Sunday morning brief"]]}; /* 今日更新清單：每日更新時重寫 d 與 l */
 /* ---------- Events data ---------- */
 const EVENTS=[
 {"id": "good-news", "icons": ["🟩", "🇹🇼", "📊", "🎯", "🛡️", "🔔", "😱"], "upd": "2026-11-22", "short": "AI earnings are still growing, Taiwan’s economy is at a 39-year high, most corrections never became bear markets — and fear is already at levels that marked past lows.", "cat": "Good news", "date": "2026-11-22", "title": "Good news and the bull case: the side the selloff drowned out", "lead": "Almost all the news for two weeks has been bad, but the data also has reasons for support: ① Nvidia’s revenue was $115.8B, $6B+ above forecasts, and it guides $130B next quarter — still growing; ② Taiwan’s 2026 GDP growth is forecast at 11.05%, a 39-year high, with 10 straight “red” business signals and export orders up 58.6% Jan–Oct; ③ E*TRADE: of 15 corrections since 1983, only 5 became bear markets; ④ Goldman’s 12-month S&P 500 target is 8,700 (~+14%) and Morgan Stanley’s Mike Wilson sees a bottom in sight; ⑤ the National Stabilization Fund is buying and the FSC has banned short selling below the prior close; ⑥ ANT came within cents of its $83 IPO price on day two, and buyers stepped in; ⑦ VIX closed above 37 — the fear peaks of the 2018 and 2022 bear markets.", "why": "In selloffs good news gets ignored (good news doesn’t lift, bad news crushes), but it decides whether this is a “correction” or a “bubble bursting”: as long as AI earnings don’t actually fall, the 2000 script hasn’t started. When fear is one-sided, it’s usually nearer the end than the start — but that’s no guarantee of a bottom. Not investment advice.", "stats": [["Nvidia next-Q guide", "$130B", "Still growing; beat by $6B+"], ["Taiwan GDP", "11.05%", "2026 forecast, 39-yr high"], ["Export orders", "+58.6%", "Jan–Oct y/y, record"], ["Past corrections", "15→5", "Since 1983, only 1/3 became bears"], ["Goldman target", "8,700", "S&P in 12 months, ~+14%"], ["VIX", "37+", "At 2018/2022 fear peaks"]], "charts": ["vixCmp"], "tl": [["11-13", "Goldman: 12-month S&P 500 target 8,700"], ["11-17", "Nvidia earnings: revenue and guidance beat", 1], ["11-20", "ANT holds its $83 IPO price intraday; E*TRADE: only 5 of 15 corrections became bears"], ["11-21", "Stabilization Fund confirms buying, lists four fundamentals; FSC bans shorting below prior close", 1], ["11-23", "Short-selling curbs take effect"]], "src": [["CNBC: Nvidia earnings", "https://www.cnbc.com/2026/11/18/nvidia-stock-earnings.html"], ["Anue (cnyes): Stabilization Fund’s four points", "https://news.cnyes.com/news/id/6669743"], ["Anue (cnyes): E*TRADE Larkin on corrections", "https://news.cnyes.com/news/id/6669311"], ["roic.ai: Goldman 8,700 target", "https://www.roic.ai/news/goldman-sachs-sees-sp-500-at-8700-despite-slowing-ai-spending-11-13-2026"], ["Morgan Stanley: Mike Wilson on the bottom", "https://www.morganstanley.com/insights/podcasts/thoughts-on-the-market/market-bottom-final-retest-mike-wilson"], ["Yahoo (Fortune): ANT holds IPO price", "https://finance.yahoo.com/markets/stocks/articles/anthropic-slid-just-5-cents-164439785.html"], ["Schwab: VIX 37", "https://www.schwab.com/learn/story/market-volatility"], ["VIX historical closes: CBOE", "https://www.cboe.com/tradable_products/vix/vix_historical_data/"]]},
@@ -804,6 +816,7 @@ function renderEv(){
   applyEvFold();
 }
 /* ---------- Render: Views ---------- */
+let vwSt="all";
 let vwTag="All";
 const ST={bull:"▲ Bullish",bear:"▼ Bearish",neu:"● Neutral"};
 function allViews(){return VIEWS.concat(LS.get("mine",[]).filter(m=>m.type==="vw").map(m=>({n:m.title,o:"My note",tag:["Mine"],st:m.stance||"neu",av:"✍️",q:[[m.date.slice(5),m.body]],src:m.url})))}
@@ -813,10 +826,10 @@ function renderVw(){
   $("#meter").innerHTML=[["bull","var(--bull)"],["neu","var(--neu)"],["bear","var(--bear)"]].filter(x=>c[x[0]]).map(x=>`<div style="flex:${c[x[0]]};background:${x[1]}" data-tip="${ST[x[0]]}: ${c[x[0]]} people">${c[x[0]]}</div>`).join("");
   const tags=["All",...new Set(V.flatMap(v=>v.tag))];
   $("#vwChips").innerHTML=tags.map(t=>`<button class="chip ${t===vwTag?"on":""}" data-vwt="${t}">${t}</button>`).join("");
-  $("#vwList").innerHTML=V.filter(v=>vwTag==="All"||v.tag.includes(vwTag)).map(v=>`
+  $("#vwList").innerHTML=V.filter(v=>vwSt==="all"||v.st===vwSt).filter(v=>vwTag==="All"||v.tag.includes(vwTag)).map(v=>`
   <article class="card">
     <div class="who"><div class="av">${esc(v.av)}</div><div><div class="n">${esc(v.n)}</div><div class="o">${esc(v.o)}</div></div><span class="stance ${v.st}">${ST[v.st]}</span></div>
-    <ul class="q">${v.q.map(q=>`<li><span class="d">${q[0]}</span>${Array.isArray(q[2])?esc(q[1])+`<span class="en">“${esc(q[2][0])}”</span>`+esc(q[3]||""):esc(q[1])}</li>`).join("")}</ul>
+    <ul class="q">${v.q.slice(0,1).map(q=>`<li><span class="d">${q[0]}</span>${Array.isArray(q[2])?esc(q[1])+`<span class="en">“${esc(q[2][0])}”</span>`+esc(q[3]||""):esc(q[1])}</li>`).join("")}</ul>${v.q.length>1?`<details class="more"><summary>Earlier ${v.q.length-1}</summary><ul class="q">${v.q.slice(1).map(q=>`<li><span class="d">${q[0]}</span>${Array.isArray(q[2])?esc(q[1])+`<span class="en">“${esc(q[2][0])}”</span>`+esc(q[3]||""):esc(q[1])}</li>`).join("")}</ul></details>`:""}
     <div class="meta" style="margin-top:6px">${v.tag.map(t=>`<span class="tag">${t}</span>`).join("")}${v.src?`<a href="${esc(v.src)}" target="_blank" rel="noopener" style="margin-left:auto;color:var(--s1)">Source ↗</a>`:""}</div>
   </article>`).join("");
 }
@@ -987,6 +1000,17 @@ function renderCB(){
   $("#cbTrig").innerHTML=CB_T.map((t,i)=>{if(t[1]==="spx"){const hit=spd>=20;return `<div style="padding:8px 0;border-top:1px dashed var(--line)"><div style="display:flex;gap:8px;align-items:center"><span class="nb" style="width:26px;height:26px;font-size:13px">${i+1}</span><b style="flex:1">${t[0]}</b><span class="tag" style="${hit?"background:var(--bear);color:#fff":""}">${hit?"Tripped":(20-spd).toFixed(1)+" pts to go"}</span></div><div style="margin:8px 0 2px 34px;height:10px;border-radius:5px;background:var(--grid);position:relative"><div style="position:absolute;inset:0 auto 0 0;width:${Math.min(spd/20,1)*100}%;border-radius:5px;background:${hit?"var(--bear)":"var(--hlb)"}"></div></div><div class="s" style="margin-left:34px;font-size:12px;color:var(--faint)">${"Now −{d}%; −20% is about {lv}".replace("{d}",spd).replace("{lv}",lv)}</div></div>`}
     return `<div style="padding:8px 0;border-top:1px dashed var(--line)"><div style="display:flex;gap:8px;align-items:center"><span class="nb" style="width:26px;height:26px;font-size:13px">${i+1}</span><b style="flex:1">${t[0]}</b><span style="width:12px;height:12px;border-radius:50%;background:${col[t[3]]||"var(--faint)"}"></span></div><div class="s" style="margin-left:34px;font-size:13px;color:var(--muted)">${esc(t[2])}</div></div>`}).join("");
 }
+/* ---------- 歷次限空令比較（2026 列以 ABC.tw 對 11/20 均線估算） ---------- */
+const BAN=[["2008-09-22", "Fin. crisis", "Ban below prior close → full ban 10/1", [-25.0, -12.4, -6.8], "2008-11-20", -33.1, -41.0, -23.9], ["2015-08-24", "China crash", "Ban below prior close", [-19.6, -11.6, -5.0], "2015-08-24", 0.0, -11.6, 14.4], ["2020-03-19", "COVID", "Conditional ban, lending cap 10%", [-21.5, -12.9, -4.7], "2020-03-19", 0.0, -12.9, 32.6], ["2022-10-03", "Rate hikes", "Lending cut, margin raised", [-19.4, 1.5, 20.7], "2022-10-25", -4.8, -3.3, 7.7], ["2025-04-07", "Tariffs", "Lending 3%, margin 130%", [-13.9, 11.6, 41.3], "2025-04-09", -9.6, 1.0, 17.4], ["2026-11-20", "AI correction (now)", "3.5% conditional → full curbs 11/23", [-8.6, 54.9, 104.3], "2026-11-20", 0.0, 54.9, null]],BAN_L={y:39408,f:23261,t:17637},BC={"cols": ["Curb date", "1-yr", "5-yr", "10-yr", "Later low", "3 mo later"], "same": "same day"};
+function renderBan(){
+  const R=BAN.map(r=>r.slice());const last=R[R.length-1],tw=ABC.tw;last[3]=[BAN_L.y,BAN_L.f,BAN_L.t].map(x=>+((tw/x-1)*100).toFixed(1));last[6]=last[3][1];
+  const cell=v=>{const a=Math.min(Math.abs(v)/60,1),c=v<0?`rgba(217,89,38,${.18+a*.6})`:`rgba(31,122,69,${.18+a*.6})`;return `<td style="background:${c};text-align:center;font:600 12px var(--mono);border-radius:6px">${v>0?"+":""}${v}%</td>`};
+  $("#banTbl").innerHTML=`<table style="width:100%;border-collapse:separate;border-spacing:3px;font-size:12px"><tr style="color:var(--muted)">${BC.cols.map(c=>`<th style="font-weight:600;text-align:center;padding:2px">${c}</th>`).join("")}</tr>${R.map((r,i)=>{const cur=i===R.length-1;return `<tr style="${cur?"outline:2px solid var(--bear);outline-offset:-1px;border-radius:6px":""}"><td style="padding:4px 2px;line-height:1.3"><b style="font-family:var(--mono)">${r[0].slice(0,7).replace("-","/")}</b><br><span style="color:var(--muted)">${r[1]}</span></td>${r[3].map(cell).join("")}<td style="text-align:center;font:12px var(--mono)">${cur?"—":r[5]===0?BC.same:r[5]+"%"}</td><td style="text-align:center;font:600 12px var(--mono);color:${r[7]==null?"var(--faint)":r[7]>=0?"var(--bull)":"var(--bear)"}">${r[7]==null?"—":(r[7]>0?"+":"")+r[7]+"%"}</td></tr>`}).join("")}</table>`;
+  const M=60,mid=W/2,L=96,Rr=W-12,c0=L+(Rr-L)*0.45,X=v=>c0+(Rr-c0)*Math.max(-M,Math.min(v,M))/M*(v<0?(c0-L)/(Rr-c0):1);
+  let g=`<svg viewBox="0 0 ${W} ${R.length*32+20}" role="img"><line x1="${c0}" x2="${c0}" y1="4" y2="${R.length*32+6}" style="stroke:var(--fg)" stroke-width="1.5"/><text x="${c0}" y="${R.length*32+18}" text-anchor="middle" font-size="10">5-yr line</text>`;
+  R.forEach((r,i)=>{const v=r[6],y=8+i*32,x=X(v),cur=i===R.length-1;g+=`<text x="${L-6}" y="${y+15}" text-anchor="end" font-size="11" style="fill:var(--fg)">${r[0].slice(0,4)} ${cur?"Now":r[1]}</text><rect x="${Math.min(x,c0)}" y="${y+4}" width="${Math.abs(x-c0)}" height="16" rx="4" style="fill:${cur?"var(--bear)":v<0?"var(--s1soft)":"var(--s1)"}"/><text x="${v<0?Math.min(x,c0)-4:x>Rr-56?x-4:x+4}" y="${y+16}" text-anchor="${v<0||x>Rr-56?"end":"start"}" font-size="11" font-weight="700" style="fill:${x>Rr-56?"#fff":"var(--fg)"};font-family:var(--mono)">${v>0?"+":""}${v}%${v>M?" ▶":""}</text>`});
+  $("#banLow").innerHTML=g+"</svg>";
+}
 /* ---------- 三種劇本 ---------- */
 (function(){
   const SC=[["2000", "var(--bear)", [[0, 0], [2.4, -37], [5.7, -16], [9.3, -54], [10.5, -43], [12.8, -68], [14.4, -54], [18.4, -72], [21.8, -59], [31, -78]], ["−78%", "31 mo", "Cut hard from Jan 2001 — didn’t help", "Dot-com profits collapsed; equipment orders cut", "Bubble fully deflated to fair value"]], ["2008", "var(--neu)", [[0, 0], [2.7, -25], [6.6, -6], [12.7, -60]], ["−60%", "13 mo", "Zero rates + QE", "Global recession", "Global rescues; credit thawed"]], ["2022", "var(--s1)", [[0, 0], [5.4, -24], [7.4, -10], [9.3, -25]], ["−25%", "9 mo", "Hiked until inflation peaked", "No recession; earnings held", "Inflation peaked; Fed slowed hikes"]]],RB=[["2000/12→2001/1", "+23%"], ["2001/4→5", "+41%"], ["2001/9→2002/1", "+45%"], ["2008/1→5 TAIEX", "+26%"], ["2022/6→8 S&P", "+17%"]],SW=[["Earnings falling?", "Not yet: Nvidia still guides $130B next quarter; watch cloud capex", "neu", "2000"], ["Fed stopped?", "No: a Dec 10 hike is nearly certain — worse than at the 2022 bottom", "bear", "2022"], ["Credit frozen?", "Not yet, but AI borrowing and credit stress are showing", "neu", "2008"]],LG=["2000 Nasdaq", "2008 TAIEX", "2022 S&P 500"],DOT=["SOX", "TAIEX", "TPEx"],COLS=["Total drop", "Time to bottom", "Fed", "Earnings", "What ended it"];
@@ -1043,6 +1067,8 @@ document.addEventListener("click",e=>{
   if(t.closest("nav button")){go(t.closest("nav button").dataset.p);window.scrollTo(0,0);return}
   if(t.dataset.evc){evCat=t.dataset.evc;renderEv();return}
   if(t.dataset.vwt){vwTag=t.dataset.vwt;renderVw();return}
+  if(t.dataset.vst){vwSt=t.dataset.vst;document.querySelectorAll("#vwSt .chip").forEach(b=>b.classList.toggle("on",b.dataset.vst===vwSt));renderVw();return}
+  if(t.dataset.bsub){setBSub(t.dataset.bsub);return}
   if(t.dataset.fav){let f=LS.get("fav",[]);f=f.includes(t.dataset.fav)?f.filter(x=>x!==t.dataset.fav):[...f,t.dataset.fav];LS.set("fav",f);renderEv();toast(f.includes(t.dataset.fav)?"⭐ Saved":"Removed from saved");return}
   if(t.dataset.del){const m=LS.get("mine",[]);m.splice(+t.dataset.del,1);LS.set("mine",m);renderMine();renderVw();return}
   if(t.dataset.ix){IXK=t.dataset.ix;renderIx();return}
@@ -1311,7 +1337,9 @@ function goBack(){
   go(s.p,true);if(s.p==="tour"&&s.map)renderTourMap();setTimeout(()=>window.scrollTo(0,s.y||0),20);
 }
 
-renderEv();renderVw();renderBear();renderCB();
+renderEv();renderVw();renderBear();renderCB();renderBan();
+function setBSub(k){LS.set("bsub",k);document.querySelectorAll("#bearSub .chip").forEach(b=>b.classList.toggle("on",b.dataset.bsub===k));document.querySelectorAll("#p-bear [data-sub]").forEach(c=>c.style.display=c.dataset.sub===k?"":"none")}
+setBSub(LS.get("bsub","now"));(()=>{const h=document.querySelector("header");const u=()=>document.documentElement.style.setProperty("--hdr",h.offsetHeight+"px");u();addEventListener("resize",u)})();document.querySelectorAll("#vwSt .chip").forEach(b=>b.classList.toggle("on",b.dataset.vst===vwSt));
 
 /* Bear History folding */
 function foldKey(c){const h=c.querySelector(":scope>h2");return h?h.textContent.replace(/[−\d.%\s]+$/,"").trim().slice(0,20):""}

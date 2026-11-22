@@ -45,6 +45,8 @@ main{max-width:760px;margin:0 auto;padding:14px max(14px,env(safe-area-inset-lef
 #p-ev .card.fold>.lead{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-bottom:0;color:var(--muted)}
 #p-ev .card.fold{padding-bottom:12px;cursor:pointer}
 .ltab{display:flex;flex-direction:column;gap:8px;margin-top:6px}.ltab .r{border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-size:13px;line-height:1.55}.ltab .r.now{border-color:var(--bear)}.ltab .h{display:flex;gap:8px;align-items:baseline;font-weight:700}.ltab .h small{font-weight:400;color:var(--muted)}.ltab .m{color:var(--muted)}.ltab .o{margin-top:2px}
+.subtabs{position:sticky;top:var(--hdr,96px);z-index:5;background:var(--bg);padding:6px 0;margin-bottom:6px}
+.subtabs .chip{font-weight:600}
 .foldbar{display:flex;gap:8px;justify-content:flex-end;margin:-4px 0 10px}
 .foldbar button{font:inherit;font-size:12px;padding:5px 10px;border-radius:999px;border:1px solid var(--line);background:var(--panel);color:var(--muted)}
 .meta{font-size:12px;color:var(--faint);display:flex;gap:8px;flex-wrap:wrap;align-items:center}
@@ -241,6 +243,7 @@ input[type=range]{width:100%;accent-color:var(--s1)}
         <div class="legend"><span><i style="background:var(--bull)"></i>▲ 偏多</span><span><i style="background:var(--neu)"></i>● 中性</span><span><i style="background:var(--bear)"></i>▼ 偏空</span></div>
       </div>
     </div>
+    <div class="chips subtabs" id="vwSt"><button class="chip" data-vst="all">全部</button><button class="chip" data-vst="bull">▲ 偏多</button><button class="chip" data-vst="neu">● 中性</button><button class="chip" data-vst="bear">▼ 偏空</button></div>
     <div class="chips" id="vwChips"></div>
     <div id="vwList"></div>
   </section>
@@ -254,8 +257,9 @@ input[type=range]{width:100%;accent-color:var(--s1)}
   </section>
 
   <section class="pane" id="p-bear">
+    <div class="chips subtabs" id="bearSub"><button class="chip" data-bsub="now">📍 現況</button><button class="chip" data-bsub="tw">🇹🇼 台股</button><button class="chip" data-bsub="hist">📜 歷史</button><button class="chip" data-bsub="plan">🧭 佈局</button></div>
     <div class="foldbar"><button data-fold="1">全部收合</button><button data-fold="0">全部展開</button></div>
-    <div class="card">
+    <div data-sub="now" class="card">
       <h2>這次跌到哪裡了？</h2>
       <div class="meta">各自從歷史高點起算；虛線 −10% 叫修正、−20% 叫空頭（美股、台股皆為 11/20 收盤）</div>
       <div id="nowGauge"></div>
@@ -270,7 +274,7 @@ input[type=range]{width:100%;accent-color:var(--s1)}
       <div class="why"><b>一句話</b>11/20 美股大屠殺：S&P −11.6%、道瓊都跌進修正區，Nasdaq −18.1% 離空頭（−20%）只差一步。費半單日 −10.73%、30 檔成分股全跌，距高點 −42.5%，已超過櫃買（−41.9%），成為這次跌最深的指數。台股加權 −27.7% 仍被台積電撐住。這次是「AI 硬體空頭」：越靠近晶片、越是中小型 AI 概念股，跌得越深——現在連最大的權值股輝達（單日 −14%）也開始補跌。</div>
     </div>
 
-    <div class="card" id="cbCard">
+    <div data-sub="now" class="card" id="cbCard">
       <h2>⚖️ 修正還是空頭？</h2>
       <div class="meta">跌 10–20% 叫修正、超過 20% 叫空頭；真正的差別是原因：獲利、經濟、聯準會</div>
       <div id="cbZone" style="margin-top:10px"></div>
@@ -280,14 +284,14 @@ input[type=range]{width:100%;accent-color:var(--s1)}
       <div class="why"><b>怎麼看</b>這次是兩層：AI 硬體和台股已經是空頭，美國大盤還在修正。三個警戒線如果前兩個觸發、聯準會又還沒停手，就比較像 2000 或 2022；如果獲利撐住、聯準會轉向，比較像 2018 年第四季那種修正後回到原趨勢。不構成投資建議。</div>
     </div>
 
-    <div class="card" id="vixCard">
+    <div data-sub="now" class="card" id="vixCard">
       <h2>😱 恐慌到什麼程度？VIX 和歷次比</h2>
       <div class="meta">VIX 是美股的「恐慌指數」，跌越兇越高；歷史數字為各次 VIX 收盤最高點（CBOE）</div>
       <div id="vixBox" style="margin-top:10px"></div>
       <div class="why"><b>怎麼看</b>37 已經達到 2018、2022 那種「沒有衰退的空頭」的恐慌高峰；真正的金融危機（2008、2020）會衝到 80 以上。恐慌越高通常越接近短線低點，但 VIX 見頂不等於股市見底：2022 年 VIX 3 月就見高 36，股市 10 月才真正落底，當時 VIX 只有 33 左右。</div>
     </div>
 
-    <div class="card" id="abcCard">
+    <div data-sub="tw" class="card" id="abcCard">
       <h2>〰️ ABC 波段測量：台股 C 波會跌到哪？</h2>
       <div class="meta">網路流傳的波浪測距法（股友群組圖），兩種算法並列；費半 8,000 是同一群人看的美股觀察點</div>
       <div id="abcChart" style="margin-top:10px"></div>
@@ -296,7 +300,15 @@ input[type=range]{width:100%;accent-color:var(--s1)}
       <div class="why"><b>怎麼看</b>A 波：前高 49,968 跌到 37,837（−12,131 點）；B 波反彈約 6,600 點到 44,437。<br>① <strong>C＝A</strong>（艾略特常用）：C 波跌幅等於 A 波，44,437 − 12,131 ≈ 32,306。<br>② <strong>鏡像測距</strong>（群組圖算法）：B 波反彈多少，就從 A 低點再跌多少，37,837 − 6,600 ≈ 31,237。<br>只是技術推算、不是預測；同一套方法換個高點（49,968 或收盤高 49,823）結果就不同，不構成投資建議。</div>
     </div>
 
-    <div class="card" id="scnCard">
+    <div data-sub="tw" class="card" id="banCard">
+      <h2>🚫 歷次限空令比較：當時加權在哪條線？</h2>
+      <div class="meta">年線＝240 日均線；五年線、十年線＝60、120 個月均線（月收盤）。資料：Yahoo Finance 加權指數歷史收盤</div>
+      <div id="banTbl" style="margin-top:10px;overflow-x:auto"></div>
+      <div class="fig"><div class="t">低點離五年線多遠</div><div class="s">每次限空後 3 個月內的最低收盤，對五年線的距離；這次用最新收盤</div><div id="banLow"></div></div>
+      <div class="why"><b>怎麼看</b>過去 5 次限空令時，加權都已經跌破年線；之後的低點多半落在五年線附近或下方（2022、2025 碰到五年線就止跌，2015、2020 在五年線下約 12%）。只有 2008 年系統性危機一路跌破十年線。這次加權雖已跌破年線，卻還比五年線高約 55%、比十年線高一倍——五年線約 23,300，遠低於 ABC 算出的 31,000–32,000。這不代表一定會跌到五年線：這次前面漲得太急，均線落後很多，參考性比過去低。不構成投資建議。</div>
+    </div>
+
+    <div data-sub="hist" class="card" id="scnCard">
       <h2>🧭 三種劇本：會像 2000、2008，還是 2022？</h2>
       <div class="meta">從高點起算的跌幅路徑（關鍵轉折點連線、約略）；實心圓點是這次的費半與加權、空心圈是櫃買（11/20）</div>
       <div id="scnChart" style="margin-top:10px"></div>
@@ -306,7 +318,7 @@ input[type=range]{width:100%;accent-color:var(--s1)}
       <div class="why"><b>怎麼看</b>三次空頭都有「像見底」的強反彈（+17%～+45%），最後只有 2022 年那次真的是底。分辨關鍵不是走勢形狀，而是下面三個開關：獲利有沒有真的往下掉、聯準會有沒有停手、信用市場有沒有凍結。目前三個都還沒到 2000 或 2008 的程度，但聯準會還在升息，比 2022 年見底時更不利。只是歷史對照，不構成投資建議。</div>
     </div>
 
-    <div class="card">
+    <div data-sub="hist" class="card">
       <h2>📉 歷史上的大空頭</h2>
       <div class="chips" id="ixChips" style="margin:8px 0 4px"></div>
       <div class="meta" id="ixMeta"></div>
@@ -316,7 +328,7 @@ input[type=range]{width:100%;accent-color:var(--s1)}
       <div class="why" id="ixWhy"></div>
     </div>
 
-    <div class="card">
+    <div data-sub="hist" class="card">
       <h2>🔎 歷史給的三個規律</h2>
       <div class="stats" id="bearStats"></div>
       <ul class="tl" style="margin-top:4px">
@@ -326,15 +338,15 @@ input[type=range]{width:100%;accent-color:var(--s1)}
       </ul>
     </div>
 
-    <div id="bearCards"></div>
+    <div data-sub="hist" id="bearCards"></div>
 
-    <div class="card">
+    <div data-sub="now" class="card">
       <h2>💣 這次還有哪些未爆彈</h2>
       <div class="meta">依「可能多傷」排列；日期為已知的引爆點</div>
       <div id="bombs" style="margin-top:6px"></div>
     </div>
 
-    <div class="card">
+    <div data-sub="plan" class="card">
       <h2>🧭 什麼時候比較適合佈局？</h2>
       <div class="meta">沒有人能抓到確切的底，以下是用歷史規律整理的判斷框架</div>
       <div class="fig"><div class="t">兩種劇本</div>
@@ -374,10 +386,10 @@ input[type=range]{width:100%;accent-color:var(--s1)}
 <div id="tip"></div><div id="toast"></div>
 
 <script>
-const ASOF="2026-11-22 17:04";
+const ASOF="2026-11-22 17:14";
 const VIX_NOW=37, VIX_TXT="37+", VIX_D="11/20"; /* VIX 最新收盤（每日更新） */
 const VIXH=[["2020", "疫情", 82.69], ["2008", "金融海嘯", 80.86], ["2025", "關稅", 52.33], ["2011", "美債降評", 48.0], ["1998", "LTCM", 45.74], ["2002", "網路泡沫", 45.08], ["2015", "人民幣貶值", 40.74], ["2022", "升息空頭", 36.45], ["2018", "Q4 縮表", 36.07]];
-const TODAY={"d": "2026-11-22", "l": [["ev", "good-news", "大事：新增「好消息與多方論點」卡片"], ["ev", "tw-rescue3", "大事：救市第三波 — 補上國安基金週末聲明、台股單週 −17.5%"], ["ev", "rout-1120", "大事：美股大屠殺 — 補 VIX 37、市場寬度"], ["ev", "fed-hike", "大事：聯準會 — 12 月升息機率 92%"], ["vw", "", "名人觀點：新增嘉信 Schwab（Gordon、Howard）"], ["cal", "", "接下來：感恩節週美國數據與財報"], ["bear", "", "空頭史：新增「ABC 波段測量」「三種劇本」圖卡"], ["bear", "", "空頭史：新增 VIX 恐慌指數歷次比較"], ["bear", "", "空頭史：新增「修正還是空頭？」比較圖卡"], ["tour", "", "導覽員：週日早報"]]}; /* 今日更新清單：每日更新時重寫 d 與 l */
+const TODAY={"d": "2026-11-22", "l": [["ev", "good-news", "大事：新增「好消息與多方論點」卡片"], ["ev", "tw-rescue3", "大事：救市第三波 — 補上國安基金週末聲明、台股單週 −17.5%"], ["ev", "rout-1120", "大事：美股大屠殺 — 補 VIX 37、市場寬度"], ["vw", "", "名人觀點：加多空分頁、舊發言收合"], ["ev", "fed-hike", "大事：聯準會 — 12 月升息機率 92%"], ["vw", "", "名人觀點：新增嘉信 Schwab（Gordon、Howard）"], ["cal", "", "接下來：感恩節週美國數據與財報"], ["bear", "", "空頭史：新增「ABC 波段測量」「三種劇本」圖卡"], ["bear", "", "空頭史：新增 VIX 恐慌指數歷次比較"], ["bear", "", "空頭史：新增「修正還是空頭？」比較圖卡"], ["bear", "", "空頭史：新增歷次限空令 vs 年線／五年線／十年線；分成四個分頁"], ["tour", "", "導覽員：週日早報"]]}; /* 今日更新清單：每日更新時重寫 d 與 l */
 /* ---------- 大事資料 ---------- */
 const EVENTS=[
 {"id": "good-news", "icons": ["🟩", "🇹🇼", "📊", "🎯", "🛡️", "🔔", "😱"], "upd": "2026-11-22", "short": "AI 獲利還在成長、台灣經濟創 39 年新高、歷史上多數修正沒變空頭；恐慌指數也已到過去多次低點的水準。", "cat": "好消息", "date": "2026-11-22", "title": "好消息與多方論點：被殺盤蓋過的另一面", "lead": "這兩週的新聞幾乎全是利空，但數據裡也有撐盤的理由：① 輝達上季營收 1,158 億美元、超出預期 60 多億，下季指引 1,300 億仍在成長；② 主計總處預估台灣今年 GDP 成長 11.05%，39 年來最高，景氣燈號連 10 個月紅燈、1–10 月外銷訂單年增 58.6%；③ E*TRADE 統計 1983 年以來 15 次修正只有 5 次演變成空頭；④ 高盛 S&P 500 一年目標 8,700（約 +14%），摩根士丹利 Mike Wilson 認為底部在望；⑤ 國安基金已進場、金管會全面限空；⑥ ANT 第二天盤中只差幾美分就跌破 83 承銷價，但有人接住；⑦ VIX 衝上 37 以上，已到 2018、2022 年空頭的恐慌高峰。", "why": "下跌時好消息常被忽略（好消息不漲、壞消息大跌），但它們決定這次是「修正」還是「泡沫破裂」：只要 AI 獲利沒有真的往下掉，2000 年那種劇本就還沒成立。恐慌一面倒時，通常比較接近末段而不是開頭；但這不保證已經見底。不構成投資建議。", "stats": [["輝達下季指引", "$1,300億", "仍在成長；上季超預期 60 多億"], ["台灣 GDP", "11.05%", "2026 預估，39 年新高"], ["外銷訂單", "+58.6%", "1–10 月年增，創新高"], ["歷史修正", "15→5", "1983 年來只有 1/3 變空頭"], ["高盛目標", "8,700", "S&P 一年後，約 +14%"], ["VIX", "37+", "已達 2018、2022 恐慌高峰"]], "charts": ["vixCmp"], "tl": [["11-13", "高盛：S&P 500 一年目標 8,700"], ["11-17", "輝達財報：營收、指引都優於預期", 1], ["11-20", "ANT 盤中守住 83 承銷價；E*TRADE：15 次修正只有 5 次變空頭"], ["11-21", "國安基金證實進場、列出四項基本面；金管會全面限空", 1], ["11-23", "限空措施上路"]], "src": [["CNBC：輝達財報", "https://www.cnbc.com/2026/11/18/nvidia-stock-earnings.html"], ["鉅亨網：國安基金四點基本面", "https://news.cnyes.com/news/id/6669743"], ["鉅亨網：E*TRADE Larkin 修正統計", "https://news.cnyes.com/news/id/6669311"], ["roic.ai：高盛 8,700 目標", "https://www.roic.ai/news/goldman-sachs-sees-sp-500-at-8700-despite-slowing-ai-spending-11-13-2026"], ["摩根士丹利：Mike Wilson 談底部", "https://www.morganstanley.com/insights/podcasts/thoughts-on-the-market/market-bottom-final-retest-mike-wilson"], ["Yahoo（Fortune）：ANT 守住承銷價", "https://finance.yahoo.com/markets/stocks/articles/anthropic-slid-just-5-cents-164439785.html"], ["Schwab：VIX 37", "https://www.schwab.com/learn/story/market-volatility"], ["VIX 歷史收盤高點：CBOE 歷史資料", "https://www.cboe.com/tradable_products/vix/vix_historical_data/"]]},
@@ -804,6 +816,7 @@ function renderEv(){
   applyEvFold();
 }
 /* ---------- 渲染：觀點 ---------- */
+let vwSt="all";
 let vwTag="全部";
 const ST={bull:"▲ 偏多",bear:"▼ 偏空",neu:"● 中性"};
 function allViews(){return VIEWS.concat(LS.get("mine",[]).filter(m=>m.type==="vw").map(m=>({n:m.title,o:"我的紀錄",tag:["我的"],st:m.stance||"neu",av:"✍️",q:[[m.date.slice(5),m.body]],src:m.url})))}
@@ -813,10 +826,10 @@ function renderVw(){
   $("#meter").innerHTML=[["bull","var(--bull)"],["neu","var(--neu)"],["bear","var(--bear)"]].filter(x=>c[x[0]]).map(x=>`<div style="flex:${c[x[0]]};background:${x[1]}" data-tip="${ST[x[0]]}：${c[x[0]]} 位">${c[x[0]]}</div>`).join("");
   const tags=["全部",...new Set(V.flatMap(v=>v.tag))];
   $("#vwChips").innerHTML=tags.map(t=>`<button class="chip ${t===vwTag?"on":""}" data-vwt="${t}">${t}</button>`).join("");
-  $("#vwList").innerHTML=V.filter(v=>vwTag==="全部"||v.tag.includes(vwTag)).map(v=>`
+  $("#vwList").innerHTML=V.filter(v=>vwSt==="all"||v.st===vwSt).filter(v=>vwTag==="全部"||v.tag.includes(vwTag)).map(v=>`
   <article class="card">
     <div class="who"><div class="av">${esc(v.av)}</div><div><div class="n">${esc(v.n)}</div><div class="o">${esc(v.o)}</div></div><span class="stance ${v.st}">${ST[v.st]}</span></div>
-    <ul class="q">${v.q.map(q=>`<li><span class="d">${q[0]}</span>${Array.isArray(q[2])?esc(q[1])+`<span class="en">“${esc(q[2][0])}”</span>`+esc(q[3]||""):esc(q[1])}</li>`).join("")}</ul>
+    <ul class="q">${v.q.slice(0,1).map(q=>`<li><span class="d">${q[0]}</span>${Array.isArray(q[2])?esc(q[1])+`<span class="en">“${esc(q[2][0])}”</span>`+esc(q[3]||""):esc(q[1])}</li>`).join("")}</ul>${v.q.length>1?`<details class="more"><summary>更早 ${v.q.length-1} 則</summary><ul class="q">${v.q.slice(1).map(q=>`<li><span class="d">${q[0]}</span>${Array.isArray(q[2])?esc(q[1])+`<span class="en">“${esc(q[2][0])}”</span>`+esc(q[3]||""):esc(q[1])}</li>`).join("")}</ul></details>`:""}
     <div class="meta" style="margin-top:6px">${v.tag.map(t=>`<span class="tag">${t}</span>`).join("")}${v.src?`<a href="${esc(v.src)}" target="_blank" rel="noopener" style="margin-left:auto;color:var(--s1)">來源 ↗</a>`:""}</div>
   </article>`).join("");
 }
@@ -987,6 +1000,17 @@ function renderCB(){
   $("#cbTrig").innerHTML=CB_T.map((t,i)=>{if(t[1]==="spx"){const hit=spd>=20;return `<div style="padding:8px 0;border-top:1px dashed var(--line)"><div style="display:flex;gap:8px;align-items:center"><span class="nb" style="width:26px;height:26px;font-size:13px">${i+1}</span><b style="flex:1">${t[0]}</b><span class="tag" style="${hit?"background:var(--bear);color:#fff":""}">${hit?"已觸發":"還差 "+(20-spd).toFixed(1)+" 個百分點"}</span></div><div style="margin:8px 0 2px 34px;height:10px;border-radius:5px;background:var(--grid);position:relative"><div style="position:absolute;inset:0 auto 0 0;width:${Math.min(spd/20,1)*100}%;border-radius:5px;background:${hit?"var(--bear)":"var(--hlb)"}"></div></div><div class="s" style="margin-left:34px;font-size:12px;color:var(--faint)">${"現在 −{d}%，−20% 約在 {lv}".replace("{d}",spd).replace("{lv}",lv)}</div></div>`}
     return `<div style="padding:8px 0;border-top:1px dashed var(--line)"><div style="display:flex;gap:8px;align-items:center"><span class="nb" style="width:26px;height:26px;font-size:13px">${i+1}</span><b style="flex:1">${t[0]}</b><span style="width:12px;height:12px;border-radius:50%;background:${col[t[3]]||"var(--faint)"}"></span></div><div class="s" style="margin-left:34px;font-size:13px;color:var(--muted)">${esc(t[2])}</div></div>`}).join("");
 }
+/* ---------- 歷次限空令比較（2026 列以 ABC.tw 對 11/20 均線估算） ---------- */
+const BAN=[["2008-09-22", "金融海嘯", "平盤下禁空→10/1 全面禁空", [-25.0, -12.4, -6.8], "2008-11-20", -33.1, -41.0, -23.9], ["2015-08-24", "中國股災", "平盤下禁空", [-19.6, -11.6, -5.0], "2015-08-24", 0.0, -11.6, 14.4], ["2020-03-19", "COVID", "條件式平盤下禁空、借券 10%", [-21.5, -12.9, -4.7], "2020-03-19", 0.0, -12.9, 32.6], ["2022-10-03", "升息空頭", "借券限額調降、保證金提高", [-19.4, 1.5, 20.7], "2022-10-25", -4.8, -3.3, 7.7], ["2025-04-07", "對等關稅", "借券 3%、保證金 130%", [-13.9, 11.6, 41.3], "2025-04-09", -9.6, 1.0, 17.4], ["2026-11-20", "AI 修正（這次）", "3.5% 條件禁空→11/23 全面限空", [-8.6, 54.9, 104.3], "2026-11-20", 0.0, 54.9, null]],BAN_L={y:39408,f:23261,t:17637},BC={"cols": ["限空日", "年線", "五年線", "十年線", "之後低點", "3 個月後"], "same": "當天"};
+function renderBan(){
+  const R=BAN.map(r=>r.slice());const last=R[R.length-1],tw=ABC.tw;last[3]=[BAN_L.y,BAN_L.f,BAN_L.t].map(x=>+((tw/x-1)*100).toFixed(1));last[6]=last[3][1];
+  const cell=v=>{const a=Math.min(Math.abs(v)/60,1),c=v<0?`rgba(217,89,38,${.18+a*.6})`:`rgba(31,122,69,${.18+a*.6})`;return `<td style="background:${c};text-align:center;font:600 12px var(--mono);border-radius:6px">${v>0?"+":""}${v}%</td>`};
+  $("#banTbl").innerHTML=`<table style="width:100%;border-collapse:separate;border-spacing:3px;font-size:12px"><tr style="color:var(--muted)">${BC.cols.map(c=>`<th style="font-weight:600;text-align:center;padding:2px">${c}</th>`).join("")}</tr>${R.map((r,i)=>{const cur=i===R.length-1;return `<tr style="${cur?"outline:2px solid var(--bear);outline-offset:-1px;border-radius:6px":""}"><td style="padding:4px 2px;line-height:1.3"><b style="font-family:var(--mono)">${r[0].slice(0,7).replace("-","/")}</b><br><span style="color:var(--muted)">${r[1]}</span></td>${r[3].map(cell).join("")}<td style="text-align:center;font:12px var(--mono)">${cur?"—":r[5]===0?BC.same:r[5]+"%"}</td><td style="text-align:center;font:600 12px var(--mono);color:${r[7]==null?"var(--faint)":r[7]>=0?"var(--bull)":"var(--bear)"}">${r[7]==null?"—":(r[7]>0?"+":"")+r[7]+"%"}</td></tr>`}).join("")}</table>`;
+  const M=60,mid=W/2,L=96,Rr=W-12,c0=L+(Rr-L)*0.45,X=v=>c0+(Rr-c0)*Math.max(-M,Math.min(v,M))/M*(v<0?(c0-L)/(Rr-c0):1);
+  let g=`<svg viewBox="0 0 ${W} ${R.length*32+20}" role="img"><line x1="${c0}" x2="${c0}" y1="4" y2="${R.length*32+6}" style="stroke:var(--fg)" stroke-width="1.5"/><text x="${c0}" y="${R.length*32+18}" text-anchor="middle" font-size="10">五年線</text>`;
+  R.forEach((r,i)=>{const v=r[6],y=8+i*32,x=X(v),cur=i===R.length-1;g+=`<text x="${L-6}" y="${y+15}" text-anchor="end" font-size="11" style="fill:var(--fg)">${r[0].slice(0,4)} ${cur?"這次":r[1]}</text><rect x="${Math.min(x,c0)}" y="${y+4}" width="${Math.abs(x-c0)}" height="16" rx="4" style="fill:${cur?"var(--bear)":v<0?"var(--s1soft)":"var(--s1)"}"/><text x="${v<0?Math.min(x,c0)-4:x>Rr-56?x-4:x+4}" y="${y+16}" text-anchor="${v<0||x>Rr-56?"end":"start"}" font-size="11" font-weight="700" style="fill:${x>Rr-56?"#fff":"var(--fg)"};font-family:var(--mono)">${v>0?"+":""}${v}%${v>M?" ▶":""}</text>`});
+  $("#banLow").innerHTML=g+"</svg>";
+}
 /* ---------- 三種劇本 ---------- */
 (function(){
   const SC=[["2000", "var(--bear)", [[0, 0], [2.4, -37], [5.7, -16], [9.3, -54], [10.5, -43], [12.8, -68], [14.4, -54], [18.4, -72], [21.8, -59], [31, -78]], ["−78%", "31 個月", "2001/1 起狂降息，救不了", "網路股獲利崩、設備商砍單", "泡沫擠完、估值回到合理"]], ["2008", "var(--neu)", [[0, 0], [2.7, -25], [6.6, -6], [12.7, -60]], ["−60%", "13 個月", "降到零利率＋QE", "全球衰退", "各國聯手救市、信用解凍"]], ["2022", "var(--s1)", [[0, 0], [5.4, -24], [7.4, -10], [9.3, -25]], ["−25%", "9 個月", "一路升息到通膨見頂", "沒有衰退、獲利撐住", "通膨見頂、Fed 放慢升息"]]],RB=[["2000/12→2001/1", "+23%"], ["2001/4→5", "+41%"], ["2001/9→2002/1", "+45%"], ["2008/1→5 台股", "+26%"], ["2022/6→8 S&P", "+17%"]],SW=[["獲利往下掉？", "還沒：Nvidia 下季指引 1,300 億美元仍成長；要盯雲端廠資本支出", "neu", "2000"], ["聯準會停手？", "還沒：12/10 幾乎確定升息，比 2022 見底時更不利", "bear", "2022"], ["信用凍結？", "還沒，但 AI 舉債、信用壓力開始浮現", "neu", "2008"]],LG=["2000 Nasdaq", "2008 台股加權", "2022 S&P 500"],DOT=["費半", "加權", "櫃買"],COLS=["總跌幅", "花多久見底", "聯準會", "獲利", "怎麼見底的"];
@@ -1043,6 +1067,8 @@ document.addEventListener("click",e=>{
   if(t.closest("nav button")){go(t.closest("nav button").dataset.p);window.scrollTo(0,0);return}
   if(t.dataset.evc){evCat=t.dataset.evc;renderEv();return}
   if(t.dataset.vwt){vwTag=t.dataset.vwt;renderVw();return}
+  if(t.dataset.vst){vwSt=t.dataset.vst;document.querySelectorAll("#vwSt .chip").forEach(b=>b.classList.toggle("on",b.dataset.vst===vwSt));renderVw();return}
+  if(t.dataset.bsub){setBSub(t.dataset.bsub);return}
   if(t.dataset.fav){let f=LS.get("fav",[]);f=f.includes(t.dataset.fav)?f.filter(x=>x!==t.dataset.fav):[...f,t.dataset.fav];LS.set("fav",f);renderEv();toast(f.includes(t.dataset.fav)?"⭐ 已收藏":"已取消收藏");return}
   if(t.dataset.del){const m=LS.get("mine",[]);m.splice(+t.dataset.del,1);LS.set("mine",m);renderMine();renderVw();return}
   if(t.dataset.ix){IXK=t.dataset.ix;renderIx();return}
@@ -1311,7 +1337,9 @@ function goBack(){
   go(s.p,true);if(s.p==="tour"&&s.map)renderTourMap();setTimeout(()=>window.scrollTo(0,s.y||0),20);
 }
 
-renderEv();renderVw();renderBear();renderCB();
+renderEv();renderVw();renderBear();renderCB();renderBan();
+function setBSub(k){LS.set("bsub",k);document.querySelectorAll("#bearSub .chip").forEach(b=>b.classList.toggle("on",b.dataset.bsub===k));document.querySelectorAll("#p-bear [data-sub]").forEach(c=>c.style.display=c.dataset.sub===k?"":"none")}
+setBSub(LS.get("bsub","now"));(()=>{const h=document.querySelector("header");const u=()=>document.documentElement.style.setProperty("--hdr",h.offsetHeight+"px");u();addEventListener("resize",u)})();document.querySelectorAll("#vwSt .chip").forEach(b=>b.classList.toggle("on",b.dataset.vst===vwSt));
 
 /* 空頭史收合 */
 function foldKey(c){const h=c.querySelector(":scope>h2");return h?h.textContent.replace(/[−\d.%\s]+$/,"").trim().slice(0,20):""}
