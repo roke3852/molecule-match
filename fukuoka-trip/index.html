@@ -709,6 +709,7 @@ html.dark .k-market{--xc:#d0705c}html.dark .k-light{--xc:#c9a25e}html.dark .k-ri
 .clo{margin-top:10px;font-family:var(--ff-b)}.clo-r{display:grid;grid-template-columns:40px 1fr;gap:6px;align-items:start;margin-bottom:8px}.clo-r>span{font-weight:700;font-size:13px;padding-top:6px}.clo-r>div{display:flex;flex-wrap:wrap;gap:6px}
 .clo-r button{font-family:var(--ff-b);font-size:13px;padding:5px 9px;border:2px solid var(--px);background:var(--card);color:var(--ink);cursor:pointer}.clo-r button.on{background:var(--maple);border-color:var(--maple);color:#fff}
 .clo-out{border:3px double var(--maple);padding:12px;margin-top:10px;background:color-mix(in srgb,var(--maple) 6%,var(--card))}.clo-out .zh{font-size:13px;color:var(--sub)}.clo-out .jp{font-size:20px;font-weight:700;margin:6px 0;line-height:1.5}.clo-out .en{font-size:13px}
+.cl-rb{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.cl-rb button{font-family:var(--ff-b);font-size:14px;font-weight:700;padding:6px 10px;border:2px solid var(--maple);background:color-mix(in srgb,var(--maple) 14%,var(--card));color:var(--ink);box-shadow:2px 2px 0 color-mix(in srgb,var(--maple) 60%,#000);cursor:pointer}.cl-rb .pr{display:inline-flex;gap:4px;white-space:nowrap}.cl-rb button.sl{padding:6px 8px}.cl-rb button:active{transform:translate(2px,2px);box-shadow:none}
 /* ===== 工具頁分頁 ===== */
 .tooltabs{padding:10px 14px 0!important}.tooltabs a{cursor:pointer;user-select:none;-webkit-user-select:none}
 #v-tools .sec[data-tt]:not(.tt-on){display:none}
@@ -2140,7 +2141,7 @@ function clCard(k,zh,jp,ro,en,tip,isHear){const L=clL();return `<div class="clc$
 function clFind(k){const[t,i]=k.split(':');const a=t==='s'?CL_SAY[i]:t==='h'?CL_HEAR[i]:CL_TERM[i];if(t==='s')return{jp:a[1],zh:a[0],en:a[3]};if(t==='h')return{jp:a[0],zh:a[2],en:''};return{jp:a[1],zh:a[0],en:a[3]}}
 function clDraw(){clProg();$('#clTabs').querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.cl===clTab));const B=$('#clBody');
  if(clTab==='say')B.innerHTML=`<div class="cl-flow">🚪 進門 → 🗒️ 點單 → ☕ 選口味 → 🫘 買豆 → 💳 付款 → 🙏 道謝</div>`+CL_SAY.map((a,i)=>clCard('s:'+i,a[0],a[1],a[2],a[3],a[4]?'💡 '+esc(a[4]):'')).join('');
- else if(clTab==='hear')B.innerHTML=`<div class="cl-flow">先按 🔊 聽店員會說的話，再看你可以怎麼回。</div>`+CL_HEAR.map((a,i)=>clCard('h:'+i,'店員：'+a[2],a[0],a[1],'',`👉 你回：<b>${esc(a[3])}</b>${a[4]?`<br><span>${esc(a[4])}</span>`:''}`,1)).join('');
+ else if(clTab==='hear')B.innerHTML=`<div class="cl-flow">先按 🔊 聽店員會說的話，再看你可以怎麼回。</div>`+CL_HEAR.map((a,i)=>clCard('h:'+i,'店員：'+a[2],a[0],a[1],'',`👉 你回：<b>${esc(a[3])}</b>${a[4]?`<br><span>${esc(a[4])}</span>`:''}${a[3].startsWith('（')?'':`<div class="cl-rb">${a[3].split('／').map(o=>`<span class="pr"><button data-rs="${esc(o)}">🔊 ${esc(o)}</button><button data-rs="${esc(o)}" data-slow="1" class="sl">🐢</button></span>`).join('')}</div>`}`,1)).join('');
  else if(clTab==='term')B.innerHTML=`<div class="cl-terms">${CL_TERM.map((a,i)=>{const L=clL();return `<button class="clt${L['t:'+i]?' ok':''}" data-tf="${i}"><span class="ic">${a[4]}</span><b>${esc(a[0])}</b><span class="jp">${esc(a[1])}</span><span class="ro">${esc(a[2])}</span><span class="en">${esc(a[3])}</span></button>`}).join('')}</div><div class="hint" style="margin-top:6px">點一下卡片就會唸日文，連點兩下唸英文。</div>`;
  else if(clTab==='quiz')clQuizDraw();
  else clOrderDraw()}
@@ -2171,6 +2172,7 @@ function clOrderDraw(){const O=clOrderTxt(),ch=(k,v,l)=>`<button data-ok="${k}" 
 $('#clTabs').onclick=e=>{const b=e.target.closest('[data-cl]');if(!b)return;clTab=b.dataset.cl;if(clTab==='quiz')clQ=null;clDraw()};
 $('#clBody').addEventListener('click',e=>{
  const cs=e.target.closest('[data-cs]');if(cs){const f=clFind(cs.dataset.cs);clSay(f.jp,'ja-JP',!!cs.dataset.slow);clMark(cs.dataset.cs);const c=cs.closest('.clc');if(c&&!c.classList.contains('ok')){c.classList.add('ok');clProg()}return}
+ const rs=e.target.closest('[data-rs]');if(rs){clSay(rs.dataset.rs,'ja-JP',!!rs.dataset.slow);return}
  const ce=e.target.closest('[data-ce]');if(ce){clSay(clFind(ce.dataset.ce).en,'en-US');return}
  const cb=e.target.closest('[data-cb]');if(cb){const f=clFind(cb.dataset.cb);big(f.jp,f.zh);return}
  const tf=e.target.closest('[data-tf]');if(tf){const i=+tf.dataset.tf,a=CL_TERM[i],now=Date.now();if(tf._t&&now-tf._t<400){clSay(a[3],'en-US')}else clSay(a[1]);tf._t=now;clMark('t:'+i);tf.classList.add('ok');clProg();return}
