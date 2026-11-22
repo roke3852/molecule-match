@@ -306,6 +306,20 @@ input[type=range]{width:100%;accent-color:var(--s1)}
       <div id="banTbl" style="margin-top:10px"></div>
       <div class="why"><b>怎麼看</b>國安基金和限空令通常在同一週內出手，而且都是在加權已經跌破年線之後。2015、2020 兩次，措施一出來就是低點；2022 年國安基金 7 月先進場，10 月限空後又跌了約 5% 才在五年線附近見底；2025 年限空後兩天、國安基金進場當天就是低點，剛好碰到五年線；2008 年系統性危機，所有措施都擋不住，又跌了三成。這次國安基金 11/6 先進場，11/9 第一波限空時指數一度反彈到 41,000 以上，但 11/20 第二波時已跌到 36,000，比國安基金進場時還低約 9%，代表賣壓比前幾次更重。不構成投資建議。</div>
     </div>
+    <div data-sub="tw" class="card" id="mgCard">
+      <h2>🧮 融資斷頭試算：跌多少會被追繳？</h2>
+      <div class="meta">台股融資維持率＝股票市值 ÷ 融資金額；低於 130% 收到追繳，兩個營業日內沒補錢就會被券商強制賣出（斷頭）</div>
+      <div class="stats" style="margin-top:10px">
+        <label class="stat"><div class="k">本金（萬）</div><input class="f" id="mgP" type="number" value="40" min="1" style="margin:4px 0 0;font:600 18px var(--mono)"></label>
+        <label class="stat"><div class="k">融資（萬）</div><input class="f" id="mgB" type="number" value="60" min="0" style="margin:4px 0 0;font:600 18px var(--mono)"></label>
+      </div>
+      <div class="k" style="font-size:13px;color:var(--muted)">股價跌幅 <b id="mgDv" style="font:700 16px var(--mono);color:var(--bear)">25%</b></div>
+      <input type="range" id="mgD" min="0" max="70" step="1" value="25" style="width:100%">
+      <div id="mgOut"></div>
+      <div class="fig"><div class="t">追繳後連續跌停</div><div id="mgSteps"></div></div>
+      <div class="fig"><div class="t">每日融資追繳與強制處分</div><div class="s">戶數（長條）與金額；單位：戶、億元</div><div id="mgTrend"></div></div>
+      <div class="why"><b>怎麼看</b>上市股票融資最多借六成，所以本金 40 萬、融資 60 萬時，股價跌 22% 就觸發追繳。追繳後如果再遇到兩根跌停，本金只剩 3 萬多；三根跌停還沒賣掉，就會倒欠券商。若主管機關把維持率門檻從 130% 降到 120%，只多了約 7.7% 的空間，還不到一根跌停。追繳與處分數字來自網路流傳整理（未查到原始出處；另有資料為 11/20 追繳 6,186 戶），僅供參考。不構成投資建議。</div>
+    </div>
 
     <div data-sub="hist" class="card" id="scnCard">
       <h2>🧭 三種劇本：會像 2000、2008，還是 2022？</h2>
@@ -385,10 +399,10 @@ input[type=range]{width:100%;accent-color:var(--s1)}
 <div id="tip"></div><div id="toast"></div>
 
 <script>
-const ASOF="2026-11-22 17:44";
+const ASOF="2026-11-22 17:47";
 const VIX_NOW=37, VIX_TXT="37+", VIX_D="11/20"; /* VIX 最新收盤（每日更新） */
 const VIXH=[["2020", "疫情", 82.69], ["2008", "金融海嘯", 80.86], ["2025", "關稅", 52.33], ["2011", "美債降評", 48.0], ["1998", "LTCM", 45.74], ["2002", "網路泡沫", 45.08], ["2015", "人民幣貶值", 40.74], ["2022", "升息空頭", 36.45], ["2018", "Q4 縮表", 36.07]];
-const TODAY={"d": "2026-11-22", "l": [["ev", "good-news", "大事：新增「好消息與多方論點」卡片"], ["ev", "tw-rescue3", "大事：救市第三波 — 補上國安基金週末聲明、台股單週 −17.5%"], ["ev", "rout-1120", "大事：美股大屠殺 — 補 VIX 37、市場寬度"], ["vw", "", "名人觀點：加多空分頁、舊發言收合"], ["ev", "fed-hike", "大事：聯準會 — 12 月升息機率 92%"], ["vw", "", "名人觀點：新增嘉信 Schwab（Gordon、Howard）"], ["cal", "", "接下來：感恩節週美國數據與財報"], ["bear", "", "空頭史：新增「ABC 波段測量」「三種劇本」圖卡"], ["bear", "", "空頭史：新增 VIX 恐慌指數歷次比較"], ["bear", "", "空頭史：新增「修正還是空頭？」比較圖卡"], ["bear", "", "空頭史：新增歷次限空令 vs 年線／五年線／十年線；分成四個分頁"], ["tour", "", "導覽員：週日早報"]]}; /* 今日更新清單：每日更新時重寫 d 與 l */
+const TODAY={"d": "2026-11-22", "l": [["ev", "good-news", "大事：新增「好消息與多方論點」卡片"], ["ev", "tw-rescue3", "大事：救市第三波 — 補上國安基金週末聲明、台股單週 −17.5%"], ["ev", "rout-1120", "大事：美股大屠殺 — 補 VIX 37、市場寬度"], ["vw", "", "名人觀點：加多空分頁、舊發言收合"], ["ev", "fed-hike", "大事：聯準會 — 12 月升息機率 92%"], ["vw", "", "名人觀點：新增嘉信 Schwab（Gordon、Howard）"], ["cal", "", "接下來：感恩節週美國數據與財報"], ["bear", "", "空頭史：新增「ABC 波段測量」「三種劇本」圖卡"], ["bear", "", "空頭史：新增 VIX 恐慌指數歷次比較"], ["bear", "", "空頭史：新增「修正還是空頭？」比較圖卡"], ["bear", "", "空頭史：新增歷次限空令 vs 年線／五年線／十年線；分成四個分頁"], ["bear", "", "空頭史：新增融資斷頭試算與追繳／處分走勢"], ["cal", "", "接下來：融資處分日改成 11/23、24、25"], ["tour", "", "導覽員：週日早報"]]}; /* 今日更新清單：每日更新時重寫 d 與 l */
 /* ---------- 大事資料 ---------- */
 const EVENTS=[
 {"id": "good-news", "icons": ["🟩", "🇹🇼", "📊", "🎯", "🛡️", "🔔", "😱"], "upd": "2026-11-22", "short": "AI 獲利還在成長、台灣經濟創 39 年新高、歷史上多數修正沒變空頭；恐慌指數也已到過去多次低點的水準。", "cat": "好消息", "date": "2026-11-22", "title": "好消息與多方論點：被殺盤蓋過的另一面", "lead": "這兩週的新聞幾乎全是利空，但數據裡也有撐盤的理由：① 輝達上季營收 1,158 億美元、超出預期 60 多億，下季指引 1,300 億仍在成長；② 主計總處預估台灣今年 GDP 成長 11.05%，39 年來最高，景氣燈號連 10 個月紅燈、1–10 月外銷訂單年增 58.6%；③ E*TRADE 統計 1983 年以來 15 次修正只有 5 次演變成空頭；④ 高盛 S&P 500 一年目標 8,700（約 +14%），摩根士丹利 Mike Wilson 認為底部在望；⑤ 國安基金已進場、金管會全面限空；⑥ ANT 第二天盤中只差幾美分就跌破 83 承銷價，但有人接住；⑦ VIX 衝上 37 以上，已到 2018、2022 年空頭的恐慌高峰。", "why": "下跌時好消息常被忽略（好消息不漲、壞消息大跌），但它們決定這次是「修正」還是「泡沫破裂」：只要 AI 獲利沒有真的往下掉，2000 年那種劇本就還沒成立。恐慌一面倒時，通常比較接近末段而不是開頭；但這不保證已經見底。不構成投資建議。", "stats": [["輝達下季指引", "$1,300億", "仍在成長；上季超預期 60 多億"], ["台灣 GDP", "11.05%", "2026 預估，39 年新高"], ["外銷訂單", "+58.6%", "1–10 月年增，創新高"], ["歷史修正", "15→5", "1983 年來只有 1/3 變空頭"], ["高盛目標", "8,700", "S&P 一年後，約 +14%"], ["VIX", "37+", "已達 2018、2022 恐慌高峰"]], "charts": ["vixCmp"], "tl": [["11-13", "高盛：S&P 500 一年目標 8,700"], ["11-17", "輝達財報：營收、指引都優於預期", 1], ["11-20", "ANT 盤中守住 83 承銷價；E*TRADE：15 次修正只有 5 次變空頭"], ["11-21", "國安基金證實進場、列出四項基本面；金管會全面限空", 1], ["11-23", "限空措施上路"]], "src": [["CNBC：輝達財報", "https://www.cnbc.com/2026/11/18/nvidia-stock-earnings.html"], ["鉅亨網：國安基金四點基本面", "https://news.cnyes.com/news/id/6669743"], ["鉅亨網：E*TRADE Larkin 修正統計", "https://news.cnyes.com/news/id/6669311"], ["roic.ai：高盛 8,700 目標", "https://www.roic.ai/news/goldman-sachs-sees-sp-500-at-8700-despite-slowing-ai-spending-11-13-2026"], ["摩根士丹利：Mike Wilson 談底部", "https://www.morganstanley.com/insights/podcasts/thoughts-on-the-market/market-bottom-final-retest-mike-wilson"], ["Yahoo（Fortune）：ANT 守住承銷價", "https://finance.yahoo.com/markets/stocks/articles/anthropic-slid-just-5-cents-164439785.html"], ["Schwab：VIX 37", "https://www.schwab.com/learn/story/market-volatility"], ["VIX 歷史收盤高點：CBOE 歷史資料", "https://www.cboe.com/tradable_products/vix/vix_historical_data/"]]},
@@ -604,7 +618,9 @@ const CAL=[
 ["11/23","一 09:00","台股開盤：消化美股費半 −10.73%","台指期夜盤已重挫 1,881 點；看台積電能否守住 2,000 元、跌停家數有沒有縮小"],
 ["11/23","一","ANT 選擇權最快開始交易","選擇權上線常放大波動"],
 ["11/23","一","金管會 5 項救市措施上路","全面禁止平盤以下放空、融券維持率 150%、暫停借券；看斷頭賣壓能否被承接"],
-["11/24","一～三","台股融資追繳到期、斷頭賣壓","11/20 純個股融資維持率跌破 130%：收到追繳的人要在兩個營業日內補錢，不補就被斷頭；看維持率能不能止跌"],
+["11/23", "一", "融資處分日①：11/18 追繳戶", "11/18 收到追繳（719 戶）沒補錢的，最快這天被強制賣出"],
+["11/24", "二", "融資處分日②：11/19 追繳戶", "11/19 追繳 2,947 戶、29.64 億；沒補足就處分"],
+["11/25", "三", "融資處分日③：11/20 追繳戶", "11/20 追繳 6,462 戶、64.64 億（統計以來新高）；最大一波斷頭賣壓"],
 ["11/24","二 23:00","美國 11 月消費者信心","AI 殺盤後消費者信心是否轉弱；同日 ADI、百思買盤前財報"],
 ["11/25","三 05:00 起","Dell、HP、Workday 財報","AI 伺服器需求的第一手訊號（盤後公布，台北週三清晨）"],
 ["11/25","三 21:30","美國 Q3 GDP 修正值、10 月 PCE、耐久財","PCE 是 Fed 最看重的通膨指標，12/10 升息前最後一份"],
@@ -1018,6 +1034,30 @@ function renderBan(){
     const res=cur?"":`<div class="s" style="font-size:13px;color:var(--muted);margin-top:2px">→ ${p>=-0.5?BL.same:BL.drop.replace("{lo}",fm(lo)).replace("{d}",r[6].slice(5).replace("-","/")).replace("{p}",Math.abs(p))}；${BL.r60.replace("{v}",`<strong style="color:${r[8]>=0?"var(--bull)":"var(--bear)"}">${r[8]>0?"+":""}${r[8]}%</strong>`)}</div>`;
     return `<div class="nli" style="display:block;margin-bottom:10px;${cur?"border-color:var(--bear)":""}"><div style="display:flex;gap:8px;align-items:baseline"><b style="font-family:var(--mono);font-size:15px;display:inline">${r[0]}</b><span class="tag">${r[1]}</span></div>${g}${li}${res}</div>`}).join("");
 }
+/* ---------- 融資斷頭試算 ---------- */
+const MC=[["11/18", 719, null, null, null], ["11/19", 2947, 29.64, 520, 9.18], ["11/20", 6462, 64.64, 632, 14.95]],MO={"mv": "股票市值", "mr": "維持率", "left": "本金剩下", "loss": "本金虧損", "ok": "安全", "call": "追繳！", "neg": "倒欠券商", "trig": "跌 {p}% 就觸發追繳", "trig120": "若維持率降到 120%：跌 {p}% 才追繳", "unit": "萬", "ld2": "追繳後連續跌停", "day": "第 {n} 根跌停", "start": "觸發追繳"},MLG=["追繳戶數", "處分戶數"];
+function mgCalc(){
+  const P=Math.max(+$("#mgP").value||0,0),Bv=Math.max(+$("#mgB").value||0,0),d=+$("#mgD").value/100,T=P+Bv;$("#mgDv").textContent=Math.round(d*100)+"%";
+  const fm=v=>(Math.round(v*100)/100).toLocaleString("en-US");
+  if(!Bv||!T){$("#mgOut").innerHTML="";$("#mgSteps").innerHTML="";return}
+  const mv=T*(1-d),mr=mv/Bv*100,left=mv-Bv,loss=(1-left/P)*100,st=mr>=130?["ok","var(--bull)"]:left>=0?["call","var(--bear)"]:["neg","var(--bear)"];
+  const tp=(1-1.3*Bv/T)*100,tp2=(1-1.2*Bv/T)*100,M=200,X=v=>Math.min(v,M)/M*100;
+  $("#mgOut").innerHTML=`<div class="stats"><div class="stat"><div class="k">${MO.mv}</div><div class="v">${fm(mv)}${MO.unit}</div></div><div class="stat"><div class="k">${MO.mr}</div><div class="v" style="color:${st[1]}">${mr.toFixed(0)}%</div><div class="d">${MO[st[0]]}</div></div><div class="stat"><div class="k">${left>=0?MO.left:MO.neg}</div><div class="v" style="color:${left>=0?"var(--fg)":"var(--bear)"}">${fm(Math.abs(left))}${MO.unit}</div></div><div class="stat"><div class="k">${MO.loss}</div><div class="v" style="color:var(--bear)">${Math.min(loss,999).toFixed(1)}%</div></div></div>
+   <div style="position:relative;height:18px;border-radius:9px;background:var(--grid);margin:6px 0 4px"><div style="position:absolute;inset:0 auto 0 0;width:${X(mr)}%;border-radius:9px;background:${st[1]}"></div><i style="position:absolute;left:${X(130)}%;top:-4px;bottom:-4px;width:2px;background:var(--fg)"></i><i style="position:absolute;left:${X(100)}%;top:-4px;bottom:-4px;width:2px;background:var(--bear)"></i></div>
+   <div style="display:flex;justify-content:space-between;font:11px var(--mono);color:var(--faint)"><span>0%</span><span style="margin-left:${X(100)-8}%">100%</span><span>130%</span><span>200%</span></div>
+   <div class="s" style="font-size:13px;color:var(--muted);margin-top:6px">${tp>0?MO.trig.replace("{p}",tp.toFixed(1)):""}<br>${tp2>0?MO.trig120.replace("{p}",tp2.toFixed(1)):""}</div>`;
+  let v=T*(1-Math.max(tp,0)/100),rows=[[MO.start,v]];for(let n=1;n<=3;n++){v*=0.9;rows.push([MO.day.replace("{n}",n),v])}
+  $("#mgSteps").innerHTML=rows.map(([n,v])=>{const l=v-Bv,pct=Math.max(l/P,0)*100;return `<div style="display:flex;gap:8px;align-items:center;padding:4px 0;font-size:13px"><span style="width:96px;flex:none">${n}</span><div style="flex:1;height:14px;border-radius:7px;background:var(--grid);position:relative"><div style="position:absolute;inset:0 auto 0 0;width:${pct}%;border-radius:7px;background:${l<0?"var(--bear)":"var(--hlb)"}"></div></div><b style="display:inline;width:84px;text-align:right;font-family:var(--mono);color:${l<0?"var(--bear)":"var(--fg)"}">${l<0?"−":""}${fm(Math.abs(l))}${MO.unit}</b></div>`}).join("");
+}
+function renderMg(){
+  ["mgP","mgB","mgD"].forEach(id=>$("#"+id).addEventListener("input",mgCalc));mgCalc();
+  const H=170,L=10,R=W-10,bw=(R-L)/MC.length,mx=Math.max(...MC.map(m=>m[1]))*1.15,Y=v=>H-24-(H-44)*v/mx;
+  let g=`<svg viewBox="0 0 ${W} ${H}" role="img">`;
+  MC.forEach((m,i)=>{const x=L+i*bw+bw*0.15,w=bw*0.33;g+=`<rect x="${x}" y="${Y(m[1])}" width="${w}" height="${H-24-Y(m[1])}" rx="3" style="fill:var(--hlb)"/><text x="${x+w/2}" y="${Y(m[1])-14}" text-anchor="middle" font-size="11" font-weight="700" style="fill:var(--fg);font-family:var(--mono)">${m[1].toLocaleString()}</text>${m[2]!=null?`<text x="${x+w/2}" y="${Y(m[1])-3}" text-anchor="middle" font-size="10" style="fill:var(--muted)">${m[2]}</text>`:""}`;
+    if(m[3]!=null){const x2=x+w+4;g+=`<rect x="${x2}" y="${Y(m[3])}" width="${w}" height="${H-24-Y(m[3])}" rx="3" style="fill:var(--bear)"/><text x="${x2+w/2}" y="${Y(m[3])-14}" text-anchor="middle" font-size="11" font-weight="700" style="fill:var(--fg);font-family:var(--mono)">${m[3]}</text><text x="${x2+w/2}" y="${Y(m[3])-3}" text-anchor="middle" font-size="10" style="fill:var(--muted)">${m[4]}</text>`}
+    g+=`<text x="${L+i*bw+bw/2}" y="${H-6}" text-anchor="middle" font-size="12" style="fill:var(--fg)">${m[0]}</text>`});
+  $("#mgTrend").innerHTML=g+`</svg><div class="legend"><span><i style="background:var(--hlb)"></i>${MLG[0]}</span><span><i style="background:var(--bear)"></i>${MLG[1]}</span></div>`;
+}
 /* ---------- 三種劇本 ---------- */
 (function(){
   const SC=[["2000", "var(--bear)", [[0, 0], [2.4, -37], [5.7, -16], [9.3, -54], [10.5, -43], [12.8, -68], [14.4, -54], [18.4, -72], [21.8, -59], [31, -78]], ["−78%", "31 個月", "2001/1 起狂降息，救不了", "網路股獲利崩、設備商砍單", "泡沫擠完、估值回到合理"]], ["2008", "var(--neu)", [[0, 0], [2.7, -25], [6.6, -6], [12.7, -60]], ["−60%", "13 個月", "降到零利率＋QE", "全球衰退", "各國聯手救市、信用解凍"]], ["2022", "var(--s1)", [[0, 0], [5.4, -24], [7.4, -10], [9.3, -25]], ["−25%", "9 個月", "一路升息到通膨見頂", "沒有衰退、獲利撐住", "通膨見頂、Fed 放慢升息"]]],RB=[["2000/12→2001/1", "+23%"], ["2001/4→5", "+41%"], ["2001/9→2002/1", "+45%"], ["2008/1→5 台股", "+26%"], ["2022/6→8 S&P", "+17%"]],SW=[["獲利往下掉？", "還沒：Nvidia 下季指引 1,300 億美元仍成長；要盯雲端廠資本支出", "neu", "2000"], ["聯準會停手？", "還沒：12/10 幾乎確定升息，比 2022 見底時更不利", "bear", "2022"], ["信用凍結？", "還沒，但 AI 舉債、信用壓力開始浮現", "neu", "2008"]],LG=["2000 Nasdaq", "2008 台股加權", "2022 S&P 500"],DOT=["費半", "加權", "櫃買"],COLS=["總跌幅", "花多久見底", "聯準會", "獲利", "怎麼見底的"];
@@ -1126,13 +1166,13 @@ const T=[
   ["J","基本面這麼好，股價怎麼還跌成這樣？"],
   ["M","因為現在賣的人多半不是看基本面，而是被迫賣：融資追繳、斷頭、避險。這種賣壓不看價格，要等它清完才會停。"],
   {q:["M","明天開盤前，你最想先搞懂哪一件？"],more:1,by:"M",again:"還想知道哪一件嗎？",o:[
-   ["限空令會不會有用","它能擋住空方再加碼，但擋不住融資戶被迫賣出。上週五估計有約 1,821 億融資本金在追繳線以下，11/24–26 是補錢期限。"],
+   ["限空令會不會有用","它能擋住空方再加碼，但擋不住融資戶被迫賣出。上週五估計有約 1,821 億融資本金在追繳線以下，11/23–25 是補錢期限。"],
    ["美股這週看什麼","感恩節週只有三天半交易：週二消費者信心、Dell 財報，週三 PCE 通膨和 GDP、褐皮書；週四休市、週五半天。"],
    ["這是不是底部","止跌訊號還是亮 3 個、半亮 7 個、未亮 2 個，週末沒有新的收盤，所以沒變。週五 VIX 衝到 37 以上，恐慌很高，但 Fed 還沒停手。"]]},
-  {card:{t:"！接下來要盯",l:["11/23（一）台股開盤、金管會 5 項措施上路","11/24–26 台股融資追繳到期","11/25（三）晚上 PCE 通膨、Q3 GDP","12/1 黃仁勳國會閉門作證、ANT 納入 MSCI","12/10 凌晨 3 點 FOMC 利率決議"]}},
+  {card:{t:"！接下來要盯",l:["11/23（一）台股開盤、金管會 5 項措施上路","11/23–25 台股融資追繳到期","11/25（三）晚上 PCE 通膨、Q3 GDP","12/1 黃仁勳國會閉門作證、ANT 納入 MSCI","12/10 凌晨 3 點 FOMC 利率決議"]}},
   ["M","今天的早報就到這裡，明天早上見！"]],
   sum:["週末休市，收盤數字仍是 11/20","台股上週 −17.5%，1991 年來最大週跌幅","國安基金假日證實進場；明天起全面限空，看融資追繳"]},
-{"k": "upd-2026-11-22", "daily": 1, "upd": 1, "day": "11/22", "ic": "🆕", "n": "今日更新導覽", "sc": "studio", "go": ["ev", ""], "L": [["M", "這是「今日更新導覽」：今天 App 新增和修改了哪些東西，我帶你一次走完。"], {"card": {"t": "！今天更新了 12 項", "l": ["大事：新增「好消息」、救市第三波、美股大屠殺、聯準會", "名人觀點：新增 Schwab、多空分頁", "接下來：感恩節週行程", "空頭史：分成四分頁；限空令比較、修正或空頭、VIX、ABC、三種劇本", "導覽員：週日早報"]}}, ["A", "最近怎麼都是壞消息？"], ["M", "所以今天多了一張「好消息與多方論點」：輝達下季指引 1,300 億美元仍在成長、台灣 GDP 39 年新高、1983 年來 15 次修正只有 5 次變空頭。"], ["M", "空頭史也多了 VIX 比較：這次 37 以上，已經和 2018、2022 空頭的恐慌高峰差不多；2008、2020 那種危機會衝到 80。"], ["M", "還有一張「修正還是空頭？」：AI 硬體和台股已經是空頭，美國大盤還在修正；卡片列出 6 個像空頭、5 個像修正的地方，和 3 條升級警戒線。"], ["M", "先看大事。「救市第三波」補上國安基金週末聲明：已經實彈進場；台股上週跌 17.5%，是 1991 年來最大單週跌幅。"], ["A", "美股那邊呢？"], ["M", "「美股大屠殺」補了兩個數字：VIX 週五衝到 37 以上，S&P 500 只剩 46% 成分股站在 200 日線上。「聯準會」那張則更新成 12 月升息機率 92%。"], ["M", "名人觀點新增嘉信 Schwab：Gordon 說市場進退兩難，Howard 預期這一輪還會再升兩次息，所以標成偏空。"], ["M", "「接下來」加了感恩節週行程：週二消費者信心和 Dell 財報，週三 PCE、GDP 和褐皮書，週四休市、週五半天。"], ["J", "空頭史好像多了兩張圖？"], ["M", "對。第一張「ABC 波段測量」，用波浪算台股 C 波可能跌到哪，每天早上會自動算出離目標還有多遠。"], {"card": {"t": "！ABC 目標（11/20 收盤）", "l": ["C＝A 32,306：還要跌 10.3%", "鏡像 31,237：還要跌 13.3%", "費半 8,000：還要跌 4.9%"]}}, ["K", "提醒一下，很多人都在喊 32,000。太多人盯的點位，常常會提早反彈，或先跌破再拉回，當參考區就好。"], ["M", "第二張「三種劇本」，把這次和 2000、2008、2022 年的空頭放在一起比。"], {"card": {"t": "！三個判斷開關", "l": ["獲利往下掉？還沒（對應 2000）", "聯準會停手？還沒，還在升息（對應 2022）", "信用凍結？還沒，但壓力浮現（對應 2008）"]}}, {"q": ["M", "你想先多了解哪一張？"], "more": 1, "by": "M", "again": "還想看另一張嗎？", "o": [["ABC 波段", "兩種算法差約 1,100 點：C＝A 是拿 A 波的跌幅去量，鏡像則是 B 波反彈多少、就從 A 低點再往下跌多少。都只是技術推算。"], ["三種劇本", "三次空頭都有 +17% 到 +45% 的強反彈，最後只有 2022 年那次是真底。分辨的關鍵是獲利、聯準會、信用三個開關，不是線型。"]]}, ["J", "空頭史怎麼變短了？"], ["M", "分成「現況／台股／歷史／佈局」四個分頁了。台股分頁新增歷次限空令比較：過去限空時加權都在年線下，低點多在五年線附近；這次還比五年線高 55%。名人觀點也可以只看偏多或偏空。"], ["M", "最後，週日早報也換新了。以後每天改了什麼，都會出現在大事圖解的「🆕 今日更新」標籤和這一站。明天見！"]], "sum": ["新增好消息卡片：AI 獲利仍成長、台灣 GDP 39 年新高", "VIX 37 已達 2018、2022 恐慌高峰，危機級是 80", "空頭史新增 VIX、ABC 波段、三種劇本圖卡"]},
+{"k": "upd-2026-11-22", "daily": 1, "upd": 1, "day": "11/22", "ic": "🆕", "n": "今日更新導覽", "sc": "studio", "go": ["ev", ""], "L": [["M", "這是「今日更新導覽」：今天 App 新增和修改了哪些東西，我帶你一次走完。"], {"card": {"t": "！今天更新了 14 項", "l": ["大事：新增「好消息」、救市第三波、美股大屠殺、聯準會", "名人觀點：新增 Schwab、多空分頁", "接下來：感恩節週行程", "空頭史：分成四分頁；限空令比較、修正或空頭、VIX、ABC、三種劇本", "導覽員：週日早報"]}}, ["A", "最近怎麼都是壞消息？"], ["M", "所以今天多了一張「好消息與多方論點」：輝達下季指引 1,300 億美元仍在成長、台灣 GDP 39 年新高、1983 年來 15 次修正只有 5 次變空頭。"], ["M", "空頭史也多了 VIX 比較：這次 37 以上，已經和 2018、2022 空頭的恐慌高峰差不多；2008、2020 那種危機會衝到 80。"], ["M", "還有一張「修正還是空頭？」：AI 硬體和台股已經是空頭，美國大盤還在修正；卡片列出 6 個像空頭、5 個像修正的地方，和 3 條升級警戒線。"], ["M", "先看大事。「救市第三波」補上國安基金週末聲明：已經實彈進場；台股上週跌 17.5%，是 1991 年來最大單週跌幅。"], ["A", "美股那邊呢？"], ["M", "「美股大屠殺」補了兩個數字：VIX 週五衝到 37 以上，S&P 500 只剩 46% 成分股站在 200 日線上。「聯準會」那張則更新成 12 月升息機率 92%。"], ["M", "名人觀點新增嘉信 Schwab：Gordon 說市場進退兩難，Howard 預期這一輪還會再升兩次息，所以標成偏空。"], ["M", "「接下來」加了感恩節週行程：週二消費者信心和 Dell 財報，週三 PCE、GDP 和褐皮書，週四休市、週五半天。"], ["J", "空頭史好像多了兩張圖？"], ["M", "對。第一張「ABC 波段測量」，用波浪算台股 C 波可能跌到哪，每天早上會自動算出離目標還有多遠。"], {"card": {"t": "！ABC 目標（11/20 收盤）", "l": ["C＝A 32,306：還要跌 10.3%", "鏡像 31,237：還要跌 13.3%", "費半 8,000：還要跌 4.9%"]}}, ["K", "提醒一下，很多人都在喊 32,000。太多人盯的點位，常常會提早反彈，或先跌破再拉回，當參考區就好。"], ["M", "第二張「三種劇本」，把這次和 2000、2008、2022 年的空頭放在一起比。"], {"card": {"t": "！三個判斷開關", "l": ["獲利往下掉？還沒（對應 2000）", "聯準會停手？還沒，還在升息（對應 2022）", "信用凍結？還沒，但壓力浮現（對應 2008）"]}}, {"q": ["M", "你想先多了解哪一張？"], "more": 1, "by": "M", "again": "還想看另一張嗎？", "o": [["ABC 波段", "兩種算法差約 1,100 點：C＝A 是拿 A 波的跌幅去量，鏡像則是 B 波反彈多少、就從 A 低點再往下跌多少。都只是技術推算。"], ["三種劇本", "三次空頭都有 +17% 到 +45% 的強反彈，最後只有 2022 年那次是真底。分辨的關鍵是獲利、聯準會、信用三個開關，不是線型。"]]}, ["J", "空頭史怎麼變短了？"], ["M", "分成「現況／台股／歷史／佈局」四個分頁了。台股分頁新增歷次限空令比較：過去限空時加權都在年線下，低點多在五年線附近；這次還比五年線高 55%。名人觀點也可以只看偏多或偏空。"], ["M", "台股分頁還多了「融資斷頭試算」：本金 40 萬、融資 60 萬，跌 22% 就被追繳，再兩根跌停本金只剩 3 萬多。11/23、24、25 是這幾批追繳戶的處分日，行事曆已經標好。"], ["M", "最後，週日早報也換新了。以後每天改了什麼，都會出現在大事圖解的「🆕 今日更新」標籤和這一站。明天見！"]], "sum": ["新增好消息卡片：AI 獲利仍成長、台灣 GDP 39 年新高", "VIX 37 已達 2018、2022 恐慌高峰，危機級是 80", "空頭史新增 VIX、ABC 波段、三種劇本圖卡"]},
 {k:"pro",ic:"🌙",n:"收盤後的交易室",sc:"trade",go:["bear"],L:[
  ["K","小安、阿傑，收盤了。今晚我帶你們把這個月的大事走一遍。"],
  ["A","K 哥，我只知道最近一直跌⋯⋯台股週五又跌了 2,394 點，美股週五 Nasdaq 重挫 5%、費半跌了快 11%！"],
@@ -1344,7 +1384,7 @@ function goBack(){
   go(s.p,true);if(s.p==="tour"&&s.map)renderTourMap();setTimeout(()=>window.scrollTo(0,s.y||0),20);
 }
 
-renderEv();renderVw();renderBear();renderCB();renderBan();
+renderEv();renderVw();renderBear();renderCB();renderBan();renderMg();
 function setBSub(k){LS.set("bsub",k);document.querySelectorAll("#bearSub .chip").forEach(b=>b.classList.toggle("on",b.dataset.bsub===k));document.querySelectorAll("#p-bear [data-sub]").forEach(c=>c.style.display=c.dataset.sub===k?"":"none")}
 setBSub(LS.get("bsub","now"));(()=>{const h=document.querySelector("header");const u=()=>document.documentElement.style.setProperty("--hdr",h.offsetHeight+"px");u();addEventListener("resize",u)})();document.querySelectorAll("#vwSt .chip").forEach(b=>b.classList.toggle("on",b.dataset.vst===vwSt));
 
