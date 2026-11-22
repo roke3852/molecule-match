@@ -140,6 +140,13 @@ button{font:inherit;color:inherit;touch-action:manipulation}
 @keyframes stamp{from{transform:rotate(-12deg) scale(2.4);opacity:0}}
 .rf-n{font-size:8.5px;color:#7a1f22;margin-top:3px}
 #tvLayer.click{pointer-events:auto}
+.rfire{display:flex;gap:8px}.rfire .bhold{flex:1;padding:14px 0}
+.arrsign{position:absolute;transform:translate(-50%,-50%);font-family:"DotGothic16","Noto Sans TC",sans-serif;font-size:12px;color:#f2c94c;white-space:nowrap;letter-spacing:1px}
+.arrlab{position:absolute;transform:translate(-50%,-50%);font-family:"DotGothic16","Noto Sans TC",sans-serif;font-size:11px;color:#cfe0f2;white-space:nowrap;background:rgba(14,17,22,.75);padding:1px 6px}
+.arrlab.dst{color:#fff;background:#d64545}
+.pickHit{position:absolute;width:7%;aspect-ratio:1;transform:translate(-50%,-50%);border-radius:50%;background:none;border:0;padding:0;cursor:pointer}
+.cupHit{position:absolute;top:48%;width:15%;aspect-ratio:1;transform:translate(-50%,-50%);border-radius:50%;background:none;border:0;padding:0;cursor:default}
+.cupHit.on{cursor:pointer}
 .shelf{position:absolute;inset:6% 4% 8%;display:flex;gap:4%;align-items:flex-end;justify-content:center}
 .sbag{flex:1;max-width:30%;background:none;border:0;padding:0;display:flex;flex-direction:column;align-items:center;cursor:pointer;transition:transform .2s}
 .sbag .bagsvg{width:70%;filter:drop-shadow(0 4px 6px rgba(0,0,0,.6))}.sbag.sel{transform:translateY(-6px) scale(1.06)}.sbag.sel .tag{border-color:#d64545}
@@ -671,7 +678,8 @@ const CH=[
  L('zhou','我算你半價。就當作，我栽培後輩。'),
  L('me','……我可以先杯測看看嗎？'),
  L('zhou','當然，當然。年輕人做事謹慎，好。'),
- {act:'cup',s:'',t:'你在他們的杯測室裡，照標準流程做了一次杯測。熱水一沖下去，香氣整個炸開——荔枝、草莓糖、玫瑰，香到讓你有點頭暈。'},
+ N('你在他們的杯測室裡，照標準流程做一次杯測。'),
+ {act:'cup',play:1,s:'',t:'熱水一沖下去的時候，香氣整個炸開——荔枝、草莓糖、玫瑰，香到讓你有點頭暈。'},
  N('可是等到杯子放涼了一點，你再喝一口……那股香味，就像被人拔掉了插頭一樣，突然消失了。'),
  N('嘴巴裡最後只剩下一股說不出來的甜，很像小時候吃的那種水果口味糖果。不像水果，像「水果口味」。'),
  L('zhou','怎麼樣？好東西吧。'),
@@ -709,6 +717,9 @@ const CH=[
  L('shen','（訊息）到了莊園，先看樹，再看人，最後才看豆子。'),
  L('shen','（訊息）一路平安。'),
  TV('world','TPE','NVA','plane','桃園機場，晚上十一點的紅眼班機。台北 → 洛杉磯 → 波哥大 → 內瓦。三段航程，三十二個小時。'),
+ {act:'arrive',ap:'NVA',hold:2,s:'',t:'三十二個小時之後，你拖著行李走出內瓦機場的入境大廳。這機場小得像台灣的客運站，空氣又熱又濕，到處都是西班牙文。'},
+ N('卡洛斯說會派人來接。你照著手機裡的簡訊，走出大門，往右手邊的停車場走。'),
+ N('一個皮膚曬得黝黑的年輕人舉著一張紙板，上面歪歪扭扭寫著「TAIWAN」。他幫你把行李丟上吉普車後座，一踩油門就出發了。'),
  BG('farm','哥倫比亞．薇拉省 1,850m'),
  {act:'jeep',s:'',t:'從內瓦機場出來，你又坐了四個小時的吉普車，在山路上顛得五臟六腑都快移位了，才終於到了帕洛瑪莊園。'},
  N('這裡海拔一千八百五十公尺，晚上冷得像台灣的合歡山。天上的星星多到你以為是有人撒了一把鹽。'),
@@ -728,14 +739,17 @@ const CH=[
   {t:'兩排都是炭疽病，噴同一種藥就好。',end:'misdiag'},
  ]),
  N('那天晚上，卡洛斯讓你住在小木屋旁邊的工具間。隔天天還沒亮，你就被雞叫聲吵醒。'),
- N('你跟著工人們一起採收。他們只摘完全紅透的果實，一顆一顆用手摘，一整天下來，你的手指被樹枝刮出好幾道傷口。'),
+ N('你跟著工人們一起採收。卡洛斯丟給你一個綁在腰上的竹籃。'),
+ L('carlos','只摘紅透的。要像紅酒那種紅。綠的、黃的留著下禮拜，黑掉的也不要。'),
+ L('carlos','一顆壞果子，就能讓一整槽發酵跑掉。'),
+ {act:'pick',play:1,s:'',t:'工人們只摘完全紅透的果實，一顆一顆用手摘。一整天下來，你的手指被樹枝刮出好幾道傷口。'},
  L('carlos','累嗎？'),
  L('me','……累。我以前都不知道，一杯咖啡後面有這麼多人的手。'),
  L('carlos','現在你知道了。'),
  N('那天傍晚，卡洛斯在小木屋的長桌上擺了五個杯測碗，還有一個裝著熱水的涮匙杯。'),
  L('carlos','買豆子之前，先喝。這是我去年同一個處理槽出來的批次。'),
  L('carlos','五杯都要喝。只要有一杯味道怪怪的，就代表那一槽有人偷懶，豆子就不能賣給你。'),
- {act:'cupfarm',s:'',t:'你照標準流程，一杯一杯聞乾香、注水、破渣、撈渣，再一杯一杯啜吸。'},
+ {act:'cupfarm',play:1,s:'',t:'五杯都喝完了。卡洛斯在旁邊抱著手臂，一句話也沒說，只是等你開口。'},
  N('五杯喝起來幾乎一模一樣：紅蘋果、黑糖、一點點柑橘的酸。放涼了以後，甜味反而更清楚。'),
  L('me','（跟金穗那杯完全相反……這支豆子，冷了還是香的。）'),
  L('carlos','怎麼樣？'),
@@ -768,12 +782,17 @@ const CH=[
  L('carlos','他們說——你會來。'),
  {item:'beans'},
  TV('world','NVA','TPE','plane','內瓦 → 波哥大 → 洛杉磯 → 台北。三十公斤的生豆塞在托運行李裡，你一路上醒來好幾次，就怕它不見了。'),
+ {act:'arrive',ap:'TPE',hold:2,s:'',t:'桃園機場，入境大廳。行李轉盤轉了三圈，那兩箱生豆終於出現。你衝過去一把抱住，旁邊的阿伯看你的眼神像在看怪人。'},
+ N('你推著行李車走出自動門，跟著指標往計程車招呼站走。台灣的空氣，濕濕的，有一點熟悉的悶。'),
+ N('你把兩箱豆子塞進後車廂。「師傅，大稻埕，迪化街。」計程車開上了國道。'),
  {done:1}
 ]},
 {t:'第三章　台灣盃',sub:'被換掉的水',recap:'你在哥倫比亞找到卡洛斯，買下 30 公斤自己參與處理的豆子，帶回一本處理紀錄。但金穗的人，似乎早就知道你的行蹤。',nodes:[
  BG('roast','比賽前一週．舟火焙煎所'),
  N('回台灣以後，你和沈懷舟花了整整三個禮拜，替那三十公斤的豆子找烘焙曲線。'),
- {act:'roast',s:'',t:'烘深一點，水果味會被焦糖蓋過去；烘淺一點，又會有一股生青的草味。你們烘了十七鍋，才終於找到一個兩個人都點頭的曲線。'},
+  L('shen','烘豆，就兩件事：火給多少，什麼時候下豆。'),
+ L('shen','烘深一點，水果味會被焦糖蓋過去；烘淺一點，又會有一股生青的草味。你自己來，烘到我點頭為止。'),
+ {act:'roast',play:1,s:'',t:'你們烘了十七鍋，才終於找到一個兩個人都點頭的曲線。'},
  L('shen','就這鍋。'),
  L('shen','記住現在這個味道。比賽那天你緊張的時候，就想想這一杯。'),
  L('me','師父，比賽那天……你會來嗎？'),
@@ -980,6 +999,9 @@ const CH=[
  N('三個人約在桃園機場第二航廈碰面。沈懷舟只帶了一個很舊的皮箱，蘇曼戴著口罩和帽子，怕被金穗的人認出來。'),
  {money:-12000,why:'東京機票與住宿'},
  TV('world','TPE','HND','plane','桃園機場 → 東京羽田。三個小時的航程，你一直盯著窗外的雲，沒有睡著。'),
+ {act:'arrive',ap:'HND',hold:2,s:'',t:'羽田機場第三航廈。入境大廳又亮又安靜，連推行李車的聲音都很小聲。'},
+ N('沈懷舟走在前面，熟門熟路地帶你往出口右邊的計程車乘車處走。'),
+ N('黑色的計程車門自己打開了。司機戴著白手套，對你們點了點頭，車子安靜地開出了機場。'),
  BG('tokyo','東京．世界手沖盃'),
  N('東京，世界手沖盃。賽前兩天，雨剛停，霓虹燈在濕漉漉的柏油路上碎成一片一片的。'),
  N('到了東京的第一件事，不是去練習場，而是把蘇曼給的資料和你的筆記本，影印成三份。'),
@@ -1686,8 +1708,11 @@ function step(){
     if(n.item){S.i++;giveItem(n.item);continue}
     if(n.money){S.i++;addMoney(n.money,n.why);continue}
     if(n.act==='buybean'){S.i++;persist();startAct('buybean');S.act.play=1;playBuy(n);return}
+    if(n.act&&n.play&&(n.act==='cup'||n.act==='cupfarm')){S.i++;persist();startAct(n.act);playCup(n);return}
+    if(n.act==='roast'&&n.play){S.i++;persist();startAct('roast');playRoast(n);return}
+    if(n.act==='pick'){S.i++;persist();startAct('pick');playPick(n);return}
     if(n.act&&n.play){S.i++;persist();startAct(n.act);S.act.play=1;S.act.st=0;S.act.brush=0;S.act.bv=0;playClean(n);return}
-    if(n.act){S.i++;persist();startAct(n.act);if(n.sticky)S.act.sticky=1;if(n.hold)S.act.hold=n.hold;showLine({s:'',t:n.t});return}
+    if(n.act){S.i++;persist();if(n.ap)S._ap=n.ap;startAct(n.act);if(n.sticky)S.act.sticky=1;if(n.hold)S.act.hold=n.hold;S.act.H0=n.hold||0;showLine({s:'',t:n.t});return}
     if(n.tv){S.i++;persist();startTravel(n.tv);showLine({s:'',t:n.t});return}
     if(n.s!==undefined){S.i++;persist();showLine(n);return}
     S.i++;
@@ -1986,15 +2011,14 @@ function startAct(k){S.act={k,t0:performance.now(),prev:curBg,loc:S.loc};curBg='
   if(k==='flood')startFlood();
   if(k==='pack'){const tl=$('tvLayer');tl.innerHTML='<div class="actcap" id="actCap"></div>';tl.hidden=false;[1200,2500,3800].forEach(d=>setTimeout(()=>{if(S&&S.act)sfx('pop')},d));setTimeout(()=>{if(S&&S.act)sfx('whoosh')},4400);setTimeout(()=>{if(S&&S.act)sfx('up')},5200)}
   if(k==='water'){const tl=$('tvLayer');tl.innerHTML='<div class="actcap" id="actCap"></div><div class="wlab" id="wl1" style="left:30%">早上：藍色封膜</div><div class="wlab bad" id="wl2" style="left:70%">現在：白色封膜</div>';tl.hidden=false;sfx('doom');setTimeout(()=>{if(S&&S.act)sfx('whoosh')},2200);setTimeout(()=>{if(S&&S.act)sfx('pop')},5000)}
-  if(k==='roast'){const tl=$('tvLayer');const X=s0=>176+(s0/7)*134,Y=v=>160-(Math.min(240,v)-80)/160*116,pos=(s0,v)=>`left:${X(s0)/320*100}%;top:${Y(v)/200*100}%`;
-    tl.innerHTML='<div class="actcap" id="actCap"></div><div class="rlab" style="top:17%">烘焙曲線</div>'+RFAIL.map((F,i)=>`<div class="rtag" id="rf${i}" hidden style="${pos(F.end,F.f(F.end))};border-color:${F.c}">${F.n.replace('第 ','').replace(' 鍋','')}</div>`).join('')+`<div class="rtag ok" id="rf3" hidden style="${pos(6.4,roastT(6.4))}">17 ✓</div>`;tl.hidden=false;
-    RFAIL.forEach((F,i)=>setTimeout(()=>{if(S&&S.act)sfx('down')},i*1200+900));
-    for(let i=0;i<12;i++)setTimeout(()=>{if(S&&S.act)sfx('crack')},3600+4330+i*130+Math.random()*80);setTimeout(()=>{if(S&&S.act)sfx('whoosh')},3600+6400);setTimeout(()=>{if(S&&S.act)sfx('up')},3600+6700)}
+  if(k==='roast'){const tl=$('tvLayer');tl.innerHTML='<div class="actcap" id="actCap"></div><div class="rlab" style="top:17%">烘焙曲線</div><div id="rTags"></div>';tl.hidden=false;Object.assign(S.act,{ph:'fire',fire:'mid',hist:[],tries:0,rs:0,dropS:0,dropT:0,crk:0})}
   if(k==='notebook'){const tl=$('tvLayer');tl.innerHTML='<div class="actcap" id="actCap"></div>';tl.hidden=false;setTimeout(()=>{if(S&&S.act)sfx('whoosh')},500)}
   if(k==='pest'){const tl=$('tvLayer');tl.innerHTML='<div class="pestl" style="left:26.5%">A 排・葉子背面</div><div class="pestl" style="left:73.5%">B 排・紅色果實</div>';tl.hidden=false;sfx('pop')}
-  $('locLabel').textContent=k==='buybean'?'永康街．山嵐豆行':k==='form'?'吧台抽屜':k==='form2'?'報名表・寄出前':k==='pack'?'出發當天':k==='flood'?'冠軍後第二天':k==='water'?'水瓶':k==='roast'?'烘豆．第 17 鍋':k==='notebook'?'處理紀錄本':k==='pest'?'放大看看':k==='cup'?'杯測．金穗':k==='cupfarm'?'杯測．帕洛瑪莊園':k==='jeep'?'內瓦 → 帕洛瑪莊園':'清理磨豆機';
+  $('locLabel').textContent=k==='buybean'?'永康街．山嵐豆行':k==='form'?'吧台抽屜':k==='form2'?'報名表・寄出前':k==='pack'?'出發當天':k==='flood'?'冠軍後第二天':k==='water'?'水瓶':k==='roast'?'舟火焙煎所．烘豆':k==='notebook'?'處理紀錄本':k==='pest'?'放大看看':k==='cup'?'杯測．金穗':k==='cupfarm'?'杯測．帕洛瑪莊園':k==='jeep'?'內瓦 → 帕洛瑪莊園':k==='arrive'?ARR[S._ap||'NVA'].hall.split('・')[0]:k==='pick'?'帕洛瑪莊園・採收':'清理磨豆機';
   if(k==='jeep'){const tl=$('tvLayer');tl.innerHTML='<div class="actcap" id="actCap"></div><div class="jsign" id="jSign" hidden>帕洛瑪莊園 →</div>';tl.hidden=false;sfx('plane');[900,1700,2600,3400,4300].forEach(d=>setTimeout(()=>{if(S&&S.act)sfx('bump')},d))}
-  if(k==='cup'||k==='cupfarm'){const tl=$('tvLayer');tl.innerHTML='<div class="actcap" id="actCap"></div>';tl.hidden=false;[[1300,'pour'],[1800,'pour'],[2700,'pop'],[2900,'whoosh'],[3900,'brush'],[4900,'slurp'],[5300,'slurp'],[5700,'slurp'],[6100,'slurp']].concat(k==='cupfarm'?[[6500,'up']]:[]).forEach(([d,k2])=>setTimeout(()=>{if(S&&S.act)sfx(k2)},d))}
+  if(k==='arrive'){const tl=$('tvLayer');S.act.ap=S._ap||'NVA';$('locLabel').textContent=ARR[S.act.ap].hall.split('・')[0];tl.innerHTML='<div class="actcap" id="actCap"></div><div id="arrL"></div>';tl.hidden=false;S.act.snd={}}
+  if(k==='pick'){$('locLabel').textContent='帕洛瑪莊園・採收';const tl=$('tvLayer');tl.innerHTML='<div class="actcap" id="actCap"></div>';tl.hidden=false}
+  if(k==='cup'||k==='cupfarm'){const tl=$('tvLayer');tl.innerHTML='<div class="actcap" id="actCap"></div>';tl.hidden=false;Object.assign(S.act,{ph:0,fill:[0,0,0,0,0],brk:[0,0,0,0,0],slp:[0,0,0,0,0],skm:0,dry:0,coolT:0,last:null})}
   if(k==='clean'&&!S.act.play){[300,900,1300,1700,2100].forEach(d=>setTimeout(()=>{if(S&&S.act)sfx('brush')},d));setTimeout(()=>{if(S&&S.act)sfx('pop')},2900)}}
 function cleanE(A,t){if(!A.play)return (performance.now()-A.t0)/1000;const dt=(performance.now()-(A.ts||A.t0))/1000;
   if(A.st===0)return 0;if(A.st===1)return Math.min(.8,dt);if(A.st===2){A.bv+=(A.brush-A.bv)*.12;return .8+A.bv*1.8}if(A.st===2.5)return 2.6;if(A.st===3)return 2.6+Math.min(.7,dt);return 3.3+dt}
@@ -2027,48 +2051,151 @@ function actClean(g,t,A){const p=PX(g);const e=cleanE(A,t);
 
 const CUPSTEP={cup:[[0,'① 聞乾香'],[1.2,'② 注水'],[2.6,'③ 破渣・聞濕香'],[3.8,'④ 撈渣'],[4.8,'⑤ 啜吸'],[6.4,'⑥ 放涼，再喝一口……']],
  cupfarm:[[0,'① 聞乾香'],[1.2,'② 注水'],[2.6,'③ 破渣・聞濕香'],[3.8,'④ 撈渣'],[4.8,'⑤ 啜吸，五杯都要喝'],[6.4,'⑥ 五杯一致，沒有瑕疵杯']]};
-function actCup(g,t,A){const p=PX(g),e=(performance.now()-A.t0)/1000,farm=A.k==='cupfarm';
-  const step=CUPSTEP[A.k].filter(x=>e>=x[0]).pop();const cap=document.getElementById('actCap');if(cap&&cap.textContent!==step[1])cap.textContent=step[1];
-  // 俯視杯測桌
+function actCup(g,t,A){const p=PX(g),now=performance.now(),farm=A.k==='cupfarm',ag=ts=>ts?(now-ts)/1000:-1;
+  const cap=document.getElementById('actCap'),txt=cupCap(A);if(cap&&cap.textContent!==txt)cap.textContent=txt;
   p(0,0,320,200,farm?'#6b4a30':'#d8d2c4');if(farm){for(let y=0;y<200;y+=14){p(0,y,320,1,'#5a3d27');p.dith(0,y+2,320,10,'#74513a',4)}}else{p.dith(0,0,320,200,'#cfc8b8',4)}
   p(0,0,320,10,'rgba(0,0,0,.25)');
-  // 杯測表
   p(14,138,74,52,'#f4efe4');p(14,138,74,2,'#fff');for(let y=146;y<186;y+=6){p(20,y,40,1,'#bdb3a1');p(64,y,18,1,'#bdb3a1')}p(20,142,30,1,'#d64545');
-  // 涮匙杯
+  const nS=A.slp.filter(x=>x).length;for(let k=0;k<nS;k++)p(64,145+k*6,10,2,farm?'#4fb3a9':'#d64545');
   p.ell(282,40,18,18,'#ece4d4');p.ell(282,40,14,14,'#8fb8d8');p.ell(278,36,4,3,'#c6dcf2');
-  const N=5,cx=i=>48+i*56,cy=96,R0=22;
-  for(let i=0;i<N;i++){const x=cx(i);
+  const N=5,cx=i=>48+i*56,cy=96,R0=22,skA=ag(A.skm);
+  for(let i=0;i<N;i++){const x=cx(i),rr=R(i*7+3),fa=ag(A.fill[i]),ba=ag(A.brk[i]),sa=ag(A.slp[i]);
+    const can=cupCan(A,i);if(can){const pl=.5+.5*Math.sin(t*6);p.ell(x,cy,R0+3,R0+3,`rgba(214,69,69,${.35+pl*.4})`)}
     p.ell(x+2,cy+3,R0,R0,'rgba(0,0,0,.18)');p.ell(x,cy,R0,R0,'#f4efe4');p.ell(x,cy,R0-1,R0-1,'#e8dfcf');p.ell(x,cy,R0-4,R0-4,'#fbf8f2');
-    const fillT=1.2+i*.25,filled=e>=fillT,fk=Math.min(1,Math.max(0,(e-fillT)/.3)),rr=R(i*7+3);
-    if(!filled){p.ell(x,cy,R0-6,R0-6,'#8a5a34');for(let k=0;k<60;k++){const a=rr()*6.28,d=rr()*(R0-7);p(x+Math.cos(a)*d,cy+Math.sin(a)*d,1,1,rr()>.5?'#5a3520':'#b07a4f')}}
-    else{const r=Math.round((R0-5)*(.5+.5*fk));p.ell(x,cy,r,r,'#2a1608');
-      const brk=2.6+(i===2?0:.35+Math.abs(i-2)*.12),broken=e>=brk,sk=Math.min(1,Math.max(0,(e-3.8-i*.1)/.5));
-      if(!broken){for(let k=0;k<90;k++){const a=rr()*6.28,d=Math.sqrt(rr())*(r-1);p(x+Math.cos(a)*d,cy+Math.sin(a)*d,1,1,['#8a5a34','#b07a4f','#6a4228'][k%3])}}
-      else if(sk<1){const left=1-sk;for(let k=0;k<Math.round(40*left);k++){const a=rr()*6.28,d=r*(.55+rr()*.4);p(x+Math.cos(a)*d,cy+Math.sin(a)*d,1,1,k%2?'#8a5a34':'#b07a4f')}}
+    if(fa<0){p.ell(x,cy,R0-6,R0-6,'#8a5a34');for(let k=0;k<60;k++){const a=rr()*6.28,d=rr()*(R0-7);p(x+Math.cos(a)*d,cy+Math.sin(a)*d,1,1,rr()>.5?'#5a3520':'#b07a4f')}}
+    else{const fk=Math.min(1,fa/.35),r=Math.round((R0-5)*(.5+.5*fk));p.ell(x,cy,r,r,'#2a1608');
+      if(ba<0){for(let k=0;k<90;k++){const a=rr()*6.28,d=Math.sqrt(rr())*(r-1);p(x+Math.cos(a)*d,cy+Math.sin(a)*d,1,1,['#8a5a34','#b07a4f','#6a4228'][k%3])}}
+      else{const sk=skA<0?0:Math.min(1,Math.max(0,(skA-i*.18)/.4)),left=1-sk;
+        for(let k=0;k<Math.round(40*left);k++){const a=rr()*6.28,d=r*(.55+rr()*.4);p(x+Math.cos(a)*d,cy+Math.sin(a)*d,1,1,k%2?'#8a5a34':'#b07a4f')}
+        if(ba<.35){const q=ba/.35;for(let k=0;k<10;k++){const a=k*.63;p(x+Math.cos(a)*q*r,cy+Math.sin(a)*q*r,2,2,'#b07a4f')}}}
       p(x-7,cy-8,4,2,'rgba(255,255,255,.25)')}
-    // 結果標記
-    if(farm&&e>=6.4){const k=Math.min(1,(e-6.4-i*.12)/.2);if(k>0){p.ell(x,cy-R0-9,6,6,'#4fb3a9');p(x-3,cy-R0-9,2,2,'#fff');p(x-1,cy-R0-7,2,2,'#fff');p(x+1,cy-R0-9,2,2,'#fff');p(x+3,cy-R0-11,2,2,'#fff')}}
+    if(sa>=0){const k=Math.min(1,sa/.25);if(k>0){if(farm||A.ph<6){p.ell(x,cy-R0-9,6,6,farm?'#4fb3a9':'#e05a6a');p(x-3,cy-R0-9,2,2,'#fff');p(x-1,cy-R0-7,2,2,'#fff');p(x+1,cy-R0-9,2,2,'#fff');p(x+3,cy-R0-11,2,2,'#fff')}
+      else{p.ell(x,cy-R0-9,6,6,'#8b93a1');p(x-3,cy-R0-9,7,2,'#fff')}}}
   }
-  // 細口壺（俯視）注水
-  if(e>=1.1&&e<2.6){const i=Math.min(4,Math.floor((e-1.2)/.25)),x=cx(i);p.ell(x+30,cy-38,14,12,'#20252e');p.ell(x+30,cy-38,9,7,'#3a4350');for(let k=0;k<7;k++)p(x+18-k*3,cy-30+k*3,3,3,'#20252e');
+  // 注水壺
+  const L=A.last,la=L?(now-L.ts)/1000:9;
+  if(L&&L.kind==='pour'&&la<.8){const x=cx(L.i);p.ell(x+30,cy-38,14,12,'#20252e');p.ell(x+30,cy-38,9,7,'#3a4350');for(let k=0;k<7;k++)p(x+18-k*3,cy-30+k*3,3,3,'#20252e');
     for(let k=0;k<6;k++){const ph=(t*3+k*.17)%1;p(x-3+Math.cos(k*2+t*5)*ph*8,cy-3+Math.sin(k*2+t*5)*ph*8,1,1,'rgba(200,225,245,.9)')}}
-  // 杯測匙（俯視）
+  // 杯測匙
   let sx=null,sy=null;
-  if(e>=2.6&&e<3.8){const u=(e-2.6)/1.2;const i=u<.45?2:Math.min(4,Math.floor((u-.45)/.14));const tgt=u<.45?2:[0,1,3,4][Math.min(3,Math.floor((u-.45)/.14))];sx=cx(tgt)+Math.sin(u*30)*3;sy=cy+4}
-  else if(e>=3.8&&e<4.8){const u=(e-3.8);sx=cx(Math.min(4,Math.floor(u*5)))+Math.sin(u*40)*6;sy=cy}
-  else if(e>=4.8&&e<6.4){const u=(e-4.8)/1.6,i=Math.min(4,Math.floor(u*5));sx=cx(i);sy=cy-(((u*5)%1)<.5?((u*5)%1)*30:(1-(u*5)%1)*30)}
-  if(sx!=null){p(sx+4,sy+2,30,3,'#c4cad1');p(sx+4,sy+2,30,1,'#fff');p.ell(sx,sy,7,5,'#c4cad1');p.ell(sx,sy,5,3,e>=4.8?'#2a1608':'#8d959e');p(sx-3,sy-2,2,1,'#fff')}
+  if(L&&L.kind==='brk'&&la<.7){sx=cx(L.i)+Math.sin(la*30)*4;sy=cy+4}
+  else if(skA>=0&&skA<1.3){const u=Math.min(4,Math.floor(skA/.26));sx=cx(u)+Math.sin(skA*40)*6;sy=cy}
+  else if(L&&L.kind==='slp'&&la<.6){sx=cx(L.i);sy=cy-(la<.3?la*80:(.6-la)*80)}
+  if(sx!=null){p(sx+4,sy+2,30,3,'#c4cad1');p(sx+4,sy+2,30,1,'#fff');p.ell(sx,sy,7,5,'#c4cad1');p.ell(sx,sy,5,3,(L&&L.kind==='slp'&&la<.6)?'#2a1608':'#8d959e');p(sx-3,sy-2,2,1,'#fff')}
   // 香氣
-  const cool=farm?0:Math.min(1,Math.max(0,(e-6.4)/1.2));
-  let inten=e<1.2?.3:e<2.6?.45:e<3.8?1.4:e<6.4?.8:(farm?.6:.8*(1-cool));
   const cols=farm?['#f0b46a','#e05a6a','#d9c08a','#9ccf8a']:['#ff9ab0','#e05a6a','#f2a0c8','#ff6b9a'];
-  for(let k=0;k<Math.round(30*inten);k++){const i=k%5,ph=(t*.5+k*.073)%1,x=cx(i)+Math.cos(k*2.3)*ph*34,y=cy-ph*60+Math.sin(k*1.7)*ph*10;g.globalAlpha=(1-ph)*Math.min(1,inten);p(x,y,2,2,cols[k%4]);g.globalAlpha=1}
-  if(e>=2.6&&e<3.8)p.glow(cx(2),cy-10,70,farm?'rgba(240,180,106,.18)':'rgba(255,154,176,.28)');
-  if(e>=4.8&&e<6.4){for(let k=0;k<12;k++){const ph=(t*1.6+k*.09)%1;g.globalAlpha=1-ph;p((sx||160)+Math.cos(k*1.9)*ph*26,(sy||90)-6-ph*22,2,2,k%3?'#c8b8a8':cols[0]);g.globalAlpha=1}}
-  // 溫度計（金穗版：放涼）
-  if(!farm&&e>=6.4){const T=Math.round(72-cool*30);p(292,70,12,100,'#f4efe4');p.frame(292,70,12,100,'#8b93a1');const h=Math.round((T-30)/50*90);p(295,166-h,6,h,T>55?'#d64545':'#6c9bd2');p.ell(298,170,7,7,T>55?'#d64545':'#6c9bd2');
-    const cap2=document.getElementById('actCap');const txt='⑥ 放涼到 '+T+'°C，再喝一口……'+(cool>.85?' 香氣不見了':'');if(cap2&&cap2.textContent!==txt)cap2.textContent=txt}
+  const cool=A.coolT?Math.min(1,ag(A.coolT)/2.4):0;
+  const da=ag(A.dry);let base=A.ph===0?(da>=0&&da<1.2?1.1:.25):A.ph<=1?.35:A.ph<=3?.7:A.ph===4?.6:(farm?.6:.8*(1-cool));if(A.ph>=6&&!farm)base=0;
+  for(let k=0;k<Math.round(30*base);k++){const i=k%5,ph=(t*.5+k*.073)%1,x=cx(i)+Math.cos(k*2.3)*ph*34,y=cy-ph*60+Math.sin(k*1.7)*ph*10;g.globalAlpha=(1-ph)*Math.min(1,base);p(x,y,2,2,cols[k%4]);g.globalAlpha=1}
+  for(let i=0;i<N;i++){const ba=ag(A.brk[i]);if(ba>=0&&ba<1.4){const q=1-ba/1.4;p.glow(cx(i),cy-10,60,farm?`rgba(240,180,106,${.25*q})`:`rgba(255,154,176,${.4*q})`);
+    for(let k=0;k<18;k++){const ph=(ba*.9+k*.055)%1;g.globalAlpha=q*(1-ph);p(cx(i)+Math.cos(k*2.1)*ph*30,cy-ph*50,2,2,cols[k%4]);g.globalAlpha=1}}}
+  if(L&&L.kind==='slp'&&la<.9){for(let k=0;k<12;k++){const ph=(la*1.4+k*.09)%1;g.globalAlpha=1-ph;p(cx(L.i)+Math.cos(k*1.9)*ph*26,cy-16-ph*22,2,2,k%3?'#c8b8a8':cols[0]);g.globalAlpha=1}}
+  if(!farm&&A.ph>=5){const T=Math.round(72-cool*30);p(292,70,12,100,'#f4efe4');p.frame(292,70,12,100,'#8b93a1');const h=Math.round((T-30)/50*90);p(295,166-h,6,h,T>55?'#d64545':'#6c9bd2');p.ell(298,170,7,7,T>55?'#d64545':'#6c9bd2')}
   p.vig()}
+function cupCan(A,i){return (A.ph===1&&!A.fill[i])||(A.ph===2&&!A.brk[i])||(A.ph===4&&!A.slp[i])}
+function cupCap(A){const farm=A.k==='cupfarm',n=a=>a.filter(x=>x).length;
+  if(A.ph===0)return '① 聞乾香';if(A.ph===1)return '② 注水　'+n(A.fill)+' / 5';if(A.ph===2)return '③ 破渣・聞濕香　'+n(A.brk)+' / 5';if(A.ph===3)return '④ 撈渣';
+  if(A.ph===4)return '⑤ 啜吸　'+n(A.slp)+' / 5';if(farm)return '⑥ 五杯一致，沒有瑕疵杯';
+  const T=Math.round(72-Math.min(1,A.coolT?(performance.now()-A.coolT)/2400:0)*30);return A.ph===6?'⑥ '+T+'°C　香氣不見了':'⑥ 放涼中……'+T+'°C'}
+/* 互動杯測：一步一步、一杯一杯 */
+function playCup(n){ffwd=false;$('tFF').classList.remove('on');waiting=false;$('box').style.display='none';$('nextBtn').classList.remove('on');
+  const A=S.act,cw=$('choices'),tl=$('tvLayer'),farm=A.k==='cupfarm';cw.classList.add('on');tl.classList.add('click');
+  tl.insertAdjacentHTML('beforeend',[0,1,2,3,4].map(i=>`<button class="cupHit" data-i="${i}" style="left:${(48+i*56)/3.2}%" aria-label="第${i+1}杯"></button>`).join(''));
+  const HINT={0:['湊近乾粉，先聞一次乾香。',farm?'紅蘋果、黑糖，很乾淨。':'甜得很直接，像糖果罐打開。'],1:['點杯子，一杯一杯注水。','熱水沖下去，粉層浮成一層殼。'],
+    2:['四分鐘到了。點杯子，用杯測匙破渣，順便湊近聞濕香。',''],3:['把浮在表面的渣撈乾淨。',''],4:[farm?'五杯都要喝：點杯子啜吸。':'點杯子，舀一匙用力啜吸。',''],5:['讓它放涼一點，再喝一口。','']};
+  const btn={0:'👃 聞乾香',3:'🥄 撈渣（五杯一起）',5:'⏳ 等它放涼'};
+  const render=(msg)=>{if(!S||S.act!==A)return;const h=HINT[A.ph]||['',''];
+    cw.innerHTML=`<div class="cq brewq">☕ ${h[0]}</div><div class="bhint">${msg||'&nbsp;'}</div>`+(btn[A.ph]?`<button class="bhold" id="cBtn">${btn[A.ph]}</button>`:'');
+    tl.querySelectorAll('.cupHit').forEach(b=>b.classList.toggle('on',cupCan(A,+b.dataset.i)));
+    const B=$('cBtn');if(B)B.onclick=()=>{B.disabled=true;
+      if(A.ph===0){A.dry=performance.now();sfx('whoosh');setTimeout(()=>{A.ph=1;render(HINT[0][1])},1100)}
+      else if(A.ph===3){A.skm=performance.now();sfx('brush');setTimeout(()=>sfx('brush'),500);setTimeout(()=>{A.ph=4;render('表面乾淨了，可以開始喝。')},1400)}
+      else if(A.ph===5){A.coolT=performance.now();sfx('tap');setTimeout(()=>{A.ph=6;sfx('down');render();finish()},2600)}}};
+  const WET=farm?['紅蘋果。','黑糖，還有一點柑橘。','跟第一杯一樣。','一樣乾淨。','五杯都一樣。']:['荔枝！','草莓糖……','玫瑰，好濃。','香到有點頭暈。','每一杯都一樣香——香得一模一樣。'];
+  const SIP=farm?['紅蘋果的酸，很明亮。','乾淨，沒有怪味。','一樣。','一樣，甜感很穩。','第五杯，也一樣乾淨。']:['好香……','荔枝、草莓糖。','很甜，甜得很直。','跟剛剛一樣。','第五杯，香氣還在。'];
+  tl.querySelectorAll('.cupHit').forEach(b=>b.onclick=()=>{const i=+b.dataset.i;if(!cupCan(A,i))return;const now=performance.now();
+    if(A.ph===1){A.fill[i]=now;A.last={i,kind:'pour',ts:now};sfx('pour');const k=A.fill.filter(x=>x).length;if(k===5)setTimeout(()=>{A.ph=2;render('（等待 4 分鐘……）')},700);else render(HINT[1][1])}
+    else if(A.ph===2){A.brk[i]=now;A.last={i,kind:'brk',ts:now};sfx('crack');const k=A.brk.filter(x=>x).length;if(k===5)setTimeout(()=>{A.ph=3;render(WET[4])},800);else render(WET[k-1])}
+    else if(A.ph===4){A.slp[i]=now;A.last={i,kind:'slp',ts:now};sfx('slurp');const k=A.slp.filter(x=>x).length;
+      if(k===5)setTimeout(()=>{if(farm){A.ph=6;sfx('up');render('五杯一致，沒有瑕疵杯。');finish()}else{A.ph=5;render(SIP[4])}},800);else render(SIP[k-1])}});
+  const finish=()=>{tl.querySelectorAll('.cupHit').forEach(b=>b.remove());setTimeout(()=>{if(!S||S.act!==A)return;cw.classList.remove('on');tl.classList.remove('click');showLine({s:'',t:n.t})},1300)};
+  render()}
+/* 抵達機場：入境大廳 → 地圖走到上車處 → 上車出發 */
+const ARR={NVA:{hall:'內瓦機場・入境大廳',sign:'LLEGADAS　入境',veh:'jeep',vc:['#4d6b3a','#344a26'],spot:'停車場',park:1,dusk:1,sky:['#e9a46a','#7a6aa0']},
+ HND:{hall:'羽田機場 第三航廈・入境大廳',sign:'到着　ARRIVALS',veh:'taxi',vc:['#2a2f3a','#181c24'],spot:'計程車乘車處',sky:['#bcd4ea','#e8eef4']},
+ TPE:{hall:'桃園機場 第一航廈・入境大廳',sign:'入境　ARRIVALS',veh:'taxi',vc:['#e8c440','#c49f22'],spot:'計程車招呼站',sky:['#a9c3d8','#d9e3ea']}};
+function walker(p,x,y,t,moving,bag){const lg=moving?(Math.sin(t*14)>0?1:-1):0;
+  if(bag){p(x-12,y-12,9,12,bag);p(x-12,y-12,9,1,'rgba(255,255,255,.3)');p(x-5,y-16,1,6,'#20252e');p(x-11,y,2,2,'#111');p(x-6,y,2,2,'#111')}
+  p(x-2,y-26,6,6,'#e0b48a');p(x-2,y-27,6,2,'#2b1d14');p(x-3,y-20,8,10,'#3d4f6a');p(x-3,y-10,3,10+lg,'#2a2f3a');p(x+2,y-10,3,10-lg,'#2a2f3a');p(x-5,y-18,2,7,'#3d4f6a')}
+function vehicle(p,x,y,v,c){if(v==='jeep'){p(x,y-22,64,16,c[0]);p(x+6,y-34,34,13,c[0]);p(x+9,y-31,12,8,'#9cc0ea');p(x+24,y-31,13,8,'#9cc0ea');p(x,y-8,64,3,c[1]);p(x+58,y-20,6,4,'#f2c94c');p(x-4,y-28,6,14,'#2a2a2a');
+   p.ell(x+14,y-4,7,7,'#151515');p.ell(x+14,y-4,3,3,'#888');p.ell(x+50,y-4,7,7,'#151515');p.ell(x+50,y-4,3,3,'#888')}
+  else{p(x,y-18,66,12,c[0]);p(x+12,y-28,40,11,c[0]);p(x+15,y-26,15,8,'#9cc0ea');p(x+33,y-26,16,8,'#9cc0ea');p(x+28,y-33,10,5,c===ARR.TPE.vc?'#fff':'#f2c94c');p(x,y-8,66,2,c[1]);p(x+62,y-16,4,3,'#fff5c0');
+   p.ell(x+14,y-5,6,6,'#151515');p.ell(x+14,y-5,2,2,'#999');p.ell(x+52,y-5,6,6,'#151515');p.ell(x+52,y-5,2,2,'#999')}}
+function actArrive(g,t,A){const p=PX(g),now=performance.now(),D=ARR[A.ap]||ARR.NVA,ph=Math.max(0,Math.min(2,(A.H0||2)-(A.hold||0)));
+  if(A._ph!==ph){A._ph=ph;A.ps=now;const L=$('arrL');if(L){const pc=(x,y)=>`left:${x/3.2}%;top:${y/2}%`;
+    L.innerHTML=ph===0?`<div class="arrsign" style="${pc(160,26)}">${D.sign}</div>`+(A.ap==='NVA'?`<div class="arrsign" style="${pc(236,74)};color:#2a1a10;font-size:9px">TAIWAN</div>`:'')
+     :ph===1?`<div class="arrlab" style="${pc(78,52)}">行李轉盤</div><div class="arrlab" style="${pc(122,96)}">入境大廳</div><div class="arrlab" style="${pc(196,28)}">出口</div><div class="arrlab dst" style="${pc(D.park?262:256,D.park?142:100)}">${D.spot}</div>`:''}}
+  const u=(now-A.ps)/1000,snd=(k,at,n)=>{if(u>=at&&!A.snd[ph+k]){A.snd[ph+k]=1;sfx(n)}};
+  const cap=document.getElementById('actCap'),txt=ph===0?D.hall:ph===1?'跟著指標，走到'+D.spot:(u<2?'上車':'出發');if(cap&&cap.textContent!==txt)cap.textContent=txt;
+  if(ph===0){p(0,0,320,120,'#c9cdd3');p(0,0,320,12,'#e9ecef');for(let x=20;x<320;x+=60)p(x,10,24,2,'#fffbe8');
+    const sk=D.sky;for(let y=36;y<92;y++){const f=(y-36)/56;p(0,y,320,1,f<.5?sk[1]:sk[0])}for(let x=0;x<320;x+=32)p(x,36,2,56,'#8b93a1');p(0,92,320,3,'#8b93a1');
+    p(84,16,152,20,'#1f2a36');p.frame(84,16,152,20,'#3a4350');
+    p(0,120,320,80,'#b9b4aa');for(let y=128;y<200;y+=10)p(0,y,320,1,'#a9a49a');for(let x=0;x<320;x+=40)p(x,120,1,80,'#aaa59b');
+    p(6,104,96,18,'#5a6068');p(6,102,96,4,'#8b93a1');for(let k=0;k<4;k++){const bx=6+((k*26+u*20)%92);p(bx,95,12,8,['#b5523a','#2f7a66','#3c3a3a','#6c9bd2'][k])}
+    const op=Math.min(1,Math.max(0,(u-1.6)/.4));p(250,52,62,70,'#59646f');p(254,56,27-op*20,66,'#9cc0ea');p(281+op*20,56,27-op*20,66,'#9cc0ea');p(254,56,54,2,'#e9ecef');p(268,46,26,6,'#4fb3a9');
+    if(A.ap==='NVA'){p(226,68,20,10,'#f4efe4');walker(p,236,124,t,0)}else{walker(p,222,124,t,0);walker(p,300,124,t,0)}
+    const wx=Math.min(276,30+u*90);walker(p,wx,150,t,wx<276,A.ap==='TPE'?'#2f7a66':'#b5523a');if(A.ap==='TPE')p(wx-14,128,9,10,'#2f7a66');
+    snd('d',1.6,'open')}
+  else if(ph===1){p(0,0,320,200,'#16202b');p.dith(0,0,320,200,'#1b2733',4);
+    p(30,36,180,70,'#2c3e52');p.frame(30,36,180,70,'#6c9bd2');p(50,46,56,14,'#3a4f66');p(186,34,20,4,'#4fb3a9');
+    p(0,112,320,8,'#4a5563');p(0,120,320,16,'#3a4350');for(let x=0;x<320;x+=18)p(x,127,9,1,'#c4cad1');
+    if(D.park){p(210,150,100,44,'#26323e');for(let x=214;x<306;x+=12)p(x,152,1,14,'#8b93a1');p(214,166,92,1,'#8b93a1');vehicle(p,248,166,'jeep',D.vc)}
+    else{p(236,110,40,6,'#f2c94c');vehicle(p,226,112,'taxi',D.vc)}
+    const pts=D.park?[[78,66],[122,88],[196,88],[196,116],[196,140],[262,160]]:[[78,66],[122,88],[196,88],[196,108],[248,108]];
+    const segs=[];let tot=0;for(let i=1;i<pts.length;i++){const l=Math.hypot(pts[i][0]-pts[i-1][0],pts[i][1]-pts[i-1][1]);segs.push(l);tot+=l}
+    const at=d=>{for(let i=0;i<segs.length;i++){if(d<=segs[i]){const f=d/segs[i];return [pts[i][0]+(pts[i+1][0]-pts[i][0])*f,pts[i][1]+(pts[i+1][1]-pts[i][1])*f]}d-=segs[i]}return pts[pts.length-1]};
+    const dist=Math.min(1,u/3)*tot;for(let d=0;d<tot;d+=6){const q=at(d);p(q[0],q[1],2,2,d<dist?'#d64545':'rgba(200,210,220,.35)')}
+    const me=at(dist);p.ell(me[0],me[1],4,4,'#fff');p.ell(me[0],me[1],2,2,'#d64545');const dst=pts[pts.length-1],pl=(Math.sin(t*5)+1)/2;p.frame(dst[0]-6-pl*2,dst[1]-6-pl*2,12+pl*4,12+pl*4,'#d64545');
+    snd('w',.1,'whoosh');snd('a',3,'pop')}
+  else{const sk=D.sky;for(let y=0;y<60;y++)p(0,y,320,1,y<30?sk[1]:sk[0]);p(0,30,320,86,'#9aa3ad');for(let x=6;x<320;x+=26){p(x,40,20,60,'#7f97ad');p(x,40,20,2,'#c6d6e4')}p(0,100,320,8,'#d8dde3');
+    p(0,116,320,30,'#c7c2b8');p(0,144,320,3,'#8b8578');p(0,147,320,53,'#3a4048');for(let x=0;x<320;x+=30)p(x+((now/20)%0),172,16,2,'#c4cad1');
+    if(!D.park)p(160,110,24,8,'#f2c94c');
+    const drive=Math.max(0,u-2.1),vx=170+drive*drive*110;vehicle(p,vx,160,D.veh,D.vc);
+    if(drive>0){for(let k=0;k<5;k++){const ph2=(t*2+k*.2)%1;g.globalAlpha=.5*(1-ph2);p.ell(vx-6-ph2*24,150-ph2*6,3+ph2*5,2+ph2*3,'#bbb');g.globalAlpha=1}snd('v',2.1,'bump');snd('v2',2.3,'whoosh')}
+    if(u<1.8){const wx=40+u*80;walker(p,Math.min(wx,182),142,t,wx<182,A.ap==='TPE'?'#2f7a66':'#b5523a')}snd('dr',1.8,'pop')}
+  p.vig()}
+
+/* 採收：只摘紅透的 */
+const CHERRY=(()=>{const r=R(77),L=[],types='rrgryoprgrrygrpror'.split('');const br=[[20,62,300,46],[10,120,290,138]];let n=0;
+  for(const [x1,y1,x2,y2] of br)for(let k=0;k<9;k++){const f=(k+.5)/9,x=x1+(x2-x1)*f,y=y1+(y2-y1)*f+Math.sin(k*1.7)*4;L.push({x:x+(r()-.5)*6,y:y+8+(k%2?4:0),k:types[n++%types.length]})}return L})();
+const CCOL={g:['#6aa84f','#4e8a3a'],y:['#c9c34a','#a39d2c'],o:['#e08a3a','#b86a22'],r:['#c8202a','#8a1018'],p:['#4a1626','#2e0c16']};
+function actPick(g,t,A){const p=PX(g),now=performance.now();
+  for(let y=0;y<200;y++){const f=y/200;p(0,y,320,1,`rgb(${Math.round(150+f*40)},${Math.round(190+f*20)},${Math.round(210-f*30)})`)}
+  p.ell(60,150,140,40,'#6c8a6a');p.ell(260,160,140,40,'#5f7d5c');
+  const r=R(9);for(let k=0;k<70;k++){const x=r()*320,y=r()*170,c=k%3?'#2f5a2a':'#3f7436';p.ell(x,y,9,4,c);p(x-6,y,12,1,'#24461f')}
+  p.line(0,0,0,'#000');g.strokeStyle='#5a3d27';g.lineWidth=4;g.beginPath();g.moveTo(20,62);g.lineTo(300,46);g.moveTo(10,120);g.lineTo(290,138);g.stroke();
+  for(let k=0;k<18;k++){const x=20+k*16,y=k<9?62-k*1.7:120+(k-9)*2;p.ell(x,y-4,7,3,'#3f7436')}
+  CHERRY.forEach((c,i)=>{const pk=A.picked[i];let x=c.x,y=c.y;
+    if(pk){const q=(now-pk)/450;if(q>=1)return;x=x+(286-x)*q;y=y+(176-y)*q-Math.sin(q*3.14)*30}
+    const bd=A.bad[i];if(bd&&now-bd<400)x+=Math.sin((now-bd)/25)*2;
+    const C=CCOL[c.k];p.ell(x,y,5,5,C[1]);p.ell(x,y-1,4,4,C[0]);p(x-2,y-3,2,1,'rgba(255,255,255,.6)');p(x-1,y-6,2,2,'#4e3a22')});
+  p(262,166,48,28,'#a77b4a');for(let x=262;x<310;x+=6)p(x,166,1,28,'#7d5934');p(260,164,52,4,'#c49a64');
+  const n=A.picked.filter(x=>x).length;for(let k=0;k<n;k++)p.ell(270+(k%6)*7,170+Math.floor(k/6)*6-(n>6?0:0),3,3,'#c8202a');
+  const cap=document.getElementById('actCap'),txt='籃子裡：'+n+' / '+A.need+' 顆紅透的果實';if(cap&&cap.textContent!==txt)cap.textContent=txt;
+  p.vig()}
+function playPick(n){ffwd=false;$('tFF').classList.remove('on');waiting=false;$('box').style.display='none';$('nextBtn').classList.remove('on');
+  const A=S.act,cw=$('choices'),tl=$('tvLayer');A.picked=CHERRY.map(()=>0);A.bad=CHERRY.map(()=>0);A.need=CHERRY.filter(c=>c.k==='r').length;A.miss=0;
+  cw.classList.add('on');tl.classList.add('click');
+  tl.insertAdjacentHTML('beforeend',CHERRY.map((c,i)=>`<button class="pickHit" data-i="${i}" style="left:${c.x/3.2}%;top:${c.y/2}%" aria-label="果實"></button>`).join(''));
+  const say=m=>{cw.innerHTML=`<div class="cq brewq">🍒 點果實，親手摘下紅透的那幾顆</div><div class="bhint">${m}</div>`};
+  say('卡洛斯：「像紅酒那種紅，才摘。」');
+  const WHY={g:'卡洛斯：「綠的還沒熟，酸得像檸檬。留著。」',y:'卡洛斯：「黃的還差幾天，糖還沒進去。」',o:'卡洛斯：「半紅？再等兩天。」',p:'卡洛斯：「黑掉了，過熟。丟進去，整槽都會有酒臭味。」'};
+  tl.querySelectorAll('.pickHit').forEach(b=>b.onclick=()=>{const i=+b.dataset.i,c=CHERRY[i];if(A.picked[i])return;
+    if(c.k==='r'){A.picked[i]=performance.now();sfx('pop');b.remove();const k=A.picked.filter(x=>x).length;
+      if(k>=A.need){say('卡洛斯：「……還行。明天五點，再來。」');sfx('up');tl.querySelectorAll('.pickHit').forEach(x=>x.remove());setTimeout(()=>{if(!S||S.act!==A)return;cw.classList.remove('on');tl.classList.remove('click');showLine({s:'',t:n.t})},1500)}
+      else say(['好，一顆。','手指輕輕一扭，果實就掉進手心。','又一顆。','樹枝刮了一下手背。','越來越順手了。'][k%5])}
+    else{A.bad[i]=performance.now();A.miss++;sfx('buzz');say(WHY[c.k]+(A.miss>=3?'<br>（提示：只摘最深的那種紅。）':''))}});
+}
 function actJeep(g,t,A){const p=PX(g),e=(performance.now()-A.t0)/1000,arrive=Math.min(1,Math.max(0,(e-4.6)/1.4)),spd=1-arrive*.95,X=(e<4.6?e:4.6+(1-Math.pow(1-arrive,2))*1.4*.5)*90;
   const hrs=Math.min(3,Math.floor(e/1.15));const cap=document.getElementById('actCap'),txt=arrive>=1?'抵達帕洛瑪莊園':'吉普車・山路 '+(hrs+1)+' / 4 小時';if(cap&&cap.textContent!==txt)cap.textContent=txt;
   // 天空：黃昏到夜
@@ -2121,7 +2248,7 @@ function actPest(g,t,A){const p=PX(g),e=(performance.now()-A.t0)/1000,z=Math.min
     const bx=nx+16+Math.sin(t*1.5)*6,by=ny-6+Math.cos(t*1.5)*2;g.fillStyle='#1a1210';g.beginPath();g.ellipse(bx,by,4,2.6,.3,0,6.283);g.fill();p(bx-5,by-1,2,1,'#3a2a20');
     for(let k=-1;k<=1;k++){p(bx+k*2,by+2,1,2,'#1a1210');p(bx+k*2,by-3,1,2,'#1a1210')}});
   p.vig()}
-BGS.act=function(g,t){const A=S&&S.act;if(!A)return;if(A.k==='buybean'){BGS.beanshop(g,t);return}(A.k==='form'||A.k==='form2'?actForm:A.k==='pack'?actPack:A.k==='flood'?actFlood:A.k==='water'?actWater:A.k==='roast'?actRoast:A.k==='notebook'?actNotebook:A.k==='pest'?actPest:A.k==='cup'||A.k==='cupfarm'?actCup:A.k==='jeep'?actJeep:actClean)(g,t,A)};
+BGS.act=function(g,t){const A=S&&S.act;if(!A)return;if(A.k==='buybean'){BGS.beanshop(g,t);return}(A.k==='form'||A.k==='form2'?actForm:A.k==='pack'?actPack:A.k==='flood'?actFlood:A.k==='water'?actWater:A.k==='roast'?actRoast:A.k==='notebook'?actNotebook:A.k==='pest'?actPest:A.k==='cup'||A.k==='cupfarm'?actCup:A.k==='jeep'?actJeep:A.k==='arrive'?actArrive:A.k==='pick'?actPick:actClean)(g,t,A)};
 
 
 /* 存款 */
@@ -2161,39 +2288,60 @@ const RFAIL=[
 function beanCol(T){const k=Math.min(1.2,Math.max(0,(T-95)/113)),lerp=(a,b,u)=>Math.round(a+(b-a)*u);
   const st=k<.45?[[122,140,90],[214,180,90],k/.45]:k<.85?[[214,180,90],[150,90,50],(k-.45)/.4]:k<=1?[[150,90,50],[105,60,32],(k-.85)/.15]:[[105,60,32],[35,22,16],Math.min(1,(k-1)/.2)];
   return `rgb(${lerp(st[0][0],st[1][0],st[2])},${lerp(st[0][1],st[1][1],st[2])},${lerp(st[0][2],st[1][2],st[2])})`}
-function actRoast(g,t,A){const p=PX(g),E=(performance.now()-A.t0)/1000,MT=3.6,mont=E<MT,fi=Math.min(2,Math.floor(E/1.2)),fu=Math.min(1,(E-fi*1.2)/.9);
-  const e=Math.max(0,E-MT),T=mont?RFAIL[fi].f(fu*RFAIL[fi].end):roastT(e),drop=!mont&&e>=6.4,de=Math.max(0,e-6.4);
-  const st=drop?'⑤ 下豆・冷卻':T<150?'① 脫水期':T<196?'② 梅納期・焦糖化':e<5.2?'③ 一爆！劈啪劈啪':'④ 發展期';
-  const cap=document.getElementById('actCap'),txt=mont?RFAIL[fi].n+'　'+RFAIL[fi].why:'第 17 鍋　'+st+'　豆溫 '+Math.round(T)+'°C';if(cap&&cap.textContent!==txt)cap.textContent=txt;
+const RFIRE={big:{n:'大火',c:'#d64545',f:s=>s<=5.2?RFAIL[0].f(s):238+(s-5.2)*5},mid:{n:'中火',c:'#ece4d4',f:s=>s<=6.2?roastT(s):208+(s-6.2)*10},small:{n:'小火',c:'#e0a050',f:s=>RFAIL[1].f(Math.min(s,6.4))+Math.max(0,s-6.4)*1.2}};
+const RSPD=2,RMAX=7.6;
+function roastNow(A){return A.ph==='roast'?Math.min(RMAX,(performance.now()-A.rs)/1000/RSPD):A.ph==='drop'?A.dropS:0}
+function roastJudge(fire,s0){const T=RFIRE[fire].f(s0);if(T<196)return {ok:0,c:'#6c9bd2',why:'還沒到一爆就下豆 → 生青草味、尖酸'};
+  if(fire==='big')return {ok:0,c:'#d64545',why:s0<3.6?'火太大：升溫太快 → 外焦內生、苦澀':'火太大：衝過二爆 → 焦苦、煙味'};
+  if(fire==='small')return {ok:0,c:'#e0a050',why:'火太小：一爆後曲線平掉 → 烤焙感、平淡'};
+  if(s0<5.3)return {ok:0,c:'#9cc0ea',why:'一爆剛開始就下豆 → 發展不足，酸得很尖'};
+  if(s0>6.8)return {ok:0,c:'#b07a4f',why:'發展太久 → 焦糖蓋過水果味'};return {ok:1,c:'#4fb3a9',why:'一爆後發展剛好 → 紅蘋果、黑糖，還留著柑橘的酸'}}
+function actRoast(g,t,A){const p=PX(g),now=performance.now(),e=roastNow(A),F=RFIRE[A.fire],T=A.ph==='fire'?95:F.f(e),drop=A.ph==='drop',de=drop?(now-A.dropT)/1000:0,roasting=A.ph==='roast';
+  const st=A.ph==='fire'?'選火力，準備入豆':drop?'⑤ 下豆・冷卻':T<150?'① 脫水期':T<196?'② 梅納期・焦糖化':(T<212?'③ 一爆！劈啪劈啪':'④ 發展期');
+  const cap=document.getElementById('actCap'),txt=(A.ph==='fire'?'第 '+A.no+' 鍋　':'第 '+A.no+' 鍋　'+F.n+'　')+st+(A.ph==='fire'?'':'　豆溫 '+Math.round(T)+'°C');if(cap&&cap.textContent!==txt)cap.textContent=txt;
+  if(roasting&&T>=196&&!A.crk){A.crk=1;for(let i=0;i<14;i++)setTimeout(()=>{if(S&&S.act===A&&A.ph==='roast')sfx('crack')},i*150+Math.random()*90)}
   const brick=(x0,y0,w,h)=>{p(x0,y0,w,h,'#24170f');for(let y=y0-(y0%7);y<y0+h;y+=7){const o=(y/7)%2?0:9;for(let x=-9;x<320;x+=18){const xx=Math.max(x0,x+o),x2=Math.min(x0+w,x+o+17);const yy=Math.max(y0,y),y2=Math.min(y0+h,y+6);if(x2>xx&&y2>yy)p(xx,yy,x2-xx,y2-yy,'#2c1c13')}}};
   brick(0,0,320,200);
-  // 左：滾筒視窗
   const cx=88,cy=92,r=62;
-  if(de<=.5){p.ell(cx,cy,r+8,r+8,'#2c323a');p.ell(cx,cy,r+4,r+4,'#5d656e');p.ell(cx,cy,r,r,'#1a0e08');
-    const fl=.6+.4*Math.sin(t*6);g.fillStyle=`rgba(255,${120+40*fl|0},60,${drop?.05:.25})`;g.beginPath();g.arc(cx,cy,r,0,6.283);g.fill();
-    const col=beanCol(T);g.save();g.beginPath();g.arc(cx,cy,r,0,6.283);g.clip();
-    const nB=drop?Math.max(0,Math.round(60*(1-de/.5))):60,crack=!mont&&!drop&&T>=196&&e<5.2;
-    for(let i=0;i<nB;i++){const a=t*(drop?0:2.2)+i*.37,rad=(i%5)*9+14,bx=cx+Math.cos(a)*rad*(.9+.1*Math.sin(i)),by=cy+18+Math.sin(a)*rad*.55+(drop?de*160:0);
-      p(bx-3,by-2,6,4,col);p(bx-2,by-3,4,6,col);p(bx-1,by-1,2,1,'rgba(0,0,0,.45)');if(crack&&(i+Math.floor(t*12))%11===0){p(bx-5,by-5,2,2,'#ffe2a8');p(bx+4,by-4,2,2,'#ffe2a8')}}
-    g.restore();
-    if(mont&&fi===0&&fu>.8)for(let k2=0;k2<10;k2++){const ph=(t*1.2+k2*.1)%1;g.globalAlpha=(1-ph)*.8;p(cx-40+k2*9,cy-30-ph*50,3,3,'#555');g.globalAlpha=1}
-    if(crack)for(let k2=0;k2<6;k2++){const ph=(t*2+k2*.17)%1;g.globalAlpha=1-ph;p(cx-30+k2*12,cy-20-ph*40,2,2,'#c8b8a8');g.globalAlpha=1}}
+  if(!drop||de<=.5){p.ell(cx,cy,r+8,r+8,'#2c323a');p.ell(cx,cy,r+4,r+4,'#5d656e');p.ell(cx,cy,r,r,'#1a0e08');
+    const fl=.6+.4*Math.sin(t*6),fa=A.ph==='fire'?.06:A.fire==='big'?.4:A.fire==='small'?.14:.25;g.fillStyle=`rgba(255,${120+40*fl|0},60,${drop?.05:fa})`;g.beginPath();g.arc(cx,cy,r,0,6.283);g.fill();
+    if(A.ph!=='fire'){const col=beanCol(T);g.save();g.beginPath();g.arc(cx,cy,r,0,6.283);g.clip();
+      const nB=drop?Math.max(0,Math.round(60*(1-de/.5))):Math.round(60*Math.min(1,(now-A.rs)/500)),crack=roasting&&T>=196&&T<214;
+      for(let i=0;i<nB;i++){const a=t*(drop?0:2.2)+i*.37,rad=(i%5)*9+14,bx=cx+Math.cos(a)*rad*(.9+.1*Math.sin(i)),by=cy+18+Math.sin(a)*rad*.55+(drop?de*160:0);
+        p(bx-3,by-2,6,4,col);p(bx-2,by-3,4,6,col);p(bx-1,by-1,2,1,'rgba(0,0,0,.45)');if(crack&&(i+Math.floor(t*12))%11===0){p(bx-5,by-5,2,2,'#ffe2a8');p(bx+4,by-4,2,2,'#ffe2a8')}}
+      g.restore();
+      if(roasting&&T>224)for(let k2=0;k2<10;k2++){const ph=(t*1.2+k2*.1)%1;g.globalAlpha=(1-ph)*.8;p(cx-40+k2*9,cy-30-ph*50,3,3,'#555');g.globalAlpha=1}
+      if(crack)for(let k2=0;k2<6;k2++){const ph=(t*2+k2*.17)%1;g.globalAlpha=1-ph;p(cx-30+k2*12,cy-20-ph*40,2,2,'#c8b8a8');g.globalAlpha=1}}
+    else{p(cx-24,cy-r-22,48,18,'#5d656e');p(cx-18,cy-r-20,36,12,'#8a6a3a');for(let k=0;k<20;k++)p(cx-16+(k*7)%32,cy-r-18+(k%3)*3,3,2,'#7a8c5a')}
+    const fy=cy+r+12,fw=A.ph==='fire'?0:A.fire==='big'?14:A.fire==='mid'?9:5;for(let k=0;k<7;k++){const h=fw*(.6+.4*Math.sin(t*12+k));p(cx-30+k*10,fy-h,4,h,k%2?'#f2a93b':'#e0603a')}}
   else{const k3=Math.min(1,(de-.5)/.4);p.ell(cx,cy+14,70,30,'#4d555f');p.ell(cx,cy+12,66,27,'#8d959e');p.ell(cx,cy+12,60,23,'#2a1608');
-    const rr=R(3);for(let i=0;i<Math.round(260*k3);i++){const a=rr()*6.283,d=Math.sqrt(rr());p(cx+Math.cos(a)*d*56,cy+12+Math.sin(a)*d*21,3,2,rr()>.5?'#6a3c20':'#8a5030')}
+    const rr=R(3);for(let i=0;i<Math.round(260*k3);i++){const a=rr()*6.283,d=Math.sqrt(rr());p(cx+Math.cos(a)*d*56,cy+12+Math.sin(a)*d*21,3,2,beanCol(T))}
     const ang=t*1.6;g.strokeStyle='#c4cad1';g.lineWidth=2;g.beginPath();g.moveTo(cx,cy+12);g.lineTo(cx+Math.cos(ang)*56,cy+12+Math.sin(ang)*21);g.stroke();
     for(let k2=0;k2<10;k2++){const ph=(t*.8+k2*.1)%1;g.globalAlpha=(1-ph)*.6;p(cx-45+k2*10,cy-ph*50,1,4,'#c8c8c8');g.globalAlpha=1}}
-  // 右：烘焙曲線
-  const L=176,R0=310,Tp=44,B=160,X=s0=>L+(s0/7)*(R0-L),Y=v=>B-(Math.min(240,v)-80)/160*(B-Tp);
+  const L=176,R0=310,Tp=44,B=160,X=s0=>L+(s0/RMAX)*(R0-L),Y=v=>B-(Math.min(240,v)-80)/160*(B-Tp);
   p(L-6,Tp-10,R0-L+12,B-Tp+28,'rgba(14,17,22,.9)');p(L,Tp,1,B-Tp,'#4a5566');p(L,B,R0-L,1,'#4a5566');
   [[150,'#d99a2b'],[196,'#d64545'],[224,'#5b6372']].forEach(([v,c])=>{for(let x=L;x<R0;x+=4)p(x,Y(v),2,1,c)});
-  RFAIL.forEach((F,i)=>{const done=!mont||i<fi,lim=done?F.end:(i===fi?fu*F.end:-1);if(lim<0)return;g.globalAlpha=done&&!(mont&&i===fi)?.45:1;
-    for(let s0=0;s0<=lim;s0+=.04)p(X(s0),Y(F.f(s0)),2,2,F.c);p(X(lim)-2,Y(F.f(lim))-2,4,4,F.c);g.globalAlpha=1;
-    const tag=document.getElementById('rf'+i);if(tag&&done&&tag.hidden){tag.hidden=false}});
-  if(!mont){for(let s0=0;s0<=Math.min(e,6.4);s0+=.04)p(X(s0),Y(roastT(s0)),2,2,'#ece4d4');
-    const fcT=4.33;if(e>=fcT)p.ell(X(fcT),Y(196),3,3,'#d64545');if(drop)p(X(6.4)-1,Tp,2,B-Tp,'#4fb3a9');
-    const tg=document.getElementById('rf3');if(tg&&drop&&tg.hidden)tg.hidden=false}
-  p.vig()}
-
+  p(X(5.3),Tp,X(6.8)-X(5.3),2,'rgba(79,179,169,.5)');
+  A.hist.forEach(H=>{g.globalAlpha=H.ok?1:.45;for(let s0=0;s0<=H.end;s0+=.04)p(X(s0),Y(RFIRE[H.fire].f(s0)),2,2,H.c);p(X(H.end)-2,Y(RFIRE[H.fire].f(H.end))-2,4,4,H.c);g.globalAlpha=1});
+  if(A.ph!=='fire'&&!(drop&&A.hist.length&&A.hist[A.hist.length-1].t===A.dropT)){for(let s0=0;s0<=e;s0+=.04)p(X(s0),Y(F.f(s0)),2,2,'#ffffff');p.ell(X(e),Y(T),3,3,'#fff')}
+  A._X=X;A._Y=Y;p.vig()}
+function playRoast(n){ffwd=false;$('tFF').classList.remove('on');waiting=false;$('box').style.display='none';$('nextBtn').classList.remove('on');
+  const A=S.act,cw=$('choices'),NO=[3,9,12,14,15,16];cw.classList.add('on');
+  const fireUI=(msg)=>{A.ph='fire';A.crk=0;A.no=NO[Math.min(A.tries,NO.length-1)];
+    cw.innerHTML=`<div class="cq brewq">🔥 第 ${A.no} 鍋：先決定火力</div><div class="bhint">${msg}</div><div class="rfire">${['small','mid','big'].map(k=>`<button class="bhold rf" data-k="${k}">${RFIRE[k].n}</button>`).join('')}</div>`;
+    cw.querySelectorAll('.rf').forEach(b=>b.onclick=()=>{A.fire=b.dataset.k;sfx('tap');
+      cw.innerHTML=`<div class="cq brewq">🔥 ${RFIRE[A.fire].n}。生豆倒進豆槽了</div><div class="bhint">按「入豆」，豆子就會落進滾筒。</div><button class="bhold" id="rIn">⬇ 入豆</button>`;
+      $('rIn').onclick=()=>{A.ph='roast';A.rs=performance.now();sfx('whoosh');
+        cw.innerHTML=`<div class="cq brewq">👂 聽爆裂聲，看顏色和曲線</div><div class="bhint">覺得到了，就按「下豆」。</div><button class="bhold" id="rDrop">⬇ 下豆</button>`;
+        const go=()=>{if(A.ph!=='roast')return;clearInterval(A.iv);A.dropS=roastNow(A);A.ph='drop';A.dropT=performance.now();sfx('whoosh');
+          const J=roastJudge(A.fire,A.dropS);if(J.ok)A.no=17;A.hist.push({fire:A.fire,end:A.dropS,c:J.c,ok:J.ok,t:A.dropT});
+          const tg=document.createElement('div');tg.className='rtag'+(J.ok?' ok':'');tg.style.cssText=`left:${A._X(A.dropS)/3.2}%;top:${A._Y(RFIRE[A.fire].f(A.dropS))/2}%;border-color:${J.c}`;tg.textContent=A.no+(J.ok?' ✓':'');$('rTags').appendChild(tg);
+          setTimeout(()=>{if(!S||S.act!==A)return;A.tries++;
+            if(J.ok){sfx('up');cw.innerHTML=`<div class="cq brewq">✓ 第 17 鍋　${J.why}</div><div class="bhint">沈懷舟聞了一下冷卻盤，點了一下頭。</div><button class="bhold" id="rEnd">繼續</button>`;$('rEnd').onclick=()=>{cw.classList.remove('on');showLine({s:'',t:n.t})}}
+            else{sfx('down');const SH={'#6c9bd2':'沈懷舟：「生的。咬一口都是草。」','#d64545':'沈懷舟：「聞到煙了嗎？火太急。」','#e0a050':'沈懷舟：「一爆之後火撐不住，味道就塌了。」','#9cc0ea':'沈懷舟：「一爆才剛開始，你就慌了。」','#b07a4f':'沈懷舟：「太久了。水果都被你烤沒了。」'};
+              cw.innerHTML=`<div class="cq brewq">✗ 第 ${A.no} 鍋　${J.why}</div><div class="bhint">${SH[J.c]||''}</div><button class="bhold" id="rNext">🫘 下一批生豆</button>`;$('rNext').onclick=()=>{sfx('pop');fireUI('再來一鍋。'+(A.tries>=3?'（提示：中火，一爆開始後再等一下，在綠色區間內下豆。）':''))}}},1400)};
+        $('rDrop').onclick=go;A.iv=setInterval(()=>{if(!S||S.act!==A){clearInterval(A.iv);return}if(roastNow(A)>=RMAX)go()},200)}})};
+  fireUI('沈懷舟：「火是你給的，豆子會告訴你對不對。」')}
 /* 水瓶被換掉的動畫 */
 function bottle(p,x,y,cap,seal,sc,lvl){const s0=sc||1,w=Math.round(20*s0),h=Math.round(54*s0);
   p(x-w/2,y,w,h,'rgba(170,205,230,.35)');p.frame(x-w/2,y,w,h,'#c6dcf2');p(x-w/2+1,y+Math.round(h*(1-(lvl||.82))),w-2,Math.round(h*(lvl||.82))-1,'rgba(108,155,210,.45)');
