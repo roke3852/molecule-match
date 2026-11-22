@@ -677,6 +677,19 @@ html.dark .k-market{--xc:#d0705c}html.dark .k-light{--xc:#c9a25e}html.dark .k-ri
 .xwhy>i{font-style:normal;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:14px;color:#fff;background:var(--xc);border:2px solid #1b1612}.xwhy>i.opt{background:transparent;color:var(--xc);border-color:var(--xc)}
 .xwhy>b{font-family:var(--ff-px);font-size:13px;background:var(--xc);color:#fff;padding:3px 6px;border:2px solid #1b1612;box-shadow:2px 2px 0 #1b1612;line-height:1}
 .xwhy span{font-size:14px;line-height:1.5}.xwhy em{display:block;font-style:normal;font-weight:700;font-family:var(--ff-b)}
+.dbrief{margin:10px 0;border:2px solid var(--px);background:var(--card);padding:10px;box-shadow:3px 3px 0 var(--px)}
+.db-t b{display:inline-block;background:var(--day);color:#fff;font-family:var(--ff-b);font-size:14px;padding:3px 10px;border:2px solid #1b1612;box-shadow:2px 2px 0 #1b1612;margin-bottom:6px}.db-t span{display:block;font-size:15px;line-height:1.6}
+.db-far{margin-top:6px;font-size:13px;color:var(--sub)}.db-far b{color:var(--ink)}
+.db-svg{width:100%;height:auto;display:block;margin-top:6px;background:color-mix(in srgb,var(--sea) 6%,var(--card));border:1.5px solid var(--line);shape-rendering:crispEdges;font-family:var(--ff-px)}
+.db-svg .cst{fill:none;stroke:color-mix(in srgb,var(--sea) 55%,transparent);stroke-width:3;stroke-linejoin:round}
+.db-svg .rt{fill:none;stroke:var(--day);stroke-width:2;stroke-dasharray:5 3;opacity:.8}
+.db-svg .hb{fill:#fbf7ef;stroke:#1b1612;stroke-width:2}.db-svg .hw{fill:#c0392b}.db-svg .hl{font-size:10px;fill:var(--ink);font-weight:700;paint-order:stroke;stroke:var(--card);stroke-width:3px}
+.db-p rect{fill:var(--day);stroke:#1b1612;stroke-width:2}.db-p text{fill:#fff;font-size:11px;font-weight:700}.db-p.far rect{fill:var(--gold)}
+.db-svg .fl{font-size:11px;font-weight:700;fill:var(--ink);paint-order:stroke;stroke:var(--card);stroke-width:3px;font-family:var(--ff-b)}
+.db-svg .sc{stroke:var(--ink);stroke-width:2}.db-svg .st{font-size:9px;fill:var(--sub)}
+.db-l{list-style:none;margin:8px 0 0;padding:0;display:flex;flex-direction:column;gap:3px}.db-l li{display:flex;align-items:center;gap:8px;font-size:13px}
+.db-l i{font-style:normal;flex:none;width:20px;height:20px;display:flex;align-items:center;justify-content:center;background:var(--day);color:#fff;border:2px solid #1b1612;font-size:11px;font-family:var(--ff-px)}.db-l li.far i{background:var(--gold)}
+.db-l span{flex:1;min-width:0}.db-l em{font-style:normal;color:var(--sub);font-size:12px;white-space:nowrap}
 .xfar{display:flex;flex-direction:column;gap:5px;margin-top:8px}
 .xnear-h{font-family:var(--ff-b);font-weight:700;font-size:13px;color:var(--ink);margin-bottom:2px}
 .xfar .far{grid-template-columns:auto auto 1fr!important}.xfar .far>i{grid-row:span 2;align-self:center;font-style:normal;font-family:var(--ff-px);font-size:12px;color:var(--sub);min-width:16px;text-align:right}
@@ -1581,6 +1594,41 @@ function photoThumbs(id,n){const g=S.get('gphoto',{}),ks=stopPhotoKeys(id).slice
 function photoHero(id){const g=S.get('gphoto',{}),ks=stopPhotoKeys(id);if(!ks.length||!g[ks[0]].u)return '';return `<img class="sim-hero" src="${g[ks[0]].u}" data-szoom="${ks[0]}" alt="">`}
 function photoBox(id,q){const g=S.get('gphoto',{}),pre='s_'+id+'_',ks=stopPhotoKeys(id),mx=ks.reduce((m,k)=>Math.max(m,+k.slice(pre.length)||0),-1);
  return `<div class="sph">${ks.map(k=>g[k].u?`<img src="${g[k].u}" data-szoom="${k}" alt="照片">`:`<span class="ld">載入中…</span>`).join('')}${ks.length<SPMAX?`<button class="add" data-sphoto="${pre}${mx+1}">📷 ${ks.length?'再加一張':'加照片'}</button>`:''}<a class="add" style="display:inline-flex;align-items:center;text-decoration:none" href="https://www.google.com/search?tbm=isch&q=${encodeURIComponent(q)}" target="_blank" rel="noopener">🔍 搜尋照片</a></div>`}
+
+/* ---------- 每日簡介＋簡圖 ---------- */
+const DBRIEF=[
+ ['✈️ 抵達日','傍晚落地福岡機場，搭車到博多站吃晚餐、逛一下就回飯店休息。'],
+ ['🚶 市區散步','睡飽後在天神吃、逛、看聖誕市集，晚上到博多吃燒肉；全程都在飯店 2 公里內。'],
+ ['🐬 海邊大自然','搭 JR 往北到海之中道：水族館看海豚秀、海濱公園讓小孩放電，晚上回天神。'],
+ ['🍁 太宰府賞楓','搭西鐵往東南到太宰府：先上竈門神社看楓，再逛天滿宮和參道，晚上吃屋台。'],
+ ['🦁 大分一日遊','往東開到大分：九州自然動物園看野生動物，下午到由布院逛湯之坪街道、金鱗湖。'],
+ ['🌊 百道濱・LaLaport','中午吃大東園燒肉，下午到西邊百道濱 BOSS E・ZO（teamLab），再到 LaLaport 看鋼彈。'],
+ ['🚄 北九州一日','新幹線到小倉，再到門司港看鐵道紀念館、唐戶市場吃海鮮，傍晚小倉城賞楓。'],
+ ['🧳 回家日','大濠公園散步、櫛田神社、補買伴手禮，傍晚出發去機場。']];
+const COAST=[[33.60,130.20],[33.585,130.27],[33.588,130.32],[33.594,130.35],[33.602,130.375],[33.61,130.395],[33.625,130.41],[33.65,130.42],[33.668,130.418],[33.662,130.38],[33.66,130.355],[33.668,130.33],[33.675,130.30],[33.685,130.32],[33.695,130.40],[33.72,130.45],[33.78,130.48],[33.85,130.53],[33.90,130.63],[33.93,130.73],[33.94,130.85],[33.96,130.95],[33.95,130.985],[33.90,130.99],[33.80,131.0],[33.70,131.03],[33.60,131.15],[33.50,131.30],[33.40,131.45],[33.30,131.50],[33.25,131.55]];
+const HOTEL_LL=[33.5848,130.4047];
+function llKm(a,b){const dy=(a[0]-b[0])*111.0,dx=(a[1]-b[1])*92.7;return Math.hypot(dx,dy)}
+function dirTxt(p){const dy=p[0]-HOTEL_LL[0],dx=(p[1]-HOTEL_LL[1])*.835,a=Math.atan2(dy,dx)*180/Math.PI;const D=['東','東北','北','西北','西','西南','南','東南'];return D[Math.round(((a+360)%360)/45)%8]}
+const kmTxt=k=>k<1?Math.round(k*1000)+' m':k<10?k.toFixed(1)+' km':Math.round(k)+' km';
+function dayBrief(i){const d=D(i),B=DBRIEF[i]||['',''];const pts=[];
+ d.stops.forEach(s=>{const p=LL[s.q];if(!p||s.q==='Hotel Monterey Fukuoka')return;const last=pts[pts.length-1];if(last&&last.q===s.q)return;if(pts.find(x=>x.q===s.q))return;pts.push({q:s.q,p,n:s.n.replace(/【[^】]*】/g,'').replace(/（.*?）/g,'').trim()})});
+ if(!pts.length)return '';
+ const far=pts.reduce((a,b)=>llKm(b.p,HOTEL_LL)>llKm(a.p,HOTEL_LL)?b:a);
+ const W=340,H=190,all=pts.map(x=>x.p).concat([HOTEL_LL]);
+ let a0=Math.min(...all.map(x=>x[0])),a1=Math.max(...all.map(x=>x[0])),l0=Math.min(...all.map(x=>x[1])),l1=Math.max(...all.map(x=>x[1]));
+ const ca=.835;let sx=(l1-l0)*ca,sy=a1-a0;const mn=.012;if(sx<mn){l0-=(mn-sx)/ca/2;l1+=(mn-sx)/ca/2;sx=mn}if(sy<mn){a0-=(mn-sy)/2;a1+=(mn-sy)/2;sy=mn}
+ const iw=W-70,ih=H-80,k=Math.min(iw/sx,ih/sy),cx=(l0+l1)/2,cy=(a0+a1)/2;
+ const X=l=>(W/2+(l-cx)*ca*k).toFixed(1),Y=a=>(H/2+4-(a-cy)*k).toFixed(1);
+ let g=`<svg viewBox="0 0 ${W} ${H}" class="db-svg">`;
+ g+=`<polyline points="${COAST.map(c=>X(c[1])+','+Y(c[0])).join(' ')}" class="cst"/>`;
+ g+=`<polyline points="${[HOTEL_LL].concat(pts.map(x=>x.p)).map(c=>X(c[1])+','+Y(c[0])).join(' ')}" class="rt"/>`;
+ const hx=+X(HOTEL_LL[1]),hy=+Y(HOTEL_LL[0]);
+ g+=`<g class="db-h"><rect x="${hx-8}" y="${hy-9}" width="16" height="18" class="hb"/>${[0,1,2].map(r=>[0,1].map(c=>`<rect x="${hx-5+c*6}" y="${hy-6+r*5}" width="4" height="3" class="hw"/>`).join('')).join('')}<text x="${hx}" y="${hy+21}" text-anchor="middle" class="hl">飯店</text></g>`;
+ pts.forEach((x,j)=>{const px=+X(x.p[1]),py=+Y(x.p[0]);g+=`<g class="db-p${x===far?' far':''}"><rect x="${px-9}" y="${py-9}" width="18" height="18"/><text x="${px}" y="${py+4}" text-anchor="middle">${j+1}</text></g>`});
+ const km=llKm(far.p,HOTEL_LL),fx=+X(far.p[1]),fy=+Y(far.p[0]);
+ if(km>=1)g+=`<text x="${Math.min(W-6,Math.max(6,fx))}" y="${fy-14<12?fy+24:fy-14}" text-anchor="${fx>W*.7?'end':fx<W*.3?'start':'middle'}" class="fl">最遠 ${kmTxt(km)}</text>`;
+ const barKm=[.5,1,2,5,10,20,50].find(b=>b*k/111>=50)||50;g+=`<line x1="8" y1="${H-8}" x2="${8+barKm*k/111}" y2="${H-8}" class="sc"/><text x="8" y="${H-12}" class="st">${kmTxt(barKm)}</text><text x="${W-6}" y="14" text-anchor="end" class="st">N ↑</text></svg>`;
+ return `<div class="dbrief"><div class="db-t"><b>${esc(B[0])}</b><span>${esc(B[1])}</span></div><div class="db-far">📍 今天最遠：<b>${esc(far.n)}</b>・在飯店${dirTxt(far.p)}方約 <b>${kmTxt(km)}</b></div>${g}<ol class="db-l">${pts.map((x,j)=>`<li class="${x===far?'far':''}"><i>${j+1}</i><span>${esc(x.n)}</span><em>${dirTxt(x.p)}・${kmTxt(llKm(x.p,HOTEL_LL))}</em></li>`).join('')}</ol></div>`}
 function renderDay(keep){
  const opened=keep?[...document.querySelectorAll('.stop.open')].map(x=>x.dataset.id):[];
  const d=D(curDay);document.documentElement.style.setProperty('--day',d.c);document.documentElement.style.setProperty('--day-soft',soft(d.c));
@@ -1593,6 +1641,7 @@ function renderDay(keep){
  <div class="hero-meta"><span class="pill${d.payWarn?' warn':''}">💳 ${esc(d.pay)}</span>${d.payNote?`<span class="pill" style="background:#f3ece4;color:#5b4d43">${esc(d.payNote)}</span>`:''}
  ${editing?'':'<button class="editbtn mapbtn" data-act="map">🗺️ 地圖</button>'}<button class="editbtn" data-act="edit">${editing?'✓ 完成編輯':'✏️ 編輯'}</button>
  <div class="prog"><span>完成 ${k}/${n}</span><div class="bar"><i style="width:${n?k/n*100:0}%"></i></div></div></div></div>`;
+ if(!editing)h+=dayBrief(curDay);
  if(!editing&&HOL[curDay]!==undefined)h+=`<div class="holnote">🎌 <b>日本三連休第 ${curDay+1} 天</b>：${HOL_NOTE.split('，').slice(1).join('，')}</div>`;
  if(editing){h+=`<div class="edtools"><button class="btn" data-act="add">＋ 新增一站</button><button class="btn" data-act="sort">⏱ 依時間排序</button>${dayChanged(curDay)?'<button class="btn" data-act="reset">↩ 還原這天</button>':''}</div>`}
  else h+=wxHtml(curDay);
