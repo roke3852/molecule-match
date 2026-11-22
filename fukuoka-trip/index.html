@@ -2473,7 +2473,8 @@ function xCard(c,done){const K=XK;const st=xStat(c);return `<div class="cafe${do
   <div class="cafe-m"><span class="tag">${K[c.k]}</span><span class="tag">🏨 ${xDistTxt(xDist(c.id))}・${esc(xHowTxt(c.id))}</span>${st?`<span class="fd-h" style="margin:0;display:inline"><span class="st ${st.c}">${st.o?'🟢':'⚪'} ${st.t}</span></span>`:''}</div>
   ${xRange(c)}${xHoursViz(c)}
   <div class="cafe-d">${esc(c.d)}<div style="margin-top:6px;color:var(--sub)">🚇 ${esc(c.ac)}</div>${c.tip?`<div class="tip">💡 ${esc(c.tip)}</div>`:''}<div class="xdays">${XDAYS.map(d=>{const k=+d.slice(5,7)+'/'+ +d.slice(8);return `<span class="${c.days.includes(k)?'on':''}${(XREC[k]||[]).includes(c.id)?' rec':''}">${k.split('/')[1]}</span>`}).join('')}<em>行程中可去的日子（11/21–28）</em></div></div>
-  <div class="cafe-b"><a class="btn" href="${mapUrl(c.jp)}" target="_blank" rel="noopener">🗺️ 地圖</a><button class="btn ghost" data-xtaxi="${c.id}">🚕 給司機看</button></div>
+  ${foodPhotoBox('xm_'+c.id,S.get('gphoto',{}))}
+  <div class="cafe-b"><a class="btn" href="${mapUrl(c.jp)}" target="_blank" rel="noopener">🗺️ 地圖</a><button class="btn ghost" data-xtaxi="${c.id}">🚕 給司機看</button><a class="btn ghost" href="https://www.google.com/search?tbm=isch&q=${encodeURIComponent(c.jp+' クリスマス 福岡')}" target="_blank" rel="noopener">🖼️ 網路照片</a>${foodPhotoKeys('xm_'+c.id).length<SPMAX?`<button class="btn ghost" data-photo="f_xm_${c.id}">📷 ${foodPhotoKeys('xm_'+c.id).length?'再加照片':'加照片'}</button>`:''}</div>
  </div>`}
 function drawXmas(){
  const done=S.get('xmas',{}),ds=jstDate(),{min}=jstNow();
@@ -2496,6 +2497,8 @@ function drawXmas(){
 $('#xmasPlan').addEventListener('click',e=>{if(e.target.closest('[data-xall]')){xSel=null;drawXmas();return}const go=e.target.closest('[data-xgo]');if(go){xSel=xSel===go.dataset.xgo?null:go.dataset.xgo;drawXmas();return}if(e.target.closest('#xmasPlan .cafe')){xCardClick(e);return}const r=e.target.closest('[data-xd]');if(!r)return;S.set('xmasDay',r.dataset.xd);drawXmas()});
 setInterval(()=>{if(currentView()==='xmas')drawXmas()},60000);
 function xCardClick(e){
+ const pb=e.target.closest('[data-photo]');if(pb){gPhotoFor=pb.dataset.photo;$('#gFile').click();return}
+ const zm=e.target.closest('[data-zoom]');if(zm){const id=zm.dataset.zoom,c=XMAS.find(x=>'f_xm_'+x.id===id.split('~')[0]);$('#imgovI').src=zm.src;$('#imgovT').textContent=c?c.n:'';$('#imgovD').dataset.id=id;$('#imgovD').textContent='移除這張照片';delete $('#imgovD').dataset.arm;$('#imgov').classList.remove('ro');$('#imgov').classList.add('on');return}
  const tx=e.target.closest('[data-xtaxi]');if(tx){const c=XMAS.find(x=>x.id===tx.dataset.xtaxi);big(c.jp+'までお願いします。','請載我們到：'+c.n);$('#ovJp').style.whiteSpace='normal';return}
  if(e.target.closest('a'))return;
  const r=e.target.closest('.cafe-h');if(!r)return;const id=r.parentNode.dataset.id,done=S.get('xmas',{});done[id]=!done[id];S.set('xmas',done);drawXmas()}
@@ -2781,7 +2784,7 @@ function drawFoodBud(){try{drawFoodBud0()}catch(e){}}
 function drawFoodBud0(){const el=$('#foodBud');if(!el)return;const bd=+S.get('foodBudget',20000)||0,E=S.get('exp',null)||{},d=exToday();
  let sp=0;for(const k in E)if(E[k].d===d&&E[k].c==='food')sp+=E[k].a;const left=bd-sp,pc=bd?Math.min(100,sp/bd*100):0;
  el.innerHTML=`<div class="fbud"><div class="t">🍜 今天（${d}）餐費 <b>¥${sp.toLocaleString()}</b> / 預算 ¥${bd.toLocaleString()}　${left>=0?`還剩 <b class="ok">¥${left.toLocaleString()}</b>`:`<b class="ng">超支 ¥${(-left).toLocaleString()}</b>`}</div><div class="bar"><i class="${left<0?'ng':pc>80?'w':''}" style="width:${pc}%"></i></div><div class="s">在「記帳」記下餐飲就會自動算進來・<a href="#money">改每日餐費預算</a></div></div>`}
-function drawFoods(){drawFoodBud();try{drawCafes();drawCups()}catch(e){}
+function drawFoods(){drawFoodBud();try{drawCafes();drawCups();drawXmas()}catch(e){}
  const want=S.get('foods',{}),ph=S.get('gphoto',{});
  const okP=f=>fPrice==='all'||fPriceOf(f)===fPrice,okA0=f=>fArea==='all'||f.a===fArea,okA=f=>okA0(f)&&okP(f),okT=f=>fType==='all'||fTypeOf(f)===fType,okW=f=>(!fWant||want[f.id])&&(!fOpen||(fStat(f)||{}).o);
  const cP=k=>FOODS.filter(f=>okA0(f)&&okT(f)&&okW(f)&&(k==='all'||fPriceOf(f)===k)).length;
