@@ -76,6 +76,12 @@ button{font:inherit;color:inherit;touch-action:manipulation}
 .slot-t{margin-top:6px;font-weight:700}.slot-t small{color:var(--muted);font-weight:400;margin-left:8px;font-size:12px}
 .slot-p{font-size:13px;color:#c3c9d3;margin-top:4px;line-height:1.6}.slot-s{font-family:DotGothic16;font-size:12px;color:var(--muted);margin-top:4px}
 .slot-b{display:flex;gap:6px;margin-top:8px}.slot-b .tb{flex:0 0 auto;padding:6px 14px}
+#tvLayer{position:absolute;inset:0;pointer-events:none}
+.tvl{position:absolute;font-family:"DotGothic16","Noto Sans TC",sans-serif;font-size:12px;line-height:1.5;background:rgba(14,17,22,.9);color:#c3c9d3;padding:0 7px 0 6px;border-left:2px solid #4a5566;white-space:nowrap}
+.tvl.dim{font-size:10.5px;color:#8b93a1;background:rgba(14,17,22,.75)}
+.tvl.hi{color:#ece4d4;border-left-color:#d64545;font-size:13px}
+.tvl.dest{background:#d64545;color:#fff;border-left-color:#fff}
+.tvs{position:absolute;top:8px;left:8px;font-family:"DotGothic16","Noto Sans TC",sans-serif;font-size:12px;background:rgba(14,17,22,.9);border:1px solid #4a5566;color:#ece4d4;padding:2px 8px}
 /* overlays */
 .ov{position:fixed;inset:0;background:rgba(6,8,11,.86);z-index:50;display:none;align-items:center;justify-content:center;padding:16px}
 .ov.on{display:flex}
@@ -180,6 +186,7 @@ button{font:inherit;color:inherit;touch-action:manipulation}
   <!-- GAME -->
   <section class="screen" id="game">
     <div class="scene"><canvas id="sceneCv" width="320" height="200"></canvas>
+      <div id="tvLayer" hidden></div>
       <div class="loc" id="locLabel"></div>
     </div>
     <div class="dlg">
@@ -1122,7 +1129,7 @@ const BGS={
 };
 /* ============ 移動動畫：台北地圖 / 世界航線 ============ */
 const PLACES={home:{x:150,y:160,n:'你家．公館',ic:'home'},cafe:{x:206,y:122,n:'白霧咖啡．東區',ic:'cup'},roast:{x:84,y:76,n:'舟火焙煎所．大稻埕',ic:'fire'},
- jinsui:{x:290,y:86,n:'金穗生豆．南港',ic:'sack'},arena:{x:118,y:38,n:'比賽會場．圓山',ic:'cup2'},xinyi:{x:250,y:132,n:'信義區',ic:'tower'}};
+ jinsui:{x:290,y:86,n:'金穗生豆．南港',ic:'sack'},arena:{x:118,y:38,n:'比賽會場．圓山',ic:'cup2'},xinyi:{x:272,y:152,n:'信義區',ic:'tower'}};
 const AIR={TPE:{lon:121.2,lat:25.1,n:'台北'},LAX:{lon:-118.4,lat:33.9,n:'洛杉磯'},BOG:{lon:-74.1,lat:4.7,n:'波哥大'},NVA:{lon:-75.3,lat:2.9,n:'內瓦'},HND:{lon:139.8,lat:35.5,n:'東京'}};
 const ROUTES={'TPE-NVA':['TPE','LAX','BOG','NVA'],'NVA-TPE':['NVA','BOG','LAX','TPE'],'TPE-HND':['TPE','HND']};
 const MODE={scooter:'機車',mrt:'捷運',walk:'步行',plane:'飛機'};
@@ -1183,9 +1190,7 @@ function travelCity(g,t){
   if(T.m==='mrt'){p(cx-6,cy-4,12,7,'#ece4d4');p(cx-5,cy-3,3,2,'#6c9bd2');p(cx-1,cy-3,3,2,'#6c9bd2');p(cx+3,cy-3,2,2,'#6c9bd2');p(cx-6,cy+1,12,1,'#4fb3a9')}
   else{p(cx-5,cy+1+bob,10,3,'#d64545');p(cx-5,cy+4,3,2,'#0e1116');p(cx+3,cy+4,3,2,'#0e1116');p(cx-2,cy-4+bob,4,5,'#3a3f4a');p(cx-2,cy-7+bob,4,3,'#ece4d4');if(el<1)for(let k=1;k<4;k++)p(cx-6-k*3,cy+3,1,1,'rgba(200,208,220,.5)')}
   // 標籤
-  g.font='9px "DotGothic16",monospace';g.textBaseline='top';
-  [[A,'出發'],[B,'抵達']].forEach(([P0,tag])=>{const w=g.measureText(P0.n).width+8;let x=Math.min(318-w,Math.max(2,P0.x-w/2)),y=P0.y+9;if(y>186)y=P0.y-22;p(x,y,w,12,'rgba(14,17,22,.9)');p(x,y,2,12,'#d64545');g.fillStyle='#ece4d4';g.fillText(P0.n,x+5,y+2)});
-  const st='台北市　'+(MODE[T.m]||'')+(el<1?'移動中…':'抵達'),sw=g.measureText(st).width+12;p(6,6,sw,14,'rgba(14,17,22,.9)');p.frame(6,6,sw,14,'#4a5566');g.fillStyle='#ece4d4';g.fillText(st,11,8);
+  tvStatus('台北市　'+(MODE[T.m]||'')+(el<1?'移動中…':'抵達'));
   p.vig();
 }
 function travelWorld(g,t){
@@ -1201,12 +1206,9 @@ function travelWorld(g,t){
     if(!pl&&d<=lens[i]){const q=bz(a,c,b,f),q2=bz(a,c,b,Math.min(1,f+.02));pl={x:q.x,y:q.y,ang:Math.atan2(q2.y-q.y,q2.x-q.x)}}
     d-=lens[i]}
   if(!pl){const a=pts[pts.length-2],b=pts[pts.length-1];pl={x:b.x,y:b.y,ang:Math.atan2(b.y-a.y,b.x-a.x)}}
-  g.font='9px "DotGothic16",monospace';g.textBaseline='top';
-  pts.forEach((q,i)=>{p(q.x-2,q.y-2,5,5,'#0e1116');p(q.x-1,q.y-1,3,3,i===0||i===pts.length-1?'#ece4d4':'#8b93a1');
-    const lab=AIR[q.k].n+' '+q.k,w=g.measureText(lab).width+6;let x=Math.min(318-w,Math.max(2,q.x-w/2)),y=q.y+(q.k==='NVA'?16:6);if(q.k==='BOG'||q.k==='HND')y=q.y-18;
-    p(x,y,w,11,'rgba(14,17,22,.85)');g.fillStyle=i===0||i===pts.length-1?'#ece4d4':'#8b93a1';g.fillText(lab,x+3,y+1)});
+  pts.forEach((q,i)=>{p(q.x-2,q.y-2,5,5,'#0e1116');p(q.x-1,q.y-1,3,3,i===0||i===pts.length-1?'#ece4d4':'#8b93a1')});
   drawPlane(g,pl.x,pl.y+(el<1?Math.sin(t*4)*.8:0),pl.ang);
-  const hrs=Math.round(el*(T.a==='TPE'&&T.b==='HND'?3:32)),st=(el<1?'飛行中　':'抵達　')+hrs+' 小時',sw=g.measureText(st).width+12;p(6,6,sw,14,'rgba(14,17,22,.9)');p.frame(6,6,sw,14,'#4a5566');g.fillStyle='#ece4d4';g.fillText(st,11,8);
+  const hrs=Math.round(el*(T.a==='TPE'&&T.b==='HND'?3:32));tvStatus((el<1?'飛行中　':'抵達　')+hrs+' 小時');
   p.vig();
 }
 BGS.travel=function(g,t){if(!S||!S.travel){g.fillStyle='#0e1116';g.fillRect(0,0,320,200);return}(S.travel.k==='world'?travelWorld:travelCity)(g,t)};
@@ -1240,7 +1242,15 @@ BGS.home=function(g,t){
   p(150,136,14,14,'#7a4e30');p(146,124,8,12,'#2f6b3f');p(156,120,8,16,'#4f9a5a');p(152,116,6,10,'#2f6b3f');
   p.vig();
 };
-function startTravel(tv){S.travel={...tv,t0:performance.now()};const nm=tv.k==='world'?`${AIR[tv.a].n} → ${AIR[tv.b].n}`:`${PLACES[tv.a].n.split('．')[0]} → ${PLACES[tv.b].n.split('．')[0]}`;
+function tvStatus(t){const e=document.getElementById('tvStat');if(e&&e.textContent!==t)e.textContent=t}
+function tvLabel(layer,x,y,txt,cls){const d=document.createElement('div');d.className='tvl '+(cls||'');d.textContent=txt;d.style.top=(y/200*100)+'%';
+  if(x<60){d.style.left=(Math.max(2,x-8)/320*100)+'%'}else if(x>260){d.style.right=((320-Math.min(318,x+8))/320*100)+'%'}else{d.style.left=(x/320*100)+'%';d.style.transform='translateX(-50%)'}
+  layer.appendChild(d)}
+function buildTvLayer(tv){const L0=document.getElementById('tvLayer');L0.innerHTML='<div class="tvs" id="tvStat"></div>';
+  if(tv.k==='city'){Object.entries(PLACES).forEach(([k,P0])=>{const hi=k===tv.a||k===tv.b;let y=P0.y+9;if(y>180)y=P0.y-22;tvLabel(L0,P0.x,y,hi?P0.n:P0.n.split('．')[0],hi?(k===tv.b?'hi dest':'hi'):'dim')})}
+  else{(ROUTES[tv.a+'-'+tv.b]||[tv.a,tv.b]).forEach((k,i,arr)=>{const q={x:wx(AIR[k].lon),y:wy(AIR[k].lat)};let y=q.y+7;if(k==='NVA')y=q.y+14;if(k==='BOG'||k==='HND')y=q.y-20;tvLabel(L0,q.x,y,AIR[k].n+' '+k,i===0||i===arr.length-1?'hi':'dim')})}
+  L0.hidden=false}
+function startTravel(tv){S.travel={...tv,t0:performance.now()};buildTvLayer(tv);const nm=tv.k==='world'?`${AIR[tv.a].n} → ${AIR[tv.b].n}`:`${PLACES[tv.a].n.split('．')[0]} → ${PLACES[tv.b].n.split('．')[0]}`;
   curBg='travel';S.bg='travel';$('locLabel').textContent=nm;sfx(tv.k==='world'?'plane':'whoosh');playTheme(tv.k==='world'?'flight':'ride')}
 
 let curBg='cafe';
@@ -1450,7 +1460,7 @@ function step(){
     S.i++;
   }
 }
-function setBg(b,loc){const ch=curBg!==b;curBg=b;S.bg=b;S.loc=loc;$('locLabel').textContent=loc||'';const dm=document.querySelector('.scene').classList.contains('doom');if(ch&&$('game').classList.contains('on'))sfx('whoosh');if(!dm)playTheme(musicFor(b))}
+function setBg(b,loc){const ch=curBg!==b;const tl=document.getElementById('tvLayer');if(tl){tl.hidden=true;tl.innerHTML=''}curBg=b;S.bg=b;S.loc=loc;$('locLabel').textContent=loc||'';const dm=document.querySelector('.scene').classList.contains('doom');if(ch&&$('game').classList.contains('on'))sfx('whoosh');if(!dm)playTheme(musicFor(b))}
 function showLine(n){
   $('choices').classList.remove('on');$('box').style.display='';
   const sp=n.s;curLine=n;
