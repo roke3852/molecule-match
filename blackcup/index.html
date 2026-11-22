@@ -390,7 +390,7 @@ const CH=[
  L('mei','{N}～～救命！磨豆機阿嬤又卡豆了啦，她又開始打呼了，你快去哄哄她。'),
  L('me','阿梅，那是一台磨豆機，不是妳阿嬤。而且妳每次都說它在打呼。'),
  L('mei','你仔細聽嘛！它卡豆的時候那個「嘎——嘎——」的聲音，跟我阿嬤午睡的時候一模一樣，你不懂啦。'),
- N('你把磨豆機的豆槽拆下來，用小刷子清掉卡在刀盤旁邊的碎豆。「阿嬤」終於安靜了。'),
+ {act:'clean',s:'',t:'你把磨豆機的豆槽拆下來，用小刷子清掉卡在刀盤旁邊的碎豆。「阿嬤」終於安靜了。'},
  L('mei','你看你看，她睡著了。你好會哄阿嬤喔，以後一定是個好孫子。'),
  L('me','……我是來當咖啡師的，不是來當孫子的。'),
  N('門上的鈴鐺叮噹響了一聲。嚴老闆收起滴著水的長柄傘，甩了甩肩膀上的雨。'),
@@ -1467,6 +1467,7 @@ function sfx(k){if(!sound)return;const a=ac();if(!a)return;const t=a.currentTime
  if(k==='pop'){voice(S,'sine',880,t,.002,.08,.08);voice(S,'sine',1320,t+.03,.002,.05,.08)}
  if(k==='whoosh'){const s=a.createBufferSource();s.buffer=AU.noise;const f=a.createBiquadFilter();f.type='bandpass';f.Q.value=1.2;f.frequency.setValueAtTime(300,t);f.frequency.exponentialRampToValueAtTime(3000,t+.45);const g=a.createGain();s.connect(f);f.connect(g);g.connect(S);g.gain.setValueAtTime(0.0001,t);g.gain.linearRampToValueAtTime(.12,t+.2);g.gain.exponentialRampToValueAtTime(0.0001,t+.55);s.start(t);s.stop(t+.6)}
  if(k==='plane'){const s=a.createBufferSource();s.buffer=AU.brown;const f=a.createBiquadFilter();f.type='lowpass';f.frequency.setValueAtTime(200,t);f.frequency.linearRampToValueAtTime(900,t+1.2);f.frequency.linearRampToValueAtTime(300,t+2.6);const g=a.createGain();s.connect(f);f.connect(g);g.connect(S);g.gain.setValueAtTime(0.0001,t);g.gain.linearRampToValueAtTime(.6,t+1);g.gain.linearRampToValueAtTime(0.0001,t+2.8);s.start(t);s.stop(t+3)}
+ if(k==='brush'){for(let i=0;i<3;i++)noiseHit(S,t+i*.07,.06,.09,'bandpass',3500+Math.random()*1500,1.2)}
  if(k==='grindtick'){noiseHit(S,t,.03,.12,'bandpass',900+Math.random()*900,2)}
  if(k==='pourtick'){noiseHit(S,t,.08,.05,'bandpass',2600+Math.random()*1500,.8)}
  if(k==='up'){[72,76,79].forEach((n,i)=>voice(S,'triangle',mtof(n),t+i*.07,.003,.1,.2))}
@@ -1530,6 +1531,7 @@ function step(){
     if(n.final){finale();return}
     if(n.c){persist();showChoice(n);return}
     if(n.brew){persist();showBrew(n);return}
+    if(n.act){S.i++;persist();startAct(n.act);showLine({s:'',t:n.t});return}
     if(n.tv){S.i++;persist();startTravel(n.tv);showLine({s:'',t:n.t});return}
     if(n.s!==undefined){S.i++;persist();showLine(n);return}
     S.i++;
@@ -1552,7 +1554,7 @@ function showLine(n){
   tx._all=toks.map(t=>t.h).join('');
 }
 function finishType(){clearInterval(typing);typing=null;const tx=$('txt');if(tx._all!==undefined&&!ffwd)tx.innerHTML=tx._all;bindLinks(tx);$('more').style.display=annot?'none':'block';$('nextBtn').classList.toggle('on',annot)}
-function advance(){if(!waiting)return;if(typing){finishType();return}waiting=false;if(!ffwd)sfx('tap');$('nextBtn').classList.remove('on');step()}
+function advance(){if(!waiting)return;if(typing){finishType();return}waiting=false;if(S&&S.act){curBg=S.act.prev;$('locLabel').textContent=S.act.loc||'';S.act=null}if(!ffwd)sfx('tap');$('nextBtn').classList.remove('on');step()}
 $('box').addEventListener('click',()=>{if(annot&&!typing)return;advance()});
 $('nextBtn').addEventListener('click',()=>{if(typing){finishType();return}advance()});
 
@@ -1798,6 +1800,36 @@ BGS.brewbar=function(g,t){const p=PX(g),B=S&&S.brewUI;if(!B)return;
   steam(p,154,80,t,B.poured>0?4:0);
   p.vig()};
 
+
+/* ============ 小動畫：清理磨豆機 ============ */
+function startAct(k){S.act={k,t0:performance.now(),prev:curBg,loc:S.loc};curBg='act';$('locLabel').textContent='清理磨豆機';
+  if(k==='clean'){[300,900,1300,1700,2100].forEach(d=>setTimeout(()=>{if(S&&S.act)sfx('brush')},d));setTimeout(()=>{if(S&&S.act)sfx('pop')},2900)}}
+BGS.act=function(g,t){const p=PX(g),A=S&&S.act;if(!A)return;const e=(performance.now()-A.t0)/1000;
+  p(0,0,320,200,'#171c27');for(let x=0;x<320;x+=40)p(x,0,1,186,'#1d2330');p.glow(160,80,150,'rgba(240,180,106,.12)');
+  p(0,186,320,4,'#b07a4f');p(0,186,320,1,'#d29a6a');p(0,190,320,10,'#4a2e1d');
+  g.save();g.translate(160,186);g.scale(1.3,1.3);g.translate(-160,-150);
+  // 阿嬤（商用磨豆機）
+  const shake=e<.5?Math.round(Math.sin(e*60)):0;const bx=124+shake;
+  p(bx-6,140,84,10,'#202834');p(bx-6,140,84,1,'#3a4350');
+  p(bx,70,72,72,'#20252e');p(bx,70,72,2,'#3a4350');p(bx+4,74,4,64,'#2c323c');
+  p(bx+30,112,12,10,'#8d959e');p(bx+32,122,8,4,'#4d555f');p(bx+22,128,28,10,'#3a4350');
+  p(bx+50,96,14,14,'#ece4d4');p(bx+56,98,2,6,'#d64545');p(bx+56,104,5,2,'#d64545');
+  // 刀盤口
+  const cx=bx+36,cy=66;p(cx-20,cy-4,40,8,'#4d555f');p(cx-17,cy-3,34,6,'#8d959e');
+  for(let i=0;i<8;i++)p(cx-15+i*4,cy-1,2,2,'#c4cad1');
+  // 碎豆（清掉前）
+  const left=Math.max(0,1-Math.max(0,e-.8)/1.6);const rr=R(3);for(let i=0;i<Math.round(14*left);i++)p(cx-15+rr()*30,cy-3+rr()*4,2,2,rr()>.5?'#5a3520':'#7d4c2c');
+  // 豆槽：拿起來→放旁邊→裝回去
+  let hx=cx,hy=cy-36;if(e<.8){const u=e/.8;hx=cx+u*90;hy=cy-36-Math.sin(u*Math.PI)*24+u*40}else if(e<2.6){hx=cx+90;hy=cy+4}else if(e<3.3){const u=(e-2.6)/.7;hx=cx+90-u*90;hy=cy+4-u*40-Math.sin(u*Math.PI)*24}
+  for(let j=0;j<30;j++){const w=44-j;p(hx-w/2,hy+j,w,1,j<3?'#c4cad1':'rgba(143,167,184,.45)')}p(hx-22,hy,44,1,'#fff');for(let j=12;j<28;j++)p(hx-(44-j)/2+3,hy+j,44-j-6,1,'#5a3520');
+  // 刷子
+  if(e>.8&&e<2.6){const u=(e-.8)/1.8,sx=cx-14+Math.abs(Math.sin(u*Math.PI*5))*28,sy=cy-12;
+    p(sx-2,sy-26,4,22,'#b07a4f');p(sx-2,sy-26,1,22,'#d29a6a');p(sx-5,sy-4,10,3,'#8d959e');for(let k=0;k<5;k++)p(sx-5+k*2,sy-1,1,6,'#2e1b11');
+    for(let k=0;k<6;k++){const ph=(t*3+k*.37)%1,dx=(k%2?1:-1)*(10+k*6)*ph,dy=-14*ph+60*ph*ph;p(cx+dx,cy+dy,2,2,k%2?'#5a3520':'#7d4c2c')}}
+  // 完成：亮晶晶＋打呼
+  if(e>3.3){const k=Math.min(1,(e-3.3)/.4);[[cx-30,cy-20],[cx+34,cy-10],[cx-8,cy-34],[bx+66,90]].forEach(([x,y],i)=>{if(Math.sin(t*6+i)>-.2){p(x,y-3,1,7,'#fff');p(x-3,y,7,1,'#fff')}});
+    g.globalAlpha=k;g.font='10px "DotGothic16",monospace';g.fillStyle='#c3c9d3';const zz=Math.floor(t*2)%3;g.fillText('z'.repeat(zz+1),bx+76,60-zz*4);g.globalAlpha=1}
+  g.restore();p.vig()};
 // boot
 if(DB.last&&DB.players[DB.last])P=DB.players[DB.last];
 toTitle();
