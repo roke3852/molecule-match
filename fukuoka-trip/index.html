@@ -683,6 +683,9 @@ html.dark .k-market{--xc:#d0705c}html.dark .k-light{--xc:#c9a25e}html.dark .k-ri
 .db-svg{width:100%;height:auto;display:block;margin-top:6px;background:color-mix(in srgb,var(--sea) 6%,var(--card));border:1.5px solid var(--line);shape-rendering:crispEdges;font-family:var(--ff-px)}
 .db-p{cursor:pointer}.db-p.dim{opacity:.35}.db-svg .selr{fill:none;stroke:var(--ink);stroke-width:2;stroke-dasharray:3 2}.db-h{cursor:pointer}
 .db-upd{display:block;font-size:11px;color:var(--sub);margin-top:2px}
+.db-only{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:8px 0;padding:8px 10px;border:2px dashed var(--day);background:color-mix(in srgb,var(--day) 10%,var(--card));font-size:13px;cursor:pointer}
+.db-only span{flex:1;min-width:0}.db-only button{font-family:var(--ff-b);font-weight:700;font-size:14px;padding:7px 14px;background:var(--day);color:#fff;border:2px solid #1b1612;box-shadow:2px 2px 0 #1b1612;cursor:pointer}
+.db-only.end{justify-content:center;border-style:solid}
 .db-hint{font-size:12px;color:var(--sub);margin-top:6px}.db-sel{margin-top:6px;font-size:13px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}.db-sel button{margin-left:auto;font-size:12px;padding:3px 10px;border:1.5px solid var(--line);border-radius:999px;background:var(--card);color:var(--ink)}
 .db-l li{cursor:pointer;padding:2px 4px}.db-l li.sel{background:color-mix(in srgb,var(--day) 18%,transparent);outline:1.5px solid var(--day)}
 .db-svg .riv{fill:none;stroke:color-mix(in srgb,var(--sea) 60%,var(--card));stroke-width:5;stroke-linejoin:round;shape-rendering:geometricPrecision}.db-svg .rivt{font-size:9px;fill:var(--sea);font-family:var(--ff-b)}
@@ -1653,7 +1656,7 @@ function dayBrief(i){const d=D(i),B0=DBRIEF[i]||['',''],chg=typeof dayChanged===
  if(km>=1)g+=`<text x="${Math.min(W-6,Math.max(6,fx))}" y="${fy-14<12?fy+24:fy-14}" text-anchor="${fx>W*.7?'end':fx<W*.3?'start':'middle'}" class="fl">最遠 ${kmTxt(km)}</text>`;
  const barKm=[.5,1,2,5,10,20,50].find(b=>b*k/111>=50)||50;g+=`<line x1="8" y1="${H-8}" x2="${8+barKm*k/111}" y2="${H-8}" class="sc"/><text x="8" y="${H-12}" class="st">${kmTxt(barKm)}</text><text x="${W-6}" y="14" text-anchor="end" class="st">N ↑</text></svg>`;
  return `<div class="dbrief"><div class="db-t"><b>${esc(B[0])}</b><span>${esc(B[1])}</span>${chg?'<small class="db-upd">🔄 行程有修改，簡介已依最新行程自動更新</small>':''}</div><div class="db-far">📍 今天最遠：<b>${esc(far.n)}</b>・在飯店${dirTxt(far.p)}方約 <b>${kmTxt(km)}</b></div>${g}${sq?`<div class="db-sel">📍 只看第 ${pts.findIndex(x=>x.q===sq)+1} 站：<b>${esc((pts.find(x=>x.q===sq)||{}).n||'')}</b><button data-dball="1">✕ 顯示全部</button></div>`:'<div class="db-hint">👆 點地圖上的數字或下面的地點，只看那一站的行程</div>'}<ol class="db-l">${pts.map((x,j)=>`<li class="${x===far?'far':''}${sq===x.q?' sel':''}" data-dbq="${esc(x.q)}"><i>${j+1}</i><span>${esc(x.n)}</span><em>${dirTxt(x.p)}・${kmTxt(llKm(x.p,HOTEL_LL))}</em></li>`).join('')}</ol></div>`}
-document.addEventListener('click',e=>{const a=e.target.closest('[data-dball]');if(a&&a.closest('.dbrief')){dbSel=null;renderDay();return}const q=e.target.closest('[data-dbq]');if(q&&q.closest('.dbrief')){const v=q.dataset.dbq;dbSel=dbQ()===v?null:{d:curDay,q:v};renderDay()}});
+document.addEventListener('click',e=>{const a=e.target.closest('[data-dball]');if(a&&(a.closest('.dbrief')||a.closest('.db-only'))){dbSel=null;renderDay();return}const q=e.target.closest('[data-dbq]');if(q&&q.closest('.dbrief')){const v=q.dataset.dbq;dbSel=dbQ()===v?null:{d:curDay,q:v};renderDay()}});
 function renderDay(keep){
  const opened=keep?[...document.querySelectorAll('.stop.open')].map(x=>x.dataset.id):[];
  const d=D(curDay);document.documentElement.style.setProperty('--day',d.c);document.documentElement.style.setProperty('--day-soft',soft(d.c));
@@ -1670,9 +1673,10 @@ function renderDay(keep){
  if(!editing&&HOL[curDay]!==undefined)h+=`<div class="holnote">🎌 <b>日本三連休第 ${curDay+1} 天</b>：${HOL_NOTE.split('，').slice(1).join('，')}</div>`;
  if(editing){h+=`<div class="edtools"><button class="btn" data-act="add">＋ 新增一站</button><button class="btn" data-act="sort">⏱ 依時間排序</button>${dayChanged(curDay)?'<button class="btn" data-act="reset">↩ 還原這天</button>':''}</div>`}
  else h+=wxHtml(curDay);
+ const fq=editing?null:dbQ();const fqN=fq?d.stops.filter(s=>s.q!==fq).length:0;
+ if(fq)h+=`<div class="db-only" data-dball="1"><span>🔍 目前只顯示 1 個地點的行程（藏起 ${fqN} 站）</span><button data-dball="1">📋 顯示全部行程</button></div>`;
  h+='<div class="tl">';
  const SG=editing?{}:stopGifts(curDay),gw=S.get('gifts',{}),SF=editing?{}:stopFoods(curDay),fw=S.get('foods',{});
- const fq=editing?null:dbQ();
  d.stops.forEach((s,i)=>{if(fq&&s.q!==fq)return;const isD=!!done[s.id],[ic,cls]=trIcon(s.tr);const tt=s.t.replace('-','<br>–<br>');
   if(editing){
    h+=`<div class="stop ed" data-id="${s.id}" data-i="${i}"><span class="dot"></span><div class="tm">${tt}</div>
@@ -1694,6 +1698,7 @@ function renderDay(keep){
    <button class="btn pri" data-act="done">${isD?'↺ 取消完成':'✓ 完成'}</button></div></div></div></div>`});
  if(!n)h+='<div class="empty">這天還沒有行程</div>';
  h+='</div>';
+ if(fq)h+=`<div class="db-only end"><button data-dball="1">📋 顯示全部 ${n} 站行程</button></div>`;
  if(!editing&&d.extras)h+=`<div class="extras"><h4>✨ 有空可加碼</h4>${d.extras.map(x=>`<a href="${mapUrl(x)}" target="_blank" rel="noopener">📍 ${esc(x)}</a>`).join('')}</div>`;
  if(!editing&&anyChanged()&&!FS.on())h+=`<div class="pub"><b>📤 改好了？發布給全家</b><div>你的修改只在這台手機。按下面按鈕複製修改內容，貼給 Claude，就會更新成全家都看得到的正式版。</div><button class="btn pri" data-act="export">📋 複製修改內容</button></div>`;
  if(!editing)h+=`<div class="memo"><h4>📝 今日筆記（${FS.on()?'全家共用':'只存在這台手機'}）</h4><textarea id="memo" placeholder="訂位編號、想吃的店、花費…">${esc(memos[curDay]||'')}</textarea></div>`;
