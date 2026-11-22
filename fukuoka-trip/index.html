@@ -910,6 +910,7 @@ html.dark [style*="background:#fde2e2"]{background:#3a2422!important;color:#d9a5
 .ex-row{display:flex;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line);font-size:16px;font-family:var(--ff-b)}
 .ex-row .ic{font-size:20px;flex:none}.ex-row .m{flex:1;min-width:0}.ex-row .m small{display:block;color:var(--sub);font-size:var(--fs-s);font-family:var(--ff-s)}
 .ex-row .a{flex:none;font-weight:bold}.ex-row .del{color:#b9a99b;font-size:16px;background:none;border:0;padding:4px 6px}
+.ex-nt{display:block;font-size:13px;font-weight:normal;color:var(--sub);text-align:right;font-family:var(--ff-s)}
 .ex-row .del.arm{color:#c0392b}
 .ex-form select,.ex-form input{font-size:16px}
 .ex-form .r{display:flex;gap:6px;margin:6px 0}.ex-form .r>*{flex:1;min-width:0}
@@ -3099,8 +3100,8 @@ function drawExp(){drawTripSpend();
  const rt=$('#exRate');if(document.activeElement!==rt)rt.value=rate;const fb=$('#exFoodBud');if(document.activeElement!==fb)fb.value=+S.get('foodBudget',20000)||0;
  let h='',cur=null;
  ids.forEach(id=>{const x=E[id],c=EX_CAT.find(c=>c[0]===x.c)||EX_CAT[EX_CAT.length-1];
-  if(x.d!==cur){cur=x.d;h+=`<div class="ex-day"><span>${x.d}（${EX_WK[EX_DAYS.indexOf(x.d)]||''}）</span><span>${yen(bd[x.d])}</span></div>`}
-  h+=`<div class="ex-row"><span class="ic">${c[1]}</span><span class="m">${esc(x.t)}<small>${EX_PAY[x.p]||''}${x.w?'・'+esc(x.w)+' 付':''}${x.n?'・'+esc(x.n):''}</small></span><span class="a">${yen(x.a)}</span><button class="del${exArm===id?' arm':''}" data-exd="${id}" aria-label="刪除">${exArm===id?'確定刪除':'×'}</button></div>`});
+  if(x.d!==cur){cur=x.d;h+=`<div class="ex-day"><span>${x.d}（${EX_WK[EX_DAYS.indexOf(x.d)]||''}）</span><span>${yen(bd[x.d])}<small class="ex-nt">≈ NT$${Math.round(bd[x.d]*rate).toLocaleString()}</small></span></div>`}
+  h+=`<div class="ex-row"><span class="ic">${c[1]}</span><span class="m">${esc(x.t)}<small>${EX_PAY[x.p]||''}${x.w?'・'+esc(x.w)+' 付':''}${x.n?'・'+esc(x.n):''}</small></span><span class="a">${yen(x.a)}<small class="ex-nt">≈ NT$${Math.round(x.a*rate).toLocaleString()}</small></span><button class="del${exArm===id?' arm':''}" data-exd="${id}" aria-label="刪除">${exArm===id?'確定刪除':'×'}</button></div>`});
  $('#exList').innerHTML=h||'<div class="xempty">還沒有紀錄。</div>'}
 $('#exCat').onclick=e=>{const b=e.target.closest('[data-exc]');if(!b)return;exCat=b.dataset.exc;drawExp()};
 $('#exAdd').onclick=()=>{const t=$('#exItem').value.trim(),a=Math.round(+$('#exAmt').value);
