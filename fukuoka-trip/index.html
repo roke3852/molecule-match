@@ -693,6 +693,8 @@ html.dark .med-red b{color:#e07a6a}
 .med-p{display:flex;align-items:center;gap:8px;border-top:1px dashed var(--line);padding:6px 0}.med-p>div{flex:1}.med-p b{display:block;font-size:15px}.med-p span{font-size:12px;color:var(--sub)}.med-p button{flex:none;width:36px;height:36px;border:2px solid var(--px);background:var(--card);font-size:16px;color:var(--ink)}
 .med-big{position:fixed;inset:0;z-index:999;background:#fbf7ef;display:flex;align-items:center;justify-content:center;padding:24px;text-align:center}.med-big b{display:block;font-size:34px;line-height:1.5;color:#1b1612}.med-big span{display:block;font-size:18px;color:#5b4d43;margin-top:12px}.med-big small{display:block;margin-top:24px;color:#9b9286}
 .med-d{margin-top:8px;border:1.5px solid var(--line);padding:6px 10px}.med-d summary{font-family:var(--ff-b);font-weight:700;cursor:pointer}.med-d ul{margin:6px 0 2px;padding-left:18px;font-size:13px;line-height:1.7}
+.clk{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:8px 0 2px;font-size:13px;position:relative;z-index:1}.clk span{background:rgba(0,0,0,.18);padding:3px 9px;border:1.5px solid rgba(255,255,255,.35)}.clk b{font-family:var(--ff-px);font-size:15px;letter-spacing:1px}.clk em{font-style:normal;font-size:11px;opacity:.8}
+@media(min-width:620px){.clk{max-width:600px;margin-left:auto;margin-right:auto}}
 .db-hint{font-size:12px;color:var(--sub);margin-top:6px}.db-sel{margin-top:6px;font-size:13px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}.db-sel button{margin-left:auto;font-size:12px;padding:3px 10px;border:1.5px solid var(--line);border-radius:999px;background:var(--card);color:var(--ink)}
 .db-l li{cursor:pointer;padding:2px 4px}.db-l li.sel{background:color-mix(in srgb,var(--day) 18%,transparent);outline:1.5px solid var(--day)}
 .db-svg .riv{fill:none;stroke:color-mix(in srgb,var(--sea) 60%,var(--card));stroke-width:5;stroke-linejoin:round;shape-rendering:geometricPrecision}.db-svg .rivt{font-size:9px;fill:var(--sea);font-family:var(--ff-b)}
@@ -984,6 +986,7 @@ html.dark .ex-tot{background:var(--card)!important}
     </div>
     <div class="count" id="count"><b>–</b><span></span></div>
   </div>
+  <div class="clk" id="clk"></div>
   <div class="hotel-line">🏨 福岡蒙特利飯店 Hotel Monterey Fukuoka<a class="fam-pill" id="famPill" href="#tools" data-tt="set">👨‍👩‍👧 共用中</a></div>
 </header>
 
@@ -2379,6 +2382,11 @@ const CL_TERM=[
 ];
 let clTab='say',clQ=null,clSlow=false;
 function clSay(t,lang,slow){try{if(!('speechSynthesis' in window)){toast('這台裝置不支援語音');return}speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t.replace(/〇〇/g,'1200'));u.lang=lang||'ja-JP';u.rate=slow?0.55:0.9;const v=speechSynthesis.getVoices().find(v=>v.lang&&v.lang.replace('_','-').startsWith(u.lang.slice(0,2)));if(v)u.voice=v;speechSynthesis.speak(u)}catch(e){}}
+
+(function(){const el=document.getElementById('clk');if(!el)return;
+ const f=tz=>new Intl.DateTimeFormat('zh-TW',{timeZone:tz,hour:'2-digit',minute:'2-digit',hour12:false,month:'numeric',day:'numeric'}).formatToParts(new Date()).reduce((o,p)=>(o[p.type]=p.value,o),{});
+ function tick(){const j=f('Asia/Tokyo'),t=f('Asia/Taipei');el.innerHTML=`<span>🇯🇵 日本 <b>${j.hour}:${j.minute}</b></span><span>🇹🇼 台灣 <b>${t.hour}:${t.minute}</b>${t.day!==j.day?` <small>${t.month}/${t.day}</small>`:''}</span><em>台灣慢 1 小時</em>`}
+ tick();setInterval(tick,15000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)tick()})})();
 
 const MED_PH=[['家族が嘔吐と下痢をしています。','家人上吐下瀉'],['日本語が話せません。中国語の通訳をお願いします。','我們不會日文，麻煩找中文口譯'],['病院に行きたいです。タクシーを呼んでください。','想去醫院，請幫忙叫計程車'],['福岡市急患診療センターまでお願いします。','（給司機）請到福岡市急患診療中心'],['救急車を呼んでください。','請幫忙叫救護車'],['保険がありません。だいたいいくらかかりますか？カードは使えますか？','沒有日本保險，大概多少錢？可以刷卡嗎？'],['英語の診断書と領収書、明細書をお願いします。','請開英文診斷書、收據和費用明細'],['熱があります。','有發燒'],['昨日の夜から吐いています。','從昨晚開始吐']];
 (function(){const el=document.getElementById('medPh');if(!el)return;el.innerHTML=MED_PH.map((p,i)=>`<div class="med-p"><button data-medsay="${i}" aria-label="唸出來">🔊</button><div><b>${p[0]}</b><span>${p[1]}</span></div><button data-medbig="${i}" class="big" aria-label="放大">⛶</button></div>`).join('');
