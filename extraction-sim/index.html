@@ -644,6 +644,7 @@ html.embed{--modesH:0px}
 .t46-row.cm4{grid-template-columns:1.6fr 1fr 1fr 1fr}.t46-row.champ span:first-child{font-weight:700}
 .cm-cmp .b.sw i{background:#e87fb0}.cm-cmp .b.bt i{background:#b07a4a}
 .cm-gd{cursor:default}
+.orea-sc .orea-dot{cursor:pointer}.orea-card.flash{animation:oreaFlash 1.2s ease}@keyframes oreaFlash{0%{box-shadow:0 0 0 3px #ff4fd8;border-radius:10px}100%{box-shadow:0 0 0 0 transparent}}
 .orea-h b{font-size:18px}.orea-h small{margin-left:8px;color:var(--muted)}.orea-h p{margin:4px 0 10px}
 .t46-row.orea6{grid-template-columns:1.5fr .9fr .8fr .5fr .5fr 1fr;cursor:pointer}.orea-f{font-style:normal;font-size:10px;color:#ff4fd8;border:1px solid #ff4fd8;border-radius:4px;padding:0 3px}
 .cm-sec.orea .cm-pick,.cm-sec.orea .seg button[aria-pressed=true]{}
@@ -1281,7 +1282,7 @@ window.BGM=(()=>{
     <div class="err" id="tErr"></div>
   </div>
   <button class="t-more" id="tMore" type="button" aria-label="咖啡宇宙：更多咖啡 App 與遊戲">咖啡宇宙</button>
-  <div class="t-foot">© 2026 Jim Lu　ver. 7.5</div>
+  <div class="t-foot">© 2026 Jim Lu　ver. 7.6</div>
 </div>
 <nav class="modes" aria-label="導覽"><div class="in">
   <button class="homebtn" id="homeBtn" type="button" hidden>‹ 主選單</button>
@@ -8267,7 +8268,7 @@ function oreaScatter(){const W=320,H=220,x0=34,y0=10,w=W-x0-10,h=H-y0-30;const e
   s+='<text x="'+(x0+w)+'" y="'+(y0+h+24)+'" font-size="9" text-anchor="end" fill="var(--muted)">萃取率 EY →</text><text x="'+(x0+2)+'" y="'+(y0+8)+'" font-size="9" fill="var(--muted)">濃度 TDS %</text>';
   OREA.forEach(r=>{const R=oreaRun(r),on=r.id===OST.cur,c=r.paper==='flat'?'#ff4fd8':'#7fb6e0';
     if((r.ice||r.bypass)&&on)s+='<line x1="'+X(R.ey)+'" x2="'+X(R.ey)+'" y1="'+Y(Math.min(1.88,R.pre))+'" y2="'+Y(R.tds)+'" stroke="'+c+'" stroke-dasharray="2 2"/><circle cx="'+X(R.ey)+'" cy="'+Y(Math.min(1.88,R.pre))+'" r="3" fill="none" stroke="'+c+'"/>';
-    s+='<circle cx="'+X(Math.max(ex[0],Math.min(ex[1],R.ey)))+'" cy="'+Y(Math.max(tx[0],Math.min(tx[1],R.tds)))+'" r="'+(on?6:4)+'" fill="'+c+'" stroke="'+(on?'var(--ink)':'none')+'" stroke-width="1.5"/>';
+    {const cx=X(Math.max(ex[0],Math.min(ex[1],R.ey))),cy=Y(Math.max(tx[0],Math.min(tx[1],R.tds)));s+='<g class="orea-dot" data-r="'+r.id+'" role="button" aria-label="'+r.n+'"><circle cx="'+cx+'" cy="'+cy+'" r="11" fill="transparent"/><circle cx="'+cx+'" cy="'+cy+'" r="'+(on?6:4)+'" fill="'+c+'" stroke="'+(on?'var(--ink)':'none')+'" stroke-width="1.5"/></g>';}
     if(on)s+='<text x="'+(X(Math.max(ex[0],Math.min(ex[1],R.ey)))+7)+'" y="'+(Y(Math.max(tx[0],Math.min(tx[1],R.tds)))+3)+'" font-size="8" fill="'+(on?'var(--ink)':'var(--muted)')+'">'+r.n.replace('The ','')+'</text>';});
   return s+'</svg><div class="cm-leg"><span><i style="border-color:#7fb6e0"></i>Wave 波浪濾紙</span><span><i style="border-color:#ff4fd8"></i>平底濾紙＋Negotiator</span><span>空心圈＝加冰／加水前</span></div>';}
 function oreaHTML(){return '<div class="cm-sec orea" data-m="orea" hidden><div><div class="label">沖煮手法 · OREA-O・O1 Brewer 官方配方</div><h1>OREA-O 配方專區</h1><p class="lede">OREA 官方指南的 10 套配方，從冰咖啡、bypass 到 1:20 的高萃取。全部放進同一個擴散萃取模型：看每套配方落在控制圖的哪裡、Wave 和平底濾紙差在哪、加冰加水改變了什麼。</p></div>'+
@@ -8276,7 +8277,7 @@ function oreaHTML(){return '<div class="cm-sec orea" data-m="orea" hidden><div><
     ['〰️','Wave 波浪濾紙：快','蛋糕型的波浪濾紙只在底部接觸，側邊有空氣通道，排水快，杯子明亮乾淨。'],
     ['🎚️','平底濾紙＋Negotiator：慢','平底濾紙整片貼底，搭配 Negotiator，排水變慢、接觸時間拉長，可以用比較粗的粉或比較寬的粉水比萃到位（模擬以較慢的流速處理）。'],
     ['🧊','加冰、加水：稀釋不改萃取率','先萃出比較濃的咖啡，再用冰塊或熱水稀釋。萃取率不變，濃度往下降，在控制圖上是一條直直往下的線。']].map(([i,h,p])=>'<div><span class="cm-ic">'+i+'</span><h3>'+h+'</h3><p>'+p+'</p></div>').join('')+'</div>'+
-   '<h3 class="cm-ch-h">10 套配方在控制圖上的位置</h3><div class="cm-chart orea-sc"></div><p class="label">模型用同一支巴拿馬藝伎計算；研磨刻度（CLIX）以 Comandante C40 每格約 27 μm 換算。點一下下面的配方，圖上會標出來。</p></section>'+
+   '<h3 class="cm-ch-h">10 套配方在控制圖上的位置</h3><div class="cm-chart orea-sc"></div><p class="label">👆 直接點圖上的點，就會切到那套配方、往下跳到它的配方細項。點太密的地方會選最近的那一點。模型用同一支巴拿馬藝伎計算；研磨刻度（CLIX）以 Comandante C40 每格約 27 μm 換算。</p></section>'+
   '<section class="panel cm-lab"><h2>動手試：選配方、換濾紙</h2><div class="params"><div class="param"><span class="label">配方</span><div class="seg wrapseg orea-pick" role="group">'+OREA.map(r=>'<button type="button" data-r="'+r.id+'">'+r.n+'</button>').join('')+'</div></div>'+
    '<div class="param"><span class="label">濾紙</span><div class="seg orea-paper" role="group"><button type="button" data-p="">配方原本的</button><button type="button" data-p="wave">Wave</button><button type="button" data-p="flat">平底＋Negotiator</button></div></div></div>'+
    '<div class="orea-card"></div><div class="t46-res cm-res"></div><h3 class="cm-ch-h">時間曲線（實線＝原配方、虛線＝換濾紙）</h3><div class="cm-chart orea-curve"></div><p class="t46-note cm-note"></p><button class="savebtn cm-go" type="button">把這套配方帶到練習模擬器</button></section>'+
@@ -8299,6 +8300,11 @@ function oreaRender(){const sec=document.querySelector('.cm-sec[data-m="orea"]')
   sec.querySelector('.orea-tab').innerHTML='<div class="t46-row head orea6"><span>配方</span><span>TDS</span><span>EY</span><span>甜</span><span>苦</span><span>滴完</span></div>'+OREA.map(x=>{const q=oreaRun(x);return '<div class="t46-row orea6'+(x.id===OST.cur?' on':'')+'" data-r="'+x.id+'"><span>'+x.n.replace('The ','')+(x.paper==='flat'?' <i class="orea-f">平底</i>':'')+'</span><span>'+q.tds.toFixed(2)+'%</span><span>'+q.ey.toFixed(1)+'%</span><span>'+T5(q.pf.sweet)+'</span><span>'+T5(q.pf.bitter)+'</span><span>'+x.done+'</span></div>';}).join('');
   sec.querySelectorAll('.orea-tab [data-r]').forEach(e=>e.onclick=()=>{OST.cur=e.dataset.r;OST.paper=null;oreaRender();});}
 function oreaBind(){const sec=document.querySelector('.cm-sec[data-m="orea"]');
+  sec.querySelector('.orea-sc').addEventListener('click',e=>{const svg=e.currentTarget.querySelector('svg');if(!svg)return;
+    const pt=svg.createSVGPoint();pt.x=e.clientX;pt.y=e.clientY;const q=pt.matrixTransform(svg.getScreenCTM().inverse());
+    let best=null,bd=1e9;svg.querySelectorAll('.orea-dot').forEach(g=>{const c=g.querySelector('circle');const d=Math.hypot(+c.getAttribute('cx')-q.x,+c.getAttribute('cy')-q.y);if(d<bd){bd=d;best=g.dataset.r;}});
+    if(!best||bd>18)return;OST.cur=best;OST.paper=null;oreaRender();
+    const card=sec.querySelector('.orea-card');if(card){card.classList.remove('flash');void card.offsetWidth;card.classList.add('flash');scrollTo({top:scrollY+card.getBoundingClientRect().top-150,behavior:'smooth'});}});
   sec.querySelectorAll('.orea-pick button').forEach(b=>b.onclick=()=>{OST.cur=b.dataset.r;OST.paper=null;oreaRender();});
   sec.querySelectorAll('.orea-paper button').forEach(b=>b.onclick=()=>{OST.paper=b.dataset.p||null;oreaRender();});
   sec.querySelector('.cm-go').onclick=()=>{const r=OREA.find(x=>x.id===OST.cur),p=oreaParams(r,OST.paper);if(!window.simApplyRecipe)return;
