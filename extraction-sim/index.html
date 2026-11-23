@@ -636,7 +636,7 @@ html.embed{--modesH:0px}
 .cm-bar{display:flex;gap:3px;margin-top:12px}.cm-bar>div{min-width:22px;height:46px;border-radius:5px;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#1a1512;font-size:12px;line-height:1.1}
 .cm-bar>div.cl{background-image:repeating-linear-gradient(45deg,transparent 0 5px,rgba(0,0,0,.16) 5px 8px)!important}.cm-bar small{font-size:10px;opacity:.8}
 .cm-tl{display:flex;gap:3px;font-size:11px;color:var(--muted);margin:4px 0 6px}.cm-tl span{min-width:22px}
-.cm-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-top:10px}.cm-cards>div{border:1px solid var(--line);border-radius:10px;padding:12px}
+.cm-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px;margin-top:10px;align-items:start}.cm-cards>details{border:1px solid var(--line);border-radius:10px;padding:10px 12px}.cm-cards summary{display:flex;align-items:center;gap:10px;list-style:none;cursor:pointer}.cm-cards summary::-webkit-details-marker{display:none}.cm-cards summary::after{content:'▾';margin-left:auto;color:var(--muted);transition:transform .2s}.cm-cards details[open] summary::after{transform:rotate(180deg)}.cm-cards details[open] p{margin-top:8px}.cm-cards .cm-ic{font-size:20px;line-height:1}.cm-cards summary h3{margin:0}
 .cm-cards h3{margin:4px 0;font-size:15px}.cm-cards p{margin:0;font-size:14px;line-height:1.6}.cm-ic{font-size:22px}
 .cm-ch-h{margin:16px 0 4px;font-size:15px}.cm-chart{max-width:560px}
 .cm-leg{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--muted)}.cm-leg i{display:inline-block;width:20px;border-top:2.2px solid var(--ink);vertical-align:middle;margin-right:5px}.cm-leg i.d{border-top:2px dashed var(--ink);opacity:.7}
@@ -1282,7 +1282,7 @@ window.BGM=(()=>{
     <div class="err" id="tErr"></div>
   </div>
   <button class="t-more" id="tMore" type="button" aria-label="咖啡宇宙：更多咖啡 App 與遊戲">咖啡宇宙</button>
-  <div class="t-foot">© 2026 Jim Lu　ver. 7.6</div>
+  <div class="t-foot">© 2026 Jim Lu　ver. 7.7</div>
 </div>
 <nav class="modes" aria-label="導覽"><div class="in">
   <button class="homebtn" id="homeBtn" type="button" hidden>‹ 主選單</button>
@@ -8194,7 +8194,7 @@ function cmGuideCard(k,g){const W=WHO[g],done=tourDone(k);
 function cmBuild(){const dyn=$('cmDyn');if(!dyn||dyn.dataset.ok)return;dyn.dataset.ok=1;
   dyn.innerHTML=CMM.map(m=>'<div class="cm-sec" data-m="'+m.id+'" hidden><div><div class="label">'+m.label+'</div><h1>'+m.title+'</h1><p class="lede">'+m.lede+'</p></div>'+
    '<section class="panel cm-recipe"><h2>基本配方</h2><div class="t46-stats">'+m.stats.map(([v,l])=>'<div><b>'+v+'</b><span>'+l+'</span></div>').join('')+'</div>'+recipeBar(m)+(m.custom?'':'<p class="label">'+cmRec(m.rec).note+'</p>')+'</section>'+
-   '<section class="panel cm-why"><h2>'+m.why.h+'</h2><p>'+m.why.p+'</p><div class="cm-cards">'+m.why.cards.map(([i,h,p])=>'<div><span class="cm-ic">'+i+'</span><h3>'+h+'</h3><p>'+p+'</p></div>').join('')+'</div>'+
+   '<section class="panel cm-why"><h2>'+m.why.h+'</h2><p>'+m.why.p+'</p><p class="label">點卡片標題展開說明</p><div class="cm-cards">'+m.why.cards.map(([i,h,p])=>'<details><summary><span class="cm-ic">'+i+'</span><h3>'+h+'</h3></summary><p>'+p+'</p></details>').join('')+'</div>'+
     '<h3 class="cm-ch-h">模型裡的時間曲線</h3><div class="cm-chart"></div><p class="label">實線是冠軍配方、虛線是下面「動手試」選的做法。上圖是粉床溫度，下圖是甜味和苦味物質累積溶出到杯子裡的量。</p></section>'+
    '<section class="panel cm-lab"><h2>動手試：'+m.lab.h+'</h2><div class="params"><div class="param"><span class="label">換一種做法</span><div class="seg wrapseg" role="group">'+m.lab.opts.map((o,i)=>'<button type="button" data-k="'+i+'">'+o[0]+'</button>').join('')+'</div></div></div>'+
     '<div class="t46-res cm-res"></div><div class="cm-cmp"></div><p class="t46-note cm-note"></p><button class="savebtn cm-go" type="button">把冠軍配方帶到練習模擬器</button></section>'+
@@ -8272,11 +8272,11 @@ function oreaScatter(){const W=320,H=220,x0=34,y0=10,w=W-x0-10,h=H-y0-30;const e
     if(on)s+='<text x="'+(X(Math.max(ex[0],Math.min(ex[1],R.ey)))+7)+'" y="'+(Y(Math.max(tx[0],Math.min(tx[1],R.tds)))+3)+'" font-size="8" fill="'+(on?'var(--ink)':'var(--muted)')+'">'+r.n.replace('The ','')+'</text>';});
   return s+'</svg><div class="cm-leg"><span><i style="border-color:#7fb6e0"></i>Wave 波浪濾紙</span><span><i style="border-color:#ff4fd8"></i>平底濾紙＋Negotiator</span><span>空心圈＝加冰／加水前</span></div>';}
 function oreaHTML(){return '<div class="cm-sec orea" data-m="orea" hidden><div><div class="label">沖煮手法 · OREA-O・O1 Brewer 官方配方</div><h1>OREA-O 配方專區</h1><p class="lede">OREA 官方指南的 10 套配方，從冰咖啡、bypass 到 1:20 的高萃取。全部放進同一個擴散萃取模型：看每套配方落在控制圖的哪裡、Wave 和平底濾紙差在哪、加冰加水改變了什麼。</p></div>'+
-  '<section class="panel cm-why"><h2>平底濾杯的科學</h2><p>OREA 是平底大孔的濾杯。錐形濾杯中間粉深、邊緣粉淺，水會偏向從中間流；平底的粉層厚度到處一樣，每一處的粉萃得比較一致。</p><div class="cm-cards">'+
+  '<section class="panel cm-why"><h2>平底濾杯的科學</h2><p>OREA 是平底大孔的濾杯。錐形濾杯中間粉深、邊緣粉淺，水會偏向從中間流；平底的粉層厚度到處一樣，每一處的粉萃得比較一致。</p><p class="label">點卡片標題展開說明</p><div class="cm-cards">'+
    [['🥞','平底：粉層一樣厚','水流過每一處粉的距離差不多，萃取均勻，比較少「中間過萃、邊緣不足」。'],
     ['〰️','Wave 波浪濾紙：快','蛋糕型的波浪濾紙只在底部接觸，側邊有空氣通道，排水快，杯子明亮乾淨。'],
     ['🎚️','平底濾紙＋Negotiator：慢','平底濾紙整片貼底，搭配 Negotiator，排水變慢、接觸時間拉長，可以用比較粗的粉或比較寬的粉水比萃到位（模擬以較慢的流速處理）。'],
-    ['🧊','加冰、加水：稀釋不改萃取率','先萃出比較濃的咖啡，再用冰塊或熱水稀釋。萃取率不變，濃度往下降，在控制圖上是一條直直往下的線。']].map(([i,h,p])=>'<div><span class="cm-ic">'+i+'</span><h3>'+h+'</h3><p>'+p+'</p></div>').join('')+'</div>'+
+    ['🧊','加冰、加水：稀釋不改萃取率','先萃出比較濃的咖啡，再用冰塊或熱水稀釋。萃取率不變，濃度往下降，在控制圖上是一條直直往下的線。']].map(([i,h,p])=>'<details><summary><span class="cm-ic">'+i+'</span><h3>'+h+'</h3></summary><p>'+p+'</p></details>').join('')+'</div>'+
    '<h3 class="cm-ch-h">10 套配方在控制圖上的位置</h3><div class="cm-chart orea-sc"></div><p class="label">👆 直接點圖上的點，就會切到那套配方、往下跳到它的配方細項。點太密的地方會選最近的那一點。模型用同一支巴拿馬藝伎計算；研磨刻度（CLIX）以 Comandante C40 每格約 27 μm 換算。</p></section>'+
   '<section class="panel cm-lab"><h2>動手試：選配方、換濾紙</h2><div class="params"><div class="param"><span class="label">配方</span><div class="seg wrapseg orea-pick" role="group">'+OREA.map(r=>'<button type="button" data-r="'+r.id+'">'+r.n+'</button>').join('')+'</div></div>'+
    '<div class="param"><span class="label">濾紙</span><div class="seg orea-paper" role="group"><button type="button" data-p="">配方原本的</button><button type="button" data-p="wave">Wave</button><button type="button" data-p="flat">平底＋Negotiator</button></div></div></div>'+
