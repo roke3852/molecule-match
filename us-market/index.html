@@ -47,6 +47,12 @@ main{max-width:760px;margin:0 auto;padding:14px max(14px,env(safe-area-inset-lef
 .ltab{display:flex;flex-direction:column;gap:8px;margin-top:6px}.ltab .r{border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-size:13px;line-height:1.55}.ltab .r.now{border-color:var(--bear)}.ltab .h{display:flex;gap:8px;align-items:baseline;font-weight:700}.ltab .h small{font-weight:400;color:var(--muted)}.ltab .m{color:var(--muted)}.ltab .o{margin-top:2px}
 .subtabs{position:sticky;top:var(--hdr,96px);z-index:5;background:var(--bg);padding:6px 0;margin-bottom:6px}
 .subtabs .chip{font-weight:600}
+.bsig{display:grid;grid-template-columns:1fr 96px 40px;gap:8px;align-items:center;padding:7px 0;border-bottom:1px dashed var(--line);font-size:14px}
+.bsig .bx{height:10px;border-radius:5px;background:var(--line);overflow:hidden}.bsig .bx i{display:block;height:100%;border-radius:5px}
+.bsig .nt{font-size:12px;color:var(--muted);grid-column:1/-1;margin-top:-4px}.bsig .hr{font-size:12px;color:var(--faint);text-align:right;font-family:ui-monospace,monospace}
+.bgrid{display:grid;grid-template-columns:64px repeat(8,1fr) 44px;gap:3px;font-size:12px;align-items:center}
+.bgrid .c{height:22px;border-radius:4px}.bgrid .h{text-align:center;color:var(--muted);font-size:11px}.bgrid .y{font-weight:600}.bgrid .p{text-align:right;font-family:ui-monospace,monospace}
+.bgrid .now{color:var(--s1)}
 .foldbar{display:flex;gap:8px;justify-content:flex-end;margin:-4px 0 10px}
 .foldbar button{font:inherit;font-size:12px;padding:5px 10px;border-radius:999px;border:1px solid var(--line);background:var(--panel);color:var(--muted)}
 .meta{font-size:12px;color:var(--faint);display:flex;gap:8px;flex-wrap:wrap;align-items:center}
@@ -354,6 +360,16 @@ input[type=range]{width:100%;accent-color:var(--s1)}
 
     <div data-sub="hist" id="bearCards"></div>
 
+    <div data-sub="now" class="card" id="botCard">
+      <h2>🎯 底部訊號儀表板</h2>
+      <div class="meta">8 個歷史上最常見的止跌訊號：亮＝1 分、半亮＝0.5 分。分數＝目前亮了全部的幾成</div>
+      <div id="botGauge"></div>
+      <div class="fig"><div class="t">8 個訊號現在的狀態</div><div class="s">右邊灰字＝過去 10 次空頭見底時，這個訊號平均亮了幾成</div><div id="botSig"></div></div>
+      <div class="fig"><div class="t">回測：過去 10 次美股空頭，見底那天亮了幾成？</div><div class="s">藍色＝現在；虛線＝歷史最低（再低就還沒見底過）</div><div id="botBT"></div></div>
+      <div class="fig"><div class="t">逐次拆解</div><div id="botGrid"></div></div>
+      <div class="why" id="botWhy"></div>
+    </div>
+
     <div data-sub="now" class="card">
       <h2>💣 這次還有哪些未爆彈</h2>
       <div class="meta">依「可能多傷」排列；日期為已知的引爆點</div>
@@ -400,7 +416,7 @@ input[type=range]{width:100%;accent-color:var(--s1)}
 <div id="tip"></div><div id="toast"></div>
 
 <script>
-const ASOF="2026-11-24 00:40";
+const ASOF="2026-11-24 01:10";
 const VIX_NOW=35.89, VIX_TXT="35.89", VIX_D="11/20"; /* VIX 最新收盤（每日更新） */
 const VIXH=[["2020", "疫情", 82.69], ["2008", "金融海嘯", 80.86], ["2025", "關稅", 52.33], ["2011", "美債降評", 48.0], ["1998", "LTCM", 45.74], ["2002", "網路泡沫", 45.08], ["2015", "人民幣貶值", 40.74], ["2022", "升息空頭", 36.45], ["2018", "Q4 縮表", 36.07]];
 const TODAY={"d": "2026-11-23", "l": [["ev", "good-news", "好消息：高盛 22 次修正後平均 +4%、H100 租金漲近六成、ARK 買 ANT"], ["ev", "tw-rescue3", "救市：證交所研議融資維持率降到 120%、卓揆今天座談"], ["ev", "sea-halt", "出口新規生效日查清：11/19 生效，既有安排緩衝到 2/17"], ["ev", "nvda-sg", "Nvidia 新加坡：修正出口新規生效日"], ["ev", "trump-xi", "川習會：修正出口新規生效日"], ["ev", "rout-1120", "美股大屠殺：VIX 週五收盤更正為 35.89"], ["vw", "", "名人觀點：高盛 Snider 見底訊號、Cathie Wood 買 ANT、Goolsbee"], ["cal", "", "接下來：卓揆座談、維持率 120% 最快 11/24、2/17 許可期限"], ["bear", "", "空頭史：VIX 更正為 35.89，止跌訊號與修正或空頭卡同步"], ["tour", "", "導覽員：週一早報"]]}; /* 今日更新清單：每日更新時重寫 d 與 l */
@@ -1419,6 +1435,45 @@ document.addEventListener("click",e=>{
   const c=e.target.closest("#evList .card");if(!c||e.target.closest("button,a,summary,[data-tip],.hit"))return;
   const onH=e.target.closest("#evList .card>h2");if(!onH&&!c.classList.contains("fold"))return;
   c.classList.toggle("fold");const st=LS.get("evfold",{});st[c.id]=c.classList.contains("fold");LS.set("evfold",st)});
+
+/* ===== 底部訊號儀表板 ===== */
+const BOT_S=["聯準會轉鬆（降息、停升息或 QE）","VIX 衝過 40 後回落","信用利差停止擴大","權值股補跌、出現恐慌量","利空落地、不確定性解除","多數個股深跌、跌勢鈍化","政府出手救市","通膨／油價壓力減輕"];
+const BOT_NOW=[[0,"市場仍押 12 月升息"],[0.5,"美國 VIX 11/20 衝到 35.9，沒破 40；11/23 隨反彈回落"],[0,"還沒看到確認"],[1,"11/20 輝達 −14%、費半 −10.7%、台股近 300 檔跌停"],[0.5,"黃仁勳回任、出口新規已公布；禁建令、國會調查還沒落地"],[1,"櫃買 11 月單月 −29%，史上最大"],[1,"國安基金、限空令 3.0、融資維持率降到 120%"],[0.5,"油價 11 月跌約 2 成，但通膨還沒降"]];
+const BOT_BT=[["1987",[1,1,.5,1,.5,1,.5,.5],"黑色星期一：Fed 隔天宣布提供流動性"],["1990",[1,.5,.5,1,.5,1,0,.5],"波灣戰爭：Fed 已在降息，油價自高點回落"],["2002",[1,1,1,1,.5,1,.5,.5],"網路泡沫：利率降到 1.75%、信用利差 10 月見頂"],["2009",[1,1,.5,1,1,1,1,1],"金融海嘯：零利率、QE、壓力測試、刺激方案全上"],["2011",[.5,1,.5,1,.5,1,.5,.5],"歐債：扭轉操作、10/26 歐盟峰會"],["2016",[1,.5,1,.5,.5,1,.5,1],"中國＋油價：Fed 放慢升息、上海協議、油價止跌"],["2018",[.5,.5,.5,1,.5,1,.5,1],"升息＋貿易戰：聖誕夜恐慌，Fed 1/4 才轉向"],["2020",[1,1,1,1,.5,1,1,1],"疫情：無限 QE、Fed 買公司債、紓困法案"],["2022",[.5,.5,1,.5,.5,1,.5,1],"暴力升息：CPI 已見頂，Fed 預告放慢"],["2025",[0,1,.5,1,1,1,1,.5],"對等關稅：Fed 沒動，靠 4/9 關稅暫停"]];
+function renderBottom(){
+  const sc=a=>Math.round(a.reduce((x,y)=>x+(typeof y==="number"?y:y[0]),0)/8*1000)/10;
+  const now=sc(BOT_NOW),bt=BOT_BT.map(b=>[b[0],sc(b[1]),b[2]]),vals=bt.map(b=>b[1]).sort((a,b)=>a-b);
+  const mn=vals[0],mx=vals[vals.length-1],med=(vals[4]+vals[5])/2,avg=Math.round(vals.reduce((a,b)=>a+b,0)/vals.length*10)/10;
+  const zone=now<50?["跌勢中","var(--faint)"]:now<mn?["築底初期","#e0a100"]:now<80?["歷史見底區","var(--bull)"]:["強烈底部訊號","var(--bull)"];
+  // gauge
+  const G=Math.min(W,420),cx=G/2,cy=G*0.52,r=G*0.42,rw=G*0.07;
+  const pt=(v,rr)=>{const a=Math.PI*(1-v/100);return[cx+rr*Math.cos(a),cy-rr*Math.sin(a)]};
+  const arc=(a,b,col,op=1)=>{const[x1,y1]=pt(a,r),[x2,y2]=pt(b,r);return`<path d="M${x1} ${y1}A${r} ${r} 0 0 1 ${x2} ${y2}" stroke="${col}" stroke-width="${rw}" fill="none" opacity="${op}"/>`};
+  const tick=(v,lab,dash)=>{const[x1,y1]=pt(v,r-rw*0.8),[x2,y2]=pt(v,r+rw*0.8),[tx,ty]=pt(v,r+rw*1.6);return`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="var(--fg)" stroke-width="1.5" ${dash?'stroke-dasharray="3 2"':""}/><text x="${tx}" y="${ty}" font-size="11" text-anchor="middle" fill="var(--muted)">${lab}</text>`};
+  const[nx,ny]=pt(now,r-rw*1.2);
+  $("#botGauge").innerHTML=`<svg viewBox="0 0 ${G} ${cy+G*0.1}" width="100%" style="max-width:${G}px;display:block;margin:6px auto 0">
+   ${arc(0,50,"var(--line)")}${arc(50,mn,"#e0a100",.55)}${arc(mn,80,"var(--bull)",.45)}${arc(80,100,"var(--bull)",.8)}
+   ${tick(mn,"歷史最低 "+mn+"%",1)}${tick(med,"中位數 "+med+"%")}
+   <line x1="${cx}" y1="${cy}" x2="${nx}" y2="${ny}" stroke="var(--s1)" stroke-width="3" stroke-linecap="round"/><circle cx="${cx}" cy="${cy}" r="6" fill="var(--s1)"/>
+   <text x="${cx}" y="${cy-r*0.38}" font-size="${G*0.11}" font-weight="800" text-anchor="middle" fill="var(--fg)">${now}%</text>
+   <text x="${cx}" y="${cy-r*0.38+G*0.06}" font-size="13" font-weight="700" text-anchor="middle" fill="${zone[1]}">${zone[0]}</text>
+   <text x="${pt(0,r)[0]}" y="${cy+16}" font-size="11" text-anchor="middle" fill="var(--faint)">0</text><text x="${pt(100,r)[0]}" y="${cy+16}" font-size="11" text-anchor="middle" fill="var(--faint)">100</text></svg>
+   <div class="legend" style="justify-content:center;margin-top:2px"><span><i style="background:var(--line)"></i>跌勢中 &lt;50</span><span><i style="background:#e0a100;opacity:.6"></i>築底初期</span><span><i style="background:var(--bull);opacity:.5"></i>歷史見底區</span><span><i style="background:var(--bull)"></i>強烈 &gt;80</span></div>`;
+  // signal bars with hit rate
+  const hit=i=>Math.round(BOT_BT.reduce((a,b)=>a+b[1][i],0)/BOT_BT.length*100);
+  const col=v=>v===1?"var(--bull)":v===.5?"#e0a100":"var(--faint)";
+  $("#botSig").innerHTML=BOT_S.map((n,i)=>`<div class="bsig"><span>${BOT_NOW[i][0]===1?"✅":BOT_NOW[i][0]===.5?"🟡":"⬜"} ${n}</span><div class="bx"><i style="width:${BOT_NOW[i][0]*100}%;background:${col(BOT_NOW[i][0])}"></i></div><span class="hr">${hit(i)}%</span><div class="nt">${BOT_NOW[i][1]}</div></div>`).join("");
+  // backtest bars
+  const rows=[["現在",now,"現在 "+now+"%"]].concat(bt.slice().sort((a,b)=>b[1]-a[1]).map(b=>[b[0],b[1],b[0]+"："+b[2]+"（"+b[1]+"%）"]));
+  $("#botBT").innerHTML=hbar(rows,{max:100,hl:0,note:`10 次見底時平均亮 ${avg}%、中位數 ${med}%，最低 ${mn}%（1990）、最高 ${mx}%（2009、2020）。`});
+  // grid
+  $("#botGrid").innerHTML=`<div class="bgrid"><span></span>${BOT_S.map((n,i)=>`<span class="h" data-tip="${n}">${i+1}</span>`).join("")}<span class="h">分數</span>`+
+   [["現在",BOT_NOW.map(x=>x[0]),now,1]].concat(BOT_BT.map(b=>[b[0],b[1],sc(b[1]),0])).map(r=>`<span class="y ${r[3]?"now":""}">${r[0]}</span>${r[1].map((v,i)=>`<span class="c" style="background:${col(v)};opacity:${v===0?.35:1}" data-tip="${r[0]}・${BOT_S[i]}：${v===1?"亮":v===.5?"半亮":"沒亮"}"></span>`).join("")}<span class="p ${r[3]?"now":""}">${r[2]}%</span>`).join("")+
+   `</div><div class="meta" style="margin-top:6px">欄位 1–8 對應上面 8 個訊號，點色塊看說明。歷史判讀為依當時事件人工整理的近似值。</div>`;
+  const gap=Math.round((mn-now)/12.5*10)/10;
+  $("#botWhy").innerHTML=`<b>怎麼讀：</b>現在 ${now}%，還低於過去 10 次見底時的最低值 ${mn}%，代表以歷史標準來看「還沒到典型的底部」，大約還差 ${gap>0?gap:0} 個訊號（每個訊號 12.5 分）。最常在底部亮起、但現在還沒亮的是<span style="font-weight:700">聯準會轉鬆</span>（歷史 ${hit(0)}% 都有）和<span style="font-weight:700">信用利差停止擴大</span>（${hit(2)}%）。<br><br><b>回測的規律：</b>① 每一次見底，「多數個股深跌」都已經亮了（100%），它是必要但不充分的條件；② 亮到 9 成以上的（2009、2020）都是央行加政府一起全力出手；③ 唯一在 Fed 沒轉鬆下見底的是 2025，靠的是政策直接退讓（關稅暫停）。這次如果 Fed 12 月不升息、或信用市場穩住，分數就會跳進 62.5–75% 的「歷史見底區」。<br><br><span style="color:var(--muted);font-size:13px">注意：只有 10 個樣本，而且是事後回看；底部那天沒有人能確定訊號「已經亮了」。這是幫你判斷位置的框架，不是買賣訊號。</span>`;
+}
+renderBottom();
 applyFold();
 </script>
 <!-- Made by Jim Lu -->
