@@ -698,6 +698,10 @@ html.dark .med-red b{color:#e07a6a}
 .resv-in{display:flex;gap:6px;margin:6px 0}.resv-in input{flex:1;min-width:0;font-size:16px;padding:6px 8px}
 .resv-note{white-space:pre-wrap;font-size:14px;line-height:1.7;background:color-mix(in srgb,var(--gold) 10%,var(--card));border:2px solid var(--px);padding:10px;font-family:var(--ff-b)}
 .resv-big{align-items:flex-start;overflow:auto}.resv-big pre{white-space:pre-wrap;text-align:left;font-size:19px;line-height:1.7;color:#1b1612;font-family:var(--ff-b);margin:0}
+.sec.foldable>h3{cursor:pointer;user-select:none}.sec.foldable>h3::after{content:"收起 ▲";margin-left:auto;font-size:12px;color:var(--sub);font-weight:400;font-family:var(--ff-s)}
+.sec.foldable.fold>h3{margin-bottom:0}.sec.foldable.fold>h3::after{content:"展開 ▼"}.sec.foldable.fold>:not(h3){display:none!important}
+.sec.foldable:not(.fold)>h3::before{display:inline-block;transform:rotate(90deg)}
+.fold-bar{display:none;justify-content:flex-end;gap:6px;margin:4px 0 6px}.fold-bar button{font-size:12px;padding:4px 10px;border:1.5px solid var(--line);background:var(--card);color:var(--ink)}
 .db-hint{font-size:12px;color:var(--sub);margin-top:6px}.db-sel{margin-top:6px;font-size:13px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}.db-sel button{margin-left:auto;font-size:12px;padding:3px 10px;border:1.5px solid var(--line);border-radius:999px;background:var(--card);color:var(--ink)}
 .db-l li{cursor:pointer;padding:2px 4px}.db-l li.sel{background:color-mix(in srgb,var(--day) 18%,transparent);outline:1.5px solid var(--day)}
 .db-svg .riv{fill:none;stroke:color-mix(in srgb,var(--sea) 60%,var(--card));stroke-width:5;stroke-linejoin:round;shape-rendering:geometricPrecision}.db-svg .rivt{font-size:9px;fill:var(--sea);font-family:var(--ff-b)}
@@ -2401,6 +2405,15 @@ const CL_TERM=[
 let clTab='say',clQ=null,clSlow=false;
 function clSay(t,lang,slow){try{if(!('speechSynthesis' in window)){toast('這台裝置不支援語音');return}speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t.replace(/〇〇/g,'1200'));u.lang=lang||'ja-JP';u.rate=slow?0.55:0.9;const v=speechSynthesis.getVoices().find(v=>v.lang&&v.lang.replace('_','-').startsWith(u.lang.slice(0,2)));if(v)u.voice=v;speechSynthesis.speak(u)}catch(e){}}
 
+(function(){const secs=[...document.querySelectorAll('.sec[data-tt="help"],.sec[data-tt="set"]')];let st={};try{st=JSON.parse(localStorage.getItem('fuk26_secfold')||'{}')}catch(e){}
+ const key=x=>(x.querySelector('h3')||{}).textContent.trim();
+ secs.forEach(x=>{const h=x.querySelector('h3');if(!h)return;x.classList.add('foldable');const k=key(x);if(st[k]!==0)x.classList.add('fold');
+  h.setAttribute('role','button');h.addEventListener('click',e=>{if(e.target.closest('button,a,input'))return;x.classList.toggle('fold');st[k]=x.classList.contains('fold')?1:0;try{localStorage.setItem('fuk26_secfold',JSON.stringify(st))}catch(e){}})});
+ const tb=document.getElementById('toolTabs');if(tb&&!document.getElementById('foldAll')){const bar=document.createElement('div');bar.className='fold-bar';bar.innerHTML='<button id="foldOpen">全部展開</button><button id="foldAll">全部收起</button>';tb.after(bar);
+  const setAll=v=>{secs.forEach(x=>{if(x.offsetParent===null)return;x.classList.toggle('fold',v);st[key(x)]=v?1:0});try{localStorage.setItem('fuk26_secfold',JSON.stringify(st))}catch(e){}};
+  {let t='air';try{t=JSON.parse(localStorage.getItem('fuk26_tooltab'))||'air'}catch(e){}bar.style.display=(t==='help'||t==='set')?'flex':'none'}
+  bar.querySelector('#foldOpen').onclick=()=>setAll(false);bar.querySelector('#foldAll').onclick=()=>setAll(true)}})();
+
 (function(){const N=document.getElementById('resvNote');if(!N)return;const R=document.getElementById('resvRoom'),M=document.getElementById('resvName');const st=S.get('resvInfo',{});R.value=st.r||'';M.value=st.n||'';
  const txt=()=>`恐れ入りますが、レストランの予約をお願いできますでしょうか。
 
@@ -2769,7 +2782,7 @@ draw();if(typeof reloaders!=='undefined')reloaders.push(draw);
 })();
 
 /* ---------- 工具頁分頁 ---------- */
-function setToolTab(t){if(!['air','help','fav','set'].includes(t))t='air';try{localStorage.setItem('fuk26_tooltab',JSON.stringify(t))}catch(e){}
+function setToolTab(t){if(!['air','help','fav','set'].includes(t))t='air';{const fb=document.querySelector('.fold-bar');if(fb)fb.style.display=(t==='help'||t==='set')?'flex':'none'}try{localStorage.setItem('fuk26_tooltab',JSON.stringify(t))}catch(e){}
  document.querySelectorAll('#toolTabs a').forEach(a=>a.classList.toggle('on',a.dataset.tt===t));
  document.querySelectorAll('#v-tools .sec[data-tt]').forEach(x=>x.classList.toggle('tt-on',x.dataset.tt===t));window.scrollTo(0,0)}
 $('#toolTabs').addEventListener('click',e=>{const a=e.target.closest('[data-tt]');if(a)setToolTab(a.dataset.tt)});
