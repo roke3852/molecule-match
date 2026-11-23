@@ -72,6 +72,13 @@ h2{font-size:15px;color:var(--mute);margin:18px 2px 8px;font-weight:600}
 .cats button{flex:none;font:inherit;font-size:14px;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:18px;padding:6px 12px;cursor:pointer;white-space:nowrap}
 .cats button.on{background:var(--accent);color:#fff;border-color:var(--accent)}
 .cats .cnt{font-size:12px;opacity:.65;margin-left:3px}
+.subs{display:flex;flex-wrap:wrap;gap:6px;margin:-4px 0 12px;padding:8px;background:#ebe2d6;border-radius:14px}
+.subs::-webkit-scrollbar{display:none}
+.subs:empty{display:none}
+.subs button{flex:none;font:inherit;font-size:13px;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:14px;padding:5px 10px;cursor:pointer;white-space:nowrap}
+.subs button.on{background:#8a5a34;color:#fff;border-color:#8a5a34}
+.subs .cnt{font-size:11px;opacity:.65;margin-left:3px}
+#list h3.sub{font-size:13px;color:var(--mute);margin:14px 2px 8px;font-weight:700;letter-spacing:.5px}
 #list h2:first-child{margin-top:4px}
 .empty{color:var(--mute);font-size:14px;padding:28px 12px;text-align:center;background:var(--card);border:1px dashed var(--line);border-radius:16px;line-height:1.6}
 .tabs{display:flex;gap:4px;background:#ebe2d6;padding:4px;border-radius:12px;margin-bottom:12px}
@@ -98,6 +105,7 @@ footer{margin-top:28px;font-size:12px;color:var(--mute);text-align:center;line-h
   </div>
 
   <div class="cats" id="cats"></div>
+  <div class="subs" id="subs"></div>
 
   <div class="bar">
     <label for="sort">排序</label>
@@ -118,7 +126,7 @@ footer{margin-top:28px;font-size:12px;color:var(--mute);text-align:center;line-h
   <footer>按右上角「↻ 更新」會重新抓這頁和所有 App 的最新版。<br>長按卡片可拖曳排序；按「編輯」可換分類（只記在這台裝置）。<br>新增或更新 App：在這頁的 APPS 清單加一行或改 ver / updated（日期＋時間）/ note。<br>版本號一變，首頁就會在那個 App 上顯示「新版」。<br><span id="hubVer"></span></footer>
 </main>
 <script>
-const HUB_VER = "2.7";
+const HUB_VER = "2.8";
 /* 分類：App 的 cat 填這裡的 id；順序就是分類標籤與分組的順序 */
 const CATS = [
   { id:"coffee", name:"咖啡", icon:"☕" },
@@ -128,6 +136,19 @@ const CATS = [
   { id:"game",   name:"遊戲", icon:"🎮" },
   { id:"life",   name:"生活", icon:"🐱" }
 ];
+/* 咖啡子分類：咖啡的 App 加上 sub（沒寫的歸「其他」） */
+const SUBS = { coffee: [
+  { id:"brew",  name:"沖煮紀錄",   icon:"🫖" },
+  { id:"sense", name:"感官與比賽", icon:"👃" },
+  { id:"know",  name:"知識圖鑑",   icon:"📚" },
+  { id:"lab",   name:"實驗室・遊戲", icon:"🧪" },
+  { id:"go",    name:"店家與活動", icon:"📍" }
+]};
+const SUB_OF = { "brew-notes/":"brew","brew-log/":"brew","grinder-guide/":"brew",
+  "cupping/":"sense","smell-training/":"sense","brew-speech/":"sense",
+  "coffee-terroir/":"know","gear-atlas/":"know","barista-guide/":"know","coffee-recall/":"know",
+  "extraction-sim/":"lab","bean-hunter/":"lab","coffee-lab-plan/":"lab",
+  "cafe-wishlist/":"go","coffee-expo/":"go" };
 /* 新增 App：加一行 { path, name, desc, icon, color, cat, tag, ver, updated, note }
    更新 App：把 ver 往上加、updated 改成更新的日期時間（"YYYY-MM-DD HH:MM"，台灣時間）、note 寫這次改了什麼 */
 const APPS = [
@@ -246,15 +267,26 @@ function card(a, i, n){
 const baseCat = a => CATS.some(c=>c.id===a.cat) ? a.cat : "other";
 const catOf = a => { const c = (S.cats||{})[a.path]; return c && (c==="other" || CATS.some(x=>x.id===c)) ? c : baseCat(a); };
 const catName = id => { const c = CATS.find(c=>c.id===id); return c ? `${c.icon} ${c.name}` : "其他"; };
+const subsOf = cat => SUBS[cat] || [];
+const subOf = a => { const l = subsOf(catOf(a)); const v = a.sub || SUB_OF[a.path]; return l.some(x=>x.id===v) ? v : "other"; };
+const subName = (cat,id) => { const x = subsOf(cat).find(x=>x.id===id); return x ? `${x.icon} ${x.name}` : "其他"; };
+const subIds = cat => [...subsOf(cat).map(x=>x.id), "other"];
 const inTab = a => S.tab !== "fav" || isFav(a);
-const visible = () => sorted(APPS).filter(a => inTab(a) && (S.cat === "all" || catOf(a) === S.cat));
+const visible = () => sorted(APPS).filter(a => inTab(a) && (S.cat === "all" || catOf(a) === S.cat) && (S.cat === "all" || !subsOf(S.cat).length || !S.sub || S.sub === "all" || subOf(a) === S.sub));
 /* 依分類分組（看「全部分類」且排序為預設／自訂／名稱時）；其他情況一整串 */
 function blocks(){
   const list = visible();
-  const group = S.cat === "all" && ["default","custom","name"].includes(S.sort);
-  if(!group) return [{ title:"", items:list }];
+  const canGroup = ["default","custom","name"].includes(S.sort);
+  const bySub = (cat, items, withCat) => subIds(cat).map((sid,i) => ({ title: withCat && i===0 ? catName(cat) : "", sub: subName(cat,sid), items: items.filter(a=>subOf(a)===sid) })).filter(b=>b.items.length);
+  if(S.cat !== "all"){
+    if(canGroup && subsOf(S.cat).length && (!S.sub || S.sub==="all")) return bySub(S.cat, list, false);
+    return [{ title:"", items:list }];
+  }
+  if(!canGroup) return [{ title:"", items:list }];
   const ids = [...CATS.map(c=>c.id), "other"];
-  return ids.map(id => ({ title:catName(id), items:list.filter(a=>catOf(a)===id) })).filter(b=>b.items.length);
+  return ids.flatMap(id => { const items = list.filter(a=>catOf(a)===id); if(!items.length) return [];
+    if(subsOf(id).length){ const bs = bySub(id, items, true); if(bs.length && !bs[0].title) bs[0].title = catName(id); return bs; }
+    return [{ title:catName(id), items }]; });
 }
 
 function render(){
@@ -283,12 +315,19 @@ function render(){
   document.getElementById("cats").innerHTML =
     `<button data-cat="all" class="${S.cat==="all"?"on":""}">全部分類<span class="cnt">${pool.length}</span></button>` +
     used.map(id => `<button data-cat="${id}" class="${S.cat===id?"on":""}">${catName(id)}<span class="cnt">${pool.filter(a=>catOf(a)===id).length}</span></button>`).join("");
+  /* 子分類（目前只有咖啡） */
+  const sl = subsOf(S.cat), inCat = pool.filter(a=>catOf(a)===S.cat);
+  const subUsed = sl.length ? subIds(S.cat).filter(id => inCat.some(a=>subOf(a)===id)) : [];
+  if(S.sub && S.sub!=="all" && !subUsed.includes(S.sub)) S.sub = "all";
+  document.getElementById("subs").innerHTML = subUsed.length ?
+    `<button data-sub="all" class="${!S.sub||S.sub==="all"?"on":""}">全部咖啡<span class="cnt">${inCat.length}</span></button>` +
+    subUsed.map(id => `<button data-sub="${id}" class="${S.sub===id?"on":""}">${subName(S.cat,id)}<span class="cnt">${inCat.filter(a=>subOf(a)===id).length}</span></button>`).join("") : "";
 
   const bs = blocks();
   const el = document.getElementById("list");
   el.className = editing ? "editing" : "";
   el.innerHTML = bs.some(b=>b.items.length)
-    ? bs.map(b => `${b.title?`<h2>${b.title}</h2>`:""}<div class="grid">${b.items.map((a,i)=>card(a,i,b.items.length)).join("")}</div>`).join("")
+    ? bs.map(b => `${b.title?`<h2>${b.title}</h2>`:""}${b.sub?`<h3 class="sub">${b.sub}</h3>`:""}<div class="grid">${b.items.map((a,i)=>card(a,i,b.items.length)).join("")}</div>`).join("")
     : S.tab === "fav"
       ? `<div class="empty">${S.cat==="all"?"還沒有最愛的 App":"這個分類還沒有最愛的 App"}<br>到「全部 App」點卡片右上角的 ☆ 就會加進來</div>`
       : `<div class="empty">這個分類目前沒有 App</div>`;
@@ -365,7 +404,11 @@ document.getElementById("refreshBtn").addEventListener("click", refreshAll);
 document.getElementById("hubVer").textContent = `目錄頁 v${HUB_VER}`;
 document.getElementById("cats").addEventListener("click", e=>{
   const b = e.target.closest("[data-cat]"); if(!b) return;
-  S.cat = b.dataset.cat; save(); render();
+  S.cat = b.dataset.cat; S.sub = "all"; save(); render();
+});
+document.getElementById("subs").addEventListener("click", e=>{
+  const b = e.target.closest("[data-sub]"); if(!b) return;
+  S.sub = b.dataset.sub; save(); render();
 });
 
 document.getElementById("sort").addEventListener("change", e=>{
