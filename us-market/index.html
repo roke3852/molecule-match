@@ -53,6 +53,7 @@ main{max-width:760px;margin:0 auto;padding:14px max(14px,env(safe-area-inset-lef
 .bgrid{display:grid;grid-template-columns:64px repeat(8,1fr) 44px;gap:3px;font-size:12px;align-items:center}
 .bgrid .c{height:22px;border-radius:4px}.bgrid .h{text-align:center;color:var(--muted);font-size:11px}.bgrid .y{font-weight:600}.bgrid .p{text-align:right;font-family:ui-monospace,monospace}
 .bgrid .now{color:var(--s1)}
+.subtabs2{margin-top:-4px;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}.subtabs2::-webkit-scrollbar{display:none}.subtabs2 .chip{font-size:13px;padding:5px 11px;flex:none;white-space:nowrap}
 .foldbar{display:flex;gap:8px;justify-content:flex-end;margin:-4px 0 10px}
 .foldbar button{font:inherit;font-size:12px;padding:5px 10px;border-radius:999px;border:1px solid var(--line);background:var(--panel);color:var(--muted)}
 .meta{font-size:12px;color:var(--faint);display:flex;gap:8px;flex-wrap:wrap;align-items:center}
@@ -264,8 +265,19 @@ input[type=range]{width:100%;accent-color:var(--s1)}
 
   <section class="pane" id="p-bear">
     <div class="chips subtabs" id="bearSub"><button class="chip" data-bsub="now">📍 現況</button><button class="chip" data-bsub="tw">🇹🇼 台股</button><button class="chip" data-bsub="hist">📜 歷史</button><button class="chip" data-bsub="plan">🧭 佈局</button></div>
+    <div class="chips subtabs2" id="bearSub2"></div>
     <div class="foldbar"><button data-fold="1">全部收合</button><button data-fold="0">全部展開</button></div>
-    <div data-sub="now" class="card">
+    <div data-sub="now" data-lab="🎯 儀表板" class="card" id="botCard">
+      <h2>🎯 底部訊號儀表板</h2>
+      <div class="meta">8 個歷史上最常見的止跌訊號：亮＝1 分、半亮＝0.5 分。分數＝目前亮了全部的幾成</div>
+      <div id="botGauge"></div>
+      <div class="fig"><div class="t">8 個訊號現在的狀態</div><div class="s">右邊灰字＝過去 10 次空頭見底時，這個訊號平均亮了幾成</div><div id="botSig"></div></div>
+      <div class="fig"><div class="t">回測：過去 10 次美股空頭，見底那天亮了幾成？</div><div class="s">藍色＝現在；虛線＝歷史最低（再低就還沒見底過）</div><div id="botBT"></div></div>
+      <div class="fig"><div class="t">逐次拆解</div><div id="botGrid"></div></div>
+      <div class="why" id="botWhy"></div>
+    </div>
+
+    <div data-sub="now" data-lab="📉 跌幅" class="card">
       <h2>這次跌到哪裡了？</h2>
       <div class="meta">各自從歷史高點起算；虛線 −10% 叫修正、−20% 叫空頭（美股、台股皆為 11/20 收盤）</div>
       <div id="nowGauge"></div>
@@ -280,7 +292,7 @@ input[type=range]{width:100%;accent-color:var(--s1)}
       <div class="why"><b>一句話</b>11/20 美股大屠殺：S&P −11.6%、道瓊都跌進修正區，Nasdaq −18.1% 離空頭（−20%）只差一步。費半單日 −10.73%、30 檔成分股全跌，距高點 −42.5%，已超過櫃買（−41.9%），成為這次跌最深的指數。台股加權 −27.7% 仍被台積電撐住。這次是「AI 硬體空頭」：越靠近晶片、越是中小型 AI 概念股，跌得越深——現在連最大的權值股輝達（單日 −14%）也開始補跌。</div>
     </div>
 
-    <div data-sub="now" class="card" id="cbCard">
+    <div data-sub="now" data-lab="⚖️ 修正或空頭" class="card" id="cbCard">
       <h2>⚖️ 修正還是空頭？</h2>
       <div class="meta">跌 10–20% 叫修正、超過 20% 叫空頭；真正的差別是原因：獲利、經濟、聯準會</div>
       <div id="cbZone" style="margin-top:10px"></div>
@@ -290,14 +302,14 @@ input[type=range]{width:100%;accent-color:var(--s1)}
       <div class="why"><b>怎麼看</b>這次是兩層：AI 硬體和台股已經是空頭，美國大盤還在修正。三個警戒線如果前兩個觸發、聯準會又還沒停手，就比較像 2000 或 2022；如果獲利撐住、聯準會轉向，比較像 2018 年第四季那種修正後回到原趨勢。不構成投資建議。</div>
     </div>
 
-    <div data-sub="now" class="card" id="vixCard">
+    <div data-sub="now" data-lab="😱 VIX" class="card" id="vixCard">
       <h2>😱 恐慌到什麼程度？VIX 和歷次比</h2>
       <div class="meta">VIX 是美股的「恐慌指數」，跌越兇越高；歷史數字為各次 VIX 收盤最高點（CBOE）</div>
       <div id="vixBox" style="margin-top:10px"></div>
       <div class="why"><b>怎麼看</b>11/20 收 35.89（盤中一度逾 37），已逼近 2018（36.07）、2022（36.45）那種「沒有衰退的空頭」的恐慌高峰；真正的金融危機（2008、2020）會衝到 80 以上。恐慌越高通常越接近短線低點，但 VIX 見頂不等於股市見底：2022 年 VIX 3 月就見高 36，股市 10 月才真正落底，當時 VIX 只有 33 左右。</div>
     </div>
 
-    <div data-sub="tw" class="card" id="abcCard">
+    <div data-sub="tw" data-lab="〰️ ABC 波段" class="card" id="abcCard">
       <h2>〰️ ABC 波段測量：台股 C 波會跌到哪？</h2>
       <div class="meta">網路流傳的波浪測距法（股友群組圖），兩種算法並列；費半 8,000 是同一群人看的美股觀察點</div>
       <div id="abcChart" style="margin-top:10px"></div>
@@ -306,13 +318,13 @@ input[type=range]{width:100%;accent-color:var(--s1)}
       <div class="why"><b>怎麼看</b>A 波：前高 49,968 跌到 37,837（−12,131 點）；B 波反彈約 6,600 點到 44,437。<br>① <strong>C＝A</strong>（艾略特常用）：C 波跌幅等於 A 波，44,437 − 12,131 ≈ 32,306。<br>② <strong>鏡像測距</strong>（群組圖算法）：B 波反彈多少，就從 A 低點再跌多少，37,837 − 6,600 ≈ 31,237。<br>只是技術推算、不是預測；同一套方法換個高點（49,968 或收盤高 49,823）結果就不同，不構成投資建議。</div>
     </div>
 
-    <div data-sub="tw" class="card" id="banCard">
+    <div data-sub="tw" data-lab="🚫 限空與國安" class="card" id="banCard">
       <h2>🚫 歷次限空令與國安基金：每一步在什麼點位？</h2>
       <div class="meta">點位尺上：編號＝每一項限空措施，顏色代表嚴格程度：灰 Lv1 降借券上限、黃 Lv2 提高融券保證金、橘 Lv3 禁止平盤以下放空、紅 Lv4 全面禁止放空（同一天有多項手段時，以最嚴格的那項標色）；🛡＝國安基金進場，位置是當天加權收盤；★＝之後 3 個月內最低收盤；三條直線是年線（240 日均線）、五年線、十年線（60、120 個月均線）。資料：Yahoo Finance 加權歷史收盤；國安基金日期與金額：遠見</div>
       <div id="banTbl" style="margin-top:10px"></div>
       <div class="why"><b>怎麼看</b>國安基金和限空令通常在同一週內出手，而且都是在加權已經跌破年線之後。2015、2020 兩次，措施一出來就是低點；2022 年國安基金 7 月先進場，10 月限空後又跌了約 5% 才在五年線附近見底；2025 年限空後兩天、國安基金進場當天就是低點，剛好碰到五年線；2008 年系統性危機，所有措施都擋不住，又跌了三成。這次國安基金 11/6 先進場，11/9 第一波限空時指數一度反彈到 41,000 以上，但 11/20 第二波時已跌到 36,000，比國安基金進場時還低約 9%，代表賣壓比前幾次更重。不構成投資建議。</div>
     </div>
-    <div data-sub="tw" class="card" id="mgCard">
+    <div data-sub="tw" data-lab="🧮 融資斷頭" class="card" id="mgCard">
       <h2>🧮 融資斷頭試算：跌多少會被追繳？</h2>
       <div class="meta">台股融資維持率＝股票市值 ÷ 融資金額；低於 130% 收到追繳，兩個營業日內沒補錢就會被券商強制賣出（斷頭）</div>
       <div class="stats" style="margin-top:10px">
@@ -327,7 +339,7 @@ input[type=range]{width:100%;accent-color:var(--s1)}
       <div class="why"><b>怎麼看</b>上市股票融資最多借六成，所以本金 40 萬、融資 60 萬時，股價跌 22% 就觸發追繳。追繳後如果再遇到兩根跌停，本金只剩 3 萬多；三根跌停還沒賣掉，就會倒欠券商。若主管機關把維持率門檻從 130% 降到 120%，只多了約 7.7% 的空間，還不到一根跌停。追繳與處分數字來自網路流傳整理（未查到原始出處；另有資料為 11/20 追繳 6,186 戶），僅供參考。不構成投資建議。</div>
     </div>
 
-    <div data-sub="hist" class="card" id="scnCard">
+    <div data-sub="hist" data-lab="🧭 三種劇本" class="card" id="scnCard">
       <h2>🧭 三種劇本：會像 2000、2008，還是 2022？</h2>
       <div class="meta">從高點起算的跌幅路徑（關鍵轉折點連線、約略）；實心圓點是這次的費半與加權、空心圈是櫃買（11/20）</div>
       <div id="scnChart" style="margin-top:10px"></div>
@@ -338,7 +350,7 @@ input[type=range]{width:100%;accent-color:var(--s1)}
       <div class="why"><b>怎麼看</b>三次空頭都有「像見底」的強反彈（+17%～+45%），最後只有 2022 年那次真的是底。分辨關鍵不是走勢形狀，而是下面三個開關：獲利有沒有真的往下掉、聯準會有沒有停手、信用市場有沒有凍結。目前三個都還沒到 2000 或 2008 的程度，但聯準會還在升息，比 2022 年見底時更不利。只是歷史對照，不構成投資建議。</div>
     </div>
 
-    <div data-sub="hist" class="card">
+    <div data-sub="hist" data-lab="📉 歷史大空頭" class="card">
       <h2>📉 歷史上的大空頭</h2>
       <div class="chips" id="ixChips" style="margin:8px 0 4px"></div>
       <div class="meta" id="ixMeta"></div>
@@ -348,7 +360,7 @@ input[type=range]{width:100%;accent-color:var(--s1)}
       <div class="why" id="ixWhy"></div>
     </div>
 
-    <div data-sub="hist" class="card">
+    <div data-sub="hist" data-lab="🔎 三個規律" class="card">
       <h2>🔎 歷史給的三個規律</h2>
       <div class="stats" id="bearStats"></div>
       <ul class="tl" style="margin-top:4px">
@@ -358,25 +370,15 @@ input[type=range]{width:100%;accent-color:var(--s1)}
       </ul>
     </div>
 
-    <div data-sub="hist" id="bearCards"></div>
+    <div data-sub="hist" data-lab="📚 逐次卡片" id="bearCards"></div>
 
-    <div data-sub="now" class="card" id="botCard">
-      <h2>🎯 底部訊號儀表板</h2>
-      <div class="meta">8 個歷史上最常見的止跌訊號：亮＝1 分、半亮＝0.5 分。分數＝目前亮了全部的幾成</div>
-      <div id="botGauge"></div>
-      <div class="fig"><div class="t">8 個訊號現在的狀態</div><div class="s">右邊灰字＝過去 10 次空頭見底時，這個訊號平均亮了幾成</div><div id="botSig"></div></div>
-      <div class="fig"><div class="t">回測：過去 10 次美股空頭，見底那天亮了幾成？</div><div class="s">藍色＝現在；虛線＝歷史最低（再低就還沒見底過）</div><div id="botBT"></div></div>
-      <div class="fig"><div class="t">逐次拆解</div><div id="botGrid"></div></div>
-      <div class="why" id="botWhy"></div>
-    </div>
-
-    <div data-sub="now" class="card">
+    <div data-sub="now" data-lab="💣 未爆彈" class="card">
       <h2>💣 這次還有哪些未爆彈</h2>
       <div class="meta">依「可能多傷」排列；日期為已知的引爆點</div>
       <div id="bombs" style="margin-top:6px"></div>
     </div>
 
-    <div data-sub="plan" class="card">
+    <div data-sub="plan" data-lab="🧭 佈局" class="card">
       <h2>🧭 什麼時候比較適合佈局？</h2>
       <div class="meta">沒有人能抓到確切的底，以下是用歷史規律整理的判斷框架</div>
       <div class="fig"><div class="t">兩種劇本</div>
@@ -416,7 +418,7 @@ input[type=range]{width:100%;accent-color:var(--s1)}
 <div id="tip"></div><div id="toast"></div>
 
 <script>
-const ASOF="2026-11-24 01:10";
+const ASOF="2026-11-24 01:35";
 const VIX_NOW=35.89, VIX_TXT="35.89", VIX_D="11/20"; /* VIX 最新收盤（每日更新） */
 const VIXH=[["2020", "疫情", 82.69], ["2008", "金融海嘯", 80.86], ["2025", "關稅", 52.33], ["2011", "美債降評", 48.0], ["1998", "LTCM", 45.74], ["2002", "網路泡沫", 45.08], ["2015", "人民幣貶值", 40.74], ["2022", "升息空頭", 36.45], ["2018", "Q4 縮表", 36.07]];
 const TODAY={"d": "2026-11-23", "l": [["ev", "good-news", "好消息：高盛 22 次修正後平均 +4%、H100 租金漲近六成、ARK 買 ANT"], ["ev", "tw-rescue3", "救市：證交所研議融資維持率降到 120%、卓揆今天座談"], ["ev", "sea-halt", "出口新規生效日查清：11/19 生效，既有安排緩衝到 2/17"], ["ev", "nvda-sg", "Nvidia 新加坡：修正出口新規生效日"], ["ev", "trump-xi", "川習會：修正出口新規生效日"], ["ev", "rout-1120", "美股大屠殺：VIX 週五收盤更正為 35.89"], ["vw", "", "名人觀點：高盛 Snider 見底訊號、Cathie Wood 買 ANT、Goolsbee"], ["cal", "", "接下來：卓揆座談、維持率 120% 最快 11/24、2/17 許可期限"], ["bear", "", "空頭史：VIX 更正為 35.89，止跌訊號與修正或空頭卡同步"], ["tour", "", "導覽員：週一早報"]]}; /* 今日更新清單：每日更新時重寫 d 與 l */
@@ -1164,6 +1166,7 @@ document.addEventListener("click",e=>{
   if(t.dataset.vwt){vwTag=t.dataset.vwt;renderVw();return}
   if(t.dataset.vst){vwSt=t.dataset.vst;document.querySelectorAll("#vwSt .chip").forEach(b=>b.classList.toggle("on",b.dataset.vst===vwSt));renderVw();return}
   if(t.dataset.bsub){setBSub(t.dataset.bsub);return}
+  if(t.dataset.bsub2){setBSub2(t.dataset.bsub2);return}
   if(t.dataset.fav){let f=LS.get("fav",[]);f=f.includes(t.dataset.fav)?f.filter(x=>x!==t.dataset.fav):[...f,t.dataset.fav];LS.set("fav",f);renderEv();toast(f.includes(t.dataset.fav)?"⭐ 已收藏":"已取消收藏");return}
   if(t.dataset.del){const m=LS.get("mine",[]);m.splice(+t.dataset.del,1);LS.set("mine",m);renderMine();renderVw();return}
   if(t.dataset.ix){IXK=t.dataset.ix;renderIx();return}
@@ -1418,7 +1421,9 @@ function goBack(){
 }
 
 renderEv();renderVw();renderBear();renderCB();renderBan();renderMg();
-function setBSub(k){LS.set("bsub",k);document.querySelectorAll("#bearSub .chip").forEach(b=>b.classList.toggle("on",b.dataset.bsub===k));document.querySelectorAll("#p-bear [data-sub]").forEach(c=>c.style.display=c.dataset.sub===k?"":"none")}
+function setBSub(k){LS.set("bsub",k);document.querySelectorAll("#bearSub .chip").forEach(b=>b.classList.toggle("on",b.dataset.bsub===k));const els=[...document.querySelectorAll("#p-bear [data-sub]")].filter(c=>c.dataset.sub===k);const s2=$("#bearSub2");if(els.length<2){s2.innerHTML="";s2.style.display="none";document.querySelectorAll("#p-bear [data-sub]").forEach(c=>c.style.display=c.dataset.sub===k?"":"none");return}s2.style.display="";let cur=LS.get("bsub2_"+k,"0");if(cur!=="all"&&!els[+cur])cur="0";s2.innerHTML=els.map((c,i)=>`<button class="chip ${String(i)===cur?"on":""}" data-bsub2="${i}">${c.dataset.lab||("第 "+(i+1)+" 項")}</button>`).join("")+`<button class="chip ${cur==="all"?"on":""}" data-bsub2="all">全部</button>`;document.querySelectorAll("#p-bear [data-sub]").forEach(c=>{const i=els.indexOf(c);c.style.display=i<0?"none":(cur==="all"||String(i)===cur?"":"none")})}
+const _siv=Element.prototype.scrollIntoView;Element.prototype.scrollIntoView=function(o){const c=this.closest&&this.closest("#p-bear [data-sub]");if(c&&c.style.display==="none"){const k=c.dataset.sub,els=[...document.querySelectorAll("#p-bear [data-sub]")].filter(x=>x.dataset.sub===k);LS.set("bsub2_"+k,String(els.indexOf(c)));setBSub(k)}return _siv.call(this,o)};
+function setBSub2(v){const k=LS.get("bsub","now");LS.set("bsub2_"+k,v);setBSub(k);window.scrollTo({top:0})}
 setBSub(LS.get("bsub","now"));(()=>{const h=document.querySelector("header");const u=()=>document.documentElement.style.setProperty("--hdr",h.offsetHeight+"px");u();addEventListener("resize",u)})();document.querySelectorAll("#vwSt .chip").forEach(b=>b.classList.toggle("on",b.dataset.vst===vwSt));
 
 /* 空頭史收合 */
