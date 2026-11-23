@@ -695,6 +695,9 @@ html.dark .med-red b{color:#e07a6a}
 .med-d{margin-top:8px;border:1.5px solid var(--line);padding:6px 10px}.med-d summary{font-family:var(--ff-b);font-weight:700;cursor:pointer}.med-d ul{margin:6px 0 2px;padding-left:18px;font-size:13px;line-height:1.7}
 .clk{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:8px 0 2px;font-size:13px;position:relative;z-index:1}.clk span{background:rgba(0,0,0,.18);padding:3px 9px;border:1.5px solid rgba(255,255,255,.35)}.clk b{font-family:var(--ff-px);font-size:15px;letter-spacing:1px}.clk em{font-style:normal;font-size:11px;opacity:.8}
 @media(min-width:620px){.clk{max-width:600px;margin-left:auto;margin-right:auto}}
+.resv-in{display:flex;gap:6px;margin:6px 0}.resv-in input{flex:1;min-width:0;font-size:16px;padding:6px 8px}
+.resv-note{white-space:pre-wrap;font-size:14px;line-height:1.7;background:color-mix(in srgb,var(--gold) 10%,var(--card));border:2px solid var(--px);padding:10px;font-family:var(--ff-b)}
+.resv-big{align-items:flex-start;overflow:auto}.resv-big pre{white-space:pre-wrap;text-align:left;font-size:19px;line-height:1.7;color:#1b1612;font-family:var(--ff-b);margin:0}
 .db-hint{font-size:12px;color:var(--sub);margin-top:6px}.db-sel{margin-top:6px;font-size:13px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}.db-sel button{margin-left:auto;font-size:12px;padding:3px 10px;border:1.5px solid var(--line);border-radius:999px;background:var(--card);color:var(--ink)}
 .db-l li{cursor:pointer;padding:2px 4px}.db-l li.sel{background:color-mix(in srgb,var(--day) 18%,transparent);outline:1.5px solid var(--day)}
 .db-svg .riv{fill:none;stroke:color-mix(in srgb,var(--sea) 60%,var(--card));stroke-width:5;stroke-linejoin:round;shape-rendering:geometricPrecision}.db-svg .rivt{font-size:9px;fill:var(--sea);font-family:var(--ff-b)}
@@ -1277,6 +1280,20 @@ html.dark .ex-tot{background:var(--card)!important}
       <details class="med-d"><summary>🧾 回台理賠要帶回的文件</summary><ul>
         <li>☐ 收據（領収書）＋費用明細（明細書）</li><li>☐ 診斷書（診断書，可要英文版，約 ¥3,000–5,000）</li><li>☐ 藥局收據</li><li>☐ 護照、登機證／出入境紀錄</li>
         <li><b>旅平險／信用卡旅遊險</b>：依保單理賠</li><li><b>健保自墊醫療費核退</b>：看診後 6 個月內申請，有上限，通常只拿回部分</li></ul></details>
+    </div>
+    <div class="sec" data-tt="help" id="resvSec">
+      <h3>🍢 請櫃台幫忙訂位</h3>
+      <div class="hint">把下面這張拿給飯店櫃台（フロント）看，請他們打電話幫訂。先填房號和名字，按「全螢幕給櫃台看」。</div>
+      <div class="resv-in"><input id="resvRoom" placeholder="房號" inputmode="numeric"><input id="resvName" placeholder="名字（英文拼音）"></div>
+      <div class="resv-note" id="resvNote"></div>
+      <div class="acts" style="margin-top:8px"><button class="btn pri" id="resvBig">⛶ 全螢幕給櫃台看</button><a class="btn" href="tel:0927914866">📞 むさし坐</a><a class="btn" href="tel:0924064711">📞 炉邸</a></div>
+      <details class="med-d"><summary>📋 中文意思與排序理由</summary><ul>
+        <li>第一志願むさし坐，7 人（5 大 2 小），吧台／桌位都可、分開坐也行</li>
+        <li>① ② 11/24（二）16:00／16:30：太宰府 16:00 回飯店，走 5 分就到</li>
+        <li>③ 11/27（五）21:00：小倉回博多約 18:00</li>
+        <li>④ 11/26（四）21:00：19:00 從 LaLaport 回飯店，小孩可能累了</li>
+        <li>全滿 → 問炉邸 11/24 17:00 或 11/25 18:00 的 7 人包廂</li>
+        <li>訂到後請櫃台寫下日期時間；要取消也請櫃台打電話</li></ul></details>
     </div>
     <div class="sec" data-tt="help">
       <h3>🏨 我們的飯店</h3>
@@ -2384,6 +2401,30 @@ const CL_TERM=[
 let clTab='say',clQ=null,clSlow=false;
 function clSay(t,lang,slow){try{if(!('speechSynthesis' in window)){toast('這台裝置不支援語音');return}speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t.replace(/〇〇/g,'1200'));u.lang=lang||'ja-JP';u.rate=slow?0.55:0.9;const v=speechSynthesis.getVoices().find(v=>v.lang&&v.lang.replace('_','-').startsWith(u.lang.slice(0,2)));if(v)u.voice=v;speechSynthesis.speak(u)}catch(e){}}
 
+(function(){const N=document.getElementById('resvNote');if(!N)return;const R=document.getElementById('resvRoom'),M=document.getElementById('resvName');const st=S.get('resvInfo',{});R.value=st.r||'';M.value=st.n||'';
+ const txt=()=>`恐れ入りますが、レストランの予約をお願いできますでしょうか。
+
+🍢 すみ劇場 むさし坐（渡辺通5-5-12）
+☎ 092-791-4866
+👨‍👩‍👧 7名（大人5名、子ども2名）
+🪑 カウンター・テーブルどちらでも可、分かれても構いません。
+
+希望日時（上から優先）：
+① 11月24日（火）16:00
+② 11月24日（火）16:30
+③ 11月27日（金）21:00
+④ 11月26日（木）21:00
+
+すべて満席の場合は、博多炉端 炉邸（☎ 092-406-4711）に
+11月24日（火）17:00 または 11月25日（水）18:00、
+7名の個室が空いているか聞いていただけますか。
+
+部屋番号：${R.value||'＿＿＿＿'}　名前：${M.value||'＿＿＿＿'}
+よろしくお願いします。`;
+ const draw=()=>{N.textContent=txt()};draw();
+ [R,M].forEach(x=>x.addEventListener('input',()=>{S.set('resvInfo',{r:R.value,n:M.value});draw()}));
+ document.getElementById('resvBig').onclick=()=>{const o=document.createElement('div');o.className='med-big resv-big';const d=document.createElement('div');const b=document.createElement('pre');b.textContent=txt();const sm=document.createElement('small');sm.textContent='點任何地方關閉';d.append(b,sm);o.append(d);o.onclick=()=>o.remove();document.body.appendChild(o)}})();
+
 (function(){const el=document.getElementById('clk');if(!el)return;
  const f=tz=>new Intl.DateTimeFormat('zh-TW',{timeZone:tz,hour:'2-digit',minute:'2-digit',hour12:false,month:'numeric',day:'numeric'}).formatToParts(new Date()).reduce((o,p)=>(o[p.type]=p.value,o),{});
  function tick(){const j=f('Asia/Tokyo'),t=f('Asia/Taipei');el.innerHTML=`<span>🇯🇵 日本 <b>${j.hour}:${j.minute}</b></span><span>🇹🇼 台灣 <b>${t.hour}:${t.minute}</b>${t.day!==j.day?` <small>${t.month}/${t.day}</small>`:''}</span><em>台灣慢 1 小時</em>`}
@@ -2858,6 +2899,8 @@ const FOODS=[
  {id:'h_matsushita',pr:[5000,8000],m:[{n:'水炊鍋套餐',jp:'水炊きコース'},{n:'收尾：雜炊',jp:'〆の雑炊'},{n:'烤雞串',jp:'焼き鳥'}],a:'hotel',n:'博多水炊鍋 松下',jp:'博多水炊き まつした',t:'水炊鍋',d:'在春吉，飯店走約 5 分鐘。福岡名物雞肉水炊鍋，由師傅在吧台現煮，湯頭溫和，長輩小孩都適合；中午 12–14 點也開。',tip:'店不大，晚餐建議先訂位或先打電話問 7 人座位。'},
  {id:'h_hiro',pr:[6000,10000],m:[{n:'水炊鍋全餐',jp:'水炊きコース'},{n:'自家製冰淇淋',jp:'自家製アイス'}],a:'hotel',n:'博多水炊鍋 Hiro',jp:'博多水たき ひろ',t:'水炊鍋',d:'飯店走約 2 分鐘，安靜精緻的水炊鍋全餐，分五道上菜，有包廂。適合安排一餐全家好好吃。',tip:'週二公休；可在 Google 地圖上直接訂位。週末中午也有營業。'},
  {id:'h_umeyama',pr:[1000,2000],m:[{n:'烤魚定食',jp:'焼き魚定食'},{n:'生魚片拼盤',jp:'刺身盛り合わせ'},{n:'炸雞',jp:'唐揚げ'}],a:'hotel',n:'梅山鐵平食堂',jp:'梅山鉄平食堂',t:'定食',d:'就在飯店旁邊，走 1 分鐘。魚很新鮮的家常定食，價格實在，當地人也排隊。',tip:'週三公休，營業到 21:00；沒有英文菜單，用「給店員看」點菜。開店時段人多要排。',kid:1},
+ {id:'h_musashi',pr:[6000,10000],m:[{n:'大トロ沙丁魚原始燒',jp:'大トロいわしの原始焼き'},{n:'特大蝦原始燒',jp:'特大海老の原始焼き'},{n:'胡麻紅甘',jp:'ゴマカンパチ'}],a:'hotel',n:'すみ劇場 むさし坐（IG 影片那家）',jp:'すみ劇場 むさし坐',t:'海鮮',d:'渡邊通 5-5-12，飯店走約 5 分鐘。圍爐原始燒＋撒鹽表演出名，店員會幫忙剝蝦，服務很好；1 樓吧台看表演，2 樓有桌位。',tip:'超難訂：只開放開店時段（平日 16:00–17:00、週五六 15:00–16:45）和 21:00 後預約；電話 092-791-4866 或 AutoReserve 代訂。請飯店櫃台幫打最快（工具→小幫手有日文小抄）。'},
+ {id:'h_rotei',pr:[4000,6000],m:[{n:'喉黑原始燒',jp:'のどぐろの原始焼き'},{n:'胡麻鯖',jp:'胡麻鯖'},{n:'爐端燒',jp:'炉端焼き'}],a:'hotel',n:'博多炉端 炉邸',jp:'博多炉端 炉邸',t:'海鮮',d:'渡邊通 5-13-23，飯店附近。爐端燒、原始燒、稻草燒三種做法；可帶小孩（嬰兒 OK），有繁中菜單，包廂 4／6／8 人。',tip:'7 人訂包廂最輕鬆：電話 092-406-4711 或 Gurunavi 網路即時訂位；17:00–24:00，週五〜日中午也有開。'},
  {id:'h_fishman',pr:[3000,6000],m:[{n:'階梯生魚片拼盤',jp:'階段刺身盛り'},{n:'現煎玉子燒',jp:'だし巻き卵'},{n:'爐端燒烤魚',jp:'炉端焼き'}],a:'hotel',n:'博多爐端 Fishman',jp:'博多炉端 魚男 フィッシュマン',t:'海鮮',d:'在今泉，飯店走約 7 分鐘。超人氣海鮮爐端燒，玉子燒在桌邊現煎，小孩很愛看；可用 QR code 點餐、有英文。',tip:'非常熱門，幾乎一定要先訂位（Tabelog）；午餐 11:00–14:30 也開。'},
  {id:'ikkousha',pr:[1000,1500],m:[{n:'泡系豚骨拉麵',jp:'泡系とんこつラーメン'},{n:'溏心蛋',jp:'味玉'},{n:'煎餃',jp:'餃子'}],a:'hakata',n:'博多一幸舍',jp:'博多一幸舎 総本店',t:'拉麵',d:'湯頭表面有一層細泡的濃郁豚骨拉麵，博多站步行可到，晚上也開。',tip:'豚骨味較濃，怕腥的人先點小碗或加大蒜。'},
  {id:'menkaido',pr:[1000,1500],m:[{n:'各家招牌豚骨拉麵',jp:'おすすめのとんこつラーメン'},{n:'加麵',jp:'替え玉'}],a:'hakata',n:'博多拉麵街道',jp:'博多めん街道',t:'拉麵',d:'博多站內一整層都是拉麵店，各家口味一次比較，不用出車站。',tip:'就在車站裡，適合抵達當晚或玩累的晚上。',kid:1},
