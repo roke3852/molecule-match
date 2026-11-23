@@ -719,6 +719,15 @@ html.dark .med-red b{color:#e07a6a}
 .mws-r b{font-size:14px}.mws-r span{font-size:11px;color:var(--sub);margin-left:6px}.mws-r em{grid-column:2;font-style:normal;display:flex;gap:4px;flex-wrap:wrap}
 .mws-r u{text-decoration:none;font-family:var(--ff-px);font-size:13px;padding:2px 6px;border:1.5px solid var(--sea);color:var(--ink)}.mws-r u.past{opacity:.35;text-decoration:line-through}.mws-r u.nx{background:var(--sea);color:#fff}
 .mws-f{font-size:10.5px;color:var(--sub);margin-top:4px}
+.od-ppl{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:6px 0}.od-ppl label{display:flex;align-items:center;gap:6px;font-size:14px}
+.od-st{display:inline-flex;align-items:center;border:2px solid var(--px)}.od-st button{width:32px;height:32px;font-size:18px;background:var(--card);color:var(--ink);border:0}.od-st i{font-style:normal;min-width:34px;text-align:center;font-family:var(--ff-px);font-size:13px}
+.od-out{position:sticky;top:calc(env(safe-area-inset-top) + 4px);z-index:3;border:2px solid var(--maple);background:color-mix(in srgb,var(--maple) 10%,var(--card));padding:8px;margin:6px 0 10px;box-shadow:0 4px 10px rgba(0,0,0,.25);max-height:44vh;overflow:auto}
+.od-l{display:flex;gap:8px;align-items:flex-start;padding:4px 0}.od-l b{display:block;font-size:14px;line-height:1.45}.od-l span{font-size:11px;color:var(--sub);line-height:1.4;display:block}.od-sp{flex:none;width:30px;height:30px;font-size:13px!important;border:2px solid var(--maple);background:var(--card);font-size:16px}
+.od-e{font-size:13px;color:var(--sub);padding:4px 0}.od-out .acts{margin-top:6px}.od-out .acts{flex-wrap:nowrap;gap:4px}.od-out .acts .btn{font-size:12px;padding:6px 4px;white-space:nowrap;flex:1}.od-sum{font-size:13px;margin-top:6px}
+.od-pay{display:flex;align-items:center;gap:8px;width:100%;text-align:left;padding:8px;margin-top:5px;border:2px solid var(--px);background:var(--card);color:var(--ink)}.od-pay i{font-style:normal}.od-pay b{display:block;font-size:15px}.od-pay span{font-size:12px;color:var(--sub)}
+.od-g{font-family:var(--ff-b);font-weight:700;margin:12px 0 4px}
+.od-i,.od-x{display:flex;align-items:center;gap:8px;padding:6px 0;border-top:1px dashed var(--line)}.od-i>div,.od-x>div{flex:1;min-width:0}.od-i b,.od-x b{display:block;font-size:15px}.od-i span,.od-x span{font-size:12px;color:var(--sub)}.od-i.on b{color:var(--maple)}
+.od-w{flex:none;width:30px;height:30px;border:1.5px solid var(--line);background:var(--card);font-size:13px}.od-x input{width:20px;height:20px;flex:none}
 .db-hint{font-size:12px;color:var(--sub);margin-top:6px}.db-sel{margin-top:6px;font-size:13px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}.db-sel button{margin-left:auto;font-size:12px;padding:3px 10px;border:1.5px solid var(--line);border-radius:999px;background:var(--card);color:var(--ink)}
 .db-l li{cursor:pointer;padding:2px 4px}.db-l li.sel{background:color-mix(in srgb,var(--day) 18%,transparent);outline:1.5px solid var(--day)}
 .db-svg .riv{fill:none;stroke:color-mix(in srgb,var(--sea) 60%,var(--card));stroke-width:5;stroke-linejoin:round;shape-rendering:geometricPrecision}.db-svg .rivt{font-size:9px;fill:var(--sea);font-family:var(--ff-b)}
@@ -1315,6 +1324,11 @@ html.dark .ex-tot{background:var(--card)!important}
         <li>11/25 由布院 17:30 才回飯店；11/26、11/27 只能 21:00 後</li>
         <li>炉邸有 4／6／8 人包廂，7 人最好坐</li>
         <li>訂到後請櫃台寫下日期時間；要取消也請櫃台打電話</li></ul></details>
+    </div>
+    <div class="sec" data-tt="help" id="ordSec">
+      <h3>🗣️ 點餐發音器</h3>
+      <div class="hint">選人數、餐點和飲料的份數，自動組成一句日文；按 🔊 唸給店員聽，或全螢幕拿給店員看。菜單照「屋台まるよし」看板＋常見飲料。</div>
+      <div id="ordBox"></div>
     </div>
     <div class="sec" data-tt="help">
       <h3>🏨 我們的飯店</h3>
@@ -2434,6 +2448,42 @@ const CL_TERM=[
 ];
 let clTab='say',clQ=null,clSlow=false;
 function clSay(t,lang,slow){try{if(!('speechSynthesis' in window)){toast('這台裝置不支援語音');return}speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t.replace(/〇〇/g,'1200'));u.lang=lang||'ja-JP';u.rate=slow?0.55:0.9;const v=speechSynthesis.getVoices().find(v=>v.lang&&v.lang.replace('_','-').startsWith(u.lang.slice(0,2)));if(v)u.voice=v;speechSynthesis.speak(u)}catch(e){}}
+
+(function(){const B=document.getElementById('ordBox');if(!B)return;
+ const NUM={tsu:['','ひとつ','ふたつ','みっつ','よっつ','いつつ','むっつ','ななつ','やっつ','ここのつ','とお'],hon:['','いっぽん','にほん','さんぼん','よんほん','ごほん','ろっぽん','ななほん','はっぽん','きゅうほん','じゅっぽん'],nin:['','いちにんまえ','ににんまえ','さんにんまえ','よにんまえ','ごにんまえ','ろくにんまえ','ななにんまえ','はちにんまえ','きゅうにんまえ','じゅうにんまえ'],hai:['','いっぱい','にはい','さんばい','よんはい','ごはい','ろっぱい','ななはい','はっぱい','きゅうはい','じゅっぱい']};
+ const UJ={tsu:n=>n+'つ',hon:n=>n+'本',nin:n=>n+'人前',hai:n=>n+'杯'},UZ={tsu:'份',hon:'串',nin:'人份',hai:'杯'};
+ const PPL=['','ひとり','ふたり','さんにん','よにん','ごにん','ろくにん','しちにん','はちにん','きゅうにん','じゅうにん'];
+ const MENU=[['🍢 屋台まるよし',[
+  ['焼鳥4本セット','やきとりよんほんセット','烤雞肉串 4 串組',1350,'tsu'],['おまかせおでんセット','おまかせおでんセット','關東煮 5 種拼盤',950,'tsu'],['手羽先明太子','てばさきめんたいこ','明太子雞翅',450,'hon'],['博多一口餃子','はかたひとくちぎょうざ','博多一口餃子（7 個）',650,'tsu'],['焼き明太子','やきめんたいこ','炭烤明太子',950,'tsu'],['もつ鍋','もつなべ','牛腸鍋',1000,'nin'],['軟骨ピーマン炒め','なんこつピーマンいため','雞軟骨炒青椒',1000,'tsu'],['牛スジの焼き鳥','ぎゅうすじのやきとり','牛筋串',500,'hon'],['豚バラ串','ぶたばらくし','豬五花串',400,'hon'],['豚骨ラーメン','とんこつラーメン','豚骨拉麵',850,'tsu'],['焼きラーメン','やきラーメン','炒拉麵',1000,'tsu'],['高菜ラーメン','たかなラーメン','高菜拉麵',950,'tsu'],['春菊のおでん','しゅんぎくのおでん','茼蒿關東煮',600,'tsu'],['餃子巻きおでん','ぎょうざまきおでん','餃子捲關東煮',300,'tsu'],['豚バラニンニクの芽炒め','ぶたばらにんにくのめいため','五花肉炒蒜苗',1300,'tsu']]],
+ ['🍺 飲料',[['生ビール','なまビール','生啤酒',0,'hai'],['ハイボール','ハイボール','威士忌蘇打',0,'hai'],['レモンサワー','レモンサワー','檸檬沙瓦',0,'hai'],['柚子酒','ゆずしゅ','柚子酒（池龜吟遊果）',800,'hai'],['日本酒','にほんしゅ','日本酒',0,'hai'],['ウーロン茶','ウーロンちゃ','烏龍茶',0,'hai'],['オレンジジュース','オレンジジュース','柳橙汁',0,'hai'],['コーラ','コーラ','可樂',0,'hai'],['温かいお茶','あたたかいおちゃ','熱茶',0,'hai'],['お水','おみず','白開水',0,'hai']]]];
+ const EXTRA=[['取り皿をください','とりざらをください','請給我們分食的小盤子'],['子ども用の食器はありますか','こどもようのしょっきはありますか','有兒童餐具嗎？'],['辛くしないでください','からくしないでください','請不要辣'],['おすすめは何ですか','おすすめはなんですか','推薦什麼？']];
+ const PAY=[['すみません、お会計をお願いします。','すみません、おかいけいをおねがいします。','不好意思，麻煩結帳'],['カードは使えますか？','カードはつかえますか？','可以刷卡嗎？'],['カードでお願いします。','カードでおねがいします。','我要刷卡'],['現金でお願いします。','げんきんでおねがいします。','我付現金'],['一緒でお願いします。','いっしょでおねがいします。','一起付'],['別々に払えますか？','べつべつにはらえますか？','可以分開付嗎？'],['領収書をください。','りょうしゅうしょをください。','請給我收據'],['ごちそうさまでした！','ごちそうさまでした！','謝謝招待，很好吃！']];
+ let st=Object.assign({ad:5,kd:2,q:{},ex:{}},S.get('ordTool',{}));const save=()=>S.set('ordTool',st);
+ const all=MENU.flatMap(g=>g[1]);
+ function sent(){const a=+st.ad||0,k=+st.kd||0,t=a+k;const pj=`${t}人です。${k?`大人${a}人、子ども${k}人です。`:''}`,pk=`${PPL[t]||t+'にん'}です。${k?`おとな${PPL[a]||a+'にん'}、こども${PPL[k]||k+'にん'}です。`:''}`;
+  const it=all.filter(x=>st.q[x[0]]>0);const oj=it.length?'すみません、'+it.map(x=>`${x[0]}を${UJ[x[4]](st.q[x[0]])}`).join('、')+'、お願いします。':'',ok=it.length?'すみません、'+it.map(x=>`${x[1]}を${NUM[x[4]][st.q[x[0]]]||st.q[x[0]]}`).join('、')+'、おねがいします。':'';
+  const ex=EXTRA.filter(x=>st.ex[x[0]]);const ej=ex.map(x=>x[0]+'。').join(''),ek=ex.map(x=>x[1]+'。').join('');
+  const zh=`${t} 位（${a} 大${k?' '+k+' 小':''}）`+(it.length?'；點：'+it.map(x=>`${x[2]} ×${st.q[x[0]]}${UZ[x[4]]}`).join('、'):'')+(ex.length?'；'+ex.map(x=>x[2]).join('、'):'');
+  const sum=it.reduce((s,x)=>s+(x[3]||0)*st.q[x[0]],0),unk=it.some(x=>!x[3]);return{pj,pk,oj,ok,ej,ek,zh,sum,unk}}
+ function draw(){const r=sent();
+  B.innerHTML=`<div class="od-ppl"><b>👪 人數</b><label>大人<span class="od-st"><button data-od="ad" data-v="-1">−</button><i>${st.ad}</i><button data-od="ad" data-v="1">＋</button></span></label><label>小孩<span class="od-st"><button data-od="kd" data-v="-1">−</button><i>${st.kd}</i><button data-od="kd" data-v="1">＋</button></span></label></div>
+  <div class="od-out"><div class="od-l"><button data-say="p" class="od-sp">🔊</button><div><b>${r.pj}</b><span>${+st.ad + +st.kd} 位${+st.kd?`（${st.ad} 大 ${st.kd} 小）`:''}</span></div></div>
+  ${r.oj?`<div class="od-l"><button data-say="o" class="od-sp">🔊</button><div><b>${r.oj}</b><span>${r.zh.split('；').slice(1).join('；')}</span></div></div>`:'<div class="od-e">↓ 在下面點 ＋ 選餐點和飲料</div>'}
+  ${r.ej?`<div class="od-l"><button data-say="e" class="od-sp">🔊</button><div><b>${r.ej}</b></div></div>`:''}
+  <div class="acts"><button class="btn pri" data-say="all">🔊 整句唸</button><button class="btn" data-say="slow">🐢 慢慢唸</button><button class="btn" data-od="big">⛶ 給店員看</button><button class="btn ghost" data-od="clr">清空</button></div>
+  ${r.sum?`<div class="od-sum">💴 看板價小計 <b>¥${r.sum.toLocaleString()}</b>${r.unk?'（飲料等沒標價的另計）':''}</div>`:''}</div>
+  ${MENU.map(g=>`<div class="od-g">${g[0]}</div>`+g[1].map(x=>{const q=st.q[x[0]]||0;return `<div class="od-i${q?' on':''}"><button data-sayw="${esc(x[1])}" class="od-w">🔊</button><div><b>${x[0]}</b><span>${x[2]}${x[3]?'・¥'+x[3].toLocaleString():''}</span></div><span class="od-st"><button data-oq="${esc(x[0])}" data-v="-1">−</button><i>${q}${q?UZ[x[4]]:''}</i><button data-oq="${esc(x[0])}" data-v="1">＋</button></span></div>`}).join('')).join('')}
+  <div class="od-g">💬 常用一句（勾選會加進句子）</div>${EXTRA.map(x=>`<label class="od-x"><input type="checkbox" data-ox="${esc(x[0])}"${st.ex[x[0]]?' checked':''}><button data-sayw="${esc(x[1])}" class="od-w">🔊</button><div><b>${x[0]}</b><span>${x[2]}</span></div></label>`).join('')}
+  <div class="od-g">💴 結帳（點整列就唸）</div>${PAY.map(x=>`<button class="od-pay" data-sayw="${esc(x[1])}"><i>🔊</i><div><b>${x[0]}</b><span>${x[2]}</span></div></button>`).join('')}`}
+ B.addEventListener('click',e=>{const t=e.target.closest('button,input');if(!t)return;const r=sent();
+  if(t.dataset.od==='ad'||t.dataset.od==='kd'){const k=t.dataset.od;st[k]=Math.max(k==='ad'?1:0,Math.min(10,(+st[k]||0)+ +t.dataset.v));save();draw();return}
+  if(t.dataset.oq){const k=t.dataset.oq;st.q[k]=Math.max(0,Math.min(10,(st.q[k]||0)+ +t.dataset.v));if(!st.q[k])delete st.q[k];save();draw();return}
+  if(t.dataset.ox!==undefined){st.ex[t.dataset.ox]=t.checked?1:0;save();draw();return}
+  if(t.dataset.sayw){clSay(t.dataset.sayw,'ja-JP');return}
+  const sy=t.dataset.say;if(sy){const m={p:r.pk,o:r.ok,e:r.ek,all:r.pk+r.ok+r.ek,slow:r.pk+r.ok+r.ek};clSay(m[sy]||'','ja-JP',sy==='slow');return}
+  if(t.dataset.od==='clr'){st.q={};st.ex={};save();draw();return}
+  if(t.dataset.od==='big'){const o=document.createElement('div');o.className='med-big resv-big';const d=document.createElement('div');const pre=document.createElement('pre');pre.textContent=[r.pj,r.oj,r.ej].filter(Boolean).join('\n\n');const sm=document.createElement('small');sm.textContent=r.zh+'\n點任何地方關閉';d.append(pre,sm);o.append(d);o.onclick=()=>o.remove();document.body.appendChild(o)}});
+ draw()})();
 
 (function(){const secs=[...document.querySelectorAll('.sec[data-tt="help"],.sec[data-tt="set"]')];let st={};try{st=JSON.parse(localStorage.getItem('fuk26_secfold')||'{}')}catch(e){}
  const key=x=>(x.querySelector('h3')||{}).textContent.trim();
