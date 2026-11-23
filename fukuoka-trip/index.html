@@ -726,6 +726,7 @@ html.dark .med-red b{color:#e07a6a}
 .od-l{display:flex;gap:8px;align-items:flex-start;padding:4px 0}.od-l b{display:block;font-size:14px;line-height:1.45}.od-l span{font-size:11px;color:var(--sub);line-height:1.4;display:block}.od-sp{flex:none;width:30px;height:30px;font-size:13px!important;border:2px solid var(--maple);background:var(--card);font-size:16px}
 .od-e{font-size:13px;color:var(--sub);padding:4px 0}.od-out .acts{margin-top:6px}.od-out .acts{flex-wrap:nowrap;gap:4px}.od-out .acts .btn{font-size:12px;padding:6px 4px;white-space:nowrap;flex:1}.od-sum{font-size:13px;margin-top:6px}
 .od-pay{display:flex;align-items:center;gap:8px;width:100%;text-align:left;padding:8px;margin-top:5px;border:2px solid var(--px);background:var(--card);color:var(--ink)}.od-pay i{font-style:normal}.od-pay b{display:block;font-size:15px}.od-pay span{font-size:12px;color:var(--sub)}
+.od-k{display:block;font-size:12px;color:var(--gold);line-height:1.4;font-family:var(--ff-b);letter-spacing:.5px}
 .od-g{font-family:var(--ff-b);font-weight:700;margin:12px 0 4px}
 .od-i,.od-x{display:flex;align-items:center;gap:8px;padding:6px 0;border-top:1px dashed var(--line)}.od-i>div,.od-x>div{flex:1;min-width:0}.od-i b,.od-x b{display:block;font-size:15px}.od-i span,.od-x span{font-size:12px;color:var(--sub)}.od-i.on b{color:var(--maple)}
 .od-w{flex:none;width:30px;height:30px;border:1.5px solid var(--line);background:var(--card);font-size:13px}.od-x input{width:20px;height:20px;flex:none}
@@ -2467,16 +2468,17 @@ function clSay(t,lang,slow){try{if(!('speechSynthesis' in window)){toast('這台
   const ex=EXTRA.filter(x=>st.ex[x[0]]);const ej=ex.map(x=>x[0]+'。').join(''),ek=ex.map(x=>x[1]+'。').join('');
   const zh=`${t} 位（${a} 大${k?' '+k+' 小':''}）`+(it.length?'；點：'+it.map(x=>`${x[2]} ×${st.q[K(x)]}${UZ[x[4]]}`).join('、'):'')+(ex.length?'；'+ex.map(x=>x[2]).join('、'):'');
   const sum=it.reduce((s,x)=>s+(x[3]||0)*st.q[K(x)],0),unk=it.some(x=>!x[3]);return{pj,pk,oj,ok,ej,ek,zh,sum,unk}}
+ const KJ=/[\u4e00-\u9fff々]/,KN=(t,k)=>KJ.test(t)?`<small class="od-k">${k}</small>`:'';
  function draw(){const r=sent();
   B.innerHTML=`<div class="od-shops">${SHOPS.map(x=>`<button data-osh="${x[0]}" class="${x[0]===st.sh?'on':''}"><b>${x[1]}</b><span>${x[2]}</span></button>`).join('')}</div><div class="od-ppl"><b>👪 人數</b><label>大人<span class="od-st"><button data-od="ad" data-v="-1">−</button><i>${st.ad}</i><button data-od="ad" data-v="1">＋</button></span></label><label>小孩<span class="od-st"><button data-od="kd" data-v="-1">−</button><i>${st.kd}</i><button data-od="kd" data-v="1">＋</button></span></label></div>
-  <div class="od-out"><div class="od-l"><button data-say="p" class="od-sp">🔊</button><div><b>${r.pj}</b><span>${+st.ad + +st.kd} 位${+st.kd?`（${st.ad} 大 ${st.kd} 小）`:''}</span></div></div>
-  ${r.oj?`<div class="od-l"><button data-say="o" class="od-sp">🔊</button><div><b>${r.oj}</b><span>${r.zh.split('；').slice(1).join('；')}</span></div></div>`:'<div class="od-e">↓ 在下面點 ＋ 選餐點和飲料</div>'}
-  ${r.ej?`<div class="od-l"><button data-say="e" class="od-sp">🔊</button><div><b>${r.ej}</b></div></div>`:''}
+  <div class="od-out"><div class="od-l"><button data-say="p" class="od-sp">🔊</button><div><b>${r.pj}</b>${KN(r.pj,r.pk)}<span>${+st.ad + +st.kd} 位${+st.kd?`（${st.ad} 大 ${st.kd} 小）`:''}</span></div></div>
+  ${r.oj?`<div class="od-l"><button data-say="o" class="od-sp">🔊</button><div><b>${r.oj}</b>${KN(r.oj,r.ok)}<span>${r.zh.split('；').slice(1).join('；')}</span></div></div>`:'<div class="od-e">↓ 在下面點 ＋ 選餐點和飲料</div>'}
+  ${r.ej?`<div class="od-l"><button data-say="e" class="od-sp">🔊</button><div><b>${r.ej}</b>${KN(r.ej,r.ek)}</div></div>`:''}
   <div class="acts"><button class="btn pri" data-say="all">🔊 整句唸</button><button class="btn" data-say="slow">🐢 慢慢唸</button><button class="btn" data-od="big">⛶ 給店員看</button><button class="btn ghost" data-od="clr">清空</button></div>
   ${r.sum?`<div class="od-sum">💴 看板價小計 <b>¥${r.sum.toLocaleString()}</b>${r.unk?'（飲料等沒標價的另計）':''}</div>`:''}</div>
-  ${MENU().map(g=>`<div class="od-g">${g[0]}</div>`+g[1].map(x=>{const q=st.q[K(x)]||0;return `<div class="od-i${q?' on':''}"><button data-sayw="${esc(x[1])}" class="od-w">🔊</button><div><b>${x[0]}</b><span>${x[2]}${x[3]?'・¥'+x[3].toLocaleString():''}</span></div><span class="od-st"><button data-oq="${esc(K(x))}" data-v="-1">−</button><i>${q}${q?UZ[x[4]]:''}</i><button data-oq="${esc(K(x))}" data-v="1">＋</button></span></div>`}).join('')).join('')}
-  <div class="od-g">💬 常用一句（勾選會加進句子）</div>${EXTRA.map(x=>`<label class="od-x"><input type="checkbox" data-ox="${esc(x[0])}"${st.ex[x[0]]?' checked':''}><button data-sayw="${esc(x[1])}" class="od-w">🔊</button><div><b>${x[0]}</b><span>${x[2]}</span></div></label>`).join('')}
-  <div class="od-g">💴 結帳（點整列就唸）</div>${PAY.map(x=>`<button class="od-pay" data-sayw="${esc(x[1])}"><i>🔊</i><div><b>${x[0]}</b><span>${x[2]}</span></div></button>`).join('')}`}
+  ${MENU().map(g=>`<div class="od-g">${g[0]}</div>`+g[1].map(x=>{const q=st.q[K(x)]||0;return `<div class="od-i${q?' on':''}"><button data-sayw="${esc(x[1])}" class="od-w">🔊</button><div><b>${x[0]}</b>${KN(x[0],x[1])}<span>${x[2]}${x[3]?'・¥'+x[3].toLocaleString():''}</span></div><span class="od-st"><button data-oq="${esc(K(x))}" data-v="-1">−</button><i>${q}${q?UZ[x[4]]:''}</i><button data-oq="${esc(K(x))}" data-v="1">＋</button></span></div>`}).join('')).join('')}
+  <div class="od-g">💬 常用一句（勾選會加進句子）</div>${EXTRA.map(x=>`<label class="od-x"><input type="checkbox" data-ox="${esc(x[0])}"${st.ex[x[0]]?' checked':''}><button data-sayw="${esc(x[1])}" class="od-w">🔊</button><div><b>${x[0]}</b>${KN(x[0],x[1])}<span>${x[2]}</span></div></label>`).join('')}
+  <div class="od-g">💴 結帳（點整列就唸）</div>${PAY.map(x=>`<button class="od-pay" data-sayw="${esc(x[1])}"><i>🔊</i><div><b>${x[0]}</b>${KN(x[0],x[1])}<span>${x[2]}</span></div></button>`).join('')}`}
  B.addEventListener('click',e=>{const t=e.target.closest('button,input');if(!t)return;const r=sent();
   if(t.dataset.od==='ad'||t.dataset.od==='kd'){const k=t.dataset.od;st[k]=Math.max(k==='ad'?1:0,Math.min(10,(+st[k]||0)+ +t.dataset.v));save();draw();return}
   if(t.dataset.osh){st.sh=t.dataset.osh;save();draw();return}
@@ -2485,7 +2487,7 @@ function clSay(t,lang,slow){try{if(!('speechSynthesis' in window)){toast('這台
   if(t.dataset.sayw){clSay(t.dataset.sayw,'ja-JP');return}
   const sy=t.dataset.say;if(sy){const m={p:r.pk,o:r.ok,e:r.ek,all:r.pk+r.ok+r.ek,slow:r.pk+r.ok+r.ek};clSay(m[sy]||'','ja-JP',sy==='slow');return}
   if(t.dataset.od==='clr'){Object.keys(st.q).forEach(k=>{if(k.startsWith(st.sh+'|')||k.startsWith('d|'))delete st.q[k]});st.ex={};save();draw();return}
-  if(t.dataset.od==='big'){const o=document.createElement('div');o.className='med-big resv-big';const d=document.createElement('div');const pre=document.createElement('pre');pre.textContent=[r.pj,r.oj,r.ej].filter(Boolean).join('\n\n');const sm=document.createElement('small');sm.textContent=r.zh+'\n點任何地方關閉';d.append(pre,sm);o.append(d);o.onclick=()=>o.remove();document.body.appendChild(o)}});
+  if(t.dataset.od==='big'){const o=document.createElement('div');o.className='med-big resv-big';const d=document.createElement('div');const pre=document.createElement('pre');pre.textContent=[[r.pj,r.pk],[r.oj,r.ok],[r.ej,r.ek]].filter(x=>x[0]).map(x=>x[0]+'\n（'+x[1]+'）').join('\n\n');const sm=document.createElement('small');sm.textContent=r.zh+'\n點任何地方關閉';d.append(pre,sm);o.append(d);o.onclick=()=>o.remove();document.body.appendChild(o)}});
  draw()})();
 
 (function(){const secs=[...document.querySelectorAll('.sec[data-tt="help"],.sec[data-tt="set"]')];let st={};try{st=JSON.parse(localStorage.getItem('fuk26_secfold')||'{}')}catch(e){}
