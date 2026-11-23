@@ -47,3 +47,6 @@
 
 ## 離線使用
 根目錄的 `sw.js` 會把所有 App 存到手機，沒網路也能開。新增或改檔後，執行 `node build/gen-sw.js .` 重建清單（版本號會更新，手機下次連網時自動換新）。
+
+## 配方資料庫（沖煮筆記）
+沖煮筆記的「配方資料庫」來自手沖咖啡實驗室。實驗室的配方有更新時，執行 `python3 build/gen-recipes.py` 匯出 `build/recipes.json`，再把它嵌進 `brew-notes/index.html` 裡 `/*RLIB*/…/*END*/` 之間。
