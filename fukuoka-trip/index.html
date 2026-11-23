@@ -727,6 +727,10 @@ html.dark .med-red b{color:#e07a6a}
 .od-e{font-size:13px;color:var(--sub);padding:4px 0}.od-out .acts{margin-top:6px}.od-out .acts{flex-wrap:nowrap;gap:4px}.od-out .acts .btn{font-size:12px;padding:6px 4px;white-space:nowrap;flex:1}.od-sum{font-size:13px;margin-top:6px}
 .od-pay{display:flex;align-items:center;gap:8px;width:100%;text-align:left;padding:8px;margin-top:5px;border:2px solid var(--px);background:var(--card);color:var(--ink)}.od-pay i{font-style:normal}.od-pay b{display:block;font-size:15px}.od-pay span{font-size:12px;color:var(--sub)}
 .od-k{display:block;font-size:12px;color:var(--gold);line-height:1.4;font-family:var(--ff-b);letter-spacing:.5px}
+.od-save{width:100%;margin-top:6px;font-size:13px}
+.od-hist{border:2px solid var(--px);margin:6px 0 8px;padding:6px 8px}.od-hist summary{font-family:var(--ff-b);font-weight:700;cursor:pointer}
+.od-h{border-top:1px dashed var(--line);padding:6px 0}.od-hh{display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}.od-hh b{font-size:14px}.od-hh span{font-size:12px;color:var(--sub)}.od-hh em{margin-left:auto;font-style:normal;font-family:var(--ff-b);color:var(--maple)}
+.od-hi{font-size:13px;line-height:1.5;margin-top:2px}.od-hz{font-size:11px;color:var(--sub)}.od-ha{display:flex;gap:4px;margin-top:4px;flex-wrap:wrap}.od-ha button{font-size:12px;padding:4px 8px;border:1.5px solid var(--line);background:var(--card);color:var(--ink)}.od-ha .del{margin-left:auto;color:var(--sub)}
 .od-g{font-family:var(--ff-b);font-weight:700;margin:12px 0 4px}
 .od-i,.od-x{display:flex;align-items:center;gap:8px;padding:6px 0;border-top:1px dashed var(--line)}.od-i>div,.od-x>div{flex:1;min-width:0}.od-i b,.od-x b{display:block;font-size:15px}.od-i span,.od-x span{font-size:12px;color:var(--sub)}.od-i.on b{color:var(--maple)}
 .od-w{flex:none;width:30px;height:30px;border:1.5px solid var(--line);background:var(--card);font-size:13px}.od-x input{width:20px;height:20px;flex:none}
@@ -2471,17 +2475,25 @@ function clSay(t,lang,slow){try{if(!('speechSynthesis' in window)){toast('這台
   const sum=it.reduce((s,x)=>s+(x[3]||0)*st.q[K(x)],0),unk=it.some(x=>!x[3]);return{pj,pk,oj,ok,ej,ek,zh,sum,unk}}
  const KJ=/[\u4e00-\u9fff々]/,KN=(t,k)=>KJ.test(t)?`<small class="od-k">${k}</small>`:'';
  function draw(){const r=sent();
-  B.innerHTML=`<div class="od-shops">${SHOPS.map(x=>`<button data-osh="${x[0]}" class="${x[0]===st.sh?'on':''}"><b>${x[1]}</b><span>${x[2]}</span></button>`).join('')}</div><div class="od-ppl"><b>👪 人數</b><label>大人<span class="od-st"><button data-od="ad" data-v="-1">−</button><i>${st.ad}</i><button data-od="ad" data-v="1">＋</button></span></label><label>小孩<span class="od-st"><button data-od="kd" data-v="-1">−</button><i>${st.kd}</i><button data-od="kd" data-v="1">＋</button></span></label></div>
+  const H=S.get('ords',{}),hk=Object.keys(H).sort((a,b)=>(H[b].o||0)-(H[a].o||0));
+  B.innerHTML=`<details class="od-hist"${hk.length&&st.hopen?' open':''}><summary>📒 點過的菜單（${hk.length}）</summary>${hk.length?hk.map(k=>{const h=H[k];return `<div class="od-h"><div class="od-hh"><b>${esc(h.s)}</b><span>${esc(h.d)}・${h.ad+h.kd} 位</span>${h.sum?`<em>¥${h.sum.toLocaleString()}</em>`:''}</div><div class="od-hi">${h.it.map(x=>`${esc(x[0])} ×${x[3]}${esc(x[4])}`).join('、')}</div><div class="od-hz">${h.it.map(x=>`${esc(x[2])}`).join('、')}</div><div class="od-ha"><button data-oh="say" data-k="${k}">🔊 唸</button><button data-oh="load" data-k="${k}">↩ 再點一次</button><button data-oh="big" data-k="${k}">⛶ 給店員看</button><button data-oh="del" data-k="${k}" class="del">✕</button></div></div>`}).join(''):'<div class="od-e">還沒有存過。點好菜後按「💾 存下這次點的菜」。</div>'}</details><div class="od-shops">${SHOPS.map(x=>`<button data-osh="${x[0]}" class="${x[0]===st.sh?'on':''}"><b>${x[1]}</b><span>${x[2]}</span></button>`).join('')}</div><div class="od-ppl"><b>👪 人數</b><label>大人<span class="od-st"><button data-od="ad" data-v="-1">−</button><i>${st.ad}</i><button data-od="ad" data-v="1">＋</button></span></label><label>小孩<span class="od-st"><button data-od="kd" data-v="-1">−</button><i>${st.kd}</i><button data-od="kd" data-v="1">＋</button></span></label></div>
   <div class="od-out"><div class="od-l"><button data-say="p" class="od-sp">🔊</button><div><b>${r.pj}</b>${KN(r.pj,r.pk)}<span>${+st.ad + +st.kd} 位${+st.kd?`（${st.ad} 大 ${st.kd} 小）`:''}</span></div></div>
   ${r.oj?`<div class="od-l"><button data-say="o" class="od-sp">🔊</button><div><b>${r.oj}</b>${KN(r.oj,r.ok)}<span>${r.zh.split('；').slice(1).join('；')}</span></div></div>`:'<div class="od-e">↓ 在下面點 ＋ 選餐點和飲料</div>'}
   ${r.ej?`<div class="od-l"><button data-say="e" class="od-sp">🔊</button><div><b>${r.ej}</b>${KN(r.ej,r.ek)}</div></div>`:''}
-  <div class="acts"><button class="btn pri" data-say="all">🔊 整句唸</button><button class="btn" data-say="slow">🐢 慢慢唸</button><button class="btn" data-od="big">⛶ 給店員看</button><button class="btn ghost" data-od="clr">清空</button></div>
+  <div class="acts"><button class="btn pri" data-say="all">🔊 整句唸</button><button class="btn" data-say="slow">🐢 慢慢唸</button><button class="btn" data-od="big">⛶ 給店員看</button><button class="btn ghost" data-od="clr">清空</button></div>${r.oj?'<button class="btn od-save" data-od="save">💾 存下這次點的菜</button>':''}
   ${r.sum?`<div class="od-sum">💴 看板價小計 <b>¥${r.sum.toLocaleString()}</b>${r.unk?'（飲料等沒標價的另計）':''}</div>`:''}</div>
   ${MENU().map(g=>`<div class="od-g">${g[0]}</div>`+g[1].map(x=>{const q=st.q[K(x)]||0;return `<div class="od-i${q?' on':''}"><button data-sayw="${esc(x[1])}" class="od-w">🔊</button><div><b>${x[0]}</b>${KN(x[0],x[1])}<span>${x[2]}${x[3]?'・¥'+x[3].toLocaleString():''}</span></div><span class="od-st"><button data-oq="${esc(K(x))}" data-v="-1">−</button><i>${q}${q?UZ[x[4]]:''}</i><button data-oq="${esc(K(x))}" data-v="1">＋</button></span></div>`}).join('')).join('')}
   <div class="od-g">💬 常用一句（勾選會加進句子）</div>${EXTRA.map(x=>`<label class="od-x"><input type="checkbox" data-ox="${esc(x[0])}"${st.ex[x[0]]?' checked':''}><button data-sayw="${esc(x[1])}" class="od-w">🔊</button><div><b>${x[0]}</b>${KN(x[0],x[1])}<span>${x[2]}</span></div></label>`).join('')}
   <div class="od-g">💴 結帳（點整列就唸）</div>${PAY.map(x=>`<button class="od-pay" data-sayw="${esc(x[1])}"><i>🔊</i><div><b>${x[0]}</b>${KN(x[0],x[1])}<span>${x[2]}</span></div></button>`).join('')}`}
  B.addEventListener('click',e=>{const t=e.target.closest('button,input');if(!t)return;const r=sent();
   if(t.dataset.od==='ad'||t.dataset.od==='kd'){const k=t.dataset.od;st[k]=Math.max(k==='ad'?1:0,Math.min(10,(+st[k]||0)+ +t.dataset.v));save();draw();return}
+  if(t.dataset.od==='save'){const it=all().filter(x=>st.q[K(x)]>0).map(x=>[x[0],x[1],x[2],st.q[K(x)],UZ[x[4]],x[3]||0,x[4]]);const H=S.get('ords',{}),td=new Date(Date.now()+9*3600e3),id='o'+Date.now().toString(36);
+   H[id]={s:SH()[1].replace(/^\S+ /,''),sh:st.sh,d:`${td.getUTCMonth()+1}/${td.getUTCDate()} ${String(td.getUTCHours()).padStart(2,'0')}:${String(td.getUTCMinutes()).padStart(2,'0')}`,ad:+st.ad,kd:+st.kd,it,sum:r.sum,j:r.oj,k:r.ok,o:Date.now()};S.set('ords',H);st.hopen=1;save();draw();toast('已存到「📒 點過的菜單」');return}
+  if(t.dataset.oh){const H=S.get('ords',{}),h=H[t.dataset.k];if(!h)return;const a=t.dataset.oh;
+   if(a==='say'){clSay(h.k||h.j,'ja-JP');return}
+   if(a==='load'){st.sh=h.sh||st.sh;Object.keys(st.q).forEach(k=>{if(k.startsWith(st.sh+'|')||k.startsWith('d|'))delete st.q[k]});const items=all();h.it.forEach(x=>{const m=items.find(y=>y[0]===x[0]);if(m)st.q[K(m)]=x[3]});save();draw();toast('已帶入，可以再調整份數');return}
+   if(a==='big'){const o=document.createElement('div');o.className='med-big resv-big';const d=document.createElement('div');const pre=document.createElement('pre');pre.textContent=h.j+'\n（'+(h.k||'')+'）';const sm=document.createElement('small');sm.textContent='點任何地方關閉';d.append(pre,sm);o.append(d);o.onclick=()=>o.remove();document.body.appendChild(o);return}
+   if(a==='del'){if(!t.dataset.arm){t.dataset.arm=1;t.textContent='確定刪除？';setTimeout(()=>{if(t.isConnected){delete t.dataset.arm;t.textContent='✕'}},2500);return}delete H[t.dataset.k];S.set('ords',H);draw();return}}
   if(t.dataset.osh){st.sh=t.dataset.osh;save();draw();return}
   if(t.dataset.oq){const k=t.dataset.oq;st.q[k]=Math.max(0,Math.min(10,(st.q[k]||0)+ +t.dataset.v));if(!st.q[k])delete st.q[k];save();draw();return}
   if(t.dataset.ox!==undefined){st.ex[t.dataset.ox]=t.checked?1:0;save();draw();return}
@@ -2489,6 +2501,8 @@ function clSay(t,lang,slow){try{if(!('speechSynthesis' in window)){toast('這台
   const sy=t.dataset.say;if(sy){const m={p:r.pk,o:r.ok,e:r.ek,all:r.pk+r.ok+r.ek,slow:r.pk+r.ok+r.ek};clSay(m[sy]||'','ja-JP',sy==='slow');return}
   if(t.dataset.od==='clr'){Object.keys(st.q).forEach(k=>{if(k.startsWith(st.sh+'|')||k.startsWith('d|'))delete st.q[k]});st.ex={};save();draw();return}
   if(t.dataset.od==='big'){const o=document.createElement('div');o.className='med-big resv-big';const d=document.createElement('div');const pre=document.createElement('pre');pre.textContent=[[r.pj,r.pk],[r.oj,r.ok],[r.ej,r.ek]].filter(x=>x[0]).map(x=>x[0]+'\n（'+x[1]+'）').join('\n\n');const sm=document.createElement('small');sm.textContent=r.zh+'\n點任何地方關閉';d.append(pre,sm);o.append(d);o.onclick=()=>o.remove();document.body.appendChild(o)}});
+ B.addEventListener('toggle',e=>{if(e.target.classList&&e.target.classList.contains('od-hist')){st.hopen=e.target.open?1:0;save()}},true);
+ try{reloaders.push(()=>draw())}catch(e){}
  draw()})();
 
 (function(){const secs=[...document.querySelectorAll('.sec[data-tt="help"],.sec[data-tt="set"]')];let st={};try{st=JSON.parse(localStorage.getItem('fuk26_secfold')||'{}')}catch(e){}
@@ -3485,7 +3499,7 @@ window.addEventListener('hashchange',route);
 /* ---------- family sync (Firebase Realtime Database, REST + 串流) ---------- */
 const FB_URL='https://molecule-match-default-rtdb.asia-southeast1.firebasedatabase.app';
 const FS=(function(){
- const KEYS=['done','cafes','shops','xmas','gifts','foods','gphoto','memo','savedNotes','edits','todo','pack','tax','xtabs','xlists','exp','cups'];
+ const KEYS=['done','cafes','shops','xmas','gifts','foods','gphoto','memo','savedNotes','edits','todo','pack','tax','xtabs','xlists','exp','cups','ords'];
  const raw={get(k){try{const v=localStorage.getItem('fuk26_'+k);return k==='gphoto'&&v?JSON.stringify(phFill(JSON.parse(v))):v}catch(e){return null}},set(k,v){try{localStorage.setItem('fuk26_'+k,k==='gphoto'?JSON.stringify(phStrip(JSON.parse(v))):v)}catch(e){}},del(k){try{localStorage.removeItem('fuk26_'+k)}catch(e){}}};
  const okCode=c=>/^[A-Za-z0-9_-]{8,40}$/.test(c||'');
  const enc=k=>encodeURIComponent(k).replace(/\./g,'%2E'),dec=k=>{try{return decodeURIComponent(k)}catch(e){return k}};
@@ -3503,6 +3517,7 @@ const FS=(function(){
   else if(key==='xlists'){for(const k in v)if(v[k]&&!v[k].p)o['xl/'+k]=JSON.stringify({n:v[k].n,tab:v[k].tab,items:v[k].items||[],o:v[k].o})}
   else if(key==='exp'){for(const k in v)if(v[k])o['ex/'+k]=JSON.stringify(v[k])}
   else if(key==='cups'){for(const k in v)if(v[k])o['cu/'+k]=JSON.stringify(v[k])}
+  else if(key==='ords'){for(const k in v)if(v[k])o['od/'+k]=JSON.stringify(v[k])}
   else if(key==='edits'){o['edits/v']=v.v||1;(v.days||[]).forEach((d,i)=>{o['edits/d'+i]=JSON.stringify(d)})}
   else o[key]=JSON.stringify(v);
   return o}
@@ -3513,6 +3528,7 @@ const FS=(function(){
   if(key==='savedNotes'){const o={},x=sub('notes/');for(const k in x)o[dec(k)]=String(x[k]);return o}
   if(key==='gphoto'){const o={},x=sub('gp/');for(const k in x)o[k]={h:String(x[k]),u:null};return o}
   if(key==='xtabs'||key==='xlists'){const o={},x=sub(key==='xtabs'?'xt/':'xl/');for(const k in x){try{const r=JSON.parse(x[k]);if(r&&typeof r.n==='string')o[k]=r}catch(e){}}return o}
+  if(key==='ords'){const o={},x=sub('od/');for(const k in x){try{const r=JSON.parse(x[k]);if(r&&r.it)o[k]=r}catch(e){}}return o}
   if(key==='cups'){const o={},x=sub('cu/');for(const k in x){try{const r=JSON.parse(x[k]);if(r&&r.s)o[k]=r}catch(e){}}return o}
   if(key==='exp'){const o={},x=sub('ex/');for(const k in x){try{const r=JSON.parse(x[k]);if(r&&r.a>0)o[k]=r}catch(e){}}return o}
   if(key==='edits'){const x=sub('edits/d');if(!Object.keys(x).length)return null;
