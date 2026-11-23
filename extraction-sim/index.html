@@ -650,6 +650,7 @@ html.embed{--modesH:0px}
 .cm-sec.flash>div:first-child{animation:oreaFlash 1.2s ease}
 .cm-mode{display:grid!important;grid-template-columns:1fr 1fr;gap:6px}.cm-pick .cm-mode button{border:1px solid var(--line)}
 .z-beans{margin-top:10px;border-left:3px solid #c9a66b;background:rgba(201,166,107,.08);border-radius:6px;padding:8px 10px}.z-beans b{font-size:14px}.z-beans p{margin:4px 0;font-size:14px;line-height:1.6}.z-beans small{color:var(--muted);font-size:11px}
+.z-robust{margin-top:12px;border:1px dashed var(--line);border-radius:8px;padding:10px}.z-robust b{font-size:14px}
 .z-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px;vertical-align:middle}
 .orea-h b{font-size:18px}.orea-h small{margin-left:8px;color:var(--muted)}.orea-h p{margin:4px 0 10px}
 .t46-row.orea6{grid-template-columns:1.5fr .9fr .8fr .5fr .5fr 1fr;cursor:pointer}.orea-f{font-style:normal;font-size:10px;color:#ff4fd8;border:1px solid #ff4fd8;border-radius:4px;padding:0 3px}
@@ -1288,7 +1289,7 @@ window.BGM=(()=>{
     <div class="err" id="tErr"></div>
   </div>
   <button class="t-more" id="tMore" type="button" aria-label="咖啡宇宙：更多咖啡 App 與遊戲">咖啡宇宙</button>
-  <div class="t-foot">© 2026 Jim Lu　ver. 8.0</div>
+  <div class="t-foot">© 2026 Jim Lu　ver. 8.1</div>
 </div>
 <nav class="modes" aria-label="導覽"><div class="in">
   <button class="homebtn" id="homeBtn" type="button" hidden>‹ 主選單</button>
@@ -8222,7 +8223,7 @@ function cmCards(){document.querySelectorAll('#learnView .cm-sec').forEach(sec=>
 const CM_ALL=[{id:'k46',g:'g46',year:2016,who:'粕谷哲',title:'4:6 沖法'}].concat(CMM.map(m=>({id:m.id,g:m.g,year:m.custom?2026:cmRec(m.rec).year,who:m.custom?'Bavis Kwong':cmRec(m.rec).name.split(' ')[0],title:m.title}))).concat([{id:'orea',g:'gOrea',year:'OREA-O',who:'官方配方',title:'OREA-O 配方專區（10 套）',grp:'orea'}]);
 function cmPick(){const p=$('cmPick');if(!p||p.dataset.ok)return;p.dataset.ok=1;
   const card=x=>'<button type="button" data-m="'+x.id+'"><span class="cm-pf"></span><span class="cm-pt"><small>'+x.year+'・'+x.who+'</small><b>'+x.title+'</b><em>'+WHO[x.g].n+' 導覽</em></span></button>';
-  p.innerHTML='<div class="seg cm-mode" role="tablist"><button type="button" data-g="champ">🏆 冠軍沖法<small>9 套</small></button><button type="button" data-g="orea">🥞 OREA-O<small>10 套</small></button><button type="button" data-g="v60">🔺 V60<small>5 套</small></button><button type="button" data-g="neo">💠 V60 NEO<small>6 套</small></button></div>'+[['champ','🏆 冠軍沖法','世界沖煮冠軍與名家的手法']].map(([g,h,d])=>'<div class="cm-grp" data-g="'+g+'"><h2>'+h+'<small>'+d+'</small></h2><div class="cm-grid">'+CM_ALL.filter(x=>(x.grp||'champ')===g).map(card).join('')+'</div>'+(g==='champ'?'<details class="champ-box" open><summary>🏆 9 套冠軍配方在金杯圖上的位置</summary><div class="cm-chart champ-sc"></div><p class="label">👆 直接點圖上的點或下面的標籤就會選那套手法（畫面不會跳走），往下滑就是它的細項。中間金框是金杯，九宮格每一格標出那一區喝起來的感覺；▲ 是超出圖範圍的點。顏色是那位導覽員的代表色。</p></details>':'')+'</div>').join('');
+  p.innerHTML='<div class="seg cm-mode" role="tablist"><button type="button" data-g="champ">🏆 冠軍沖法<small>9 套</small></button><button type="button" data-g="orea">🥞 OREA-O<small>10 套</small></button><button type="button" data-g="v60">🔺 V60<small>5 套</small></button><button type="button" data-g="neo">💠 V60 NEO<small>7 套</small></button></div>'+[['champ','🏆 冠軍沖法','世界沖煮冠軍與名家的手法']].map(([g,h,d])=>'<div class="cm-grp" data-g="'+g+'"><h2>'+h+'<small>'+d+'</small></h2><div class="cm-grid">'+CM_ALL.filter(x=>(x.grp||'champ')===g).map(card).join('')+'</div>'+(g==='champ'?'<details class="champ-box" open><summary>🏆 9 套冠軍配方在金杯圖上的位置</summary><div class="cm-chart champ-sc"></div><p class="label">👆 直接點圖上的點或下面的標籤就會選那套手法（畫面不會跳走），往下滑就是它的細項。中間金框是金杯，九宮格每一格標出那一區喝起來的感覺；▲ 是超出圖範圍的點。顏色是那位導覽員的代表色。</p></details>':'')+'</div>').join('');
   p.querySelectorAll('.cm-mode button').forEach(b=>b.onclick=()=>cmMode(b.dataset.g));
   p.querySelectorAll('.cm-grid button').forEach(b=>{b.querySelector('.cm-pf').appendChild(sprCv(CM_ALL.find(x=>x.id===b.dataset.m).g,36));b.onclick=()=>{cmShow(b.dataset.m);const s=document.querySelector('.cm-sec[data-m="'+b.dataset.m+'"]');if(s)scrollTo({top:scrollY+s.getBoundingClientRect().top-110,behavior:'smooth'});};});}
 
@@ -8351,8 +8352,9 @@ const ZONES={
   color:r=>r.valveWins?'#e8b04a':'#6fd3d8',legend:[['#6fd3d8','只用 NEO'],['#e8b04a','NEO＋Switch 閥門']],
   varH:'濾杯',vars:[['neo','V60 NEO',p=>{p.dripper='v60neo';}],['v60','換成一般 V60',p=>{p.dripper='v60';}],['nosw','拿掉 Switch（純滴濾）',p=>{if(p.valveWins){p.pattern='pulse';p.valveWins=null;}p.dripper='v60neo';}]],
   fine:'配方整理自 Gota 收錄的 V60 NEO 02 配方（Coffee Samurai、Quality Life Coffee、Kurasu、Ethan Junseong Park、Coffee 365）與 BeanBook。原文沒寫的粉量、注水秒數、閥門時間為估計值。NEO 的流速與繞流是依 Hario 說明估計的模型參數；Switch 段落以模型的閥門浸泡計算。',
-  practice:['先用 Coffee Samurai 的 15 Method：兩注就完成，目標 1:45 滴完。','如果滴得比 V60 快很多、杯子偏淡，研磨調細一到兩格。','有 Switch 的話試 Kurasu 的 Switch Hybrid，比較浸泡帶來的甜感。','進階挑戰 Ethan Park 的世界賽配方：熱水開閥滴濾、最後關閥 70°C 浸泡。'],
+  practice:['最穩的起點是 100＋100 閥門法：關閥注 100 g，0:50 開閥再注 100 g，1:15 滴完。','再試 Coffee Samurai 的 15 Method：兩注就完成，目標 1:45 滴完。','如果滴得比 V60 快很多、杯子偏淡，研磨調細一到兩格。','有 Switch 的話試 Kurasu 的 Switch Hybrid，比較浸泡帶來的甜感。','進階挑戰 Ethan Park 的世界賽配方：熱水開閥滴濾、最後關閥 70°C 浸泡。'],
   recipes:[
+   {id:'neo100',n:'100＋100 閥門法',by:'Roke 聽說的配方',d:'NEO 放在 Switch 上：關閥一次注 100 g 浸泡，0:50 開閥，再注 100 g，約 1:15 滴完。只有兩注，很難失敗。',dose:13,water:200,temp:93,grind:600,gl:'中研磨',dripper:'v60neo',pattern:'switch',plan:[100,100],planT:[0,50],planD:[10,12],valveWins:[[0,50]],done:'約 1:15',est:'粉量、水溫、研磨',bean:'col',robust:true,beans:'幾乎什麼豆都可以，這正是它好用的原因。前段浸泡會自己慢下來、不太會過萃；後段開閥用新鮮的水沖過粉層、時間又短，苦味沒機會出來。極淺焙的硬豆可能偏淡，研磨調細一格或水溫拉到 96°C；深焙則降到 88°C。'},
    {id:'samurai',n:'15 Method',by:'Coffee Samurai',d:'兩注完成：15% 的水悶蒸並輕輕旋轉，再一次注到 1:15，目標 1:45 滴完。',dose:15,water:225,temp:90,grind:600,gl:'中細',dripper:'v60neo',plan:[34,191],planT:[0,30],planD:[8,40],done:'約 1:45',est:'粉量（原文只給 1:15 比例）、研磨、主注秒數',bean:'ethw',beans:'快沖、90°C，適合香氣型的水洗淺焙。時間短、水溫低，日曬豆比較不會出現過萃的發酵味，但淺焙硬豆可能萃不足。'},
    {id:'qlife',n:'兩階段注水',by:'Quality Life Coffee',d:'前段注水比較有力，帶出香氣和酸；後段改成溫和的中心注水，拉出甜感、避免尾段澀。',dose:15,water:240,temp:92,grind:560,gl:'中細',dripper:'v60neo',plan:[40,100,100],planT:[0,30,75],planD:[8,20,30],style:[0,0,'c'],done:'約 2:30',est:'每段水量與時間',bean:'ethn',beans:'淺焙到中焙都可以。前段攪動帶酸、後段溫和帶甜，適合日曬、蜜處理這類甜感好的豆。'},
    {id:'beanbook',n:'NEO 四段',by:'BeanBook',d:'35–40 g 悶蒸 30 秒，0:30 邊注邊攪到 120 g，1:05 到 180–185 g，1:35 到 235 g。C40 約 24–25 格。',dose:15,water:235,temp:93,grind:clix(24,25),gl:'24–25 格',dripper:'v60neo',plan:[38,82,63,52],planT:[0,30,65,95],done:'約 2:30',est:'粉量、水溫',bean:'col',beans:'通用型配方，中焙、中淺焙最穩。研磨偏粗配 NEO 的快排水，杯子清爽。'},
@@ -8390,6 +8392,11 @@ function zHTML(z){const Z=ZONES[z];return '<div class="cm-sec zone" data-m="'+z+
    '<div class="orea-card"></div><div class="t46-res cm-res"></div><h3 class="cm-ch-h">時間曲線（實線＝原配方、虛線＝換'+Z.varH+'）</h3><div class="cm-chart z-curve"></div><p class="t46-note cm-note"></p><button class="savebtn cm-go" type="button">把這套配方帶到練習模擬器</button></section>'+
   '<section class="panel"><h2>'+Z.recipes.length+' 套配方一覽</h2><div class="cm-cmp z-tab"></div><p class="label">TDS 和萃取率是模型算的；「滴完」是原始配方寫的時間。點一列就切到那套配方。</p></section>'+
   '<section class="panel t46-practice"><h2>實際練習的順序</h2><ol>'+Z.practice.map(x=>'<li>'+x+'</li>').join('')+'</ol></section><p class="fine">'+Z.fine+' 模擬結果來自本 app 的擴散萃取模型。</p></div>';}
+function zRobust(z,r){const ids=['ethw','geisha','ken','col','bra','ethn','cof_peach','g_nordic'].filter(i=>cmBean(i));
+  const rows=ids.map(i=>{const k=z+r.id+'@'+i;if(!ZRES[k]){const p=zParams(z,Object.assign({},r,{bean:i}),null),a=cmSim(p),c=cupOf(a.M,a.V,p.dose,a.S0);ZRES[k]={tds:c.tds,ey:c.ey,pf:cupProfile(c)};}return [cmBean(i).name,ZRES[k]];});
+  const inGold=rows.filter(([,q])=>zoneOf(q.ey,q.tds)==='金杯').length,inEY=rows.filter(([,q])=>q.ey>=18&&q.ey<=22).length;
+  return '<div class="z-robust"><b>🧪 換 '+rows.length+' 支豆子跑模型：為什麼很難失敗</b><div class="t46-row head orea6"><span>豆子</span><span>TDS</span><span>EY</span><span>甜</span><span>苦</span><span>落點</span></div>'+rows.map(([n,q])=>'<div class="t46-row orea6"><span>'+n+'</span><span>'+q.tds.toFixed(2)+'%</span><span>'+q.ey.toFixed(1)+'%</span><span>'+T5(q.pf.sweet)+'</span><span>'+T5(q.pf.bitter)+'</span><span>'+zoneOf(q.ey,q.tds)+'</span></div>').join('')+
+   '<p class="label zr-note">同一套參數、不調研磨也不調水溫：'+rows.length+' 支豆子有 <b>'+inEY+' 支萃取率落在理想的 18–22%</b>（其中 '+inGold+' 支連濃度也落在金杯）。濃淡主要由粉水比決定，加減粉量就能調；萃取率不容易跑掉，才是它難失敗的原因。只有極淺焙的硬豆會萃不足，要磨細或拉高水溫。</p></div>';}
 const styleN=x=>x==='c'?'中心':x==='h'?'繞＋中':'繞圈';
 function zRender(z){const sec=document.querySelector('.cm-sec[data-m="'+z+'"]');if(!sec)return;const Z=ZONES[z],S=ZST[z],r=Z.recipes.find(x=>x.id===S.cur)||Z.recipes[0],R=zRun(z,r);
   sec.querySelectorAll('.z-pick button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.r===r.id));
@@ -8400,7 +8407,7 @@ function zRender(z){const sec=document.querySelector('.cm-sec[data-m="'+z+'"]');
    '<div class="cm-bar">'+r.plan.map((ml,i)=>'<div style="flex:'+ml+';background:'+tempCol(temps[i])+'"'+(inV(r.planT[i])?' class="cl"':'')+'><b>'+Math.round(ml)+'</b><small>'+(r.style?styleN((r.style||[])[i]):temps[i]+'°')+'</small></div>').join('')+(r.ice?'<div style="flex:'+r.ice+';background:#dff1fb"><b>冰 '+r.ice+'</b><small>公杯</small></div>':'')+(r.bypass?'<div style="flex:'+r.bypass+';background:#f3d9b0"><b>+'+r.bypass+'</b><small>滴完後加</small></div>':'')+'</div>'+
    '<div class="cm-tl">'+r.plan.map((ml,i)=>'<span style="flex:'+ml+'">'+cmFmt(r.planT[i])+'</span>').join('')+(r.ice?'<span style="flex:'+r.ice+'"></span>':'')+(r.bypass?'<span style="flex:'+r.bypass+'"></span>':'')+'</div>'+
    '<p class="label">濾杯：'+DRIPPER[r.dripper].name+(vw?'＋Switch 閥門（斜線格＝關閥浸泡）':'')+'・原始配方滴完 '+r.done+(r.est?'・估計：'+r.est:'')+'</p>'+
-   '<p class="label">模型落點：<b>'+zoneOf(R.ey,R.tds)+'</b>（萃取率 '+R.ey.toFixed(1)+'%、濃度 '+R.tds.toFixed(2)+'%）</p><div class="z-beans"><b>☕ 適合的豆子</b><p>'+r.beans+'</p><small>模擬用：'+bn.name+'</small></div>';
+   '<p class="label">模型落點：<b>'+zoneOf(R.ey,R.tds)+'</b>（萃取率 '+R.ey.toFixed(1)+'%、濃度 '+R.tds.toFixed(2)+'%）</p><div class="z-beans"><b>☕ 適合的豆子</b><p>'+r.beans+'</p><small>模擬用：'+bn.name+'</small></div>'+(r.robust?zRobust(z,r):'');
   const B=S.v?zRun(z,r,S.v):null,X=B||R;
   sec.querySelector('.cm-res').innerHTML=[['濃度 TDS',X.tds.toFixed(2)+'%'],['萃取率',X.ey.toFixed(1)+'%'],['甜',T5(X.pf.sweet)],['酸',T5(X.pf.acid)],['苦',T5(X.pf.bitter)],['模型滴完',cmFmt(X.end)]].map(([k,v])=>'<div><b>'+v+'</b><span>'+k+'</span></div>').join('');
   const vl=S.v?Z.vars.find(v=>v[0]===S.v)[1]:'';
