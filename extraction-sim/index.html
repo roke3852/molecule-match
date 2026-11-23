@@ -645,6 +645,9 @@ html.embed{--modesH:0px}
 .cm-cmp .b.sw i{background:#e87fb0}.cm-cmp .b.bt i{background:#b07a4a}
 .cm-gd{cursor:default}
 .orea-sc .orea-dot{cursor:pointer}.orea-card.flash{animation:oreaFlash 1.2s ease}@keyframes oreaFlash{0%{box-shadow:0 0 0 3px #ff4fd8;border-radius:10px}100%{box-shadow:0 0 0 0 transparent}}
+.champ-box{margin-top:12px;border:1px solid var(--line);border-radius:10px;padding:10px 12px}.champ-box summary{cursor:pointer;font-weight:700;font-size:15px}.champ-box .cm-chart{max-width:560px;margin-top:8px}.champ-sc .orea-dot{cursor:pointer}
+.champ-leg{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:6px;margin-top:6px}.cm-pick .champ-leg button{display:flex;flex-wrap:wrap;width:100%;align-items:center;gap:5px;background:none;border:1px solid var(--line);border-radius:10px;padding:6px 9px;color:var(--ink);font:inherit;font-size:12px;cursor:pointer}.cm-pick .champ-leg button.on{box-shadow:none;border-color:var(--ink)}.champ-leg i{width:9px;height:9px;border-radius:50%;display:inline-block}.champ-leg small{color:var(--muted);width:100%;padding-left:14px;font-size:11px}
+.cm-sec.flash>div:first-child{animation:oreaFlash 1.2s ease}
 .orea-h b{font-size:18px}.orea-h small{margin-left:8px;color:var(--muted)}.orea-h p{margin:4px 0 10px}
 .t46-row.orea6{grid-template-columns:1.5fr .9fr .8fr .5fr .5fr 1fr;cursor:pointer}.orea-f{font-style:normal;font-size:10px;color:#ff4fd8;border:1px solid #ff4fd8;border-radius:4px;padding:0 3px}
 .cm-sec.orea .cm-pick,.cm-sec.orea .seg button[aria-pressed=true]{}
@@ -1282,7 +1285,7 @@ window.BGM=(()=>{
     <div class="err" id="tErr"></div>
   </div>
   <button class="t-more" id="tMore" type="button" aria-label="咖啡宇宙：更多咖啡 App 與遊戲">咖啡宇宙</button>
-  <div class="t-foot">© 2026 Jim Lu　ver. 7.7</div>
+  <div class="t-foot">© 2026 Jim Lu　ver. 7.8</div>
 </div>
 <nav class="modes" aria-label="導覽"><div class="in">
   <button class="homebtn" id="homeBtn" type="button" hidden>‹ 主選單</button>
@@ -8215,13 +8218,43 @@ function cmCards(){document.querySelectorAll('#learnView .cm-sec').forEach(sec=>
 const CM_ALL=[{id:'k46',g:'g46',year:2016,who:'粕谷哲',title:'4:6 沖法'}].concat(CMM.map(m=>({id:m.id,g:m.g,year:m.custom?2026:cmRec(m.rec).year,who:m.custom?'Bavis Kwong':cmRec(m.rec).name.split(' ')[0],title:m.title}))).concat([{id:'orea',g:'gOrea',year:'OREA-O',who:'官方配方',title:'OREA-O 配方專區（10 套）',grp:'orea'}]);
 function cmPick(){const p=$('cmPick');if(!p||p.dataset.ok)return;p.dataset.ok=1;
   const card=x=>'<button type="button" data-m="'+x.id+'"><span class="cm-pf"></span><span class="cm-pt"><small>'+x.year+'・'+x.who+'</small><b>'+x.title+'</b><em>'+WHO[x.g].n+' 導覽</em></span></button>';
-  p.innerHTML=[['champ','🏆 冠軍沖法','世界沖煮冠軍與名家的手法'],['orea','🥞 OREA-O','OREA 平底濾杯官方配方']].map(([g,h,d])=>'<div class="cm-grp"><h2>'+h+'<small>'+d+'</small></h2><div class="cm-grid">'+CM_ALL.filter(x=>(x.grp||'champ')===g).map(card).join('')+'</div></div>').join('');
+  p.innerHTML=[['champ','🏆 冠軍沖法','世界沖煮冠軍與名家的手法'],['orea','🥞 OREA-O','OREA 平底濾杯官方配方']].map(([g,h,d])=>'<div class="cm-grp"><h2>'+h+'<small>'+d+'</small></h2><div class="cm-grid">'+CM_ALL.filter(x=>(x.grp||'champ')===g).map(card).join('')+'</div>'+(g==='champ'?'<details class="champ-box" open><summary>🏆 9 套冠軍配方在金杯圖上的位置</summary><div class="cm-chart champ-sc"></div><p class="label">👆 直接點圖上的點，就會切到那套手法、往下跳到它的細項。點太密的地方會選最近的那一點。每個點的顏色就是那位導覽員的代表色；模型用各冠軍原本的豆子與配方計算。</p></details>':'')+'</div>').join('');
   p.querySelectorAll('button').forEach(b=>{b.querySelector('.cm-pf').appendChild(sprCv(CM_ALL.find(x=>x.id===b.dataset.m).g,36));b.onclick=()=>{cmShow(b.dataset.m);const s=document.querySelector('.cm-sec[data-m="'+b.dataset.m+'"]');if(s)scrollTo({top:scrollY+s.getBoundingClientRect().top-110,behavior:'smooth'});};});}
+
+const CHAMP_PT={};
+function champPt(id){if(CHAMP_PT[id])return CHAMP_PT[id];let R;
+  if(id==='k46'){const a=cmSim(cmP(cmRec('wbrc2016')));R=cmCup([a],a.dose);}
+  else{const m=CMM.find(x=>x.id===id);R=cmRun(m,0);}
+  return CHAMP_PT[id]={tds:R.tds,ey:R.ey};}
+let champCur=null;
+function champScRender(){const box=document.querySelector('#cmPick .champ-sc');if(!box)return;
+  const L=CM_ALL.filter(x=>(x.grp||'champ')==='champ').map(x=>Object.assign({x},champPt(x.id)));
+  const eys=L.map(v=>v.ey),tds=L.map(v=>v.tds);
+  const ex=[Math.min(17,Math.floor(Math.min(...eys))-1),Math.max(23,Math.ceil(Math.max(...eys))+1)],tx=[Math.min(1.1,Math.floor(Math.min(...tds)*10)/10-0.1),Math.max(1.5,Math.ceil(Math.max(...tds)*10)/10+0.1)];
+  const W=320,H=230,x0=34,y0=10,w=W-x0-10,h=H-y0-32;
+  const X=v=>x0+(v-ex[0])/(ex[1]-ex[0])*w,Y=v=>y0+h-(v-tx[0])/(tx[1]-tx[0])*h;
+  let s='<svg viewBox="0 0 '+W+' '+H+'" width="100%">';
+  s+='<rect x="'+X(18)+'" y="'+Y(1.45)+'" width="'+(X(22)-X(18))+'" height="'+(Y(1.15)-Y(1.45))+'" fill="#e8b04a" opacity=".14" stroke="#e8b04a" stroke-dasharray="3 3"/><text x="'+X(20)+'" y="'+(Y(1.45)-3)+'" font-size="8" text-anchor="middle" fill="#e8b04a">金杯（SCA 理想區）</text>';
+  for(let e=Math.ceil(ex[0]);e<=ex[1];e+=2)s+='<text x="'+X(e)+'" y="'+(y0+h+12)+'" font-size="8" text-anchor="middle" fill="var(--muted)">'+e+'%</text>';
+  for(let t=Math.ceil(tx[0]*5)/5;t<=tx[1]+1e-6;t+=0.2)s+='<text x="'+(x0-4)+'" y="'+(Y(t)+3)+'" font-size="8" text-anchor="end" fill="var(--muted)">'+t.toFixed(1)+'</text>';
+  s+='<line x1="'+x0+'" x2="'+(x0+w)+'" y1="'+(y0+h)+'" y2="'+(y0+h)+'" stroke="var(--line)"/><line x1="'+x0+'" x2="'+x0+'" y1="'+y0+'" y2="'+(y0+h)+'" stroke="var(--line)"/>';
+  s+='<text x="'+(x0+w)+'" y="'+(y0+h+26)+'" font-size="9" text-anchor="end" fill="var(--muted)">萃取率 EY →</text><text x="'+(x0+2)+'" y="'+(y0+8)+'" font-size="9" fill="var(--muted)">濃度 TDS %</text>';
+  L.forEach(v=>{const on=v.x.id===champCur,cx=X(v.ey),cy=Y(v.tds),c=WHO[v.x.g].c;
+    s+='<g class="orea-dot" data-m="'+v.x.id+'" role="button" aria-label="'+v.x.title+'"><circle cx="'+cx+'" cy="'+cy+'" r="11" fill="transparent"/><circle cx="'+cx+'" cy="'+cy+'" r="'+(on?6.5:4.5)+'" fill="'+c+'" stroke="'+(on?'var(--ink)':'none')+'" stroke-width="1.5"/></g>';
+    if(on)s+='<text x="'+(cx+8)+'" y="'+(cy+3)+'" font-size="9" fill="var(--ink)">'+v.x.year+' '+v.x.title+'</text>';});
+  s+='</svg><div class="champ-leg">'+L.map(v=>'<button type="button" data-m="'+v.x.id+'"'+(v.x.id===champCur?' class="on"':'')+'><i style="background:'+WHO[v.x.g].c+'"></i>'+v.x.year+' '+v.x.who+'<small>'+v.ey.toFixed(1)+'%・'+v.tds.toFixed(2)+'%</small></button>').join('')+'</div>';
+  box.innerHTML=s;}
+function champGo(id){cmShow(id);const sec=document.querySelector('.cm-sec[data-m="'+id+'"]');if(sec){sec.classList.remove('flash');void sec.offsetWidth;sec.classList.add('flash');scrollTo({top:scrollY+sec.getBoundingClientRect().top-140,behavior:'smooth'});}}
+function champScBind(){const box=document.querySelector('#cmPick .champ-sc');if(!box||box.dataset.b)return;box.dataset.b=1;
+  box.addEventListener('click',e=>{const lb=e.target.closest('.champ-leg [data-m]');if(lb){champGo(lb.dataset.m);return;}
+    const svg=box.querySelector('svg');if(!svg)return;const pt=svg.createSVGPoint();pt.x=e.clientX;pt.y=e.clientY;const q=pt.matrixTransform(svg.getScreenCTM().inverse());
+    let best=null,bd=1e9;svg.querySelectorAll('.orea-dot').forEach(g=>{const c=g.querySelector('circle');const d=Math.hypot(+c.getAttribute('cx')-q.x,+c.getAttribute('cy')-q.y);if(d<bd){bd=d;best=g.dataset.m;}});
+    if(best&&bd<=18)champGo(best);});}
 function cmShow(id){cmPick();cmBuild();if(!document.querySelector('.cm-sec[data-m="'+id+'"]'))id='k46';
   document.querySelectorAll('#learnView .cm-sec').forEach(s=>s.hidden=s.dataset.m!==id);
   document.querySelectorAll('#cmPick button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.m===id));
   try{localStorage.setItem('cm-cur',id);}catch(e){}
-  const m=CMM.find(x=>x.id===id);if(m)cmRender(m);if(id==='orea')oreaRender();cmCards();}
+  const m=CMM.find(x=>x.id===id);if(m)cmRender(m);if(id==='orea')oreaRender();champCur=id;champScBind();champScRender();cmCards();}
 window.cmShow=cmShow;
 // 導覽
 CMM.forEach(m=>{const W=WHO[m.g];TOURS['cm_'+m.id]={view:'learnView',lead:m.g,title:m.title,blurb:'我是'+W.n+'。'+m.label+'的「'+m.title+'」，我一步一步帶你看配方、原理和動手試。',
