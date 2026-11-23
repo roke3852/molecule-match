@@ -8513,6 +8513,8 @@ window.__RECIPE_LIB=function(){const out=[];const c40=um=>Math.round(um/27.25*2)
   CMM.forEach(m=>{if(m.custom){out.push({id:'champ-bavis',cat:'champ',name:m.title,by:'2026 Bavis Kwong',desc:m.lede,gear:'Contour（模擬用 V60）＋兩張濾紙',drip:'v60',sw:false,dose:16,water:BAVIS.W,temp:94,temps:null,um:1000,c40:c40(1000),pours:pours(BAVIS.plan,BAVIS.planT,null,null,null),done:'',beans:CM_BEANS.bavis,bean:'',src:m.src[0][1],est:'總水量與注水時間'});return;}champ(m.id,cmRec(m.rec),m);});
   Object.keys(ZONES).forEach(z=>ZONES[z].recipes.forEach(r=>{const g=/格/.test(r.gl)&&!/Ode/.test(r.gl)?r.gl.replace(/^C40\s*/,''):null;
     out.push({id:z+'-'+r.id,cat:z,name:r.n,by:r.by||'',desc:r.d,gear:DRIPPER[r.dripper].name+(r.valveWins?'＋Switch':''),drip:r.dripper,sw:!!r.valveWins,dose:r.dose,water:r.water,ice:r.ice||0,bypass:r.bypass||0,temp:r.temp,temps:r.planTemp||null,um:r.grind,c40:c40(r.grind),c40txt:g,gl:r.gl,pours:pours(r.plan,r.planT,r.planTemp,r.valveWins,r.style),done:r.done,beans:r.beans,bean:cmBean(r.bean||'geisha').name,est:r.est||''});}));
+  out.forEach(o=>{try{let R;if(o.cat==='champ')R=champPt(o.id.slice(6));else{const r=ZONES[o.cat].recipes.find(x=>o.id===o.cat+'-'+x.id);R=zRun(o.cat,r);}
+    if(R&&isFinite(R.ey)){o.ey=Math.round(R.ey*10)/10;o.tds=Math.round(R.tds*100)/100;}}catch(e){}});
   return out;};
 
 function startTour(k,opt){endTour(true);const T=TOURS[k];if(!T)return;
