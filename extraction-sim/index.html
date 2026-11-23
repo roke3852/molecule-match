@@ -628,7 +628,7 @@ html.embed{--modesH:0px}
 @media (max-width:420px){.modes .app{display:none}}
 .t46 h1{font-size:clamp(26px,6vw,36px)}
 .cm-sec{display:flex;flex-direction:column;gap:22px}.cm h1{font-size:clamp(26px,6vw,36px)}
-.cm-pick{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.cm-pick{display:flex;flex-direction:column;gap:14px}.cm-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}.cm-grp h2{font-size:17px;margin:0 0 8px}.cm-grp h2 small{font-size:12px;font-weight:400;color:var(--muted);margin-left:8px}
 .cm-pick button{display:flex;gap:8px;align-items:center;text-align:left;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px;color:var(--ink);font:inherit;cursor:pointer}
 .cm-pick button[aria-pressed=true]{border-color:var(--accent,#c9a66b);box-shadow:0 0 0 1px var(--accent,#c9a66b) inset}
 .cm-pick button.done em::after{content:" ✓"}
@@ -1281,7 +1281,7 @@ window.BGM=(()=>{
     <div class="err" id="tErr"></div>
   </div>
   <button class="t-more" id="tMore" type="button" aria-label="咖啡宇宙：更多咖啡 App 與遊戲">咖啡宇宙</button>
-  <div class="t-foot">© 2026 Jim Lu　ver. 7.4</div>
+  <div class="t-foot">© 2026 Jim Lu　ver. 7.5</div>
 </div>
 <nav class="modes" aria-label="導覽"><div class="in">
   <button class="homebtn" id="homeBtn" type="button" hidden>‹ 主選單</button>
@@ -1290,7 +1290,7 @@ window.BGM=(()=>{
   <button class="cloudchip" id="navCloud" type="button" data-st="off" aria-label="雲端存檔：尚未連結 Google" title="雲端存檔"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 18a4 4 0 0 1-.6-7.96A5.5 5.5 0 0 1 17 9.2 4.4 4.4 0 0 1 17.5 18z"/></svg><i></i></button>
   <div class="labtabs" id="labTabs" role="group" aria-label="咖啡實驗室分頁" hidden data-noswipe>
     <button id="mSim" aria-pressed="true">模擬器</button><span class="sep"></span>
-    <button class="teach" id="mLearn" aria-pressed="false">冠軍沖法</button><button class="teach" id="mMicro" aria-pressed="false">顯微鏡</button><button class="teach" id="mBed" aria-pressed="false">粉層</button><button class="teach" id="mNose" aria-pressed="false">嗅覺斷水</button><button class="teach" id="mWater" aria-pressed="false">水質</button><button class="teach" id="mGold" aria-pressed="false">金杯計算</button>
+    <button class="teach" id="mLearn" aria-pressed="false">沖煮手法</button><button class="teach" id="mMicro" aria-pressed="false">顯微鏡</button><button class="teach" id="mBed" aria-pressed="false">粉層</button><button class="teach" id="mNose" aria-pressed="false">嗅覺斷水</button><button class="teach" id="mWater" aria-pressed="false">水質</button><button class="teach" id="mGold" aria-pressed="false">金杯計算</button>
   </div>
 </div></nav>
 <section id="hubView" hidden>
@@ -1470,9 +1470,9 @@ window.BGM=(()=>{
 <section id="learnView" hidden>
 <div class="wrap cm">
   <div>
-    <div class="label">教學 · 世界沖煮冠軍與名家</div>
-    <h1>冠軍沖煮手法</h1>
-    <p class="lede">九套冠軍與名家的手沖方法，加上 OREA 官方配方專區，每一套都用同一個擴散萃取模型拆開：配方、背後的科學、動手試、練習順序。每個手法都有自己的導覽員，按「開始導覽」一步一步帶你看。</p>
+    <div class="label">教學 · 冠軍沖法與器材配方</div>
+    <h1>沖煮手法</h1>
+    <p class="lede">分成兩大類：「冠軍沖法」收錄九套世界冠軍與名家的手法，「OREA-O」收錄 OREA 官方的 10 套配方。每一套都用同一個擴散萃取模型拆開：配方、背後的科學、動手試、練習順序。每個手法都有自己的導覽員，按「開始導覽」一步一步帶你看。</p>
   </div>
   <div class="cm-pick" id="cmPick" role="group" aria-label="選擇沖煮手法"></div>
 <div class="cm-sec t46" data-m="k46">
@@ -8211,9 +8211,10 @@ function cmCards(){document.querySelectorAll('#learnView .cm-sec').forEach(sec=>
   const tmp=document.createElement('div');tmp.innerHTML=html;const n=tmp.firstChild;if(c)c.replaceWith(n);else (sec.children[0]).after(n);
   n.querySelector('.gd-face').appendChild(sprCv(id==='k46'?'g46':m?m.g:'gOrea',48));n.querySelectorAll('[data-t]').forEach(b=>b.onclick=e=>{e.stopPropagation();startTour(b.dataset.t);});});
   document.querySelectorAll('#cmPick button').forEach(b=>{const id=b.dataset.m,k=id==='k46'?'learn':'cm_'+id;b.classList.toggle('done',tourDone(k));});}
-const CM_ALL=[{id:'k46',g:'g46',year:2016,who:'粕谷哲',title:'4:6 沖法'}].concat(CMM.map(m=>({id:m.id,g:m.g,year:m.custom?2026:cmRec(m.rec).year,who:m.custom?'Bavis Kwong':cmRec(m.rec).name.split(' ')[0],title:m.title}))).concat([{id:'orea',g:'gOrea',year:'OREA',who:'官方配方',title:'OREA 配方專區（10 套）'}]);
+const CM_ALL=[{id:'k46',g:'g46',year:2016,who:'粕谷哲',title:'4:6 沖法'}].concat(CMM.map(m=>({id:m.id,g:m.g,year:m.custom?2026:cmRec(m.rec).year,who:m.custom?'Bavis Kwong':cmRec(m.rec).name.split(' ')[0],title:m.title}))).concat([{id:'orea',g:'gOrea',year:'OREA-O',who:'官方配方',title:'OREA-O 配方專區（10 套）',grp:'orea'}]);
 function cmPick(){const p=$('cmPick');if(!p||p.dataset.ok)return;p.dataset.ok=1;
-  p.innerHTML=CM_ALL.map(x=>'<button type="button" data-m="'+x.id+'"><span class="cm-pf"></span><span class="cm-pt"><small>'+x.year+'・'+x.who+'</small><b>'+x.title+'</b><em>'+WHO[x.g].n+' 導覽</em></span></button>').join('');
+  const card=x=>'<button type="button" data-m="'+x.id+'"><span class="cm-pf"></span><span class="cm-pt"><small>'+x.year+'・'+x.who+'</small><b>'+x.title+'</b><em>'+WHO[x.g].n+' 導覽</em></span></button>';
+  p.innerHTML=[['champ','🏆 冠軍沖法','世界沖煮冠軍與名家的手法'],['orea','🥞 OREA-O','OREA 平底濾杯官方配方']].map(([g,h,d])=>'<div class="cm-grp"><h2>'+h+'<small>'+d+'</small></h2><div class="cm-grid">'+CM_ALL.filter(x=>(x.grp||'champ')===g).map(card).join('')+'</div></div>').join('');
   p.querySelectorAll('button').forEach(b=>{b.querySelector('.cm-pf').appendChild(sprCv(CM_ALL.find(x=>x.id===b.dataset.m).g,36));b.onclick=()=>{cmShow(b.dataset.m);const s=document.querySelector('.cm-sec[data-m="'+b.dataset.m+'"]');if(s)scrollTo({top:scrollY+s.getBoundingClientRect().top-110,behavior:'smooth'});};});}
 function cmShow(id){cmPick();cmBuild();if(!document.querySelector('.cm-sec[data-m="'+id+'"]'))id='k46';
   document.querySelectorAll('#learnView .cm-sec').forEach(s=>s.hidden=s.dataset.m!==id);
@@ -8269,7 +8270,7 @@ function oreaScatter(){const W=320,H=220,x0=34,y0=10,w=W-x0-10,h=H-y0-30;const e
     s+='<circle cx="'+X(Math.max(ex[0],Math.min(ex[1],R.ey)))+'" cy="'+Y(Math.max(tx[0],Math.min(tx[1],R.tds)))+'" r="'+(on?6:4)+'" fill="'+c+'" stroke="'+(on?'var(--ink)':'none')+'" stroke-width="1.5"/>';
     if(on)s+='<text x="'+(X(Math.max(ex[0],Math.min(ex[1],R.ey)))+7)+'" y="'+(Y(Math.max(tx[0],Math.min(tx[1],R.tds)))+3)+'" font-size="8" fill="'+(on?'var(--ink)':'var(--muted)')+'">'+r.n.replace('The ','')+'</text>';});
   return s+'</svg><div class="cm-leg"><span><i style="border-color:#7fb6e0"></i>Wave 波浪濾紙</span><span><i style="border-color:#ff4fd8"></i>平底濾紙＋Negotiator</span><span>空心圈＝加冰／加水前</span></div>';}
-function oreaHTML(){return '<div class="cm-sec orea" data-m="orea" hidden><div><div class="label">OREA O1 官方配方・平底濾杯</div><h1>OREA 配方專區</h1><p class="lede">OREA 官方指南的 10 套配方，從冰咖啡、bypass 到 1:20 的高萃取。全部放進同一個擴散萃取模型：看每套配方落在控制圖的哪裡、Wave 和平底濾紙差在哪、加冰加水改變了什麼。</p></div>'+
+function oreaHTML(){return '<div class="cm-sec orea" data-m="orea" hidden><div><div class="label">沖煮手法 · OREA-O・O1 Brewer 官方配方</div><h1>OREA-O 配方專區</h1><p class="lede">OREA 官方指南的 10 套配方，從冰咖啡、bypass 到 1:20 的高萃取。全部放進同一個擴散萃取模型：看每套配方落在控制圖的哪裡、Wave 和平底濾紙差在哪、加冰加水改變了什麼。</p></div>'+
   '<section class="panel cm-why"><h2>平底濾杯的科學</h2><p>OREA 是平底大孔的濾杯。錐形濾杯中間粉深、邊緣粉淺，水會偏向從中間流；平底的粉層厚度到處一樣，每一處的粉萃得比較一致。</p><div class="cm-cards">'+
    [['🥞','平底：粉層一樣厚','水流過每一處粉的距離差不多，萃取均勻，比較少「中間過萃、邊緣不足」。'],
     ['〰️','Wave 波浪濾紙：快','蛋糕型的波浪濾紙只在底部接觸，側邊有空氣通道，排水快，杯子明亮乾淨。'],
@@ -8302,7 +8303,7 @@ function oreaBind(){const sec=document.querySelector('.cm-sec[data-m="orea"]');
   sec.querySelectorAll('.orea-paper button').forEach(b=>b.onclick=()=>{OST.paper=b.dataset.p||null;oreaRender();});
   sec.querySelector('.cm-go').onclick=()=>{const r=OREA.find(x=>x.id===OST.cur),p=oreaParams(r,OST.paper);if(!window.simApplyRecipe)return;
     simApplyRecipe({dripper:'orea',dose:p.dose,ratio:p.ratio,temp:p.temp,grind:p.grind,pattern:'pulse',plan:p.plan,planT:p.planT,planD:p.planD,planTemp:null,beanId:'geisha',valveWins:null,prePO:'none'});location.hash='#sim';};}
-TOURS.cm_orea={view:'learnView',lead:'gOrea',title:'OREA 配方專區',blurb:'我是歐蕾，負責 OREA 平底濾杯。10 套官方配方，我帶你用模型一套一套看懂。',steps:[
+TOURS.cm_orea={view:'learnView',lead:'gOrea',title:'OREA-O 配方專區',blurb:'我是歐蕾，負責 OREA 平底濾杯。10 套官方配方，我帶你用模型一套一套看懂。',steps:[
   {w:'gOrea',t:'我是歐蕾，這裡收著 OREA 官方的 10 套 O1 配方。',el:'.cm-sec[data-m="orea"] h1',go:()=>cmShow('orea')},
   {w:'gOrea',t:'先看平底濾杯的原理：粉層到處一樣厚，水流過每一處粉的距離差不多，所以萃得均勻。',el:'.cm-sec[data-m="orea"] .cm-cards'},
   {w:'li',t:'Wave 和平底濾紙差在哪？'},
