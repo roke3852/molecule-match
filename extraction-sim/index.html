@@ -1294,7 +1294,7 @@ window.BGM=(()=>{
     <div class="err" id="tErr"></div>
   </div>
   <button class="t-more" id="tMore" type="button" aria-label="咖啡宇宙：更多咖啡 App 與遊戲">咖啡宇宙</button>
-  <div class="t-foot">© 2026 Jim Lu　ver. 8.7</div>
+  <div class="t-foot">© 2026 Jim Lu　ver. 8.8</div>
 </div>
 <nav class="modes" aria-label="導覽"><div class="in">
   <button class="homebtn" id="homeBtn" type="button" hidden>‹ 主選單</button>
@@ -8408,6 +8408,7 @@ function zRobustNote(rows,inEY,inGold){const main=rows.filter(([n])=>!/極淺焙
   return '同一套參數、不調研磨也不調水溫：除了極淺焙，'+main.length+' 支豆子的萃取率都擠在 <b>'+lo.toFixed(1)+'–'+hi.toFixed(1)+'%</b>（只差 '+(hi-lo).toFixed(1)+'%），苦味也只在 '+T5(Math.min(...bits))+'–'+T5(Math.max(...bits))+' 分（滿分 5）之間。不管換哪支豆，杯子都落在同一區、走向一樣，這就是它難失敗的原因。'+
    (inEY<main.length/2?'模型認為這套配方偏「濃度高、萃取率低」：喝起來甜、濃、不苦，但還沒推到金杯。想往金杯靠，把水溫改 96°C（上面可以切換）或研磨往 25 格調細。':'有 '+inEY+' 支萃取率落在理想的 18–22%。')+'極淺焙的硬豆會明顯萃不足，要磨細或拉高水溫。';}
 const c40L=x=>/格/.test(x.gl)&&!/Ode/.test(x.gl)?'C40 '+x.gl.replace(/^C40\s*/,''):'C40 約 '+Math.round(x.grind/27.25)+' 格'+(x.gl?'（原文：'+x.gl+'）':'');
+const c40N=um=>{const v=Math.round(um/27.25*2)/2;return '≈ C40 '+(v%1?v.toFixed(1):v)+' 格';};
 const styleN=x=>x==='c'?'中心':x==='h'?'繞＋中':'繞圈';
 function zRender(z){const sec=document.querySelector('.cm-sec[data-m="'+z+'"]');if(!sec)return;const Z=ZONES[z],S=ZST[z],r=Z.recipes.find(x=>x.id===S.cur)||Z.recipes[0],R=zRun(z,r);
   sec.querySelectorAll('.z-pick button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.r===r.id));
@@ -8416,7 +8417,7 @@ function zRender(z){const sec=document.querySelector('.cm-sec[data-m="'+z+'"]');
   const E=zParams(z,r,S.v),B0=S.v?zRun(z,r,S.v):null,Rv=B0||R,vName=S.v?Z.vars.find(v=>v[0]===S.v)[1]:'';
   const temps=E.planTemp||E.plan.map(()=>E.temp),vw=E.valveWins,inV=t=>vw&&vw.some(([a,b])=>t>=a&&t<b),bn=cmBean(r.bean||'geisha');
   const tTxt=(E.planTemp?E.planTemp[0]+'→'+E.planTemp[E.planTemp.length-1]:E.temp)+'°C',tOrig=(r.planTemp?r.planTemp[0]+'→'+r.planTemp[r.planTemp.length-1]:r.temp)+'°C';
-  sec.querySelector('.orea-card').innerHTML='<div class="orea-h"><b>'+r.n+'</b>'+(r.by?'<small>'+r.by+'</small>':'')+'<p>'+r.d+'</p></div><div class="t46-stats z-stats"><div><b>'+r.dose+' g</b><span>咖啡粉</span></div><div><b>'+r.water+' g'+(r.ice?'＋冰 '+r.ice+' g':'')+(r.bypass?'＋'+r.bypass+' g':'')+'</b><span>水（1:'+(+((r.water+(r.ice||0)+(r.bypass||0))/r.dose).toFixed(1))+'）</span></div><div><b>'+tTxt+'</b><span>水溫'+(tTxt!==tOrig?'<br>原配方 '+tOrig:'')+'</span></div><div><b>'+c40L(r).replace(/（原文：.*）/,'')+'</b><span>研磨'+(/原文/.test(c40L(r))?'・原文「'+r.gl.replace(/（.*）/,'')+'」':'')+'<br>模擬 '+r.grind+' μm</span></div></div>'+
+  sec.querySelector('.orea-card').innerHTML='<div class="orea-h"><b>'+r.n+'</b>'+(r.by?'<small>'+r.by+'</small>':'')+'<p>'+r.d+'</p></div><div class="t46-stats z-stats"><div><b>'+r.dose+' g</b><span>咖啡粉</span></div><div><b>'+r.water+' g'+(r.ice?'＋冰 '+r.ice+' g':'')+(r.bypass?'＋'+r.bypass+' g':'')+'</b><span>水（1:'+(+((r.water+(r.ice||0)+(r.bypass||0))/r.dose).toFixed(1))+'）</span></div><div><b>'+tTxt+'</b><span>水溫'+(tTxt!==tOrig?'<br>原配方 '+tOrig:'')+'</span></div><div><b>'+c40L(r).replace(/（原文：.*）/,'')+'</b><span>研磨'+(/原文/.test(c40L(r))?'・原文「'+r.gl.replace(/（.*）/,'')+'」':'')+'<br>模擬 '+r.grind+' μm '+c40N(r.grind)+'</span></div></div>'+
    (S.v?'<p class="z-adjtag">🔧 目前顯示的是調整後：'+vName+'</p>':'')+'<div class="cm-bar">'+E.plan.map((ml,i)=>'<div style="flex:'+ml+';background:'+tempCol(temps[i])+'"'+(inV(E.planT[i])?' class="cl"':'')+'><b>'+Math.round(ml)+'</b><small>'+(r.style?styleN((r.style||[])[i])+' '+temps[i]+'°':temps[i]+'°')+'</small></div>').join('')+(r.ice?'<div style="flex:'+r.ice+';background:#dff1fb"><b>冰 '+r.ice+'</b><small>公杯</small></div>':'')+(r.bypass?'<div style="flex:'+r.bypass+';background:#f3d9b0"><b>+'+r.bypass+'</b><small>滴完後加</small></div>':'')+'</div>'+
    '<div class="cm-tl">'+r.plan.map((ml,i)=>'<span style="flex:'+ml+'">'+cmFmt(r.planT[i])+'</span>').join('')+(r.ice?'<span style="flex:'+r.ice+'"></span>':'')+(r.bypass?'<span style="flex:'+r.bypass+'"></span>':'')+'</div>'+
    '<p class="label">濾杯：'+DRIPPER[E.dripper].name+(E.dripper!==r.dripper?'（原配方 '+DRIPPER[r.dripper].name+'）':'')+(vw?'＋Switch 閥門（斜線格＝關閥浸泡）':'')+'・原始配方滴完 '+r.done+(r.est?'・估計：'+r.est:'')+'</p>'+
@@ -8432,7 +8433,7 @@ function zRender(z){const sec=document.querySelector('.cm-sec[data-m="'+z+'"]');
    (B?' <b>'+vl+'：</b>萃取率 '+R.ey.toFixed(1)+'% → '+B.ey.toFixed(1)+'%，滴完 '+cmFmt(R.end)+' → '+cmFmt(B.end)+'，甜 '+T5(R.pf.sweet)+' → '+T5(B.pf.sweet)+'，苦 '+T5(R.pf.bitter)+' → '+T5(B.pf.bitter)+'。':(r.ice||r.bypass?'':'<b>試試看：</b>上面換一個'+Z.varH+'，模型會算出差別。'));
   {const tb=S.tb||null,q0=x=>tb?zRun(z,Object.assign({},x,{id:x.id+'@'+tb,bean:tb})):zRun(z,x);
   sec.querySelectorAll('.z-tb button').forEach(b=>b.setAttribute('aria-pressed',(b.dataset.b||null)===tb));
-  sec.querySelector('.z-tab').innerHTML='<div class="t46-row head orea6"><span>配方／研磨</span><span>TDS</span><span>EY</span><span>甜</span><span>苦</span><span>滴完</span></div>'+Z.recipes.map(x=>{const q=q0(x);return '<div class="t46-row orea6'+(x.id===r.id?' on':'')+'" data-r="'+x.id+'"><span><i class="z-dot" style="background:'+Z.color(x)+'"></i>'+x.n.replace('The ','')+'<small class="z-g">'+c40L(x)+'・'+x.grind+' μm・'+x.dose+' g／'+x.water+' g・'+x.temp+'°C'+(tb?'':'・'+cmBean(x.bean||'geisha').name)+'</small></span><span>'+q.tds.toFixed(2)+'%</span><span>'+q.ey.toFixed(1)+'%</span><span>'+T5(q.pf.sweet)+'</span><span>'+T5(q.pf.bitter)+'</span><span>'+x.done+'</span></div>';}).join('');}
+  sec.querySelector('.z-tab').innerHTML='<div class="t46-row head orea6"><span>配方／研磨</span><span>TDS</span><span>EY</span><span>甜</span><span>苦</span><span>滴完</span></div>'+Z.recipes.map(x=>{const q=q0(x);return '<div class="t46-row orea6'+(x.id===r.id?' on':'')+'" data-r="'+x.id+'"><span><i class="z-dot" style="background:'+Z.color(x)+'"></i>'+x.n.replace('The ','')+'<small class="z-g">'+c40L(x)+'・模擬 '+x.grind+' μm '+c40N(x.grind)+'・'+x.dose+' g／'+x.water+' g・'+x.temp+'°C'+(tb?'':'・'+cmBean(x.bean||'geisha').name)+'</small></span><span>'+q.tds.toFixed(2)+'%</span><span>'+q.ey.toFixed(1)+'%</span><span>'+T5(q.pf.sweet)+'</span><span>'+T5(q.pf.bitter)+'</span><span>'+x.done+'</span></div>';}).join('');}
   sec.querySelectorAll('.z-tab [data-r]').forEach(e=>e.onclick=()=>{S.cur=e.dataset.r;S.v=null;zRender(z);});}
 function zPick(z,id){const S=ZST[z];S.cur=id;S.v=null;zRender(z);const sec=document.querySelector('.cm-sec[data-m="'+z+'"]'),card=sec&&sec.querySelector('.orea-card');
   if(card){card.classList.remove('flash');void card.offsetWidth;card.classList.add('flash');}}
