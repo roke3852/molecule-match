@@ -1094,11 +1094,8 @@ html.dark .ex-tot{background:var(--card)!important}
     <div class="sec cl-launch">
       <button class="cl-open" id="clOpen"><span class="ic">🗣️</span><span class="t"><b>咖啡店點單特訓</b><small id="clMini">常用句・手沖專區・選豆產生器・聽懂店員・術語・測驗・點單產生器</small></span><span class="go">開始 ›</span></button>
     </div>
-    <div class="sec" id="cupSec">
-      <h3>📓 我的咖啡品飲紀錄</h3>
-      <div class="hint">每喝一杯就記一筆：店家、豆子、沖法，熱的和放涼後的味道各打幾分，全家同步。</div>
-      <div id="cups"></div>
-      <button class="btn pri" id="cupAdd" style="margin-top:8px">＋ 記一杯</button>
+    <div class="sec cl-launch" id="cupSec">
+      <button class="cl-open cup-open" id="cupOpen"><span class="ic">📓</span><span class="t"><b>我的咖啡品飲紀錄</b><small id="cupMini">點開看每一杯的紀錄</small></span><span class="go">打開 ›</span></button>
     </div>
     <div class="sec">
       <h3>☕ 福岡咖啡名店</h3>
@@ -1441,6 +1438,12 @@ html.dark .ex-tot{background:var(--card)!important}
       <div class="cl-prog" id="clProg"></div>
       <div class="seg cl-tabs" id="clTabs"><button data-cl="say">① 常用句</button><button data-cl="po">☕ 手沖專區</button><button data-cl="bean">🫘 選豆產生器</button><button data-cl="hear">② 聽懂店員</button><button data-cl="term">③ 咖啡術語</button><button data-cl="quiz">④ 小測驗</button><button data-cl="order">⑤ 點單產生器</button></div>
       <div id="clBody"></div>
+  </div></div>
+  <div class="cl-modal" id="cupList" aria-hidden="true"><div class="cl-sheet sec">
+      <div class="cl-mh"><h3>📓 我的咖啡品飲紀錄</h3><button class="cl-x" id="cupListX" aria-label="關閉">✕</button></div>
+      <div class="hint">每喝一杯就記一筆：店家、豆子、沖法，熱的和放涼後的味道各打幾分，全家同步。</div>
+      <button class="btn pri" id="cupAdd" style="margin:4px 0 8px">＋ 記一杯</button>
+      <div id="cups"></div>
   </div></div>
   <div class="cl-modal" id="cupModal" aria-hidden="true"><div class="cl-sheet sec">
     <div class="cl-mh"><h3>📓 記一杯咖啡</h3><button class="cl-x" id="cupClose">✕</button></div>
@@ -2743,13 +2746,17 @@ function cupCardHtml(id,c,ph){const B={sn:(c.b||'').replace(/單品|配方/g,'')
   ${c.n?`<div class="cup-n">💬 ${esc(c.n)}</div>`:''}
   ${foodPhotoBox('cup_'+id,ph)}
   <div class="cup-b"><button class="btn ghost" data-photo="f_cup_${id}">📷 加照片</button><button class="btn ghost" data-cupedit="${id}">✏️ 修改</button></div></div>`}
-function drawCups(){const el=$('#cups');if(!el)return;const C=S.get('cups',{}),ph=S.get('gphoto',{});const ids=Object.keys(C).sort((a,b)=>(C[b].o||0)-(C[a].o||0));
+function drawCups(){const el=$('#cups');if(!el)return;const C=S.get('cups',{}),ph=S.get('gphoto',{});const ids=Object.keys(C).sort((a,b)=>(C[b].o||0)-(C[a].o||0));{const m=$('#cupMini');if(m)m.textContent=ids.length?`已記 ${ids.length} 杯・最近：${C[ids[0]].s}${C[ids[0]].b?' '+C[ids[0]].b:''}`:'還沒有紀錄，點開記第一杯'}
  el.innerHTML=ids.length?ids.map(id=>cupCardHtml(id,C[id],ph)).join(''):'<div class="hint">還沒有紀錄，喝完一杯就按下面的按鈕記下來。</div>'}
 function cupForm(id){const C=S.get('cups',{}),c=id?C[id]:{hot:{ac:3,sw:3,bi:2},cool:{ac:3,sw:3,bi:2},ar:[]};cupEdit=id;cupF=JSON.parse(JSON.stringify({hot:c.hot||{},cool:c.cool||{},ar:c.ar||[]}));
  $('#cfS').value=c.s||'';$('#cfB').value=c.b||'';$('#cfR').value=c.r||'非洲';$('#cfM').value=c.m||'';$('#cfN').value=c.n||'';cupFormDraw();$('#cupModal').classList.add('on');document.body.classList.add('cl-lock')}
 function cupFormDraw(){['hot','cool'].forEach(k=>{$(k==='hot'?'#cfHot':'#cfCool').innerHTML=CUP_AX.map(a=>`<div class="cr"><span>${a[2]} ${a[1]}</span><span class="cupbar ed">${[1,2,3,4,5].map(i=>`<i data-cf="${k}.${a[0]}.${i}" class="${i<=(cupF[k][a[0]]||0)?'on':''}" style="${i<=(cupF[k][a[0]]||0)?'background:'+CUP_COL[a[0]]:''}"></i>`).join('')}</span></div>`).join('')});
  $('#cfAr').innerHTML=CUP_AR.map(a=>`<button data-car="${a}" class="${cupF.ar.includes(a)?'on':''}">${a}</button>`).join('')}
-function cupClose(){$('#cupModal').classList.remove('on');document.body.classList.remove('cl-lock')}
+function cupClose(){$('#cupModal').classList.remove('on');if(!$('#cupList').classList.contains('on'))document.body.classList.remove('cl-lock')}
+function cupListOpen(){$('#cupList').classList.add('on');document.body.classList.add('cl-lock');drawCups()}
+function cupListClose(){$('#cupList').classList.remove('on');document.body.classList.remove('cl-lock')}
+$('#cupOpen').onclick=cupListOpen;$('#cupListX').onclick=cupListClose;$('#cupList').addEventListener('click',e=>{if(e.target.id==='cupList')cupListClose()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&$('#cupList').classList.contains('on')&&!$('#cupModal').classList.contains('on'))cupListClose()});
 $('#cupAdd').onclick=()=>cupForm(null);$('#cupClose').onclick=cupClose;$('#cupModal').addEventListener('click',e=>{if(e.target.id==='cupModal')cupClose();
  const c=e.target.closest('[data-cf]');if(c){const[k,a,v]=c.dataset.cf.split('.');cupF[k][a]=+v;cupFormDraw();return}
  const r=e.target.closest('[data-car]');if(r){const a=r.dataset.car,i=cupF.ar.indexOf(a);if(i>=0)cupF.ar.splice(i,1);else cupF.ar.push(a);cupFormDraw()}});
