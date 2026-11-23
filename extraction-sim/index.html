@@ -653,6 +653,9 @@ html.embed{--modesH:0px}
 .z-robust{margin-top:12px;border:1px dashed var(--line);border-radius:8px;padding:10px}.z-robust b{font-size:14px}
 .z-g{display:block;font-size:10.5px;color:var(--muted);line-height:1.35;margin-top:2px}.z-tb button{font-size:12px}
 .z-adjtag{margin:10px 0 0;font-size:13px;color:#e8b04a;font-weight:700}
+.z-stats{display:grid!important;grid-template-columns:repeat(2,1fr);gap:8px}.z-stats>div{display:flex;flex-direction:column;justify-content:center;align-items:flex-start;text-align:left;padding:10px 12px;min-height:0}
+.z-stats b{font-size:20px;line-height:1.2;white-space:nowrap}.z-stats span{font-size:12px;line-height:1.4;margin-top:2px;color:var(--muted)}
+@media(min-width:620px){.z-stats{grid-template-columns:repeat(4,1fr)}}
 .z-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px;vertical-align:middle}
 .orea-h b{font-size:18px}.orea-h small{margin-left:8px;color:var(--muted)}.orea-h p{margin:4px 0 10px}
 .t46-row.orea6{grid-template-columns:1.5fr .9fr .8fr .5fr .5fr 1fr;cursor:pointer}.orea-f{font-style:normal;font-size:10px;color:#ff4fd8;border:1px solid #ff4fd8;border-radius:4px;padding:0 3px}
@@ -1291,7 +1294,7 @@ window.BGM=(()=>{
     <div class="err" id="tErr"></div>
   </div>
   <button class="t-more" id="tMore" type="button" aria-label="咖啡宇宙：更多咖啡 App 與遊戲">咖啡宇宙</button>
-  <div class="t-foot">© 2026 Jim Lu　ver. 8.5</div>
+  <div class="t-foot">© 2026 Jim Lu　ver. 8.6</div>
 </div>
 <nav class="modes" aria-label="導覽"><div class="in">
   <button class="homebtn" id="homeBtn" type="button" hidden>‹ 主選單</button>
@@ -8413,7 +8416,7 @@ function zRender(z){const sec=document.querySelector('.cm-sec[data-m="'+z+'"]');
   const E=zParams(z,r,S.v),B0=S.v?zRun(z,r,S.v):null,Rv=B0||R,vName=S.v?Z.vars.find(v=>v[0]===S.v)[1]:'';
   const temps=E.planTemp||E.plan.map(()=>E.temp),vw=E.valveWins,inV=t=>vw&&vw.some(([a,b])=>t>=a&&t<b),bn=cmBean(r.bean||'geisha');
   const tTxt=(E.planTemp?E.planTemp[0]+'→'+E.planTemp[E.planTemp.length-1]:E.temp)+'°C',tOrig=(r.planTemp?r.planTemp[0]+'→'+r.planTemp[r.planTemp.length-1]:r.temp)+'°C';
-  sec.querySelector('.orea-card').innerHTML='<div class="orea-h"><b>'+r.n+'</b>'+(r.by?'<small>'+r.by+'</small>':'')+'<p>'+r.d+'</p></div><div class="t46-stats"><div><b>'+r.dose+' g</b><span>咖啡粉</span></div><div><b>'+r.water+' g'+(r.ice?'＋冰 '+r.ice+' g':'')+(r.bypass?'＋'+r.bypass+' g':'')+'</b><span>水（1:'+(+((r.water+(r.ice||0)+(r.bypass||0))/r.dose).toFixed(1))+'）</span></div><div><b>'+tTxt+'</b><span>水溫'+(tTxt!==tOrig?'（原配方 '+tOrig+'）':'')+'</span></div><div><b>'+c40L(r).replace(/（原文：.*）/,'')+'</b><span>研磨（'+(/原文/.test(c40L(r))?'原文「'+r.gl+'」、':'')+'模擬 '+r.grind+' μm）</span></div></div>'+
+  sec.querySelector('.orea-card').innerHTML='<div class="orea-h"><b>'+r.n+'</b>'+(r.by?'<small>'+r.by+'</small>':'')+'<p>'+r.d+'</p></div><div class="t46-stats z-stats"><div><b>'+r.dose+' g</b><span>咖啡粉</span></div><div><b>'+r.water+' g'+(r.ice?'＋冰 '+r.ice+' g':'')+(r.bypass?'＋'+r.bypass+' g':'')+'</b><span>水（1:'+(+((r.water+(r.ice||0)+(r.bypass||0))/r.dose).toFixed(1))+'）</span></div><div><b>'+tTxt+'</b><span>水溫'+(tTxt!==tOrig?'<br>原配方 '+tOrig:'')+'</span></div><div><b>'+c40L(r).replace(/（原文：.*）/,'')+'</b><span>研磨'+(/原文/.test(c40L(r))?'・原文「'+r.gl.replace(/（.*）/,'')+'」':'')+'<br>模擬 '+r.grind+' μm</span></div></div>'+
    (S.v?'<p class="z-adjtag">🔧 目前顯示的是調整後：'+vName+'</p>':'')+'<div class="cm-bar">'+E.plan.map((ml,i)=>'<div style="flex:'+ml+';background:'+tempCol(temps[i])+'"'+(inV(E.planT[i])?' class="cl"':'')+'><b>'+Math.round(ml)+'</b><small>'+(r.style?styleN((r.style||[])[i])+' '+temps[i]+'°':temps[i]+'°')+'</small></div>').join('')+(r.ice?'<div style="flex:'+r.ice+';background:#dff1fb"><b>冰 '+r.ice+'</b><small>公杯</small></div>':'')+(r.bypass?'<div style="flex:'+r.bypass+';background:#f3d9b0"><b>+'+r.bypass+'</b><small>滴完後加</small></div>':'')+'</div>'+
    '<div class="cm-tl">'+r.plan.map((ml,i)=>'<span style="flex:'+ml+'">'+cmFmt(r.planT[i])+'</span>').join('')+(r.ice?'<span style="flex:'+r.ice+'"></span>':'')+(r.bypass?'<span style="flex:'+r.bypass+'"></span>':'')+'</div>'+
    '<p class="label">濾杯：'+DRIPPER[E.dripper].name+(E.dripper!==r.dripper?'（原配方 '+DRIPPER[r.dripper].name+'）':'')+(vw?'＋Switch 閥門（斜線格＝關閥浸泡）':'')+'・原始配方滴完 '+r.done+(r.est?'・估計：'+r.est:'')+'</p>'+
