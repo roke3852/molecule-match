@@ -628,7 +628,7 @@ html.embed{--modesH:0px}
 @media (max-width:420px){.modes .app{display:none}}
 .t46 h1{font-size:clamp(26px,6vw,36px)}
 .cm-sec{display:flex;flex-direction:column;gap:22px}.cm h1{font-size:clamp(26px,6vw,36px)}
-.cm-pick{display:flex;flex-direction:column;gap:14px}.cm-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}.cm-grp h2{font-size:17px;margin:0 0 8px}.cm-grp h2 small{font-size:12px;font-weight:400;color:var(--muted);margin-left:8px}
+.cm-pick{display:flex;flex-direction:column;gap:14px}.cm-mode{display:flex}.cm-pick .cm-mode button{flex:1;justify-content:center;font-size:16px;font-weight:700;padding:12px 8px;border-radius:10px}.cm-pick .cm-mode button[aria-pressed=true]{background:var(--accent,#c9a66b);color:#1a1512;box-shadow:none}.cm-mode small{font-size:11px;font-weight:400;margin-left:6px;opacity:.75}.cm-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}.cm-grp h2{font-size:17px;margin:0 0 8px}.cm-grp h2 small{font-size:12px;font-weight:400;color:var(--muted);margin-left:8px}
 .cm-pick button{display:flex;gap:8px;align-items:center;text-align:left;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px;color:var(--ink);font:inherit;cursor:pointer}
 .cm-pick button[aria-pressed=true]{border-color:var(--accent,#c9a66b);box-shadow:0 0 0 1px var(--accent,#c9a66b) inset}
 .cm-pick button.done em::after{content:" ✓"}
@@ -1285,7 +1285,7 @@ window.BGM=(()=>{
     <div class="err" id="tErr"></div>
   </div>
   <button class="t-more" id="tMore" type="button" aria-label="咖啡宇宙：更多咖啡 App 與遊戲">咖啡宇宙</button>
-  <div class="t-foot">© 2026 Jim Lu　ver. 7.8</div>
+  <div class="t-foot">© 2026 Jim Lu　ver. 7.9</div>
 </div>
 <nav class="modes" aria-label="導覽"><div class="in">
   <button class="homebtn" id="homeBtn" type="button" hidden>‹ 主選單</button>
@@ -1476,7 +1476,7 @@ window.BGM=(()=>{
   <div>
     <div class="label">教學 · 冠軍沖法與器材配方</div>
     <h1>沖煮手法</h1>
-    <p class="lede">分成兩大類：「冠軍沖法」收錄九套世界冠軍與名家的手法，「OREA-O」收錄 OREA 官方的 10 套配方。每一套都用同一個擴散萃取模型拆開：配方、背後的科學、動手試、練習順序。每個手法都有自己的導覽員，按「開始導覽」一步一步帶你看。</p>
+    <p class="lede">用上方按鈕切換兩大類：「冠軍沖法」收錄九套世界冠軍與名家的手法，「OREA-O」收錄 OREA 官方的 10 套配方。每一套都用同一個擴散萃取模型拆開：配方、背後的科學、動手試、練習順序。每個手法都有自己的導覽員，按「開始導覽」一步一步帶你看。</p>
   </div>
   <div class="cm-pick" id="cmPick" role="group" aria-label="選擇沖煮手法"></div>
 <div class="cm-sec t46" data-m="k46">
@@ -8214,12 +8214,13 @@ function cmCards(){document.querySelectorAll('#learnView .cm-sec').forEach(sec=>
   let c=sec.querySelector('.cm-gd');const html=id==='k46'?cmGuideCard('learn','g46'):cmGuideCard(k,m?m.g:'gOrea');
   const tmp=document.createElement('div');tmp.innerHTML=html;const n=tmp.firstChild;if(c)c.replaceWith(n);else (sec.children[0]).after(n);
   n.querySelector('.gd-face').appendChild(sprCv(id==='k46'?'g46':m?m.g:'gOrea',48));n.querySelectorAll('[data-t]').forEach(b=>b.onclick=e=>{e.stopPropagation();startTour(b.dataset.t);});});
-  document.querySelectorAll('#cmPick button').forEach(b=>{const id=b.dataset.m,k=id==='k46'?'learn':'cm_'+id;b.classList.toggle('done',tourDone(k));});}
+  document.querySelectorAll('#cmPick .cm-grid button').forEach(b=>{const id=b.dataset.m,k=id==='k46'?'learn':'cm_'+id;b.classList.toggle('done',tourDone(k));});}
 const CM_ALL=[{id:'k46',g:'g46',year:2016,who:'粕谷哲',title:'4:6 沖法'}].concat(CMM.map(m=>({id:m.id,g:m.g,year:m.custom?2026:cmRec(m.rec).year,who:m.custom?'Bavis Kwong':cmRec(m.rec).name.split(' ')[0],title:m.title}))).concat([{id:'orea',g:'gOrea',year:'OREA-O',who:'官方配方',title:'OREA-O 配方專區（10 套）',grp:'orea'}]);
 function cmPick(){const p=$('cmPick');if(!p||p.dataset.ok)return;p.dataset.ok=1;
   const card=x=>'<button type="button" data-m="'+x.id+'"><span class="cm-pf"></span><span class="cm-pt"><small>'+x.year+'・'+x.who+'</small><b>'+x.title+'</b><em>'+WHO[x.g].n+' 導覽</em></span></button>';
-  p.innerHTML=[['champ','🏆 冠軍沖法','世界沖煮冠軍與名家的手法'],['orea','🥞 OREA-O','OREA 平底濾杯官方配方']].map(([g,h,d])=>'<div class="cm-grp"><h2>'+h+'<small>'+d+'</small></h2><div class="cm-grid">'+CM_ALL.filter(x=>(x.grp||'champ')===g).map(card).join('')+'</div>'+(g==='champ'?'<details class="champ-box" open><summary>🏆 9 套冠軍配方在金杯圖上的位置</summary><div class="cm-chart champ-sc"></div><p class="label">👆 直接點圖上的點，就會切到那套手法、往下跳到它的細項。點太密的地方會選最近的那一點。每個點的顏色就是那位導覽員的代表色；模型用各冠軍原本的豆子與配方計算。</p></details>':'')+'</div>').join('');
-  p.querySelectorAll('button').forEach(b=>{b.querySelector('.cm-pf').appendChild(sprCv(CM_ALL.find(x=>x.id===b.dataset.m).g,36));b.onclick=()=>{cmShow(b.dataset.m);const s=document.querySelector('.cm-sec[data-m="'+b.dataset.m+'"]');if(s)scrollTo({top:scrollY+s.getBoundingClientRect().top-110,behavior:'smooth'});};});}
+  p.innerHTML='<div class="seg cm-mode" role="tablist"><button type="button" data-g="champ">🏆 冠軍沖法<small>9 套</small></button><button type="button" data-g="orea">🥞 OREA-O<small>10 套</small></button></div>'+[['champ','🏆 冠軍沖法','世界沖煮冠軍與名家的手法']].map(([g,h,d])=>'<div class="cm-grp" data-g="'+g+'"><h2>'+h+'<small>'+d+'</small></h2><div class="cm-grid">'+CM_ALL.filter(x=>(x.grp||'champ')===g).map(card).join('')+'</div>'+(g==='champ'?'<details class="champ-box" open><summary>🏆 9 套冠軍配方在金杯圖上的位置</summary><div class="cm-chart champ-sc"></div><p class="label">👆 直接點圖上的點，就會切到那套手法、往下跳到它的細項。點太密的地方會選最近的那一點。每個點的顏色就是那位導覽員的代表色；模型用各冠軍原本的豆子與配方計算。</p></details>':'')+'</div>').join('');
+  p.querySelectorAll('.cm-mode button').forEach(b=>b.onclick=()=>cmMode(b.dataset.g));
+  p.querySelectorAll('.cm-grid button').forEach(b=>{b.querySelector('.cm-pf').appendChild(sprCv(CM_ALL.find(x=>x.id===b.dataset.m).g,36));b.onclick=()=>{cmShow(b.dataset.m);const s=document.querySelector('.cm-sec[data-m="'+b.dataset.m+'"]');if(s)scrollTo({top:scrollY+s.getBoundingClientRect().top-110,behavior:'smooth'});};});}
 
 const CHAMP_PT={};
 function champPt(id){if(CHAMP_PT[id])return CHAMP_PT[id];let R;
@@ -8250,9 +8251,13 @@ function champScBind(){const box=document.querySelector('#cmPick .champ-sc');if(
     const svg=box.querySelector('svg');if(!svg)return;const pt=svg.createSVGPoint();pt.x=e.clientX;pt.y=e.clientY;const q=pt.matrixTransform(svg.getScreenCTM().inverse());
     let best=null,bd=1e9;svg.querySelectorAll('.orea-dot').forEach(g=>{const c=g.querySelector('circle');const d=Math.hypot(+c.getAttribute('cx')-q.x,+c.getAttribute('cy')-q.y);if(d<bd){bd=d;best=g.dataset.m;}});
     if(best&&bd<=18)champGo(best);});}
+function cmMode(g){let id=g==='orea'?'orea':'k46';try{id=localStorage.getItem('cm-last-'+g)||id;}catch(e){}cmShow(id);scrollTo({top:Math.max(0,scrollY+$('cmPick').getBoundingClientRect().top-140),behavior:'smooth'});}
+window.cmMode=cmMode;
 function cmShow(id){cmPick();cmBuild();if(!document.querySelector('.cm-sec[data-m="'+id+'"]'))id='k46';
+  {const g=id==='orea'?'orea':'champ';document.querySelectorAll('#cmPick .cm-mode button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.g===g));
+   document.querySelectorAll('#cmPick .cm-grp').forEach(x=>x.hidden=x.dataset.g!==g);try{localStorage.setItem('cm-last-'+g,id);}catch(e){}}
   document.querySelectorAll('#learnView .cm-sec').forEach(s=>s.hidden=s.dataset.m!==id);
-  document.querySelectorAll('#cmPick button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.m===id));
+  document.querySelectorAll('#cmPick .cm-grid button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.m===id));
   try{localStorage.setItem('cm-cur',id);}catch(e){}
   const m=CMM.find(x=>x.id===id);if(m)cmRender(m);if(id==='orea')oreaRender();champCur=id;champScBind();champScRender();cmCards();}
 window.cmShow=cmShow;
