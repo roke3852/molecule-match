@@ -648,6 +648,9 @@ html.embed{--modesH:0px}
 .champ-box{margin-top:12px;border:1px solid var(--line);border-radius:10px;padding:10px 12px}.champ-box summary{cursor:pointer;font-weight:700;font-size:15px}.champ-box .cm-chart{max-width:560px;margin-top:8px}.champ-sc .orea-dot{cursor:pointer}
 .champ-leg{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:6px;margin-top:6px}.cm-pick .champ-leg button{display:flex;flex-wrap:wrap;width:100%;align-items:center;gap:5px;background:none;border:1px solid var(--line);border-radius:10px;padding:6px 9px;color:var(--ink);font:inherit;font-size:12px;cursor:pointer}.cm-pick .champ-leg button.on{box-shadow:none;border-color:var(--ink)}.champ-leg i{width:9px;height:9px;border-radius:50%;display:inline-block}.champ-leg small{color:var(--muted);width:100%;padding-left:14px;font-size:11px}
 .cm-sec.flash>div:first-child{animation:oreaFlash 1.2s ease}
+.cm-mode{display:grid!important;grid-template-columns:1fr 1fr;gap:6px}.cm-pick .cm-mode button{border:1px solid var(--line)}
+.z-beans{margin-top:10px;border-left:3px solid #c9a66b;background:rgba(201,166,107,.08);border-radius:6px;padding:8px 10px}.z-beans b{font-size:14px}.z-beans p{margin:4px 0;font-size:14px;line-height:1.6}.z-beans small{color:var(--muted);font-size:11px}
+.z-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px;vertical-align:middle}
 .orea-h b{font-size:18px}.orea-h small{margin-left:8px;color:var(--muted)}.orea-h p{margin:4px 0 10px}
 .t46-row.orea6{grid-template-columns:1.5fr .9fr .8fr .5fr .5fr 1fr;cursor:pointer}.orea-f{font-style:normal;font-size:10px;color:#ff4fd8;border:1px solid #ff4fd8;border-radius:4px;padding:0 3px}
 .cm-sec.orea .cm-pick,.cm-sec.orea .seg button[aria-pressed=true]{}
@@ -1285,7 +1288,7 @@ window.BGM=(()=>{
     <div class="err" id="tErr"></div>
   </div>
   <button class="t-more" id="tMore" type="button" aria-label="咖啡宇宙：更多咖啡 App 與遊戲">咖啡宇宙</button>
-  <div class="t-foot">© 2026 Jim Lu　ver. 7.9</div>
+  <div class="t-foot">© 2026 Jim Lu　ver. 8.0</div>
 </div>
 <nav class="modes" aria-label="導覽"><div class="in">
   <button class="homebtn" id="homeBtn" type="button" hidden>‹ 主選單</button>
@@ -1476,7 +1479,7 @@ window.BGM=(()=>{
   <div>
     <div class="label">教學 · 冠軍沖法與器材配方</div>
     <h1>沖煮手法</h1>
-    <p class="lede">用上方按鈕切換兩大類：「冠軍沖法」收錄九套世界冠軍與名家的手法，「OREA-O」收錄 OREA 官方的 10 套配方。每一套都用同一個擴散萃取模型拆開：配方、背後的科學、動手試、練習順序。每個手法都有自己的導覽員，按「開始導覽」一步一步帶你看。</p>
+    <p class="lede">用上方按鈕切換四類：「冠軍沖法」收錄九套世界冠軍與名家的手法，「OREA-O」「V60」「V60 NEO」收錄各濾杯的官方與經典配方，每套都標出適合的豆子。每一套都用同一個擴散萃取模型拆開：配方、背後的科學、動手試、練習順序。每個手法都有自己的導覽員，按「開始導覽」一步一步帶你看。</p>
   </div>
   <div class="cm-pick" id="cmPick" role="group" aria-label="選擇沖煮手法"></div>
 <div class="cm-sec t46" data-m="k46">
@@ -8196,14 +8199,15 @@ function cmGuideCard(k,g){const W=WHO[g],done=tourDone(k);
   return '<div class="gd-card cm-gd" data-t="'+k+'"><div class="gd-face"></div><div class="gd-txt"><b>'+W.n+'<i>'+W.r+'</i></b><p>'+TOURS[k].blurb+'</p><button class="gd-go" type="button" data-t="'+k+'">'+(done?'再聽一次':'開始導覽')+'</button>'+(done?'<span class="gd-done">✓ 已完成</span>':'')+'</div></div>';}
 function cmBuild(){const dyn=$('cmDyn');if(!dyn||dyn.dataset.ok)return;dyn.dataset.ok=1;
   dyn.innerHTML=CMM.map(m=>'<div class="cm-sec" data-m="'+m.id+'" hidden><div><div class="label">'+m.label+'</div><h1>'+m.title+'</h1><p class="lede">'+m.lede+'</p></div>'+
-   '<section class="panel cm-recipe"><h2>基本配方</h2><div class="t46-stats">'+m.stats.map(([v,l])=>'<div><b>'+v+'</b><span>'+l+'</span></div>').join('')+'</div>'+recipeBar(m)+(m.custom?'':'<p class="label">'+cmRec(m.rec).note+'</p>')+'</section>'+
+   '<section class="panel cm-recipe"><h2>基本配方</h2><div class="t46-stats">'+m.stats.map(([v,l])=>'<div><b>'+v+'</b><span>'+l+'</span></div>').join('')+'</div>'+recipeBar(m)+(m.custom?'':'<p class="label">'+cmRec(m.rec).note+'</p>')+'<div class="z-beans"><b>☕ 適合的豆子</b><p>'+CM_BEANS[m.id]+'</p></div></section>'+
    '<section class="panel cm-why"><h2>'+m.why.h+'</h2><p>'+m.why.p+'</p><p class="label">點卡片標題展開說明</p><div class="cm-cards">'+m.why.cards.map(([i,h,p])=>'<details><summary><span class="cm-ic">'+i+'</span><h3>'+h+'</h3></summary><p>'+p+'</p></details>').join('')+'</div>'+
     '<h3 class="cm-ch-h">模型裡的時間曲線</h3><div class="cm-chart"></div><p class="label">實線是冠軍配方、虛線是下面「動手試」選的做法。上圖是粉床溫度，下圖是甜味和苦味物質累積溶出到杯子裡的量。</p></section>'+
    '<section class="panel cm-lab"><h2>動手試：'+m.lab.h+'</h2><div class="params"><div class="param"><span class="label">換一種做法</span><div class="seg wrapseg" role="group">'+m.lab.opts.map((o,i)=>'<button type="button" data-k="'+i+'">'+o[0]+'</button>').join('')+'</div></div></div>'+
     '<div class="t46-res cm-res"></div><div class="cm-cmp"></div><p class="t46-note cm-note"></p><button class="savebtn cm-go" type="button">把冠軍配方帶到練習模擬器</button></section>'+
    '<section class="panel t46-practice"><h2>實際練習的順序</h2><ol>'+m.practice.map(x=>'<li>'+x+'</li>').join('')+'</ol></section>'+
    '<p class="fine">'+(m.est?m.est+' ':((cmRec(m.rec).est||[]).length?'模擬時估計的參數：'+cmRec(m.rec).est.join('、')+'。':''))+'資料來源：'+m.src.map(([n,u])=>'<a href="'+u+'">'+n+'</a>').join('、')+'。模擬結果來自本 app 的擴散萃取模型。</p></div>').join('');
-  dyn.insertAdjacentHTML('beforeend',oreaHTML());oreaBind();
+  Object.keys(ZONES).forEach(z=>{dyn.insertAdjacentHTML('beforeend',zHTML(z));zBind(z);});
+  {const k=document.querySelector('.cm-sec[data-m="k46"] .t46-steps');if(k&&!k.querySelector('.z-beans'))k.insertAdjacentHTML('beforeend','<div class="z-beans"><b>☕ 適合的豆子</b><p>'+CM_BEANS.k46+'</p></div>');}
   CMM.forEach(m=>{const sec=document.querySelector('.cm-sec[data-m="'+m.id+'"]');
     sec.querySelectorAll('.cm-lab .seg button').forEach(b=>b.onclick=()=>{CMS[m.id].k=+b.dataset.k;cmRender(m);});
     sec.querySelector('.cm-go').onclick=()=>{if(!window.simApplyRecipe)return;
@@ -8211,17 +8215,27 @@ function cmBuild(){const dyn=$('cmDyn');if(!dyn||dyn.dataset.ok)return;dyn.datas
       else{const c=cmRec(m.rec);simApplyRecipe({dripper:c.dripper,dose:c.dose,ratio:c.water/c.dose,temp:c.temp,grind:c.grind,pattern:c.pattern,plan:c.plan,planT:c.planT,planD:c.planD,planTemp:c.planTemp||null,beanId:c.bean,valveWins:c.valveWins||null,prePO:'none'});}
       location.hash='#sim';};});}
 function cmCards(){document.querySelectorAll('#learnView .cm-sec').forEach(sec=>{const id=sec.dataset.m,k=id==='k46'?'learn':'cm_'+id,m=CMM.find(x=>x.id===id);
-  let c=sec.querySelector('.cm-gd');const html=id==='k46'?cmGuideCard('learn','g46'):cmGuideCard(k,m?m.g:'gOrea');
+  let c=sec.querySelector('.cm-gd');const html=id==='k46'?cmGuideCard('learn','g46'):cmGuideCard(k,m?m.g:ZONES[id].g);
   const tmp=document.createElement('div');tmp.innerHTML=html;const n=tmp.firstChild;if(c)c.replaceWith(n);else (sec.children[0]).after(n);
-  n.querySelector('.gd-face').appendChild(sprCv(id==='k46'?'g46':m?m.g:'gOrea',48));n.querySelectorAll('[data-t]').forEach(b=>b.onclick=e=>{e.stopPropagation();startTour(b.dataset.t);});});
+  n.querySelector('.gd-face').appendChild(sprCv(id==='k46'?'g46':m?m.g:ZONES[id].g,48));n.querySelectorAll('[data-t]').forEach(b=>b.onclick=e=>{e.stopPropagation();startTour(b.dataset.t);});});
   document.querySelectorAll('#cmPick .cm-grid button').forEach(b=>{const id=b.dataset.m,k=id==='k46'?'learn':'cm_'+id;b.classList.toggle('done',tourDone(k));});}
 const CM_ALL=[{id:'k46',g:'g46',year:2016,who:'粕谷哲',title:'4:6 沖法'}].concat(CMM.map(m=>({id:m.id,g:m.g,year:m.custom?2026:cmRec(m.rec).year,who:m.custom?'Bavis Kwong':cmRec(m.rec).name.split(' ')[0],title:m.title}))).concat([{id:'orea',g:'gOrea',year:'OREA-O',who:'官方配方',title:'OREA-O 配方專區（10 套）',grp:'orea'}]);
 function cmPick(){const p=$('cmPick');if(!p||p.dataset.ok)return;p.dataset.ok=1;
   const card=x=>'<button type="button" data-m="'+x.id+'"><span class="cm-pf"></span><span class="cm-pt"><small>'+x.year+'・'+x.who+'</small><b>'+x.title+'</b><em>'+WHO[x.g].n+' 導覽</em></span></button>';
-  p.innerHTML='<div class="seg cm-mode" role="tablist"><button type="button" data-g="champ">🏆 冠軍沖法<small>9 套</small></button><button type="button" data-g="orea">🥞 OREA-O<small>10 套</small></button></div>'+[['champ','🏆 冠軍沖法','世界沖煮冠軍與名家的手法']].map(([g,h,d])=>'<div class="cm-grp" data-g="'+g+'"><h2>'+h+'<small>'+d+'</small></h2><div class="cm-grid">'+CM_ALL.filter(x=>(x.grp||'champ')===g).map(card).join('')+'</div>'+(g==='champ'?'<details class="champ-box" open><summary>🏆 9 套冠軍配方在金杯圖上的位置</summary><div class="cm-chart champ-sc"></div><p class="label">👆 直接點圖上的點，就會切到那套手法、往下跳到它的細項。點太密的地方會選最近的那一點。每個點的顏色就是那位導覽員的代表色；模型用各冠軍原本的豆子與配方計算。</p></details>':'')+'</div>').join('');
+  p.innerHTML='<div class="seg cm-mode" role="tablist"><button type="button" data-g="champ">🏆 冠軍沖法<small>9 套</small></button><button type="button" data-g="orea">🥞 OREA-O<small>10 套</small></button><button type="button" data-g="v60">🔺 V60<small>5 套</small></button><button type="button" data-g="neo">💠 V60 NEO<small>6 套</small></button></div>'+[['champ','🏆 冠軍沖法','世界沖煮冠軍與名家的手法']].map(([g,h,d])=>'<div class="cm-grp" data-g="'+g+'"><h2>'+h+'<small>'+d+'</small></h2><div class="cm-grid">'+CM_ALL.filter(x=>(x.grp||'champ')===g).map(card).join('')+'</div>'+(g==='champ'?'<details class="champ-box" open><summary>🏆 9 套冠軍配方在金杯圖上的位置</summary><div class="cm-chart champ-sc"></div><p class="label">👆 直接點圖上的點或下面的標籤就會選那套手法（畫面不會跳走），往下滑就是它的細項。中間金框是金杯，九宮格每一格標出那一區喝起來的感覺；▲ 是超出圖範圍的點。顏色是那位導覽員的代表色。</p></details>':'')+'</div>').join('');
   p.querySelectorAll('.cm-mode button').forEach(b=>b.onclick=()=>cmMode(b.dataset.g));
   p.querySelectorAll('.cm-grid button').forEach(b=>{b.querySelector('.cm-pf').appendChild(sprCv(CM_ALL.find(x=>x.id===b.dataset.m).g,36));b.onclick=()=>{cmShow(b.dataset.m);const s=document.querySelector('.cm-sec[data-m="'+b.dataset.m+'"]');if(s)scrollTo({top:scrollY+s.getBoundingClientRect().top-110,behavior:'smooth'});};});}
 
+const CM_BEANS={
+ k46:'可調性最高的通用沖法。前 40% 可以把酸往上或往下推，最能發揮的是酸甜明顯的淺中焙（衣索比亞、藝伎）。深焙也能用：粕谷哲本人示範淺焙用 93°C、深焙降到 83°C。',
+ chad2017:'淺焙、高密度的水洗豆（藝伎、衣索比亞水洗）。細研磨讓難萃的硬豆萃得到位，時間短保持明亮。日曬或深焙磨這麼細容易苦。',
+ emi2018:'想要甜感和厚度的中淺焙到中焙。80°C 浸泡對日曬、發酵味重的豆也友善，不會把酒酵味一口氣推出來。',
+ sherry2022:'香氣細緻的淺焙：藝伎、花香型的衣索比亞。低溫悶蒸讓揮發性的花香留在杯子裡，之後再用高溫補萃取。',
+ wolfl2024:'淺焙、要求乾淨度的高價豆；也適合細粉多、容易塞水的豆子或磨豆機。低擾動讓細粉不會沖到底部。',
+ peng2025:'淺焙但尾段容易苦澀的豆：日曬、厭氧、競標藝伎。Peng 比賽用的就是巴拿馬 Mount Totumas 的日曬藝伎。前段高溫拿甜，後段低溫踩煞車。',
+ kasuya10:'高品質、香氣層次多的淺焙豆。超粗研磨加 96°C 萃得慢而穩，層次清楚；深焙用高溫長時間會苦，不建議。',
+ nagasaki:'想喝濃（1:12）又不要苦：甜感好的中淺焙。原始配方用 La Esmeralda 水洗藝伎；水溫一路降，把苦澀壓住。',
+ bavis:'複雜度高的特殊處理藝伎（原始用豆是巴拿馬 Jansen 低溫發酵藝伎）。細粉被當成甜感和厚度的來源，一般商業豆效益不大。'};
 const CHAMP_PT={};
 function champPt(id){if(CHAMP_PT[id])return CHAMP_PT[id];let R;
   if(id==='k46'){const a=cmSim(cmP(cmRec('wbrc2016')));R=cmCup([a],a.dose);}
@@ -8230,36 +8244,23 @@ function champPt(id){if(CHAMP_PT[id])return CHAMP_PT[id];let R;
 let champCur=null;
 function champScRender(){const box=document.querySelector('#cmPick .champ-sc');if(!box)return;
   const L=CM_ALL.filter(x=>(x.grp||'champ')==='champ').map(x=>Object.assign({x},champPt(x.id)));
-  const eys=L.map(v=>v.ey),tds=L.map(v=>v.tds);
-  const ex=[Math.min(17,Math.floor(Math.min(...eys))-1),Math.max(23,Math.ceil(Math.max(...eys))+1)],tx=[Math.min(1.1,Math.floor(Math.min(...tds)*10)/10-0.1),Math.max(1.5,Math.ceil(Math.max(...tds)*10)/10+0.1)];
-  const W=320,H=230,x0=34,y0=10,w=W-x0-10,h=H-y0-32;
-  const X=v=>x0+(v-ex[0])/(ex[1]-ex[0])*w,Y=v=>y0+h-(v-tx[0])/(tx[1]-tx[0])*h;
-  let s='<svg viewBox="0 0 '+W+' '+H+'" width="100%">';
-  s+='<rect x="'+X(18)+'" y="'+Y(1.45)+'" width="'+(X(22)-X(18))+'" height="'+(Y(1.15)-Y(1.45))+'" fill="#e8b04a" opacity=".14" stroke="#e8b04a" stroke-dasharray="3 3"/><text x="'+X(20)+'" y="'+(Y(1.45)-3)+'" font-size="8" text-anchor="middle" fill="#e8b04a">金杯（SCA 理想區）</text>';
-  for(let e=Math.ceil(ex[0]);e<=ex[1];e+=2)s+='<text x="'+X(e)+'" y="'+(y0+h+12)+'" font-size="8" text-anchor="middle" fill="var(--muted)">'+e+'%</text>';
-  for(let t=Math.ceil(tx[0]*5)/5;t<=tx[1]+1e-6;t+=0.2)s+='<text x="'+(x0-4)+'" y="'+(Y(t)+3)+'" font-size="8" text-anchor="end" fill="var(--muted)">'+t.toFixed(1)+'</text>';
-  s+='<line x1="'+x0+'" x2="'+(x0+w)+'" y1="'+(y0+h)+'" y2="'+(y0+h)+'" stroke="var(--line)"/><line x1="'+x0+'" x2="'+x0+'" y1="'+y0+'" y2="'+(y0+h)+'" stroke="var(--line)"/>';
-  s+='<text x="'+(x0+w)+'" y="'+(y0+h+26)+'" font-size="9" text-anchor="end" fill="var(--muted)">萃取率 EY →</text><text x="'+(x0+2)+'" y="'+(y0+8)+'" font-size="9" fill="var(--muted)">濃度 TDS %</text>';
-  L.forEach(v=>{const on=v.x.id===champCur,cx=X(v.ey),cy=Y(v.tds),c=WHO[v.x.g].c;
-    s+='<g class="orea-dot" data-m="'+v.x.id+'" role="button" aria-label="'+v.x.title+'"><circle cx="'+cx+'" cy="'+cy+'" r="11" fill="transparent"/><circle cx="'+cx+'" cy="'+cy+'" r="'+(on?6.5:4.5)+'" fill="'+c+'" stroke="'+(on?'var(--ink)':'none')+'" stroke-width="1.5"/></g>';
-    if(on)s+='<text x="'+(cx+8)+'" y="'+(cy+3)+'" font-size="9" fill="var(--ink)">'+v.x.year+' '+v.x.title+'</text>';});
-  s+='</svg><div class="champ-leg">'+L.map(v=>'<button type="button" data-m="'+v.x.id+'"'+(v.x.id===champCur?' class="on"':'')+'><i style="background:'+WHO[v.x.g].c+'"></i>'+v.x.year+' '+v.x.who+'<small>'+v.ey.toFixed(1)+'%・'+v.tds.toFixed(2)+'%</small></button>').join('')+'</div>';
-  box.innerHTML=s;}
-function champGo(id){cmShow(id);const sec=document.querySelector('.cm-sec[data-m="'+id+'"]');if(sec){sec.classList.remove('flash');void sec.offsetWidth;sec.classList.add('flash');scrollTo({top:scrollY+sec.getBoundingClientRect().top-140,behavior:'smooth'});}}
+  box.innerHTML=goldChart(L.map(v=>({id:v.x.id,x:v.ey,y:v.tds,c:WHO[v.x.g].c,on:v.x.id===champCur,label:v.x.year+' '+v.x.title})))+
+   '<div class="champ-leg">'+L.map(v=>'<button type="button" data-m="'+v.x.id+'"'+(v.x.id===champCur?' class="on"':'')+'><i style="background:'+WHO[v.x.g].c+'"></i>'+v.x.year+' '+v.x.who+'<small>'+v.ey.toFixed(1)+'%・'+v.tds.toFixed(2)+'%・'+zoneOf(v.ey,v.tds)+'</small></button>').join('')+'</div>';}
+function champGo(id){const y=scrollY;cmShow(id);scrollTo(0,y);}
 function champScBind(){const box=document.querySelector('#cmPick .champ-sc');if(!box||box.dataset.b)return;box.dataset.b=1;
   box.addEventListener('click',e=>{const lb=e.target.closest('.champ-leg [data-m]');if(lb){champGo(lb.dataset.m);return;}
     const svg=box.querySelector('svg');if(!svg)return;const pt=svg.createSVGPoint();pt.x=e.clientX;pt.y=e.clientY;const q=pt.matrixTransform(svg.getScreenCTM().inverse());
-    let best=null,bd=1e9;svg.querySelectorAll('.orea-dot').forEach(g=>{const c=g.querySelector('circle');const d=Math.hypot(+c.getAttribute('cx')-q.x,+c.getAttribute('cy')-q.y);if(d<bd){bd=d;best=g.dataset.m;}});
+    let best=null,bd=1e9;svg.querySelectorAll('.orea-dot').forEach(g=>{const c=g.querySelector('circle');const d=Math.hypot(+c.getAttribute('cx')-q.x,+c.getAttribute('cy')-q.y);if(d<bd){bd=d;best=g.dataset.r;}});
     if(best&&bd<=18)champGo(best);});}
-function cmMode(g){let id=g==='orea'?'orea':'k46';try{id=localStorage.getItem('cm-last-'+g)||id;}catch(e){}cmShow(id);scrollTo({top:Math.max(0,scrollY+$('cmPick').getBoundingClientRect().top-140),behavior:'smooth'});}
+function cmMode(g){let id=ZONES[g]?g:'k46';try{id=localStorage.getItem('cm-last-'+g)||id;}catch(e){}cmShow(id);scrollTo({top:Math.max(0,scrollY+$('cmPick').getBoundingClientRect().top-140),behavior:'smooth'});}
 window.cmMode=cmMode;
 function cmShow(id){cmPick();cmBuild();if(!document.querySelector('.cm-sec[data-m="'+id+'"]'))id='k46';
-  {const g=id==='orea'?'orea':'champ';document.querySelectorAll('#cmPick .cm-mode button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.g===g));
+  {const g=ZONES[id]?id:'champ';document.querySelectorAll('#cmPick .cm-mode button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.g===g));
    document.querySelectorAll('#cmPick .cm-grp').forEach(x=>x.hidden=x.dataset.g!==g);try{localStorage.setItem('cm-last-'+g,id);}catch(e){}}
   document.querySelectorAll('#learnView .cm-sec').forEach(s=>s.hidden=s.dataset.m!==id);
   document.querySelectorAll('#cmPick .cm-grid button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.m===id));
   try{localStorage.setItem('cm-cur',id);}catch(e){}
-  const m=CMM.find(x=>x.id===id);if(m)cmRender(m);if(id==='orea')oreaRender();champCur=id;champScBind();champScRender();cmCards();}
+  const m=CMM.find(x=>x.id===id);if(m)cmRender(m);if(ZONES[id])zRender(id);champCur=id;champScBind();champScRender();cmCards();}
 window.cmShow=cmShow;
 // 導覽
 CMM.forEach(m=>{const W=WHO[m.g];TOURS['cm_'+m.id]={view:'learnView',lead:m.g,title:m.title,blurb:'我是'+W.n+'。'+m.label+'的「'+m.title+'」，我一步一步帶你看配方、原理和動手試。',
@@ -8268,96 +8269,182 @@ CMM.forEach(m=>{const W=WHO[m.g];TOURS['cm_'+m.id]={view:'learnView',lead:m.g,ti
  const v=$('learnView');if(v)ob.observe(v,{attributes:true,attributeFilter:['hidden']});
  setTimeout(()=>{const v=$('learnView');if(v&&!v.hidden&&!v.dataset.cmInit){v.dataset.cmInit=1;let id='k46';try{id=localStorage.getItem('cm-cur')||'k46';}catch(e){}cmShow(id);}},0);}
 
-// ================= OREA O1 配方專區 =================
+// ================= 器材配方專區（OREA-O／V60／V60 NEO） =================
 DRIPPER.orea_neg=DRIPPER.orea_neg||{het:0.15,name:'OREA＋平底濾紙＋Negotiator',q:.85,u:1,by:.01,desc:'平底濾紙＋Negotiator，排水較慢'};
-Object.assign(SPR,{gOrea:(()=>{const r=["..F..FFFFFF..F..","...FFFFFFFFFF...","..FFFFFFFFFFFF..","..FFFFFFFFFFFF..","..FFSSSSSSSSFF..","..FSSSSSSSSSSF..","..SSEESSSSEESS..","..SSEESSSSEESS..","..SSSSSSSSSSSS..","..SrSSSSSSSSrS..","...SSSSssSSSS...","...SSSMMMMSSS...","....SSSSSSSS....","..KKKKKFFKKKKK..",".KKKKKKFFKKKKKK.",".KKKKKKKKKKKKKK."];return r;})()});
-Object.assign(WHO,{gOrea:{n:'歐蕾',r:'OREA 配方導覽員',c:'#ff4fd8'}});
-const C40=um=>Math.round(um);// 刻度換算：Comandante C40 約 27.25 μm／格
-const clix=(a,b)=>Math.round((a+b)/2*27.25);
-const OREA=[
- {id:'bright',n:'The Bright',d:'早上想偷懶的簡單配方：75／75／150 三段，杯子明亮開心。',dose:18,water:300,temp:94,ck:[20,24],paper:'wave',plan:[75,75,150],planT:[0,30,60],done:'2:00–2:45'},
- {id:'ice',n:'The Ice',d:'冰咖啡（急速冷卻）配方：四段溫柔螺旋注水，明亮不水，適合水洗豆。',dose:18,water:160,ice:140,temp:94,ck:[22,24],paper:'wave',plan:[40,40,40,40],planT:[0,40,60,80],done:'1:40–2:20'},
- {id:'techno',n:'The Techno',by:'Mordy',d:'越注越快的節奏：後兩注改成中心注水。',dose:12.4,water:200,temp:94,ck:[23,26],paper:'flat',plan:[40,80,40,40],planT:[0,30,80,105],style:[0,0,'h','c'],done:'2:30–3:00'},
- {id:'bypass',n:'The Bypass',by:'英國沖煮冠軍 Matteo D’Ottavio',d:'萃取 260 g 後，再加 15–30 g 熱水稀釋（bypass）平衡杯子。',dose:18,water:260,bypass:30,temp:96,ck:[20,24],paper:'wave',plan:[60,100,100],planT:[0,40,90],planD:[15,25,25],done:'2:30–3:00'},
- {id:'fine',n:'The Fine',d:'社群最愛：細研磨、一次注完，2 分鐘內滴完。',dose:12,water:200,temp:94,ck:[15,18],paper:'wave',plan:[50,150],planT:[0,15],planD:[15,45],style:[0,'c'],done:'2:00 前'},
- {id:'easy',n:'Easy Does It',d:'五段脈衝注水，適合各種豆子，研磨和水溫依口味調整。',dose:16,water:260,temp:94,ck:[24,28],paper:'flat',plan:[60,50,50,50,50],planT:[0,40,70,100,130],done:'2:40–3:40'},
- {id:'mid',n:'The Mid',d:'簡單的三段配方，每注一半繞圈、一半中心。',dose:12,water:200,temp:92,ck:[20,24],paper:'flat',plan:[50,75,75],planT:[0,40,105],style:[0,'h','h'],done:'2:30–3:30'},
- {id:'wide',n:'The Wide',d:'高萃取、寬粉水比（1:20）：細研磨、96°C，給平底濾紙用。',dose:10,water:200,temp:96,ck:[14,17],paper:'flat',plan:[50,75,75],planT:[0,60,120],style:[0,'h','h'],done:'3:30–4:30'},
- {id:'dara',n:'The Dara',by:'馬德里的 Dara',d:'四段螺旋注水，每次都很平衡。',dose:12,water:200,temp:94,ck:[20,24],paper:'wave',plan:[40,50,60,50],planT:[0,40,80,120],done:'2:30–3:00'},
- {id:'base',n:'Base One',d:'從 V60 或 Kalita 轉過來會很熟悉：明亮度高、甜感和厚度較輕。',dose:12,water:200,temp:96,ck:[20,24],paper:'wave',plan:[50,50,50,50],planT:[0,40,70,100],done:'2:00–2:30'}];
-const OST={cur:'bright',paper:null,res:{}};
-function oreaParams(r,paper){const b=cmBean('geisha');const pp=paper||r.paper;
-  const st=(r.style||[]).map(x=>x==='c'?'c':null);
-  return {dose:r.dose,ratio:r.water/r.dose,temp:r.temp,grind:clix(...r.ck),roast:b.roast,bean:b.f,pattern:'pulse',dripper:pp==='flat'?'orea_neg':'orea',
-   plan:r.plan.slice(),planT:r.planT.slice(),planD:(r.planD||r.plan.map(()=>null)).slice(),planTemp:null,valveWins:null,stirPO:[],planStyle:st.length?st:null};}
-function oreaRun(r,paper){const key=r.id+(paper||'');if(OST.res[key])return OST.res[key];
-  const p=oreaParams(r,paper),a=cmSim(p),add=(r.ice||0)+(r.bypass||0);
-  const M=a.M,V=a.V+add,cup=cupOf(M,V,p.dose,a.S0);const pf=cupProfile(cup);
-  const pre=cupOf(M,a.V,p.dose,a.S0);
-  return OST.res[key]={tds:cup.tds,ey:cup.ey,pf,pre:pre.tds,end:a.s.end,curve:cmCurve([a],48)};}
-function oreaScatter(){const W=320,H=220,x0=34,y0=10,w=W-x0-10,h=H-y0-30;const ex=[14,26],tx=[0.7,1.9];
-  const X=v=>x0+(v-ex[0])/(ex[1]-ex[0])*w,Y=v=>y0+h-(v-tx[0])/(tx[1]-tx[0])*h;
-  let s='<svg viewBox="0 0 '+W+' '+H+'" width="100%" aria-hidden="true">';
-  s+='<rect x="'+X(18)+'" y="'+Y(1.45)+'" width="'+(X(22)-X(18))+'" height="'+(Y(1.15)-Y(1.45))+'" fill="#e8b04a" opacity=".14" stroke="#e8b04a" stroke-dasharray="3 3"/>';
-  s+='<text x="'+(X(20))+'" y="'+(Y(1.45)-3)+'" font-size="8" text-anchor="middle" fill="#e8b04a">SCA 理想區</text>';
-  for(let e=14;e<=26;e+=2)s+='<text x="'+X(e)+'" y="'+(y0+h+12)+'" font-size="8" text-anchor="middle" fill="var(--muted)">'+e+'%</text>';
-  for(let t=0.8;t<=1.81;t+=0.2)s+='<text x="'+(x0-4)+'" y="'+(Y(t)+3)+'" font-size="8" text-anchor="end" fill="var(--muted)">'+t.toFixed(1)+'</text>';
-  s+='<line x1="'+x0+'" x2="'+(x0+w)+'" y1="'+(y0+h)+'" y2="'+(y0+h)+'" stroke="var(--line)"/><line x1="'+x0+'" x2="'+x0+'" y1="'+y0+'" y2="'+(y0+h)+'" stroke="var(--line)"/>';
-  s+='<text x="'+(x0+w)+'" y="'+(y0+h+24)+'" font-size="9" text-anchor="end" fill="var(--muted)">萃取率 EY →</text><text x="'+(x0+2)+'" y="'+(y0+8)+'" font-size="9" fill="var(--muted)">濃度 TDS %</text>';
-  OREA.forEach(r=>{const R=oreaRun(r),on=r.id===OST.cur,c=r.paper==='flat'?'#ff4fd8':'#7fb6e0';
-    if((r.ice||r.bypass)&&on)s+='<line x1="'+X(R.ey)+'" x2="'+X(R.ey)+'" y1="'+Y(Math.min(1.88,R.pre))+'" y2="'+Y(R.tds)+'" stroke="'+c+'" stroke-dasharray="2 2"/><circle cx="'+X(R.ey)+'" cy="'+Y(Math.min(1.88,R.pre))+'" r="3" fill="none" stroke="'+c+'"/>';
-    {const cx=X(Math.max(ex[0],Math.min(ex[1],R.ey))),cy=Y(Math.max(tx[0],Math.min(tx[1],R.tds)));s+='<g class="orea-dot" data-r="'+r.id+'" role="button" aria-label="'+r.n+'"><circle cx="'+cx+'" cy="'+cy+'" r="11" fill="transparent"/><circle cx="'+cx+'" cy="'+cy+'" r="'+(on?6:4)+'" fill="'+c+'" stroke="'+(on?'var(--ink)':'none')+'" stroke-width="1.5"/></g>';}
-    if(on)s+='<text x="'+(X(Math.max(ex[0],Math.min(ex[1],R.ey)))+7)+'" y="'+(Y(Math.max(tx[0],Math.min(tx[1],R.tds)))+3)+'" font-size="8" fill="'+(on?'var(--ink)':'var(--muted)')+'">'+r.n.replace('The ','')+'</text>';});
-  return s+'</svg><div class="cm-leg"><span><i style="border-color:#7fb6e0"></i>Wave 波浪濾紙</span><span><i style="border-color:#ff4fd8"></i>平底濾紙＋Negotiator</span><span>空心圈＝加冰／加水前</span></div>';}
-function oreaHTML(){return '<div class="cm-sec orea" data-m="orea" hidden><div><div class="label">沖煮手法 · OREA-O・O1 Brewer 官方配方</div><h1>OREA-O 配方專區</h1><p class="lede">OREA 官方指南的 10 套配方，從冰咖啡、bypass 到 1:20 的高萃取。全部放進同一個擴散萃取模型：看每套配方落在控制圖的哪裡、Wave 和平底濾紙差在哪、加冰加水改變了什麼。</p></div>'+
-  '<section class="panel cm-why"><h2>平底濾杯的科學</h2><p>OREA 是平底大孔的濾杯。錐形濾杯中間粉深、邊緣粉淺，水會偏向從中間流；平底的粉層厚度到處一樣，每一處的粉萃得比較一致。</p><p class="label">點卡片標題展開說明</p><div class="cm-cards">'+
-   [['🥞','平底：粉層一樣厚','水流過每一處粉的距離差不多，萃取均勻，比較少「中間過萃、邊緣不足」。'],
-    ['〰️','Wave 波浪濾紙：快','蛋糕型的波浪濾紙只在底部接觸，側邊有空氣通道，排水快，杯子明亮乾淨。'],
-    ['🎚️','平底濾紙＋Negotiator：慢','平底濾紙整片貼底，搭配 Negotiator，排水變慢、接觸時間拉長，可以用比較粗的粉或比較寬的粉水比萃到位（模擬以較慢的流速處理）。'],
-    ['🧊','加冰、加水：稀釋不改萃取率','先萃出比較濃的咖啡，再用冰塊或熱水稀釋。萃取率不變，濃度往下降，在控制圖上是一條直直往下的線。']].map(([i,h,p])=>'<details><summary><span class="cm-ic">'+i+'</span><h3>'+h+'</h3></summary><p>'+p+'</p></details>').join('')+'</div>'+
-   '<h3 class="cm-ch-h">10 套配方在控制圖上的位置</h3><div class="cm-chart orea-sc"></div><p class="label">👆 直接點圖上的點，就會切到那套配方、往下跳到它的配方細項。點太密的地方會選最近的那一點。模型用同一支巴拿馬藝伎計算；研磨刻度（CLIX）以 Comandante C40 每格約 27 μm 換算。</p></section>'+
-  '<section class="panel cm-lab"><h2>動手試：選配方、換濾紙</h2><div class="params"><div class="param"><span class="label">配方</span><div class="seg wrapseg orea-pick" role="group">'+OREA.map(r=>'<button type="button" data-r="'+r.id+'">'+r.n+'</button>').join('')+'</div></div>'+
-   '<div class="param"><span class="label">濾紙</span><div class="seg orea-paper" role="group"><button type="button" data-p="">配方原本的</button><button type="button" data-p="wave">Wave</button><button type="button" data-p="flat">平底＋Negotiator</button></div></div></div>'+
-   '<div class="orea-card"></div><div class="t46-res cm-res"></div><h3 class="cm-ch-h">時間曲線（實線＝原配方、虛線＝換濾紙）</h3><div class="cm-chart orea-curve"></div><p class="t46-note cm-note"></p><button class="savebtn cm-go" type="button">把這套配方帶到練習模擬器</button></section>'+
-  '<section class="panel"><h2>10 套配方一覽</h2><div class="cm-cmp orea-tab"></div><p class="label">TDS 和萃取率是模型算的；「滴完」是 OREA 官方寫的時間。OREA 提醒：時間只是參考，看到水位快碰到粉床時就注下一注。</p></section>'+
-  '<section class="panel t46-practice"><h2>實際練習的順序</h2><ol><li>先用 Base One 沖一杯當基準，記下滴完時間。</li><li>同一支豆子換 The Dara、The Mid，比較甜感和厚度。</li><li>有平底濾紙和 Negotiator 的話，用 Easy Does It 或 The Wide，感受慢排水帶來的萃取差別。</li><li>想做冰咖啡用 The Ice；覺得太濃就試 The Bypass 的加水法。</li></ol></section>'+
-  '<p class="fine">配方整理自 OREA 官方 O1 Brewer 指南（GUIDES）。模擬用 OREA＋蛋糕濾紙代表 Wave；平底濾紙＋Negotiator 的流速是估計值。模擬結果來自本 app 的擴散萃取模型。</p></div>';}
-function oreaRender(){const sec=document.querySelector('.cm-sec[data-m="orea"]');if(!sec)return;const r=OREA.find(x=>x.id===OST.cur),R=oreaRun(r);
-  sec.querySelectorAll('.orea-pick button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.r===OST.cur));
-  sec.querySelectorAll('.orea-paper button').forEach(b=>b.setAttribute('aria-pressed',(b.dataset.p||null)===OST.paper));
-  sec.querySelector('.orea-sc').innerHTML=oreaScatter();
-  const temps=r.plan.map(()=>r.temp);
-  sec.querySelector('.orea-card').innerHTML='<div class="orea-h"><b>'+r.n+'</b>'+(r.by?'<small>'+r.by+'</small>':'')+'<p>'+r.d+'</p></div><div class="t46-stats"><div><b>'+r.dose+' g</b><span>咖啡粉</span></div><div><b>'+r.water+' g'+(r.ice?'＋冰 '+r.ice+' g':'')+(r.bypass?'＋'+r.bypass+' g':'')+'</b><span>水（1:'+(+((r.water+(r.ice||0)+(r.bypass||0))/r.dose).toFixed(1))+'）</span></div><div><b>'+r.temp+'°C</b><span>水溫</span></div><div><b>'+r.ck[0]+'–'+r.ck[1]+' 格</b><span>研磨（約 '+clix(...r.ck)+' μm）</span></div></div>'+
-   '<div class="cm-bar">'+r.plan.map((ml,i)=>'<div style="flex:'+ml+';background:'+tempCol(temps[i])+'"><b>'+ml+'</b><small>'+((r.style||[])[i]==='c'?'中心':(r.style||[])[i]==='h'?'繞＋中':'繞圈')+'</small></div>').join('')+(r.ice?'<div style="flex:'+r.ice+';background:#dff1fb"><b>冰 '+r.ice+'</b><small>公杯</small></div>':'')+(r.bypass?'<div style="flex:'+r.bypass+';background:#f3d9b0"><b>+'+r.bypass+'</b><small>滴完後加</small></div>':'')+'</div>'+
-   '<div class="cm-tl">'+r.plan.map((ml,i)=>'<span style="flex:'+ml+'">'+cmFmt(r.planT[i])+'</span>').join('')+(r.ice?'<span style="flex:'+r.ice+'"></span>':'')+(r.bypass?'<span style="flex:'+r.bypass+'">'+r.done+'</span>':'')+'</div><p class="label">濾紙：'+(r.paper==='flat'?'OREA 平底濾紙＋Negotiator':'OREA Wave')+'・官方滴完時間 '+r.done+'</p>';
-  const B=OST.paper&&OST.paper!==r.paper?oreaRun(r,OST.paper):null,S=B||R;
-  sec.querySelector('.cm-res').innerHTML=[['濃度 TDS',S.tds.toFixed(2)+'%'],['萃取率',S.ey.toFixed(1)+'%'],['甜',T5(S.pf.sweet)],['酸',T5(S.pf.acid)],['苦',T5(S.pf.bitter)],['模型滴完',cmFmt(S.end)]].map(([k,v])=>'<div><b>'+v+'</b><span>'+k+'</span></div>').join('');
-  sec.querySelector('.orea-curve').innerHTML=curveSvg(R.curve,(B||R).curve,'原配方（'+(r.paper==='flat'?'平底＋Negotiator':'Wave')+'）',B?'換成 '+(OST.paper==='flat'?'平底＋Negotiator':'Wave'):'（選「濾紙」比較）');
+// V60 NEO：72 條細肋骨收成底部 9 條，水沿整面杯壁流下、排水更快、繞流（bypass）更多（數值為估計）
+DRIPPER.v60neo=DRIPPER.v60neo||{het:0.5,name:'V60 NEO',q:1.6,u:.95,by:.1,desc:'72 條細肋骨，排水快、繞流多'};
+const zSpr=(h,body,o)=>{o=o||{};const hair={short:["....hhhhhhhh....","...hhhhhhhhhh...","..hhhhhhhhhhhh..","..hhhhhhhhhhhh.."],side:["..h..hhhhhh..h..","...hhhhhhhhhh...","..hhhhhhhhhhhh..","..hhhhhhhhhhhh.."],
+  tall:[".....hhhhhh.....","...hhhhhhhhhh...","..hhhhhhhhhhhh..","..hhhhhhhhhhhh.."]}[o.hair||'short'];
+  return hair.concat(["..hhSSSSSSSShh..","..hSSSSSSSSSSh..",...(o.glass?["..SGGGGSSGGGGS..","..SGgEGGGGEgGS.."]:["..SSEESSSSEESS..","..SSEESSSSEESS.."]),"..SSSSSSSSSSSS..",o.cheek?"..SrSSSSSSSSrS..":"..SSSSSSSSSSSS..","...SSSSssSSSS...","...SSSMMMMSSS...","....SSSSSSSS...."],body).map(r=>r.replace(/h/g,h));};
+Object.assign(SPR,{gOrea:zSpr('F',["..KKKKKFFKKKKK..",".KKKKKKFFKKKKKK.",".KKKKKKKKKKKKKK."],{hair:'side',cheek:1}),
+  gV60:zSpr('K',["..QQQQQWWQQQQQ..",".QQQQQQWWQQQQQQ.",".QQQQQQQQQQQQQQ."],{glass:1}),
+  gNeo:zSpr('I',["..DDDDDDDDDDDD..",".DDIDDIDDIDDIDD.",".DDDDDDDDDDDDDD."],{hair:'tall',cheek:1})});
+Object.assign(WHO,{gOrea:{n:'歐蕾',r:'OREA 配方導覽員',c:'#ff4fd8'},gV60:{n:'錐哥',r:'V60 配方導覽員',c:'#e0604f'},gNeo:{n:'尼歐',r:'V60 NEO 導覽員',c:'#6fd3d8'}});
+const clix=(a,b)=>Math.round((a+b)/2*27.25);// Comandante C40 約 27.25 μm／格
+const ZONES={
+ orea:{name:'OREA-O',emoji:'🥞',g:'gOrea',label:'沖煮手法 · OREA-O・O1 Brewer 官方配方',h1:'OREA-O 配方專區',
+  lede:'OREA 官方指南的 10 套配方，從冰咖啡、bypass 到 1:20 的高萃取。全部放進同一個擴散萃取模型：看每套配方落在控制圖的哪裡、Wave 和平底濾紙差在哪、加冰加水改變了什麼。',
+  sciH:'平底濾杯的科學',sciP:'OREA 是平底大孔的濾杯。錐形濾杯中間粉深、邊緣粉淺，水會偏向從中間流；平底的粉層厚度到處一樣，每一處的粉萃得比較一致。',
+  cards:[['🥞','平底：粉層一樣厚','水流過每一處粉的距離差不多，萃取均勻，比較少「中間過萃、邊緣不足」。'],
+   ['〰️','Wave 波浪濾紙：快','蛋糕型的波浪濾紙只在底部接觸，側邊有空氣通道，排水快，杯子明亮乾淨。'],
+   ['🎚️','平底濾紙＋Negotiator：慢','平底濾紙整片貼底，搭配 Negotiator，排水變慢、接觸時間拉長，可以用比較粗的粉或比較寬的粉水比萃到位（模擬以較慢的流速處理）。'],
+   ['🧊','加冰、加水：稀釋不改萃取率','先萃出比較濃的咖啡，再用冰塊或熱水稀釋。萃取率不變，濃度往下降，在控制圖上是一條直直往下的線。']],
+  color:r=>r.dripper==='orea_neg'?'#ff4fd8':'#7fb6e0',legend:[['#7fb6e0','Wave 波浪濾紙'],['#ff4fd8','平底濾紙＋Negotiator']],
+  varH:'濾紙',vars:[['wave','Wave',p=>{p.dripper='orea';}],['flat','平底＋Negotiator',p=>{p.dripper='orea_neg';}]],
+  fine:'配方整理自 OREA 官方 O1 Brewer 指南（GUIDES）。模擬用 OREA＋蛋糕濾紙代表 Wave；平底濾紙＋Negotiator 的流速是估計值。研磨刻度（CLIX）以 Comandante C40 每格約 27 μm 換算。',
+  practice:['先用 Base One 沖一杯當基準，記下滴完時間。','同一支豆子換 The Dara、The Mid，比較甜感和厚度。','有平底濾紙和 Negotiator 的話，用 Easy Does It 或 The Wide，感受慢排水帶來的萃取差別。','想做冰咖啡用 The Ice；覺得太濃就試 The Bypass 的加水法。'],
+  recipes:[
+   {id:'bright',n:'The Bright',d:'早上想偷懶的簡單配方：75／75／150 三段，杯子明亮開心。',dose:18,water:300,temp:94,grind:clix(20,24),gl:'20–24 格',dripper:'orea',plan:[75,75,150],planT:[0,30,60],done:'2:00–2:45',bean:'ethw',beans:'水洗淺焙、柑橘花香系（衣索比亞水洗、肯亞）。大水量、注水少，萃取偏輕，讓酸質和香氣站在前面。'},
+   {id:'ice',n:'The Ice',d:'冰咖啡（急速冷卻）配方：四段溫柔螺旋注水，明亮不水，適合水洗豆。',dose:18,water:160,ice:140,temp:94,grind:clix(22,24),gl:'22–24 格',dripper:'orea',plan:[40,40,40,40],planT:[0,40,60,80],done:'1:40–2:20',bean:'ethw',beans:'官方指定水洗豆。冰會壓低甜感和香氣，酸質明亮的水洗淺焙（衣索比亞、肯亞）冰了最不會變水。'},
+   {id:'techno',n:'The Techno',by:'Mordy',d:'越注越快的節奏：後兩注改成中心注水。',dose:12.4,water:200,temp:94,grind:clix(23,26),gl:'23–26 格',dripper:'orea_neg',plan:[40,80,40,40],planT:[0,30,80,105],style:[0,0,'h','c'],done:'2:30–3:00',bean:'geisha',beans:'粉量少（12.4 g）、研磨偏粗，適合高價的淺焙藝伎、競標豆：用少少的粉沖出層次。'},
+   {id:'bypass',n:'The Bypass',by:'英國沖煮冠軍 Matteo D’Ottavio',d:'萃取 260 g 後，再加 15–30 g 熱水稀釋（bypass）平衡杯子。',dose:18,water:260,bypass:30,temp:96,grind:clix(20,24),gl:'20–24 格',dripper:'orea',plan:[60,100,100],planT:[0,40,90],planD:[15,25,25],done:'2:30–3:00',bean:'cof_peach',beans:'風味很濃、很容易沖得太重的豆：日曬、厭氧、共發酵。先萃到位再加水，把濃度拉回舒服的範圍。'},
+   {id:'fine',n:'The Fine',d:'社群最愛：細研磨、一次注完，2 分鐘內滴完。',dose:12,water:200,temp:94,grind:clix(15,18),gl:'15–18 格',dripper:'orea',plan:[50,150],planT:[0,15],planD:[15,45],style:[0,'c'],done:'2:00 前',bean:'ethw',beans:'高海拔、密度高的水洗淺焙。細研磨讓難萃的硬豆也萃得到位，時間短則避開日曬豆容易出現的過萃發酵味。'},
+   {id:'easy',n:'Easy Does It',d:'五段脈衝注水，適合各種豆子，研磨和水溫依口味調整。',dose:16,water:260,temp:94,grind:clix(24,28),gl:'24–28 格',dripper:'orea_neg',plan:[60,50,50,50,50],planT:[0,40,70,100,130],done:'2:40–3:40',bean:'col',beans:'官方說各種豆都適合。中焙、哥倫比亞或巴西這類甜感型的豆子最穩；淺焙就把水溫拉高一點。'},
+   {id:'mid',n:'The Mid',d:'簡單的三段配方，每注一半繞圈、一半中心。',dose:12,water:200,temp:92,grind:clix(20,24),gl:'20–24 格',dripper:'orea_neg',plan:[50,75,75],planT:[0,40,105],style:[0,'h','h'],done:'2:30–3:30',bean:'col',beans:'官方說各種豆都適合。92°C 偏低，對中焙、中深焙特別友善，苦味收得住。'},
+   {id:'wide',n:'The Wide',d:'高萃取、寬粉水比（1:20）：細研磨、96°C，給平底濾紙用。',dose:10,water:200,temp:96,grind:clix(14,17),gl:'14–17 格',dripper:'orea_neg',plan:[50,75,75],planT:[0,60,120],style:[0,'h','h'],done:'3:30–4:30',bean:'g_nordic',beans:'極淺焙（北歐式）、高海拔硬豆。這類豆很難萃，要細研磨、高溫、長時間才出得來；深焙用這套會苦。'},
+   {id:'dara',n:'The Dara',by:'馬德里的 Dara',d:'四段螺旋注水，每次都很平衡。',dose:12,water:200,temp:94,grind:clix(20,24),gl:'20–24 格',dripper:'orea',plan:[40,50,60,50],planT:[0,40,80,120],done:'2:30–3:00',bean:'ethn',beans:'日曬或蜜處理的淺中焙。注水平均、節奏慢，甜感和果香都照顧得到。'},
+   {id:'base',n:'Base One',d:'從 V60 或 Kalita 轉過來會很熟悉：明亮度高、甜感和厚度較輕。',dose:12,water:200,temp:96,grind:clix(20,24),gl:'20–24 格',dripper:'orea',plan:[50,50,50,50],planT:[0,40,70,100],done:'2:00–2:30',bean:'ken',beans:'想喝明亮酸質的水洗淺焙（肯亞、衣索比亞水洗）。官方形容明亮、甜感和厚度較輕，不適合想喝厚實甜感的人。'}],
+  tour:[['gOrea','我是歐蕾，這裡收著 OREA 官方的 10 套 O1 配方。','h1'],
+   ['gOrea','先看平底濾杯的原理：粉層到處一樣厚，水流過每一處粉的距離差不多，所以萃得均勻。','.cm-cards'],
+   ['li','Wave 和平底濾紙差在哪？'],
+   ['cui','Wave 濾紙側邊有空氣通道，排水快；平底濾紙整片貼底，再加上 Negotiator，排水變慢、接觸時間變長。','.cm-cards'],
+   ['gOrea','這張控制圖把 10 套配方都畫上去了。藍點是 Wave、粉紅點是平底濾紙。直接點圖上的點就能切換配方。','.z-sc'],
+   ['gOrea','配方卡會畫出每一注的水量、注法和時間，下面還有「適合的豆子」。','.orea-card'],
+   ['gOrea','換濾紙試試：同一套配方換成平底濾紙，萃取率會往上；換成 Wave，滴得比較快、比較明亮。','.z-var'],
+   ['gOrea','這張表把 10 套一起比較，點一列就會切過去。','.z-tab'],
+   ['gOrea','挑一套喜歡的，按這裡帶到模擬器沖一次。','.cm-go']]},
+
+ v60:{name:'V60',emoji:'🔺',g:'gV60',label:'沖煮手法 · Hario V60・官方與經典配方',h1:'V60 配方專區',
+  lede:'Hario V60 是世界上最常見的手沖濾杯，也是大多數冠軍沖法的起點。這裡收錄 Hario 官方指南和幾套經典配方，用同一個模型看它們落在哪裡，再換成 V60 NEO 比一比。',
+  sciH:'V60 錐形濾杯的科學',sciP:'V60 是 60° 的錐形、底部一個大孔，濾杯本身幾乎不限制流速。水多快流走，主要由研磨粗細和你的注水決定，所以同一支 V60 可以沖出很不一樣的杯子。',
+  cards:[['🔺','60° 錐形：中間深、邊緣淺','粉層中間厚、邊緣薄。水會偏向從中間走，邊緣的粉萃得比較少，注水繞圈就是為了讓邊緣也被照顧到。'],
+   ['🕳️','單一大孔：流速靠你控制','出水口很大，濾杯不幫你踩煞車。注得快、磨得粗就流得快；磨細、慢注就流得慢。'],
+   ['🌀','螺旋肋骨：讓空氣與水流出去','杯壁上的螺旋肋骨讓濾紙不會整片貼死，空氣和水都能從側邊離開，排水順。'],
+   ['↪️','繞流（bypass）','有一部分水會沿著濾紙和杯壁流下去，沒有真正穿過粉層。注水太靠邊、水位太高，繞流就變多，杯子變淡。']],
+  color:r=>'#e0604f',legend:[['#e0604f','V60（原版）']],
+  varH:'濾杯',vars:[['v60','V60（原版）',p=>{p.dripper='v60';}],['neo','換成 V60 NEO',p=>{p.dripper='v60neo';}]],
+  fine:'配方整理自 Hario 官方指南（Hario UK 基礎版與進階版）、Honest Coffee Guide、Equator Coffees、Crema.co。原文沒寫的悶蒸量、注水秒數和水溫為估計值。V60 NEO 的流速與繞流是依 Hario 說明估計的模型參數。',
+  practice:['先用 Hario 官方進階版沖一杯當基準：15 g、250 g、悶蒸 30 秒、約 3 分鐘滴完。','只改研磨：細一格、粗一格各沖一杯，感受流速和濃度的變化。','試 Hoffmann 的「悶蒸搖晃＋後段輕攪」，比較甜感和厚度。','有 V60 NEO 的話，同一套配方各沖一杯，NEO 通常滴得更快，可能要磨細一點。'],
+  recipes:[
+   {id:'hbasic',n:'Hario 官方基礎版',by:'Hario',d:'最簡單的入門配方：悶蒸後一路慢慢注滿。',dose:15,water:250,temp:95,grind:560,gl:'中細',dripper:'v60',plan:[30,220],planT:[0,30],planD:[8,70],done:'約 3:00',est:'悶蒸水量與主注秒數',bean:'col',beans:'入門用的中焙、中淺焙（哥倫比亞、巴西）。注水方式簡單，對容易萃的豆最寬容；淺焙會偏酸偏淡。'},
+   {id:'huk',n:'Hario 官方進階版',by:'Hario UK',d:'一次快速注水濕透粉、悶蒸 30 秒，再小圈慢注到 250 g，滴約 2.5 分鐘。',dose:15,water:250,temp:94,grind:600,gl:'濾掛研磨',dripper:'v60',plan:[40,210],planT:[0,30],planD:[6,60],done:'約 3:00',est:'悶蒸水量、主注秒數、水溫取 92–96°C 中間',bean:'antigua',beans:'中淺焙到中焙都適合。水溫 92–96°C 可以照焙度調：淺焙往 96°C，中焙往 92°C。'},
+   {id:'hoffmann',n:'James Hoffmann 終極 V60',by:'James Hoffmann',d:'悶蒸用粉重兩倍的水並搖晃，之後分兩段注滿，最後輕攪、搖平粉床。重點是精準注水和定時的輕微攪動。',dose:30,water:500,temp:99,grind:620,gl:'中細',dripper:'v60',plan:[60,240,200],planT:[0,45,75],planD:[10,30,30],done:'約 3:30',est:'各段注水秒數',bean:'col',beans:'原文是中焙。沸水加攪動會把萃取推高，對中焙、甜感型的豆很穩；極淺焙也撐得住，深焙會苦。'},
+   {id:'equator',n:'Equator 三等分',by:'Equator Coffees',d:'悶蒸後分三次各注 100 g，每 100 g 慢慢注 30 秒，從中心往外繞。',dose:24,water:360,temp:96,grind:560,gl:'中細',dripper:'v60',plan:[60,100,100,100],planT:[0,30,60,90],planD:[10,30,30,30],done:'約 3:00',est:'悶蒸水量',bean:'ethn',beans:'1:15 偏濃，適合想要厚度的日曬、蜜處理淺中焙；酸質尖的水洗豆可以把粉水比放寬到 1:16。'},
+   {id:'crema',n:'Crema 一次注滿',by:'Crema.co',d:'75 g 悶蒸 30 秒，之後繞圈慢慢注到 375 g，2:30–3:00 滴完。',dose:25,water:375,temp:93,grind:650,gl:'中研磨',dripper:'v60',plan:[75,300],planT:[0,30],planD:[10,90],done:'2:30–3:00',est:'主注秒數',bean:'bra',beans:'中焙、巴西或中美洲這類好萃、甜感型的豆。中研磨、93°C，不容易沖過頭。'}],
+  tour:[['gV60','我是錐哥，V60 是世界上最多人用的濾杯，也是大多數冠軍沖法的起點。','h1'],
+   ['gV60','先看錐形濾杯的原理：中間粉深、邊緣粉淺，出水口很大，流速主要由你決定。','.cm-cards'],
+   ['li','那為什麼大家都要繞圈注水？'],
+   ['cui','因為邊緣的粉比較薄，水容易偏向從中間走。繞圈把水帶到邊緣，整層粉才萃得比較平均。','.cm-cards'],
+   ['gV60','這張控制圖把這幾套配方畫在一起，點圖上的點就會切到那套配方。','.z-sc'],
+   ['gV60','配方卡下面有「適合的豆子」，告訴你這套配方為什麼適合哪一類豆。','.orea-card'],
+   ['gV60','試試換成 V60 NEO：同一套配方，NEO 排水更快，萃取率會掉一點。','.z-var'],
+   ['gV60','這張表把全部配方一起比，點一列就切過去。','.z-tab'],
+   ['gV60','挑一套，按這裡帶到模擬器沖一次。','.cm-go']]},
+
+ neo:{name:'V60 NEO',emoji:'💠',g:'gNeo',label:'沖煮手法 · Hario V60 NEO・2026 新款',h1:'V60 NEO 配方專區',
+  lede:'V60 NEO 是 V60 推出近二十年來第一次大改內部結構：72 條細肋骨在底部收成 9 條，排水更快、更穩。這裡收錄 NEO 的代表配方，從兩注快沖到搭配 Switch 閥門的冠軍賽配方。',
+  sciH:'V60 NEO 的科學',sciP:'外型和 V60 一樣是錐形，差別在杯壁內側。NEO 刻意增加濾紙和杯壁的接觸面，讓水沿著整面杯壁往下流，而不是只從中間走。',
+  cards:[['📏','72 條細肋骨收成 9 條','上半部 72 條很細的直肋骨把水均勻帶下杯壁，底部收成 9 條較粗的肋骨，加速水從出水口離開。'],
+   ['💨','排水更快、更穩','同樣的研磨和注水，NEO 通常比 V60 更早滴完。原本在 V60 剛好的研磨，到 NEO 可能要調細一點。'],
+   ['↪️','刻意加大繞流（bypass）','Hario 說 NEO 是以「最大化 bypass」為設計重點：更多水沿杯壁流走，粉層不會泡太久，苦味比較少，杯子乾淨。'],
+   ['🔀','可以接 Switch 閥門','NEO 可以放在 Hario Switch 底座上，先關閥浸泡、再開閥滴濾，很多 NEO 配方都這樣玩。']],
+  color:r=>r.valveWins?'#e8b04a':'#6fd3d8',legend:[['#6fd3d8','只用 NEO'],['#e8b04a','NEO＋Switch 閥門']],
+  varH:'濾杯',vars:[['neo','V60 NEO',p=>{p.dripper='v60neo';}],['v60','換成一般 V60',p=>{p.dripper='v60';}],['nosw','拿掉 Switch（純滴濾）',p=>{if(p.valveWins){p.pattern='pulse';p.valveWins=null;}p.dripper='v60neo';}]],
+  fine:'配方整理自 Gota 收錄的 V60 NEO 02 配方（Coffee Samurai、Quality Life Coffee、Kurasu、Ethan Junseong Park、Coffee 365）與 BeanBook。原文沒寫的粉量、注水秒數、閥門時間為估計值。NEO 的流速與繞流是依 Hario 說明估計的模型參數；Switch 段落以模型的閥門浸泡計算。',
+  practice:['先用 Coffee Samurai 的 15 Method：兩注就完成，目標 1:45 滴完。','如果滴得比 V60 快很多、杯子偏淡，研磨調細一到兩格。','有 Switch 的話試 Kurasu 的 Switch Hybrid，比較浸泡帶來的甜感。','進階挑戰 Ethan Park 的世界賽配方：熱水開閥滴濾、最後關閥 70°C 浸泡。'],
+  recipes:[
+   {id:'samurai',n:'15 Method',by:'Coffee Samurai',d:'兩注完成：15% 的水悶蒸並輕輕旋轉，再一次注到 1:15，目標 1:45 滴完。',dose:15,water:225,temp:90,grind:600,gl:'中細',dripper:'v60neo',plan:[34,191],planT:[0,30],planD:[8,40],done:'約 1:45',est:'粉量（原文只給 1:15 比例）、研磨、主注秒數',bean:'ethw',beans:'快沖、90°C，適合香氣型的水洗淺焙。時間短、水溫低，日曬豆比較不會出現過萃的發酵味，但淺焙硬豆可能萃不足。'},
+   {id:'qlife',n:'兩階段注水',by:'Quality Life Coffee',d:'前段注水比較有力，帶出香氣和酸；後段改成溫和的中心注水，拉出甜感、避免尾段澀。',dose:15,water:240,temp:92,grind:560,gl:'中細',dripper:'v60neo',plan:[40,100,100],planT:[0,30,75],planD:[8,20,30],style:[0,0,'c'],done:'約 2:30',est:'每段水量與時間',bean:'ethn',beans:'淺焙到中焙都可以。前段攪動帶酸、後段溫和帶甜，適合日曬、蜜處理這類甜感好的豆。'},
+   {id:'beanbook',n:'NEO 四段',by:'BeanBook',d:'35–40 g 悶蒸 30 秒，0:30 邊注邊攪到 120 g，1:05 到 180–185 g，1:35 到 235 g。C40 約 24–25 格。',dose:15,water:235,temp:93,grind:clix(24,25),gl:'24–25 格',dripper:'v60neo',plan:[38,82,63,52],planT:[0,30,65,95],done:'約 2:30',est:'粉量、水溫',bean:'col',beans:'通用型配方，中焙、中淺焙最穩。研磨偏粗配 NEO 的快排水，杯子清爽。'},
+   {id:'kurasu',n:'Switch Hybrid',by:'Kurasu',d:'NEO 放在 Switch 上：先關閥悶蒸 50 g 並輕晃，0:40 開閥改成分段滴濾，2:33 滴完。粗研磨。',dose:16,water:240,temp:91,grind:800,gl:'粗（Ode Gen2 約 8）',dripper:'v60neo',pattern:'switch',plan:[50,95,95],planT:[0,40,85],planD:[8,25,25],valveWins:[[0,40]],done:'約 2:33',est:'開閥後兩段的水量與時間',bean:'geisha',beans:'原文是淺焙、果香花香型。關閥浸泡讓淺焙的甜感出得來，粗研磨又保持乾淨，很適合藝伎、衣索比亞。'},
+   {id:'ethan',n:'WBrC 2026 第五名',by:'Ethan Junseong Park',d:'NEO＋Switch：關閥悶蒸，開閥用 95°C 熱水滴濾，最後關閥改用 70°C 浸泡收尾，約 2 分鐘。',dose:14,water:200,temp:95,grind:600,gl:'中研磨',dripper:'v60neo',pattern:'switch',plan:[40,90,70],planT:[0,30,75],planD:[8,20,15],planTemp:[95,95,70],valveWins:[[0,30],[75,100]],done:'約 2:00',est:'每段水量、時間與閥門開關時間',bean:'geisha',beans:'比賽用的淺焙花香型豆（原文：花香、柑橘、輕盈）。熱水滴濾拿香氣和酸，70°C 浸泡收尾壓住苦味。'},
+   {id:'c365',n:'Full Immersion',by:'Coffee 365',d:'NEO＋Switch 當浸泡壺：關閥一次注滿 225 g，0:35 用湯匙破渣，浸泡到約 2:30 再開閥，3:25 滴完。',dose:18,water:225,temp:94,grind:650,gl:'中研磨',dripper:'v60neo',pattern:'switch',plan:[225],planT:[0],planD:[35],valveWins:[[0,150]],done:'約 3:25',est:'開閥時間、研磨',bean:'bra',beans:'想要厚實口感：中焙、巴西、甜感型的豆。浸泡把甜和醇厚拉滿；很淺的硬豆也能萃到位。'}],
+  tour:[['gNeo','我是尼歐，負責 2026 年的新 V60 NEO。','h1'],
+   ['gNeo','NEO 的重點在杯壁：72 條細肋骨收成底部 9 條，水沿整面杯壁流下，排水更快、繞流更多。','.cm-cards'],
+   ['li','排水變快，那不是會萃不夠嗎？'],
+   ['cui','會快一點，所以很多人把研磨調細一點。繞流多也代表粉層不會泡太久，苦味比較少，杯子乾淨。','.cm-cards'],
+   ['gNeo','控制圖上的藍綠點是只用 NEO，金色點是搭配 Switch 閥門。點圖上的點就能切換配方。','.z-sc'],
+   ['gNeo','配方卡下面有「適合的豆子」。','.orea-card'],
+   ['gNeo','試試「換成一般 V60」或「拿掉 Switch」，看 NEO 和閥門各自帶來什麼差別。','.z-var'],
+   ['gNeo','全部配方的比較表在這裡。','.z-tab'],
+   ['gNeo','挑一套帶到模擬器。有閥門的配方會自動套用 Switch。','.cm-go']]}
+};
+const ZST={orea:{cur:'bright',v:null},v60:{cur:'huk',v:null},neo:{cur:'samurai',v:null}};const ZRES={};
+function zParams(z,r,vk){const b=cmBean(r.bean||'geisha');
+  const p={dose:r.dose,ratio:r.water/r.dose,temp:r.temp,grind:r.grind,roast:b.roast,bean:b.f,pattern:r.pattern||'pulse',dripper:r.dripper,
+   plan:r.plan.slice(),planT:r.planT.slice(),planD:(r.planD||r.plan.map(()=>null)).slice(),planTemp:r.planTemp?r.planTemp.slice():null,
+   valveWins:r.valveWins||null,swMode:'closeFirst',swOpen:r.valveWins?r.valveWins[0][1]:120,stirPO:[],planStyle:r.style?r.style.map(x=>x==='c'?'c':null):null};
+  if(vk){const v=ZONES[z].vars.find(x=>x[0]===vk);if(v)v[2](p);}return p;}
+function zRun(z,r,vk){const key=z+r.id+(vk||'');if(ZRES[key])return ZRES[key];
+  const p=zParams(z,r,vk),a=cmSim(p),add=(r.ice||0)+(r.bypass||0);
+  const cup=cupOf(a.M,a.V+add,p.dose,a.S0),pre=cupOf(a.M,a.V,p.dose,a.S0);
+  return ZRES[key]={tds:cup.tds,ey:cup.ey,pf:cupProfile(cup),pre:pre.tds,end:a.s.end,curve:cmCurve([a],48)};}
+function zScatter(z){const Z=ZONES[z],S=ZST[z];
+  const pts=Z.recipes.map(r=>{const R=zRun(z,r);return {id:r.id,x:R.ey,y:R.tds,pre:(r.ice||r.bypass)?R.pre:null,c:Z.color(r),on:r.id===S.cur,label:r.n.replace('The ','')};});
+  return goldChart(pts)+'<div class="cm-leg">'+Z.legend.map(([c,l])=>'<span><i style="border-color:'+c+'"></i>'+l+'</span>').join('')+(Z.recipes.some(r=>r.ice||r.bypass)?'<span>空心圈＝加冰／加水前</span>':'')+'<span>▲＝超出圖的範圍</span></div>';}
+function zHTML(z){const Z=ZONES[z];return '<div class="cm-sec zone" data-m="'+z+'" hidden><div><div class="label">'+Z.label+'</div><h1>'+Z.h1+'</h1><p class="lede">'+Z.lede+'</p></div>'+
+  '<section class="panel cm-why"><h2>'+Z.sciH+'</h2><p>'+Z.sciP+'</p><p class="label">點卡片標題展開說明</p><div class="cm-cards">'+Z.cards.map(([i,h,p])=>'<details><summary><span class="cm-ic">'+i+'</span><h3>'+h+'</h3></summary><p>'+p+'</p></details>').join('')+'</div>'+
+   '<h3 class="cm-ch-h">'+Z.recipes.length+' 套配方在金杯圖上的位置</h3><div class="cm-chart z-sc"></div><p class="label">👆 直接點圖上的點就會選那套配方（畫面不會跳走），下面的配方卡、結果和比較表會跟著換。點太密的地方會選最近的那一點。中間金框是金杯，九宮格的每一格標出那一區喝起來的感覺。模型用每套配方「適合的豆子」來計算。</p></section>'+
+  '<section class="panel cm-lab"><h2>動手試：選配方、換'+Z.varH+'</h2><div class="params"><div class="param"><span class="label">配方</span><div class="seg wrapseg z-pick" role="group">'+Z.recipes.map(r=>'<button type="button" data-r="'+r.id+'">'+r.n+'</button>').join('')+'</div></div>'+
+   '<div class="param"><span class="label">'+Z.varH+'</span><div class="seg z-var" role="group"><button type="button" data-v="">配方原本的</button>'+Z.vars.map(v=>'<button type="button" data-v="'+v[0]+'">'+v[1]+'</button>').join('')+'</div></div></div>'+
+   '<div class="orea-card"></div><div class="t46-res cm-res"></div><h3 class="cm-ch-h">時間曲線（實線＝原配方、虛線＝換'+Z.varH+'）</h3><div class="cm-chart z-curve"></div><p class="t46-note cm-note"></p><button class="savebtn cm-go" type="button">把這套配方帶到練習模擬器</button></section>'+
+  '<section class="panel"><h2>'+Z.recipes.length+' 套配方一覽</h2><div class="cm-cmp z-tab"></div><p class="label">TDS 和萃取率是模型算的；「滴完」是原始配方寫的時間。點一列就切到那套配方。</p></section>'+
+  '<section class="panel t46-practice"><h2>實際練習的順序</h2><ol>'+Z.practice.map(x=>'<li>'+x+'</li>').join('')+'</ol></section><p class="fine">'+Z.fine+' 模擬結果來自本 app 的擴散萃取模型。</p></div>';}
+const styleN=x=>x==='c'?'中心':x==='h'?'繞＋中':'繞圈';
+function zRender(z){const sec=document.querySelector('.cm-sec[data-m="'+z+'"]');if(!sec)return;const Z=ZONES[z],S=ZST[z],r=Z.recipes.find(x=>x.id===S.cur)||Z.recipes[0],R=zRun(z,r);
+  sec.querySelectorAll('.z-pick button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.r===r.id));
+  sec.querySelectorAll('.z-var button').forEach(b=>b.setAttribute('aria-pressed',(b.dataset.v||null)===S.v));
+  sec.querySelector('.z-sc').innerHTML=zScatter(z);
+  const temps=r.planTemp||r.plan.map(()=>r.temp),vw=r.valveWins,inV=t=>vw&&vw.some(([a,b])=>t>=a&&t<b),bn=cmBean(r.bean||'geisha');
+  sec.querySelector('.orea-card').innerHTML='<div class="orea-h"><b>'+r.n+'</b>'+(r.by?'<small>'+r.by+'</small>':'')+'<p>'+r.d+'</p></div><div class="t46-stats"><div><b>'+r.dose+' g</b><span>咖啡粉</span></div><div><b>'+r.water+' g'+(r.ice?'＋冰 '+r.ice+' g':'')+(r.bypass?'＋'+r.bypass+' g':'')+'</b><span>水（1:'+(+((r.water+(r.ice||0)+(r.bypass||0))/r.dose).toFixed(1))+'）</span></div><div><b>'+(r.planTemp?r.planTemp[0]+'→'+r.planTemp[r.planTemp.length-1]:r.temp)+'°C</b><span>水溫</span></div><div><b>'+r.gl+'</b><span>研磨（模擬 '+r.grind+' μm）</span></div></div>'+
+   '<div class="cm-bar">'+r.plan.map((ml,i)=>'<div style="flex:'+ml+';background:'+tempCol(temps[i])+'"'+(inV(r.planT[i])?' class="cl"':'')+'><b>'+Math.round(ml)+'</b><small>'+(r.style?styleN((r.style||[])[i]):temps[i]+'°')+'</small></div>').join('')+(r.ice?'<div style="flex:'+r.ice+';background:#dff1fb"><b>冰 '+r.ice+'</b><small>公杯</small></div>':'')+(r.bypass?'<div style="flex:'+r.bypass+';background:#f3d9b0"><b>+'+r.bypass+'</b><small>滴完後加</small></div>':'')+'</div>'+
+   '<div class="cm-tl">'+r.plan.map((ml,i)=>'<span style="flex:'+ml+'">'+cmFmt(r.planT[i])+'</span>').join('')+(r.ice?'<span style="flex:'+r.ice+'"></span>':'')+(r.bypass?'<span style="flex:'+r.bypass+'"></span>':'')+'</div>'+
+   '<p class="label">濾杯：'+DRIPPER[r.dripper].name+(vw?'＋Switch 閥門（斜線格＝關閥浸泡）':'')+'・原始配方滴完 '+r.done+(r.est?'・估計：'+r.est:'')+'</p>'+
+   '<p class="label">模型落點：<b>'+zoneOf(R.ey,R.tds)+'</b>（萃取率 '+R.ey.toFixed(1)+'%、濃度 '+R.tds.toFixed(2)+'%）</p><div class="z-beans"><b>☕ 適合的豆子</b><p>'+r.beans+'</p><small>模擬用：'+bn.name+'</small></div>';
+  const B=S.v?zRun(z,r,S.v):null,X=B||R;
+  sec.querySelector('.cm-res').innerHTML=[['濃度 TDS',X.tds.toFixed(2)+'%'],['萃取率',X.ey.toFixed(1)+'%'],['甜',T5(X.pf.sweet)],['酸',T5(X.pf.acid)],['苦',T5(X.pf.bitter)],['模型滴完',cmFmt(X.end)]].map(([k,v])=>'<div><b>'+v+'</b><span>'+k+'</span></div>').join('');
+  const vl=S.v?Z.vars.find(v=>v[0]===S.v)[1]:'';
+  sec.querySelector('.z-curve').innerHTML=curveSvg(R.curve,(B||R).curve,'原配方',B?vl:'（選「'+Z.varH+'」比較）');
   sec.querySelector('.cm-note').innerHTML=(r.ice||r.bypass?'<b>稀釋：</b>滴出來的咖啡濃度約 '+R.pre.toFixed(2)+'%，'+(r.ice?'加 '+r.ice+' g 冰':'再加 '+r.bypass+' g 熱水')+'後變成 '+R.tds.toFixed(2)+'%；萃取率不變（'+R.ey.toFixed(1)+'%）。':'')+
-   (B?' <b>換濾紙：</b>萃取率 '+R.ey.toFixed(1)+'% → '+B.ey.toFixed(1)+'%，滴完 '+cmFmt(R.end)+' → '+cmFmt(B.end)+'，苦 '+T5(R.pf.bitter)+' → '+T5(B.pf.bitter)+'。排水越慢，接觸時間越長，萃得越多。':(r.ice||r.bypass?'':'<b>試試看：</b>上面選另一種濾紙，模型會算出排水速度改變後的差別。'));
-  sec.querySelector('.orea-tab').innerHTML='<div class="t46-row head orea6"><span>配方</span><span>TDS</span><span>EY</span><span>甜</span><span>苦</span><span>滴完</span></div>'+OREA.map(x=>{const q=oreaRun(x);return '<div class="t46-row orea6'+(x.id===OST.cur?' on':'')+'" data-r="'+x.id+'"><span>'+x.n.replace('The ','')+(x.paper==='flat'?' <i class="orea-f">平底</i>':'')+'</span><span>'+q.tds.toFixed(2)+'%</span><span>'+q.ey.toFixed(1)+'%</span><span>'+T5(q.pf.sweet)+'</span><span>'+T5(q.pf.bitter)+'</span><span>'+x.done+'</span></div>';}).join('');
-  sec.querySelectorAll('.orea-tab [data-r]').forEach(e=>e.onclick=()=>{OST.cur=e.dataset.r;OST.paper=null;oreaRender();});}
-function oreaBind(){const sec=document.querySelector('.cm-sec[data-m="orea"]');
-  sec.querySelector('.orea-sc').addEventListener('click',e=>{const svg=e.currentTarget.querySelector('svg');if(!svg)return;
-    const pt=svg.createSVGPoint();pt.x=e.clientX;pt.y=e.clientY;const q=pt.matrixTransform(svg.getScreenCTM().inverse());
+   (B?' <b>'+vl+'：</b>萃取率 '+R.ey.toFixed(1)+'% → '+B.ey.toFixed(1)+'%，滴完 '+cmFmt(R.end)+' → '+cmFmt(B.end)+'，甜 '+T5(R.pf.sweet)+' → '+T5(B.pf.sweet)+'，苦 '+T5(R.pf.bitter)+' → '+T5(B.pf.bitter)+'。':(r.ice||r.bypass?'':'<b>試試看：</b>上面換一個'+Z.varH+'，模型會算出差別。'));
+  sec.querySelector('.z-tab').innerHTML='<div class="t46-row head orea6"><span>配方</span><span>TDS</span><span>EY</span><span>甜</span><span>苦</span><span>滴完</span></div>'+Z.recipes.map(x=>{const q=zRun(z,x);return '<div class="t46-row orea6'+(x.id===r.id?' on':'')+'" data-r="'+x.id+'"><span><i class="z-dot" style="background:'+Z.color(x)+'"></i>'+x.n.replace('The ','')+'</span><span>'+q.tds.toFixed(2)+'%</span><span>'+q.ey.toFixed(1)+'%</span><span>'+T5(q.pf.sweet)+'</span><span>'+T5(q.pf.bitter)+'</span><span>'+x.done+'</span></div>';}).join('');
+  sec.querySelectorAll('.z-tab [data-r]').forEach(e=>e.onclick=()=>{S.cur=e.dataset.r;S.v=null;zRender(z);});}
+function zPick(z,id){const S=ZST[z];S.cur=id;S.v=null;zRender(z);const sec=document.querySelector('.cm-sec[data-m="'+z+'"]'),card=sec&&sec.querySelector('.orea-card');
+  if(card){card.classList.remove('flash');void card.offsetWidth;card.classList.add('flash');}}
+function zBind(z){const sec=document.querySelector('.cm-sec[data-m="'+z+'"]'),S=ZST[z],Z=ZONES[z];
+  sec.querySelector('.z-sc').addEventListener('click',e=>{const svg=e.currentTarget.querySelector('svg');if(!svg)return;const pt=svg.createSVGPoint();pt.x=e.clientX;pt.y=e.clientY;const q=pt.matrixTransform(svg.getScreenCTM().inverse());
     let best=null,bd=1e9;svg.querySelectorAll('.orea-dot').forEach(g=>{const c=g.querySelector('circle');const d=Math.hypot(+c.getAttribute('cx')-q.x,+c.getAttribute('cy')-q.y);if(d<bd){bd=d;best=g.dataset.r;}});
-    if(!best||bd>18)return;OST.cur=best;OST.paper=null;oreaRender();
-    const card=sec.querySelector('.orea-card');if(card){card.classList.remove('flash');void card.offsetWidth;card.classList.add('flash');scrollTo({top:scrollY+card.getBoundingClientRect().top-150,behavior:'smooth'});}});
-  sec.querySelectorAll('.orea-pick button').forEach(b=>b.onclick=()=>{OST.cur=b.dataset.r;OST.paper=null;oreaRender();});
-  sec.querySelectorAll('.orea-paper button').forEach(b=>b.onclick=()=>{OST.paper=b.dataset.p||null;oreaRender();});
-  sec.querySelector('.cm-go').onclick=()=>{const r=OREA.find(x=>x.id===OST.cur),p=oreaParams(r,OST.paper);if(!window.simApplyRecipe)return;
-    simApplyRecipe({dripper:'orea',dose:p.dose,ratio:p.ratio,temp:p.temp,grind:p.grind,pattern:'pulse',plan:p.plan,planT:p.planT,planD:p.planD,planTemp:null,beanId:'geisha',valveWins:null,prePO:'none'});location.hash='#sim';};}
-TOURS.cm_orea={view:'learnView',lead:'gOrea',title:'OREA-O 配方專區',blurb:'我是歐蕾，負責 OREA 平底濾杯。10 套官方配方，我帶你用模型一套一套看懂。',steps:[
-  {w:'gOrea',t:'我是歐蕾，這裡收著 OREA 官方的 10 套 O1 配方。',el:'.cm-sec[data-m="orea"] h1',go:()=>cmShow('orea')},
-  {w:'gOrea',t:'先看平底濾杯的原理：粉層到處一樣厚，水流過每一處粉的距離差不多，所以萃得均勻。',el:'.cm-sec[data-m="orea"] .cm-cards'},
-  {w:'li',t:'Wave 和平底濾紙差在哪？'},
-  {w:'cui',t:'Wave 濾紙側邊有空氣通道，排水快；平底濾紙整片貼底，再加上 Negotiator，排水變慢、接觸時間變長。',el:'.cm-sec[data-m="orea"] .cm-cards'},
-  {w:'gOrea',t:'這張控制圖把 10 套配方都畫上去了。藍點是 Wave、粉紅點是平底濾紙。中間黃框是 SCA 的理想區。',el:'.cm-sec[data-m="orea"] .orea-sc'},
-  {w:'gOrea',t:'在這裡選配方，配方卡會畫出每一注的水量、注法和時間。',el:'.cm-sec[data-m="orea"] .orea-pick'},
-  {w:'gOrea',t:'再換濾紙試試：同一套配方，換成平底濾紙，萃取率會往上；換成 Wave，滴得比較快、比較明亮。',el:'.cm-sec[data-m="orea"] .orea-paper',go:()=>{OST.cur='base';OST.paper='flat';oreaRender();}},
-  {w:'cui',t:'加冰的 The Ice 和加水的 The Bypass，萃取率不會變，只有濃度往下掉。在控制圖上看就是一條直直往下的虛線。',el:'.cm-sec[data-m="orea"] .orea-sc',go:()=>{OST.cur='ice';OST.paper=null;oreaRender();}},
-  {w:'gOrea',t:'這張表把 10 套一起比較，點一列就會切過去。',el:'.cm-sec[data-m="orea"] .orea-tab'},
-  {w:'gOrea',t:'挑一套喜歡的，按這裡帶到模擬器沖一次。',el:'.cm-sec[data-m="orea"] .cm-go'}]};
+    if(best&&bd<=18)zPick(z,best);});
+  sec.querySelectorAll('.z-pick button').forEach(b=>b.onclick=()=>{S.cur=b.dataset.r;S.v=null;zRender(z);});
+  sec.querySelectorAll('.z-var button').forEach(b=>b.onclick=()=>{S.v=b.dataset.v||null;zRender(z);});
+  sec.querySelector('.cm-go').onclick=()=>{const r=Z.recipes.find(x=>x.id===S.cur),p=zParams(z,r,S.v);if(!window.simApplyRecipe)return;
+    const dr=DRIPPER[p.dripper]&&['v60','orea','cone','origami_c','origami_w','kalita','solo'].includes(p.dripper)?p.dripper:(p.dripper==='v60neo'?'v60':'orea');
+    simApplyRecipe({dripper:dr,dose:p.dose,ratio:p.ratio,temp:p.temp,grind:p.grind,pattern:p.pattern,plan:p.plan,planT:p.planT,planD:p.planD,planTemp:p.planTemp,beanId:r.bean||'geisha',valveWins:p.valveWins,prePO:'none'});location.hash='#sim';};}
+Object.keys(ZONES).forEach(z=>{const Z=ZONES[z];TOURS['cm_'+z]={view:'learnView',lead:Z.g,title:Z.h1,blurb:'我是'+WHO[Z.g].n+'。'+Z.h1+'收錄 '+Z.recipes.length+' 套配方，我帶你看原理、金杯圖和每套配方適合的豆子。',
+  steps:Z.tour.map(([w,t,el],i)=>{const s={w,t};if(el)s.el='.cm-sec[data-m="'+z+'"] '+el;if(i===0)s.go=()=>cmShow(z);return s;})};});
+// ---------- 九宮格金杯圖（SCA 沖煮控制圖） ----------
+// 中心方格是金杯；EY 18–22%、TDS 1.15–1.45% 把圖切成 9 區。軸固定以金杯為中心，超出範圍的點貼在邊上並標出數值。
+const GC={ex:[13,27],tx:[0.8,1.8]};
+function goldChart(pts){const W=320,H=250,x0=34,y0=8,w=W-x0-8,h=H-y0-34,ex=GC.ex,tx=GC.tx;
+  const X=v=>x0+(v-ex[0])/(ex[1]-ex[0])*w,Y=v=>y0+h-(v-tx[0])/(tx[1]-tx[0])*h,cl=(v,a)=>Math.max(a[0],Math.min(a[1],v));
+  const xs=[ex[0],18,22,ex[1]],ys=[tx[1],1.45,1.15,tx[0]];
+  const NAME=[['濃・萃取不足','濃','濃・過度萃取'],['萃取不足','金杯','過度萃取'],['淡・萃取不足','淡','淡・過度萃取']];
+  const TASTE=[['酸、鹹、刺','厚重','苦、厚重'],['酸、薄、青','平衡','苦、澀'],['水、酸','水、淡','水、苦澀']];
+  let s='<svg viewBox="0 0 '+W+' '+H+'" width="100%">';
+  for(let i=0;i<3;i++)for(let j=0;j<3;j++){const gx=X(xs[j]),gy=Y(ys[i]),gw=X(xs[j+1])-gx,gh=Y(ys[i+1])-gy,center=i===1&&j===1;
+    s+='<rect x="'+gx+'" y="'+gy+'" width="'+gw+'" height="'+gh+'" fill="'+(center?'#e8b04a':['#7fb6e0','#e8805a'][j===0?0:1])+'" opacity="'+(center?.2:j===1?.03:.07)+'" stroke="var(--line)" stroke-width=".6"/>';
+    s+='<text x="'+(gx+gw/2)+'" y="'+(gy+gh/2-2)+'" font-size="'+(center?9:7.5)+'" text-anchor="middle" fill="'+(center?'#e8b04a':'var(--muted)')+'" opacity="'+(center?1:.75)+'" font-weight="'+(center?700:400)+'">'+NAME[i][j]+'</text>';
+    s+='<text x="'+(gx+gw/2)+'" y="'+(gy+gh/2+8)+'" font-size="6.5" text-anchor="middle" fill="var(--muted)" opacity=".55">'+TASTE[i][j]+'</text>';}
+  s+='<rect x="'+X(18)+'" y="'+Y(1.45)+'" width="'+(X(22)-X(18))+'" height="'+(Y(1.15)-Y(1.45))+'" fill="none" stroke="#e8b04a" stroke-width="1.4"/>';
+  [13,15,18,20,22,25,27].forEach(e=>{s+='<text x="'+X(e)+'" y="'+(y0+h+11)+'" font-size="8" text-anchor="middle" fill="var(--muted)">'+e+'%</text>';});
+  [0.8,1.0,1.15,1.3,1.45,1.6,1.8].forEach(t=>{s+='<text x="'+(x0-3)+'" y="'+(Y(t)+3)+'" font-size="8" text-anchor="end" fill="var(--muted)">'+t.toFixed(t===1.15||t===1.45?2:1)+'</text>';});
+  s+='<text x="'+(x0+w)+'" y="'+(y0+h+26)+'" font-size="9" text-anchor="end" fill="var(--muted)">萃取率 EY →</text><text x="'+(x0-30)+'" y="'+(y0+h+26)+'" font-size="9" fill="var(--muted)">↑ 濃度 TDS %</text>';
+  pts.forEach(p=>{if(p.pre!=null&&p.on){const px=X(cl(p.x,ex));s+='<line x1="'+px+'" x2="'+px+'" y1="'+Y(cl(p.pre,tx))+'" y2="'+Y(cl(p.y,tx))+'" stroke="'+p.c+'" stroke-dasharray="2 2"/><circle cx="'+px+'" cy="'+Y(cl(p.pre,tx))+'" r="3" fill="none" stroke="'+p.c+'"/>';}});
+  pts.slice().sort((a,b)=>a.on-b.on).forEach(p=>{const out=p.x<ex[0]||p.x>ex[1]||p.y<tx[0]||p.y>tx[1],cx=X(cl(p.x,ex)),cy=Y(cl(p.y,tx));
+    s+='<g class="orea-dot" data-r="'+p.id+'"><circle cx="'+cx+'" cy="'+cy+'" r="11" fill="transparent"/>'+(out?'<path d="M'+cx+' '+(cy-6)+'L'+(cx+5.5)+' '+(cy+4)+'L'+(cx-5.5)+' '+(cy+4)+'Z" fill="'+p.c+'" stroke="'+(p.on?'var(--ink)':'none')+'" stroke-width="1.5"/>':'<circle cx="'+cx+'" cy="'+cy+'" r="'+(p.on?6:4.5)+'" fill="'+p.c+'" stroke="'+(p.on?'var(--ink)':'none')+'" stroke-width="1.5"/>')+'</g>';
+    if(p.on){const right=cx<x0+w*0.62;s+='<text x="'+(right?cx+9:cx-9)+'" y="'+(cy+3)+'" font-size="9" font-weight="700" text-anchor="'+(right?'start':'end')+'" fill="var(--ink)" paint-order="stroke" stroke="var(--panel)" stroke-width="3">'+p.label+(out?'（'+p.x.toFixed(1)+'%・'+p.y.toFixed(2)+'%）':'')+'</text>';}});
+  return s+'</svg>';}
+function zoneOf(ey,tds){const c=ey<18?0:ey>22?2:1,r=tds>1.45?0:tds<1.15?2:1;return [['濃・萃取不足','濃','濃・過度萃取'],['萃取不足','金杯','過度萃取'],['淡・萃取不足','淡','淡・過度萃取']][r][c];}
 
 function startTour(k,opt){endTour(true);const T=TOURS[k];if(!T)return;
   const modeOf={simView:'sim',learnView:'learn',microView:'micro',bedView:'bed',noseView:'nose',waterView:'water',goldView:'gold'}[T.view];
