@@ -112,6 +112,11 @@ label.f input.mono{font-family:var(--mono)}
 .psvg .pa{fill:var(--rc,var(--accent));fill-opacity:.1}.psvg .pl{fill:none;stroke:var(--muted);stroke-width:1.2;stroke-dasharray:2 2}
 .psvg .cb{fill:var(--cold);fill-opacity:.12}.psvg .dn{stroke:var(--good);stroke-width:1.2;stroke-dasharray:3 2}
 .lmap .ld{cursor:pointer}.lmap .gz{font-size:8px;fill:var(--muted);opacity:.8}.lmap .gz.gc{font-size:10px;font-weight:700;fill:#c8902a;opacity:1}.lmap .gt{font-size:7px;fill:var(--muted);opacity:.6}
+.pbar{display:flex;gap:4px;margin:8px 0 3px}.pb{min-width:0;border-radius:7px;padding:6px 2px 5px;text-align:center;color:#2a1d12;line-height:1.15;overflow:hidden}
+.pb b{display:block;font-size:15px;font-family:var(--body)}.pb small{display:block;font-size:10.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;opacity:.85}
+.pb.pc{background-image:repeating-linear-gradient(135deg,transparent 0 6px,rgba(0,0,0,.08) 6px 12px)}.pb.px{background:transparent;border:1.5px dashed var(--line);color:var(--muted)}
+.pbt{display:flex;gap:4px;font-size:11px;color:var(--muted);font-family:var(--mono);margin-bottom:4px}.pbt span{min-width:0;overflow:hidden;white-space:nowrap}
+.rlib details .psvg{margin:6px 0 2px}
 .simz{display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--muted);margin:0 0 6px}.zb{font-size:11px;padding:1px 7px;border-radius:99px;background:var(--sunken);color:var(--ink)}.zb.zg{background:#e8b04a33;color:#a8741a;font-weight:600}.lmap .lbl{fill:var(--ink);font-family:var(--body);font-size:11px;font-weight:600;paint-order:stroke;stroke:var(--surface);stroke-width:3px}
 .lmapc{padding-bottom:6px}
 .tkey{display:flex;align-items:center;gap:4px;font-size:10.5px;color:var(--muted);margin-top:2px}.tkey i{display:inline-block;width:14px;height:4px;border-radius:2px}.tkey span{margin-right:4px}
@@ -1647,12 +1652,18 @@ function libMap(L){const W=340,H=262,x0=36,y0=8,w=W-x0-8,h=H-y0-36;
     if(on){const right=cx<x0+w*.6;s+=`<text x="${(right?cx+10:cx-10).toFixed(1)}" y="${(cy+3).toFixed(1)}" class="tk lbl" text-anchor="${right?'start':'end'}">${esc(r.name)}${out?`（${r.ey}%・${r.tds}%）`:''}</text>`}});
   return s+'</svg>'}
 function simLine(r){return has(r.ey)&&has(r.tds)?`<div class="simz"><span class="zb z${zoneOf(r.ey,r.tds)==='金杯'?'g':''}">${zoneOf(r.ey,r.tds)}</span><span class="mono">模擬 EY ${r.ey}%・TDS ${r.tds}%</span></div>`:''}
+/* 注水區塊：一塊＝一注，寬度＝這注的水量，顏色深淺＝水溫 */
+function blockCol(t){if(!has(t))return '#c99a6e';if(t<86){const k=Math.max(0,Math.min(1,(t-70)/16));return `hsl(205,${30+k*5}%,${72-k*6}%)`}const k=Math.max(0,Math.min(1,(t-86)/13));return `hsl(${30-k*12},${48+k*14}%,${68-k*14}%)`}
+function blockBar(r){const P=(r.pours||[]).slice().sort((a,b)=>a.t-b.t);if(!P.length)return '';const fx=p=>Math.max(p.add,r.water/14);
+  return `<div class="pbar">${P.map(p=>{const t=p.temp??r.temp,tag=[p.closed?'關閥':p.center?'中心':p.half?'繞＋中':'繞圈',has(t)?t+'°':''].filter(Boolean).join(' ');
+    return `<div class="pb${p.closed?' pc':''}" style="flex:${fx(p)} 1 0;background-color:${blockCol(t)}"><b>${p.add}</b><small>${tag}</small></div>`}).join('')}${r.ice||r.bypass?`<div class="pb px" style="flex:${Math.max(r.ice||r.bypass,r.water/14)} 1 0"><b>${r.ice||r.bypass}</b><small>${r.ice?'冰塊':'補水'}</small></div>`:''}</div>
+    <div class="pbt">${P.map(p=>`<span style="flex:${fx(p)} 1 0">${fmtTime(p.t)}</span>`).join('')}${r.ice||r.bypass?`<span style="flex:${Math.max(r.ice||r.bypass,r.water/14)} 1 0">${r.ice?'':'最後'}</span>`:''}</div>`}
 function libCard(r,sel){const mine=myByLib(r.id),c=RCOL[r.cat]||'var(--accent)',temps=new Set((r.pours||[]).map(p=>p.temp??r.temp));
   return `<div class="card rlib${sel?' sel':''}" style="--rc:${c}"><div class="between"><div><div class="title">${esc(r.name)}</div><div class="sub"><span class="cdot" style="background:${c}"></span>${esc(RCAT[r.cat]||'')}${r.by?' · '+esc(r.by):''}</div></div>${sel?'<button class="btn sm" data-act="libPick" data-id="" aria-label="關閉">✕</button>':''}</div>
     <div class="gearline">${esc(r.gear||'')}${r.sw?' · 閥門':''}${r.ice?` · 冰 ${r.ice}g`:''}${r.bypass?` · 補水 ${r.bypass}g`:''}</div>
-    ${simLine(r)}${tilesHtml(r)}${pourSvg(r,sel)}${temps.size>1?'<div class="tkey"><span>線的顏色＝水溫</span><i style="background:'+tempCol(72)+'"></i>低<i style="background:'+tempCol(85)+'"></i><i style="background:'+tempCol(97)+'"></i>高</div>':''}
+    ${simLine(r)}${tilesHtml(r)}${blockBar(r)}
     ${fitHtml(r)}
-    <details><summary class="sub">文字說明、注水表</summary>
+    <details><summary class="sub">注水曲線、文字說明、注水表</summary>${pourSvg(r,true)}${temps.size>1?'<div class="tkey"><span>線的顏色＝水溫</span><i style="background:'+tempCol(72)+'"></i>低<i style="background:'+tempCol(85)+'"></i><i style="background:'+tempCol(97)+'"></i>高</div>':''}
       ${r.desc?`<div style="margin:6px 0">${esc(r.desc)}</div>`:''}
       <table class="cmp"><tr><th>時間</th><th>這段注</th><th>累計</th><th></th></tr>${(r.pours||[]).map(p=>`<tr><td class="mono">${fmtTime(p.t)}</td><td class="mono">+${p.add}g</td><td class="mono">${p.to}g</td><td class="sub">${[p.temp!=null?p.temp+'°C':'',p.closed?'關閥':'',p.center?'中心':p.half?'繞＋中':''].filter(Boolean).join('、')}</td></tr>`).join('')}</table>
       ${r.beans?`<div class="sub" style="margin-top:6px">☕ 適合的豆子：${esc(r.beans)}</div>`:''}${r.est?`<div class="sub">估計：${esc(r.est)}</div>`:''}</details>
