@@ -713,6 +713,12 @@ html.dark .med-red b{color:#e07a6a}
 .rs-hot{display:flex;gap:8px;margin:2px 0;font-size:12px}.rs-hot span{border:1.5px solid var(--line);padding:1px 6px}.rs-bk{display:block;text-align:center;margin-top:8px}
 .rs-ph{margin-top:6px}.rs-ph .btn{font-size:13px;padding:8px 6px;white-space:nowrap}
 .rs-info{margin-top:6px;font-size:13px;line-height:1.6;border-left:3px solid var(--maple);padding-left:8px}
+.mws{margin:10px 0;border:2px solid var(--px);background:color-mix(in srgb,var(--sea) 10%,var(--card));padding:8px 10px}
+.mws-h{font-family:var(--ff-b);font-weight:700;margin-bottom:4px}.mws-nx{font-size:13px;background:var(--sea);color:#fff;padding:4px 8px;margin-bottom:6px}
+.mws-r{display:grid;grid-template-columns:24px 1fr;gap:2px 6px;padding:5px 0;border-top:1px dashed var(--line);align-items:center}.mws-r>i{font-style:normal;grid-row:span 2;font-size:18px}
+.mws-r b{font-size:14px}.mws-r span{font-size:11px;color:var(--sub);margin-left:6px}.mws-r em{grid-column:2;font-style:normal;display:flex;gap:4px;flex-wrap:wrap}
+.mws-r u{text-decoration:none;font-family:var(--ff-px);font-size:13px;padding:2px 6px;border:1.5px solid var(--sea);color:var(--ink)}.mws-r u.past{opacity:.35;text-decoration:line-through}.mws-r u.nx{background:var(--sea);color:#fff}
+.mws-f{font-size:10.5px;color:var(--sub);margin-top:4px}
 .db-hint{font-size:12px;color:var(--sub);margin-top:6px}.db-sel{margin-top:6px;font-size:13px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}.db-sel button{margin-left:auto;font-size:12px;padding:3px 10px;border:1.5px solid var(--line);border-radius:999px;background:var(--card);color:var(--ink)}
 .db-l li{cursor:pointer;padding:2px 4px}.db-l li.sel{background:color-mix(in srgb,var(--day) 18%,transparent);outline:1.5px solid var(--day)}
 .db-svg .riv{fill:none;stroke:color-mix(in srgb,var(--sea) 60%,var(--card));stroke-width:5;stroke-linejoin:round;shape-rendering:geometricPrecision}.db-svg .rivt{font-size:9px;fill:var(--sea);font-family:var(--ff-b)}
@@ -1728,6 +1734,18 @@ function dayBrief(i){const d=D(i),B0=DBRIEF[i]||['',''],chg=typeof dayChanged===
  const barKm=[.5,1,2,5,10,20,50].find(b=>b*k/111>=50)||50;g+=`<line x1="8" y1="${H-8}" x2="${8+barKm*k/111}" y2="${H-8}" class="sc"/><text x="8" y="${H-12}" class="st">${kmTxt(barKm)}</text><text x="${W-6}" y="14" text-anchor="end" class="st">N ↑</text></svg>`;
  return `<div class="dbrief"><div class="db-t"><b>${esc(B[0])}</b><span>${esc(B[1])}</span>${chg?'<small class="db-upd">🔄 行程有修改，簡介已依最新行程自動更新</small>':''}</div><div class="db-far">📍 今天最遠：<b>${esc(far.n)}</b>・在飯店${dirTxt(far.p)}方約 <b>${kmTxt(km)}</b></div>${g}${sq?`<div class="db-sel">📍 只看第 ${pts.findIndex(x=>x.q===sq)+1} 站：<b>${esc((pts.find(x=>x.q===sq)||{}).n||'')}</b><button data-dball="1">✕ 顯示全部</button></div>`:'<div class="db-hint">👆 點地圖上的數字或下面的地點，只看那一站的行程</div>'}<ol class="db-l">${pts.map((x,j)=>`<li class="${x===far?'far':''}${sq===x.q?' sel':''}" data-dbq="${esc(x.q)}"><i>${j+1}</i><span>${esc(x.n)}</span><em>${dirTxt(x.p)}・${kmTxt(llKm(x.p,HOTEL_LL))}</em></li>`).join('')}</ol></div>`}
 document.addEventListener('click',e=>{const a=e.target.closest('[data-dball]');if(a&&(a.closest('.dbrief')||a.closest('.db-only'))){dbSel=null;renderDay();return}const q=e.target.closest('[data-dbq]');if(q&&q.closest('.dbrief')){const v=q.dataset.dbq;dbSel=dbQ()===v?null:{d:curDay,q:v};renderDay()}});
+
+const MW_SHOWS={d:'11/23',src:'館內看板 11/23 12:54 拍',rows:[
+ ['🐬','海豚・海獅秀','2F・3F 表演池',['11:00','12:30','14:00','15:30']],
+ ['🐟','外洋大水槽秀（餵食）','1・2F 外洋大水槽',['11:15','12:45','14:15']],
+ ['🦭','GOGO 海豹','怪獸島',['10:40']],
+ ['🐧','企鵝活動','怪獸島',['11:50','16:10']],
+ ['🗣️','島嶼解說（海豚訓練）','怪獸島',['15:00']]]};
+function mwShows(){const n=jstNow(),today=n.mo===11&&n.da===23,cur=today?n.min:-1;const toM=t=>{const[a,b]=t.split(':');return +a*60+ +b};
+ let nx=null;if(today)MW_SHOWS.rows.forEach(r=>r[3].forEach(t=>{const m=toM(t);if(m>=cur&&(!nx||m<nx.m))nx={m,t,r}}));
+ return `<div class="mws"><div class="mws-h">🎪 今日表演時刻（免費觀賞）</div>${nx?`<div class="mws-nx">⏭ 下一場：<b>${nx.t}</b> ${nx.r[0]} ${nx.r[1]}（${nx.r[2]}）・還有 ${nx.m-cur} 分</div>`:''}
+ ${MW_SHOWS.rows.map(r=>`<div class="mws-r"><i>${r[0]}</i><div><b>${r[1]}</b><span>${r[2]}</span></div><em>${r[3].map(t=>{const m=toM(t),past=today&&m<cur,nxt=nx&&nx.t===t&&nx.r===r;return `<u class="${past?'past':''}${nxt?' nx':''}">${t}</u>`}).join('')}</em></div>`).join('')}
+ <div class="mws-f">資料：${MW_SHOWS.src}；天候或動物狀況可能取消，以現場看板為準</div></div>`}
 function renderDay(keep){
  const opened=keep?[...document.querySelectorAll('.stop.open')].map(x=>x.dataset.id):[];
  const d=D(curDay);document.documentElement.style.setProperty('--day',d.c);document.documentElement.style.setProperty('--day-soft',soft(d.c));
@@ -1762,6 +1780,7 @@ function renderDay(keep){
    <div class="more">${esc(s.d)}${s.tip?`<div class="tip">💡 ${esc(s.tip)}</div>`:''}${SF[s.id]?(()=>{const a=SF[s.id],fs=FOODS.filter(f=>f.a===a.k).sort((x,y)=>(fw[y.id]?1:0)-(fw[x.id]?1:0)),nw=fs.filter(f=>fw[f.id]).length;
     return `<a class="foodbox" href="#food" data-farea="${a.k}"><b>🍜 ${a.n}附近好吃的 ${fs.length} 間${nw?`（${nw} 間在想吃清單）`:''}</b><span>${fs.map(f=>(fw[f.id]?'✓ ':'')+esc(f.n.replace(/（.*?）/g,''))).join('、')}</span><em>看推薦 ›</em></a>`})():''}${SG[s.id]?(()=>{const gs=SG[s.id].slice().sort((a,b)=>(gw[b.id]?1:0)-(gw[a.id]?1:0)),nw=gs.filter(g=>gw[g.id]).length;
     return (curDay>=6&&/機場|空港/.test(stopText(s))?`<a class="giftbox" href="#tax" style="background:#e9f4ec;border-color:#c5dccb"><b style="color:#2f6b4a">🧾 有買免稅品？託運行李「之前」要先辦免稅手續</b><span>新制要在機場掃護照做海關確認才會退稅，順序錯了就退不回來。</span><em>看退稅教學 ›</em></a>`:'')+`<a class="giftbox" href="#gift" data-gf=""${gs.map(g=>g.id).join(',')}" data-gl="${esc(s.n)}"><b>🎁 這一站買得到 ${gs.length} 款伴手禮${nw?`（其中 ${nw} 款在想買清單）`:''}</b><span>${gs.slice(0,8).map(g=>(gw[g.id]?'✓ ':'')+esc(gShort(g))).join('、')}${gs.length>8?'…':''}</span><em>看介紹 ›</em></a>`})():''}
+   ${/海之中道海洋世界|海洋世界/.test(s.n)&&!/前往/.test(s.n)?mwShows():''}
    ${/九州自然動物園/.test(s.n)?`<div class="zmap"><div class="zmap-h">🗺️ 九州自然動物園 園區地圖</div><img src="zoo-map.webp" alt="九州自然動物園 園區地圖" data-mzoom="1" loading="lazy"><div class="zmap-f">點圖放大（可雙指縮放）・<a href="zoo-map.webp" target="_blank" rel="noopener">開原圖</a>・圖：波比看世界</div></div>`:''}
    ${photoBox(s.id,s.q||s.n)}
    <div class="acts"><a class="btn" href="${mapUrl(s.q||s.n)}" target="_blank" rel="noopener">📍 地圖導航</a>
