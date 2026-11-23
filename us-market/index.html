@@ -68,6 +68,9 @@ main{max-width:760px;margin:0 auto;padding:14px max(14px,env(safe-area-inset-lef
 .bgrid .now{color:var(--s1)}
 .chip:has(.sico){display:inline-flex;align-items:center}svg.sico{display:inline-block;width:15px;height:15px;flex:none;vertical-align:-3px;margin-right:6px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;opacity:.85}.chip.on .sico{opacity:1}
 .subtabs2{margin-top:-4px;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}.subtabs2::-webkit-scrollbar{display:none}.subtabs2 .chip{font-size:13px;padding:5px 11px;flex:none;white-space:nowrap}
+.caltl{overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;margin:8px -4px 0;padding:0 4px}.caltl::-webkit-scrollbar{display:none}.caltl svg{display:block}
+.calhint{font-size:13px;color:var(--muted);display:flex;align-items:center;gap:8px;min-height:28px}.calhint b{color:var(--fg)}
+.cdot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;vertical-align:2px}
 .foldbar{display:flex;gap:8px;justify-content:flex-end;margin:-4px 0 10px}
 .foldbar button{font:inherit;font-size:12px;padding:5px 10px;border-radius:999px;border:1px solid var(--line);background:var(--panel);color:var(--muted)}
 .meta{font-size:12px;color:var(--faint);display:flex;gap:8px;flex-wrap:wrap;align-items:center}
@@ -272,7 +275,10 @@ input[type=range]{width:100%;accent-color:var(--s1)}
   <section class="pane" id="p-cal">
     <div class="card">
       <h2>接下來要盯的日子</h2>
-      <div class="meta">時間皆換算為台北時間</div>
+      <div class="meta">時間皆換算為台北時間；圓圈裡的數字＝那天有幾件事，上方小點＝類別</div>
+      <div id="calTlW" class="caltl"><div id="calTl"></div></div>
+      <div class="legend" id="calLeg" style="margin:4px 0 8px"></div>
+      <div class="calhint" id="calHint"></div>
       <div class="cal" id="calList" style="margin-top:8px"></div>
     </div>
   </section>
@@ -905,7 +911,38 @@ function renderVw(){
   </article>`).join("");
 }
 /* ---------- 行事曆 ---------- */
-$("#calList").innerHTML=CAL.map(c=>`<div class="day">${c[0]}<small>${c[1]}</small></div><div class="ev"><b>${esc(c[2])}</b><span>${esc(c[3])}</span></div>`).join("");
+/* 接下來：時間軸 */
+const CALK=t=>/台股|櫃買|融資|金管會|證交所|國安|台指|加權/.test(t)?"tw":/Fed|FOMC|聯準會|CPI|PCE|GDP|非農|就業|褐皮書|通膨|消費者信心|利率|鮑爾|Powell/.test(t)?"macro":/財報|法說|營收|指引/.test(t)?"earn":/IPO|上市|Nvidia|黃仁勳|國會|作證|Anthropic|OpenAI/.test(t)?"co":"oth";
+const CALC={tw:["台股","#e0662e"],macro:["總經／Fed","#8a5cf6"],earn:["財報","#2f80ed"],co:["公司／政策","#16a085"],oth:["其他","#8a8f98"]};
+let CALSEL=null;
+function calDate(md){if(!/^\d{1,2}\/\d{1,2}$/.test(md))return null;const[m,d]=md.split("/").map(Number);const y=m<10?2027:2026;return new Date(y,m-1,d)}
+function renderCal(){
+  const days=[];CAL.forEach(c=>{if(!days.includes(c[0]))days.push(c[0])});
+  const wk="日一二三四五六",today=new Date(ASOF.slice(0,10)+"T00:00");
+  let x=28,pos=[],prev=null;days.forEach(d=>{const dt=calDate(d);if(pos.length){x+=dt&&prev?Math.max(52,Math.min(120,(dt-prev)/864e5*16)):60}pos.push([d,x,dt]);if(dt)prev=dt});
+  const Wd=x+28,H=118,ax=58;
+  let svg=`<svg viewBox="0 0 ${Wd} ${H}" width="${Wd}" height="${H}" style="display:block;width:${Wd}px;max-width:none">`;
+  svg+=`<line x1="10" y1="${ax}" x2="${Wd-10}" y2="${ax}" stroke="var(--line)" stroke-width="2"/>`;
+  // month separators
+  let lm=null;pos.forEach(([d,px,dt])=>{if(!dt)return;if(lm===null)svg+=`<text x="${px-22}" y="14" font-size="11" fill="var(--muted)">${dt.getMonth()+1} 月</text>`;if(lm!==null&&dt.getMonth()!==lm){svg+=`<line x1="${px-26}" y1="16" x2="${px-26}" y2="${H-8}" stroke="var(--line)" stroke-dasharray="3 3"/><text x="${px-22}" y="14" font-size="11" fill="var(--muted)">${dt.getMonth()+1} 月</text>`}lm=dt.getMonth()});
+  pos.forEach(([d,px,dt],i)=>{const evs=CAL.filter(c=>c[0]===d),on=CALSEL===d,isT=dt&&+dt===+today;
+    const r=Math.min(13,7+evs.length*2);
+    svg+=`<g class="cald" data-cald="${d}" style="cursor:pointer"><rect x="${px-26}" y="0" width="52" height="${H}" fill="transparent"/>`;
+    if(on)svg+=`<rect x="${px-24}" y="20" width="48" height="${H-24}" rx="10" fill="var(--fg)" opacity=".08"/>`;
+    svg+=`<circle cx="${px}" cy="${ax}" r="${r}" fill="${on?"var(--fg)":"var(--panel)"}" stroke="${isT?"var(--bear)":"var(--fg)"}" stroke-width="${isT?2.5:1.5}" ${dt?"":'stroke-dasharray="3 2"'}/>`;
+    svg+=`<text x="${px}" y="${ax+4}" font-size="11" font-weight="700" text-anchor="middle" fill="${on?"var(--bg)":"var(--fg)"}">${evs.length}</text>`;
+    evs.slice(0,4).forEach((c,j)=>{svg+=`<circle cx="${px-((Math.min(evs.length,4)-1)*7)/2+j*7}" cy="${ax-r-9}" r="2.8" fill="${CALC[CALK(c[2]+c[3])][1]}"/>`});
+    svg+=`<text x="${px}" y="${ax+r+17}" font-size="12" font-weight="700" text-anchor="middle" fill="var(--fg)">${d}</text><text x="${px}" y="${ax+r+31}" font-size="10.5" text-anchor="middle" fill="${isT?"var(--bear)":"var(--muted)"}">${isT?"今天":dt?"週"+wk[dt.getDay()]:"日期未定"}</text></g>`});
+  svg+=`</svg>`;
+  $("#calTl").innerHTML=svg;
+  $("#calLeg").innerHTML=Object.values(CALC).map(v=>`<span><i style="background:${v[1]}"></i>${v[0]}</span>`).join("")+`<span><i style="background:transparent;border:2px solid var(--bear)"></i>今天</span>`;
+  const list=CALSEL?CAL.filter(c=>c[0]===CALSEL):CAL;
+  $("#calHint").innerHTML=CALSEL?`<b>${CALSEL}</b> 共 ${list.length} 件　<button class="chip" data-calall="1">看全部</button>`:`點時間軸上的日期，只看那天的大事（共 ${CAL.length} 件、${days.length} 天）`;
+  $("#calList").innerHTML=list.map(c=>`<div class="day">${c[0]}<small>${c[1]}</small></div><div class="ev"><b><i class="cdot" style="background:${CALC[CALK(c[2]+c[3])][1]}"></i>${esc(c[2])}</b><span>${esc(c[3])}</span></div>`).join("");
+}
+document.addEventListener("click",e=>{const g=e.target.closest("[data-cald]");if(g){const d=g.dataset.cald;CALSEL=CALSEL===d?null:d;const sc=$("#calTlW").scrollLeft;renderCal();$("#calTlW").scrollLeft=sc;return}
+ if(e.target.closest("[data-calall]")){CALSEL=null;const sc=$("#calTlW").scrollLeft;renderCal();$("#calTlW").scrollLeft=sc}});
+renderCal();
 /* ---------- 我的 ---------- */
 function renderMine(){
   const fav=LS.get("fav",[]);
