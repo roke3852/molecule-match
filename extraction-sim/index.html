@@ -650,7 +650,7 @@ html.embed{--modesH:0px}
 .cm-sec.flash>div:first-child{animation:oreaFlash 1.2s ease}
 .cm-mode{display:grid!important;grid-template-columns:1fr 1fr;gap:6px}.cm-pick .cm-mode button{border:1px solid var(--line)}
 .z-beans{margin-top:10px;border-left:3px solid #c9a66b;background:rgba(201,166,107,.08);border-radius:6px;padding:8px 10px}.z-beans b{font-size:14px}.z-beans p{margin:4px 0;font-size:14px;line-height:1.6}.z-beans small{color:var(--muted);font-size:11px}
-.z-robust{margin-top:12px;border:1px dashed var(--line);border-radius:8px;padding:10px}.z-robust b{font-size:14px}
+.z-robust{margin-top:12px;border:1px dashed var(--line);border-radius:8px;padding:10px}.z-robust b{font-size:14px}.z-robust summary{cursor:pointer;list-style:none;display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px}.z-robust summary::-webkit-details-marker{display:none}.z-robust summary::after{content:'▾';margin-left:auto;color:var(--muted)}.z-robust[open] summary::after{content:'▴'}.zr-hint{font-size:11px;color:var(--muted)}.z-robust[open] .zr-hint{display:none}.z-robust[open] summary{margin-bottom:8px}
 .z-g{display:block;font-size:10.5px;color:var(--muted);line-height:1.35;margin-top:2px}.z-tb button{font-size:12px}
 .z-adjtag{margin:10px 0 0;font-size:13px;color:#e8b04a;font-weight:700}
 .z-stats{display:grid!important;grid-template-columns:repeat(2,1fr);gap:8px}.z-stats>div{display:flex;flex-direction:column;justify-content:center;align-items:flex-start;text-align:left;padding:10px 12px;min-height:0}
@@ -1294,7 +1294,7 @@ window.BGM=(()=>{
     <div class="err" id="tErr"></div>
   </div>
   <button class="t-more" id="tMore" type="button" aria-label="咖啡宇宙：更多咖啡 App 與遊戲">咖啡宇宙</button>
-  <div class="t-foot">© 2026 Jim Lu　ver. 8.8</div>
+  <div class="t-foot">© 2026 Jim Lu　ver. 8.9</div>
 </div>
 <nav class="modes" aria-label="導覽"><div class="in">
   <button class="homebtn" id="homeBtn" type="button" hidden>‹ 主選單</button>
@@ -8401,8 +8401,8 @@ function zHTML(z){const Z=ZONES[z];return '<div class="cm-sec zone" data-m="'+z+
 function zRobust(z,r){const ids=['ethw','geisha','ken','col','bra','ethn','cof_peach','g_nordic'].filter(i=>cmBean(i));
   const rows=ids.map(i=>{const k=z+r.id+'@'+i;if(!ZRES[k]){const p=zParams(z,Object.assign({},r,{bean:i}),null),a=cmSim(p),c=cupOf(a.M,a.V,p.dose,a.S0);ZRES[k]={tds:c.tds,ey:c.ey,pf:cupProfile(c)};}return [cmBean(i).name,ZRES[k]];});
   const inGold=rows.filter(([,q])=>zoneOf(q.ey,q.tds)==='金杯').length,inEY=rows.filter(([,q])=>q.ey>=18&&q.ey<=22).length;
-  return '<div class="z-robust"><b>🧪 換 '+rows.length+' 支豆子跑模型：為什麼很難失敗</b><div class="t46-row head orea6"><span>豆子</span><span>TDS</span><span>EY</span><span>甜</span><span>苦</span><span>落點</span></div>'+rows.map(([n,q])=>'<div class="t46-row orea6"><span>'+n+'</span><span>'+q.tds.toFixed(2)+'%</span><span>'+q.ey.toFixed(1)+'%</span><span>'+T5(q.pf.sweet)+'</span><span>'+T5(q.pf.bitter)+'</span><span>'+zoneOf(q.ey,q.tds)+'</span></div>').join('')+
-   '<p class="label zr-note">'+zRobustNote(rows,inEY,inGold)+'</p></div>';}
+  return '<details class="z-robust"><summary><b>🧪 換 '+rows.length+' 支豆子跑模型：為什麼很難失敗</b><small class="zr-hint">點開看 '+rows.length+' 支豆子的結果</small></summary><div class="t46-row head orea6"><span>豆子</span><span>TDS</span><span>EY</span><span>甜</span><span>苦</span><span>落點</span></div>'+rows.map(([n,q])=>'<div class="t46-row orea6"><span>'+n+'</span><span>'+q.tds.toFixed(2)+'%</span><span>'+q.ey.toFixed(1)+'%</span><span>'+T5(q.pf.sweet)+'</span><span>'+T5(q.pf.bitter)+'</span><span>'+zoneOf(q.ey,q.tds)+'</span></div>').join('')+
+   '<p class="label zr-note">'+zRobustNote(rows,inEY,inGold)+'</p></details>';}
 function zRobustNote(rows,inEY,inGold){const main=rows.filter(([n])=>!/極淺焙/.test(n)),eys=main.map(([,q])=>q.ey),bits=main.map(([,q])=>q.pf.bitter);
   const lo=Math.min(...eys),hi=Math.max(...eys);
   return '同一套參數、不調研磨也不調水溫：除了極淺焙，'+main.length+' 支豆子的萃取率都擠在 <b>'+lo.toFixed(1)+'–'+hi.toFixed(1)+'%</b>（只差 '+(hi-lo).toFixed(1)+'%），苦味也只在 '+T5(Math.min(...bits))+'–'+T5(Math.max(...bits))+' 分（滿分 5）之間。不管換哪支豆，杯子都落在同一區、走向一樣，這就是它難失敗的原因。'+
