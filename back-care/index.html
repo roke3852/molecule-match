@@ -108,6 +108,8 @@ th{color:var(--sub);font-weight:500;font-size:13px}
 .fold{cursor:pointer;display:flex;align-items:center;gap:8px}
 .fold i{margin-left:auto;font-style:normal;color:var(--sub);transition:transform .2s}
 .fold.closed i{transform:rotate(-90deg)}
+.card.folded h2{margin-bottom:0}
+#chkHead.closed{margin-bottom:0}
 .toast{position:fixed;left:50%;bottom:96px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:8px 16px;border-radius:999px;font-size:13px;opacity:0;transition:.25s;pointer-events:none;z-index:20}
 .toast.on{opacity:1}
 </style>
@@ -463,6 +465,21 @@ function setFold(c){$('#chkBody').style.display=c?'none':'block';$('#chkHead').c
 $('#chkHead').onclick=()=>setFold($('#chkBody').style.display!=='none');setFold(store.get('bp_chk_fold',false));
 $('#shoeReset').onclick=()=>{sh=[];store.set('bp_shoe',sh);renderShoe()};
 renderShoe();
+
+
+/* ===== generic collapsible cards (鞋子分頁) ===== */
+(function(){let F=store.get('bp_fold',{});
+  document.querySelectorAll('#t-shoe .card').forEach(card=>{
+    const h=card.querySelector(':scope > h2');if(!h||h.id==='chkHead')return;
+    const key=h.textContent.trim().slice(0,12);
+    const body=document.createElement('div');
+    while(h.nextSibling)body.appendChild(h.nextSibling);
+    card.appendChild(body);
+    h.classList.add('fold');h.insertAdjacentHTML('beforeend','<i>▾</i>');
+    const set=c=>{body.style.display=c?'none':'block';h.classList.toggle('closed',c);card.classList.toggle('folded',c);F[key]=c;store.set('bp_fold',F)};
+    h.onclick=()=>set(body.style.display!=='none');set(!!F[key]);
+  });
+})();
 
 /* ===== brand comparison ===== */
 const SHOES=[
