@@ -102,6 +102,9 @@ th{color:var(--sub);font-weight:500;font-size:13px}
 .rate button.on{color:var(--gold)}
 .my{border:1px solid var(--line);border-radius:14px;padding:12px;margin:10px 0;background:#fff}
 .stars{color:var(--gold);letter-spacing:1px}
+.fav{border:0;background:none;font-size:20px;cursor:pointer;padding:0 4px 0 0;vertical-align:middle}
+.note{background:#fbf6ea;border-left:3px solid var(--gold);border-radius:8px;padding:8px 10px;font-size:14px;line-height:1.6;margin-top:6px;white-space:pre-wrap;cursor:pointer}
+.nedit textarea{display:block;width:100%;margin-top:6px;border:1px solid var(--line);border-radius:10px;padding:8px;font:inherit;font-size:15px}
 .toast{position:fixed;left:50%;bottom:96px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:8px 16px;border-radius:999px;font-size:13px;opacity:0;transition:.25s;pointer-events:none;z-index:20}
 .toast.on{opacity:1}
 </style>
@@ -222,7 +225,7 @@ th{color:var(--sub);font-weight:500;font-size:13px}
 
   <div class="card">
     <h2>品牌鞋款實戰比較</h2>
-    <p class="sub">每款都可以按「🔍 網路照片」看樣子，或「📷 新增照片」存自己在店裡拍的照片（存在這支手機的瀏覽器裡）。</p>
+    <p class="sub">每款都可以按 🤍 收藏、「📝 寫筆記」記下試穿感想、「🔍 網路照片」看樣子，或「📷 新增照片」存自己在店裡拍的照片（都存在這支手機的瀏覽器裡）。</p>
     <p class="sub">2026/11 在福岡門市逐面牆試看整理。落差先寫官方標示，括號內是評測實際量測；價格為日本門市未稅標價，僅供參考。</p>
     <div class="verdict" style="background:#e2efe9;margin:10px 0">
       <b>🏆 硬挺派前三名</b>
@@ -457,6 +460,7 @@ const SHOES=[
 ];
 const RT={top:['🏆 首選','g'],ok:['✅ 推薦','g'],try:['⚠️ 試穿再決定',''],no:['❌ 不建議','r']};
 let brand='全部';
+let FAV=store.get('bp_fav',[]);let NOTE=store.get('bp_note',{});
 const QX={'ASICS|魔鬼氈／懶人鞋款':'ASICS ウォーキング スリッポン','Vans|全系列（含 GORE-TEX 戶外款）':'Vans MTE GORE-TEX','Timberland|6 吋黃靴等高筒靴':'Timberland 6 inch premium boot','Timberland|低筒 Oxford／Chukka':'Timberland basic oxford waterproof'};
 const skey=s=>s.b+'|'+s.m;
 const sq=s=>s.q||QX[skey(s)]||(s.b+' '+s.m);
@@ -475,21 +479,30 @@ async function renderPhotos(i,k){
 }
 function openLB(src){$('#lbImg').src=src;$('#lb').classList.add('on')}
 function renderBrands(){
-  const bs=['全部','👞 皮鞋感',...new Set(SHOES.map(s=>s.b))];
+  const bs=['全部','❤️ 收藏','👞 皮鞋感',...new Set(SHOES.map(s=>s.b))];
   $('#brandFilters').innerHTML=bs.map(b=>`<button class="opt ${brand===b?'on':''}" data-b="${b}">${b}</button>`).join('');
   document.querySelectorAll('#brandFilters .opt').forEach(x=>x.onclick=()=>{brand=x.dataset.b;renderBrands()});
-  const list=SHOES.filter(s=>brand==='全部'||(brand==='👞 皮鞋感'?s.f:s.b===brand)).sort((a,b)=>Object.keys(RT).indexOf(a.r)-Object.keys(RT).indexOf(b.r));
+  const list=SHOES.filter(s=>brand==='全部'||(brand==='❤️ 收藏'?FAV.includes(skey(s)):brand==='👞 皮鞋感'?s.f:s.b===brand)).sort((a,b)=>Object.keys(RT).indexOf(a.r)-Object.keys(RT).indexOf(b.r));
   $('#shoeList').innerHTML=list.map((s,i)=>{const q=encodeURIComponent(sq(s));return `<div class="ex" style="padding:12px">
-    <div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start"><div><span class="sub">${s.b}</span><h3 style="margin:2px 0 4px;font-size:16px">${s.m}</h3></div><div style="text-align:right"><span class="pill ${RT[s.r][1]}" style="white-space:nowrap">${RT[s.r][0]}</span>${s.f?'<br><span class="pill">👞 皮鞋感</span>':''}</div></div>
+    <div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start"><div><span class="sub">${s.b}</span><h3 style="margin:2px 0 4px;font-size:16px">${s.m}</h3></div><div style="text-align:right"><button class="fav ${FAV.includes(skey(s))?'on':''}" data-fav="${i}" aria-label="收藏">${FAV.includes(skey(s))?'❤️':'🤍'}</button><span class="pill ${RT[s.r][1]}" style="white-space:nowrap">${RT[s.r][0]}</span>${s.f?'<br><span class="pill">👞 皮鞋感</span>':''}</div></div>
     <div><span class="pill">落差 ${s.d}</span>${s.p!=='—'?`<span class="pill">${s.p}</span>`:''}</div>
     <p style="font-size:14px;margin-top:6px">${s.n}</p>
+    ${NOTE[skey(s)]?`<div class="note" data-nt="${i}">📝 ${esc(NOTE[skey(s)])}</div>`:''}
+    <div class="nedit" id="ne-${i}" style="display:none"><textarea rows="3" placeholder="寫下試穿感想、尺寸、店家、價格…">${esc(NOTE[skey(s)]||'')}</textarea><div style="display:flex;gap:6px;margin-top:6px"><button class="opt on" data-ns="${i}">儲存筆記</button><button class="opt" data-nc="${i}">取消</button></div></div>
     <div class="phs" id="ph-${i}"></div>
     <div class="phbar">
+      <button class="opt" data-nw="${i}">📝 ${NOTE[skey(s)]?'改筆記':'寫筆記'}</button>
       <a class="opt" href="https://www.google.com/search?tbm=isch&q=${q}" target="_blank" rel="noopener">🔍 網路照片</a>
       <a class="opt" href="https://www.google.com/search?q=${q}+drop+mm" target="_blank" rel="noopener">📏 查規格</a>
       <label class="opt">📷 新增照片<input type="file" accept="image/*" multiple hidden data-i="${i}"></label>
       ${s.r==='no'?'':MY.some(x=>x.b===s.b&&x.m===s.m)?'<span class="opt" style="opacity:.6">✓ 已在清單</span>':`<button class="opt" data-add="${i}">＋ 試穿清單</button>`}
     </div></div>`}).join('');
+  if(brand==='❤️ 收藏'&&!list.length)$('#shoeList').innerHTML='<p class="sub">還沒有收藏，點鞋款右上角的 🤍 就能收藏。</p>';
+  document.querySelectorAll('[data-fav]').forEach(b=>b.onclick=()=>{const k=skey(list[+b.dataset.fav]);FAV=FAV.includes(k)?FAV.filter(x=>x!==k):[...FAV,k];store.set('bp_fav',FAV);toast(FAV.includes(k)?'已收藏':'已取消收藏');renderBrands()});
+  const openNote=i=>{const e=document.getElementById('ne-'+i);e.style.display='block';e.querySelector('textarea').focus()};
+  document.querySelectorAll('[data-nw],[data-nt]').forEach(b=>b.onclick=()=>openNote(b.dataset.nw||b.dataset.nt));
+  document.querySelectorAll('[data-nc]').forEach(b=>b.onclick=()=>{document.getElementById('ne-'+b.dataset.nc).style.display='none'});
+  document.querySelectorAll('[data-ns]').forEach(b=>b.onclick=()=>{const i=+b.dataset.ns,k=skey(list[i]),v=document.querySelector('#ne-'+i+' textarea').value.trim();if(v)NOTE[k]=v;else delete NOTE[k];store.set('bp_note',NOTE);toast(v?'筆記已儲存':'筆記已清除');renderBrands()});
   document.querySelectorAll('[data-add]').forEach(b=>b.onclick=()=>addFromRec(list[+b.dataset.add]));
   list.forEach((s,i)=>renderPhotos(i,skey(s)));
   document.querySelectorAll('#shoeList input[type=file]').forEach(inp=>inp.onchange=async()=>{
