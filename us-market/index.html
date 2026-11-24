@@ -61,6 +61,12 @@ main{max-width:760px;margin:0 auto;padding:14px max(14px,env(safe-area-inset-lef
 .btd-i{font-size:14px;padding:5px 0 5px 17px;border-bottom:1px dashed var(--line)}.btd-i small{display:block;font-size:12px;color:var(--muted)}
 .btd-i em{font-style:normal;font-size:11px;font-weight:700;margin-left:6px;padding:1px 6px;border-radius:6px}.btd-i em.up{color:#e0a100;background:color-mix(in srgb,#e0a100 14%,transparent)}.btd-i em.dn{color:var(--bull);background:color-mix(in srgb,var(--bull) 14%,transparent)}
 .btd-sum{margin-top:10px;font-size:14px;line-height:1.65}
+.bpend{margin:8px 0 2px;border:1px solid var(--line);border-radius:12px;padding:6px 10px}
+.bpend>div:not(.bpend-s){display:grid;grid-template-columns:20px 1fr;column-gap:6px;padding:6px 0;border-bottom:1px dashed var(--line);font-size:13px}
+.bpend i{grid-row:span 2;font-style:normal;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;margin-top:1px}
+.bpend .done i{background:var(--bull);color:#fff}.bpend .wait i{border:1.5px solid #e0a100;color:#e0a100}
+.bpend b{font-weight:600}.bpend span{color:var(--muted);font-size:12px;line-height:1.55}.bpend .done b{color:var(--muted);text-decoration:line-through}
+.bpend-s{font-size:12px;color:var(--muted);padding:6px 0 2px}
 .bsum{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:6px 0}
 .bsum-c{border-radius:12px;padding:10px 8px;text-align:center;border:1px solid var(--line)}
 .bsum-c b{display:block;font-size:26px;line-height:1.1;font-family:var(--mono)}.bsum-c span{font-size:12px;color:var(--muted)}
@@ -1070,6 +1076,8 @@ const IXH={
 let IXK="sp";
 const NOW={y:"2026",nm:"這次 AI 修正",dd:7.4,now:1};
 const BOMBS=[
+{ic:"🏛️",t:"1 月新國會：政黨輪替後的政策轉向",lv:"m",lvt:"中",d:"民主黨在 11/3 期中選舉同時拿下參眾兩院，1 月新國會上任後華府變成分治。AI 晶片出口管制、科技公司監管、資料中心用電、財政預算都可能轉向，國會調查（Nvidia、出口許可）也會更積極。有人拿來比台灣 2008 年：政權交替的期待撞上經濟下行，市場先漲後跌。",m:"觀察：1 月新國會第一批法案與聽證、對 AI 晶片出口的立場、預算談判"},
+{ic:"📉",t:"2027 年美國經濟放緩",lv:"h",lvt:"高",d:"高利率還沒鬆、AI 投資開始降溫，明年景氣放緩甚至衰退的風險還沒排除。過去最深的空頭（2000、2008）都是「估值修正＋獲利衰退」一起來；如果分析師開始下修明年獲利，就要改用 2000 年劇本看。",m:"觀察：失業率、ISM 製造業、明年 EPS 預估是否下修、大型雲端廠資本支出指引"},
 {ic:"💧",t:"流動性賣壓：只能以跌止跌",lv:"h",lvt:"高",d:"台股這幾天的下跌，主因不是基本面，是「被迫賣」：融資追繳斷頭、股票質押等借款去槓桿，加上部分主動式 ETF 遇到贖回只能賣持股。11/19 日韓股和美股期貨都沒大跌，台股卻獨自重挫 1,768 點；國安基金盤中拉抬時，櫃買和散戶也不跟。這種賣壓不看價格，護盤只能讓它跌慢一點。要等槓桿清完、贖回停下來，價格跌到有人願意接，才會真正止住，也就是「以跌止跌」。",m:"11/20 融資維持率：大盤（含 ETF）140.43%、扣掉 ETF 的純個股只剩約 118–120%，已跌破 130% 追繳線，是 2025 年 4 月以來最低。觀察：維持率何時止跌回升、融資餘額減幅、違約交割件數、跌停家數有沒有縮小"},
 {ic:"🏦",t:"聯準會升息循環",lv:"h",lvt:"高",d:"12/10 幾乎確定升一碼（11/23 機率約 93%，一次升兩碼已降到 0），真正的風險是點陣圖顯示 2027 年還要升幾次。歷史上空頭要結束，幾乎都要等聯準會停手。",m:"引爆點：12/10 凌晨 3 點（台北）"},
 {ic:"🏗️",t:"AI 資料中心禁建令",lv:"h",lvt:"高",d:"民主黨選後喊全國暫停新建 AI 資料中心，紐約州已暫停大型資料中心許可、德州也在審查電網。這直接打到 AI 硬體需求的長期預期。但川普有否決權，聯邦版本很難過。",m:"引爆點：12/10 德州 ERCOT 公布稽核結果、12/17 PUCT 開會；1 月新國會開議提案"},
@@ -1091,7 +1099,7 @@ const SIGNALS=[
 ["外資回頭買","部分（連 6 日買超櫃買，但台指期淨空單仍約 9.9 萬口）","neu"],
 ["流動性賣壓出清（以跌止跌）","未（追繳取消讓短線斷頭賣壓消失，但不是出清；11/23 法人仍賣超 512 億）","bear"],
 ["融資維持率跌破 130%（追繳線，歷史上常是恐慌底部區）","部分（11/20 純個股約 118–120% 已破；含 ETF 的大盤 140.4% 還沒破）","neu"],
-["政策利空落地（禁建令、出口規定明朗）","出口新規已公布、禁建令未","neu"],
+["政策利空落地（調查、聽證、禁建令、新國會）","未（只有出口新規落地；黃仁勳回任只解決人事，轉運調查、聽證、禁建令、1 月新國會都還懸著）","bear"],
 ["多數個股已深跌、跌勢鈍化","已出現","bull"],
 ["政府出手護盤","已出現（11/22 證交所研議融資維持率 130%→120%、待金管會拍板；11/21 再宣布 5 項措施：全面禁止平盤下放空、鼓勵庫藏股、鼓勵暫停出借股票；國安基金證實進場、八大行庫 11/19 買超 360 億；限空令 2.0 11/20 起）","bull"],
 ["油價回落、通膨壓力減輕","油價 11 月已跌約 2 成，通膨未降","neu"],
@@ -1528,7 +1536,8 @@ document.addEventListener("click",e=>{
 /* ===== 底部訊號儀表板 ===== */
 const BOT_S=["聯準會轉鬆（降息、停升息或 QE）","VIX 衝過 40 後回落","信用利差停止擴大","權值股補跌、出現恐慌量","利空落地、不確定性解除","多數個股深跌、跌勢鈍化","政府出手救市","通膨／油價壓力減輕"];
 const BOT_SH=["央行轉鬆","恐慌破表","利差穩住","權值補跌","利空落地","個股深跌","政府救市","通膨降溫"];
-const BOT_NOW=[[0,"12 月升一碼機率約 93%（升兩碼已降到 0）；Williams：還有工作要做"],[0.5,"VIX 11/20 收 35.89 沒破 40；11/23 一天回落到 26.62"],[0,"還沒確認：私募信貸開始減記、放款人撤離新雲端業者"],[1,"11/20 輝達 −14%、費半 −10.7%、台股近 300 檔跌停"],[0.5,"黃仁勳回任、出口新規已公布；SEC 調查、12/1 與 12/3 國會作證、禁建令還沒落地"],[1,"櫃買 11 月單月 −29%，史上最大"],[1,"國安基金、限空令 3.0、融資維持率降到 120%"],[0.5,"WTI 11/23 −4.5% 到 80 美元，但通膨還沒降"]];
+const BOT_NOW=[[0,"12 月升一碼機率約 93%（升兩碼已降到 0）；Williams：還有工作要做"],[0.5,"VIX 11/20 收 35.89 沒破 40；11/23 一天回落到 26.62"],[0,"還沒確認：私募信貸開始減記、放款人撤離新雲端業者"],[1,"11/20 輝達 −14%、費半 −10.7%、台股近 300 檔跌停"],[0,"黃仁勳回任只解決人事，不是利空落地；東南亞轉運調查、國會聽證、SEC 調查、禁建令、1 月新國會都還懸著（見下方清單）"],[1,"櫃買 11 月單月 −29%，史上最大"],[1,"國安基金、限空令 3.0、融資維持率降到 120%"],[0.5,"只亮一半：油價有降（WTI 11/23 到 80 美元），但通膨本身沒解決，Williams 估今年底通膨 3.5%"]];
+const BOT_PEND=[["黃仁勳去留","done","11/23 回任。但只解決「誰當 CEO」，調查與聽證都還在"],["東南亞出口新規","done","出口許可新規已公布，規則明朗"],["東南亞轉運調查（Megaspeed 等）","wait","晶片經新加坡轉運中國的調查還沒結論"],["國會聽證","wait","12/1 黃仁勳赴眾院閉門作證，之後還有 Nvidia 法務長作證"],["SEC 會計調查","wait","傳聞中的調查還沒有結果"],["AI 資料中心禁建令","wait","德州 ERCOT 審查、新國會是否立法都還沒定"],["1 月新國會上任（政黨輪替）","wait","民主黨在 11/3 期中選舉同時拿下參眾兩院，1 月起華府變分治；科技監管、出口管制、預算可能大轉向。有人拿來比台灣 2008：政權交替的期待撞上經濟下行"],["2027 年美國經濟","wait","高利率加上 AI 投資降溫，明年景氣放緩甚至衰退的風險還沒排除；獲利預估若下修，就是「2000 年劇本」"]];
 const BOT_BT=[["1987",[1,1,.5,1,.5,1,.5,.5],"黑色星期一：Fed 隔天宣布提供流動性"],["1990",[1,.5,.5,1,.5,1,0,.5],"波灣戰爭：Fed 已在降息，油價自高點回落"],["2002",[1,1,1,1,.5,1,.5,.5],"網路泡沫：利率降到 1.75%、信用利差 10 月見頂"],["2009",[1,1,.5,1,1,1,1,1],"金融海嘯：零利率、QE、壓力測試、刺激方案全上"],["2011",[.5,1,.5,1,.5,1,.5,.5],"歐債：扭轉操作、10/26 歐盟峰會"],["2016",[1,.5,1,.5,.5,1,.5,1],"中國＋油價：Fed 放慢升息、上海協議、油價止跌"],["2018",[.5,.5,.5,1,.5,1,.5,1],"升息＋貿易戰：聖誕夜恐慌，Fed 1/4 才轉向"],["2020",[1,1,1,1,.5,1,1,1],"疫情：無限 QE、Fed 買公司債、紓困法案"],["2022",[.5,.5,1,.5,.5,1,.5,1],"暴力升息：CPI 已見頂，Fed 預告放慢"],["2025",[0,1,.5,1,1,1,1,.5],"對等關稅：Fed 沒動，靠 4/9 關稅暫停"]];
 
 function botBTshow(i){window._botSel=i;const r=window._botRows[i],nowV=BOT_NOW.map(x=>x[0]);
@@ -1568,7 +1577,7 @@ function renderBottom(){
   const cnt=v=>BOT_NOW.filter(x=>x[0]===v).length,histN=i=>[BOT_BT.filter(b=>b[1][i]===1).length,BOT_BT.filter(b=>b[1][i]===.5).length];
   $("#botSig").innerHTML=`<div class="bsum">${grp.map(g=>`<div class="bsum-c ${g[2]}"><b>${cnt(g[0])}</b><span>${g[1]}</span></div>`).join("")}</div>
    <div class="bsum-f">${cnt(1)} 個 × 1 分 ＋ ${cnt(.5)} 個 × 0.5 分 ＝ <b>${cnt(1)+cnt(.5)/2} 分</b><br>${cnt(1)+cnt(.5)/2} ÷ 滿分 8 分 ＝ <b>${now}%</b></div>`+
-   grp.map(g=>{const ix=BOT_S.map((n,i)=>i).filter(i=>BOT_NOW[i][0]===g[0]);if(!ix.length)return"";return`<div class="bgrp"><div class="bgrp-h ${g[2]}"><i></i>${g[1]}（每個 ${g[3]}）</div>`+ix.map(i=>{const[h1,h5]=histN(i);return`<div class="bitem"><div class="bn">${BOT_S[i]}</div><div class="bd">${BOT_NOW[i][1]}</div><div class="bh">歷史 10 次見底時：${h1} 次已亮${h5?`、${h5} 次半亮`:""}${g[0]===0&&h1+h5>=9?"<em>→ 見底時幾乎都有，接下來盯它</em>":""}</div></div>`}).join("")+`</div>`}).join("");
+   grp.map(g=>{const ix=BOT_S.map((n,i)=>i).filter(i=>BOT_NOW[i][0]===g[0]);if(!ix.length)return"";return`<div class="bgrp"><div class="bgrp-h ${g[2]}"><i></i>${g[1]}（每個 ${g[3]}）</div>`+ix.map(i=>{const[h1,h5]=histN(i);return`<div class="bitem"><div class="bn">${BOT_S[i]}</div><div class="bd">${BOT_NOW[i][1]}</div>${i===4?`<div class="bpend">${BOT_PEND.map(x=>`<div class="${x[1]}"><i>${x[1]==="done"?"✓":"…"}</i><b>${x[0]}</b><span>${x[2]}</span></div>`).join("")}<div class="bpend-s">已落地 ${BOT_PEND.filter(x=>x[1]==="done").length} 項、還懸著 ${BOT_PEND.filter(x=>x[1]!=="done").length} 項：大部分落地之前，這個訊號不算亮。</div></div>`:""}<div class="bh">歷史 10 次見底時：${h1} 次已亮${h5?`、${h5} 次半亮`:""}${g[0]===0&&h1+h5>=9?"<em>→ 見底時幾乎都有，接下來盯它</em>":""}</div></div>`}).join("")+`</div>`}).join("");
   // backtest bars
   const rows=[["現在",now,"現在 "+now+"%"]].concat(bt.slice().sort((a,b)=>b[1]-a[1]).map(b=>[b[0],b[1],b[0]+"："+b[2]+"（"+b[1]+"%）"]));
   const rowsB=[["現在",BOT_NOW.map(x=>x[0]),now,"",BOT_NOW.map(x=>x[1])]].concat(BOT_BT.map(b=>[b[0],b[1],sc(b[1]),b[2]]).sort((a,b)=>b[2]-a[2]));
