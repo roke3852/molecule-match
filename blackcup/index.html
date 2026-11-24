@@ -114,6 +114,22 @@ button{font:inherit;color:inherit;touch-action:manipulation}
 .inv-h{font-family:DotGothic16;font-size:12px;color:var(--muted);writing-mode:vertical-rl;letter-spacing:2px;border-right:1px solid var(--line);padding-right:6px}
 .inv-l{display:flex;flex-wrap:wrap;gap:6px;flex:1}.inv-e{font-size:12px;color:var(--dim)}
 .inv-i{width:36px;height:36px;display:grid;place-items:center;background:var(--ink);border:1px solid var(--line2);padding:0}
+.inv-i{position:relative}.inv-i.k:after{content:"";position:absolute;right:2px;top:2px;width:5px;height:5px;background:var(--cherry)}.inv-i.m:after{content:"";position:absolute;right:2px;top:2px;width:5px;height:5px;background:#f0b46a;border-radius:50%}
+.inv-g{font-family:DotGothic16;font-size:10px;color:var(--muted);align-self:center;letter-spacing:1px}.inv-g.k{color:#ff8a7e}.inv-g.m{color:#f0b46a}.inv-sep{width:1px;align-self:stretch;background:var(--line);margin:0 2px}
+.inv.ask{border-color:var(--cherry);box-shadow:0 0 0 1px var(--cherry),0 0 14px rgba(214,69,69,.35)}.inv.ask .inv-i{animation:invask 1.2s ease-in-out infinite}
+@keyframes invask{50%{border-color:var(--cherry);transform:translateY(-2px)}}
+.cq.useq{border-left-color:#f0b46a}
+.usegrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:8px}
+.useit{display:flex;flex-direction:column;align-items:center;gap:4px;background:var(--ink2);border:1px solid var(--line2);padding:8px 4px 6px;box-shadow:0 3px 0 #06080b;font-size:12px;line-height:1.3;color:var(--cream);position:relative}
+.useit svg{image-rendering:pixelated;background:var(--ink3);border:1px solid var(--line)}
+.useit small{font-family:DotGothic16;font-size:10px;color:var(--muted)}.useit.k small{color:#ff8a7e}.useit.m small{color:#f0b46a}
+.useit:active{transform:translateY(2px);box-shadow:none}.useit.no{animation:useno .35s;border-color:#6a2a2a;opacity:.55}.useit.ok{border-color:var(--teal);box-shadow:0 0 0 2px var(--teal)}
+@keyframes useno{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+.usemsg{font-size:14px;line-height:1.7;border-left:3px solid var(--blue);padding-left:8px;color:#c3c9d3;min-height:24px}.usemsg b{color:var(--cream)}
+.usepop{position:fixed;left:50%;top:30%;transform:translate(-50%,-50%) scale(.6);z-index:86;display:flex;flex-direction:column;align-items:center;gap:8px;background:var(--ink);border:1px solid var(--line2);border-top:4px solid #f0b46a;padding:16px 22px;box-shadow:0 10px 40px rgba(0,0,0,.6);animation:usepop .45s cubic-bezier(.2,1.4,.4,1) forwards}
+.usepop svg{image-rendering:pixelated}.usepop small{font-family:DotGothic16;color:#f0b46a;letter-spacing:3px}.usepop b{font-family:"Noto Serif TC",serif;font-size:18px;color:var(--cream)}
+.usepop.out{animation:usepopo .35s ease-in forwards}
+@keyframes usepop{to{transform:translate(-50%,-50%) scale(1)}}@keyframes usepopo{to{transform:translate(-50%,-80%) scale(.9);opacity:0}}
 .inv-i svg{image-rendering:pixelated}.inv-i.new{border-color:var(--cherry);animation:invnew .5s ease-in-out 4}
 @keyframes invnew{50%{transform:translateY(-4px)}}
 .itempop{position:fixed;left:50%;top:22%;transform:translateX(-50%);z-index:85;display:flex;gap:12px;align-items:center;background:var(--ink);border:1px solid var(--line2);border-left:4px solid var(--cherry);padding:12px 18px 12px 14px;box-shadow:0 0 0 3px var(--ink),0 10px 30px #000;animation:itin .35s cubic-bezier(.2,1.6,.4,1) both;pointer-events:none}
@@ -587,6 +603,9 @@ const MAIN_CH=[
  L('me','（名片上的地址是這附近沒錯……可是 Google 地圖一直帶我在原地繞圈。）'),
  N('你拿著名片，在同一段路上來來回回走了三趟。賣烏魚子的阿姨終於忍不住，從店裡探出頭來。'),
  N('「少年仔，你在找啥？走三遍了喔。」'),
+ {use:{q:'賣烏魚子的阿姨問你在找什麼。拿什麼給她看？',need:'card',tip:'嘴巴說不清楚的地址，拿出來給她看就好。',
+   ng:{geisha:['','阿姨：「這啥？藝伎？少年仔，我們這邊賣的是烏魚子啦。」'],rec:['me','（……拿錄音給路人聽？不行不行。）']},no:['','阿姨：「蛤？我是問你要找哪裡啦。」'],hint:'沈懷舟留在杯墊下的那張手工紙。',
+   ok:[['me','阿姨，我在找這個地方……'],['','阿姨瞇著眼睛，把名片拿得很遠看了一下，又還給你。']]}},
  L('me','阿姨，請問「舟火焙煎所」在哪裡？'),
  N('「舟火喔？那個不太講話的阿伯？」阿姨用下巴比了比對面兩間老屋中間的一條縫，「你自己聞，有沒有聞到？」'),
  N('你深吸一口氣。在乾貨的味道底下，真的有一絲很淡、很暖的香味——像烤堅果，又像剛煮好的焦糖。'),
@@ -683,6 +702,10 @@ const MAIN_CH=[
 ]},
 {t:'第二章　金穗',sub:'太香的豆子，與遠方的樹',recap:'沈懷舟收你為徒，教你水、數字與塞水，還幫你寫了推薦函。他說：好豆子在樹上。但在你出發之前，有人先找上了門。',nodes:[
  BG('home','公館．你的租屋處'),
+ N('台灣盃的報名表攤在桌上。只剩最後一欄是空的：「推薦店家／推薦人（＊必填）」。'),
+ {use:{q:'報名表的「推薦人」欄還空著。要附上什麼？',need:'letter',tip:'未附推薦函者，不予受理。',
+   ng:{card:['me','（名片……只能證明我認識他，不能證明他推薦我。）'],geisha:['me','（附一包豆子？評審會以為我在送禮……）']},no:['me','（不對。報名表要的是一份正式的東西。）'],hint:'封著紅色封蠟的那封信。',
+   ok:[['','你把那封封著紅色封蠟的信，連同報名表一起放進牛皮信封。'],['me','（師父……謝謝您。）']]}},
  {act:'form2',s:'',t:'推薦函有了，報名表寄出去了。剩下最大的問題，是比賽要用的豆子。'},
  N('你打開網路銀行看了一下存款：六萬三千五百二十塊。這大概是你兩年來省吃儉用的全部了。'),
  L('me','（一公斤比賽等級的藝伎，少說也要兩三萬……而且還不一定買得到。）'),
@@ -1038,6 +1061,9 @@ const MAIN_CH=[
  N('坐在桌子後面的，是一位短髮、戴著細框眼鏡的女士。她的名牌上寫著：「倫理委員會主席　花野凜子」。'),
  L('hana','我是花野。聽說你們有東西要給我？'),
  L('hana','我先說清楚：委員會只看證據，不看故事。不管你們的故事有多感人，沒有證據，我一個字都不會採信。'),
+ {use:{q:'「沒有證據，我一個字都不會採信。」——你要拿出什麼？',need:'docs',tip:'花野要的是紙本、時間、出處。',
+   ng:{notebook:['hana','處理紀錄，是證明你的豆子。我問的是，誰的豆子有問題。'],rec:['hana','這是你和你前老闆的事。和這屆賽事有關的，是什麼？'],rec2:['hana','錄音我會聽。但錄音只能證明他說了什麼，證明不了金穗做了什麼。'],trophy:['hana','……這是獎盃。委員會不看獎盃。'],letter:['hana','推薦函證明的是你的師父相信你。我不需要相信，我需要證據。']},no:['hana','這不是證據。'],hint:'蘇曼冒著違約的風險，交給你們的牛皮紙袋。',
+   ok:[['','你把蘇曼給的牛皮紙袋放在桌上。出貨單、香精採購單，一張一張滑出來。'],['hana','（推了一下眼鏡）……先放著。我要知道，你們打算怎麼交。']]}},
  C('證據，什麼時候交？',[
   {t:'比完再交，免得影響比賽心情。',end:'late'},
   {t:'現在。正式書面提交：出貨單、香精採購單、處理紀錄，並要求林評審迴避。',fx:{fame:1},r:[['','你把文件一份一份攤在桌上。花野一頁一頁看，看得非常慢。'],['hana','……書面、時間、出處，都齊了。'],['hana','從現在起，林正衡先生迴避本屆所有評審工作。金穗贊助選手的參賽生豆，全數送驗。'],['su','（小聲地）……我自己的豆子也會被驗。'],['hana','是的。但妳是提供證據的人，委員會會把這一點寫進報告裡。']]},
@@ -1065,6 +1091,9 @@ const MAIN_CH=[
  N('評審長是花野。她慢慢喝完那杯咖啡，放下杯子，抬起頭看著你的眼睛。'),
  L('hana','在這屆賽事發生的事情之後，我必須問每一位選手同一個問題。'),
  L('hana','你的豆子，有沒有加過任何東西？'),
+ {use:{q:'花野在等你的回答。開口之前，你要先拿出什麼？',need:'notebook',tip:'能替你的豆子說話的，不是你的嘴。',
+   ng:{beans:['hana','豆子我已經喝過了。我問的是，它經歷過什麼。'],trophy:['hana','台灣盃的獎盃，證明不了這批豆子。'],docs:['hana','金穗的文件，委員會已經收下了。現在問的是你的豆子。'],letter:['hana','推薦函不是處理紀錄。']},no:['hana','……這不能回答我的問題。'],hint:'沾著泥巴、兩個人字跡的那一本。',
+   ok:[['','你把那本沾著泥巴的筆記本，放在評審桌上。'],['','花野翻開第一頁，看了很久。']]}},
  IF('coferm','fq_co'),
  C('最後一個問題。',[
   {t:'「沒有。這是每一天的糖度、pH 和溫度紀錄，農人卡洛斯可以作證。」',fx:{heart:1},go:'fin'},
@@ -1477,7 +1506,9 @@ GD.shen={name:'舟火',short:'外傳・沈懷舟',hero:'shen',sub:'沈懷舟外�
  N('第二杯放到你面前。你聞了很久，喝了一口。'),
  N('酸變圓了。尾韻拉出一段紅茶的甜。不完美，但這杯咖啡，把話說完了。'),
  L('shen','……嗯。'),
- N('你在杯墊下壓了錢，還有一張名片。很厚的手工紙。'),
+ {use:{q:'你要走了。要在杯墊下留下什麼給這個孩子？',need:'card',tip:'你想讓他知道，大稻埕的巷底在哪裡。',
+   ng:{sh_photo:['shen','（這張照片，給誰都不能給。）'],sh_key:['shen','（火伯的鑰匙。……不是今天。）']},no:['shen','（……不是這個。）'],hint:'你印了一整盒、從來沒發出去過的東西。',
+   ok:[['','你在杯墊下壓了錢，還有一張名片。很厚的手工紙。'],['','十二年來，這是你發出去的第一張。']]}},
  N('你推門走進雨裡。十二年來，你第一次覺得，雨聲不那麼吵。'),
  BG('roast','星期一・舟火焙煎所'),
  N('星期一早上，舟火焙煎所的鐵門被敲了三下。'),
@@ -1912,12 +1943,8 @@ GD.carlos={name:'帕洛瑪',short:'外傳・卡洛斯',hero:'carlos',sub:'卡洛
  N('畫面上出現一位短髮、戴細框眼鏡的女士。她沒有笑，但說話很慢、很清楚。'),
  L('hana','卡洛斯先生，抱歉這麼晚打擾。我們手上有一本處理紀錄，選手說是你們兩個人一起寫的。'),
  L('hana','你那邊，有這本紀錄的副本嗎？'),
- IF('it_ca_copy','ca_c_have'),
- L('carlos','……有，在我家。我現在去拿。'),
- J('ca_c_go'),
- LB('ca_c_have'),
- L('carlos','有。露西亞說，帳本要留兩份。'),
- LB('ca_c_go'),
+ {use:{q:'花野要看紀錄的副本。你拿什麼對著鏡頭？',need:'ca_copy',tip:'露西亞說，帳本要留兩份。',no:['hana','卡洛斯先生，我需要的是那本處理紀錄。'],hint:'你自己影印留下來的那一份。',
+   ok:[['carlos','有。露西亞說，帳本要留兩份。']]}},
  N('你把那份影本攤在鏡頭前面，一頁一頁翻給她看。花野讓佐伯拿著正本，在另一邊對照。'),
  L('saeki','第一天到第十四天……日期、筆跡、數字，完全一致。'),
  IF('ca_stmt','ca_c_stmt'),J('ca_c_q'),
@@ -2250,6 +2277,10 @@ GD.hana={name:'證據',short:'外傳・花野凜子',hero:'hana',sub:'花野凜�
  L('hana','……佐伯，存證。'),
  N('隔天下午，檢驗報告出來了。'),
  {act:'doc',doc:{sub:'GC-MS 檢驗報告　證物 E-05',h:'金穗「指定比賽豆」生豆樣本',l:['檢出：γ-十內酯、乙酸異戊酯、覆盆子酮。','上列化合物之濃度，遠超出咖啡豆天然生成範圍。','與證物 E-03（香精採購單）所列品項，成分一致。','結論：本樣本含外加香料。'],hl:[2,3],sign:'東京分析中心',stamp:'確認',loc:'檢驗報告'},s:'',t:'報告第三行，和蘇曼帶來的採購單，一字不差。'},
+ N('報告就在桌上。但要暫停一位評審，委員會需要依據。'),
+ {use:{q:'要用什麼依據，暫停林正衡的評審資格？',need:'ha_rule',tip:'委員會只看證據；委員會的處分，也只看規則。',
+   ng:{ha_memo:['saeki','主席，2014 年的紀錄只是附件。用它當依據，林評審會說您有私人成見。']},no:['saeki','主席……這個不能當作暫停評審的依據。'],hint:'你親手起草的那一份修正案，第七章。',
+   ok:[['','你翻開規則手冊，指著第 7.5 條。'],['saeki','評審應申報與贊助商之利益關係……他的申報表寫「無」。'],['hana','而檢驗報告證明，有。']]}},
  L('hana','佐伯。通知林正衡評審：依規則 7.5，自即刻起暫停評審職務，請於四十八小時內書面說明與金穗的關係。'),
  L('saeki','是。'),
  {done:1}
@@ -2271,6 +2302,9 @@ GD.hana={name:'證據',short:'外傳・花野凜子',hero:'hana',sub:'花野凜�
  BG('office','賽後・倫理委員會'),
  N('比賽結束了。林正衡的書面說明，最後沒有送來。他的律師送來的，是一封辭職信。'),
  L('saeki','主席，金穗的案子，委員會會移交司法單位。另外……2014 年那份觀察紀錄，要怎麼處理？'),
+ {use:{q:'佐伯在等你。你從行李箱的夾層裡，拿出什麼？',need:'ha_memo',tip:'十二年了，它一直跟著你。',
+   ng:{ha_rule:['saeki','規則手冊……主席，我問的是 2014 年的那一份。']},no:['saeki','主席？'],hint:'2014 年，台北，你影印下來的那一份。',
+   ok:[['','你把那份泛黃的影本，放進寫著「待證」的資料夾。']]}},
  N('你打開那個資料夾。十二年前的你，字寫得比現在大一點，也潦草一點。'),
  N('「08:20、08:42，選手置物區，金穗公司人員……」'),
  N('「瓶口為藍色膠帶（本人目視）。」'),
@@ -2947,6 +2981,7 @@ function step(){
     if(n.done){chapterDone();return}
     if(n.final){finale();return}
     if(n.c){persist();showChoice(n);return}
+    if(n.use){persist();showUse(n);return}
     if(n.brew){persist();showBrew(n);return}
     if(n.item){S.i++;giveItem(n.item);continue}
     if(n.money){S.i++;addMoney(n.money,n.why);continue}
@@ -3097,7 +3132,7 @@ function login(n){n=(n||'').trim();if(!n){toast('請輸入名字');return}ac();
  if(!DB.players[n])DB.players[n]=newPlayer(n);P=DB.players[n];DB.last=n;saveDB();toTitle()}
 $('loginBtn').onclick=()=>login($('nameIn').value);
 $('nameIn').addEventListener('keydown',e=>{if(e.key==='Enter')login(e.target.value)});
-function toTitle(){show('title');playTheme('night');if(document.querySelector('.scene'))document.querySelector('.scene').classList.remove('doom');S=null;useStory('main');renderStats();$('chLabel').textContent=P?('入座：'+P.name):'—';
+function toTitle(){if(S)S.useN=null;show('title');playTheme('night');if(document.querySelector('.scene'))document.querySelector('.scene').classList.remove('doom');S=null;useStory('main');renderStats();$('chLabel').textContent=P?('入座：'+P.name):'—';
  if(!P){$('loginBox').style.display='';$('mainMenu').style.display='none';renderNames();return}
  $('loginBox').style.display='none';$('mainMenu').style.display='flex';
  $('hello').textContent=`歡迎回來，${P.name}　（本傳結局 ${P.endings.filter(e=>MAIN_ENDS().includes(e)).length}/${MAIN_ENDS().length}）`;
@@ -3543,8 +3578,31 @@ function giveItem(id){if(!S||!ITEMS[id]||S.flags['it_'+id])return;S.flags['it_'+
   const d=document.createElement('div');d.className='itempop';d.innerHTML=`${icoSvg(id,56)}<div><small>獲得道具</small><b>${ITEMS[id].n}</b></div>`;document.body.appendChild(d);
   setTimeout(()=>d.classList.add('out'),2000);setTimeout(()=>d.remove(),2500);S.log.push({w:'▸ 獲得道具',t:ITEMS[id].n,pick:1});const b=document.querySelector(`#invList [data-it="${id}"]`);if(b){b.classList.add('new');setTimeout(()=>b.classList.remove('new'),2500)}}
 function renderInv(){const mb=document.getElementById('moneyBox');if(mb)mb.innerHTML='<small>'+(S&&S.story&&S.story!=='main'?GD[S.story].mlabel:'存款')+'</small>'+cur()+getMoney().toLocaleString();const L0=document.getElementById('invList');if(!L0)return;const ids=S?Object.keys(S.flags).filter(k=>k.startsWith('it_')).map(k=>k.slice(3)).filter(k=>ITEMS[k]):[];
-  L0.innerHTML=ids.length?ids.map(id=>`<button class="inv-i" data-it="${id}" aria-label="${ITEMS[id].n}">${icoSvg(id,26)}</button>`).join(''):'<span class="inv-e">還沒有道具</span>';
-  L0.querySelectorAll('.inv-i').forEach(b=>b.onclick=e=>{e.stopPropagation();const it=ITEMS[b.dataset.it];popup(b,`<b>${it.n}</b><br>${it.d}`)})}
+  const kk=ids.filter(i=>ITEMS[i].k==='key'),mm=ids.filter(i=>ITEMS[i].k!=='key');
+  const btn=id=>`<button class="inv-i ${ITEMS[id].k==='key'?'k':'m'}" data-it="${id}" aria-label="${ITEMS[id].n}">${icoSvg(id,26)}</button>`;
+  L0.innerHTML=ids.length?(kk.length?`<span class="inv-g k">${IKIND.key}</span>`+kk.map(btn).join(''):'')+(kk.length&&mm.length?'<span class="inv-sep"></span>':'')+(mm.length?`<span class="inv-g m">${IKIND.memo}</span>`+mm.map(btn).join(''):''):'<span class="inv-e">還沒有道具</span>';
+  const inv=L0.closest('.inv');if(inv)inv.classList.toggle('ask',!!(S&&S.useN));
+  L0.querySelectorAll('.inv-i').forEach(b=>b.onclick=e=>{e.stopPropagation();const id=b.dataset.it,it=ITEMS[id];
+    if(S&&S.useN){presentItem(id);return}
+    popup(b,`<small style="color:${it.k==='key'?'#ff8a7e':'#f0b46a'};font-family:DotGothic16">${it.k==='key'?IKIND.key+'・需要時可以出示':IKIND.memo+'・一路走來的紀念'}</small><br><b>${it.n}</b><br>${it.d}${S.flags['used_'+id]?'<br><small style="color:#4fb3a9">✓ 已出示過</small>':''}`)})}
+const IKIND={key:'證物',memo:'珍藏'};
+/* 出示證物：在關鍵時刻，從道具裡選一樣拿出來 */
+function useItemsHTML(){const ids=Object.keys(S.flags).filter(k=>k.startsWith('it_')).map(k=>k.slice(3)).filter(k=>ITEMS[k]);ids.sort((a,b)=>(ITEMS[a].k==='key'?0:1)-(ITEMS[b].k==='key'?0:1));
+  return ids.map(id=>`<button class="useit ${ITEMS[id].k==='key'?'k':'m'}" data-u="${id}">${icoSvg(id,40)}<span>${ITEMS[id].n}</span><small>${ITEMS[id].k==='key'?IKIND.key:IKIND.memo}</small></button>`).join('')}
+function showUse(n){ffwd=false;$('tFF').classList.remove('on');waiting=false;const U=n.use;
+  if(!S.flags['it_'+U.need]){S.flags['it_'+U.need]=1}
+  S.useN=n;S.useWrong=0;const cw=$('choices');
+  cw.innerHTML=`<div class="cq useq">🔍 ${linkify(fill(U.q))}</div><div class="usegrid">${useItemsHTML()}</div><div class="usemsg" id="useMsg">${U.tip?linkify(fill(U.tip)):'點一樣東西拿出來。下方的道具欄也可以點。'}</div>`;
+  bindLinks(cw);cw.querySelectorAll('.useit').forEach(b=>b.onclick=()=>presentItem(b.dataset.u));
+  $('box').style.display='none';$('pCv').classList.add('hide');$('nextBtn').classList.remove('on');cw.classList.add('on');renderInv();sfx('pop')}
+function presentItem(id){const n=S&&S.useN;if(!n)return;const U=n.use,it=ITEMS[id],b=document.querySelector(`.useit[data-u="${id}"]`);
+  if(id===U.need){sfx('win');if(b)b.classList.add('ok');S.useN=null;S.flags['used_'+id]=1;S.log.push({w:'▸ 出示'+(it.k==='key'?IKIND.key:''),t:it.n,pick:1});
+    const d=document.createElement('div');d.className='usepop';d.innerHTML=`<small>出示</small>${icoSvg(id,64)}<b>${it.n}</b>`;document.body.appendChild(d);
+    setTimeout(()=>d.classList.add('out'),1100);setTimeout(()=>d.remove(),1500);
+    setTimeout(()=>{if(!S)return;$('choices').classList.remove('on');renderInv();S.i++;S.q=(U.ok||[]).map(x=>x.slice());step()},900);return}
+  S.useWrong++;sfx('down');if(b){b.classList.remove('no');void b.offsetWidth;b.classList.add('no')}
+  const ng=(U.ng&&U.ng[id])||U.no||['','……這個，好像不是現在要的東西。'];const who=ng[0]&&PEOPLE[ng[0]]?(ng[0]==='me'?P.name:PEOPLE[ng[0]].name):'';
+  $('useMsg').innerHTML=(who?`<b>${esc(who)}</b>：`:'')+linkify(fill(ng[1]))+(S.useWrong>=2&&U.hint?`<br><span style="color:#f0b46a">提示：${linkify(fill(U.hint))}</span>`:'');bindLinks($('useMsg'))}
 
 /* 烘豆動畫（參考咖啡風土圖鑑的烘豆教學：轉黃 150°C、一爆 196°C、下豆）：先快速看三鍋失敗，再看成功的第 17 鍋 */
 function roastT(e){const u=Math.min(1,e/6.2);return 95+(208-95)*(1-Math.pow(1-u,1.6))}
@@ -3839,6 +3897,7 @@ Object.assign(ITEMS,{
  ha_rule:{n:'規則修正案',d:'世界手沖盃競賽規則第七章：用水封存、利益衝突迴避、只依證據審理。第一條，就是那瓶水。',ic:['............','.EEEEEEEEE..','.EwwwwwwwE..','.EwccccwwE..','.EwwwwwwwE..','.EwcccccwE..','.EwwwwwwwE..','.EwccwwwwE..','.EwwwwwwwE..','.EEEEEEEEE..','............','............']},
 });
 
+['card','rec','letter','notebook','rec2','docs','ca_copy','ha_memo','ha_rule'].forEach(k=>{if(ITEMS[k])ITEMS[k].k='key'});
 // boot
 if(DB.last&&DB.players[DB.last])P=DB.players[DB.last];
 toTitle();
