@@ -297,6 +297,10 @@ button{font:inherit;color:inherit;touch-action:manipulation}
 .be-b button.sniff{background:#3a2e14;border-color:#f0b46a;color:#ffd98a;font-size:16px}.be-t small{color:#8fa7b8}.be-p{font-size:11.5px;color:#8b93a1;margin-top:4px}
 .bhrow{display:flex;gap:8px}.bhrow .bhold{flex:1}.bsniff{flex:none;width:78px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;background:#3a2e14;border:2px solid #f0b46a;color:#ffd98a;font-size:22px;box-shadow:0 3px 0 #06080b}.bsniff span{font-size:12px;font-family:DotGothic16}.bsniff:active{transform:translateY(2px);box-shadow:none}
 .bevt.peek{left:auto;right:2%;width:42%;top:30%;border-color:#4fb3a9;padding:6px 8px}
+.bwat{position:absolute;left:8px;top:62px;display:grid;grid-template-columns:auto auto;gap:0 8px;font-family:DotGothic16;font-size:11px;background:rgba(14,17,22,.88);padding:3px 8px;border-left:3px solid #6c9bd2}.bwat span{color:#8b93a1}.bwat b{color:#cfe2f3;font-weight:400;text-align:right}
+.ico{display:inline-block;vertical-align:-3px}.bsniff .ico .w1,.bsniff .ico .w2,.bsniff .ico .w3{animation:aroma 2.4s ease-in-out infinite}.bsniff .ico .w2{animation-delay:.3s}.bsniff .ico .w3{animation-delay:.6s}
+@keyframes aroma{0%,100%{opacity:.35;transform:translateX(0)}50%{opacity:1;transform:translateX(1.5px)}}
+.bsniff{background:linear-gradient(180deg,#3a2e14,#2a2210)}.be-t .ico{color:#f0b46a;margin-right:2px}
 </style>
 </head>
 <body>
@@ -3351,7 +3355,7 @@ function showBrew(n){ffwd=false;$('tFF').classList.remove('on');waiting=false;co
   const evk=cfg.ev===0?null:cfg.ev||(Math.random()<.8?Object.keys(BEVS)[Math.floor(Math.random()*Object.keys(BEVS).length)]:null);
   if(evk){const P0=BRECIPES[B.rk].p;B.ev={k:evk,at:Math.max(10,P0[Math.min(1,P0.length-1)][0]*.5+Math.random()*(P0[P0.length-1][0]*.8)),st:'wait'}}
   S.brewUI=B;curBg='brewbar';$('locLabel').textContent='親手沖一杯';const L0=$('tvLayer');
-  L0.innerHTML='<div class="bscale" id="bScale">0.0 g</div><div class="btarget" id="bTarget"></div><div class="bclock" id="bClock" hidden>⏱ 0:00</div><div class="bevt" id="bEvt" hidden></div>';L0.hidden=false;
+  L0.innerHTML='<div class="bscale" id="bScale">0.0 g</div><div class="btarget" id="bTarget"></div><div class="bclock" id="bClock" hidden>⏱ 0:00</div><div class="bwat" id="bWat" hidden></div><div class="bevt" id="bEvt" hidden></div>';L0.hidden=false;
   $('box').style.display='none';$('nextBtn').classList.remove('on');brewPanel()}
 function brewTargets(B){const tgt=BRATIO[B.rt];return BRECIPES[B.rk].p.map(([at,f,nm])=>({at,to:Math.round(tgt*f*10)/10,nm}))}
 function brewStepsHTML(B){const T=brewTargets(B);return `<div class="bsteps">${T.map((s,i)=>{const d=B.steps[i];const cls=d?d.gr:(i===B.si?'cur':'');
@@ -3377,10 +3381,10 @@ function brewPanel(){const B=S.brewUI,cw=$('choices');cw.classList.add('on');con
     cw.innerHTML=`<div class="cq brewq">磨好了。把粉倒進濾杯</div><div class="bhint">倒完輕輕拍兩下濾杯，讓粉床變平——粉床不平，水就會往低的地方鑽。</div><button class="bhold" id="bDose">⬇ 倒粉、拍平</button>`;
     $('bDose').onclick=()=>{if(B.doseT)return;B.doseT=performance.now();sfx('whoosh');$('bDose').disabled=true;setTimeout(()=>sfx('pop'),1250);setTimeout(()=>sfx('tap'),1700);setTimeout(()=>sfx('tap'),1900);
       setTimeout(()=>{if(S&&S.brewUI===B){B.phase='pour';sfx('pick');brewPanel()}},2300)};return}
-  if(B.phase==='pour'){const T=brewTargets(B),tgt=BRATIO[B.rt];$('bTarget').textContent=`${R0.n}・目標 ${tgt} g`;$('bClock').hidden=false;
+  if(B.phase==='pour'){const T=brewTargets(B),tgt=BRATIO[B.rt];$('bTarget').textContent=`${R0.n}・目標 ${tgt} g`;$('bClock').hidden=false;$('bWat').hidden=false;
     cw.innerHTML=`<div class="cq brewq" id="bCue"></div>${brewStepsHTML(B)}
      <div class="bbar"><i id="bProg"></i>${T.map(s=>`<em style="left:${s.to/320*100}%"></em>`).join('')}</div>
-     <div class="bhrow"><button class="bhold" id="bHold">按住注水</button><button class="bsniff" id="bSniff">👃<span>聞一聞</span></button></div><button class="big alt" id="bDone" disabled>完成，看結果</button>`;
+     <div class="bhrow"><button class="bhold" id="bHold">按住注水</button><button class="bsniff" id="bSniff">${noseSvg(30,"anim")}<span>聞一聞</span></button></div><button class="big alt" id="bDone" disabled>完成，看結果</button>`;
     $('bSniff').onclick=brewSniff;
     bindHold();$('bDone').onclick=()=>{BH.hold=false;brewFinish()};brewCue(B);return}
   if(B.phase==='result'){const r=B.res;cw.innerHTML=`<div class="cq brewq">${r.gold?'進金杯了！':'這杯沒有進金杯'}</div>
@@ -3417,30 +3421,33 @@ function brewEvent(B){const E=BEVS[B.ev.k],el=$('bEvt');B.ev.st='cue';B.ev.t0=pe
     el.className='bevt';el.innerHTML=`<div class="be-t ${ok?'ok':'ng'}">${ok?'✓ '+E.ok:'✗ '+E.ng}</div><div class="be-b"><button id="evOk" class="alt">好</button></div>`;
     $('evOk').onclick=()=>{el.hidden=true;if(B.ev.st==='cut')B.ev.st='done'}};
   const sniff=()=>{if(B.ev.st!=='cue')return;B.ev.st='on';B.paused=true;clearTimeout(B.pk);el.hidden=false;if(BH.hold){brewRelease(B);BH.hold=false;const h=$('bHold');if(h)h.classList.remove('on')}sfx('whoosh');
-    el.className='bevt';el.innerHTML=`<div class="be-t">👃 ${E.t}</div>${owns('nose')?`<div class="be-h">香氣瓶組：${E.bad?'這個味道不對勁。':'這是正常的味道。'}</div>`:''}<div class="be-p">⏸ 聞的時候，計時先停一下。慢慢想。</div><div class="be-b"><button id="evCut">✋ 斷水！</button><button id="evGo" class="alt">沒事，繼續</button></div>`;
+    el.className='bevt';el.innerHTML=`<div class="be-t">${noseSvg(16,'in')} ${E.t}</div>${owns('nose')?`<div class="be-h">香氣瓶組：${E.bad?'這個味道不對勁。':'這是正常的味道。'}</div>`:''}<div class="be-p">⏸ 聞的時候，計時先停一下。慢慢想。</div><div class="be-b"><button id="evCut">✋ 斷水！</button><button id="evGo" class="alt">沒事，繼續</button></div>`;
     $('evCut').onclick=()=>done(true);$('evGo').onclick=()=>done(false)};
   const miss=()=>{if(B.ev.st!=='cue')return;B.ev.st='done';el.hidden=true;
     if(E.bad){B.notes.push('✗ 你沒有去聞。'+E.ng);B.adj+=E.pen||0;B.tdsAdj+=E.tds||0;sfx('fail');toast('剛剛那個味道……你錯過了')}else B.notes.push('（你沒去聞。那只是'+E.t.replace(/[——！].*$/,'')+'）')};
   B.ev.sniff=sniff;B.ev.miss=miss;B.ev.fin=()=>{if(B.ev.st==='cue')miss();else if(B.ev.st==='on')done(false)}}
+/* 線條圖示：鼻子＋香氣、TDS 筆 */
+function noseSvg(sz,cls){return `<svg class="ico ${cls||''}" width="${sz}" height="${sz}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.2 3.2v7c0 1.7-3.7 2.9-3.7 6.4a3 3 0 0 0 3 3c1.1 0 1.5-.7 2.5-.7s1.4.7 2.5.7a3 3 0 0 0 3-3c0-3.5-3.7-4.7-3.7-6.4v-7"/><path d="M9.7 16.9c.5.4 1.1.4 1.6 0M12.7 16.9c.5.4 1.1.4 1.6 0" opacity=".7"/><path class="w1" d="M1.6 6.2c.9-.8 1.9-.8 2.8 0s1.9.8 2.8 0"/><path class="w2" d="M16.8 6.2c.9-.8 1.9-.8 2.8 0s1.9.8 2.8 0"/><path class="w3" d="M2.6 10.4c.7-.6 1.5-.6 2.2 0M19.2 10.4c.7-.6 1.5-.6 2.2 0" opacity=".7"/></svg>`}
+function tdsSvg(sz){return `<svg class="ico" width="${sz}" height="${sz}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="2.5" width="8" height="13" rx="2"/><path d="M10 6h4M10 9h2.5"/><path d="M11 15.5v4.2a1 1 0 0 0 2 0v-4.2"/><path d="M5 20.5c1.2-.8 2.4-.8 3.6 0M15.4 20.5c1.2-.8 2.4-.8 3.6 0" opacity=".6"/></svg>`}
 /* 主動聞：任何時候都可以按。有狀況就會發現，沒狀況只會聞到豆子本來的味道 */
 function brewSniff(){const B=S&&S.brewUI;if(!B||B.phase!=='pour'||B.paused)return;B.sniffs=(B.sniffs||0)+1;
   if(B.ev&&B.ev.st==='cue'){B.ev.sniff();return}
   const el=$('bEvt');if(B.ev&&(B.ev.st==='on'||B.ev.st==='cut'))return;sfx('whoosh');
-  const fl=BEANF[B.bean]||'豆子本來的香氣';el.className='bevt peek';el.innerHTML=`<div class="be-t">👃 ${B.poured>0?'只聞到'+fl+'。一切正常。':'乾香：'+fl+'。'}</div>`;el.hidden=false;
+  const fl=BEANF[B.bean]||'豆子本來的香氣';el.className='bevt peek';el.innerHTML=`<div class="be-t">${noseSvg(16,'in')} ${B.poured>0?'只聞到'+fl+'。一切正常。':'乾香：'+fl+'。'}</div>`;el.hidden=false;
   clearTimeout(B.pk);B.pk=setTimeout(()=>{if(el.classList.contains('peek'))el.hidden=true},1600)}
 const BEANF={'巴拿馬藝伎・淺焙':'茉莉、佛手柑和蜂蜜','衣索比亞・淺中焙':'檸檬皮、花香和紅茶','帕洛瑪莊園・厭氧日曬':'紅蘋果、黑糖和一點柑橘','巴西喜拉朵・中深焙':'可可、堅果和焦糖'};
-function brewDrain(B){const g={fine:.62,mid:1,coarse:1.45}[B.g]*(B.gr==='blade'?.7:1);const clog=B.ev&&BEVS[B.ev.k].clog&&B.ev.st!=='wait'&&!B.ev.fixed;return clog?(B.ev.st==='done'?2.4:.6):7.5*g}
+function brewDrain(B){const g={fine:.62,mid:1,coarse:1.45}[B.g]*(B.gr==='blade'?.7:1);const clog=B.ev&&BEVS[B.ev.k].clog&&B.ev.st!=='wait'&&!B.ev.fixed;return clog?(B.ev.st==='done'?Math.max(1.2,.07*(B.wat||0)):.5):Math.max(1.4*g,.26*g*(B.wat||0))}
 function brewTick(now){const B=S&&S.brewUI;if(!B||(B.phase!=='grind'&&B.phase!=='pour'))return;const dt=Math.min(.05,(now-BH.last)/1000);BH.last=now;
   if(B.phase==='grind'){if(BH.hold){B.grind=Math.min(1,B.grind+dt/1.8);B.crank+=dt*9;if(Math.random()<.5)sfx('grindtick');
       $('bProg').style.width=(B.grind*100)+'%';if(B.grind>=1){BH.hold=false;sfx('pick');B.phase='dose';brewPanel();return}}}
   else{if(B.paused){BH.raf=requestAnimationFrame(brewTick);return}
     if(B.run){B.clock+=dt*BCLK;const c=$('bClock');if(c)c.textContent='⏱ '+mmss(B.clock)}
     const pouring=BH.hold&&!(B.ev&&B.ev.st==='cut');
-    if(pouring){const add=dt*BPOUR;B.poured=Math.min(320,B.poured+add);B.wat=(B.wat||0)+add;if(Math.random()<.35)sfx('pourtick');$('bProg').style.width=(B.poured/320*100)+'%';$('bScale').textContent=B.poured.toFixed(1)+' g';
+    if(pouring){const add=dt*BPOUR;B.poured=Math.min(320,B.poured+add);const ab=Math.min(add,Math.max(0,BDOSE*2-(B.abs||0)));B.abs=(B.abs||0)+ab;B.wat=(B.wat||0)+add-ab;if(Math.random()<.35)sfx('pourtick');$('bProg').style.width=(B.poured/320*100)+'%';$('bScale').textContent=B.poured.toFixed(1)+' g';
       const d=$('bDone');if(d&&d.disabled&&B.poured>=BRATIO[B.rt]*.6)d.disabled=false;
       if(B.poured>=320){BH.hold=false;brewFinish();return}}
     if(B.wat>0){const dr=Math.min(B.wat,brewDrain(B)*dt);B.wat-=dr;B.dripped=(B.dripped||0)+dr;B.dRate=dr/dt}else B.dRate=0;
-    B.slurry=Math.min(1,(B.wat||0)/80);
+    B.slurry=Math.min(1,(B.wat||0)/70);const wb=$('bWat');if(wb)wb.innerHTML=`<span>注水</span><b>${B.poured.toFixed(1)} g</b><span>濾杯內</span><b>${Math.round(B.wat||0)} g</b><span>粉吸水</span><b>${Math.round(B.abs||0)} g</b><span>分享壺</span><b>${Math.round(B.dripped||0)} g</b>`;
     if(B.si>=brewTargets(B).length&&!B.dry&&(B.wat||0)<.5){B.dry=B.clock;B.notes.push('滴完：總萃取時間 '+mmss(B.clock));sfx('pop');const d=$('bDone');if(d)d.disabled=false}
     if(B.ev&&B.ev.st==='wait'&&B.run&&B.clock>=B.ev.at)brewEvent(B);
     if(B.ev&&B.ev.st==='cue'&&(now-B.ev.t0)/1000>=BCUE)B.ev.miss()
@@ -3507,7 +3514,7 @@ BGS.brewbar=function(g,t){const p=PX(g),B=S&&S.brewUI;if(!B)return;const now=per
   // 電子秤
   p(112,142,100,8,'#0e1116');p(112,142,100,1,'#3a4350');
   // 分享壺
-  const sx=132,sy=110,fill=Math.max(0,((B.dripped||0)-BDOSE*1.2)/240);
+  const sx=132,sy=110,fill=Math.max(0,(B.dripped||0)/240);
   p(sx,sy,56,32,'rgba(143,167,184,.28)');p.frame(sx,sy,56,32,'#8fa7b8');p(sx+56,sy+6,4,14,'#8fa7b8');
   if(fill>0){const h=Math.min(30,Math.round(fill*28));p(sx+1,sy+31-h,54,h,'#4a2b18');p(sx+1,sy+31-h,54,1,'#8a5a34')}
   {const rate=B.dRate||0,bot=sy+30-Math.round(fill*28);if(rate>3){for(let y=108;y<bot;y++)p(159+((y+Math.floor(t*30))%7===0?1:0),y,rate>6?2:1,1,'rgba(90,50,30,.9)')}
@@ -3520,7 +3527,7 @@ BGS.brewbar=function(g,t){const p=PX(g),B=S&&S.brewUI;if(!B)return;const now=per
   const bed=Math.round(B.bed*9),bloomUp=B.steps[0]&&B.clock<(brewTargets(B)[1]||{at:40}).at?Math.round(Math.min(2,Math.sin(Math.min(1,B.clock/10)*1.57)*2)):0;
   for(let j=0;j<bed;j++){const w=36-j*2;p(160-w/2,95+(9-bed)+j-bloomUp*(j===0?1:0),w,1,B.poured>0?'#3a2010':'#7a4a28')}
   if(bed&&B.poured===0){const rr=R(5);for(let i=0;i<10;i++)p(144+rr()*32,95+rr()*2,1,1,'#9a6a40')}
-  if(B.slurry>.02){const top=Math.round(95-B.slurry*12);for(let j=top;j<95;j++){const w=Math.min(56,36+(95-j)*2);p(160-w/2,j,w,1,'rgba(120,80,40,.55)')}p(160-Math.min(56,36+(95-top)*2)/2,top,Math.min(56,36+(95-top)*2),1,'rgba(220,200,160,.5)');
+  if(B.slurry>.02){const top=Math.round(95-B.slurry*12);for(let j=top;j<95;j++){const w=Math.min(56,36+(95-j)*2),d=(j-top)/12;p(160-w/2,j,w,1,`rgba(${150-d*50|0},${95-d*35|0},${50-d*20|0},.85)`)}p(160-Math.min(56,36+(95-top)*2)/2,top,Math.min(56,36+(95-top)*2),1,'rgba(220,200,160,.5)');
     if(B.ev&&BEVS[B.ev.k].clog&&B.ev.st!=='wait'&&!B.ev.fixed){const rr=R(Math.floor(t*2));for(let i=0;i<4;i++)p(146+rr()*28,top+2+rr()*4,2,2,'rgba(60,35,20,.8)')}
     if(B.slurry>.3){const rr=R(Math.floor(t*6));for(let i=0;i<5;i++)p(140+rr()*40,top+1,1,1,'rgba(240,220,190,.6)')}}
   // 細口壺：注水時移到濾杯上方，壺嘴前後繞圈
@@ -3637,7 +3644,7 @@ function playCup(n){ffwd=false;$('tFF').classList.remove('on');waiting=false;$('
   tl.insertAdjacentHTML('beforeend',[0,1,2,3,4].map(i=>`<button class="cupHit" data-i="${i}" style="left:${(48+i*56)/3.2}%" aria-label="第${i+1}杯"></button>`).join(''));
   const HINT={0:['湊近乾粉，先聞一次乾香。',farm?'紅蘋果、黑糖，很乾淨。':'甜得很直接，像糖果罐打開。'],1:['點杯子，一杯一杯注水。','熱水沖下去，粉層浮成一層殼。'],
     2:['四分鐘到了。點杯子，用杯測匙破渣，順便湊近聞濕香。',''],3:['把浮在表面的渣撈乾淨。',''],4:[farm?'五杯都要喝：點杯子啜吸。':'點杯子，舀一匙用力啜吸。',''],5:['讓它放涼一點，再喝一口。',''],7:['放涼了。點一杯，再喝一口。','']};
-  const btn={0:'👃 聞乾香',3:'🥄 撈渣（五杯一起）',5:'⏳ 等它放涼'};
+  const btn={0:noseSvg(20,'in')+' 聞乾香',3:'🥄 撈渣（五杯一起）',5:'⏳ 等它放涼'};
   const render=(msg)=>{if(!S||S.act!==A)return;const h=HINT[A.ph]||['',''];
     cw.innerHTML=`<div class="cq brewq">☕ ${h[0]}</div><div class="bhint">${msg||'&nbsp;'}</div>`+(btn[A.ph]?`<button class="bhold" id="cBtn">${btn[A.ph]}</button>`:'');
     tl.querySelectorAll('.cupHit').forEach(b=>b.classList.toggle('on',cupCan(A,+b.dataset.i)));
@@ -4186,8 +4193,8 @@ const SHOP=[
  {id:'stagg',k:'kt',p:5900,d:'天鵝頸細口壺，壺嘴更細，控流更準。'},
  {id:'kalita',k:'dr',p:900,d:'平底濾杯，流速穩，萃取均勻。'},
  {id:'origami',k:'dr',p:1100,d:'摺紙濾杯，介於錐形和平底之間。'},
- {id:'tds',k:'tool',p:3200,n:'TDS 筆',ic:'🧪',d:'調參數時，會先幫你估出這一杯的萃取率和 TDS。'},
- {id:'nose',k:'tool',p:4500,n:'香氣瓶組',ic:'👃',d:'嗅覺訓練組。沖煮時聞到怪味，會提示你那個味道正不正常。'}];
+ {id:'tds',k:'tool',p:3200,n:'TDS 筆',ic:'tds',d:'調參數時，會先幫你估出這一杯的萃取率和 TDS。'},
+ {id:'nose',k:'tool',p:4500,n:'香氣瓶組',ic:'nose',d:'嗅覺訓練組。沖煮時聞到怪味，會提示你那個味道正不正常。'}];
 const GEAR0={main:['v60','blade','plain'],shen:['v60','c40','plain'],carlos:['v60','blade','plain'],hana:['kalita','c40','brewista']};
 const MRATE={main:1,shen:1,carlos:120,hana:4};
 const WORK={main:{t:'在白霧咖啡多排一班，幫客人沖手沖。小費看你沖得好不好。',tip:[4800,1800]},shen:{t:'幫迪化街的老客人代沖咖啡。沖得好，他們會多買一包豆子。',tip:[4200,1600]},
@@ -4200,7 +4207,7 @@ function ensureGear(){if(!S||S.flags.gear0)return;S.flags.gear0=1;(GEAR0[storyK(
 function gearName(id){for(const k of ['dr','gr','kt']){const x=GEAR[k].find(o=>o[0]===id);if(x)return x[1]}const t=SHOP.find(o=>o.id===id);return t?t.n:id}
 function bestOwned(k){const order={gr:['zp6','c40','blade'],kt:['stagg','brewista','plain'],dr:['v60','kalita','origami']}[k];return order.find(owns)||order[order.length-1]}
 function openShop(back){ensureGear();const sec=(lab,items)=>`<div class="shs"><b>${lab}</b>${items.map(it=>{const o=owns(it.id),pr=price(it),base=it.k!=='tool',sell=Math.round(pr/2);
-    return `<div class="shi ${o?'own':''}"><div class="shic">${base?gearSvg(it.id):`<span style="font-size:22px">${it.ic}</span>`}</div><div class="sht"><b>${it.n||gearName(it.id)}</b><small>${it.d}</small></div>
+    return `<div class="shi ${o?'own':''}"><div class="shic" style="color:#f0b46a">${base?gearSvg(it.id):it.ic==='nose'?noseSvg(22):tdsSvg(22)}</div><div class="sht"><b>${it.n||gearName(it.id)}</b><small>${it.d}</small></div>
      <div class="shb">${o?`<span class="sho">已擁有</span>${(GEAR0[storyK()]||[]).includes(it.id)?'':`<button class="tb" data-sell="${it.id}">賣 ${cur()}${sell.toLocaleString()}</button>`}`:`<button class="tb on" data-buy="${it.id}" ${getMoney()<pr?'disabled':''}>${cur()}${pr.toLocaleString()}</button>`}</div></div>`}).join('')}</div>`;
   openCard(`<button class="x" id="shX">✕</button><h3>器材行</h3><div class="shm">${S.story&&S.story!=='main'?GD[S.story].mlabel:'存款'}　<b>${cur()}${getMoney().toLocaleString()}</b></div>
    <p style="color:#8b93a1;font-size:12.5px;margin:2px 0 8px">好器材讓親手沖更容易進金杯（進金杯＝技術 +1）。但錢也要留著——機票、生豆、該付的帳，付不出來，故事就走不下去。</p>
