@@ -145,6 +145,18 @@ details.more[open]>summary::before{content:"▾ "}
 .why b{font-size:12px;color:var(--muted);display:block}
 .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin:12px 0}
 .stat{border:1px solid var(--line);border-radius:10px;padding:8px 10px}
+.stat{position:relative;overflow:hidden}
+.stat .k{display:flex;justify-content:space-between;align-items:center;gap:6px}
+.sbadge{font-size:11.5px;font-weight:800;padding:2px 7px;border-radius:999px;white-space:nowrap;font-family:var(--mono)}
+.s-up{border-left:4px solid var(--bull);background:linear-gradient(90deg,color-mix(in srgb,var(--bull) 10%,transparent),transparent 70%)}
+.s-dn{border-left:4px solid var(--bear);background:linear-gradient(90deg,color-mix(in srgb,var(--bear) 10%,transparent),transparent 70%)}
+.s-up .sbadge{color:#fff;background:var(--bull)}.s-dn .sbadge{color:#fff;background:var(--bear)}
+.s-up.s-big .v{color:var(--bull)}.s-dn.s-big .v{color:var(--bear)}
+.sbar{margin-top:7px}.sbar-t{position:relative;height:6px;border-radius:3px;background:var(--line)}
+.sbar-t i{position:absolute;left:0;top:0;bottom:0;border-radius:3px}.sbar-t i.ok{background:var(--muted)}.sbar-t i.warn{background:#e0a100}.sbar-t i.bear{background:var(--bear)}
+.sbar-t em{position:absolute;top:-2px;bottom:-2px;border-left:1px dashed var(--fg);opacity:.35}
+.sbar-l{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:3px}.sbar-l .lv{font-weight:700}.sbar-l .lv.bear{color:var(--bear)}.sbar-l .lv.warn{color:#e0a100}
+
 .stat .k{font-size:12px;color:var(--muted)}
 .stat .v{font:600 20px var(--mono);letter-spacing:-.02em}
 .stat .d{font-size:11px;color:var(--faint)}
@@ -1801,6 +1813,23 @@ function renderRB(){const now=ABC.tw,lv=[[46000,"44,000–46,000","第二段：�
  const up1=Math.round((40000/now-1)*1000)/10,up2=Math.round((44000/now-1)*1000)/10;
  $("#rbWhy").innerHTML=`<b>這份劇本的邏輯</b>①  黃仁勳回任解決了 10 月以來這波下跌的大部分問題，所以先看回到 40,000–42,000（離現在約 +${up1}%）。<br>② 再往上要等兩關：國會聽證（12/1 起）和 12/10 FOMC；沒有大狀況，農曆年前、1 月新國會上任前有機會到 44,000–46,000（約 +${up2}% 以上）。<br>③ 黃仁勳解決不了的：美國地方反資料中心、消費弱只靠投資撐、高利率下新雲端業者發債困難、對中國銷售可能讓步（傳聞），以及台廠被要求加速赴美、去中化。<b>另一派看法</b>也有人認為黃仁勳回任只是「假議題」：通膨沒解決、央行沒轉鴿、東南亞調查和聽證都還沒結束，所以不該把它當成底部訊號——這也是底部儀表板目前把「利空落地」記為沒亮的原因。兩派的共同點是：<span style="font-weight:700">聽證會和 12/10 FOMC 是下一個分水嶺</span>。<br><br><span style="color:var(--muted);font-size:13px">傳聞（Vance 出面協調、以減少對中國銷售換回任）均未經證實。</span>`}
 renderRB();
+
+/* 數字卡片圖像化：漲跌箭頭＋距高點條 */
+function vizStats(root){root.querySelectorAll(".stat:not([data-viz])").forEach(st=>{st.dataset.viz=1;
+  const k=st.querySelector(".k"),v=st.querySelector(".v"),d=st.querySelector(".d");if(!k||!v)return;
+  const vt=v.textContent.trim(),dt=d?d.textContent:"",num=x=>parseFloat(x.replace("−","-").replace(/[+%,]/g,""));
+  let dd=null,day=null;const m=dt.match(/距高點\s*([−-]\s?\d+(?:\.\d+)?)%/);
+  if(m)dd=num(m[1]);else if(/^[−-]\d+(\.\d+)?%$/.test(vt)&&/高點|→/.test(dt))dd=num(vt);
+  const rest=dt.replace(/距高點\s*[−-]\s?\d+(?:\.\d+)?%/,"");const mm=rest.match(/([+−-]\s?\d+(?:\.\d+)?)%/);
+  if(mm)day=num(mm[1]);else if(/^[+−-]\d+(\.\d+)?%$/.test(vt)&&dd===null)day=num(vt);
+  if(day!==null&&!isNaN(day)&&day!==0){const inv=/VIX|恐慌/.test(k.textContent),up=inv?day<0:day>0;if(inv)st.classList.add("s-inv");st.classList.add(up?"s-up":"s-dn");
+    const b=document.createElement("span");b.className="sbadge";b.textContent=(day>0?"▲ ":"▼ ")+Math.abs(day)+"%";k.appendChild(b);
+    const big=Math.abs(day)>=5&&!/^[−-]\d+(\.\d+)?%$/.test(vt);if(big)st.classList.add("s-big")}
+  if(dd!==null&&!isNaN(dd)&&dd<0){const a=Math.min(Math.abs(dd),50),bar=document.createElement("div");bar.className="sbar";
+    const lvl=Math.abs(dd)>=20?"空頭":Math.abs(dd)>=10?"修正":"正常";
+    bar.innerHTML=`<div class="sbar-t"><i style="width:${a*2}%" class="${Math.abs(dd)>=20?"bear":Math.abs(dd)>=10?"warn":"ok"}"></i><em style="left:20%"></em><em style="left:40%"></em></div><div class="sbar-l"><span>距高點 ${dd}%</span><span class="lv ${lvl==="空頭"?"bear":lvl==="修正"?"warn":"ok"}">${lvl}</span></div>`;st.appendChild(bar)}
+ })}
+(()=>{let tm=null;new MutationObserver(()=>{clearTimeout(tm);tm=setTimeout(()=>vizStats(document),60)}).observe($("main")||document.body,{childList:true,subtree:true});vizStats(document)})();
 applyFold();
 </script>
 <!-- Made by Jim Lu -->
