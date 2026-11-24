@@ -71,6 +71,19 @@ main{max-width:760px;margin:0 auto;padding:14px max(14px,env(safe-area-inset-lef
 .caltl{overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;margin:8px -4px 0;padding:0 4px}.caltl::-webkit-scrollbar{display:none}.caltl svg{display:block}
 .calhint{font-size:13px;color:var(--muted);display:flex;align-items:center;gap:8px;min-height:28px}.calhint b{color:var(--fg)}
 .cdot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;vertical-align:2px}
+.gl{border-bottom:1.5px dotted var(--s1);cursor:pointer;-webkit-tap-highlight-color:transparent}.gl:active{background:color-mix(in srgb,var(--s1) 18%,transparent)}
+#glBg{position:fixed;inset:0;background:rgba(0,0,0,.35);opacity:0;pointer-events:none;transition:opacity .2s;z-index:80}#glBg.on{opacity:1;pointer-events:auto}
+#glPop{position:fixed;left:0;right:0;bottom:0;z-index:81;transform:translateY(105%);transition:transform .25s cubic-bezier(.2,.8,.2,1);display:flex;justify-content:center;pointer-events:none}
+#glPop.on{transform:none;pointer-events:auto}
+.glp-in{width:min(640px,100%);background:var(--panel);border:1px solid var(--line);border-bottom:none;border-radius:18px 18px 0 0;padding:14px 18px calc(18px + env(safe-area-inset-bottom));box-shadow:0 -8px 30px rgba(0,0,0,.25);max-height:60vh;overflow-y:auto}
+.glp-h{display:flex;justify-content:space-between;align-items:center}.glp-x{font-size:18px;color:var(--muted);cursor:pointer;padding:4px 6px}
+.glp-t{font-size:11px;font-weight:700;letter-spacing:.08em;padding:3px 9px;border-radius:999px;border:1px solid var(--line);color:var(--muted)}
+.glp-t.co{color:#2f80ed;border-color:#2f80ed66}.glp-t.ppl{color:#16a085;border-color:#16a08566}.glp-t.term{color:#8a5cf6;border-color:#8a5cf666}.glp-t.org{color:#e0662e;border-color:#e0662e66}
+.glp-n{font-size:22px;font-weight:800;margin-top:10px}.glp-s{font-size:13px;color:var(--muted);margin-top:2px}
+.glp-in p{font-size:15px;line-height:1.7;margin:10px 0 0}
+.glp-q{margin-top:12px;padding:10px 12px;border-radius:12px;background:color-mix(in srgb,var(--fg) 6%,transparent);font-size:14px;line-height:1.65}.glp-q span{display:block;font-size:12px;color:var(--muted);margin-bottom:3px}
+.glp-b{margin-top:12px;width:100%;padding:10px;border-radius:12px;border:1px solid var(--line);background:transparent;color:var(--s1);font:600 14px var(--sans);cursor:pointer}
+.card.flash{outline:2px solid var(--s1);transition:outline .3s}
 .foldbar{display:flex;gap:8px;justify-content:flex-end;margin:-4px 0 10px}
 .foldbar button{font:inherit;font-size:12px;padding:5px 10px;border-radius:999px;border:1px solid var(--line);background:var(--panel);color:var(--muted)}
 .meta{font-size:12px;color:var(--faint);display:flex;gap:8px;flex-wrap:wrap;align-items:center}
@@ -1532,10 +1545,138 @@ function renderBottom(){
   $("#botWhy").innerHTML=`<b>怎麼讀：</b>現在 ${now}%，還低於過去 10 次見底時的最低值 ${mn}%，代表以歷史標準來看「還沒到典型的底部」，大約還差 ${gap>0?gap:0} 個訊號（每個訊號 12.5 分）。最常在底部亮起、但現在還沒亮的是<span style="font-weight:700">聯準會轉鬆</span>（歷史 ${hit(0)}% 都有）和<span style="font-weight:700">信用利差停止擴大</span>（${hit(2)}%）。<br><br><b>回測的規律：</b>① 每一次見底，「多數個股深跌」都已經亮了（100%），它是必要但不充分的條件；② 亮到 9 成以上的（2009、2020）都是央行加政府一起全力出手；③ 唯一在 Fed 沒轉鬆下見底的是 2025，靠的是政策直接退讓（關稅暫停）。這次如果 Fed 12 月不升息、或信用市場穩住，分數就會跳進 62.5–75% 的「歷史見底區」。<br><br><span style="color:var(--muted);font-size:13px">注意：只有 10 個樣本，而且是事後回看；底部那天沒有人能確定訊號「已經亮了」。這是幫你判斷位置的框架，不是買賣訊號。</span>`;
 }
 renderBottom();
+/* ===== 名詞解釋（點底線字跳出卡片） ===== */
+const GL={
+/* 公司 */
+"Nvidia":["co","NVDA｜輝達","全球最大的 AI 晶片（GPU）公司，資料中心訓練與執行 AI 模型幾乎都用它的晶片。這波 AI 行情的龍頭，也是美股市值最大的公司之一。",["NVDA","輝達"]],
+"AMD":["co","AMD｜超微半導體","Nvidia 最主要的 GPU 對手，也做電腦與伺服器 CPU。AI 晶片產品線叫 Instinct（例如 MI325X）。執行長是台裔的蘇姿丰。",["超微"]],
+"Anthropic":["co","ANT｜Claude 的開發公司","美國 AI 公司，開發 Claude 系列語言模型，由一群前 OpenAI 成員創立。11/19 在美股上市，代號 ANT，承銷價 83 美元。",["ANT"]],
+"OpenAI":["co","ChatGPT 的開發公司","推出 ChatGPT 的 AI 公司，微軟是大股東。市場傳出它也在準備上市（IPO）。",[]],
+"SpaceX":["co","馬斯克的太空公司","做火箭發射和星鏈（Starlink）衛星網路。它的上市規模被拿來和這次 Anthropic 比較。",[]],
+"HPE":["co","HPE｜慧與科技（Hewlett Packard Enterprise）","2015 年從惠普拆出來的企業設備公司，賣伺服器、儲存和網路設備給企業。AI 伺服器是重點業務，所以它的財報常被當成 AI 伺服器需求的溫度計。",[]],
+"HP":["co","HPQ｜惠普","做個人電腦和印表機的消費端公司。和 HPE 原本是同一家，2015 年拆成兩家。",[]],
+"Dell":["co","DELL｜戴爾","個人電腦與伺服器大廠，也是 AI 伺服器（裝 Nvidia GPU 的機櫃）的出貨大戶，供應鏈裡有很多台廠。",[]],
+"Workday":["co","WDAY｜雲端人資軟體","賣人資、薪資、財務管理的雲端軟體給企業。財報可以看出企業願不願意花錢買軟體。",[]],
+"Autodesk":["co","ADSK｜設計軟體","AutoCAD 的公司，建築、製造、影視都在用它的設計軟體。",[]],
+"CoreWeave":["co","CRWV｜AI 算力出租","大量買 Nvidia GPU，再把算力出租給 AI 公司的「新雲端」業者，Nvidia 也是它的股東。借錢擴張、槓桿高，常被當成 AI 泡沫的溫度計。",["CRWV"]],
+"IREN":["co","IREN｜從挖礦轉型 AI 算力","原本做比特幣挖礦，後來把電力和機房轉去做 AI 資料中心與 GPU 出租。",[]],
+"Nebius":["co","NBIS｜AI 雲端算力","從俄羅斯搜尋引擎 Yandex 分拆出來的荷蘭公司，提供 AI 雲端算力出租，屬於「新雲端」。",["NBIS"]],
+"Kymera":["co","KYMR｜生技公司","研發「標靶蛋白降解」新藥的生技公司，和 AI 無關。",["KYMR"]],
+"Megaspeed":["co","新加坡算力公司","被指涉把 Nvidia AI 晶片轉運到中國，採購規模約 48 億美元，是黃仁勳案的核心之一。",[]],
+"Maginfra":["co","被指為空殼公司","出現在 Nvidia 出口許可申請名單上的中國公司，眾院外委會主席 Mast 說它是走私前哨的「假公司」；Hunterbrook 的 AMD 報告也點名它。",[]],
+"New Matrix":["co","被指為空殼公司","出現在 Nvidia 出口許可申請名單上的中國公司，紐約時報實地走訪發現註冊地址空無一人。",[]],
+"Hunterbrook":["org","調查報導媒體＋避險基金","先做調查報導，同時旗下基金建立對應的空頭部位，所以報告有利益衝突。11/19 發報告質疑 AMD 違反出口管制。",[]],
+"台積電":["co","2330／TSM｜全球最大晶圓代工廠","Nvidia、AMD、Apple 的先進晶片都靠它生產。在美國上市的是存託憑證（ADR），代號 TSM。",["TSM","TSMC"]],
+"ASML":["co","艾司摩爾｜荷蘭半導體設備商","全球唯一能做 EUV 極紫外光曝光機的公司，先進製程離不開它。",[]],
+"Arm":["co","ARM｜晶片架構授權","英國公司，手機晶片幾乎都用它的架構設計；它不自己賣晶片，靠授權收費。",[]],
+"美光":["co","MU｜Micron，美國記憶體大廠","做 DRAM 和 HBM 高頻寬記憶體。AI 伺服器需要大量 HBM，所以美光是 AI 概念股。",["Micron"]],
+/* 指數、名詞 */
+"S&P 500":["term","標普 500 指數","美國 500 家大企業組成的指數，最常拿來代表「美股大盤」。",["S&P","標普"]],
+"Nasdaq-100":["term","那斯達克 100 指數","那斯達克前 100 大非金融公司，科技股比重極高。它的期貨常用來看美股開盤前科技股的方向。",[]],
+"Nasdaq":["term","那斯達克綜合指數","以科技股為主的美股指數，Nvidia、Apple、微軟都在裡面。",["那斯達克"]],
+"道瓊":["term","道瓊工業平均指數","30 家美國藍籌大公司組成，歷史最久的美股指數；用股價加權，高價股影響大。",[]],
+"SOX":["term","費城半導體指數（費半）","30 檔在美國上市的半導體股，含 Nvidia、AMD、台積電 ADR。台股電子股的領先指標。",["費半"]],
+"VIX":["term","恐慌指數","用 S&P 500 選擇權價格算出「市場預期未來 30 天波動多大」。20 以下算平靜，30 以上緊張，40 以上就是恐慌。",[]],
+"Fed":["org","聯準會｜美國央行","決定美國利率和貨幣供給。升息會讓借錢變貴、通常壓抑股市；降息則相反。",["聯準會"]],
+"FOMC":["term","聯邦公開市場委員會","Fed 決定利率的會議，一年開 8 次。會後聲明和主席記者會常讓市場大波動。",[]],
+"QE":["term","量化寬鬆","央行印錢去買債券，把大量資金灌進市場、壓低利率。2008、2020 都靠它止跌。",[]],
+"CPI":["term","消費者物價指數","最常用的通膨數字，看一般人買東西變貴多少。",[]],
+"PCE":["term","個人消費支出物價指數","另一種通膨數字，涵蓋範圍比 CPI 廣，是 Fed 最看重的通膨指標。",[]],
+"GDP":["term","國內生產毛額","衡量一國經濟規模；GDP 成長率就是經濟成長率。",[]],
+"褐皮書":["term","Fed 經濟情勢報告","Fed 12 個地區分行整理的各地景氣與物價狀況，在每次 FOMC 會議前兩週公布。",[]],
+"點陣圖":["term","Fed 利率預測圖","每季公布一次，每位 Fed 官員點出自己預估的未來利率，市場用來猜升降息方向。",[]],
+"FedWatch":["term","CME 升降息機率","芝商所依利率期貨價格推算的「下次 Fed 會議升息、降息、不動」機率。",[]],
+"IPO":["term","首次公開發行","公司第一次在股市上市、公開賣股票。承銷價是上市前賣給法人的價格。",[]],
+"ETF":["term","指數股票型基金","一籃子股票包成一檔，可以像股票一樣買賣，例如追蹤 S&P 500 的 ETF。",[]],
+"ADR":["term","美國存託憑證","外國公司在美股掛牌的方式。台積電在美國上市的就是 ADR（TSM）。",[]],
+"SEC":["org","美國證券交易委員會","美國的證券主管機關，類似台灣金管會證期局，負責調查財報與內線交易。",[]],
+"BIS":["org","美國商務部工業與安全局","負責出口管制，AI 晶片賣到中國要先拿它核發的許可證。",[]],
+"H200":["term","Nvidia 的 AI 晶片","Nvidia 上一代 Hopper 架構的高階 AI 晶片，川普政府 2025 年底重新開放逐案審批賣到中國。",[]],
+"MI325X":["term","AMD 的 AI 晶片","AMD Instinct 系列 AI 加速器，對標 Nvidia H200。",[]],
+"HBM":["term","高頻寬記憶體","疊在 AI 晶片旁邊的高速記憶體，AI 伺服器的必備零件，主要供應商是 SK 海力士、三星、美光。",[]],
+"WTI":["term","西德州原油","美國油價的基準。",[]],
+"KOSPI":["term","韓國綜合股價指數","韓國股市大盤，三星、SK 海力士權重高，和台股常同步。",[]],
+"ERCOT":["org","德州電網管理機構","管理德州大部分電網。AI 資料中心很耗電，ERCOT 對新資料中心接電的審查會影響建置速度。",[]],
+"Kalshi":["org","預測市場","可以用真錢押注事件結果（例如誰當 CEO、Fed 會不會升息）的平台，價格就是市場認為的機率。",["Polymarket"]],
+"CEO":["term","執行長","公司最高的經營主管。",[]],
+"CFO":["term","財務長","管公司財務的主管。",[]],
+"信用利差":["term","公司債比公債多付的利息","利差越大，代表市場越擔心企業倒帳。利差持續擴大是金融壓力上升的危險訊號。",[]],
+"新雲端":["term","Neocloud","專門出租 GPU 算力的新興雲端公司（CoreWeave、Nebius 等），和 Amazon、微軟這種傳統雲端不同。",[]],
+/* 媒體與機構 */
+"WSJ":["org","華爾街日報","美國主要財經報紙。",[]],
+"CNBC":["org","美國財經電視台","",[]],
+"Bloomberg":["org","彭博","財經新聞與金融資料公司。",["彭博"]],
+"高盛":["org","Goldman Sachs","美國頂級投資銀行。",[]],
+"摩根士丹利":["org","Morgan Stanley（大摩）","美國頂級投資銀行。",["大摩"]],
+"摩根大通":["org","JPMorgan Chase（小摩）","美國最大銀行。",[]],
+"Bernstein":["org","伯恩斯坦","以半導體與科技研究出名的券商研究機構。",[]],
+/* 人物 */
+"黃仁勳":["ppl","Jensen Huang｜Nvidia 共同創辦人、執行長","台裔美國人，1993 年創辦 Nvidia。11/12 因婚外情與調查辭職，11/23 回任執行長。",["Jensen Huang"]],
+"Kress":["ppl","Colette Kress｜Nvidia 財務長","黃仁勳下台期間暫代執行長。",["Colette Kress"]],
+"Harvey Jones":["ppl","Nvidia 董事會主席","",[]],
+"蘇姿丰":["ppl","Lisa Su｜AMD 執行長","台裔美國人，2014 年接掌 AMD，帶領公司從瀕臨破產翻身。",["Lisa Su"]],
+"Rene Haas":["ppl","Arm 執行長","",[]],
+"Ian Buck":["ppl","Nvidia 加速運算副總裁","CUDA 的主要推手之一，被押注為 Nvidia 可能的接班人選。",[]],
+"Amodei":["ppl","Dario Amodei｜Anthropic 執行長","Anthropic 共同創辦人，前 OpenAI 研究副總裁。",[]],
+"Mast":["ppl","Brian Mast｜眾院外交委員會主席","共和黨籍眾議員。11/19 公開 AI 晶片對中國出口許可資料，點名兩家空殼公司。",["Brian Mast"]],
+"Powell":["ppl","Jerome Powell｜鮑爾","2018 年起擔任 Fed 主席。",["鮑爾"]],
+"Williams":["ppl","John Williams｜紐約 Fed 總裁","FOMC 常任投票委員，發言很有份量。",[]],
+"Waller":["ppl","Christopher Waller｜Fed 理事","",[]],
+"Logan":["ppl","Lorie Logan｜達拉斯 Fed 總裁","",[]],
+"Paulson":["ppl","Anna Paulson｜費城 Fed 總裁","",[]],
+"Cook":["ppl","Lisa Cook｜Fed 理事","",[]],
+"Goolsbee":["ppl","Austan Goolsbee｜芝加哥 Fed 總裁","",[]],
+"Mike Wilson":["ppl","摩根士丹利 美股首席策略師","以偏空聞名，2022 年準確看空美股。",["Wilson"]],
+"Dan Ives":["ppl","科技股多頭代表人物","長年看多 AI 和特斯拉，目標價常是華爾街最高。",["Ives"]],
+"Steve Eisman":["ppl","《大賣空》原型人物","2008 年做空次貸大賺，電影《大賣空》裡 Mark Baum 的原型。",["Eisman"]],
+"Aswath Damodaran":["ppl","紐約大學教授","被稱為「估值大師」，以公開的企業估值模型聞名。",["Damodaran"]],
+"Jamie Dimon":["ppl","摩根大通執行長","華爾街最有影響力的銀行家之一。",["Dimon"]],
+"Cathie Wood":["ppl","ARK Invest 創辦人","押注顛覆式創新科技股，2020 年爆紅，之後績效大起大落。",[]],
+"Bill Ackman":["ppl","Pershing Square 創辦人","知名激進派避險基金經理人。",["Ackman"]],
+"Mohamed El-Erian":["ppl","前 PIMCO 執行長、經濟學家","",["El-Erian"]],
+"Greg Ip":["ppl","WSJ 首席經濟評論員","",[]],
+};
+const GLT={co:"公司",org:"機構",term:"名詞",ppl:"人物"};
+const GLMAP={};let GLRE=null;
+function glBuild(){
+  Object.entries(GL).forEach(([k,v])=>{GLMAP[k]=k;(v[3]||[]).forEach(a=>{if(!GLMAP[a])GLMAP[a]=k})});
+  // 名人觀點的人物自動加入
+  try{allViews().forEach((v,i)=>{v.n.split(/、|＆|&| 與 /).map(x=>x.trim()).filter(x=>x.length>=3&&!/（/.test(x)).forEach(nm=>{if(!GLMAP[nm]){GL[nm]=["ppl",v.o,"",[]];GLMAP[nm]=nm}GL[GLMAP[nm]].vw=v.n;const last=nm.split(" ").pop();if(last.length>=4&&last!==nm&&!GLMAP[last])GLMAP[last]=GLMAP[nm]})})}catch(e){}
+  const ks=Object.keys(GLMAP).sort((a,b)=>b.length-a.length),esc_=x=>x.replace(/[.*+?^${}()|[\]\\]/g,"\\$&");
+  const asc=ks.filter(k=>/^[\x00-\x7f]+$/.test(k)).map(esc_),cjk=ks.filter(k=>!/^[\x00-\x7f]+$/.test(k)).map(esc_);
+  GLRE=new RegExp(`((?<![A-Za-z0-9&\\-])(?:${asc.join("|")})(?![A-Za-z0-9\\-])|${cjk.join("|")})`,"g");
+}
+const GL_SKIP="svg,button,a,script,style,input,textarea,select,.chip,[data-gl],.gl-pop,summary,.ix,.day";
+function glossify(root){
+  if(!GLRE)glBuild();
+  root.querySelectorAll(".card").forEach(card=>{
+    if(card.dataset.glDone===String(card.childElementCount)+card.textContent.length)return;
+    const used=new Set([...card.querySelectorAll("[data-gl]")].map(e=>e.dataset.gl));
+    const w=document.createTreeWalker(card,NodeFilter.SHOW_TEXT,{acceptNode:n=>n.nodeValue.trim()&&!n.parentElement.closest(GL_SKIP)?1:2});
+    const nodes=[];while(w.nextNode())nodes.push(w.currentNode);
+    nodes.forEach(n=>{const t=n.nodeValue;GLRE.lastIndex=0;let m,last=0,frag=null;
+      while((m=GLRE.exec(t))){const key=GLMAP[m[0]];if(!key||used.has(key))continue;used.add(key);frag=frag||document.createDocumentFragment();
+        frag.appendChild(document.createTextNode(t.slice(last,m.index)));const u=document.createElement("span");u.className="gl";u.dataset.gl=key;u.textContent=m[0];frag.appendChild(u);last=m.index+m[0].length}
+      if(frag){frag.appendChild(document.createTextNode(t.slice(last)));n.parentNode.replaceChild(frag,n)}});
+    card.dataset.glDone=String(card.childElementCount)+card.textContent.length;
+  });
+}
+function glShow(k){const g=GL[k];if(!g)return;const p=$("#glPop");
+  p.innerHTML=`<div class="glp-in"><div class="glp-h"><span class="glp-t ${g[0]}">${GLT[g[0]]}</span><span class="glp-x" data-glx="1">✕</span></div><div class="glp-n">${k}</div>${g[1]?`<div class="glp-s">${g[1]}</div>`:""}${g[2]?`<p>${g[2]}</p>`:""}${(()=>{if(!g.vw)return"";const v=allViews().find(x=>x.n===g.vw);if(!v||!v.q[0])return"";const q=v.q[0],t=Array.isArray(q[2])?q[1]+"「"+q[2][0]+"」"+(q[3]||""):q[1];return`<div class="glp-q"><span>${q[0]} 最新觀點・${ST[v.st]}</span>${esc(t.length>110?t.slice(0,110)+"…":t)}</div>`})()}${g.vw?`<button class="glp-b" data-glvw="${esc(g.vw)}">看他在「名人觀點」說了什麼 →</button>`:""}</div>`;
+  p.classList.add("on");$("#glBg").classList.add("on")}
+function glHide(){$("#glPop").classList.remove("on");$("#glBg").classList.remove("on")}
+document.addEventListener("click",e=>{
+  const u=e.target.closest("[data-gl]");if(u){e.stopPropagation();e.preventDefault();glShow(u.dataset.gl);return}
+  const vb=e.target.closest("[data-glvw]");if(vb){e.stopPropagation();const n=vb.dataset.glvw;glHide();go("vw");setTimeout(()=>{const c=[...document.querySelectorAll("#vwList .card")].find(c=>c.querySelector(".n")?.textContent===n);if(c){c.scrollIntoView({behavior:"smooth",block:"center"});c.classList.add("flash");setTimeout(()=>c.classList.remove("flash"),1600)}},120);return}
+  if(e.target.closest("[data-glx]")||e.target.id==="glBg"){e.stopPropagation();glHide();return}
+},true);
+(()=>{let tm=null;const run=()=>{["#p-ev","#p-vw","#p-cal","#p-bear"].forEach(s=>{const r=$(s);if(r)glossify(r)})};
+ new MutationObserver(()=>{clearTimeout(tm);tm=setTimeout(run,80)}).observe($("main")||document.body,{childList:true,subtree:true});run()})();
 applyFold();
 </script>
 <!-- Made by Jim Lu -->
 <div class="jl-sig" style="text-align:center;font-size:11px;line-height:1.4;letter-spacing:.08em;opacity:.6;padding:14px 12px;color:inherit;font-family:inherit">Made by <b style="font-weight:700">Jim Lu</b></div>
 <script>/*offline*/if("serviceWorker"in navigator)navigator.serviceWorker.register("../sw.js",{scope:"../"}).catch(function(){});</script>
+<div id="glBg"></div><div id="glPop"></div>
 </body>
 </html>
