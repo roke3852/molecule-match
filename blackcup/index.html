@@ -260,6 +260,17 @@ button{font:inherit;color:inherit;touch-action:manipulation}
 .gd-s.ok{border-color:#2f7a66;color:#2f7a66}
 @keyframes gds{to{transform:rotate(-12deg) scale(1);opacity:.9}}
 .gd-sign{text-align:right;font-family:"Noto Serif TC",serif;margin-top:4px;font-size:11px;opacity:0;animation:gdl .3s ease forwards}
+.rk-sum{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:6px 0 10px}.rk-sum div{background:var(--ink);border:1px solid var(--line);padding:6px 8px}.rk-sum small{display:block;font-family:DotGothic16;font-size:10px;color:var(--muted)}.rk-sum b{font-family:DotGothic16;font-size:16px;color:var(--cream)}
+.rk-ctl{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 8px;align-items:center}.rk-ctl .tb{font-size:12px;padding:4px 8px}.rk-ctl label{font-size:12px;color:var(--muted);display:flex;gap:4px;align-items:center;margin-left:auto}
+.rk-list{display:flex;flex-direction:column;gap:6px}
+.rk{display:grid;grid-template-columns:30px 1fr;gap:8px;background:var(--ink);border:1px solid var(--line);padding:8px}.rk.me{border-left:3px solid var(--teal)}.rk.new{border-color:#f0b46a;box-shadow:0 0 0 1px #f0b46a}
+.rk-n{font-family:DotGothic16;font-size:18px;color:var(--muted);text-align:center;align-self:center}.rk-n.g1{color:#f0b46a}.rk-n.g2{color:#c4cad1}.rk-n.g3{color:#c9803e}
+.rk-h{display:flex;gap:6px;align-items:baseline;flex-wrap:wrap;font-size:13px}.rk-h b{color:var(--cream);font-size:14px}.rk-h .ty{font-family:DotGothic16;font-size:11px;padding:0 5px;border:1px solid currentColor}
+.rk-m{font-size:11px;color:var(--muted);margin:2px 0 4px}
+.rk-b{display:grid;grid-template-columns:repeat(3,1fr) 1.3fr;gap:6px;font-size:11px;color:#c3c9d3;align-items:center}
+.rk-b span i{display:block;height:4px;background:var(--line);margin-top:2px}.rk-b span i u{display:block;height:100%}
+.rk-b em{font-style:normal;font-family:DotGothic16;text-align:right;color:#f0b46a}
+.rkline{margin:8px 0;font-size:13px;color:#c3c9d3;border-left:3px solid #f0b46a;padding-left:8px}.rkline button{margin-left:6px;font-size:12px;padding:2px 8px}
 </style>
 </head>
 <body>
@@ -293,6 +304,7 @@ button{font:inherit;color:inherit;touch-action:manipulation}
         <button class="big alt" id="mChapters">章節選擇</button>
         <button class="big alt" id="mGaiden">外傳</button>
         <button class="big alt" id="mEnds">結局圖鑑</button>
+        <button class="big alt" id="mRank">排行榜</button>
         <button class="big alt" id="mHelp">怎麼玩</button>
         <button class="big alt" id="mSwitch">換人入座</button>
       </div>
@@ -3115,13 +3127,13 @@ const _step=step;step=function(){if(S&&S.pendingEnd&&!S.q.length){gameOver();ret
 function doom(on){document.querySelector('.scene').classList.toggle('doom',on);$('box').classList.toggle('doom',on);if(on){playTheme('doom');sfx('doom')}}
 function gameOver(){
   const {id,why}=S.pendingEnd;S.pendingEnd=null;const E=ENDS[id];sfx('fail');
-  if(!P.endings.includes(id))P.endings.push(id);prog().run=null;saveDB();
+  if(!P.endings.includes(id))P.endings.push(id);prog().run=null;const RK=recordRun(id,E.t,'BAD');saveDB();
   const g0=S.story==='main'?undefined:S.story,mine=Object.keys(ENDS).filter(k=>ENDS[k].g===g0);
   const total=mine.length;
   const got=P.endings.filter(e=>mine.includes(e)).length;
-  openCard(`<div class="tag">BAD END　${got}/${total}</div><h3>${E.t}</h3><div class="why"><b style="color:#ece4d4">解析</b><br>${linkify(E.w)}${why?'<br>'+linkify(why):''}</div>
+  openCard(`<div class="tag">BAD END　${got}/${total}</div><h3>${E.t}</h3><div class="why"><b style="color:#ece4d4">解析</b><br>${linkify(E.w)}${why?'<br>'+linkify(why):''}</div>${rankLine(RK)}
   <button class="big" id="eRetry">從本章開頭再來</button>${hasSave()?'<button class="big alt" id="eLoad">讀取中途存檔</button>':''}<button class="big alt" id="eTitle">回到標題</button>`,'endcard lock');
-  bindLinks($('card'));
+  bindLinks($('card'));bindRankBtn();
   $('eRetry').onclick=()=>{closeCard();const cs=S.chStart;startChapter(S.ch,{...cs.stats},{...cs.flags});enterGame()};
   $('eTitle').onclick=()=>{closeCard();toTitle()};if($('eLoad'))$('eLoad').onclick=()=>openSaves('end');
 }
@@ -3139,7 +3151,7 @@ function finale(){
   if(S.story&&S.story!=='main'){gdFinale();return}
   const s=S.stats,good=s.heart>=7&&s.tech>=7;const id=good?'TRUE':'GOOD';playTheme('finale');
   sfx('win');if(!P.endings.includes(id))P.endings.push(id);P.cleared=CH.length;P.run=null;
-  P.best=P.best==='TRUE'?'TRUE':id;saveDB();
+  P.best=P.best==='TRUE'?'TRUE':id;const RK=recordRun(id,good?'清澈的一杯':'第二名的光',id);saveDB();
   const tips=[];if(s.tech<7)tips.push('技術不足 7（有些知識題可以答得更完整）');if(s.heart<7)tips.push('良心不足 7（心機路線能活下來，但杯子不夠清澈）');
   const body=good?
   `<div class="tag" style="color:#ece4d4;font-family:DotGothic16;letter-spacing:3px">TRUE END</div><h3>清澈的一杯</h3>
@@ -3152,8 +3164,8 @@ function finale(){
    <p>你拿下世界亞軍。冠軍頒獎時，鏡頭一直停在你身上——因為所有人都知道，這屆比賽之所以乾淨，是因為誰。</p>
    <p>金穗遭到調查，林正衡退出評審圈。沈懷舟的頭銜還沒恢復，但他說：「不急。冰凍三尺，非一日之寒。」</p>
    <p style="color:#8b93a1">還差一點：${tips.join('；')}。</p>`;
-  openCard(body+`<p class="statchg">技術 ${s.tech}　名聲 ${s.fame}　良心 ${s.heart}</p><button class="big" id="fT">回到標題</button>`,'goodcard lock');
-  bindLinks($('card'));$('fT').onclick=()=>{closeCard();toTitle()};
+  openCard(body+`<p class="statchg">技術 ${s.tech}　名聲 ${s.fame}　良心 ${s.heart}</p>${rankLine(RK)}<button class="big" id="fT">回到標題</button>`,'goodcard lock');
+  bindLinks($('card'));$('fT').onclick=()=>{closeCard();toTitle()};bindRankBtn();
 }
 function enterGame(fresh,rq){
   doom(false);show('game');renderStats();$('chLabel').textContent=storyTag(S.story)+CH[S.ch].t;
@@ -3940,10 +3952,10 @@ function docHTML(d){const L0=(d.l||[]).map(x=>fill(x));const del=i=>(.55+i*.32).
 
 // 外傳結局
 function gdFinale(){const k=S.story,G=GD[k],s=S.stats,good=G.trueIf(s),id=k+'_'+(good?'TRUE':'GOOD');playTheme('finale');sfx('win');
-  if(!P.endings.includes(id))P.endings.push(id);const pg=prog();pg.cleared=CH.length;pg.run=null;saveDB();
+  if(!P.endings.includes(id))P.endings.push(id);const pg=prog();pg.cleared=CH.length;pg.run=null;const RK=recordRun(id,(good?G.tru:G.good).t,good?'TRUE':'GOOD');saveDB();
   const E=good?G.tru:G.good;
-  openCard(`<div class="tag" style="color:${good?'#ece4d4':'#4fb3a9'};font-family:DotGothic16;letter-spacing:3px">外傳・${G.name}　${good?'TRUE':'GOOD'} END</div><h3>${E.t}</h3>${E.h}${good?'':`<p style="color:#8b93a1">還差一點：${G.tips(s)}。</p>`}<p class="statchg">技術 ${s.tech}　名聲 ${s.fame}　良心 ${s.heart}</p><button class="big" id="fT">回到標題</button>`,'goodcard lock');
-  bindLinks($('card'));$('fT').onclick=()=>{closeCard();toTitle()}}
+  openCard(`<div class="tag" style="color:${good?'#ece4d4':'#4fb3a9'};font-family:DotGothic16;letter-spacing:3px">外傳・${G.name}　${good?'TRUE':'GOOD'} END</div><h3>${E.t}</h3>${E.h}${good?'':`<p style="color:#8b93a1">還差一點：${G.tips(s)}。</p>`}<p class="statchg">技術 ${s.tech}　名聲 ${s.fame}　良心 ${s.heart}</p>${rankLine(RK)}<button class="big" id="fT">回到標題</button>`,'goodcard lock');
+  bindLinks($('card'));$('fT').onclick=()=>{closeCard();toTitle()};bindRankBtn()}
 
 // 外傳選單
 function gdOpen(){const ks=Object.keys(GD);
@@ -3964,6 +3976,39 @@ Object.assign(ITEMS,{
 });
 
 ['card','rec','letter','notebook','rec2','docs','ca_copy','ha_memo','ha_rule'].forEach(k=>{if(ITEMS[k])ITEMS[k].k='key'});
+/* ============ 排行榜：每次遊戲結束都記一筆 ============ */
+function recScore(r){return r.tech+r.fame+r.heart}
+function recordRun(id,title,ty){if(!S)return null;if(!DB.records)DB.records=[];
+  const r={at:Date.now(),name:P.name,story:S.story||'main',ch:S.ch,chT:CH[S.ch]?CH[S.ch].t:'',end:id,endT:title,ty,tech:S.stats.tech,fame:S.stats.fame,heart:S.stats.heart,money:getMoney(),cur:cur()};
+  DB.records.push(r);if(DB.records.length>300)DB.records=DB.records.slice(-300);
+  const same=DB.records.filter(x=>x.story===r.story).sort(rkSort('score'));return {r,rank:same.indexOf(r)+1,n:same.length}}
+const TYW={TRUE:3,GOOD:2,BAD:1};
+function rkSort(k){return (a,b)=>k==='new'?b.at-a.at:k==='money'?(b.money-a.money)||(b.at-a.at):k==='score'?((TYW[b.ty]-TYW[a.ty])||(b.ch-a.ch)||(recScore(b)-recScore(a))||(b.money-a.money)||(a.at-b.at)):((b[k]-a[k])||(recScore(b)-recScore(a))||(b.at-a.at))}
+function rankLine(RK){if(!RK)return'';const sn=RK.r.story==='main'?'本傳':GD[RK.r.story].name;return `<div class="rkline">已記入排行榜：${sn}第 <b style="color:#f0b46a">${RK.rank}</b> 名（共 ${RK.n} 次）<button class="tb" id="rkGo">看排行榜</button></div>`}
+function bindRankBtn(){const b=$('rkGo');if(b)b.onclick=()=>{const r=DB.records[DB.records.length-1];openRank(r?r.story:'main',r)}}
+function openRank(story,hl){const tabs=['main',...Object.keys(GD)];let st=story||'main',sk='score',mine=false;
+  const draw=()=>{const all=(DB.records||[]).filter(r=>r.story===st),list=all.filter(r=>!mine||r.name===P.name).sort(rkSort(sk));
+    const best=all.slice().sort(rkSort('score'))[0],avg=k=>all.length?(all.reduce((a,r)=>a+r[k],0)/all.length).toFixed(1):'—',clear=all.filter(r=>r.ty!=='BAD').length;
+    const bar=(v,c)=>`<i><u style="width:${Math.max(0,Math.min(10,v))*10}%;background:${c}"></u></i>`;
+    const tyc={TRUE:'#ece4d4',GOOD:'#4fb3a9',BAD:'#ff6b5e'};
+    const d=new Date();const fmt=t=>{const x=new Date(t);return `${x.getMonth()+1}/${x.getDate()} ${String(x.getHours()).padStart(2,'0')}:${String(x.getMinutes()).padStart(2,'0')}`};
+    openCard(`<button class="x" id="rkX">✕</button><h3>排行榜</h3>
+     <div class="etabs">${tabs.map(t=>`<button class="tb ${t===st?'on':''}" data-rs="${t}">${t==='main'?'本傳':GD[t].name}</button>`).join('')}</div>
+     <div class="rk-sum"><div><small>遊玩次數</small><b>${all.length}</b></div><div><small>通關次數</small><b>${clear}</b></div><div><small>最佳</small><b style="font-size:13px">${best?esc(best.name)+'・'+best.ty:'—'}</b></div>
+       <div><small>平均技術</small><b>${avg('tech')}</b></div><div><small>平均名聲</small><b>${avg('fame')}</b></div><div><small>平均良心</small><b>${avg('heart')}</b></div></div>
+     <div class="rk-ctl">${[['score','綜合'],['tech','技術'],['fame','名聲'],['heart','良心'],['money','金錢'],['new','最新']].map(([k,n])=>`<button class="tb ${k===sk?'on':''}" data-rk="${k}">${n}</button>`).join('')}<label><input type="checkbox" id="rkMine" ${mine?'checked':''}>只看我</label></div>
+     <div class="rk-list">${list.length?list.slice(0,50).map((r,i)=>`<div class="rk ${r.name===P.name?'me':''} ${hl&&r.at===hl.at?'new':''}"><div class="rk-n ${sk!=='new'&&i<3?'g'+(i+1):''}">${sk==='new'?'·':i+1}</div><div>
+        <div class="rk-h"><span class="ty" style="color:${tyc[r.ty]}">${r.ty}</span><b>${esc(r.endT||'')}</b><span style="color:#8b93a1">${esc(r.name)}</span></div>
+        <div class="rk-m">${esc(r.chT)}　・　${fmt(r.at)}</div>
+        <div class="rk-b"><span>技術 ${r.tech}${bar(r.tech,'#6c9bd2')}</span><span>名聲 ${r.fame}${bar(r.fame,'#ece4d4')}</span><span>良心 ${r.heart}${bar(r.heart,'#4fb3a9')}</span><em>${r.cur}${(r.money||0).toLocaleString()}</em></div></div></div>`).join(''):'<p style="color:#8b93a1">還沒有紀錄。玩到任何一個結局（包括 BAD END），就會記一筆。</p>'}</div>
+     <p style="color:#8b93a1;font-size:12px">綜合排名：結局（TRUE＞GOOD＞BAD）→ 走到第幾章 → 技術＋名聲＋良心 → 金錢。紀錄存在這台裝置上，同一台的所有玩家一起比。</p>`);
+    document.querySelectorAll('[data-rs]').forEach(b=>b.onclick=()=>{sfx('tap');st=b.dataset.rs;draw()});
+    document.querySelectorAll('[data-rk]').forEach(b=>b.onclick=()=>{sfx('tap');sk=b.dataset.rk;draw()});
+    $('rkMine').onchange=e=>{mine=e.target.checked;draw()};
+    $('rkX').onclick=()=>{closeCard();if(hl&&S)toTitle()}};
+  draw()}
+$('mRank').onclick=()=>{ac();openRank('main')};
+
 // boot
 if(DB.last&&DB.players[DB.last])P=DB.players[DB.last];
 toTitle();
