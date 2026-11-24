@@ -292,6 +292,9 @@ button{font:inherit;color:inherit;touch-action:manipulation}
 .shb{flex:none;display:flex;flex-direction:column;gap:4px;align-items:flex-end}.shb .tb{font-size:12px;padding:4px 8px;white-space:nowrap}.shb .tb:disabled{opacity:.4}.sho{font-size:11px;color:#4fb3a9;font-family:DotGothic16}
 .cq.payq{border-left-color:#f0b46a}.payb{display:flex;justify-content:space-between;font-family:DotGothic16;font-size:14px;background:var(--ink);border:1px solid var(--line);padding:8px 10px}.payb b{color:#f0b46a;font-size:16px}.payb b.neg{color:#ff6b5e}
 .be-h{font-size:12px;color:#f0b46a;margin-top:4px}
+.bevt.cue{left:auto;right:2%;width:38%;top:28%;padding:6px 7px 8px;font-size:12px;border-style:dashed;animation:formin .35s ease both,cuepulse 1.2s ease-in-out infinite}
+@keyframes cuepulse{50%{box-shadow:0 0 0 3px rgba(240,180,106,.35),0 8px 30px rgba(0,0,0,.6)}}
+.be-b button.sniff{background:#3a2e14;border-color:#f0b46a;color:#ffd98a;font-size:16px}.be-t small{color:#8fa7b8}.be-p{font-size:11.5px;color:#8b93a1;margin-top:4px}
 </style>
 </head>
 <body>
@@ -3312,7 +3315,7 @@ function gearSvg(id){const P2={v60:['wwwwwwwwwwww','.wwwwwwwwww.','..wwwwwwww..'
  const C={w:'#ece4d4',p:'#e48aa6',r:'#f4d0dc',s:'#c4cad1',g:'#8d959e',b:'#7a4e30',K:'#2a2f3a',r2:'#d64545'};let h='';P2.forEach((row,y)=>[...row].forEach((ch,x)=>{if(ch!=='.')h+=`<rect x="${x}" y="${y+2}" width="1.02" height="1.02" fill="${ch==='r'&&id==='blade'?'#d64545':C[ch]}"/>`}));
  return `<svg viewBox="0 0 12 11" width="28" height="26" shape-rendering="crispEdges" aria-hidden="true">${h}</svg>`}
 /* 沖煮配方：每段 [開始秒數, 累積到目標的比例, 名稱]；遊戲時鐘 BCLK 倍速 */
-const BCLK=5,BPOUR=30;
+const BCLK=3,BPOUR=18,BCUE=9;
 const BRECIPES={
  three:{n:'三段式',d:'悶蒸 35 秒，再分兩段注水',p:[[0,.16,'悶蒸'],[35,.6,'第二段'],[70,1,'第三段']]},
  four:{n:'四段沖',d:'每段 25%，等水位降下再注下一段',p:[[0,.25,'悶蒸'],[40,.5,'第二段'],[70,.75,'第三段'],[100,1,'第四段']]},
@@ -3324,6 +3327,7 @@ const BEVS={
  kettle:{bad:1,t:'一股金屬燒焦的味道——細口壺快空了，壺底在乾燒！',ok:'你立刻斷水、補水。壺沒燒壞，水溫也穩住了。',ng:'壺底乾燒，最後那幾十克水溫度忽高忽低，杯子變得乾澀。',pen:-1.6},
  spike:{bad:1,t:'熱水一沖下去，冒出一股甜膩的人工草莓香——這不是豆子的味道，是水有問題！',ok:'你斷水，把那壺水整個倒掉換新的。自己的水，自己封。',ng:'香精味混進了杯子，喝起來像草莓糖漿。',pen:-3},
  overflow:{bad:1,t:'濾杯邊緣冒出濕紙的味道——水位太高，快要溢出濾紙了！',ok:'你斷水等水位降下去，粉床沒被沖垮。',ng:'水從濾紙邊緣繞過粉床直接流下去，杯子變淡。',pen:-1.2,tds:-.1},
+ clog:{bad:1,t:'水位停在濾杯裡不往下走，滴漏越來越慢，聞到一股悶悶的、泡太久的苦味——塞水了！',ok:'你斷水，輕輕敲了兩下濾杯，水又開始往下滴了。',ng:'水一直悶在粉裡，泡出又苦又澀的一杯。',pen:-1.8,clog:1},
  channel:{bad:1,t:'粉床中間突然凹下一個洞，冒出一股生青的酸味——通道效應！',ok:'你斷水，輕輕搖了搖濾杯，讓粉床回到平的。',ng:'水全從那個洞流走，一半過萃、一半不足。',pen:-1.4},
  bloom:{bad:0,t:'粉床像麵包一樣鼓起來，冒出一股烤堅果和焦糖的香氣。',ok:'沉得住氣。那只是新鮮的豆子在排出二氧化碳。',ng:'你嚇得斷水——那只是新鮮豆子在排氣。節奏亂了。',pen:-.6},
  jasmine:{bad:0,t:'一股很濃的茉莉花香從濾杯裡飄出來，連隔壁都聞得到。',ok:'這是豆子本來的花香。好現象，繼續。',ng:'你斷水檢查——什麼問題都沒有。節奏亂了。',pen:-.6},
@@ -3383,7 +3387,7 @@ function brewPanel(){const B=S.brewUI,cw=$('choices');cw.classList.add('on');con
     $('bCont').onclick=brewExit;}
 }
 function bindHold(){const h=$('bHold');if(!h)return;const B=S.brewUI;
-  const on=e=>{e.preventDefault();if(B.ev&&B.ev.st==='cut')return;BH.hold=true;h.classList.add('on');if(B.phase==='pour')brewPress(B)},off=()=>{if(BH.hold&&B.phase==='pour')brewRelease(B);BH.hold=false;h.classList.remove('on')};
+  const on=e=>{e.preventDefault();if(B.ev&&B.ev.st==='cut'||B.paused)return;BH.hold=true;h.classList.add('on');if(B.phase==='pour')brewPress(B)},off=()=>{if(BH.hold&&B.phase==='pour')brewRelease(B);BH.hold=false;h.classList.remove('on')};
   h.addEventListener('pointerdown',on);['pointerup','pointerleave','pointercancel'].forEach(ev=>h.addEventListener(ev,off));
   BH.last=performance.now();cancelAnimationFrame(BH.raf);BH.raf=requestAnimationFrame(brewTick)}
 function brewPress(B){const T=brewTargets(B);if(B.si>=T.length)return;if(!B.run){B.run=true;B.clock=0}
@@ -3393,36 +3397,47 @@ function brewRelease(B,force){const T=brewTargets(B),s=T[B.si];if(!s||!B.cur)ret
   const terr=B.si===0?0:B.cur.t0-s.at,werr=B.poured-s.to,gr=Math.abs(terr)<=5&&Math.abs(werr)<=8?'ok':Math.abs(terr)<=12&&Math.abs(werr)<=20?'mid':'bad';
   B.steps[B.si]={terr,werr,gr};B.cur=null;B.si++;sfx(gr==='ok'?'up':gr==='mid'?'pop':'down');
   const el=document.querySelector('.bsteps');if(el)el.outerHTML=brewStepsHTML(B);
-  if(B.si>=T.length){B.drainT=B.clock;const d=$('bDone');if(d)d.disabled=false}brewCue(B)}
+  brewCue(B)}
 function brewCue(B){const c=$('bCue');if(!c)return;const T=brewTargets(B),s=T[B.si];let h;
-  if(!s)h='最後一段注完了。等它滴完，按「完成，看結果」。';
+  if(!s)h=B.dry?'滴完了。按「完成，看結果」。':'最後一段注完了。等濾杯裡的水滴完……';
   else if(!B.run)h=`第一段：<b>${s.nm}</b>　按住注水，倒到 <b>${s.to} g</b> 放開（計時從第一滴水開始）`;
   else if(BH.hold)h=`<b>${s.nm}</b>　倒到 <b>${s.to} g</b> 放開`;
   else if(B.clock<s.at-1)h=`等一下……到 <b>${mmss(s.at)}</b> 再注水（現在 ${mmss(B.clock)}）`;
   else h=`時間到！<b>${s.nm}</b>：按住注水，倒到 <b>${s.to} g</b>`;
   if(c.innerHTML!==h)c.innerHTML=h;c.classList.toggle('go',!!(s&&B.run&&!BH.hold&&B.clock>=s.at-1))}
-function brewEvent(B){const E=BEVS[B.ev.k],el=$('bEvt');B.ev.st='on';B.ev.t0=performance.now();sfx('buzz');
-  el.innerHTML=`<div class="be-t">👃 ${E.t}</div>${owns('nose')?`<div class="be-h">香氣瓶組：${E.bad?'這個味道不對勁。':'這是正常的味道。'}</div>`:''}<div class="be-b"><button id="evCut">✋ 斷水！</button><button id="evGo" class="alt">沒事，繼續</button></div><i class="be-cd" id="evCd"></i>`;el.hidden=false;
-  const done=(cut)=>{if(B.ev.st!=='on')return;const ok=!!cut===!!E.bad;B.ev.st=cut?'cut':'done';
+/* 突發狀況：先出現「好像有什麼味道」的提示，按「聞一聞」才看得到是什麼味道；聞的時候計時暫停，慢慢決定要不要斷水 */
+function brewEvent(B){const E=BEVS[B.ev.k],el=$('bEvt');B.ev.st='cue';B.ev.t0=performance.now();sfx('pop');
+  el.className='bevt cue';el.innerHTML=`<div class="be-t">👃 好像……有什麼味道飄過來？${E.clog?'<br><small>濾杯裡的水，好像不太往下走了。</small>':''}</div><div class="be-b"><button id="evSniff" class="sniff">👃 聞一聞</button></div><i class="be-cd" id="evCd"></i>`;el.hidden=false;
+  const done=(cut)=>{if(B.ev.st!=='on')return;const ok=!!cut===!!E.bad;B.ev.st=cut?'cut':'done';B.paused=false;
     if(cut){if(BH.hold)brewRelease(B);BH.hold=false;const h=$('bHold');if(h)h.classList.remove('on')}
-    if(ok){B.notes.push('✓ '+E.ok);sfx('up');if(E.bad){B.ev.saved=1}}else{B.notes.push('✗ '+E.ng);sfx('fail');B.adj+=E.pen||0;B.tdsAdj+=E.tds||0}
-    el.innerHTML=`<div class="be-t ${ok?'ok':'ng'}">${ok?'✓ '+E.ok:'✗ '+E.ng}</div>`;
-    setTimeout(()=>{el.hidden=true;if(B.ev.st==='cut')B.ev.st='done'},cut?1600:1300)};
-  $('evCut').onclick=()=>done(true);$('evGo').onclick=()=>done(false);B.ev.fin=done}
+    if(ok){B.notes.push('✓ '+E.ok);sfx('up')}else{B.notes.push('✗ '+E.ng);sfx('fail');B.adj+=E.pen||0;B.tdsAdj+=E.tds||0}
+    if(E.clog&&cut)B.ev.fixed=1;
+    el.className='bevt';el.innerHTML=`<div class="be-t ${ok?'ok':'ng'}">${ok?'✓ '+E.ok:'✗ '+E.ng}</div><div class="be-b"><button id="evOk" class="alt">好</button></div>`;
+    $('evOk').onclick=()=>{el.hidden=true;if(B.ev.st==='cut')B.ev.st='done'}};
+  const sniff=()=>{if(B.ev.st!=='cue')return;B.ev.st='on';B.paused=true;if(BH.hold){brewRelease(B);BH.hold=false;const h=$('bHold');if(h)h.classList.remove('on')}sfx('whoosh');
+    el.className='bevt';el.innerHTML=`<div class="be-t">👃 ${E.t}</div>${owns('nose')?`<div class="be-h">香氣瓶組：${E.bad?'這個味道不對勁。':'這是正常的味道。'}</div>`:''}<div class="be-p">⏸ 聞的時候，計時先停一下。慢慢想。</div><div class="be-b"><button id="evCut">✋ 斷水！</button><button id="evGo" class="alt">沒事，繼續</button></div>`;
+    $('evCut').onclick=()=>done(true);$('evGo').onclick=()=>done(false)};
+  const miss=()=>{if(B.ev.st!=='cue')return;B.ev.st='done';el.hidden=true;
+    if(E.bad){B.notes.push('✗ 你沒有去聞。'+E.ng);B.adj+=E.pen||0;B.tdsAdj+=E.tds||0;sfx('fail');toast('剛剛那個味道……你錯過了')}else B.notes.push('（你沒去聞。那只是'+E.t.replace(/[——！].*$/,'')+'）')};
+  $('evSniff').onclick=sniff;B.ev.miss=miss;B.ev.fin=()=>{if(B.ev.st==='cue')miss();else if(B.ev.st==='on')done(false)}}
+function brewDrain(B){const g={fine:.62,mid:1,coarse:1.45}[B.g]*(B.gr==='blade'?.7:1);const clog=B.ev&&BEVS[B.ev.k].clog&&B.ev.st!=='wait'&&!B.ev.fixed;return clog?(B.ev.st==='done'?2.4:.6):7.5*g}
 function brewTick(now){const B=S&&S.brewUI;if(!B||(B.phase!=='grind'&&B.phase!=='pour'))return;const dt=Math.min(.05,(now-BH.last)/1000);BH.last=now;
   if(B.phase==='grind'){if(BH.hold){B.grind=Math.min(1,B.grind+dt/1.8);B.crank+=dt*9;if(Math.random()<.5)sfx('grindtick');
       $('bProg').style.width=(B.grind*100)+'%';if(B.grind>=1){BH.hold=false;sfx('pick');B.phase='dose';brewPanel();return}}}
-  else{if(B.run){B.clock+=dt*BCLK;const c=$('bClock');if(c)c.textContent='⏱ '+mmss(B.clock)}
+  else{if(B.paused){BH.raf=requestAnimationFrame(brewTick);return}
+    if(B.run){B.clock+=dt*BCLK;const c=$('bClock');if(c)c.textContent='⏱ '+mmss(B.clock)}
     const pouring=BH.hold&&!(B.ev&&B.ev.st==='cut');
-    if(pouring){B.poured=Math.min(320,B.poured+dt*BPOUR);B.slurry=Math.min(1,B.slurry+dt*.9);if(Math.random()<.35)sfx('pourtick');$('bProg').style.width=(B.poured/320*100)+'%';$('bScale').textContent=B.poured.toFixed(1)+' g';
+    if(pouring){const add=dt*BPOUR;B.poured=Math.min(320,B.poured+add);B.wat=(B.wat||0)+add;if(Math.random()<.35)sfx('pourtick');$('bProg').style.width=(B.poured/320*100)+'%';$('bScale').textContent=B.poured.toFixed(1)+' g';
       const d=$('bDone');if(d&&d.disabled&&B.poured>=BRATIO[B.rt]*.6)d.disabled=false;
       if(B.poured>=320){BH.hold=false;brewFinish();return}}
-    else B.slurry=Math.max(0,B.slurry-dt*.22);
+    if(B.wat>0){const dr=Math.min(B.wat,brewDrain(B)*dt);B.wat-=dr;B.dripped=(B.dripped||0)+dr;B.dRate=dr/dt}else B.dRate=0;
+    B.slurry=Math.min(1,(B.wat||0)/80);
+    if(B.si>=brewTargets(B).length&&!B.dry&&(B.wat||0)<.5){B.dry=B.clock;B.notes.push('滴完：總萃取時間 '+mmss(B.clock));sfx('pop');const d=$('bDone');if(d)d.disabled=false}
     if(B.ev&&B.ev.st==='wait'&&B.run&&B.clock>=B.ev.at)brewEvent(B);
-    if(B.ev&&B.ev.st==='on'){const u=(now-B.ev.t0)/1000/3.5,cd=$('evCd');if(cd)cd.style.width=Math.max(0,100-u*100)+'%';if(u>=1)B.ev.fin(false)}
+    if(B.ev&&B.ev.st==='cue'){const u=(now-B.ev.t0)/1000/BCUE,cd=$('evCd');if(cd)cd.style.width=Math.max(0,100-u*100)+'%';if(u>=1)B.ev.miss()}
     brewCue(B)}
   BH.raf=requestAnimationFrame(brewTick)}
-function brewFinish(){const B=S.brewUI;cancelAnimationFrame(BH.raf);BH.hold=false;if(B.cur)brewRelease(B,true);if(B.ev&&B.ev.st==='on')B.ev.fin(false);
+function brewFinish(){const B=S.brewUI;cancelAnimationFrame(BH.raf);BH.hold=false;B.paused=false;if(B.cur)brewRelease(B,true);if(B.ev&&(B.ev.st==='on'||B.ev.st==='cue'))B.ev.fin();
   const T=brewTargets(B),done=B.steps.filter(Boolean),late=done.slice(1).map(d=>d.terr);
   if(late.length)B.adj+=Math.max(-1.5,Math.min(1.5,late.reduce((a,b)=>a+b,0)/late.length/20));
   const bad=done.filter(d=>d.gr==='bad').length;B.adj-=bad*.4;if(done.length<T.length){B.adj-=.8;B.notes.push('✗ 配方還沒走完就停了：最後幾段沒有注水')}
@@ -3482,10 +3497,12 @@ BGS.brewbar=function(g,t){const p=PX(g),B=S&&S.brewUI;if(!B)return;const now=per
   // 電子秤
   p(112,142,100,8,'#0e1116');p(112,142,100,1,'#3a4350');
   // 分享壺
-  const sx=132,sy=110,fill=Math.max(0,(B.poured-2.1*BDOSE)/240)*Math.min(1,(B.clock||0)/30+.2);
+  const sx=132,sy=110,fill=Math.max(0,((B.dripped||0)-BDOSE*1.2)/240);
   p(sx,sy,56,32,'rgba(143,167,184,.28)');p.frame(sx,sy,56,32,'#8fa7b8');p(sx+56,sy+6,4,14,'#8fa7b8');
   if(fill>0){const h=Math.min(30,Math.round(fill*28));p(sx+1,sy+31-h,54,h,'#4a2b18');p(sx+1,sy+31-h,54,1,'#8a5a34')}
-  if(B.poured>0&&B.phase==='pour'&&B.slurry>.05)for(let k=0;k<2;k++)p(159,108+((t*40+k*9)%(sy+30-108-Math.round(fill*28))),2,3,'rgba(90,50,30,.85)');
+  {const rate=B.dRate||0,bot=sy+30-Math.round(fill*28);if(rate>3){for(let y=108;y<bot;y++)p(159+((y+Math.floor(t*30))%7===0?1:0),y,rate>6?2:1,1,'rgba(90,50,30,.9)')}
+   else if(rate>.05){const n=Math.max(1,Math.round(rate*1.2));for(let k=0;k<n;k++){const yy=108+((t*70+k*23)%(bot-108));p(159,yy,1,2,'rgba(90,50,30,.9)')}}
+   if(rate>.05)p(157,bot-1,6,1,'rgba(160,110,70,.6)')}
   // 濾杯
   if(B.dr==='kalita'){for(let j=0;j<22;j++){const w=Math.max(30,60-j*2);p(160-w/2,82+j,w,1,j===0?'#fff':'#ece4d4');for(let x=160-w/2+3;x<160+w/2;x+=5)p(x,82+j,1,1,'#d8ccb4')}p(146,104,28,4,'#ece4d4')}
   else{for(let j=0;j<22;j++){const w=60-j*2;p(160-w/2,82+j,w,1,j===0?'#fff':B.dr==='origami'?'#e48aa6':'#ece4d4');if(B.dr==='origami')for(let x=160-w/2+2;x<160+w/2;x+=4)p(x,82+j,1,1,'#c86a8c')}p(150,104,20,4,B.dr==='origami'?'#e48aa6':'#ece4d4')}
@@ -3493,7 +3510,8 @@ BGS.brewbar=function(g,t){const p=PX(g),B=S&&S.brewUI;if(!B)return;const now=per
   const bed=Math.round(B.bed*9),bloomUp=B.steps[0]&&B.clock<(brewTargets(B)[1]||{at:40}).at?Math.round(Math.min(2,Math.sin(Math.min(1,B.clock/10)*1.57)*2)):0;
   for(let j=0;j<bed;j++){const w=36-j*2;p(160-w/2,95+(9-bed)+j-bloomUp*(j===0?1:0),w,1,B.poured>0?'#3a2010':'#7a4a28')}
   if(bed&&B.poured===0){const rr=R(5);for(let i=0;i<10;i++)p(144+rr()*32,95+rr()*2,1,1,'#9a6a40')}
-  if(B.slurry>.02){const top=Math.round(95-B.slurry*9);for(let j=top;j<95;j++){const w=Math.min(56,36+(95-j)*2);p(160-w/2,j,w,1,'rgba(120,80,40,.55)')}p(160-Math.min(56,36+(95-top)*2)/2,top,Math.min(56,36+(95-top)*2),1,'rgba(220,200,160,.5)');
+  if(B.slurry>.02){const top=Math.round(95-B.slurry*12);for(let j=top;j<95;j++){const w=Math.min(56,36+(95-j)*2);p(160-w/2,j,w,1,'rgba(120,80,40,.55)')}p(160-Math.min(56,36+(95-top)*2)/2,top,Math.min(56,36+(95-top)*2),1,'rgba(220,200,160,.5)');
+    if(B.ev&&BEVS[B.ev.k].clog&&B.ev.st!=='wait'&&!B.ev.fixed){const rr=R(Math.floor(t*2));for(let i=0;i<4;i++)p(146+rr()*28,top+2+rr()*4,2,2,'rgba(60,35,20,.8)')}
     if(B.slurry>.3){const rr=R(Math.floor(t*6));for(let i=0;i<5;i++)p(140+rr()*40,top+1,1,1,'rgba(240,220,190,.6)')}}
   // 細口壺：注水時移到濾杯上方，壺嘴前後繞圈
   const pouring=B.phase==='pour'&&BH.hold&&!(B.ev&&B.ev.st==='cut');B.tilt=(B.tilt||0)+((pouring?1:0)-(B.tilt||0))*.12;const ta=B.tilt;
@@ -3501,7 +3519,7 @@ BGS.brewbar=function(g,t){const p=PX(g),B=S&&S.brewUI;if(!B)return;const now=per
   const PL=B.kt==='plain',ang=.62*ta,rest=[252,148],[tx0,ty0]=kettleTipAt(0,0,ang,PL),pose=[cxp-tx0,cyp-ty0];
   const ox=rest[0]+(pose[0]-rest[0])*ta,oy=rest[1]+(pose[1]-rest[1])*ta;
   drawKettle(g,B,ox,oy,ang);
-  if(ta>.7){const [tx,ty]=kettleTipAt(ox,oy,ang,PL),surf=bed?95-B.slurry*9:100;
+  if(ta>.7){const [tx,ty]=kettleTipAt(ox,oy,ang,PL),surf=bed?95-B.slurry*12:100;
     for(let y=Math.round(ty)+1;y<surf;y++){const k=(y-ty)/(surf-ty);p(tx-1+k*1.5+((y+Math.floor(t*40))%5===0?1:0),y,2,1,'rgba(160,200,235,.9)')}
     // 落點漣漪
     for(let k=0;k<3;k++){const ph=(t*2.4+k/3)%1;g.globalAlpha=(1-ph)*.6;g.strokeStyle='#d8e8f4';g.lineWidth=1;g.beginPath();g.ellipse(tx+1,surf,2+ph*7,1+ph*2,0,0,6.283);g.stroke();g.globalAlpha=1}}
