@@ -138,6 +138,13 @@ label.f input.mono{font-family:var(--mono)}
 .dtrack{height:8px;background:var(--sunken);border-radius:4px;overflow:hidden}.dtrack i{display:block;height:100%;background:var(--muted);border-radius:4px}.dbar.top .dtrack i{background:var(--good)}.dbar.top .dk{font-weight:600}
 .dv{text-align:right}.dv small{color:var(--muted);font-size:10px;margin-left:2px}
 .prow{padding:7px 0;border-bottom:1px solid var(--line);gap:8px;align-items:center}.prow>div:first-child{flex:1;min-width:0}.prow .btn{white-space:nowrap}.row.nowrap{flex-wrap:nowrap}.ckrow{display:flex;gap:6px;align-items:center;font-size:13px;margin:8px 0 4px}.recpick{margin-bottom:10px;padding-bottom:10px;border-bottom:1px dashed var(--line)}.rlib details summary{cursor:pointer;margin-top:4px}.myrec .grp small{font-weight:400}
+.blbar{display:flex;gap:3px;margin:6px 0 2px;height:38px}.blbar i{min-width:0;border-radius:7px;display:flex;flex-direction:column;justify-content:center;align-items:center;color:#22170f;line-height:1.1;overflow:hidden;font-style:normal}.blbar b{font-family:var(--mono);font-size:13px}.blbar small{font-size:10px;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 3px}
+.blc.bad{border-left:4px solid var(--accent)}.blparts{display:grid;gap:4px;font-size:13.5px}.blparts .tag{font-size:11px;padding:0 6px}
+.blpf{display:grid;gap:3px}.blpf>div{display:grid;grid-template-columns:2.6em 1fr 2.2em;gap:6px;align-items:center;font-size:12px}.blpf i{height:7px;background:var(--sunken);border-radius:4px;overflow:hidden}.blpf em{display:block;height:100%;background:var(--warn);border-radius:4px}.blpf b{font-size:12px;text-align:right}
+.tag.blbad{background:var(--accent-soft);color:var(--accent)}.bltrk{border-top:1px dashed var(--line);padding-top:6px}.bltr{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center;padding:4px 0;font-size:12.5px;cursor:pointer}.bltr .sub{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.blrow{display:grid;grid-template-columns:1fr 64px auto auto;gap:6px;align-items:center;margin-bottom:8px}.blrow select{grid-column:1/-1}.blrow input,.blrow select,.blfp input,.blfp select{min-width:0;padding:7px 8px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink)}
+.blfp{display:grid;grid-template-columns:minmax(0,1fr) 56px auto minmax(0,1.3fr);gap:6px;align-items:center;font-size:13.5px}
+.blintro{background:var(--accent-soft)}a.btn{text-decoration:none;display:inline-block;color:inherit}a.btn.pri{color:var(--accent-ink)}
 .chip{border:1px solid var(--line);background:var(--bg);border-radius:99px;padding:5px 11px;font-size:13px}
 .chip.open{border-color:var(--ink);font-weight:700}
 .chip.on{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
@@ -439,7 +446,8 @@ function beanStatus(b){
   if(d<=e)return{c:'good',t:`適飲期 · 還有 ${e-d} 天`};
   return{c:'muted',t:`已過適飲期 ${d-e} 天`};
 }
-function remaining(b){if(!has(b.weight))return null;return Math.round(b.weight-brews().filter(x=>x.beanId===b.id).reduce((s,x)=>s+(+x.dose||0),0))}
+function usedG(x,id){if(x.blend&&x.blend.parts){return x.blend.parts.filter(p=>p.beanId===id).reduce((s,p)=>s+(has(p.g)?+p.g:(+x.dose||0)*(p.pct||0)/100),0)}return x.beanId===id?(+x.dose||0):0}
+function remaining(b){if(!has(b.weight))return null;return Math.round(b.weight-brews().reduce((s,x)=>s+usedG(x,b.id),0))}
 const same=(a,b)=>(!has(a)&&!has(b))||String(a)===String(b);
 const diff=(a,b)=>PARAMS.filter(p=>!same(a[p.k],b[p.k])).map(p=>({p,from:a[p.k],to:b[p.k]}));
 function sens(b,k){const v=TEMPS.map(t=>b.temps?.[t[0]]?.s?.[k]).filter(has);return v.length?v.reduce((a,c)=>a+c,0)/v.length:null}
@@ -484,7 +492,7 @@ function brewCard(b){
   const nx=String(b.next||'').split('\n').map(x=>x.trim().replace(/^\d+[.、)]\s*/,'')).filter(Boolean)[0];
   return `<button class="card bc" data-act="detail" data-id="${esc(b.id)}">
     <div class="between" style="align-items:flex-start;gap:10px"><div style="min-width:0"><div class="bc-meta">${when(b.ts)}${has(b.restDay)?` · 第 ${b.restDay} 天`:''}</div>
-      <div class="title bc-name">${esc(bean?shortBean(bean):'已刪除的豆子')}</div></div>${totBox(b)}</div>
+      <div class="title bc-name">${b.blend?'🫘 '+esc(b.blend.name):esc(bean?shortBean(bean):'已刪除的豆子')}</div>${b.blend?`<div class="sub bc-name">${esc(b.blend.parts.map(p=>p.name+' '+p.pct+'%').join('＋'))}</div>`:''}</div>${totBox(b)}</div>
     <div class="mono bc-p">${esc(paramLine(b))}${has(b.tds)?` · TDS ${b.tds}`:''}</div>
     ${d.length?`<div class="bc-l"><span class="bc-k">變因</span><span>${esc(d.slice(0,3).map(chgTxt).join('、'))}${d.length>3?` 等 ${d.length} 項`:''}</span></div>`:base?'<div class="bc-l"><span class="bc-k">變因</span><span class="sub">同配方重現</span></div>':''}
     ${ef.length?`<div class="bc-l"><span class="bc-k">結果</span><span>${ef.map(x=>`${x.l}<b class="${x.d>0?'up':'dn'}">${x.t}</b>`).join('　')}</span></div>`:''}
@@ -696,7 +704,7 @@ function detail(id){
   const b=brewById(id);if(!b)return;const bean=beanById(b.beanId);
   const temps=sensGrid(b);
   openSheet(`<div class="sheet-head"><b>${when(b.ts)}</b><button class="btn sm" data-act="close">關閉</button></div><div class="sheet-body">
-    <div class="between"><div><div class="title">${esc(bean?bean.name:'已刪除的豆子')}</div><div class="sub">${has(b.restDay)?`養豆第 ${b.restDay} 天`:''}</div></div>${totBox(b)}</div>
+    <div class="between"><div><div class="title">${b.blend?'混豆：'+esc(b.blend.name):esc(bean?bean.name:'已刪除的豆子')}</div>${b.blend?`<div class="sub">${esc(b.blend.parts.map(p=>(p.beanId&&beanById(p.beanId)?beanById(p.beanId).name:p.name)+' '+p.pct+'%'+(has(p.g)?'（'+p.g+' g）':'')).join('＋'))}</div>`:''}<div class="sub">${has(b.restDay)?`養豆第 ${b.restDay} 天`:''}</div></div>${totBox(b)}</div>
     <fieldset><legend>參數</legend>${b.recName?`<div class="sub" style="margin-bottom:4px">配方：${esc(b.recName)}${b.preName?'（'+esc(b.preName)+'）':''}</div>`:''}<dl class="kv mono">${PARAMS.map(p=>`<dt>${p.l}</dt><dd>${esc(fmtP(p,b[p.k]))}</dd>`).join('')}<dt>TDS</dt><dd>${b.tds??'—'}</dd><dt>萃取率</dt><dd>${has(b.ey)?b.ey+'%':'—'}</dd></dl></fieldset>
     ${disturbed(b)?`<fieldset class="condf"><legend>品飲狀態</legend><div>⚠ ${esc(condTxt(b))}${b.condN?'：'+esc(b.condN):''}</div><div class="sub">這杯的感受可能受干擾，分數僅供參考。用相同參數再沖一次，比較準。</div><div class="row" style="margin-top:6px"><button class="btn sm pri" data-act="retest" data-id="${esc(b.id)}">相同參數重測</button></div></fieldset>`:(b.cond||[]).includes('ok')?'<div class="sub" style="margin:4px 0">品飲狀態：正常</div>':''}
     ${b.target||b.met?`<fieldset><legend>測試目的</legend><div>${esc(b.target||'')}</div>${b.met?`<div><span class="pill ${b.met==='yes'?'good':b.met==='part'?'warn':'muted'}">${MET[b.met]}</span></div>`:''}</fieldset>`:''}
@@ -737,7 +745,7 @@ function drawForm(){
     `<div class="grp">品質（−1 差、0 普通、0.5 好、1 很好、1.5 優異、2 傑出）</div>${QI.map(([k,l])=>`<div class="srow q"><span>${l}</span>${qRow(k,(F.q||{})[k],false)}</div>`).join('')}`+(base?`<div class="sub">跟上一杯（${when(base.ts)}）比</div>${REL.map(([k,l])=>`<div class="srow"><span>${l}</span><div class="seg txt">${[[-1,'↓ 少'],[0,'＝'],[1,'↑ 多']].map(o=>`<button type="button" data-act="rel" data-k="${k}" data-v="${o[0]}" class="${F.rel[k]===o[0]?'on':''}">${o[1]}</button>`).join('')}</div></div>`).join('')}`:'<div class="sub">這是這支豆子的第一杯，之後的紀錄會拿它當比較基準。</div>');
   openSheet(`<div class="sheet-head"><b>${F._edit?'編輯紀錄':'記一杯'}</b><button class="btn sm" data-act="close">取消</button></div><div class="sheet-body">
     ${true?`<fieldset><legend>貼上筆記</legend>${F._paste?`<label class="f">把整段沖煮筆記貼在這裡<textarea id="f-_pasteText" data-f="_pasteText" data-t="str" rows="6">${esc(F._pasteText||'')}</textarea></label><div class="row"><button type="button" class="btn sm pri" data-act="parse">自動填寫</button><span class="sub" id="parseMsg">${esc(F._parseMsg||'')}</span></div>`:`<div class="row"><button type="button" class="btn sm pri" data-act="voice">🎤 語音記一杯（有提示卡）</button><button type="button" class="btn sm" data-act="pasteToggle">貼上文字筆記，自動填寫下面的欄位</button><span class="sub">${esc(F._parseMsg||'')}</span></div>`}</fieldset>`:''}
-    <fieldset><legend>豆子</legend><label class="f">豆子<select id="f-beanId" data-f="beanId" data-t="str">${S.beans.map(b=>`<option value="${esc(b.id)}" ${b.id===F.beanId?'selected':''}>${esc(b.name)}</option>`).join('')}</select></label>
+    <fieldset><legend>豆子</legend>${blendFormHtml()}${F.blend||F._bl?'':`<label class="f">豆子<select id="f-beanId" data-f="beanId" data-t="str">${S.beans.map(b=>`<option value="${esc(b.id)}" ${b.id===F.beanId?'selected':''}>${esc(b.name)}</option>`).join('')}</select></label>`}
       <div class="row">${rd!=null?`<span class="tag mono">養豆第 ${rd} 天</span>`:''}${st?`<span class="pill ${st.c}">${st.t}</span>`:''}</div>
       <label class="f">沖煮時間<input id="f-ts" type="datetime-local" data-f="ts" data-t="dt" value="${isoLocal(F.ts)}"></label></fieldset>
     <fieldset><legend>參數</legend>${recFormHtml()}${base&&!F._edit?'<div class="sub">已帶入上一杯的設定，只要改這次有變動的欄位。</div>':''}
@@ -1203,6 +1211,7 @@ async function saveBrew(){
   if(!has(b.score)){const o=TEMPS.map(t=>b.temps?.[t[0]]?.s?.overall).filter(has);if(o.length)b.score=r1(o.reduce((a,c)=>a+c,0)/o.length)}b.restDay=restDay(beanById(b.beanId),b.ts);
   if(b.mode==='quick'&&!Object.keys(b.temps).length)b.temps={};
   ['_edit','_slot','_cat','_photoMsg','_paste','_pasteText','_parseMsg','eyManual'].forEach(k=>delete b[k]);
+  blBeforeSave(b);
   const np=await savePresetFromForm();if(np){b.preKey='p:'+np.pid;b.preName=np.name}
   draftClear();try{await store.save('brews',b);draftClear();closeSheet();render();toast('已儲存');if(S.view!=='log'&&S.view!=='recipe')location.hash='log'}catch(e){toast(e&&e.code==='quota_exceeded'?'儲存空間已滿，請先刪除舊紀錄':'儲存失敗，請再試一次')}
 }
@@ -1479,9 +1488,10 @@ document.addEventListener('pointerup',ev=>endDrag(ev));
 document.addEventListener('pointercancel',ev=>endDrag(ev,true));
 function vRecipe(){
   const rt=S.rtab==='pro'?'lib':S.rtab;
-  const tabs=`<div class="seg txt" style="margin:4px 0 10px">${[['desk','沖煮桌'],['my','我的配方'],['lib','配方資料庫'],['cat','器材圖鑑']].map(([k,l])=>`<button type="button" data-act="rTab" data-v="${k}" class="${(rt||'desk')===k?'on':''}">${l}${k==='my'&&myRecs().length?' <small>'+myRecs().length+'</small>':''}</button>`).join('')}</div>`;
+  const tabs=`<div class="seg txt" style="margin:4px 0 10px">${[['desk','沖煮桌'],['my','我的配方'],['lib','配方資料庫'],['blend','混豆'],['cat','器材圖鑑']].map(([k,l])=>`<button type="button" data-act="rTab" data-v="${k}" class="${(rt||'desk')===k?'on':''}">${l}${k==='my'&&myRecs().length?' <small>'+myRecs().length+'</small>':''}${k==='blend'&&myBlends().length?' <small>'+myBlends().length+'</small>':''}</button>`).join('')}</div>`;
   if(rt==='cat')return tabs+catalogHtml();
   if(rt==='lib')return tabs+libHtml();
+  if(rt==='blend')return tabs+blendHtml();
   if(rt==='my')return tabs+myHtml();
   return tabs+vDesk()}
 function vDesk(){
@@ -1562,6 +1572,7 @@ async function savePreset(){const rec=gearById(PF.recId);if(!rec)return;const p=
 async function delPreset(){const rec=gearById(PF.recId);if(!rec)return;try{await store.save('gear',{...rec,presets:(rec.presets||[]).filter(x=>x.pid!==PF.pid)});PF=null;closeSheet();toast('已刪除參數組')}catch(e){}}
 async function recAction(a,el){const id=el.dataset.id,v=el.dataset.v;
   if(await vizAction(a,el))return true;
+  if(await blAction(a,el))return true;
   if(a==='myAdd'){await addMyRec(id);return true}
   if(a==='myGo'){S.rtab='my';render();setTimeout(()=>{const n=document.getElementById('my-'+id);if(n)n.scrollIntoView({block:'start'})},50);return true}
   if(a==='libCat'){LIBC=v;render();return true}
@@ -1765,6 +1776,98 @@ function trkHtml(rec){const all=recBrews(rec),open=TRKO.has(rec.id);
     <div class="sub" style="margin:10px 0 2px">依條件比較平均分數（×杯數）</div>
     ${dims.map(d=>`<div class="dgrp"><div class="dname">${d.n}</div>${d.G.slice(0,5).map((g,i)=>bar(g,i===0&&d.G.length>1)).join('')}</div>`).join('')}</details>`}
 document.addEventListener('toggle',ev=>{const d=ev.target;if(d&&d.dataset&&d.dataset.trk){d.open?TRKO.add(d.dataset.trk):TRKO.delete(d.dataset.trk)}},true);
+
+/* ---------- 混豆：預設混豆清單（來自手沖咖啡實驗室）、我的混豆、記一杯時選混豆 ---------- */
+const BLCOL=['#C9A66B','#6FA79B','#DD8458'];
+const myBlends=()=>gear('mblend').sort((a,b)=>(b.ts||0)-(a.ts||0));
+function labBlends(){try{return JSON.parse(localStorage.getItem('brewlab-blends-v1')||'[]')}catch(e){return []}}
+let BLF=null;
+const blBar=parts=>`<div class="blbar">${parts.map((p,i)=>`<i style="flex:${Math.max(p.pct,8)} 1 0;background:${BLCOL[i%3]}"><b>${p.pct}%</b><small>${esc(p.name)}</small></i>`).join('')}</div>`;
+const blZone=(ey,tds)=>GNAME[tds>1.45?0:tds<1.15?2:1][ey<18?0:ey>22?2:1];
+function blBrews(bl){return brews().filter(b=>b.blend&&b.blend.bid===bl.id)}
+function blMatch(name){const n=String(name||'').trim();if(!n)return null;const B=S.beans.find(b=>b.name===n)||S.beans.find(b=>b.name.includes(n)||n.includes(b.name));return B?B.id:null}
+function blParamTxt(bl){return [bl.methodName,has(bl.dose)?bl.dose+' g':'',has(bl.water)?bl.water+' g':'',has(bl.temp)?bl.temp+'°C':'',has(bl.c40)?'C40 '+bl.c40+' 格'+(bl.sep?'（分開磨）':''):''].filter(Boolean).join(' · ')}
+function blendCard(bl,lab){const L=lab?[]:blBrews(bl),sc=L.map(rk).filter(has),avgS=sc.length?Math.round(sc.reduce((a,c)=>a+c,0)/sc.length):null,best=sc.length?Math.max(...sc):null,sim=bl.sim||null,bad=(bl.flags||[]).some(f=>/💥|💸/.test(f));
+  return `<div class="card blc${bad?' bad':''}"><div class="between"><div style="min-width:0"><div class="title">${esc(bl.name)}</div><div class="sub">${bl.labId||lab?'🧪 實驗室模擬':'✍️ 自己建立'}${bl.verdict?' · '+esc(bl.verdict):''}</div></div>${sim?`<div class="score${bad?' dim':''}">${sim.score}<small>模擬</small></div>`:''}</div>
+    ${blBar(bl.parts)}
+    <div class="blparts">${bl.parts.map((p,i)=>{const mb=p.beanId?beanById(p.beanId):null;return `<div><span class="cdot" style="background:${BLCOL[i%3]}"></span><b>${esc(p.name)}</b> ${p.pct}%${p.role?` <span class="tag">${esc(p.role)}</span>`:''}${p.roastName?` <span class="sub">${esc(p.roastName)}</span>`:''}${bl.sep&&has(p.c40)?` <span class="sub mono">C40 ${p.c40} 格</span>`:''}${mb?`<div class="sub">→ 我的豆子：${esc(mb.name)}</div>`:''}</div>`}).join('')}</div>
+    ${blParamTxt(bl)?`<div class="sub mono">${esc(blParamTxt(bl))}</div>`:''}
+    ${sim?`<div class="simz"><span class="zb ${blZone(sim.ey,sim.tds)==='金杯'?'zg':''}">${blZone(sim.ey,sim.tds)}</span><span class="mono">模擬 EY ${sim.ey}%・TDS ${sim.tds}%</span></div>
+      <div class="blpf">${[['甜',sim.sweet],['酸',sim.acid],['苦',sim.bitter],['醇厚',sim.body],['花果',sim.fruity]].map(([k,v])=>`<div><span>${k}</span><i><em style="width:${has(v)?v*20:0}%"></em></i><b class="mono">${has(v)?v:'—'}</b></div>`).join('')}</div>`:''}
+    ${(bl.flags||[]).length?`<div class="row">${bl.flags.map(f=>`<span class="tag ${/💥|💸/.test(f)?'blbad':''}">${esc(f)}</span>`).join('')}</div>`:''}
+    ${(bl.tags||[]).length?`<div class="sub">可能喝到：${bl.tags.map(esc).join('、')}</div>`:''}
+    ${bl.note?`<div class="sub">${esc(bl.note)}</div>`:''}
+    ${lab?'':L.length?`<div class="bltrk"><div class="grp">☕ 實際沖過 ${L.length} 杯${avgS!=null?` · 平均 ${avgS} · 最高 ${best}`:''}${sim&&avgS!=null?` · 模擬 ${sim.score}`:''}</div>${L.slice(0,5).map(b=>`<div class="bltr" data-act="detail" data-id="${esc(b.id)}"><span class="mono">${when(b.ts)}</span><span class="sub">${esc((b.blend.parts||[]).map(p=>p.pct+'%').join('／'))} · ${esc(paramLine(b))}</span><b class="mono">${rk(b)??'—'}</b></div>`).join('')}</div>`:'<div class="sub">還沒用這組混豆記過。按「照這個沖」實際沖一杯，分數會記在這裡跟模擬比。</div>'}
+    <div class="row">${lab?(myBlends().some(m=>m.labId===bl.id)?'<span class="sub">✓ 已在我的混豆</span>':`<button class="btn sm pri" data-act="blAdd" data-id="${esc(bl.id)}">＋ 加入我的混豆</button>`):`<button class="btn sm pri" data-act="blBrew" data-id="${esc(bl.id)}">照這個沖</button><button class="btn sm" data-act="blEdit" data-id="${esc(bl.id)}">編輯</button><button class="btn sm danger" data-act="blDel" data-id="${esc(bl.id)}">刪除</button>`}</div></div>`}
+function blendHtml(){const M=myBlends(),Lb=labBlends().filter(x=>!M.some(m=>m.labId===x.id));
+  return `<div class="card blintro"><div class="between" style="align-items:center"><div><b>混豆</b><div class="sub">先在手沖咖啡實驗室模擬方向，再到這裡實際沖、記分數，跟模擬比一比。</div></div></div>
+    <div class="row"><a class="btn sm pri" href="https://roke3852.github.io/molecule-match/extraction-sim/#blend">🧪 到實驗室模擬混豆</a><button class="btn sm" data-act="blNew">＋ 自己建立</button><button class="btn sm" data-act="blImport">📋 貼上實驗室代碼</button></div></div>
+    <h2>我的混豆 ${M.length?`<small class="sub">${M.length}</small>`:''}</h2>
+    ${M.length?M.map(b=>blendCard(b)).join(''):'<div class="card sub">還沒有混豆配方。可以從下面的預設清單加入，或自己建立。</div>'}
+    <h2>預設混豆清單（實驗室存的）</h2>
+    ${Lb.length?Lb.map(b=>blendCard(b,true)).join(''):`<div class="card sub">${labBlends().length?'實驗室存的混豆都已經加入了。':'還沒有。在手沖咖啡實驗室的「混豆」分頁按「儲存」，這裡就會出現（同一台裝置、同一個瀏覽器）。在別的地方開的話，用實驗室裡的「複製代碼」，再按上面的「貼上實驗室代碼」。'}</div>`}`}
+function blFromLab(x){return {id:newId(),type:'mblend',ts:Date.now(),labId:x.id,name:x.name,method:x.method,methodName:x.methodName,dose:x.dose,water:x.water,temp:x.temp,c40:x.c40,sep:!!x.sep,
+  parts:x.parts.map(p=>({name:p.name,sub:p.sub||'',pct:p.pct,roastName:p.roastName||'',role:p.role||'',c40:p.c40,beanId:blMatch(p.name)})),sim:x.sim||null,verdict:x.verdict||'',flags:x.flags||[],tags:x.tags||[]}}
+function openBlendEd(id){const bl=id?gearById(id):null;
+  BLF=bl?JSON.parse(JSON.stringify(bl)):{id:null,name:'',methodName:'',dose:15,water:240,temp:92,c40:24,sep:false,note:'',parts:[{name:'',pct:60,beanId:null,roastName:''},{name:'',pct:40,beanId:null,roastName:''}]};drawBlendEd()}
+function drawBlendEd(){const tot=BLF.parts.reduce((a,p)=>a+(+p.pct||0),0);
+  openSheet(`<div class="sheet-head"><b>${BLF.id?'編輯混豆':'建立混豆'}</b><button class="btn sm" data-act="close">取消</button></div><div class="sheet-body">
+    <label class="f">名稱<input data-blf="name" value="${esc(BLF.name)}" placeholder="例如 週末早晨"></label>
+    <fieldset><legend>豆子與比例 <small class="sub mono ${tot===100?'':'up'}">合計 ${tot}%</small></legend>
+    ${BLF.parts.map((p,i)=>`<div class="blrow"><input data-blfp="${i}:name" value="${esc(p.name)}" placeholder="豆子名稱" list="blbeans"><input data-blfp="${i}:pct" type="number" inputmode="decimal" class="mono" value="${esc(p.pct??'')}"><span class="sub">%</span>${BLF.parts.length>1?`<button type="button" class="btn sm" data-act="bfDel" data-v="${i}">✕</button>`:''}
+      <select data-blfp="${i}:beanId"><option value="">對應我的豆子（選填）</option>${S.beans.map(b=>`<option value="${esc(b.id)}" ${b.id===p.beanId?'selected':''}>${esc(b.name)}</option>`).join('')}</select></div>`).join('')}
+    <datalist id="blbeans">${S.beans.map(b=>`<option value="${esc(b.name)}">`).join('')}</datalist>
+    ${BLF.parts.length<4?'<button type="button" class="btn sm" data-act="bfAdd">＋ 加一支豆</button>':''}</fieldset>
+    <fieldset><legend>沖煮參數（選填）</legend><label class="f">沖法<input data-blf="methodName" value="${esc(BLF.methodName||'')}" placeholder="例如 V60 三段"></label>
+      <div class="grid2">${[['dose','粉 g'],['water','水 g'],['temp','水溫 °C'],['c40','C40 格']].map(([k,l])=>`<label class="f">${l}<input data-blf="${k}" type="number" inputmode="decimal" class="mono" value="${esc(BLF[k]??'')}"></label>`).join('')}</div>
+      <label class="ckrow"><input type="checkbox" data-blf="sep" ${BLF.sep?'checked':''}> 分開磨</label></fieldset>
+    <label class="f">筆記<textarea data-blf="note" rows="2">${esc(BLF.note||'')}</textarea></label></div>
+    <div class="sheet-foot"><button class="btn pri" data-act="bfSave">儲存</button></div>`)}
+function blfInput(t){if(!BLF)return false;
+  if(t.dataset.blf){const k=t.dataset.blf;BLF[k]=t.type==='checkbox'?t.checked:t.type==='number'?num(t.value):t.value;return true}
+  if(t.dataset.blfp){const[i,k]=t.dataset.blfp.split(':'),p=BLF.parts[+i];if(!p)return true;p[k]=k==='pct'?num(t.value):t.value||null;if(k==='name'&&!p.beanId){const m=blMatch(p.name);if(m)p.beanId=m}
+    if(k==='pct'){const tot=BLF.parts.reduce((a,x)=>a+(+x.pct||0),0),e=document.querySelector('.sheet-body legend small');if(e){e.textContent='合計 '+tot+'%';e.classList.toggle('up',tot!==100)}}return true}
+  return false}
+/* 記一杯：選混豆 */
+function blendFormHtml(){const on=!!F.blend||F._bl;const M=myBlends();
+  let h=`<div class="seg txt"><button type="button" data-act="fBl" data-v="0" class="${on?'':'on'}">單品</button><button type="button" data-act="fBl" data-v="1" class="${on?'on':''}">混豆</button></div>`;
+  if(!on)return h;
+  if(!M.length)return h+'<div class="sub">還沒有混豆配方。先到「配方 → 混豆」加入或建立。</div>';
+  const bl=F.blend;
+  h+=`<label class="f">混豆配方<select data-blsel="1"><option value="">選一組混豆…</option>${M.map(m=>`<option value="${esc(m.id)}" ${bl&&bl.bid===m.id?'selected':''}>${esc(m.name)}</option>`).join('')}</select></label>`;
+  if(bl){const d=+F.dose||0;h+=blBar(bl.parts)+bl.parts.map((p,i)=>`<div class="blfp"><div><span class="cdot" style="background:${BLCOL[i%3]}"></span>${esc(p.name)}<div class="sub mono">${d?r1(d*p.pct/100)+' g':''}</div></div><input type="number" inputmode="decimal" class="mono" data-blpct="${i}" value="${esc(p.pct)}"><span class="sub">%</span><select data-blbean="${i}"><option value="">用哪支豆子？</option>${S.beans.map(b=>`<option value="${esc(b.id)}" ${b.id===p.beanId?'selected':''}>${esc(b.name)}</option>`).join('')}</select></div>`).join('')+
+    `<div class="sub">比例可以照這次實際的改；每支豆子會各自扣掉用掉的克數。</div>`}
+  return h}
+function blMain(){const bl=F.blend;if(!bl)return;const m=bl.parts.filter(p=>p.beanId).sort((a,b)=>b.pct-a.pct)[0];if(m)F.beanId=m.beanId}
+function applyBlend(id){const m=gearById(id);if(!m||!F)return;
+  F.blend={bid:m.id,name:m.name,parts:m.parts.map(p=>({name:p.name,pct:p.pct,beanId:p.beanId&&beanById(p.beanId)?p.beanId:blMatch(p.name)}))};blMain();
+  if(has(m.dose))F.dose=m.dose;if(has(m.water))F.water=m.water;if(has(m.temp))F.temp=m.temp;const g=c40Gear();if(g&&has(m.c40)){F.grinder=g.name;F.grind=m.c40}
+  if(!F.target)F.target='照混豆「'+m.name+'」';}
+function blFormChange(t){if(!F)return false;
+  if(t.dataset.blsel){if(t.value)applyBlend(t.value);else F.blend=null;drawForm();return true}
+  if(t.dataset.blbean&&F.blend){F.blend.parts[+t.dataset.blbean].beanId=t.value||null;blMain();drawForm();return true}
+  if(t.dataset.blpct&&F.blend){F.blend.parts[+t.dataset.blpct].pct=num(t.value)||0;return true}
+  return false}
+function blBeforeSave(b){if(!b.blend)return;const d=+b.dose||0,tot=b.blend.parts.reduce((a,p)=>a+(+p.pct||0),0)||100;
+  b.blend={bid:b.blend.bid,name:b.blend.name,parts:b.blend.parts.map(p=>({name:p.name,pct:Math.round(p.pct*100/tot),beanId:p.beanId||null,g:d?r1(d*p.pct/tot):null}))}}
+async function blAction(a,el){const id=el.dataset.id,v=el.dataset.v;
+  if(a==='fBl'&&F){if(v==='1'){F._bl=true}else{F._bl=false;F.blend=null}drawForm();return true}
+  if(a==='blAdd'){const x=labBlends().find(y=>y.id===id);if(!x)return true;try{await store.save('gear',blFromLab(x));toast('已加入我的混豆：'+x.name)}catch(e){toast('加入失敗')}return true}
+  if(a==='blNew'){openBlendEd();return true}
+  if(a==='blEdit'){openBlendEd(id);return true}
+  if(a==='blDel'){if(confirmTap(el,'bl'+id)){try{await store.del('gear',id);toast('已刪除（之前記的杯數還在）')}catch(e){}}return true}
+  if(a==='blBrew'){startBrew({});if(!F||F._edit)return true;F._bl=true;applyBlend(id);drawForm();return true}
+  if(a==='bfAdd'&&BLF){BLF.parts.push({name:'',pct:20,beanId:null});drawBlendEd();return true}
+  if(a==='bfDel'&&BLF){BLF.parts.splice(+v,1);drawBlendEd();return true}
+  if(a==='bfSave'&&BLF){const parts=BLF.parts.filter(p=>String(p.name||'').trim()||p.beanId).map(p=>({...p,name:String(p.name||'').trim()||(beanById(p.beanId)||{}).name||'豆子',pct:+p.pct||0}));
+    if(parts.length<2){toast('至少要兩支豆子');return true}
+    const o={...BLF,parts,id:BLF.id||newId(),type:'mblend',ts:BLF.ts||Date.now(),name:String(BLF.name||'').trim()||parts.map(p=>p.name).join('＋')};
+    try{await store.save('gear',o);BLF=null;closeSheet();toast('已儲存混豆')}catch(e){toast('儲存失敗')}return true}
+  if(a==='blImport'){openSheet(`<div class="sheet-head"><b>貼上實驗室代碼</b><button class="btn sm" data-act="close">取消</button></div><div class="sheet-body"><div class="sub">在手沖咖啡實驗室「混豆 → 我存的混豆」按「複製代碼」，貼到下面。</div><label class="f">代碼<textarea id="blCode" rows="6"></textarea></label></div><div class="sheet-foot"><button class="btn pri" data-act="blImportGo">匯入</button></div>`);return true}
+  if(a==='blImportGo'){const t=($('#blCode')||{}).value||'';let arr=null;try{arr=JSON.parse(decodeURIComponent(escape(atob(t.trim().replace(/^BLEND:/,'')))))}catch(e){}
+    if(!Array.isArray(arr)){toast('代碼看不懂，請重新複製');return true}let n=0;for(const x of arr){if(x&&x.parts&&!myBlends().some(m=>m.labId===x.id)){try{await store.save('gear',blFromLab(x));n++}catch(e){}}}
+    closeSheet();toast(n?'已匯入 '+n+' 組混豆':'沒有新的混豆');return true}
+  return false}
 
 /* ---------- 名家配方（舊；已併入配方資料庫） ---------- */
 const PRO=[{id:'jbrc2026',title:'2026 JBrC 冠軍沖法',who:'長崎愛美（PHILOCOFFEA）',ev:'2026 日本沖煮大賽（JBrC）冠軍',bean:'Costa Rica, La Esmeralda, Washed Reposado（@sipwithshin 分享時用的豆子）',
@@ -2133,6 +2236,7 @@ document.addEventListener('click',async ev=>{
 document.addEventListener('input',ev=>{
   const t=ev.target;
   if(ufInput(t))return;
+  if(blfInput(t))return;
   if(t.dataset.arn&&F){F.aromN={...(F.aromN||{}),[t.dataset.arn]:t.value};return}
   if(t.dataset.vtxt&&VW){VW.txt[t.dataset.vtxt]=t.value;const st=VSTEPS[VW.i],ck=vChecks(st,t.value);document.querySelectorAll('.vcard~.chips .chip').forEach((c,i)=>{c.classList.toggle('on',ck[i][1]);c.textContent=(ck[i][1]?'✓ ':'')+ck[i][0]});return}
   if(t.dataset.b&&BF){BF[t.dataset.b]=t.value;return}
@@ -2151,6 +2255,7 @@ document.addEventListener('input',ev=>{
 });
 document.addEventListener('change',ev=>{
   const t=ev.target;
+  if(blFormChange(t))return;
   if(t.dataset.rsel){SEL[t.dataset.rsel]=t.value;keepSel();render();return}
   if(t.dataset.recsel&&F){if(t.value)applyRec(t.value,'base');else{F.recId=null;F.recName=null;F.preKey=null;F.preName=null;F._savePre=false}drawForm();return}
   if(t.dataset.presel&&F&&F.recId){applyRec(F.recId,t.value);drawForm();return}
