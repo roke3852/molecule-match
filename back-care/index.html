@@ -82,6 +82,17 @@ th{color:var(--sub);font-weight:500;font-size:13px}
 .alert li{line-height:1.8}
 .sign{text-align:center;color:var(--sub);font-size:12px;margin:26px 0 10px;letter-spacing:.1em}
 .sign b{font-family:"Brush Script MT",cursive;font-size:20px;color:var(--accent);letter-spacing:0}
+.phbar{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.phbar .opt{text-decoration:none;color:var(--ink);font-size:13px;padding:6px 12px}
+.phs{display:flex;gap:8px;overflow-x:auto;margin-top:6px}
+.phs:empty{display:none}
+.ph{position:relative;flex:0 0 auto}
+.ph img{height:96px;width:auto;max-width:160px;object-fit:cover;border-radius:10px;border:1px solid var(--line);display:block;cursor:zoom-in}
+.phx{position:absolute;top:4px;right:4px;border:0;border-radius:999px;background:rgba(43,38,33,.75);color:#fff;font:inherit;font-size:12px;min-width:22px;height:22px;padding:0 6px;cursor:pointer}
+.phx.sure{background:var(--warn)}
+.lb{position:fixed;inset:0;background:rgba(0,0,0,.88);display:none;align-items:center;justify-content:center;z-index:30;padding:20px}
+.lb.on{display:flex}
+.lb img{max-width:100%;max-height:100%;border-radius:12px}
 .toast{position:fixed;left:50%;bottom:96px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:8px 16px;border-radius:999px;font-size:13px;opacity:0;transition:.25s;pointer-events:none;z-index:20}
 .toast.on{opacity:1}
 </style>
@@ -179,6 +190,7 @@ th{color:var(--sub);font-weight:500;font-size:13px}
 
   <div class="card">
     <h2>品牌鞋款實戰比較</h2>
+    <p class="sub">每款都可以按「🔍 網路照片」看樣子，或「📷 新增照片」存自己在店裡拍的照片（存在這支手機的瀏覽器裡）。</p>
     <p class="sub">2026/11 在福岡門市逐面牆試看整理。落差先寫官方標示，括號內是評測實際量測；價格為日本門市未稅標價，僅供參考。</p>
     <div class="verdict" style="background:#e2efe9;margin:10px 0">
       <b>🏆 硬挺派前三名</b>
@@ -187,6 +199,7 @@ th{color:var(--sub);font-weight:500;font-size:13px}
         <li><b>Merrell Moab 3 GTX</b>：11.5 mm，尼龍足弓片＋後跟氣墊</li>
         <li><b>ASICS GEL-1130</b>：10 mm，穩定型跑鞋出身，楦頭最寬鬆</li>
       </ol>
+      <p style="margin:8px 0 0"><b>👞 想要跟皮鞋差不多的感覺：</b>ECCO ST.1 Hybrid、ASICS RUNWALK（按下方「👞 皮鞋感」篩選）</p>
     </div>
     <div class="verdict" style="background:#fbf0d9;margin:10px 0">
       <b>💡 關鍵發現：軟 ≠ 對腰好</b>
@@ -271,6 +284,7 @@ th{color:var(--sub);font-weight:500;font-size:13px}
   <button data-t="t-alert"><b>🚨</b>警訊</button>
 </nav>
 <div class="toast" id="toast"></div>
+<div class="lb" id="lb" onclick="this.classList.remove('on')"><img id="lbImg" alt=""></div>
 
 <script>
 const $=s=>document.querySelector(s);
@@ -403,22 +417,54 @@ const SHOES=[
  {b:'HOKA',m:'Anacapa 2 Low GTX',d:'8 mm（實測 12）',p:'—',r:'try',n:'防水健行鞋、Vibram 大底，實際落差比標示陡，感覺接近 XA Pro。'},
  {b:'HOKA',m:'Bondi 9',d:'5 mm（實測 9.1）',p:'—',r:'try',n:'Hoka 最厚的一款，避震最好，但鞋底很高，腳踝比較不穩。'},
  {b:'Vans',m:'全系列（含 GORE-TEX 戶外款）',d:'低',p:'¥14,990–22,500',r:'no',n:'滑板鞋出身，鞋底平、落差小、足弓支撐少。'},
+ {b:'ECCO',m:'ST.1 Hybrid',d:'—',p:'—',r:'top',f:1,n:'經典皮革德比鞋配上運動鞋科技鞋底：PHORENE 中底＋後跟 SHOCK THRU 避震點。外型就是皮鞋，最接近你穿起來有效的那雙 Ecco，但更輕、更有緩衝。'},
+ {b:'ASICS',m:'RUNWALK（ランウォーク）',d:'—',p:'約 ¥30,000–50,000',r:'top',f:1,q:'アシックス ランウォーク',n:'「可以跑的商務鞋」，1994 年起出到第 7 代；皮鞋外型、鞋底用 ASICS 跑鞋技術，後跟有 GEL 避震。也有皮革休閒鞋款，日本才買得到，有寬楦。'},
+ {b:'ASICS',m:'PEDALA RIDEWALK',d:'—',p:'—',r:'ok',f:1,q:'アシックス ペダラ ライドウォーク',n:'皮革街頭健走鞋，跟 GEL-RIDEWALK 一樣有弧形滾動鞋底，外型比較像休閒皮鞋，適合想要「皮鞋外型＋健走鞋功能」的人。'},
  {b:'Timberland',m:'6 吋黃靴等高筒靴',d:'—',p:'¥18,000–28,000',r:'no',n:'硬挺有跟像皮鞋，但很重、避震少、鞋底不好彎；只適合造型或短時間穿。'},
- {b:'Timberland',m:'低筒 Oxford／Chukka',d:'—',p:'¥18,000–22,000',r:'try',n:'比高筒輕、腳踝自由，可以短時間通勤，不要當主要的走路鞋。'}
+ {b:'Timberland',m:'低筒 Oxford／Chukka',d:'—',p:'¥18,000–22,000',r:'try',f:1,n:'比高筒輕、腳踝自由，可以短時間通勤，不要當主要的走路鞋。'}
 ];
 const RT={top:['🏆 首選','g'],ok:['✅ 推薦','g'],try:['⚠️ 試穿再決定',''],no:['❌ 不建議','r']};
 let brand='全部';
+const QX={'ASICS|魔鬼氈／懶人鞋款':'ASICS ウォーキング スリッポン','Vans|全系列（含 GORE-TEX 戶外款）':'Vans MTE GORE-TEX','Timberland|6 吋黃靴等高筒靴':'Timberland 6 inch premium boot','Timberland|低筒 Oxford／Chukka':'Timberland basic oxford waterproof'};
+const skey=s=>s.b+'|'+s.m;
+const sq=s=>s.q||QX[skey(s)]||(s.b+' '+s.m);
+/* photo store: IndexedDB (falls back to memory) */
+const PH={mem:{},db:null};
+function phOpen(){return new Promise(r=>{try{const q=indexedDB.open('bp_photos',1);q.onupgradeneeded=()=>q.result.createObjectStore('p');q.onsuccess=()=>{PH.db=q.result;r()};q.onerror=()=>r()}catch(e){r()}})}
+function phGet(k){return new Promise(r=>{if(!PH.db)return r(PH.mem[k]||[]);try{const q=PH.db.transaction('p').objectStore('p').get(k);q.onsuccess=()=>r(q.result||[]);q.onerror=()=>r([])}catch(e){r(PH.mem[k]||[])}})}
+function phSet(k,v){PH.mem[k]=v;return new Promise(r=>{if(!PH.db)return r();try{const t=PH.db.transaction('p','readwrite');t.objectStore('p').put(v,k);t.oncomplete=()=>r();t.onerror=()=>{toast('照片儲存失敗，空間可能不足');r()}}catch(e){r()}})}
+function shrink(file){return new Promise((res,rej)=>{const fr=new FileReader();fr.onload=()=>{const im=new Image();im.onload=()=>{const M=900,sc=Math.min(1,M/Math.max(im.width,im.height));const c=document.createElement('canvas');c.width=Math.round(im.width*sc);c.height=Math.round(im.height*sc);c.getContext('2d').drawImage(im,0,0,c.width,c.height);res(c.toDataURL('image/jpeg',0.82))};im.onerror=rej;im.src=fr.result};fr.onerror=rej;fr.readAsDataURL(file)})}
+async function renderPhotos(i,k){
+  const box=document.getElementById('ph-'+i);if(!box)return;
+  const arr=await phGet(k);
+  box.innerHTML=arr.length?arr.map((u,j)=>`<div class="ph"><img src="${u}" data-i="${i}" data-j="${j}" alt=""><button class="phx" data-i="${i}" data-j="${j}" aria-label="刪除">×</button></div>`).join(''):'';
+  box.querySelectorAll('img').forEach(im=>im.onclick=()=>openLB(im.src));
+  box.querySelectorAll('.phx').forEach(b=>b.onclick=async()=>{if(!b.classList.contains('sure')){b.classList.add('sure');b.textContent='刪?';setTimeout(()=>{b.classList.remove('sure');b.textContent='×'},2500);return}const a=await phGet(k);a.splice(+b.dataset.j,1);await phSet(k,a);renderPhotos(i,k);toast('已刪除')});
+}
+function openLB(src){$('#lbImg').src=src;$('#lb').classList.add('on')}
 function renderBrands(){
-  const bs=['全部',...new Set(SHOES.map(s=>s.b))];
+  const bs=['全部','👞 皮鞋感',...new Set(SHOES.map(s=>s.b))];
   $('#brandFilters').innerHTML=bs.map(b=>`<button class="opt ${brand===b?'on':''}" data-b="${b}">${b}</button>`).join('');
   document.querySelectorAll('#brandFilters .opt').forEach(x=>x.onclick=()=>{brand=x.dataset.b;renderBrands()});
-  const list=SHOES.filter(s=>brand==='全部'||s.b===brand).sort((a,b)=>Object.keys(RT).indexOf(a.r)-Object.keys(RT).indexOf(b.r));
-  $('#shoeList').innerHTML=list.map(s=>`<div class="ex" style="padding:12px">
-    <div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start"><div><span class="sub">${s.b}</span><h3 style="margin:2px 0 4px;font-size:16px">${s.m}</h3></div><span class="pill ${RT[s.r][1]}" style="white-space:nowrap">${RT[s.r][0]}</span></div>
+  const list=SHOES.filter(s=>brand==='全部'||(brand==='👞 皮鞋感'?s.f:s.b===brand)).sort((a,b)=>Object.keys(RT).indexOf(a.r)-Object.keys(RT).indexOf(b.r));
+  $('#shoeList').innerHTML=list.map((s,i)=>{const q=encodeURIComponent(sq(s));return `<div class="ex" style="padding:12px">
+    <div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start"><div><span class="sub">${s.b}</span><h3 style="margin:2px 0 4px;font-size:16px">${s.m}</h3></div><div style="text-align:right"><span class="pill ${RT[s.r][1]}" style="white-space:nowrap">${RT[s.r][0]}</span>${s.f?'<br><span class="pill">👞 皮鞋感</span>':''}</div></div>
     <div><span class="pill">落差 ${s.d}</span>${s.p!=='—'?`<span class="pill">${s.p}</span>`:''}</div>
-    <p style="font-size:14px;margin-top:6px">${s.n}</p></div>`).join('');
+    <p style="font-size:14px;margin-top:6px">${s.n}</p>
+    <div class="phs" id="ph-${i}"></div>
+    <div class="phbar">
+      <a class="opt" href="https://www.google.com/search?tbm=isch&q=${q}" target="_blank" rel="noopener">🔍 網路照片</a>
+      <a class="opt" href="https://www.google.com/search?q=${q}+drop+mm" target="_blank" rel="noopener">📏 查規格</a>
+      <label class="opt">📷 新增照片<input type="file" accept="image/*" multiple hidden data-i="${i}"></label>
+    </div></div>`}).join('');
+  list.forEach((s,i)=>renderPhotos(i,skey(s)));
+  document.querySelectorAll('#shoeList input[type=file]').forEach(inp=>inp.onchange=async()=>{
+    const s=list[+inp.dataset.i],k=skey(s);const a=await phGet(k);let n=0;
+    for(const f of inp.files){try{a.push(await shrink(f));n++}catch(e){}}
+    await phSet(k,a);renderPhotos(+inp.dataset.i,k);if(n)toast(`已新增 ${n} 張照片`);inp.value='';
+  });
 }
-renderBrands();
+phOpen().then(renderBrands);
 
 /* ===== training ===== */
 const svgWrap=inner=>`<svg viewBox="0 0 260 120">${inner}</svg>`;
