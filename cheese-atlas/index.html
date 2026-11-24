@@ -208,7 +208,7 @@ nav a.on{background:#4a3828;color:#fff}nav a.on i{color:var(--rind)}
 <section class="view" id="v-pair"></section>
 <section class="view" id="v-proc"></section>
 <!-- Made by Jim Lu -->
-<div class="jl-sig">起司品飲圖鑑 v1.3・Made by <b style="font-weight:700">Jim Lu</b></div>
+<div class="jl-sig">起司品飲圖鑑 v1.4・Made by <b style="font-weight:700">Jim Lu</b></div>
 </main>
 <nav><a href="#learn" data-v="learn"><i>學</i>學習</a><a href="#guide" data-v="guide"><i>覽</i>導覽</a><a href="#cheese" data-v="cheese"><i>起</i>起司</a><a href="#items" data-v="items"><i>配</i>配角</a><a href="#pair" data-v="pair"><i>搭</i>搭配</a><a href="#proc" data-v="proc"><i>製</i>製程</a></nav>
 <div id="toast"></div>
@@ -465,6 +465,11 @@ const ITEMS = [
  art:{s:"wine",col:"#9a2f3e"},d:"輕盈的紅酒，單寧低、有紅莓果香。最好搭的紅酒。",eat:"配卡門貝爾、布里、生火腿、薩拉米都不會出錯。",
  br:[["勃根地","黑皮諾的故鄉。"],["智利・紐西蘭","有很多平價好喝的黑皮諾。"]],
  mk:["採收紅葡萄、去梗","帶皮浸漬發酵，萃取顏色","壓榨","橡木桶陳年","裝瓶"],proc:"wred"},
+{id:"beaujolais",k:"drink",n:"薄酒萊新酒",jp:"ボージョレ・ヌーヴォー",en:"Beaujolais-Villages Nouveau",c:"法國",r:"薄酒萊",int:2,salt:0,sw:1,acid:4,tan:1,
+ art:{s:"wine",col:"#b0284a"},d:"用佳美（Gamay）葡萄、以二氧化碳浸泡法釀造，採收後 6–8 週就裝瓶的「新酒」。草莓、櫻桃、香蕉般的果香，單寧很低、清爽多汁。Villages 等級來自薄酒萊條件較好的村莊，酒體比一般新酒紮實。",
+ eat:"冰到 12–14°C 再喝。低單寧配卡門貝爾、布里不會苦，配生火腿、薩拉米最經典。新酒不耐放，當年冬天喝完。",
+ br:[["Georges Dubœuf（喬治・杜柏夫）","1964 年創立的酒商，被稱為「薄酒萊教宗」，把新酒推廣到全世界；每年換設計的花朵酒標是招牌。"],["Sélection Plus Beaujolais-Villages Nouveau 2026","2026 年 11 月福岡旅行買的那瓶：Villages 等級、酒精 14.5%，比一般新酒更飽滿。"],["上市日","1985 年起統一在 11 月第三個星期四凌晨 12:01 上市；日本因時差是最早開喝的地方之一。"]],
+ mk:["手工整串採收佳美葡萄","不破碎，整串放進密封槽、灌入二氧化碳","果粒在無氧狀態下內部發酵，產生果香","幾天後壓榨，完成發酵","6–8 週內裝瓶，11 月第三個星期四上市"],proc:"carbonic"},
 {id:"cabernet",k:"drink",n:"卡本內蘇維濃",jp:"カベルネ・ソーヴィニヨン",en:"Cabernet Sauvignon",c:"法國・美國",r:"波爾多／納帕",int:5,salt:0,sw:1,acid:3,tan:5,
  art:{s:"wine",col:"#5e1728"},d:"厚重的紅酒，單寧強、有黑醋栗與橡木味。",eat:"配熟成切達、高達、帕瑪森這類硬質起司；配軟質或藍黴起司容易苦。",
  br:[["波爾多左岸","梅多克的列級酒莊以卡本內為主。"],["納帕谷","美國加州的代表產區。"]],
@@ -515,6 +520,7 @@ const PROCS = {
  salami:{g:"meat",n:"薩拉米與香腸",steps:[["grind","絞肉","豬肉和背脂絞碎，粗細決定口感。"],["season","調味","加鹽、胡椒、大蒜、紅酒或紅椒粉。"],["stuff","灌腸","灌進天然腸衣，綁緊。"],["ferment","發酵","在溫暖潮濕處 1–3 天，乳酸菌讓肉變酸、更安全。"],["hang","風乾","移到涼爽處風乾數週到數月。"],["mold","白色黴衣","外層長出白色好黴，保護內部、增加風味。"]]},
  wwhite:{g:"wine",n:"白葡萄酒",steps:[["grape","採收","在酸度與甜度平衡時採收白葡萄。"],["press2","立刻壓榨","只取果汁，不帶皮，所以顏色淡、沒有單寧。"],["tank","低溫發酵","酵母把糖變成酒精，低溫保留果香。"],["barrel","陳年","不鏽鋼槽保留清爽，橡木桶帶來奶油、香草味。"],["bottle","裝瓶","過濾、裝瓶。"]]},
  wred:{g:"wine",n:"紅葡萄酒",steps:[["grape","採收","紅葡萄的顏色和單寧都在皮裡。"],["crush","去梗破碎","去掉梗、壓破果粒。"],["tank","帶皮發酵","皮和汁一起發酵，萃取顏色、單寧與香氣。"],["press2","壓榨","發酵後把酒和皮分開。"],["barrel","橡木桶陳年","單寧變柔和，增加香草、煙燻味。"],["bottle","裝瓶","有些還要在瓶中陳年多年。"]]},
+ carbonic:{info:{why:"想在採收後幾週就喝到新酒：整串葡萄在二氧化碳中「果粒內發酵」，不需要長時間浸皮，就能得到鮮豔的顏色和濃郁果香，又幾乎不萃取苦澀的單寧。",hist:"新酒原本是薄酒萊的葡萄園工人用來慶祝採收結束的早發酒。1960 年代起，酒商喬治・杜柏夫等人舉辦「誰最快把新酒送到巴黎」的比賽打開知名度；1985 年法國官方把上市日統一為 11 月第三個星期四。",fl:"草莓、櫻桃、覆盆子，常帶香蕉、泡泡糖、櫻桃白蘭地的香氣；單寧低、酸度清爽，冰涼喝最好。",tags:["草莓","櫻桃","香蕉","低單寧"]},g:"wine",n:"薄酒萊新酒（二氧化碳浸泡）",steps:[["grape","整串手採","法規要求手工採收，果粒要完整不破。","果粒完整，之後才能在果粒內發酵。"],["tank","整串入槽、灌二氧化碳","不破碎，整串放進密封槽，用二氧化碳趕走氧氣。","沒有氧氣，酵母暫時不作用，換果粒自己的酵素上場。"],["moto","果粒內發酵","果粒內的酵素把部分糖轉成酒精，產生草莓、香蕉般的香氣。","這就是新酒特有果香的來源。"],["press2","壓榨、完成發酵","幾天後壓榨，果汁在酵母作用下完成發酵。","浸皮時間短，所以單寧很少。"],["bottle","快速裝瓶上市","6–8 週內裝瓶，11 月第三個星期四上市。","不經橡木桶陳年，保留最新鮮的果香。"]]},
  sparkling:{g:"wine",n:"香檳（傳統法）",steps:[["grape","基酒","先釀出酸度高、不起泡的白酒。"],["blend","調配","混合不同年份、品種、葡萄園的基酒。"],["bottle","加糖與酵母裝瓶","封上瓶蓋。"],["bubbles","瓶中二次發酵","酵母在瓶中產生二氧化碳，關在瓶裡變成氣泡。"],["lees","帶酒渣陳年","死掉的酵母帶來麵包、堅果香。"],["riddle","轉瓶","慢慢把瓶子轉到倒立，酒渣集中到瓶口。"],["disgorge","除渣補液","瓶口冷凍、開瓶噴出酒渣，補上少量糖液後封瓶。"]]},
  port:{g:"wine",n:"波特酒",steps:[["grape","採收","斗羅河谷陡峭梯田的葡萄。"],["tank","短暫發酵","只發酵 2–3 天，還有很多糖。"],["brandy","加白蘭地","加入葡萄白蘭地，酵母停止工作，留下甜味。"],["barrel","陳年","Ruby 短期陳年；Tawny 在小桶中氧化多年。"]]},
  beer:{g:"beer",n:"啤酒",steps:[["malt","麥芽","大麥發芽後烘乾，烘越深顏色越深。"],["mash","糖化","麥芽泡熱水，酵素把澱粉變成糖。"],["filter","過濾麥汁","把甜甜的麥汁和麥殼分開。"],["hops","煮沸加啤酒花","啤酒花帶來苦味和香氣。"],["tank","發酵","冷卻後加酵母，糖變成酒精與二氧化碳。"],["age","熟成","低溫熟成讓味道圓潤。"],["bottle","裝瓶","過濾、裝瓶或裝罐。"]]},
@@ -524,11 +530,11 @@ const PROCS = {
 };
 
 Object.entries({"fresh": ["殺菌讓起司更安全，也讓之後加的菌種成為主角。", "乳酸讓牛奶變酸，蛋白質比較容易凝結，也帶來清爽的酸味。", "凝乳酶切斷酪蛋白，讓它們連成網、抓住脂肪。", "排得越少越濕潤，瑞可塔、茅屋起司就是這樣。", "不熟成，保留最新鮮的奶味。"], "filata": ["水牛奶脂肪和蛋白質都比牛奶多，做出來更濃。", "凝乳酶讓蛋白質結成網。", "酸度要剛剛好：太低拉不開，太高會碎掉。", "熱水讓蛋白質變軟、排成一條條纖維，這就是彈牙口感的來源。", "泡冷水定型、泡鹽水調味。"], "whey": ["乳清裡的白蛋白、球蛋白，凝乳酶抓不住。", "這些蛋白質要靠高溫才會凝結。", "加一點酸，蛋白質就凝成小花浮上來。", "瀝的時間決定濕潤或扎實。"], "white": ["諾曼第的牧草讓牛奶富含脂肪與香氣。", "凝乳越軟、越完整，保留的水分越多。", "不切碎、輕輕舀，是為了保留水分與柔軟。", "不壓榨，水分多，白黴才有東西分解，起司才會變軟。", "鹽調味，也幫助形成外皮；白黴菌是熟成的主角。", "白黴蓋住表面，擋住其他雜菌。", "白黴的酵素從外往內分解蛋白質，所以外層先軟、中心最後熟。"], "blue": ["菌種一開始就混在牛奶裡，才會長在起司內部。", "大塊凝乳之間留下縫隙，藍黴之後可以長進去。", "不壓榨，讓內部保持鬆散、有空隙。", "大量的鹽讓雜菌長不起來，也是藍黴起司鹹的原因。", "藍黴需要氧氣，戳洞是幫它開「通風管」。", "藍紋沿著針孔和縫隙長，所以切面常看到一條條的線。", "洞穴的涼爽與高濕度最適合藍黴慢慢生長。"], "wash": ["。", "切小一點，排出較多水分。", "輕壓保留柔軟度。", "鹽水讓外皮適合耐鹽細菌生長。", "反覆擦洗，讓橘紅色細菌長滿外皮，擋住其他黴菌。", "細菌從外往內分解，味道在外皮最濃。"], "semi": ["。", "乳酸菌決定之後的酸度與風味。", "切得越小，排的乳清越多，起司越硬。", "加溫讓凝乳收縮、吐出水分。", "切達化讓凝乳變酸變緊密；洗凝乳帶走乳糖，讓高達偏甜。", "壓榨做出紮實、好保存的起司。", "鹽抑制雜菌、調味、形成外皮。", "熟成越久，蛋白質分解越多，越濃越有鮮味。"], "hard": ["銅鍋導熱均勻，傳說銅離子也影響風味。", "高山生乳帶有牧草與花的香氣。", "切到米粒大，排水最多，起司才會硬。", "高溫讓凝乳排出大量水分，也篩選出耐熱的菌種。", "布撈起整團凝乳，直接放進大模具。", "壓整天，做出紮實、低水分的大輪。", "鹽水慢慢滲入，形成保護外皮。", "溫暖室讓丙酸菌產氣（孔洞）；涼室慢慢熟成出堅果味。"], "xhard": ["脫脂讓脂肪少一點，適合長期熟成、不易變質。", "前一天的乳清帶著當地特有的菌種，延續風味。", "切到米粒大，排水最多。", "高溫讓凝乳收縮，沉到鍋底黏成一團。", "一鍋分成兩輪，每輪約 40 公斤。", "印上字樣與編號，證明產地與日期。", "大輪起司需要很久鹽分才能滲透。", "一年以上的熟成讓蛋白質大量分解，產生鮮味和結晶。"], "proc": ["混合不同熟成度的起司，調出想要的味道。", "磨碎才能均勻融化。", "乳化鹽讓油和水不分離，融化時才不會出油。", "趁熱成形，冷卻後就固定。", "加熱殺菌後菌種不再作用，所以味道不會再變。"]}).forEach(([k,L])=>L.forEach((w,i)=>{if(w&&w!=="。"&&PROCS[k].steps[i])PROCS[k].steps[i][3]=w}));
-const PROC_GROUPS=[["cheese","起司",["fresh","filata","whey","white","blue","wash","semi","hard","xhard","proc"]],["meat","風乾肉",["ham","salami"]],["wine","葡萄酒",["wwhite","wred","sparkling","port"]],["beer","啤酒",["beer"]],["sake","日本酒",["sake"]],["whisky","威士忌",["whisky"]],["cracker","餅乾",["cracker"]]];
+const PROC_GROUPS=[["cheese","起司",["fresh","filata","whey","white","blue","wash","semi","hard","xhard","proc"]],["meat","風乾肉",["ham","salami"]],["wine","葡萄酒",["wwhite","wred","carbonic","sparkling","port"]],["beer","啤酒",["beer"]],["sake","日本酒",["sake"]],["whisky","威士忌",["whisky"]],["cracker","餅乾",["cracker"]]];
 
 /* 預設拼盤 */
 const PRESETS = [
- {n:"福岡超市拼盤",d:"11/23 在福岡超市買的組合",ids:["camembert","cheddar","mimolette","parma","salame","levainlow","grape","yebisu"]},
+ {n:"福岡超市拼盤",d:"11/23 在福岡超市買的組合",ids:["camembert","cheddar","mimolette","parma","salame","levainlow","grape","yebisu","beaujolais"]},
  {n:"法式入門",d:"溫和好入口，適合第一次吃起司盤",ids:["brie","comte","roquefort","baguette","walnut","grape","fig","pinot"]},
  {n:"義大利開胃",d:"配氣泡酒的義式組合",ids:["burrata","gorgonzola","parmigiano","parma","salame","grissini","honey","champagne"]},
  {n:"西班牙小酒館",d:"Tapas 風格",ids:["manchego","iberico","chorizo","membrillo","olive","baguette","cava"]},
@@ -738,9 +744,9 @@ function picoSvg(k,cls="pico"){return`<svg class="${cls}" viewBox="0 0 160 110" 
 const FD={mozzarella:"鮮奶香、Q 彈多汁",burrata:"包著奶油內餡、濃滑",stracciatella:"撕碎凝乳泡在鮮奶油裡",ricotta:"鬆軟淡甜、像雲",mascarpone:"濃郁奶油、微甜",camembert:"蘑菇與奶油香",brie:"溫和、奶油感重",kombu:"昆布海味與鮮味",taleggio:"外皮臭、內裡果香",gorgonzola:"綿滑微辣的藍紋",roquefort:"羊奶、又鹹又辣",cheddar:"微酸、堅果味",colbyjack:"大理石紋、很溫和",gouda:"焦糖、奶油糖",mimolette:"橘色、像烏魚子",emmental:"有洞、甜甜的堅果味",gruyere:"濃堅果、沒有洞",comte:"榛果、烤堅果",manchego:"羊奶、人字紋外皮",parmigiano:"強烈鮮味、有結晶",pecorino:"很鹹很嗆的羊奶",process:"溫和、味道固定",
 parma:"甜、柔軟、只用鹽",serrano:"較乾、有嚼勁",iberico:"油脂入口即化、橡實香",salame:"細絞肉、米粒般脂肪",chorizo:"煙燻紅椒、紅色",coppa:"頸肉、油花交錯",bresaola:"瘦牛肉、清爽",mortadella:"有開心果、蒸熟的",speck:"木頭煙燻香",
 levain:"表面撒鹽、酥脆中性",levainlow:"不撒鹽、減鹽",maeda:"奶油香、M 字小圓餅",ritz:"鹹甜奶油圓餅",water:"薄脆、幾乎無味",baguette:"外脆內軟",grissini:"細長乾脆的棒子",crisp:"裸麥穀物香",honey:"甜，做鹹甜對比",fig:"濃甜帶顆粒",membrillo:"酸甜的果泥糕",walnut:"微苦的油香",grape:"酸甜、清口",olive:"鹹、微苦",
-champagne:"細緻氣泡、麵包香",cava:"西班牙平價氣泡酒",sauvblanc:"青草柑橘、高酸",chardonnay:"奶油或礦物感白酒",pinot:"紅莓果、低單寧",cabernet:"黑醋栗、單寧強",port:"加烈甜紅、果乾香",sauternes:"貴腐、蜂蜜杏桃",yebisu:"全麥芽、麥香厚",superdry:"辛口、清爽",ipa:"很苦、柑橘松針",sake:"米的鮮味、果香",whisky:"泥煤煙燻、海風"};
+champagne:"細緻氣泡、麵包香",cava:"西班牙平價氣泡酒",sauvblanc:"青草柑橘、高酸",chardonnay:"奶油或礦物感白酒",pinot:"紅莓果、低單寧",beaujolais:"草莓香蕉、新鮮的紅酒",cabernet:"黑醋栗、單寧強",port:"加烈甜紅、果乾香",sauternes:"貴腐、蜂蜜杏桃",yebisu:"全麥芽、麥香厚",superdry:"辛口、清爽",ipa:"很苦、柑橘松針",sake:"米的鮮味、果香",whisky:"泥煤煙燻、海風"};
 const LANGBY={"義大利":"it-IT","法國":"fr-FR","西班牙":"es-ES","日本":"ja-JP","荷蘭":"nl-NL","葡萄牙":"pt-PT","瑞典":"sv-SE"};
-const LANGFIX={emmental:"de-DE",gruyere:"fr-FR",speck:"it-IT",port:"pt-PT",champagne:"fr-FR",chardonnay:"fr-FR",pinot:"fr-FR",cabernet:"fr-FR",sauvblanc:"fr-FR",sauternes:"fr-FR"};
+const LANGFIX={emmental:"de-DE",gruyere:"fr-FR",speck:"it-IT",port:"pt-PT",champagne:"fr-FR",chardonnay:"fr-FR",pinot:"fr-FR",cabernet:"fr-FR",beaujolais:"fr-FR",sauvblanc:"fr-FR",sauternes:"fr-FR"};
 const LNAME={"it-IT":"義大利文","fr-FR":"法文","es-ES":"西班牙文","ja-JP":"日文","nl-NL":"荷蘭文","de-DE":"德文","pt-PT":"葡萄牙文","sv-SE":"瑞典文"};
 function nativeOf(it){const l=LANGFIX[it.id]||LANGBY[CTRY(it.c)[0]];return l?{l,t:l==="ja-JP"?it.jp:it.en}:null}
 function speak(text,lang="en-US",rate=.85){try{const s=window.speechSynthesis;if(!s){toast("這個瀏覽器不支援發音");return}s.cancel();const u=new SpeechSynthesisUtterance(text);u.lang=lang;u.rate=rate;const v=s.getVoices().find(v=>v.lang&&v.lang.replace("_","-").startsWith(lang.slice(0,2)));if(v)u.voice=v;s.speak(u)}catch(e){toast("無法發音")}}
@@ -808,7 +814,7 @@ const COURSES=[
  Q:[["帕瑪森、洛克福這類鹹起司，配哪種餅乾比較好？",["表面撒鹽的蘇打餅","減鹽或無鹽餅乾","奶油餅乾"],1,"起司已經很鹹，餅乾不加鹽才不會過頭。"],["曼切戈的西班牙國民吃法是配？",["榅桲醬","花生醬","番茄醬"],0,"酸甜的榅桲醬配濃郁的羊奶起司。"],["起司盤上的葡萄主要用途是？",["清口","增加鹹味","裝飾而已"],0,"水分與酸甜讓下一口起司吃得更清楚。"]]},
 {id:"c7",n:"酒的搭配",d:"氣泡酒、白酒、紅酒、甜酒、啤酒、日本酒",icon:"champagne",
  L:[["氣泡與酸度：最萬用","香檳、卡瓦、白蘇維濃酸度高，像清潔劑一樣把起司的油脂洗掉，越吃越清爽。軟質、新鮮、白黴起司都合。",{ids:["champagne","cava","sauvblanc"],proc:"sparkling"}],
-  ["紅酒要小心單寧","單寧遇到軟質或藍黴起司容易苦、有金屬味。最好搭的紅酒是輕盈的黑皮諾；厚重的卡本內留給熟成切達、帕瑪森這類硬質起司。",{cmp:["pinot","cabernet"]}],
+  ["紅酒要小心單寧","單寧遇到軟質或藍黴起司容易苦、有金屬味。最好搭的紅酒是輕盈的黑皮諾和薄酒萊新酒；厚重的卡本內留給熟成切達、帕瑪森這類硬質起司。",{cmp:["pinot","cabernet"]}],
   ["甜酒：鹹甜對比","波特酒和蘇玳甜白酒的甜，最能包住藍黴起司的鹹與辣。",{ids:["port","sauternes","roquefort"]}],
   ["啤酒也很好配","麥香和起司的堅果味相呼應；苦味能壓住重口味。惠比壽配米摩雷特、切達；Super Dry 配火腿解膩；IPA 配藍黴。",{ids:["yebisu","superdry","ipa"],proc:"beer"}],
   ["日本酒與威士忌","日本酒的鮮味和起司的鮮味會疊加，配帕瑪森、昆布卡門貝爾。艾雷島威士忌的煙燻配最重口味的藍黴。",{ids:["sake","whisky","kombu"]}]],
@@ -905,7 +911,7 @@ function toast(t){const e=$("#toast");e.textContent=t;e.classList.add("on");clea
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 
 /* ---------- 搭配引擎 ---------- */
-const CLASSIC=[["camembert","parma","生火腿的鹹香配白黴的奶油感",2],["brie","parma","法式拼盤常見的組合",1],["roquefort","sauternes","法國最經典的鹹甜組合",5],["manchego","membrillo","西班牙的國民吃法",5],["manchego","iberico","同在西班牙中部長大的老搭檔",2],["burrata","parma","布拉塔配生火腿是義大利開胃菜經典",3],["mozzarella","parma","義式開胃拼盤的基本款",2],["gouda","port","熟成高達的焦糖味配波特酒的果乾香",3],["cheddar","ipa","英國酒館的經典：切達配啤酒",2],["mimolette","yebisu","像烏魚子的鮮味配厚實麥香",2],["kombu","sake","昆布鮮味遇上日本酒",4],["comte","chardonnay","侏羅和勃根地相鄰，在地經典",3],["gruyere","chardonnay","瑞士起司配清爽白酒，起司火鍋也這樣配",2],["mascarpone","fig","抹餅乾再加無花果醬，就是一道甜點",3],["ricotta","honey","瑞可塔淋蜂蜜是義大利家常甜點",3],["process","ritz","小孩最愛的組合",2],["colbyjack","maeda","溫和配奶油香，小孩會喜歡",2],["brie","baguette","法國人的日常吃法",3],["camembert","baguette","諾曼第式吃法",2],["camembert","levain","鹽粒帶出卡門貝爾的奶香",2],["emmental","speck","阿爾卑斯山的鄰居",2],["parmigiano","champagne","鮮味結晶配細緻氣泡",2],["parmigiano","honey","帕瑪森淋蜂蜜是義大利的吃法",2],["pecorino","honey","鹹羊奶起司配蜂蜜",2],["gorgonzola","walnut","藍黴配核桃，再淋點蜂蜜更好",2],["taleggio","crisp","洗浸起司配穀物香",1],["mozzarella","olive","地中海的清爽組合",2]];
+const CLASSIC=[["camembert","beaujolais","低單寧的果香紅酒配白黴起司，不會苦",3],["brie","beaujolais","法國人秋冬的日常組合",2],["camembert","parma","生火腿的鹹香配白黴的奶油感",2],["brie","parma","法式拼盤常見的組合",1],["roquefort","sauternes","法國最經典的鹹甜組合",5],["manchego","membrillo","西班牙的國民吃法",5],["manchego","iberico","同在西班牙中部長大的老搭檔",2],["burrata","parma","布拉塔配生火腿是義大利開胃菜經典",3],["mozzarella","parma","義式開胃拼盤的基本款",2],["gouda","port","熟成高達的焦糖味配波特酒的果乾香",3],["cheddar","ipa","英國酒館的經典：切達配啤酒",2],["mimolette","yebisu","像烏魚子的鮮味配厚實麥香",2],["kombu","sake","昆布鮮味遇上日本酒",4],["comte","chardonnay","侏羅和勃根地相鄰，在地經典",3],["gruyere","chardonnay","瑞士起司配清爽白酒，起司火鍋也這樣配",2],["mascarpone","fig","抹餅乾再加無花果醬，就是一道甜點",3],["ricotta","honey","瑞可塔淋蜂蜜是義大利家常甜點",3],["process","ritz","小孩最愛的組合",2],["colbyjack","maeda","溫和配奶油香，小孩會喜歡",2],["brie","baguette","法國人的日常吃法",3],["camembert","baguette","諾曼第式吃法",2],["camembert","levain","鹽粒帶出卡門貝爾的奶香",2],["emmental","speck","阿爾卑斯山的鄰居",2],["parmigiano","champagne","鮮味結晶配細緻氣泡",2],["parmigiano","honey","帕瑪森淋蜂蜜是義大利的吃法",2],["pecorino","honey","鹹羊奶起司配蜂蜜",2],["gorgonzola","walnut","藍黴配核桃，再淋點蜂蜜更好",2],["taleggio","crisp","洗浸起司配穀物香",1],["mozzarella","olive","地中海的清爽組合",2]];
 const CTRY=s=>(s||"").split(/[・／ ]/).filter(x=>x&&!/各地|地中海/.test(x));
 function sameCountry(a,b){const A=CTRY(a.c),B=CTRY(b.c);return A.some(x=>B.includes(x))}
 function score(c,x){let s=6;const why=[];
