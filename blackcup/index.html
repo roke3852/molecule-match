@@ -1260,6 +1260,7 @@ GD.shen={name:'舟火',short:'外傳・沈懷舟',hero:'shen',sub:'沈懷舟外�
   {t:'「好。拿了獎金，就把這間店的房子買下來，以後不用看房東臉色。」',fx:{fame:1},r:[['huo','（咳）……也行。房東那個囝仔，確實很討厭。']]},
  ]),
  BG('dadaocheng','一個月後・迪化街'),
+ {sv:{sedan:{}}},
  N('一個月後。你在迪化街幫阿青家搬貨的時候，一台黑色的轎車停在南北貨行門口。'),
  N('下車的男人四十出頭，頭髮剃得很短，手上戴著一枚玉扳指。他笑著遞來一張燙金名片。'),
  L('zhou','沈先生吧？我姓周，剛成立一家生豆公司，叫「金穗」。'),
@@ -2747,9 +2748,73 @@ BGS.dadaocheng=function(g,t){const p=PX(g);
   house(162,80,'#8f4434','#e8dcc8',['#2a1d14','#e8c890'],2);house(246,74,'#a0523c','#efe6d4',['#1f3a6b','#f0e0b0'],2);
   // 街道
   p(0,152,320,48,'#7d7a74');for(let y=156;y<200;y+=8)for(let x=(y/8%2)*10;x<320;x+=20)p(x,y,19,7,'#8a8780');p(0,152,320,3,'#5d5a55');
-  // 機車
-  p(200,168,30,10,'#d64545');p(198,176,8,8,'#1a1a1a');p(224,176,8,8,'#1a1a1a');p(214,162,10,6,'#2a2f3a');
+  // 機車（停在騎樓前）
+  scooter(p,g,t,222,186);
+  // 黑色轎車（劇情觸發：開進來、停下、開門）
+  if(S&&S._v&&S._v.sedan)sedan(p,g,t,S._v.sedan);
   p.vig()};
+function wheel(p,g,cx,cy,r,rot,rim,hub){g.fillStyle='#0c0d10';g.beginPath();g.arc(cx,cy,r,0,6.283);g.fill();g.fillStyle='#24262c';g.beginPath();g.arc(cx,cy,r-1,0,6.283);g.fill();
+  g.fillStyle=rim;g.beginPath();g.arc(cx,cy,r*.58,0,6.283);g.fill();g.fillStyle=hub;g.beginPath();g.arc(cx,cy,r*.42,0,6.283);g.fill();
+  g.strokeStyle=rim;g.lineWidth=1;for(let k=0;k<5;k++){const a=rot+k*1.2566;g.beginPath();g.moveTo(cx,cy);g.lineTo(cx+Math.cos(a)*r*.55,cy+Math.sin(a)*r*.55);g.stroke()}
+  p(cx-1,cy-1,2,2,'#e8eaee')}
+function scooter(p,g,t,x,y){// x=前輪中心，面向左
+  g.fillStyle='rgba(0,0,0,.28)';g.beginPath();g.ellipse(x+14,y+5,22,3,0,0,6.283);g.fill();
+  // 後輪擋泥與排氣管
+  p(x+20,y-6,14,3,'#b23a3a');p(x+22,y-2,12,3,'#9aa1aa');p(x+33,y-2,3,2,'#6b7178');
+  wheel(p,g,x,y,6,0,'#9aa1aa','#3a3f48');wheel(p,g,x+28,y,6,0,'#9aa1aa','#3a3f48');
+  // 前擋泥板與前叉
+  p(x-6,y-8,12,3,'#d64545');p(x-5,y-8,10,1,'#f08a80');p(x-1,y-20,3,13,'#4a4f58');
+  // 腳踏板
+  p(x+6,y-5,14,3,'#2a2d34');p(x+6,y-5,14,1,'#4a4f58');
+  // 前護板（擋風腳踏前方）
+  p(x+2,y-24,6,20,'#d64545');p(x+2,y-24,2,20,'#f08a80');p(x+7,y-22,1,18,'#9a2e2e');
+  // 車身後罩
+  p(x+16,y-16,22,11,'#d64545');p(x+18,y-18,18,3,'#d64545');p(x+18,y-16,18,1,'#f08a80');p(x+16,y-7,22,2,'#9a2e2e');
+  p(x+36,y-14,3,4,'#ff6b5e');p(x+38,y-13,1,2,'#ffd0c8');// 尾燈
+  p(x+30,y-8,7,4,'#ece4d4');p(x+31,y-7,5,1,'#2a2d34');// 車牌
+  // 座墊
+  p(x+16,y-21,20,4,'#1c1d22');p(x+17,y-22,17,1,'#3a3d46');p(x+14,y-19,3,3,'#1c1d22');
+  // 龍頭、把手、後照鏡
+  p(x+1,y-29,9,5,'#d64545');p(x+1,y-29,9,1,'#f08a80');p(x-3,y-29,4,2,'#1c1d22');p(x+10,y-29,4,2,'#1c1d22');
+  p(x+7,y-34,1,5,'#9aa1aa');p(x+6,y-36,3,2,'#9aa1aa');p(x-1,y-34,1,5,'#9aa1aa');p(x-2,y-36,3,2,'#9aa1aa');
+  // 大燈
+  p(x-1,y-27,3,3,'#fff1c0');p(x-1,y-27,1,1,'#ffffff');
+  // 安全帽掛在把手
+  p(x+11,y-27,6,5,'#ece4d4');p(x+11,y-27,6,1,'#ffffff');p(x+12,y-24,4,1,'#2a3a4a')}
+function sedan(p,g,t,v){if(!v.t0)v.t0=performance.now();const e=(performance.now()-v.t0)/1000,T=2.2,u=Math.min(1,e/T),ez=1-Math.pow(1-u,3);
+  const X=Math.round(-110+(36+110)*ez),Y=190,moving=u<1,bob=moving?Math.round(Math.sin(e*18)*.5):0,rot=-ez*28;
+  // 影子
+  g.fillStyle='rgba(0,0,0,.35)';g.beginPath();g.ellipse(X+46,Y+2,48,4,0,0,6.283);g.fill();
+  const y0=Y-28+bob;
+  // 車身下半
+  p(X+2,y0+12,90,12,'#15171c');p(X,y0+15,94,8,'#15171c');p(X+2,y0+12,90,1,'#4a505c');p(X+4,y0+16,86,1,'#2c3038');
+  // 鍍鉻飾條、保桿
+  p(X+4,y0+19,86,1,'#c4cad1');p(X-1,y0+21,8,3,'#9aa1aa');p(X+88,y0+21,8,3,'#9aa1aa');
+  // 車艙（後窗斜、擋風斜）
+  for(let k=0;k<11;k++){const l=X+22-Math.min(k,8)*1.4,r=X+66+Math.min(k,10)*1.8;p(Math.round(l),y0+1+k,Math.round(r-l),1,'#15171c')}
+  p(X+22,y0,44,2,'#2c3038');
+  // 車窗
+  const win=(a,b,c,d)=>{for(let k=0;k<8;k++){const l=a-Math.min(k,7)*1.2,r=c+Math.min(k,7)*1.4;p(Math.round(l),y0+3+k,Math.round(r-l),1,'#26394a')}};
+  win(X+25,0,X+44,0);win(X+48,0,X+64,0);p(X+45,y0+3,3,9,'#15171c');
+  // 窗上反光（移動時流動）
+  const sh=((e*40)%60);g.save();g.beginPath();g.rect(X+14,y0+3,60,9);g.clip();g.fillStyle='rgba(220,235,250,.35)';
+  for(let k=0;k<2;k++){const sx=X+14+((sh+k*30)%60);g.beginPath();g.moveTo(sx,y0+12);g.lineTo(sx+5,y0+3);g.lineTo(sx+8,y0+3);g.lineTo(sx+3,y0+12);g.fill()}g.restore();
+  // 車門線、把手
+  p(X+46,y0+12,1,10,'#2c3038');p(X+24,y0+12,1,10,'#2c3038');p(X+68,y0+12,1,9,'#2c3038');p(X+34,y0+14,5,1,'#c4cad1');p(X+56,y0+14,5,1,'#c4cad1');
+  // 頭燈與尾燈
+  p(X+90,y0+14,4,3,'#fff1c0');p(X+93,y0+15,1,1,'#ffffff');p(X,y0+14,3,3,'#b8202a');
+  if(moving||e<T+.4){g.fillStyle='rgba(255,240,190,.18)';g.beginPath();g.moveTo(X+94,y0+15);g.lineTo(X+140,y0+8);g.lineTo(X+140,y0+26);g.fill()}
+  if(e>T-.3&&e<T+1.2&&Math.sin(e*14)>0)p(X-1,y0+14,4,3,'#ff4a4a');// 煞車燈
+  // 輪子
+  wheel(p,g,X+20,Y-4+bob*0,7,rot,'#c4cad1','#3a3f48');wheel(p,g,X+74,Y-4,7,rot,'#c4cad1','#3a3f48');
+  p(X+11,y0+17,18,2,'#0c0d10');p(X+65,y0+17,18,2,'#0c0d10');// 輪拱
+  // 排氣
+  if(moving)for(let k=0;k<4;k++){const ph=(e*2+k*.25)%1;g.globalAlpha=(1-ph)*.4;p(X-4-ph*20,y0+21-ph*6,3+ph*3,2,'#cfd3da');g.globalAlpha=1}
+  // 停妥後：後門打開，周董下車
+  if(e>T+.7){const k=Math.min(1,(e-T-.7)/.5);p(X+46,y0+12,1,10,'#15171c');p(X+46-Math.round(10*k),y0+4,Math.round(10*k)+1,18,'#22252c');p(X+46-Math.round(10*k),y0+4,1,18,'#4a505c');
+    if(e>T+1.3){const s=Math.min(1,(e-T-1.3)/.6),fx=X+38-Math.round(12*s),fy=Y-24+Math.round(6*s);g.fillStyle='rgba(0,0,0,.3)';g.beginPath();g.ellipse(fx+4,fy+29,7,2,0,0,6.283);g.fill();
+      p(fx,fy+12,8,14,'#2a2f3a');p(fx+2,fy+14,4,6,'#e8e2d0');p(fx+3,fy+14,2,5,'#7a1f22');p(fx,fy+26,3,3,'#0c0d10');p(fx+5,fy+26,3,3,'#0c0d10');
+      p(fx+1,fy+4,6,8,'#e2b590');p(fx+1,fy+3,6,3,'#151515');p(fx+2,fy+7,1,1,'#151515');p(fx+5,fy+7,1,1,'#151515');p(fx+8,fy+18,2,2,'#4fb36a')}}}
 BGS.alley=function(g,t){const p=PX(g);p(0,0,320,200,'#120e0c');
   // 兩側磚牆透視
   for(let i=0;i<14;i++){const k=i/14,xL=Math.round(150*k*k*0+150*(1-Math.pow(1-k,1.5))*0),w=0;}
@@ -2982,6 +3047,7 @@ function step(){
     if(n.final){finale();return}
     if(n.c){persist();showChoice(n);return}
     if(n.use){persist();showUse(n);return}
+    if(n.sv){S._v=Object.assign(S._v||{},JSON.parse(JSON.stringify(n.sv)));S.i++;continue}
     if(n.brew){persist();showBrew(n);return}
     if(n.item){S.i++;giveItem(n.item);continue}
     if(n.money){S.i++;addMoney(n.money,n.why);continue}
@@ -2996,7 +3062,7 @@ function step(){
     S.i++;
   }
 }
-function setBg(b,loc){if(S&&S.act)S.act=null;const ch=curBg!==b;const tl=document.getElementById('tvLayer');if(tl){tl.hidden=true;tl.innerHTML=''}curBg=b;S.bg=b;S.loc=loc;$('locLabel').textContent=loc||'';const dm=document.querySelector('.scene').classList.contains('doom');if(ch&&$('game').classList.contains('on'))sfx('whoosh');if(!dm)playTheme(musicFor(b))}
+function setBg(b,loc){if(S&&S.act)S.act=null;const ch=curBg!==b;if(S&&ch)S._v=null;const tl=document.getElementById('tvLayer');if(tl){tl.hidden=true;tl.innerHTML=''}curBg=b;S.bg=b;S.loc=loc;$('locLabel').textContent=loc||'';const dm=document.querySelector('.scene').classList.contains('doom');if(ch&&$('game').classList.contains('on'))sfx('whoosh');if(!dm)playTheme(musicFor(b))}
 function showLine(n){
   $('choices').classList.remove('on');$('box').style.display='';
   const sp=n.s;curLine=n;
