@@ -32,7 +32,7 @@ p{line-height:1.75;margin:6px 0}
 .pill.g{background:#e2efe9;color:var(--accent2)}.pill.r{background:#f6e1dc;color:var(--warn)}
 nav{position:fixed;bottom:0;left:0;right:0;background:rgba(255,253,249,.96);backdrop-filter:blur(8px);border-top:1px solid var(--line);display:flex;justify-content:space-around;padding:8px 4px calc(8px + env(safe-area-inset-bottom));z-index:10}
 nav button{flex:1;border:0;background:none;font:inherit;font-size:12px;color:var(--sub);padding:4px 0;cursor:pointer}
-nav button b{display:block;font-size:20px;margin-bottom:2px}
+nav button b{display:block;font-size:19px;margin-bottom:2px}
 nav button.on{color:var(--accent);font-weight:700}
 /* slider */
 .sim{display:grid;grid-template-columns:1fr;gap:10px}
@@ -105,6 +105,9 @@ th{color:var(--sub);font-weight:500;font-size:13px}
 .fav{border:0;background:none;font-size:20px;cursor:pointer;padding:0 4px 0 0;vertical-align:middle}
 .note{background:#fbf6ea;border-left:3px solid var(--gold);border-radius:8px;padding:8px 10px;font-size:14px;line-height:1.6;margin-top:6px;white-space:pre-wrap;cursor:pointer}
 .nedit textarea{display:block;width:100%;margin-top:6px;border:1px solid var(--line);border-radius:10px;padding:8px;font:inherit;font-size:15px}
+.fold{cursor:pointer;display:flex;align-items:center;gap:8px}
+.fold i{margin-left:auto;font-style:normal;color:var(--sub);transition:transform .2s}
+.fold.closed i{transform:rotate(-90deg)}
 .toast{position:fixed;left:50%;bottom:96px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:8px 16px;border-radius:999px;font-size:13px;opacity:0;transition:.25s;pointer-events:none;z-index:20}
 .toast.on{opacity:1}
 </style>
@@ -167,12 +170,14 @@ th{color:var(--sub);font-weight:500;font-size:13px}
 <!-- ============ 鞋子 ============ -->
 <section class="tab" id="t-shoe">
   <div class="card">
-    <h2>試穿檢查表</h2>
+    <h2 class="fold" id="chkHead">試穿檢查表 <span class="sub" id="chkMini"></span><i>▾</i></h2>
+    <div id="chkBody">
     <p class="sub">在店裡逐項勾選，最好帶著目前穿起來舒服的那雙一起比較。</p>
     <div id="shoeChk"></div>
     <div style="display:flex;align-items:baseline;gap:10px;margin-top:10px"><span class="score" id="shoeScore">0</span><span class="sub">/ 7 分</span></div>
     <p id="shoeVerdict" class="sub"></p>
     <button class="opt" id="shoeReset" style="margin-top:6px">清除重來</button>
+    </div>
   </div>
 
   <div class="card">
@@ -198,29 +203,6 @@ th{color:var(--sub);font-weight:500;font-size:13px}
     <p>扁平的帆布鞋、夾腳拖、鞋底軟到可以對折的鞋、高跟鞋。</p>
     <h3>🔄 其他小技巧</h3>
     <p>鞋子穿久了，中底避震會變差（大約 500–800 公里），後跟磨歪也會影響骨盆。如果舊鞋已經不太好走，可以考慮加一雙輪替穿或換新。</p>
-  </div>
-
-  <div class="card" id="myShoes">
-    <h2>👟 我的鞋櫃・試穿清單</h2>
-    <p class="sub">推薦鞋款按「＋ 試穿清單」就會出現在這裡；試穿後給腰的感受打分數，分數最高的排最前面。自己的鞋也可以加進來當比較基準。資料和照片只存在這支手機的瀏覽器裡。</p>
-    <div class="phbar" id="myTop" style="margin-bottom:4px"></div>
-    <div id="myList"></div>
-    <div class="phbar" id="myQuick"></div>
-    <button class="opt" id="myAddBtn" style="margin-top:8px">＋ 新增一雙鞋</button>
-    <div id="myForm" style="display:none;margin-top:10px" class="ex">
-      <div class="fgrid">
-        <label>品牌<input id="mfB" placeholder="例如 New Balance"></label>
-        <label>型號<input id="mfM" placeholder="例如 1906R"></label>
-        <label>狀態<select id="mfS"><option>想試穿</option><option>已試穿</option><option>已擁有</option></select></label>
-        <label>類型<select id="mfT"><option>運動鞋</option><option>皮鞋</option><option>健行鞋</option><option>休閒鞋</option><option>靴子</option><option>其他</option></select></label>
-        <label>落差／鞋跟（選填）<input id="mfD" placeholder="例如 11.5 mm 或 3 cm"></label>
-      </div>
-      <div class="rate"><span>腰的感受</span><div data-k="back"></div></div>
-      <div class="rate"><span>後跟穩定</span><div data-k="stab"></div></div>
-      <div class="rate"><span>大腿在撐</span><div data-k="thigh"></div></div>
-      <label class="sub" style="display:block;margin-top:8px">備註<textarea id="mfN" rows="2" placeholder="走多久、哪裡不舒服、跟哪雙比較…"></textarea></label>
-      <div style="display:flex;gap:8px;margin-top:8px"><button class="opt on" id="mfSave">儲存</button><button class="opt" id="mfCancel">取消</button><button class="opt" id="mfDel" style="margin-left:auto;display:none;color:var(--warn)">刪除這雙</button></div>
-    </div>
   </div>
 
   <div class="card">
@@ -255,6 +237,52 @@ th{color:var(--sub);font-weight:500;font-size:13px}
       <li>「ドロップは何ミリですか？」（落差是幾 mm？）</li>
     </ul>
   </div>
+</section>
+
+<!-- ============ 我的鞋櫃 ============ -->
+<section class="tab" id="t-my">
+  <div class="card" id="myFoot">
+    <h2>📏 我的腳和尺寸</h2>
+    <p class="sub">量一次就好：腳跟貼牆站直，量到最長的腳趾。左右腳可能不一樣，以長的那隻為準。</p>
+    <div class="fgrid">
+      <label>左腳長（cm）<input id="ftL" inputmode="decimal" placeholder="例如 26.3"></label>
+      <label>右腳長（cm）<input id="ftR" inputmode="decimal" placeholder="例如 26.5"></label>
+      <label>腳寬<select id="ftW"><option value="">未填</option><option>窄</option><option>標準</option><option>偏寬（2E）</option><option>很寬（3E 以上）</option></select></label>
+      <label>腳背<select id="ftH"><option value="">未填</option><option>低</option><option>標準</option><option>高</option></select></label>
+      <label>平常穿（日本 cm）<input id="ftJP" inputmode="decimal" placeholder="例如 27.0"></label>
+      <label>平常穿（US）<input id="ftUS" inputmode="decimal" placeholder="例如 9"></label>
+    </div>
+    <p class="sub" id="ftHint" style="margin-top:8px"></p>
+    <h3>各品牌穿起來的尺寸</h3>
+    <p class="sub">在下面鞋櫃的每雙鞋填「尺寸」和「合腳程度」，這裡會自動整理。</p>
+    <div id="sizeTable"></div>
+  </div>
+
+  <div class="card" id="myShoes">
+    <h2>👟 我的鞋櫃・試穿清單</h2>
+    <p class="sub">在「鞋子」分頁按「＋ 試穿清單」，鞋款就會出現在這裡；試穿後給腰的感受打分數，分數最高的排最前面。自己的鞋也可以加進來當比較基準。資料和照片只存在這支手機的瀏覽器裡。</p>
+    <div class="phbar" id="myTop" style="margin-bottom:4px"></div>
+    <div id="myList"></div>
+    <div class="phbar" id="myQuick"></div>
+    <button class="opt" id="myAddBtn" style="margin-top:8px">＋ 新增一雙鞋</button>
+    <div id="myForm" style="display:none;margin-top:10px" class="ex">
+      <div class="fgrid">
+        <label>品牌<input id="mfB" placeholder="例如 New Balance"></label>
+        <label>型號<input id="mfM" placeholder="例如 1906R"></label>
+        <label>狀態<select id="mfS"><option>想試穿</option><option>已試穿</option><option>已擁有</option></select></label>
+        <label>類型<select id="mfT"><option>運動鞋</option><option>皮鞋</option><option>健行鞋</option><option>休閒鞋</option><option>靴子</option><option>其他</option></select></label>
+        <label>落差／鞋跟（選填）<input id="mfD" placeholder="例如 11.5 mm 或 3 cm"></label>
+        <label>尺寸<input id="mfZ" placeholder="例如 27.5 / US 9.5"></label>
+        <label>合腳程度<select id="mfF"><option value="">未試</option><option>偏小</option><option>剛好</option><option>偏大</option><option>腳趾擠</option><option>後跟鬆</option></select></label>
+      </div>
+      <div class="rate"><span>腰的感受</span><div data-k="back"></div></div>
+      <div class="rate"><span>後跟穩定</span><div data-k="stab"></div></div>
+      <div class="rate"><span>大腿在撐</span><div data-k="thigh"></div></div>
+      <label class="sub" style="display:block;margin-top:8px">備註<textarea id="mfN" rows="2" placeholder="走多久、哪裡不舒服、跟哪雙比較…"></textarea></label>
+      <div style="display:flex;gap:8px;margin-top:8px"><button class="opt on" id="mfSave">儲存</button><button class="opt" id="mfCancel">取消</button><button class="opt" id="mfDel" style="margin-left:auto;display:none;color:var(--warn)">刪除這雙</button></div>
+    </div>
+  </div>
+
 </section>
 
 <!-- ============ 訓練 ============ -->
@@ -315,6 +343,7 @@ th{color:var(--sub);font-weight:500;font-size:13px}
   <button data-t="t-sci" class="on"><b>🦴</b>原理</button>
   <button data-t="t-quiz"><b>🧭</b>自評</button>
   <button data-t="t-shoe"><b>👞</b>鞋子</button>
+  <button data-t="t-my"><b>👟</b>我的</button>
   <button data-t="t-train"><b>💪</b>訓練</button>
   <button data-t="t-alert"><b>🚨</b>警訊</button>
 </nav>
@@ -327,7 +356,7 @@ const store={get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v)
 function toast(t){const el=$('#toast');el.textContent=t;el.classList.add('on');clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('on'),1600)}
 
 /* nav */
-const tabs={'sci':'t-sci','quiz':'t-quiz','shoe':'t-shoe','train':'t-train','alert':'t-alert'};
+const tabs={'sci':'t-sci','quiz':'t-quiz','shoe':'t-shoe','my':'t-my','train':'t-train','alert':'t-alert'};
 function show(id){document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('on',t.id===id));document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.t===id));window.scrollTo(0,0)}
 document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{show(b.dataset.t);const k=Object.keys(tabs).find(k=>tabs[k]===b.dataset.t);history.replaceState(null,'','#'+k)});
 const h=location.hash.slice(1);if(tabs[h])show(tabs[h]);
@@ -427,9 +456,11 @@ let sh=store.get('bp_shoe',[]);
 function renderShoe(){
   $('#shoeChk').innerHTML=S.map((x,i)=>`<div class="chk ${sh.includes(i)?'on':''}" data-i="${i}"><div class="box">${sh.includes(i)?'✓':''}</div><div><b>${x[0]}</b><div class="sub">${x[1]}</div></div></div>`).join('');
   document.querySelectorAll('.chk').forEach(c=>c.onclick=()=>{const i=+c.dataset.i;sh=sh.includes(i)?sh.filter(x=>x!==i):[...sh,i];store.set('bp_shoe',sh);renderShoe()});
-  const n=sh.length;$('#shoeScore').textContent=n;
+  const n=sh.length;$('#shoeScore').textContent=n;$('#chkMini').textContent=`${n}/7`;
   $('#shoeVerdict').textContent=n>=6?'很適合，可以考慮帶回家。':n>=4?'還不錯，重點看第 1 項和最後一項有沒有勾到。':n>0?'還不太理想，建議再試試其他鞋款。':'';
 }
+function setFold(c){$('#chkBody').style.display=c?'none':'block';$('#chkHead').classList.toggle('closed',c);store.set('bp_chk_fold',c)}
+$('#chkHead').onclick=()=>setFold($('#chkBody').style.display!=='none');setFold(store.get('bp_chk_fold',false));
 $('#shoeReset').onclick=()=>{sh=[];store.set('bp_shoe',sh);renderShoe()};
 renderShoe();
 
@@ -495,7 +526,7 @@ function renderBrands(){
       <a class="opt" href="https://www.google.com/search?tbm=isch&q=${q}" target="_blank" rel="noopener">🔍 網路照片</a>
       <a class="opt" href="https://www.google.com/search?q=${q}+drop+mm" target="_blank" rel="noopener">📏 查規格</a>
       <label class="opt">📷 新增照片<input type="file" accept="image/*" multiple hidden data-i="${i}"></label>
-      ${s.r==='no'?'':MY.some(x=>x.b===s.b&&x.m===s.m)?'<span class="opt" style="opacity:.6">✓ 已在清單</span>':`<button class="opt" data-add="${i}">＋ 試穿清單</button>`}
+      ${s.r==='no'?'':MY.some(x=>x.b===s.b&&x.m===s.m)?'<a class="opt" href="#my" onclick="show(\'t-my\')" style="opacity:.75">✓ 已在清單 →</a>':`<button class="opt" data-add="${i}">＋ 試穿清單</button>`}
     </div></div>`}).join('');
   if(brand==='❤️ 收藏'&&!list.length)$('#shoeList').innerHTML='<p class="sub">還沒有收藏，點鞋款右上角的 🤍 就能收藏。</p>';
   document.querySelectorAll('[data-fav]').forEach(b=>b.onclick=()=>{const k=skey(list[+b.dataset.fav]);FAV=FAV.includes(k)?FAV.filter(x=>x!==k):[...FAV,k];store.set('bp_fav',FAV);toast(FAV.includes(k)?'已收藏':'已取消收藏');renderBrands()});
@@ -517,13 +548,13 @@ let MY=store.get('bp_my',[]);let editId=null;const R={back:0,stab:0,thigh:0};
 const star=n=>'★'.repeat(n)+'☆'.repeat(5-n);
 const QUICK=[{b:'ECCO',m:'有跟皮鞋',t:'皮鞋',d:'小鞋跟',st:'已擁有'},{b:'New Balance',m:'1906R',t:'運動鞋',d:'實測 11.5 mm',st:'已擁有'}];
 const TYPEOF=s=>s.f?'皮鞋':/GTX|MOAB|ADVENTURE|ULTRA|Anacapa/i.test(s.m)?'健行鞋':/Timberland/.test(s.b)?'靴子':'運動鞋';
-function addFromRec(s){if(MY.some(x=>x.b===s.b&&x.m===s.m)){toast('已在試穿清單裡');return}MY=[...MY,{id:'s'+Date.now()+Math.random().toString(36).slice(2,5),b:s.b,m:s.m,t:TYPEOF(s),d:s.d==='—'?'':s.d,st:'想試穿',n:'',back:0,stab:0,thigh:0,rec:1}];store.set('bp_my',MY);renderMy();renderBrands();toast(`已加入：${s.m}`)}
+function addFromRec(s){if(MY.some(x=>x.b===s.b&&x.m===s.m)){toast('已在試穿清單裡');return}MY=[...MY,{id:'s'+Date.now()+Math.random().toString(36).slice(2,5),b:s.b,m:s.m,t:TYPEOF(s),d:s.d==='—'?'':s.d,st:'想試穿',n:'',back:0,stab:0,thigh:0,rec:1}];store.set('bp_my',MY);renderMy();renderBrands();toast(`已加入試穿清單：${s.m}（在「👟 我的」分頁）`)}
 function rateUI(){document.querySelectorAll('.rate div').forEach(d=>{const k=d.dataset.k;d.innerHTML=[1,2,3,4,5].map(i=>`<button type="button" class="${i<=R[k]?'on':''}" data-v="${i}">★</button>`).join('');d.querySelectorAll('button').forEach(b=>b.onclick=()=>{R[k]=+b.dataset.v;rateUI()})})}
-function openForm(x){editId=x&&x.id||null;$('#myForm').style.display='block';$('#mfB').value=x?x.b:'';$('#mfM').value=x?x.m:'';$('#mfT').value=x?x.t:'運動鞋';$('#mfD').value=x?x.d||'':'';$('#mfS').value=x&&x.st||'想試穿';$('#mfN').value=x?x.n||'':'';R.back=x?x.back||0:0;R.stab=x?x.stab||0:0;R.thigh=x?x.thigh||0:0;rateUI();$('#mfDel').style.display=editId?'block':'none';$('#myForm').scrollIntoView({behavior:'smooth',block:'center'})}
+function openForm(x){editId=x&&x.id||null;$('#myForm').style.display='block';$('#mfB').value=x?x.b:'';$('#mfM').value=x?x.m:'';$('#mfT').value=x?x.t:'運動鞋';$('#mfD').value=x?x.d||'':'';$('#mfS').value=x&&x.st||'想試穿';$('#mfZ').value=x&&x.z||'';$('#mfF').value=x&&x.fit||'';$('#mfN').value=x?x.n||'':'';R.back=x?x.back||0:0;R.stab=x?x.stab||0:0;R.thigh=x?x.thigh||0:0;rateUI();$('#mfDel').style.display=editId?'block':'none';$('#myForm').scrollIntoView({behavior:'smooth',block:'center'})}
 $('#myAddBtn').onclick=()=>openForm(null);
 $('#mfCancel').onclick=()=>{$('#myForm').style.display='none'};
 $('#mfSave').onclick=()=>{const b=$('#mfB').value.trim(),m=$('#mfM').value.trim();if(!b&&!m){toast('請填品牌或型號');return}
-  const o={id:editId||('s'+Date.now()),b,m,st:$('#mfS').value,t:$('#mfT').value,d:$('#mfD').value.trim(),n:$('#mfN').value.trim(),back:R.back,stab:R.stab,thigh:R.thigh,at:new Date().toISOString().slice(0,10)};
+  const o={id:editId||('s'+Date.now()),b,m,st:$('#mfS').value,z:$('#mfZ').value.trim(),fit:$('#mfF').value,t:$('#mfT').value,d:$('#mfD').value.trim(),n:$('#mfN').value.trim(),back:R.back,stab:R.stab,thigh:R.thigh,at:new Date().toISOString().slice(0,10)};
   MY=editId?MY.map(x=>x.id===editId?o:x):[...MY,o];store.set('bp_my',MY);$('#myForm').style.display='none';renderMy();renderBrands();toast('已儲存')};
 $('#mfDel').onclick=async()=>{const b=$('#mfDel');if(!b.dataset.sure){b.dataset.sure=1;b.textContent='再按一次確認';setTimeout(()=>{delete b.dataset.sure;b.textContent='刪除這雙'},2500);return}
   MY=MY.filter(x=>x.id!==editId);store.set('bp_my',MY);await phSet('my|'+editId,[]);$('#myForm').style.display='none';renderMy();toast('已刪除')};
@@ -534,7 +565,7 @@ function renderMy(){
   if(tops.length)$('#addTops').onclick=()=>{tops.forEach(addFromRec)};
   $('#myList').innerHTML=sorted.length?sorted.map((x,i)=>`<div class="my">
     <div style="display:flex;justify-content:space-between;gap:8px"><div><span class="sub">${esc(x.b)} · ${esc(x.t)}</span> <span class="pill ${x.st==='已擁有'?'':x.st==='已試穿'?'g':''}" style="font-size:11px;padding:1px 8px">${esc(x.st||'已擁有')}</span><h3 style="margin:2px 0 4px;font-size:16px">${i===0&&x.back?'🥇 ':''}${esc(x.m)}</h3></div><button class="opt" data-ed="${x.id}" style="padding:4px 10px;font-size:12px;height:fit-content;white-space:nowrap">${x.back?'編輯':'✏️ 評分'}</button></div>
-    ${x.d?`<span class="pill">落差 ${esc(x.d)}</span>`:''}
+    ${x.d?`<span class="pill">落差 ${esc(x.d)}</span>`:''}${x.z?`<span class="pill">📏 ${esc(x.z)}${x.fit?'・'+esc(x.fit):''}</span>`:''}
     <div style="font-size:13px;margin-top:6px;line-height:1.8">腰的感受 <span class="stars">${star(x.back||0)}</span><br>後跟穩定 <span class="stars">${star(x.stab||0)}</span><br>大腿在撐 <span class="stars">${star(x.thigh||0)}</span></div>
     ${x.n?`<p style="font-size:14px;margin-top:6px">${esc(x.n)}</p>`:''}
     <div class="phs" id="ph-my-${x.id}"></div>
@@ -543,10 +574,20 @@ function renderMy(){
   sorted.forEach(x=>renderPhotos('my-'+x.id,'my|'+x.id));
   document.querySelectorAll('[data-ed]').forEach(b=>b.onclick=()=>openForm(MY.find(x=>x.id===b.dataset.ed)));
   document.querySelectorAll('input[data-my]').forEach(inp=>inp.onchange=async()=>{const id=inp.dataset.my,k='my|'+id;const a=await phGet(k);let n=0;for(const f of inp.files){try{a.push(await shrink(f));n++}catch(e){}}await phSet(k,a);renderPhotos('my-'+id,k);if(n)toast(`已新增 ${n} 張照片`);inp.value=''});
+  renderSizes();
   const have=new Set(MY.map(x=>x.b+'|'+x.m));
   $('#myQuick').innerHTML=QUICK.filter(q=>!have.has(q.b+'|'+q.m)).map((q,i)=>`<button class="opt" data-q="${i}">＋ ${q.b} ${q.m}</button>`).join('');
   document.querySelectorAll('[data-q]').forEach(b=>b.onclick=()=>openForm({...QUICK[+b.dataset.q]}));
 }
+
+/* ===== my foot & sizes ===== */
+let FT=store.get('bp_foot',{});
+['ftL','ftR','ftW','ftH','ftJP','ftUS'].forEach(id=>{const el=document.getElementById(id);el.value=FT[id]||'';el.onchange=()=>{FT[id]=el.value.trim();store.set('bp_foot',FT);footHint()}});
+function footHint(){const L=parseFloat(FT.ftL),R=parseFloat(FT.ftR);const m=Math.max(L||0,R||0);
+  $('#ftHint').innerHTML=m?`以較長的 <b>${m} cm</b> 為準，運動鞋通常選腳長 <b>+1～1.5 cm</b>，約日本尺寸 <b>${(Math.round((m+1)*2)/2).toFixed(1)}～${(Math.round((m+1.5)*2)/2).toFixed(1)}</b>；皮鞋通常只加 0.5～1 cm。${FT.ftW&&/寬/.test(FT.ftW)?' 腳偏寬：優先試 ASICS（3E／4E）、New Balance 2E，Salomon 偏窄。':''}`:''}
+function renderSizes(){const rows=MY.filter(x=>x.z);
+  $('#sizeTable').innerHTML=rows.length?`<table><tr><th>品牌</th><th>型號</th><th>尺寸</th><th>合腳</th></tr>${rows.map(x=>`<tr><td>${esc(x.b)}</td><td>${esc(x.m)}</td><td><b>${esc(x.z)}</b></td><td>${x.fit==='剛好'?'<span class="pill g">剛好</span>':x.fit?`<span class="pill r">${esc(x.fit)}</span>`:'—'}</td></tr>`).join('')}</table>`:'<p class="sub">還沒有尺寸紀錄。</p>'}
+footHint();
 function esc(t){return String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
 
 
