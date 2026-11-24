@@ -67,6 +67,12 @@ main{max-width:760px;margin:0 auto;padding:14px max(14px,env(safe-area-inset-lef
 .bpend .done i{background:var(--bull);color:#fff}.bpend .wait i{border:1.5px solid #e0a100;color:#e0a100}
 .bpend b{font-weight:600}.bpend span{color:var(--muted);font-size:12px;line-height:1.55}.bpend .done b{color:var(--muted);text-decoration:line-through}
 .bpend-s{font-size:12px;color:var(--muted);padding:6px 0 2px}
+.bex{margin-top:8px;border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.bex-h{display:flex;align-items:center;gap:8px}.bex-h b{font-size:14px}.bex-h i{font-style:normal;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700}
+.bex.bear .bex-h i{border:1.5px solid var(--faint);color:var(--faint)}.bex.neu .bex-h i{background:#e0a100;color:#fff}.bex.bull .bex-h i{background:var(--bull);color:#fff}
+.bex-d{font-size:13px;color:var(--muted);margin-top:4px;line-height:1.6}.bex-q{font-size:12px;color:#e0a100;margin-top:4px}
+.bex-t{margin-top:8px;display:flex;flex-direction:column;gap:3px}.bex-t div{font-size:13px}.bex-t span{display:inline-block;width:72px;font-family:var(--mono);font-size:12px;color:var(--muted)}
+.bex-n{font-size:12.5px;color:var(--muted);margin-top:8px;line-height:1.6;border-top:1px dashed var(--line);padding-top:6px}
 .bsum{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:6px 0}
 .bsum-c{border-radius:12px;padding:10px 8px;text-align:center;border:1px solid var(--line)}
 .bsum-c b{display:block;font-size:26px;line-height:1.1;font-family:var(--mono)}.bsum-c span{font-size:12px;color:var(--muted)}
@@ -335,6 +341,7 @@ input[type=range]{width:100%;accent-color:var(--s1)}
       <div class="fig"><div class="t">分數怎麼來的？</div><div id="botSig"></div></div>
       <div class="fig"><div class="t">回測：過去 10 次美股空頭，見底那天亮了幾成？</div><div class="s">亮藍＝現在；虛線＝歷史最低（再低就還沒見底過）</div><div id="botBT"></div><div id="botBTd"></div></div>
       <div class="fig"><div class="t">逐次拆解</div><div id="botGrid"></div></div>
+      <div class="fig" id="botExtra"></div>
       <div class="why" id="botWhy"></div>
     </div>
 
@@ -523,7 +530,7 @@ const EVENTS=[
  why:"強勢美元會形成「股匯雙殺」：資金回流美國 → 外資賣台股、匯出換美元 → 台幣貶 → 還沒走的外資怕匯損再賣。央行說沒有特定防線，做法是在尾盤「調節」把匯率拉回、讓貶值慢一點，不會硬把方向扭轉，因為每次護盤都要動用外匯存底。這也是台股這波跌得比美股深的重要原因。",
  stats:[["美元指數","≈103.9","19 個月新高、連 8 漲"],["新台幣","33.04","11/20 盤中低點"],["外資賣超","≈8,303億","11/1–11/19 累計"],["台股盤中","−2,000點+","最低約 36,222"]],
  charts:["usdLoop","bondEtf","usdMyth"],
- tl:[["11-17","台幣盤中破 33，央行與出口商拋匯，收 32.85；外資賣超 381 億"],["11-18","盤中低 33.023，央行尾盤調節，收 32.947"],["11-19","美元指數觸 104；台股跌 1,768 點；金管會宣布限空令 2.0，隔天實施"],["11-20","台幣開 32.96、盤中 33.04；台股盤中跌逾 2,000 點，跌破 37,837 前低",1]],
+ tl:[["11-24","美元仍強：兌日圓 158.9、兌南非幣、瑞典克朗等小漲；底部儀表板加入「美元轉弱」加分觀察"],["11-17","台幣盤中破 33，央行與出口商拋匯，收 32.85；外資賣超 381 億"],["11-18","盤中低 33.023，央行尾盤調節，收 32.947"],["11-19","美元指數觸 104；台股跌 1,768 點；金管會宣布限空令 2.0，隔天實施"],["11-20","台幣開 32.96、盤中 33.04；台股盤中跌逾 2,000 點，跌破 37,837 前低",1]],
  src:[["經濟日報：台幣開盤破 33、兩大觀察指標","https://money.udn.com/money/story/5616/9890600"],["NOWnews：美元指數 103.91、台幣 33.038","https://www.nownews.com/news/6893939"],["經濟日報：11/18 央行尾盤調節","https://money.udn.com/money/story/5616/9887664"],["工商時報：央行與出口商穩匯","https://www.ctee.com.tw/news/20261118700093-439901"],["四季線上：美元指數 19 個月高點原因","https://www.4gtv.tv/article/2026112010000011"],["風傳媒：前低 37,837、外資賣超","https://www.storm.mg/article/11183381"],["TVBS：限空令 2.0 內容","https://tech.tvbs.com.tw/money/4053349"],["經濟日報：台積電、聯發科、日月光盤中","https://udn.com/news/story/7251/9890614"],["鉅亨網：國家隊守台積電 2,000、台幣 33","https://news.cnyes.com/news/id/6668587"]]},
 {id:"who-sells",short:"外資賣超一天比一天少，指數卻越跌越重——現在主要是融資斷頭和自營商在賣。",cat:"台股",hot:1,date:"2026-11-20",title:"誰在賣台股？外資賣超一路縮小，指數卻越跌越重：換內資在砍",
  lead:"本週外資賣超從 11/18 的 765 億，縮到 11/19 的 243 億，今天（11/20）只剩 94.13 億。但指數反而越跌越兇：11/19 跌 1,768 點、284 檔跌停，11/20 再重挫 2,393.6 點（−6.23%）收 36,033。今天三大法人賣 522 億，其中自營商賣 341 億、原本在接盤的投信也轉賣 87 億，內資合計 428 億，是外資的 4.5 倍。外資賣得少、跌得卻更多，代表主要賣壓已經從外資轉到國內：融資斷頭、自營商避險、散戶恐慌。",
@@ -1538,6 +1545,7 @@ const BOT_S=["聯準會轉鬆（降息、停升息或 QE）","VIX 衝過 40 後�
 const BOT_SH=["央行轉鬆","恐慌破表","利差穩住","權值補跌","利空落地","個股深跌","政府救市","通膨降溫"];
 const BOT_NOW=[[0,"12 月升一碼機率約 93%（升兩碼已降到 0）；Williams：還有工作要做"],[0.5,"VIX 11/20 收 35.89 沒破 40；11/23 一天回落到 26.62"],[0,"還沒確認：私募信貸開始減記、放款人撤離新雲端業者"],[1,"11/20 輝達 −14%、費半 −10.7%、台股近 300 檔跌停"],[0,"黃仁勳回任只解決人事，不是利空落地；東南亞轉運調查、國會聽證、SEC 調查、禁建令、1 月新國會都還懸著（見下方清單）"],[1,"櫃買 11 月單月 −29%，史上最大"],[1,"國安基金、限空令 3.0、融資維持率降到 120%"],[0.5,"只亮一半：油價有降（WTI 11/23 到 80 美元），但通膨本身沒解決，Williams 估今年底通膨 3.5%"]];
 const BOT_PEND=[["黃仁勳去留","done","11/23 回任。但只解決「誰當 CEO」，調查與聽證都還在"],["東南亞出口新規","done","出口許可新規已公布，規則明朗"],["東南亞轉運調查（Megaspeed 等）","wait","晶片經新加坡轉運中國的調查還沒結論"],["國會聽證","wait","12/1 黃仁勳赴眾院閉門作證，之後還有 Nvidia 法務長作證"],["SEC 會計調查","wait","傳聞中的調查還沒有結果"],["AI 資料中心禁建令","wait","德州 ERCOT 審查、新國會是否立法都還沒定"],["1 月新國會上任（政黨輪替）","wait","民主黨在 11/3 期中選舉同時拿下參眾兩院，1 月起華府變分治；科技監管、出口管制、預算可能大轉向。有人拿來比台灣 2008：政權交替的期待撞上經濟下行"],["2027 年美國經濟","wait","高利率加上 AI 投資降溫，明年景氣放緩甚至衰退的風險還沒排除；獲利預估若下修，就是「2000 年劇本」"]];
+const BOT_EX=[["美元轉弱（美元指數從高點回落）","bear","還沒：美元指數 11/19 逼近 104，創 19 個月新高；11/24 早上美元兌日圓 158.9、兌各主要貨幣仍小漲。台幣在 33 附近、外資持續匯出","市場觀點：只有美元轉弱，外資才會回來",[["2009/3","美元指數 3 月初見頂 → 美股 3/9 見底"],["2020/3","美元指數 3/19 見頂 → 美股 3/23 見底"],["2022/9–10","美元指數 9/28 見頂 → 美股 10/12 見底"]]]];
 const BOT_BT=[["1987",[1,1,.5,1,.5,1,.5,.5],"黑色星期一：Fed 隔天宣布提供流動性"],["1990",[1,.5,.5,1,.5,1,0,.5],"波灣戰爭：Fed 已在降息，油價自高點回落"],["2002",[1,1,1,1,.5,1,.5,.5],"網路泡沫：利率降到 1.75%、信用利差 10 月見頂"],["2009",[1,1,.5,1,1,1,1,1],"金融海嘯：零利率、QE、壓力測試、刺激方案全上"],["2011",[.5,1,.5,1,.5,1,.5,.5],"歐債：扭轉操作、10/26 歐盟峰會"],["2016",[1,.5,1,.5,.5,1,.5,1],"中國＋油價：Fed 放慢升息、上海協議、油價止跌"],["2018",[.5,.5,.5,1,.5,1,.5,1],"升息＋貿易戰：聖誕夜恐慌，Fed 1/4 才轉向"],["2020",[1,1,1,1,.5,1,1,1],"疫情：無限 QE、Fed 買公司債、紓困法案"],["2022",[.5,.5,1,.5,.5,1,.5,1],"暴力升息：CPI 已見頂，Fed 預告放慢"],["2025",[0,1,.5,1,1,1,1,.5],"對等關稅：Fed 沒動，靠 4/9 關稅暫停"]];
 
 function botBTshow(i){window._botSel=i;const r=window._botRows[i],nowV=BOT_NOW.map(x=>x[0]);
@@ -1551,6 +1559,7 @@ function botBTshow(i){window._botSel=i;const r=window._botRows[i],nowV=BOT_NOW.m
   else{const off=r[1].map((v,j)=>v<1?j:-1).filter(j=>j>=0);h+=`<div class="btd-sum">已經發生的是「已亮」那幾項；還沒完全發生的是：<b>${off.map(j=>BOT_S[j].replace(/（.*）/,"")).join("、")}</b>。</div>`}
   $("#botBTd").innerHTML=h+`</div>`}
 document.addEventListener("click",e=>{const b=e.target.closest("[data-btr]");if(b){botBTshow(+b.dataset.btr)}});
+function renderBotExtra(){$("#botExtra").innerHTML=`<div class="t">加分觀察（不計入分數）</div><div class="s">回測資料沒有逐次整理這一項，所以先不算分，但歷史上很關鍵</div>`+BOT_EX.map(x=>`<div class="bex ${x[1]}"><div class="bex-h"><i>${x[1]==="bull"?"✓":x[1]==="neu"?"½":"✕"}</i><b>${x[0]}</b></div><div class="bex-d">${x[2]}</div><div class="bex-q">${x[3]}</div><div class="bex-t">${x[4].map(r=>`<div><span>${r[0]}</span>${r[1]}</div>`).join("")}</div><div class="bex-n">規律：美元見頂常和美股見底同一時間出現——美元轉弱代表 Fed 不再那麼鷹、資金開始流回美國以外的市場。對台股來說，台幣止貶回升往往是外資回補的第一個訊號。</div></div>`).join("")}
 function renderBottom(){
   const sc=a=>Math.round(a.reduce((x,y)=>x+(typeof y==="number"?y:y[0]),0)/8*1000)/10;
   const now=sc(BOT_NOW),bt=BOT_BT.map(b=>[b[0],sc(b[1]),b[2]]),vals=bt.map(b=>b[1]).sort((a,b)=>a-b);
@@ -1591,7 +1600,7 @@ function renderBottom(){
   const gap=Math.round((mn-now)/12.5*10)/10;
   $("#botWhy").innerHTML=`<b>怎麼讀：</b>現在 ${now}%，還低於過去 10 次見底時的最低值 ${mn}%，代表以歷史標準來看「還沒到典型的底部」，大約還差 ${gap>0?gap:0} 個訊號（每個訊號 12.5 分）。最常在底部亮起、但現在還沒亮的是<span style="font-weight:700">聯準會轉鬆</span>（歷史 ${hit(0)}% 都有）和<span style="font-weight:700">信用利差停止擴大</span>（${hit(2)}%）。<br><br><b>回測的規律：</b>① 每一次見底，「多數個股深跌」都已經亮了（100%），它是必要但不充分的條件；② 亮到 9 成以上的（2009、2020）都是央行加政府一起全力出手；③ 唯一在 Fed 沒轉鬆下見底的是 2025，靠的是政策直接退讓（關稅暫停）。這次如果 Fed 12 月不升息、或信用市場穩住，分數就會跳進 62.5–75% 的「歷史見底區」。<br><br><span style="color:var(--muted);font-size:13px">注意：只有 10 個樣本，而且是事後回看；底部那天沒有人能確定訊號「已經亮了」。這是幫你判斷位置的框架，不是買賣訊號。</span>`;
 }
-renderBottom();
+renderBottom();renderBotExtra();
 /* ===== 名詞解釋（點底線字跳出卡片） ===== */
 const GL={
 /* 公司 */
