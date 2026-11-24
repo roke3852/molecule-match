@@ -301,6 +301,10 @@ button{font:inherit;color:inherit;touch-action:manipulation}
 .ico{display:inline-block;vertical-align:-3px}.bsniff .ico .w1,.bsniff .ico .w2,.bsniff .ico .w3{animation:aroma 2.4s ease-in-out infinite}.bsniff .ico .w2{animation-delay:.3s}.bsniff .ico .w3{animation-delay:.6s}
 @keyframes aroma{0%,100%{opacity:.35;transform:translateX(0)}50%{opacity:1;transform:translateX(1.5px)}}
 .bsniff{background:linear-gradient(180deg,#3a2e14,#2a2210)}.be-t .ico{color:#f0b46a;margin-right:2px}
+.bflow{display:flex;flex-direction:column;align-items:stretch;gap:6px;padding:12px 12px 8px}.bflow .bf-t{text-align:center;font-size:18px}
+.bf-m{position:relative;height:6px;background:#0e1116;border:1px solid var(--line2)}.bf-m i{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,#6c9bd2,#cfe2f3);width:40%}
+.bflow small{display:flex;justify-content:space-between;font-size:10.5px;color:#8b93a1;font-family:DotGothic16}.bflow small b{font-weight:400;color:#cfe2f3}
+.bflow.on small{color:#2a3a3a}.bflow.on small b{color:#0e1116}
 </style>
 </head>
 <body>
@@ -3321,7 +3325,9 @@ function gearSvg(id){const P2={v60:['wwwwwwwwwwww','.wwwwwwwwww.','..wwwwwwww..'
  const C={w:'#ece4d4',p:'#e48aa6',r:'#f4d0dc',s:'#c4cad1',g:'#8d959e',b:'#7a4e30',K:'#2a2f3a',r2:'#d64545'};let h='';P2.forEach((row,y)=>[...row].forEach((ch,x)=>{if(ch!=='.')h+=`<rect x="${x}" y="${y+2}" width="1.02" height="1.02" fill="${ch==='r'&&id==='blade'?'#d64545':C[ch]}"/>`}));
  return `<svg viewBox="0 0 12 11" width="28" height="26" shape-rendering="crispEdges" aria-hidden="true">${h}</svg>`}
 /* 沖煮配方：每段 [開始秒數, 累積到目標的比例, 名稱]；遊戲時鐘 BCLK 倍速 */
-const BCLK=3,BPOUR=18,BCUE=12;
+const BCLK=3,BPOUR=18,BCUE=12,BFLOW=[4,24],BCAP=115;
+function flowRate(B){return BFLOW[0]+(BFLOW[1]-BFLOW[0])*(B.flowX??.4)}
+function flowName(r){return r<9?'細流':r<16?'中流':'大流'}
 const BRECIPES={
  three:{n:'三段式',d:'悶蒸 35 秒，再分兩段注水',p:[[0,.16,'悶蒸'],[35,.6,'第二段'],[70,1,'第三段']]},
  four:{n:'四段沖',d:'每段 25%，等水位降下再注下一段',p:[[0,.25,'悶蒸'],[40,.5,'第二段'],[70,.75,'第三段'],[100,1,'第四段']]},
@@ -3384,7 +3390,7 @@ function brewPanel(){const B=S.brewUI,cw=$('choices');cw.classList.add('on');con
   if(B.phase==='pour'){const T=brewTargets(B),tgt=BRATIO[B.rt];$('bTarget').textContent=`${R0.n}・目標 ${tgt} g`;$('bClock').hidden=false;$('bWat').hidden=false;
     cw.innerHTML=`<div class="cq brewq" id="bCue"></div>${brewStepsHTML(B)}
      <div class="bbar"><i id="bProg"></i>${T.map(s=>`<em style="left:${s.to/320*100}%"></em>`).join('')}</div>
-     <div class="bhrow"><button class="bhold" id="bHold">按住注水</button><button class="bsniff" id="bSniff">${noseSvg(30,"anim")}<span>聞一聞</span></button></div><button class="big alt" id="bDone" disabled>完成，看結果</button>`;
+     <div class="bhrow"><button class="bhold bflow" id="bHold"><span class="bf-t">按住注水</span><span class="bf-m"><i id="bFlowI"></i><em style="left:${(BFLOW[0]-BFLOW[0])/(BFLOW[1]-BFLOW[0])*100}%"></em></span><small><span>← 細水柱</span><b id="bFlowN">按的位置＝水流大小</b><span>大水柱 →</span></small></button><button class="bsniff" id="bSniff">${noseSvg(30,"anim")}<span>聞一聞</span></button></div><button class="big alt" id="bDone" disabled>完成，看結果</button>`;
     $('bSniff').onclick=brewSniff;
     bindHold();$('bDone').onclick=()=>{BH.hold=false;brewFinish()};brewCue(B);return}
   if(B.phase==='result'){const r=B.res;cw.innerHTML=`<div class="cq brewq">${r.gold?'進金杯了！':'這杯沒有進金杯'}</div>
@@ -3394,8 +3400,9 @@ function brewPanel(){const B=S.brewUI,cw=$('choices');cw.classList.add('on');con
     $('bCont').onclick=brewExit;}
 }
 function bindHold(){const h=$('bHold');if(!h)return;const B=S.brewUI;
-  const on=e=>{e.preventDefault();if(B.ev&&B.ev.st==='cut'||B.paused)return;BH.hold=true;h.classList.add('on');if(B.phase==='pour')brewPress(B)},off=()=>{if(BH.hold&&B.phase==='pour')brewRelease(B);BH.hold=false;h.classList.remove('on')};
-  h.addEventListener('pointerdown',on);['pointerup','pointerleave','pointercancel'].forEach(ev=>h.addEventListener(ev,off));
+  const fx=e=>{const r=h.getBoundingClientRect();B.flowX=Math.max(0,Math.min(1,(e.clientX-r.left)/r.width))};
+  const on=e=>{e.preventDefault();if(B.ev&&B.ev.st==='cut'||B.paused)return;try{h.setPointerCapture(e.pointerId)}catch(_){}if(B.phase==='pour')fx(e);BH.hold=true;h.classList.add('on');if(B.phase==='pour')brewPress(B)},off=()=>{if(BH.hold&&B.phase==='pour')brewRelease(B);BH.hold=false;h.classList.remove('on')};
+  h.addEventListener('pointerdown',on);h.addEventListener('pointermove',e=>{if(BH.hold&&B.phase==='pour')fx(e)});['pointerup','pointercancel','lostpointercapture'].forEach(ev=>h.addEventListener(ev,off));
   BH.last=performance.now();cancelAnimationFrame(BH.raf);BH.raf=requestAnimationFrame(brewTick)}
 function brewPress(B){const T=brewTargets(B);if(B.si>=T.length)return;if(!B.run){B.run=true;B.clock=0}
   if(!B.cur){B.cur={t0:B.clock,g0:B.poured}}}
@@ -3411,6 +3418,7 @@ function brewCue(B){const c=$('bCue');if(!c)return;const T=brewTargets(B),s=T[B.
   else if(BH.hold)h=`<b>${s.nm}</b>　倒到 <b>${s.to} g</b> 放開`;
   else if(B.clock<s.at-1)h=`等一下……到 <b>${mmss(s.at)}</b> 再注水（現在 ${mmss(B.clock)}）`;
   else h=`時間到！<b>${s.nm}</b>：按住注水，倒到 <b>${s.to} g</b>`;
+  if(BH.hold&&(B.wat||0)>BCAP*.82)h='⚠ 濾杯快滿了！放開，或往左滑轉小水流';
   if(c.innerHTML!==h)c.innerHTML=h;c.classList.toggle('go',!!(s&&B.run&&!BH.hold&&B.clock>=s.at-1))}
 /* 突發狀況：先出現「好像有什麼味道」的提示，按「聞一聞」才看得到是什麼味道；聞的時候計時暫停，慢慢決定要不要斷水 */
 function brewEvent(B){const E=BEVS[B.ev.k],el=$('bEvt');B.ev.st='cue';B.ev.t0=performance.now();
@@ -3436,18 +3444,20 @@ function brewSniff(){const B=S&&S.brewUI;if(!B||B.phase!=='pour'||B.paused)retur
   const fl=BEANF[B.bean]||'豆子本來的香氣';el.className='bevt peek';el.innerHTML=`<div class="be-t">${noseSvg(16,'in')} ${B.poured>0?'只聞到'+fl+'。一切正常。':'乾香：'+fl+'。'}</div>`;el.hidden=false;
   clearTimeout(B.pk);B.pk=setTimeout(()=>{if(el.classList.contains('peek'))el.hidden=true},1600)}
 const BEANF={'巴拿馬藝伎・淺焙':'茉莉、佛手柑和蜂蜜','衣索比亞・淺中焙':'檸檬皮、花香和紅茶','帕洛瑪莊園・厭氧日曬':'紅蘋果、黑糖和一點柑橘','巴西喜拉朵・中深焙':'可可、堅果和焦糖'};
-function brewDrain(B){const g={fine:.62,mid:1,coarse:1.45}[B.g]*(B.gr==='blade'?.7:1);const clog=B.ev&&BEVS[B.ev.k].clog&&B.ev.st!=='wait'&&!B.ev.fixed;return clog?(B.ev.st==='done'?Math.max(1.2,.07*(B.wat||0)):.5):Math.max(1.4*g,.26*g*(B.wat||0))}
+function brewDrain(B){const g={fine:.62,mid:1,coarse:1.45}[B.g]*(B.gr==='blade'?.7:1);const clog=B.ev&&BEVS[B.ev.k].clog&&B.ev.st!=='wait'&&!B.ev.fixed;return clog?(B.ev.st==='done'?Math.max(1.2,.07*(B.wat||0)):.5):Math.max(1.4*g,.2*g*(B.wat||0))}
 function brewTick(now){const B=S&&S.brewUI;if(!B||(B.phase!=='grind'&&B.phase!=='pour'))return;const dt=Math.min(.05,(now-BH.last)/1000);BH.last=now;
   if(B.phase==='grind'){if(BH.hold){B.grind=Math.min(1,B.grind+dt/1.8);B.crank+=dt*9;if(Math.random()<.5)sfx('grindtick');
       $('bProg').style.width=(B.grind*100)+'%';if(B.grind>=1){BH.hold=false;sfx('pick');B.phase='dose';brewPanel();return}}}
   else{if(B.paused){BH.raf=requestAnimationFrame(brewTick);return}
     if(B.run){B.clock+=dt*BCLK;const c=$('bClock');if(c)c.textContent='⏱ '+mmss(B.clock)}
     const pouring=BH.hold&&!(B.ev&&B.ev.st==='cut');
-    if(pouring){const add=dt*BPOUR;B.poured=Math.min(320,B.poured+add);const ab=Math.min(add,Math.max(0,BDOSE*2-(B.abs||0)));B.abs=(B.abs||0)+ab;B.wat=(B.wat||0)+add-ab;if(Math.random()<.35)sfx('pourtick');$('bProg').style.width=(B.poured/320*100)+'%';$('bScale').textContent=B.poured.toFixed(1)+' g';
+    {const fr=flowRate(B),fi=$('bFlowI'),fn=$('bFlowN');if(fi)fi.style.width=((fr-BFLOW[0])/(BFLOW[1]-BFLOW[0])*100)+'%';if(fn&&BH.hold)fn.textContent=`${flowName(fr)}・${(fr*.33).toFixed(1)} g/秒`}
+    if(pouring){const add=dt*flowRate(B);B.poured=Math.min(320,B.poured+add);const ab=Math.min(add,Math.max(0,BDOSE*2-(B.abs||0)));B.abs=(B.abs||0)+ab;B.wat=(B.wat||0)+add-ab;if(Math.random()<.35)sfx('pourtick');$('bProg').style.width=(B.poured/320*100)+'%';$('bScale').textContent=B.poured.toFixed(1)+' g';
       const d=$('bDone');if(d&&d.disabled&&B.poured>=BRATIO[B.rt]*.6)d.disabled=false;
       if(B.poured>=320){BH.hold=false;brewFinish();return}}
     if(B.wat>0){const dr=Math.min(B.wat,brewDrain(B)*dt);B.wat-=dr;B.dripped=(B.dripped||0)+dr;B.dRate=dr/dt}else B.dRate=0;
-    B.slurry=Math.min(1,(B.wat||0)/70);const wb=$('bWat');if(wb)wb.innerHTML=`<span>注水</span><b>${B.poured.toFixed(1)} g</b><span>濾杯內</span><b>${Math.round(B.wat||0)} g</b><span>粉吸水</span><b>${Math.round(B.abs||0)} g</b><span>分享壺</span><b>${Math.round(B.dripped||0)} g</b>`;
+    if((B.wat||0)>BCAP){const ov=B.wat-BCAP;B.wat=BCAP;B.bypass=(B.bypass||0)+ov;B.dripped=(B.dripped||0)+ov;if(!B.ovWarn){B.ovWarn=1;sfx('fail');toast('溢出來了！水從濾紙邊緣直接流下去')}}
+    B.slurry=Math.min(1,(B.wat||0)/BCAP);const cue=$('bCue');if(cue&&BH.hold&&(B.wat||0)>BCAP*.82)cue.innerHTML='⚠ 濾杯快滿了！放開或轉小水流';const wb=$('bWat');if(wb)wb.innerHTML=`<span>注水</span><b>${B.poured.toFixed(1)} g</b><span>濾杯內</span><b>${Math.round(B.wat||0)} g</b><span>粉吸水</span><b>${Math.round(B.abs||0)} g</b><span>分享壺</span><b>${Math.round(B.dripped||0)} g</b>`;
     if(B.si>=brewTargets(B).length&&!B.dry&&(B.wat||0)<.5){B.dry=B.clock;B.notes.push('滴完：總萃取時間 '+mmss(B.clock));sfx('pop');const d=$('bDone');if(d)d.disabled=false}
     if(B.ev&&B.ev.st==='wait'&&B.run&&B.clock>=B.ev.at)brewEvent(B);
     if(B.ev&&B.ev.st==='cue'&&(now-B.ev.t0)/1000>=BCUE)B.ev.miss()
@@ -3460,6 +3470,7 @@ function brewFinish(){const B=S.brewUI;cancelAnimationFrame(BH.raf);BH.hold=fals
   if(bad)B.notes.push(`✗ 有 ${bad} 段節奏或克數差太多，萃取不均`);else if(done.length===T.length&&done.every(d=>d.gr==='ok'))B.notes.push('✓ 每一段都準時、準確');
   if(B.ev&&B.ev.st==='wait')B.notes.push('（這一杯很平靜，什麼事都沒發生）');
   if(B.sniffs)B.notes.push(`你一共聞了 ${B.sniffs} 次。`);
+  if(B.bypass>2){B.notes.push(`✗ 溢出了 ${Math.round(B.bypass)} g：水從濾紙邊緣繞過粉床直接流下去，杯子變淡`);B.adj-=Math.min(2,B.bypass/25);B.tdsAdj-=Math.min(.12,B.bypass/400)}
   const r=brewCalc(B);r.gold=r.ey>=18&&r.ey<=22&&r.tds>=1.15&&r.tds<=1.35;B.res=r;B.phase='result';$('bEvt').hidden=true;sfx(r.gold?'win':'pop');brewPanel()}
 function brewExit(){const B=S.brewUI,r=B.res;S.brewUI=null;$('choices').classList.remove('on');const [pb,pl]=B.prev;setBg(pb,pl);
   if(B.n.work){const W=WORK[storyK()],tip=Math.round((r.gold?W.tip[0]:W.tip[1])*mrate());S.q=(r.gold?B.n.brew.ok:B.n.brew.ng).map(x=>x.slice());addMoney(tip,r.gold?'打工小費（金杯！）':'打工小費');persist();step();return}
@@ -3533,11 +3544,12 @@ BGS.brewbar=function(g,t){const p=PX(g),B=S&&S.brewUI;if(!B)return;const now=per
   // 細口壺：注水時移到濾杯上方，壺嘴前後繞圈
   const pouring=B.phase==='pour'&&BH.hold&&!(B.ev&&B.ev.st==='cut');B.tilt=(B.tilt||0)+((pouring?1:0)-(B.tilt||0))*.12;const ta=B.tilt;
   const w=t*5.2,cxp=160+Math.cos(w)*8*ta,cyp=74+Math.sin(w)*2.5*ta;// 繞圈：左右 8px、前後 2.5px（俯角）
-  const PL=B.kt==='plain',ang=.62*ta,rest=[252,148],[tx0,ty0]=kettleTipAt(0,0,ang,PL),pose=[cxp-tx0,cyp-ty0];
+  const PL=B.kt==='plain',ang=(.5+.25*(B.flowX??.4))*ta,rest=[252,148],[tx0,ty0]=kettleTipAt(0,0,ang,PL),pose=[cxp-tx0,cyp-ty0];
   const ox=rest[0]+(pose[0]-rest[0])*ta,oy=rest[1]+(pose[1]-rest[1])*ta;
   drawKettle(g,B,ox,oy,ang);
   if(ta>.7){const [tx,ty]=kettleTipAt(ox,oy,ang,PL),surf=bed?95-B.slurry*12:100;
-    for(let y=Math.round(ty)+1;y<surf;y++){const k=(y-ty)/(surf-ty);p(tx-1+k*1.5+((y+Math.floor(t*40))%5===0?1:0),y,2,1,'rgba(160,200,235,.9)')}
+    const sw=flowRate(B)<9?1:flowRate(B)<16?2:3;for(let y=Math.round(ty)+1;y<surf;y++){const k=(y-ty)/(surf-ty);p(tx-1+k*1.5+((y+Math.floor(t*40))%5===0?1:0),y,sw,1,'rgba(160,200,235,.9)')}
+    if((B.wat||0)>=BCAP-1){const rr=R(Math.floor(t*12));for(let i=0;i<6;i++){const sd=rr()<.5?-1:1;p(160+sd*(27+rr()*3),84+rr()*16,1,2,'rgba(160,200,235,.8)')}}
     // 落點漣漪
     for(let k=0;k<3;k++){const ph=(t*2.4+k/3)%1;g.globalAlpha=(1-ph)*.6;g.strokeStyle='#d8e8f4';g.lineWidth=1;g.beginPath();g.ellipse(tx+1,surf,2+ph*7,1+ph*2,0,0,6.283);g.stroke();g.globalAlpha=1}}
   steam(p,154,80,t,B.poured>0?4:0);
