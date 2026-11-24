@@ -93,6 +93,15 @@ th{color:var(--sub);font-weight:500;font-size:13px}
 .lb{position:fixed;inset:0;background:rgba(0,0,0,.88);display:none;align-items:center;justify-content:center;z-index:30;padding:20px}
 .lb.on{display:flex}
 .lb img{max-width:100%;max-height:100%;border-radius:12px}
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.fgrid label,#myForm label{font-size:13px;color:var(--sub)}
+#myForm input,#myForm select,#myForm textarea{display:block;width:100%;margin-top:3px;border:1px solid var(--line);border-radius:10px;padding:8px;font:inherit;font-size:15px;background:#fff;color:var(--ink)}
+.rate{display:flex;align-items:center;gap:10px;margin-top:8px;font-size:14px}
+.rate span{flex:0 0 64px;color:var(--sub);font-size:13px}
+.rate button{border:0;background:none;font-size:22px;padding:0 2px;cursor:pointer;color:#d8cfc2}
+.rate button.on{color:var(--gold)}
+.my{border:1px solid var(--line);border-radius:14px;padding:12px;margin:10px 0;background:#fff}
+.stars{color:var(--gold);letter-spacing:1px}
 .toast{position:fixed;left:50%;bottom:96px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:8px 16px;border-radius:999px;font-size:13px;opacity:0;transition:.25s;pointer-events:none;z-index:20}
 .toast.on{opacity:1}
 </style>
@@ -186,6 +195,29 @@ th{color:var(--sub);font-weight:500;font-size:13px}
     <p>扁平的帆布鞋、夾腳拖、鞋底軟到可以對折的鞋、高跟鞋。</p>
     <h3>🔄 其他小技巧</h3>
     <p>鞋子穿久了，中底避震會變差（大約 500–800 公里），後跟磨歪也會影響骨盆。如果舊鞋已經不太好走，可以考慮加一雙輪替穿或換新。</p>
+  </div>
+
+  <div class="card" id="myShoes">
+    <h2>👟 我的鞋櫃・試穿清單</h2>
+    <p class="sub">推薦鞋款按「＋ 試穿清單」就會出現在這裡；試穿後給腰的感受打分數，分數最高的排最前面。自己的鞋也可以加進來當比較基準。資料和照片只存在這支手機的瀏覽器裡。</p>
+    <div class="phbar" id="myTop" style="margin-bottom:4px"></div>
+    <div id="myList"></div>
+    <div class="phbar" id="myQuick"></div>
+    <button class="opt" id="myAddBtn" style="margin-top:8px">＋ 新增一雙鞋</button>
+    <div id="myForm" style="display:none;margin-top:10px" class="ex">
+      <div class="fgrid">
+        <label>品牌<input id="mfB" placeholder="例如 New Balance"></label>
+        <label>型號<input id="mfM" placeholder="例如 1906R"></label>
+        <label>狀態<select id="mfS"><option>想試穿</option><option>已試穿</option><option>已擁有</option></select></label>
+        <label>類型<select id="mfT"><option>運動鞋</option><option>皮鞋</option><option>健行鞋</option><option>休閒鞋</option><option>靴子</option><option>其他</option></select></label>
+        <label>落差／鞋跟（選填）<input id="mfD" placeholder="例如 11.5 mm 或 3 cm"></label>
+      </div>
+      <div class="rate"><span>腰的感受</span><div data-k="back"></div></div>
+      <div class="rate"><span>後跟穩定</span><div data-k="stab"></div></div>
+      <div class="rate"><span>大腿在撐</span><div data-k="thigh"></div></div>
+      <label class="sub" style="display:block;margin-top:8px">備註<textarea id="mfN" rows="2" placeholder="走多久、哪裡不舒服、跟哪雙比較…"></textarea></label>
+      <div style="display:flex;gap:8px;margin-top:8px"><button class="opt on" id="mfSave">儲存</button><button class="opt" id="mfCancel">取消</button><button class="opt" id="mfDel" style="margin-left:auto;display:none;color:var(--warn)">刪除這雙</button></div>
+    </div>
   </div>
 
   <div class="card">
@@ -456,7 +488,9 @@ function renderBrands(){
       <a class="opt" href="https://www.google.com/search?tbm=isch&q=${q}" target="_blank" rel="noopener">🔍 網路照片</a>
       <a class="opt" href="https://www.google.com/search?q=${q}+drop+mm" target="_blank" rel="noopener">📏 查規格</a>
       <label class="opt">📷 新增照片<input type="file" accept="image/*" multiple hidden data-i="${i}"></label>
+      ${s.r==='no'?'':MY.some(x=>x.b===s.b&&x.m===s.m)?'<span class="opt" style="opacity:.6">✓ 已在清單</span>':`<button class="opt" data-add="${i}">＋ 試穿清單</button>`}
     </div></div>`}).join('');
+  document.querySelectorAll('[data-add]').forEach(b=>b.onclick=()=>addFromRec(list[+b.dataset.add]));
   list.forEach((s,i)=>renderPhotos(i,skey(s)));
   document.querySelectorAll('#shoeList input[type=file]').forEach(inp=>inp.onchange=async()=>{
     const s=list[+inp.dataset.i],k=skey(s);const a=await phGet(k);let n=0;
@@ -464,7 +498,44 @@ function renderBrands(){
     await phSet(k,a);renderPhotos(+inp.dataset.i,k);if(n)toast(`已新增 ${n} 張照片`);inp.value='';
   });
 }
-phOpen().then(renderBrands);
+phOpen().then(()=>{renderBrands();renderMy()});
+/* ===== my shoes ===== */
+let MY=store.get('bp_my',[]);let editId=null;const R={back:0,stab:0,thigh:0};
+const star=n=>'★'.repeat(n)+'☆'.repeat(5-n);
+const QUICK=[{b:'ECCO',m:'有跟皮鞋',t:'皮鞋',d:'小鞋跟',st:'已擁有'},{b:'New Balance',m:'1906R',t:'運動鞋',d:'實測 11.5 mm',st:'已擁有'}];
+const TYPEOF=s=>s.f?'皮鞋':/GTX|MOAB|ADVENTURE|ULTRA|Anacapa/i.test(s.m)?'健行鞋':/Timberland/.test(s.b)?'靴子':'運動鞋';
+function addFromRec(s){if(MY.some(x=>x.b===s.b&&x.m===s.m)){toast('已在試穿清單裡');return}MY=[...MY,{id:'s'+Date.now()+Math.random().toString(36).slice(2,5),b:s.b,m:s.m,t:TYPEOF(s),d:s.d==='—'?'':s.d,st:'想試穿',n:'',back:0,stab:0,thigh:0,rec:1}];store.set('bp_my',MY);renderMy();renderBrands();toast(`已加入：${s.m}`)}
+function rateUI(){document.querySelectorAll('.rate div').forEach(d=>{const k=d.dataset.k;d.innerHTML=[1,2,3,4,5].map(i=>`<button type="button" class="${i<=R[k]?'on':''}" data-v="${i}">★</button>`).join('');d.querySelectorAll('button').forEach(b=>b.onclick=()=>{R[k]=+b.dataset.v;rateUI()})})}
+function openForm(x){editId=x&&x.id||null;$('#myForm').style.display='block';$('#mfB').value=x?x.b:'';$('#mfM').value=x?x.m:'';$('#mfT').value=x?x.t:'運動鞋';$('#mfD').value=x?x.d||'':'';$('#mfS').value=x&&x.st||'想試穿';$('#mfN').value=x?x.n||'':'';R.back=x?x.back||0:0;R.stab=x?x.stab||0:0;R.thigh=x?x.thigh||0:0;rateUI();$('#mfDel').style.display=editId?'block':'none';$('#myForm').scrollIntoView({behavior:'smooth',block:'center'})}
+$('#myAddBtn').onclick=()=>openForm(null);
+$('#mfCancel').onclick=()=>{$('#myForm').style.display='none'};
+$('#mfSave').onclick=()=>{const b=$('#mfB').value.trim(),m=$('#mfM').value.trim();if(!b&&!m){toast('請填品牌或型號');return}
+  const o={id:editId||('s'+Date.now()),b,m,st:$('#mfS').value,t:$('#mfT').value,d:$('#mfD').value.trim(),n:$('#mfN').value.trim(),back:R.back,stab:R.stab,thigh:R.thigh,at:new Date().toISOString().slice(0,10)};
+  MY=editId?MY.map(x=>x.id===editId?o:x):[...MY,o];store.set('bp_my',MY);$('#myForm').style.display='none';renderMy();renderBrands();toast('已儲存')};
+$('#mfDel').onclick=async()=>{const b=$('#mfDel');if(!b.dataset.sure){b.dataset.sure=1;b.textContent='再按一次確認';setTimeout(()=>{delete b.dataset.sure;b.textContent='刪除這雙'},2500);return}
+  MY=MY.filter(x=>x.id!==editId);store.set('bp_my',MY);await phSet('my|'+editId,[]);$('#myForm').style.display='none';renderMy();toast('已刪除')};
+function renderMy(){
+  const sorted=[...MY].sort((a,b)=>(b.back||0)-(a.back||0));
+  const tops=SHOES.filter(s=>s.r==='top'&&!MY.some(x=>x.b===s.b&&x.m===s.m));
+  $('#myTop').innerHTML=tops.length?`<button class="opt on" id="addTops">＋ 一鍵加入全部首選（${tops.length} 雙）</button>`:'';
+  if(tops.length)$('#addTops').onclick=()=>{tops.forEach(addFromRec)};
+  $('#myList').innerHTML=sorted.length?sorted.map((x,i)=>`<div class="my">
+    <div style="display:flex;justify-content:space-between;gap:8px"><div><span class="sub">${esc(x.b)} · ${esc(x.t)}</span> <span class="pill ${x.st==='已擁有'?'':x.st==='已試穿'?'g':''}" style="font-size:11px;padding:1px 8px">${esc(x.st||'已擁有')}</span><h3 style="margin:2px 0 4px;font-size:16px">${i===0&&x.back?'🥇 ':''}${esc(x.m)}</h3></div><button class="opt" data-ed="${x.id}" style="padding:4px 10px;font-size:12px;height:fit-content;white-space:nowrap">${x.back?'編輯':'✏️ 評分'}</button></div>
+    ${x.d?`<span class="pill">落差 ${esc(x.d)}</span>`:''}
+    <div style="font-size:13px;margin-top:6px;line-height:1.8">腰的感受 <span class="stars">${star(x.back||0)}</span><br>後跟穩定 <span class="stars">${star(x.stab||0)}</span><br>大腿在撐 <span class="stars">${star(x.thigh||0)}</span></div>
+    ${x.n?`<p style="font-size:14px;margin-top:6px">${esc(x.n)}</p>`:''}
+    <div class="phs" id="ph-my-${x.id}"></div>
+    <div class="phbar"><label class="opt">📷 新增照片<input type="file" accept="image/*" multiple hidden data-my="${x.id}"></label><a class="opt" href="https://www.google.com/search?tbm=isch&q=${encodeURIComponent(x.b+' '+x.m)}" target="_blank" rel="noopener">🔍 網路照片</a></div>
+  </div>`).join(''):'<p class="sub">還沒有鞋子，先從下面加一雙吧。</p>';
+  sorted.forEach(x=>renderPhotos('my-'+x.id,'my|'+x.id));
+  document.querySelectorAll('[data-ed]').forEach(b=>b.onclick=()=>openForm(MY.find(x=>x.id===b.dataset.ed)));
+  document.querySelectorAll('input[data-my]').forEach(inp=>inp.onchange=async()=>{const id=inp.dataset.my,k='my|'+id;const a=await phGet(k);let n=0;for(const f of inp.files){try{a.push(await shrink(f));n++}catch(e){}}await phSet(k,a);renderPhotos('my-'+id,k);if(n)toast(`已新增 ${n} 張照片`);inp.value=''});
+  const have=new Set(MY.map(x=>x.b+'|'+x.m));
+  $('#myQuick').innerHTML=QUICK.filter(q=>!have.has(q.b+'|'+q.m)).map((q,i)=>`<button class="opt" data-q="${i}">＋ ${q.b} ${q.m}</button>`).join('');
+  document.querySelectorAll('[data-q]').forEach(b=>b.onclick=()=>openForm({...QUICK[+b.dataset.q]}));
+}
+function esc(t){return String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+
 
 /* ===== training ===== */
 const svgWrap=inner=>`<svg viewBox="0 0 260 120">${inner}</svg>`;
