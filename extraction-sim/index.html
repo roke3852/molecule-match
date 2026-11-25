@@ -350,6 +350,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
 .dz-ctab{display:grid;margin:8px 0;font-size:13px}.dz-ctr{display:grid;gap:4px;padding:6px 0;border-bottom:1px solid var(--line);align-items:center}.dz-ctr>*{min-width:0;text-align:right;font-family:var(--f-mono)}.dz-ctr>span:first-child{text-align:left;font-family:inherit;color:var(--muted);font-size:12px}
 .dz-ctr.hd>span{font-family:inherit;font-weight:700;font-size:12.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.dz-ctr .best{color:#6fcf97;font-weight:700}.dz-ctr .best::after{content:" ★";font-size:10px}
 .dz-cmp-h{margin:16px 0 4px;font-size:15px}
+.dz-off{display:none!important}.dz-cv{flex-wrap:wrap;margin:10px 0 6px}.dz-cv button{flex:1 0 auto}.dz-cvb{min-height:200px}
 .dz-st{display:flex;align-items:center;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--panel)}
 .dz-st button{width:48px;height:42px;border:0;background:transparent;color:var(--accent);font-size:22px;font-weight:700;cursor:pointer;touch-action:manipulation;-webkit-user-select:none;user-select:none}
 .dz-st button:active{background:rgba(226,189,106,.15)}.dz-st b{flex:1;text-align:center;font-family:var(--f-mono);font-weight:500;font-size:16px;white-space:nowrap}
@@ -1372,7 +1373,7 @@ window.BGM=(()=>{
     <div class="err" id="tErr"></div>
   </div>
   <button class="t-more" id="tMore" type="button" aria-label="咖啡宇宙：更多咖啡 App 與遊戲">咖啡宇宙</button>
-  <div class="t-foot">© 2026 Jim Lu　ver. 9.4</div>
+  <div class="t-foot">© 2026 Jim Lu　ver. 9.5</div>
 </div>
 <nav class="modes" aria-label="導覽"><div class="in">
   <button class="homebtn" id="homeBtn" type="button" hidden>‹ 主選單</button>
@@ -1945,7 +1946,8 @@ window.BGM=(()=>{
     <h1>手法設計工作台</h1>
     <p class="lede">把一套沖法拆成好幾段：每段帶出哪些物質、把金杯圖上的點推多遠、改了之後會怎樣。從範本或 10 等分開始，一段一段調出你的手法。</p>
   </div>
-  <section class="panel" id="dzSetP">
+  <div class="stabs" id="dzTabs" role="tablist" aria-label="手法設計分頁" data-noswipe><button type="button" data-t="set" aria-pressed="true">① 設定手法</button><button type="button" data-t="res" aria-pressed="false">② 每段分析</button><button type="button" data-t="path" aria-pressed="false">③ 金杯軌跡</button><button type="button" data-t="exp" aria-pressed="false">④ 調整實驗</button><button type="button" data-t="cmp" aria-pressed="false">⑤ 手法比較</button><button type="button" data-t="how" aria-pressed="false">⑥ 設計步驟</button></div>
+  <section class="panel" id="dzSetP" data-dz="set">
     <div class="bl-hd"><h2>豆子與器材</h2><select id="dzTpl" aria-label="範本"></select></div>
     <div class="params bl-brew dz-g2">
       <div class="param"><span class="label">咖啡豆</span><select id="dzBean"></select></div>
@@ -1956,7 +1958,7 @@ window.BGM=(()=>{
       <div class="param"><span class="label">總水量 <b id="dzRatio"></b></span><div class="dz-st" data-st="water"><button type="button" data-d="-1" aria-label="總水量減少">−</button><b id="dzWV"></b><button type="button" data-d="1" aria-label="總水量增加">＋</button></div></div>
     </div>
   </section>
-  <section class="panel" id="dzSegsP">
+  <section class="panel" id="dzSegsP" data-dz="set">
     <div class="bl-hd"><h2>分段注水</h2><span class="label" id="dzSegN"></span></div>
     <div class="dz-qs"><button type="button" class="savebtn" id="dzQS">💾 存目前設定</button><button type="button" class="ghost" id="dzQSn" hidden>另存新的</button></div><div id="dzQL" class="dz-ql"></div><p class="label">點時間軸的柱子或下面的格子選一段，再用滑桿或 −／＋ 調整（按住 −／＋ 會連續加減）。目前的設定會自動保留，下次打開還在。</p><div id="dzTl" class="dz-tl"></div><div id="dzSegs" class="dz-chips"></div><div id="dzEd" class="dz-ed"></div>
     <div class="bl-row2"><button type="button" class="bl-rand" id="dzAdd">＋ 加一段</button><button type="button" class="bl-rand" id="dzDel">－ 刪最後一段</button><button type="button" class="bl-rand" id="dzEven">平均分水</button></div>
@@ -1964,8 +1966,8 @@ window.BGM=(()=>{
     <div class="param dz-tail"><span class="label">尾段處理</span><select id="dzTail"></select></div>
     <p class="label">每注的秒數依水量自動算（約 4 g／秒），下一段不會早於前一注結束。</p>
   </section>
-  <section class="panel bl-verdict" id="dzSumP"><div id="dzSum"></div></section>
-  <section class="panel" id="dzFracP">
+  <section class="panel bl-verdict" id="dzSumP" data-dz="set res path exp"><div id="dzSum"></div></section>
+  <section class="panel" id="dzFracP" data-dz="res">
     <div class="bl-hd"><h2>每段帶出什麼</h2><div class="seg" id="dzFmd" role="group" aria-label="顯示方式"><button type="button" data-v="g">克數</button><button type="button" data-v="pct">組成比例</button></div></div>
     <div class="dz-fm"><span class="label">分杯方式</span><div class="seg" id="dzFm" role="group" aria-label="分杯方式"><button type="button" data-v="pour">依注水段</button><button type="button" data-v="even">等重分杯</button></div><label id="dzNEvenP" class="dz-ne" hidden><input type="number" id="dzNEven" min="3" max="12" inputmode="numeric"> 杯</label></div>
     <div id="dzFrac" class="cm-chart"></div>
@@ -1973,21 +1975,21 @@ window.BGM=(()=>{
     <div class="bl-dir" id="dzIns"></div>
     <p class="label">「依注水段」：每段開始到下一段開始之間滴下的液體算一份。滴濾有延遲，所以悶蒸那一份常常幾乎是空的。「等重分杯」：依杯中重量平均切成幾杯，和用 TDS 計做分杯實驗的方法一樣，可以填實測值對照。</p>
   </section>
-  <section class="panel" id="dzPathP">
+  <section class="panel" id="dzPathP" data-dz="path">
     <h2>金杯圖上的萃取軌跡</h2>
     <div id="dzPath" class="cm-chart"></div>
     <p class="label">數字 n 是「在第 n 份之後斷水，剩下的水改成補水」時這杯的位置，★ 是照完整手法沖完的結果。杯重相同，所以所有點都在同一條粉水比線上；每多一段，點就往右上推一點，越後面推得越少。灰色虛線是比較基準。</p>
   </section>
-  <section class="panel" id="dzCutP">
+  <section class="panel" id="dzCutP" data-dz="path">
     <h2>斷水點與味道</h2>
     <div id="dzCut" class="cm-chart"></div>
   </section>
-  <section class="panel" id="dzExpP">
+  <section class="panel" id="dzExpP" data-dz="exp">
     <h2>如果做這些調整，會發生什麼事</h2>
     <p class="label">每一列都是在目前手法上只改一件事，模型先算好的變化（甜、苦是 0–5 分）。按「試」就會套用，上面的數字會用 ▲▼ 和改之前比較。</p>
     <div id="dzExp" class="dz-exp"></div>
   </section>
-  <section class="panel mic-notes" id="dzHowP">
+  <section class="panel mic-notes" id="dzHowP" data-dz="how">
     <h2>設計手法的四個步驟</h2>
     <ol class="ucd-how">
       <li><b>先定目標。</b>在金杯圖上選一個點，再寫下想要的味道，例如「EY 20%、TDS 1.35%、明亮帶甜」。</li>
@@ -1996,19 +1998,19 @@ window.BGM=(()=>{
       <li><b>一次只改一件事。</b>用「設為比較基準」，再從上面的調整表挑一項來試，看軌跡和每段的組成怎麼變。</li>
     </ol>
   </section>
-  <section class="panel" id="dzCmpP">
+  <section class="panel" id="dzCmpP" data-dz="cmp">
     <div class="bl-hd"><h2>手法比較</h2><span class="label">最多 4 套</span></div>
     <p class="label">勾選要比較的手法（「目前設定」就是上面正在調的這套）。存檔請按上面的「💾 存目前設定」。</p>
     <div id="dzCmpPick" class="dz-ql dz-pick"></div>
     <div id="dzCmpOut"></div>
   </section>
-  <section class="panel" id="dzSaveP">
+  <section class="panel" id="dzSaveP" data-dz="set">
     <h2>存下這套手法</h2>
     <div class="bl-save"><input type="text" id="dzName" placeholder="幫這套手法取個名字" maxlength="30"><button type="button" class="savebtn" id="dzSave">儲存</button></div>
     <div id="dzSaved"></div>
     <button type="button" class="bl-go" id="dzToSim">☕ 帶到模擬器實際沖</button>
   </section>
-  <p class="fine">用本 app 的擴散萃取模型計算。每段帶出的物質是依溶出速度推算的趨勢，不是實驗室量測；實際數字會因豆子、研磨與手法而不同。想知道你的豆子實際怎樣，可以用 TDS 計做等重分杯實驗，再填進表格對照。</p>
+  <p class="fine" data-dz="res path exp how">用本 app 的擴散萃取模型計算。每段帶出的物質是依溶出速度推算的趨勢，不是實驗室量測；實際數字會因豆子、研磨與手法而不同。想知道你的豆子實際怎樣，可以用 TDS 計做等重分杯實驗，再填進表格對照。</p>
 </div>
 </section>
 <section id="waterView" hidden>
@@ -9313,20 +9315,29 @@ function cmpWords(C){const a=C[0],P=C.map(c=>prog(c.A)),o=[];
     o.push('<b style="color:'+c.col+'">'+c.L+'</b> 比 <b style="color:'+a.col+'">A</b> '+(Math.abs(dEY)<.2?'萃取率幾乎一樣':(dEY>0?'多萃出 ':'少萃出 ')+Math.abs(dEY).toFixed(1)+'%')+
       (t0!=null?'，差距從 <b>'+fmt(t0)+'</b> 左右開始拉開':'，整個過程的萃取進度都很接近')+(fl?'；味道上'+fl:'；味道差異很小')+'，分數 '+Math.round(a.A.score)+' → '+Math.round(c.A.score)+'。');});
   return '<ul>'+o.map(x=>'<li>'+x+'</li>').join('')+'</ul>';}
+let cv='tab';
 function renderCmp(){let a=[];try{a=JSON.parse(localStorage.getItem(DSV)||'[]');}catch(e){}CS=CS.filter(id=>id==='__cur'||a.some(x=>x.id===id));
   const opts=[{id:'__cur',name:'目前設定'}].concat(a.slice(0,20));
   $('dzCmpPick').innerHTML=opts.map(x=>{const j=CS.indexOf(x.id);return '<button type="button" data-c="'+x.id+'" class="'+(j>=0?'on':'')+'" aria-pressed="'+(j>=0)+'"><i style="'+(j>=0?'background:'+CCOL[j]:'')+'"></i>'+(j>=0?CLET[j]+' ':'')+esc(x.name)+'</button>';}).join('');
   const C=cmpList(),out=$('dzCmpOut');
   if(C.length<2){out.innerHTML='<p class="label">'+(a.length?'再勾一套就能開始比較。':'先用上面的「💾 存目前設定」存一套，改一改再存一套，就能在這裡比較。')+'</p>';return;}
+  const V={tab:()=>cmpTable(C),gold:()=>'<div class="cm-chart">'+cmpGold(C)+'</div><p class="label">大圓點是沖完的位置，小點是每段斷水的位置。軌跡越長，表示後段還在推進；擠在一起，表示後段幾乎沒加什麼。</p>',
+    prog:()=>'<div class="cm-chart">'+cmpProg(C)+'</div><p class="label">曲線越早往上衝，表示前段萃得越兇。兩條線分開的時間點，就是兩套手法真正不一樣的地方。</p>',
+    tl:()=>'<div class="cm-chart">'+cmpTl(C)+'</div><p class="label">柱子越高水量越多，虛線是滴完的時間。</p>',mix:()=>'<div class="cm-chart">'+cmpMix(C)+'</div>'};
+  if(!V[cv])cv='tab';
   out.innerHTML='<div class="dz-cmpk">'+C.map(c=>'<span><i style="background:'+c.col+'"></i>'+c.L+' '+esc(c.name)+'</span>').join('')+'</div>'+
     '<div class="bl-dir">'+cmpWords(C)+'</div>'+
-    '<h3 class="dz-cmp-h">總表</h3>'+cmpTable(C)+
-    '<h3 class="dz-cmp-h">金杯圖上的軌跡</h3><div class="cm-chart">'+cmpGold(C)+'</div><p class="label">大圓點是沖完的位置，小點是每段斷水的位置。軌跡越長，表示後段還在推進；擠在一起，表示後段幾乎沒加什麼。</p>'+
-    '<h3 class="dz-cmp-h">萃取進度（隨時間）</h3><div class="cm-chart">'+cmpProg(C)+'</div><p class="label">曲線越早往上衝，表示前段萃得越兇。兩條線分開的時間點，就是兩套手法真正不一樣的地方。</p>'+
-    '<h3 class="dz-cmp-h">注水節奏</h3><div class="cm-chart">'+cmpTl(C)+'</div>'+
-    '<h3 class="dz-cmp-h">每段組成</h3><div class="cm-chart">'+cmpMix(C)+'</div>';}
-function bindCmp(){$('dzCmpPick').addEventListener('click',e=>{const b=e.target.closest('[data-c]');if(!b)return;const id=b.dataset.c;
+    '<div class="seg dz-cv" id="dzCv" role="group" aria-label="比較圖表">'+[['tab','總表'],['gold','金杯軌跡'],['prog','萃取進度'],['tl','注水節奏'],['mix','每段組成']].map(([k,n])=>'<button type="button" data-cv="'+k+'" aria-pressed="'+(k===cv)+'">'+n+'</button>').join('')+'</div>'+
+    '<div class="dz-cvb">'+V[cv]()+'</div>';}
+function bindCmp(){$('dzCmpOut').addEventListener('click',e=>{const b=e.target.closest('[data-cv]');if(!b)return;cv=b.dataset.cv;renderCmp();});$('dzCmpPick').addEventListener('click',e=>{const b=e.target.closest('[data-c]');if(!b)return;const id=b.dataset.c;
   const j=CS.indexOf(id);if(j>=0)CS.splice(j,1);else{if(CS.length>=4)return toastMsg('最多比較 4 套');CS.push(id);}saveCS();renderCmp();});}
+
+// ---- 手法設計分頁 ----
+function setDzTab(t,quiet){D.tab=t;document.querySelectorAll('#dzTabs [data-t]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.t===t)));
+  document.querySelectorAll('#designView [data-dz]').forEach(el=>el.classList.toggle('dz-off',!el.dataset.dz.split(' ').includes(t)));
+  {const tb=$('dzTabs'),on=tb&&tb.querySelector('[aria-pressed="true"]');if(on)tb.scrollLeft=on.offsetLeft-(tb.clientWidth-on.offsetWidth)/2;}
+  saveD();if(!quiet){const tb=$('dzTabs');if(tb&&tb.getBoundingClientRect().top<0)tb.scrollIntoView({block:'start'});}}
+window.__dzTab=setDzTab;
 function renderSaved(){let a=[];try{a=JSON.parse(localStorage.getItem(DSV)||'[]');}catch(e){}
   $('dzSaved').innerHTML=a.length?a.map(x=>'<div class="bl-sv"><div><b>'+esc(x.name)+'</b><span class="label">'+esc(x.sum)+'</span></div><button type="button" data-ld="'+x.id+'">載入</button><button type="button" data-del="'+x.id+'" aria-label="刪除">✕</button></div>').join(''):'<p class="label">還沒有存過手法。</p>';}
 function setTpl(id){const t=TPL.find(x=>x.id===id);if(!t)return;Object.assign(D,t.mk(),{tpl:id,tail:0,meas:[],sid:null});sel=0;render();}
@@ -9341,6 +9352,7 @@ function bind(){const v=$('designView');if(!v||v.dataset.b)return;v.dataset.b=1;
   $('dzRoast').oninput=e=>{D.roast=+e.target.value;mod();later();};
   $('dzGrind').oninput=e=>{D.grind=gum(+e.target.value);mod();later();};
   bindSeg();bindCmp();
+  $('dzTabs').addEventListener('click',e=>{const b=e.target.closest('[data-t]');if(!b)return;try{SFX.p('page')}catch(x){}setDzTab(b.dataset.t);});setDzTab(D.tab||'set',1);
 
   $('dzTail').onchange=e=>{D.tail=+e.target.value;mod();render();};
   $('dzFm').onclick=e=>{const x=e.target.closest('button');if(!x)return;D.fm=x.dataset.v;render();};
@@ -9354,7 +9366,7 @@ function bind(){const v=$('designView');if(!v||v.dataset.b)return;v.dataset.b=1;
   $('dzTab').addEventListener('change',e=>{const t=e.target;if(!t.classList.contains('dz-meas'))return;D.meas=D.meas||[];D.meas[+t.dataset.j]=t.value===''?null:+t.value;render();});
   $('dzSave').onclick=()=>{saveDesign(true,$('dzName').value.trim()||null);$('dzName').value='';};
   $('dzSaved').addEventListener('click',e=>{const t=e.target.closest('button');if(!t)return;let a=[];try{a=JSON.parse(localStorage.getItem(DSV)||'[]');}catch(er){}
-    if(t.dataset.ld){loadDesign(t.dataset.ld);$('dzSegsP').scrollIntoView({behavior:'smooth',block:'start'});}
+    if(t.dataset.ld){loadDesign(t.dataset.ld);setDzTab('set');$('dzSegsP').scrollIntoView({behavior:'smooth',block:'start'});}
     if(t.dataset.del){if(t.dataset.ok){try{localStorage.setItem(DSV,JSON.stringify(a.filter(y=>y.id!==t.dataset.del)));}catch(er){}if(D.sid===t.dataset.del)D.sid=null;renderSaved();renderQuick();renderCmp();}else{t.dataset.ok=1;t.textContent='確定？';setTimeout(()=>{t.dataset.ok='';t.textContent='✕';},2500);}}});
   $('dzToSim').onclick=()=>{if(!window.simApplyRecipe||!A)return;const p=A.p,sg=A.sg;
     simApplyRecipe({dripper:p.dripper,dose:p.dose,ratio:p.ratio,temp:p.temp,grind:p.grind,roast:p.roast,pattern:'pulse',plan:p.plan,planT:sg.map(g=>Math.round(g.s)),planD:sg.map(g=>Math.round(g.e-g.s)),planTemp:p.planTemp,planStyle:p.planStyle,beanId:D.bean,bypassMl:p.bypassMl,prePO:'none'});
@@ -9375,6 +9387,7 @@ TOURS.design={view:'designView',lead:'mu',title:'怎麼策略性地設計一套�
   {w:'mu',t:'可以。範本裡有 4:6、粕谷哲 10 段和其他冠軍沖法，載入後看看它們的軌跡和每段角色。最後把喜歡的存起來，或按「帶到模擬器」實際沖一次。',el:'#dzTpl'},
   {w:'mu',t:'設計了好幾套手法？存起來後，到下面的「手法比較」勾 2–4 套：總表、金杯軌跡、萃取進度曲線、注水節奏和每段組成都會疊在一起，還會用一句話說出差在哪。',el:'#dzCmpP'},
   {w:'zhou',t:'如果你有 TDS 計，把分杯方式切到「等重分杯」，照表格各接一杯量 TDS，填進「實測」欄，就能對照模型和你自己的豆子差多少。',el:'#dzFm'}]};
+TOURS.design.steps.forEach(st=>{if(!st.el)return;const g=st.go;st.go=()=>{const el=document.querySelector(st.el),sec=el&&el.closest('[data-dz]');if(sec&&sec.classList.contains('dz-off'))setDzTab(sec.dataset.dz.split(' ')[0],1);if(g)g();};});
 COURSES.splice(COURSES.findIndex(c=>c.id==='c10'),0,{id:'c15',lv:'進階',n:'沖煮手法設計',d:'把沖法拆成好幾段：每段帶出什麼物質、怎麼推動金杯圖，以及斷水、補水、合併注水的效果。',tours:['design'],quiz:[
   {q:'把一杯手沖分成 10 段接，哪一段的液體通常最濃、有機酸比例最高？',o:['最前面幾段','正中間','最後一段','每段都一樣'],a:0,e:'有機酸、咖啡因溶得快，最先被沖出來；前段濃度可以到好幾 %。'},
   {q:'尾段（最後幾段）最主要的影響是什麼？',o:['萃取率只加一點，但苦澀比例變高','大幅提高甜感','大幅提高濃度','完全沒有影響'],a:0,e:'糖已經快萃完，剩下溶得慢的苦味大分子，所以尾段推高的是苦澀比。'},
