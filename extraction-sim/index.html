@@ -361,6 +361,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
 .dz-cmat{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:6px 0}.dz-cmat table{border-collapse:collapse;font-size:12px;white-space:nowrap;min-width:100%}
 .dz-cmat th,.dz-cmat td{padding:5px 7px;text-align:right;border-bottom:1px solid var(--line);font-family:var(--f-mono);font-weight:400}.dz-cmat th{font-family:inherit;color:var(--muted);font-size:11px}
 .dz-cmat th:first-child,.dz-cmat td:first-child{text-align:left;position:sticky;left:0;background:var(--panel);font-family:inherit}.dz-cmat tr.on td{color:var(--accent)}.dz-cmat tr.sum td{font-weight:700;border-top:2px solid var(--line)}
+.dz-cch{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0 8px}.dz-dot{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:4px}.dz-pc{display:block;font-size:10px;color:var(--muted)}.dz-pc.up{color:#e0a060}.dz-pc.dn{color:#7fb6e0}.dz-subs{margin:4px 0 6px}
 .dz-st{display:flex;align-items:center;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--panel)}
 .dz-st button{width:48px;height:42px;border:0;background:transparent;color:var(--accent);font-size:22px;font-weight:700;cursor:pointer;touch-action:manipulation;-webkit-user-select:none;user-select:none}
 .dz-st button:active{background:rgba(226,189,106,.15)}.dz-st b{flex:1;text-align:center;font-family:var(--f-mono);font-weight:500;font-size:16px;white-space:nowrap}
@@ -1383,7 +1384,7 @@ window.BGM=(()=>{
     <div class="err" id="tErr"></div>
   </div>
   <button class="t-more" id="tMore" type="button" aria-label="咖啡宇宙：更多咖啡 App 與遊戲">咖啡宇宙</button>
-  <div class="t-foot">© 2026 Jim Lu　ver. 9.6</div>
+  <div class="t-foot">© 2026 Jim Lu　ver. 9.7</div>
 </div>
 <nav class="modes" aria-label="導覽"><div class="in">
   <button class="homebtn" id="homeBtn" type="button" hidden>‹ 主選單</button>
@@ -9334,21 +9335,66 @@ function cmpWords(C){const a=C[0],P=C.map(c=>prog(c.A)),o=[];
     o.push('<b style="color:'+c.col+'">'+c.L+'</b> 比 <b style="color:'+a.col+'">A</b> '+(Math.abs(dEY)<.2?'萃取率幾乎一樣':(dEY>0?'多萃出 ':'少萃出 ')+Math.abs(dEY).toFixed(1)+'%')+
       (t0!=null?'，差距從 <b>'+fmt(t0)+'</b> 左右開始拉開':'，整個過程的萃取進度都很接近')+(fl?'；味道上'+fl:'；味道差異很小')+'，分數 '+Math.round(a.A.score)+' → '+Math.round(c.A.score)+'。');});
   return '<ul>'+o.map(x=>'<li>'+x+'</li>').join('')+'</ul>';}
-let cv='tab';
+
+// ---- 手法比較：成分對照（整杯／每段，克・毫克・毫莫耳＋水） ----
+let ccm='cup',csub=2;
+const SUBS=()=>CMP.map((c,i)=>({k:i,n:c.name,c:CCL[i]})).concat([{k:'tot',n:'溶質合計',c:'var(--accent)'},{k:'w',n:'水',c:'#7fb6e0'}]);
+function fv(f,k){if(k==='w')return Math.max(0,f.v-f.tot);if(k==='tot')return f.tot;return f.m[k];}
+function uv(g,k){if(k==='w')return cu==='g'?g:cu==='mg'?g*1000:g/18.015*1000;if(k==='tot')return cu==='mmol'?null:cu==='g'?g:g*1000;return cuv(g,k);}
+function uf(v,k){if(v==null)return '—';if(k==='w'&&cu!=='g')return Math.round(v).toLocaleString();return cfmt(v);}
+function cmpComp(C){const S=SUBS(),un=cu==='g'?'g':cu==='mg'?'mg':'mmol';
+  let h='<div class="dz-cch"><div class="seg" role="group" aria-label="範圍"><button type="button" data-ccm="cup" aria-pressed="'+(ccm==='cup')+'">整杯</button><button type="button" data-ccm="seg" aria-pressed="'+(ccm==='seg')+'">每段</button></div>'+
+    '<div class="seg" role="group" aria-label="單位"><button type="button" data-cu="mg" aria-pressed="'+(cu==='mg')+'">毫克</button><button type="button" data-cu="g" aria-pressed="'+(cu==='g')+'">克</button><button type="button" data-cu="mmol" aria-pressed="'+(cu==='mmol')+'">毫莫耳</button></div></div>';
+  if(ccm==='cup'){const tot=C.map(c=>{const F=c.A.F,o={v:0,tot:0,m:Array(NC).fill(0)};F.forEach(f=>{o.v+=f.v;o.tot+=f.tot;f.m.forEach((g,i)=>o.m[i]+=g);});return o;});
+    const gc='grid-template-columns:5.6em repeat('+C.length+',1fr)';
+    h+='<div class="dz-ctab"><div class="dz-ctr hd" style="'+gc+'"><span>'+un+'</span>'+C.map(c=>'<span style="color:'+c.col+'">'+c.L+' '+esc(c.name)+'</span>').join('')+'</div>'+
+      S.map(sb=>{const vals=tot.map(o=>uv(fv(o,sb.k),sb.k)),base=vals[0];
+        return '<div class="dz-ctr" style="'+gc+'"><span><i class="dz-dot" style="background:'+sb.c+'"></i>'+sb.n+'</span>'+vals.map((v,i)=>'<span>'+uf(v,sb.k)+(i&&v!=null&&base?'<small class="dz-pc '+(v>base*1.005?'up':v<base*.995?'dn':'')+'">'+(v>=base?'+':'')+((v/base-1)*100).toFixed(0)+'%</small>':'')+'</span>').join('')+'</div>';}).join('')+
+      '<div class="dz-ctr" style="'+gc+'"><span>液體總重</span>'+tot.map(o=>'<span>'+o.v.toFixed(1)+' g</span>').join('')+'</div></div>'+
+      '<p class="label">小字是和 A 比多或少幾 %。整杯的量把每段（含補水）加起來。</p>';
+    // 圖：每種物質各手法並排（以 A 為 100%）
+    const W=340,rh=22,top=6,H=top+S.length*rh+16,x0=72,w=W-x0-34;let mxr=1;
+    S.forEach(sb=>{const v=tot.map(o=>fv(o,sb.k));if(v[0]>0)v.forEach(x=>mxr=Math.max(mxr,x/v[0]));});
+    let g='<svg viewBox="0 0 '+W+' '+H+'" width="100%" role="img" aria-label="各物質總量對照">';
+    g+='<line x1="'+(x0+w/mxr)+'" x2="'+(x0+w/mxr)+'" y1="'+top+'" y2="'+(H-14)+'" stroke="var(--muted)" stroke-dasharray="3 2"/><text x="'+(x0+w/mxr)+'" y="'+(H-3)+'" font-size="8" text-anchor="middle" fill="var(--muted)">A＝100%</text>';
+    S.forEach((sb,r)=>{const v=tot.map(o=>fv(o,sb.k)),y=top+r*rh,bh=(rh-6)/C.length;g+='<text x="'+(x0-4)+'" y="'+(y+rh/2+2)+'" font-size="9" text-anchor="end" fill="var(--ink)">'+sb.n+'</text>';
+      C.forEach((c,i)=>{const ww=v[0]>0?v[i]/v[0]/mxr*w:0;g+='<rect x="'+x0+'" y="'+(y+2+i*bh).toFixed(1)+'" width="'+ww.toFixed(1)+'" height="'+Math.max(1.5,bh-.6).toFixed(1)+'" fill="'+c.col+'"/>';});
+      const r2=v.slice(1).map(x=>v[0]>0?x/v[0]:1),ex=r2.reduce((a,x)=>Math.abs(x-1)>Math.abs(a-1)?x:a,1);if(C.length>1&&Math.abs(ex-1)>=.03)g+='<text x="'+(x0+w+3)+'" y="'+(y+rh/2+2)+'" font-size="8" fill="'+(ex>1?'#e0a060':'#7fb6e0')+'">'+(ex>1?'+':'')+Math.round((ex-1)*100)+'%</text>';});
+    h+='<div class="cm-chart">'+g+'</svg></div>';
+    // 一句話：差最多的物質
+    const lines=C.slice(1).map((c,j)=>{const a=tot[0],b=tot[j+1];const d=CMP.map((q,i)=>({n:q.name,r:a.m[i]>0?b.m[i]/a.m[i]-1:0,dm:(b.m[i]-a.m[i])*1000})).sort((x,y)=>Math.abs(y.r)-Math.abs(x.r)).slice(0,3);
+      return '<li><b style="color:'+c.col+'">'+c.L+'</b> 比 <b style="color:'+C[0].col+'">A</b>：'+d.map(x=>x.n+(x.r>=0?' 多 ':' 少 ')+Math.abs(x.r*100).toFixed(0)+'%（'+(x.dm>=0?'+':'−')+Math.abs(x.dm).toFixed(x.dm<10&&x.dm>-10?1:0)+' mg）').join('、')+'；水 '+(b.v-b.tot-(a.v-a.tot)>=0?'多 ':'少 ')+Math.abs(b.v-b.tot-(a.v-a.tot)).toFixed(1)+' g。</li>';});
+    h+='<div class="bl-dir"><ul>'+lines.join('')+'</ul></div>';}
+  else{h+='<div class="dz-ql dz-pick dz-subs">'+S.map(sb=>'<button type="button" data-sub="'+sb.k+'" class="'+(String(sb.k)===String(csub)?'on':'')+'"><i style="background:'+sb.c+';border-color:transparent"></i>'+sb.n+'</button>').join('')+'</div>';
+    const k=csub==='w'||csub==='tot'?csub:+csub,sb=S.find(x=>String(x.k)===String(csub)),P=C.map(c=>c.A.F.map(f=>({lab:f.byp?'補':f.lab.replace(/第 | 段| 杯| 悶蒸/g,''),v:uv(fv(f,k),k),f}))),n=Math.max(...P.map(p=>p.length));
+    if(k==='tot'&&cu==='mmol'){h+='<p class="label">溶質合計包含沒有固定分子量的苦味大分子，不換算毫莫耳；請改用克或毫克。</p>';return h;}
+    if(k===4&&cu==='mmol'){h+='<p class="label">苦味大分子沒有固定分子量，不換算毫莫耳；請改用克或毫克。</p>';return h;}
+    const mx=Math.max(1e-9,...P.flat().map(x=>x.v||0)),W=340,H=200,x0=40,y0=12,w=W-x0-6,hh=H-y0-26,gw=w/n,bw=Math.min(14,(gw-4)/C.length),Y=v=>y0+hh-v/mx*hh;
+    let g='<svg viewBox="0 0 '+W+' '+H+'" width="100%" role="img" aria-label="每段'+sb.n+'對照">';
+    [0,.5,1].forEach(t=>g+='<line x1="'+x0+'" x2="'+(x0+w)+'" y1="'+Y(mx*t)+'" y2="'+Y(mx*t)+'" stroke="var(--line)" stroke-width=".5"/><text x="'+(x0-3)+'" y="'+(Y(mx*t)+3)+'" font-size="8" text-anchor="end" fill="var(--muted)">'+uf(mx*t,k)+'</text>');
+    for(let j=0;j<n;j++){const cx=x0+j*gw+gw/2;C.forEach((c,i)=>{const q=P[i][j];if(!q)return;const v=q.v||0;g+='<rect x="'+(cx-bw*C.length/2+i*bw).toFixed(1)+'" y="'+Y(v).toFixed(1)+'" width="'+(bw-1).toFixed(1)+'" height="'+(y0+hh-Y(v)).toFixed(1)+'" fill="'+c.col+'"/>';});
+      g+='<text x="'+cx+'" y="'+(y0+hh+11)+'" font-size="8.5" text-anchor="middle" fill="var(--muted)">'+(P[0][j]?P[0][j].lab:(P.find(p=>p[j])||[])[j].lab)+'</text>';}
+    g+='<text x="'+x0+'" y="8" font-size="8.5" fill="var(--muted)">'+sb.n+'（'+un+'）</text><text x="'+(x0+w)+'" y="'+(H-3)+'" font-size="8.5" text-anchor="end" fill="var(--muted)">第幾段 →</text></svg>';
+    h+='<div class="cm-chart">'+g+'</div>';
+    h+='<div class="dz-cmat"><table><thead><tr><th>段</th>'+C.map(c=>'<th style="color:'+c.col+'">'+c.L+'</th>').join('')+'</tr></thead><tbody>'+[...Array(n)].map((_,j)=>'<tr><td>'+((P.find(p=>p[j])||[])[j].lab)+'</td>'+C.map((c,i)=>'<td>'+(P[i][j]?uf(P[i][j].v,k):'')+'</td>').join('')+'</tr>').join('')+
+      '<tr class="sum"><td>合計</td>'+C.map((c,i)=>'<td>'+uf(P[i].reduce((a,q)=>a+(q.v||0),0),k)+'</td>').join('')+'</tr></tbody></table></div>'+
+      '<p class="label">每段是「那段時間內滴下的液體」；段數不同時，多出來的段只有那套手法有。「補」是補水。</p>';}
+  return h;}
+let cv='comp';
 function renderCmp(){let a=[];try{a=JSON.parse(localStorage.getItem(DSV)||'[]');}catch(e){}CS=CS.filter(id=>id==='__cur'||a.some(x=>x.id===id));
   const opts=[{id:'__cur',name:'目前設定'}].concat(a.slice(0,20));
   $('dzCmpPick').innerHTML=opts.map(x=>{const j=CS.indexOf(x.id);return '<button type="button" data-c="'+x.id+'" class="'+(j>=0?'on':'')+'" aria-pressed="'+(j>=0)+'"><i style="'+(j>=0?'background:'+CCOL[j]:'')+'"></i>'+(j>=0?CLET[j]+' ':'')+esc(x.name)+'</button>';}).join('');
   const C=cmpList(),out=$('dzCmpOut');
   if(C.length<2){out.innerHTML='<p class="label">'+(a.length?'再勾一套就能開始比較。':'先用上面的「💾 存目前設定」存一套，改一改再存一套，就能在這裡比較。')+'</p>';return;}
-  const V={tab:()=>cmpTable(C),gold:()=>'<div class="cm-chart">'+cmpGold(C)+'</div><p class="label">大圓點是沖完的位置，小點是每段斷水的位置。軌跡越長，表示後段還在推進；擠在一起，表示後段幾乎沒加什麼。</p>',
+  const V={comp:()=>cmpComp(C),tab:()=>cmpTable(C),gold:()=>'<div class="cm-chart">'+cmpGold(C)+'</div><p class="label">大圓點是沖完的位置，小點是每段斷水的位置。軌跡越長，表示後段還在推進；擠在一起，表示後段幾乎沒加什麼。</p>',
     prog:()=>'<div class="cm-chart">'+cmpProg(C)+'</div><p class="label">曲線越早往上衝，表示前段萃得越兇。兩條線分開的時間點，就是兩套手法真正不一樣的地方。</p>',
     tl:()=>'<div class="cm-chart">'+cmpTl(C)+'</div><p class="label">柱子越高水量越多，虛線是滴完的時間。</p>',mix:()=>'<div class="cm-chart">'+cmpMix(C)+'</div>'};
-  if(!V[cv])cv='tab';
+  if(!V[cv])cv='comp';
   out.innerHTML='<div class="dz-cmpk">'+C.map(c=>'<span><i style="background:'+c.col+'"></i>'+c.L+' '+esc(c.name)+'</span>').join('')+'</div>'+
     '<div class="bl-dir">'+cmpWords(C)+'</div>'+
-    '<div class="seg dz-cv" id="dzCv" role="group" aria-label="比較圖表">'+[['tab','總表'],['gold','金杯軌跡'],['prog','萃取進度'],['tl','注水節奏'],['mix','每段組成']].map(([k,n])=>'<button type="button" data-cv="'+k+'" aria-pressed="'+(k===cv)+'">'+n+'</button>').join('')+'</div>'+
+    '<div class="seg dz-cv" id="dzCv" role="group" aria-label="比較圖表">'+[['comp','成分對照'],['tab','總表'],['gold','金杯軌跡'],['prog','萃取進度'],['tl','注水節奏'],['mix','每段組成']].map(([k,n])=>'<button type="button" data-cv="'+k+'" aria-pressed="'+(k===cv)+'">'+n+'</button>').join('')+'</div>'+
     '<div class="dz-cvb">'+V[cv]()+'</div>';}
-function bindCmp(){$('dzCmpOut').addEventListener('click',e=>{const b=e.target.closest('[data-cv]');if(!b)return;cv=b.dataset.cv;renderCmp();});$('dzCmpPick').addEventListener('click',e=>{const b=e.target.closest('[data-c]');if(!b)return;const id=b.dataset.c;
+function bindCmp(){$('dzCmpOut').addEventListener('click',e=>{const b=e.target.closest('[data-cv],[data-ccm],[data-cu],[data-sub]');if(!b)return;if(b.dataset.cv)cv=b.dataset.cv;if(b.dataset.ccm)ccm=b.dataset.ccm;if(b.dataset.cu){cu=b.dataset.cu;renderComp();}if(b.dataset.sub)csub=b.dataset.sub;renderCmp();});$('dzCmpPick').addEventListener('click',e=>{const b=e.target.closest('[data-c]');if(!b)return;const id=b.dataset.c;
   const j=CS.indexOf(id);if(j>=0)CS.splice(j,1);else{if(CS.length>=4)return toastMsg('最多比較 4 套');CS.push(id);}saveCS();renderCmp();});}
 
 
