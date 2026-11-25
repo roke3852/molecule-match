@@ -424,7 +424,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
 .dz-mv{color:#6fcf97!important}.dz-mv.off{color:var(--fail)!important}
 .dz-mini{border:1px solid var(--accent);background:transparent;color:var(--accent);border-radius:8px;font:inherit;font-size:12.5px;font-weight:700;padding:2px 10px;margin-left:6px;cursor:pointer}
 .dz-exp{display:grid;margin-top:6px}
-.dz-e{display:grid;grid-template-columns:1fr 2.7em 3.1em 2.4em 2.4em 2.6em 2.4em 2.4em;font-size:12px!important;gap:4px;align-items:center;padding:6px 0;border-bottom:1px solid var(--line);font-size:13px}
+.dz-e{display:grid;grid-template-columns:minmax(4.6em,1fr) 2.5em 3em 2.3em 2.3em 2.3em 2.5em 2.3em 2.3em;gap:2px!important;font-size:11.5px!important;gap:4px;align-items:center;padding:6px 0;border-bottom:1px solid var(--line);font-size:13px}
 .dz-e>span{font-family:var(--f-mono);text-align:right}.dz-e>span:first-child{font-family:inherit;text-align:left}.dz-e.dz-h>span{text-align:right}.dz-e.dz-h>span:first-child{text-align:left}
 .dz-e .ok{color:#6fcf97}.dz-e .bad{color:var(--fail)}.dz-e .z{color:var(--muted)}.dz-e .dz-mini{margin:0;padding:2px 0}
 @media (max-width:420px){.dz .dz-g2{grid-template-columns:1fr}.dz-t{grid-template-columns:1.2fr .6fr .8fr .8fr;}.dz-t .dz-role{grid-column:1/-1}.dz-kp{grid-template-columns:repeat(4,1fr)}}
@@ -1409,7 +1409,7 @@ window.BGM=(()=>{
     <div class="err" id="tErr"></div>
   </div>
   <button class="t-more" id="tMore" type="button" aria-label="咖啡宇宙：更多咖啡 App 與遊戲">咖啡宇宙</button>
-  <div class="t-foot">© 2026 Jim Lu　ver. 10.3</div>
+  <div class="t-foot">© 2026 Jim Lu　ver. 10.4</div>
 </div>
 <nav class="modes" aria-label="導覽"><div class="in">
   <button class="homebtn" id="homeBtn" type="button" hidden>‹ 主選單</button>
@@ -2033,7 +2033,7 @@ window.BGM=(()=>{
   </section>
   <section class="panel" id="dzExpP" data-dz="exp">
     <h2>如果做這些調整，會發生什麼事</h2>
-    <p class="label">每一列都是在目前手法上只改一件事，模型先算好的變化（甜、苦、口感是 0–5 分；口感＝黏稠、滑順、厚度的綜合）。按「試」就會套用，上面的數字會用 ▲▼ 和改之前比較。</p>
+    <p class="label">每一列都是在目前手法上只改一件事，模型先算好的變化（酸、甜、苦、口感是 0–5 分；酸沒有好壞，看你要的風味；口感＝黏稠、滑順、厚度的綜合）。按「試」就會套用，上面的數字會用 ▲▼ 和改之前比較。</p>
     <div id="dzExp" class="dz-exp"></div>
   </section>
   <section class="panel mic-notes" id="dzHowP" data-dz="how">
@@ -9280,7 +9280,7 @@ function render(){const v=$('designView');if(!v||v.hidden)return;A=analyze(D);if
   // 調整實驗
   const rows=EXP.filter(e=>!e.ok||e.ok(D)).map(e=>{const X=clone(D);e.f(X);const r=analyze(X,1);return {e,r};}).filter(x=>x.r);
   const dd=(v,dec,good)=>{const t=Math.abs(v)<Math.pow(10,-dec)/2?'<span class="z">0</span>':'<span class="'+(good==null?'':(good>0)===(v>0)?'ok':'bad')+'">'+(v>0?'+':'−')+Math.abs(v).toFixed(dec)+'</span>';return t;};
-  $('dzExp').innerHTML='<div class="dz-e dz-h"><span>如果…</span><span>EY</span><span>TDS</span><span>甜</span><span>苦</span><span>口感</span><span>分數</span><span></span></div>'+rows.map(({e,r})=>'<div class="dz-e"><span>'+e.n+'</span>'+dd(r.cup.ey-A.cup.ey,1)+dd(r.cup.tds-A.cup.tds,2)+dd((r.pf.sweet-A.pf.sweet)/2,1,1)+dd((r.pf.bitter-A.pf.bitter)/2,1,-1)+dd((r.tex.mouth-A.tex.mouth)/2,1,1)+dd(r.score-A.score,0,1)+'<button type="button" class="dz-mini" data-e="'+e.id+'">試</button></div>').join('');
+  $('dzExp').innerHTML='<div class="dz-e dz-h"><span>如果…</span><span>EY</span><span>TDS</span><span>酸</span><span>甜</span><span>苦</span><span>口感</span><span>分數</span><span></span></div>'+rows.map(({e,r})=>'<div class="dz-e"><span>'+e.n+'</span>'+dd(r.cup.ey-A.cup.ey,1)+dd(r.cup.tds-A.cup.tds,2)+dd((r.pf.acid-A.pf.acid)/2,1)+dd((r.pf.sweet-A.pf.sweet)/2,1,1)+dd((r.pf.bitter-A.pf.bitter)/2,1,-1)+dd((r.tex.mouth-A.tex.mouth)/2,1,1)+dd(r.score-A.score,0,1)+'<button type="button" class="dz-mini" data-e="'+e.id+'">試</button></div>').join('');
   renderComp();renderSaved();renderCmp();saveD();}
 
 // ---- 分段注水：時間軸＋滑桿編輯（不用打字） ----
