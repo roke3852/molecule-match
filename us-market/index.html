@@ -173,6 +173,7 @@ svg text{font-family:var(--sans);fill:var(--muted)}
 .tl li::before{content:"";position:absolute;left:-21px;top:7px;width:10px;height:10px;border-radius:50%;background:var(--panel);border:2px solid var(--s1)}
 .tl li.big::before{background:var(--s1)}
 .tl .dt{font:12px var(--mono);color:var(--faint);margin-right:6px}
+.tl .dt .tm{font-weight:700;color:var(--s1)}
 details.src{margin-top:8px;font-size:12px;color:var(--faint)}
 details.src a{color:var(--s1)}
 .row{display:flex;gap:8px;align-items:center}
@@ -1051,7 +1052,7 @@ function renderCal(){
   $("#calTl").innerHTML=svg;
   $("#calLeg").innerHTML=Object.values(CALC).map(v=>`<span><i style="background:${v[1]}"></i>${v[0]}</span>`).join("")+`<span><i style="background:transparent;border:2px solid var(--bear)"></i>今天</span>`;
   const list=CALSEL?CAL.filter(c=>c[0]===CALSEL):CAL;
-  $("#calHint").innerHTML=CALSEL?`<b>${CALSEL}</b> 共 ${list.length} 件　<button class="chip" data-calall="1">看全部</button>`:`點時間軸上的日期，只看那天的大事（共 ${CAL.length} 件、${days.length} 天）`;
+  $("#calHint").innerHTML=CALSEL?`<b>${CALSEL}</b> 共 ${list.length} 件　<button class="chip" data-calall="1">看全部</button>`:`時間皆為台北時間・點時間軸上的日期，只看那天的大事（共 ${CAL.length} 件、${days.length} 天）`;
   $("#calList").innerHTML=list.map(c=>`<div class="day">${c[0]}<small>${c[1]}</small></div><div class="ev"><b><i class="cdot" style="background:${CALC[CALK(c[2]+c[3])][1]}"></i>${esc(c[2])}</b><span>${esc(c[3])}</span></div>`).join("");
 }
 document.addEventListener("click",e=>{const g=e.target.closest("[data-cald]");if(g){const d=g.dataset.cald;CALSEL=CALSEL===d?null:d;const sc=$("#calTlW").scrollLeft;renderCal();$("#calTlW").scrollLeft=sc;return}
@@ -1531,7 +1532,7 @@ function infoHTML(go){
   const [t,id]=go||[];
   if(t==="ev"){const e=EVENTS.find(x=>x.id===id);if(!e)return "";const c=(e.charts||[]).find(k=>CH[k]);let r=null;try{r=c?CH[c]():null}catch(x){}
     return `<div class="meta"><span class="tag ${e.hot?"hot":""} ${/好消息|Good/.test(e.cat)?"good":""}">${e.hot?"🔥 ":""}${e.cat}</span><span>${e.date}</span></div><h3>${esc(e.title)}</h3>${e.stats?`<div class="stats">${e.stats.slice(0,4).map(s=>`<div class="stat"><div class="k">${s[0]}</div><div class="v">${s[1]}</div>${s[2]?`<div class="d">${s[2]}</div>`:""}</div>`).join("")}</div>`:""}${r?`<div class="fig"><div class="t">${r.t}</div>${r.b}</div>`:`<p class="lead short">${esc(e.short||evShort(e.lead))}</p>`}<button class="btn tw-ilink" data-tlink="ev|${id}">看完整卡片 ›</button>`}
-  if(t==="cal")return `<div class="tw-icap">📅 接下來要盯</div><ul class="tl">${CAL.slice(0,6).map(c=>`<li><span class="dt">${c[0]}</span>${esc(c[2])}</li>`).join("")}</ul><button class="btn tw-ilink" data-tlink="cal|">看完整行事曆 ›</button>`;
+  if(t==="cal")return `<div class="tw-icap">📅 接下來要盯<small style="font-weight:400;color:var(--muted)">（台北時間）</small></div><ul class="tl">${CAL.slice(0,6).map(c=>`<li><span class="dt">${c[0]}${c[1]?` <b class="tm">${esc(c[1])}</b>`:""}</span>${esc(c[2])}</li>`).join("")}</ul><button class="btn tw-ilink" data-tlink="cal|">看完整行事曆 ›</button>`;
   if(t==="dash"&&typeof BOT_NOW!=="undefined"){const sc=BOT_NOW.reduce((a,b)=>a+b[0],0);return `<div class="tw-icap">📊 底部訊號儀表板：${sc} / 8 分</div>${BOT_SH.map((n,i)=>`<div class="tw-irow"><span>${n}</span><i style="width:${BOT_NOW[i][0]*100}%;min-width:2px;background:${BOT_NOW[i][0]?"var(--bull)":"var(--line)"}"></i><b>${BOT_NOW[i][0]}</b></div>`).join("")}<button class="btn tw-ilink" data-tlink="bear|">看儀表板 ›</button>`}
   if(t==="signals"&&typeof SIGNALS!=="undefined"){const n=k=>SIGNALS.filter(x=>x[2]===k).length,SC={bull:"✅",neu:"🟡",bear:"⬜"};return `<div class="tw-icap">🚦 止跌訊號：亮 ${n("bull")}・半亮 ${n("neu")}・未亮 ${n("bear")}</div>${SIGNALS.map(x=>`<div style="font-size:13.5px;padding:2px 0">${SC[x[2]]} ${esc(x[0])}</div>`).join("")}<button class="btn tw-ilink" data-tlink="bear|">看檢查表 ›</button>`}
   if(t==="ix"&&typeof IXH!=="undefined"){return `<div class="tw-icap">📉 各指數距歷史高點</div>${["sp","nq","sox","tw","otc"].filter(k=>IXH[k]).map(k=>`<div class="tw-irow ${IXH[k].now>=20?"b":""}"><span>${IXH[k].nm}</span><i style="width:${Math.min(100,IXH[k].now*2)}%"></i><b>−${IXH[k].now}%</b></div>`).join("")}<button class="btn tw-ilink" data-tlink="bear|">看空頭史 ›</button>`}

@@ -87,6 +87,7 @@ svg text{font-family:var(--sans);fill:var(--muted)}
 .tl li::before{content:"";position:absolute;left:-21px;top:7px;width:10px;height:10px;border-radius:50%;background:var(--panel);border:2px solid var(--s1)}
 .tl li.big::before{background:var(--s1)}
 .tl .dt{font:12px var(--mono);color:var(--faint);margin-right:6px}
+.tl .dt .tm{font-weight:700;color:var(--s1)}
 details.src{margin-top:8px;font-size:12px;color:var(--faint)}
 details.src a{color:var(--s1)}
 .row{display:flex;gap:8px;align-items:center}
@@ -1369,7 +1370,7 @@ function infoHTML(go){
   const [t,id]=go||[];
   if(t==="ev"){const e=EVENTS.find(x=>x.id===id);if(!e)return "";const c=(e.charts||[]).find(k=>CH[k]);let r=null;try{r=c?CH[c]():null}catch(x){}
     return `<div class="meta"><span class="tag ${e.hot?"hot":""} ${/好消息|Good/.test(e.cat)?"good":""}">${e.hot?"🔥 ":""}${e.cat}</span><span>${e.date}</span></div><h3>${esc(e.title)}</h3>${e.stats?`<div class="stats">${e.stats.slice(0,4).map(s=>`<div class="stat"><div class="k">${s[0]}</div><div class="v">${s[1]}</div>${s[2]?`<div class="d">${s[2]}</div>`:""}</div>`).join("")}</div>`:""}${r?`<div class="fig"><div class="t">${r.t}</div>${r.b}</div>`:`<p class="lead short">${esc(e.short||evShort(e.lead))}</p>`}<button class="btn tw-ilink" data-tlink="ev|${id}">Open full card ›</button>`}
-  if(t==="cal")return `<div class="tw-icap">📅 Dates to watch</div><ul class="tl">${CAL.slice(0,6).map(c=>`<li><span class="dt">${c[0]}</span>${esc(c[2])}</li>`).join("")}</ul><button class="btn tw-ilink" data-tlink="cal|">Open calendar ›</button>`;
+  if(t==="cal")return `<div class="tw-icap">📅 Dates to watch<small style="font-weight:400;color:var(--muted)"> (Taipei time)</small></div><ul class="tl">${CAL.slice(0,6).map(c=>`<li><span class="dt">${c[0]}${c[1]?` <b class="tm">${esc(c[1])}</b>`:""}</span>${esc(c[2])}</li>`).join("")}</ul><button class="btn tw-ilink" data-tlink="cal|">Open calendar ›</button>`;
   if(t==="dash"&&typeof BOT_NOW!=="undefined"){const sc=BOT_NOW.reduce((a,b)=>a+b[0],0);return `<div class="tw-icap">📊 Bottom-signal dashboard：${sc} / 8 pts</div>${BOT_SH.map((n,i)=>`<div class="tw-irow"><span>${n}</span><i style="width:${BOT_NOW[i][0]*100}%;min-width:2px;background:${BOT_NOW[i][0]?"var(--bull)":"var(--line)"}"></i><b>${BOT_NOW[i][0]}</b></div>`).join("")}<button class="btn tw-ilink" data-tlink="bear|">Open dashboard ›</button>`}
   if(t==="signals"&&typeof SIGNALS!=="undefined"){const n=k=>SIGNALS.filter(x=>x[2]===k).length,SC={bull:"✅",neu:"🟡",bear:"⬜"};return `<div class="tw-icap">🚦 Bottoming signals：on ${n("bull")}・half ${n("neu")}・off ${n("bear")}</div>${SIGNALS.map(x=>`<div style="font-size:13.5px;padding:2px 0">${SC[x[2]]} ${esc(x[0])}</div>`).join("")}<button class="btn tw-ilink" data-tlink="bear|">Open checklist ›</button>`}
   if(t==="ix"&&typeof IXH!=="undefined"){return `<div class="tw-icap">📉 Drop from record highs</div>${["sp","nq","sox","tw","otc"].filter(k=>IXH[k]).map(k=>`<div class="tw-irow ${IXH[k].now>=20?"b":""}"><span>${IXH[k].nm}</span><i style="width:${Math.min(100,IXH[k].now*2)}%"></i><b>−${IXH[k].now}%</b></div>`).join("")}<button class="btn tw-ilink" data-tlink="bear|">Open bear history ›</button>`}
