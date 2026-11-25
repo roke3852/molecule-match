@@ -304,6 +304,27 @@ input[type=range]{width:100%;accent-color:var(--s1)}
 .lvls div b{display:block;font:600 15px var(--mono);color:var(--fg)}
 .lvls div.hit2{border-color:var(--s1);background:var(--s1soft)}
 
+
+/* ===== AI 分析（每張大事卡、名人觀點） ===== */
+.aibar{display:flex;justify-content:flex-end;margin-top:8px}
+.aibt{border:1.5px solid #7b5cd6;color:#5b3fb8;background:var(--panel);border-radius:16px;padding:6px 12px;font:700 13.5px var(--sans);white-space:nowrap;cursor:pointer}
+.aibt.has{background:#f1ecff}
+.aip2{margin-top:8px;border:1px solid #e1d9f7;border-radius:10px;background:#faf8ff;color:#1d1b24;padding:10px 12px;font-size:14px;line-height:1.65;cursor:auto}
+.aip2 h5{margin:10px 0 3px;font-size:13.5px;color:#5b3fb8}.aip2 h5:first-child{margin-top:0}
+.aip2 p{margin:2px 0}.aip2 ul{margin:2px 0;padding-left:18px}
+.aip2 .wait{color:#6b6878}.aip2 .err{color:#b3261e}
+.aip2 .risk{display:inline-block;margin-left:4px;padding:0 7px;border-radius:6px;color:#fff;font-weight:800;font-size:12px}
+.aip2 .rH{background:#d7263d}.aip2 .rM{background:#f07c2e}.aip2 .rL{background:#3d9a62}
+.aip2 .qa{border-top:1px dashed #d8cff2;margin-top:8px;padding-top:6px}
+.aip2 .qa .q{font-weight:800;color:#33415a;margin-top:6px}.aip2 .qa .q:before{content:"問：";color:#7b5cd6}
+.aip2 .ask{display:flex;gap:6px;margin-top:8px}
+.aip2 .ask input{flex:1;min-width:0;border:1px solid #d5dce6;border-radius:8px;padding:7px 9px;font:inherit;font-size:16px;background:#fff;color:#1d1b24}
+.aip2 .ask button{border:0;background:#5b3fb8;color:#fff;border-radius:8px;padding:0 12px;font-weight:800}
+.aip2 .ameta{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:8px;font-size:11.5px;color:#6b6878}
+.aip2 .ameta button{border:1px solid #d5dce6;background:#fff;color:#1d1b24;border-radius:7px;padding:3px 8px;font-size:12px;white-space:nowrap}
+.aip2 .stale{background:#fff4d6;border-radius:7px;padding:5px 8px;margin-bottom:6px;font-size:12.5px;color:#6b4e00}
+.aibtn2{width:100%;padding:8px 0;border-radius:8px;border:1px solid #7b5cd6;background:#fff;color:#5b3fb8;font-weight:700}
+.aip2 a{color:#5b3fb8;font-weight:700}
 </style>
 </head>
 <body>
@@ -1009,9 +1030,70 @@ function renderEv(){
     ${e.tl?(()=>{const b=e.tl.filter(t=>t[2]).slice(-4),li=t=>`<li class="${t[2]?"big":""}"><span class="dt">${t[0]}</span>${esc(t[1])}</li>`;return `<div class="fig"><div class="t">時間軸・關鍵節點</div><ul class="tl">${(b.length?b:e.tl.slice(-3)).map(li).join("")}</ul>${e.tl.length>b.length?`<details class="more"><summary>完整時間軸（${e.tl.length} 則）</summary><ul class="tl">${e.tl.map(li).join("")}</ul></details>`:""}</div>`})():""}
     <details class="more"><summary>📖 詳細說明與為什麼重要</summary>${leadHTML(e)}<div class="why"><b>為什麼重要</b>${esc(e.why)}</div></details>
     <details class="src"><summary>資料來源（${e.src.length}）</summary>${e.src.map(s=>s[1]?`<div>· <a href="${s[1]}" target="_blank" rel="noopener">${esc(s[0])}</a></div>`:`<div>· ${esc(s[0])}</div>`).join("")}</details>
+    <div class="aibar">${aiBtn("e:"+e.id)}</div>${aiPanel("e:"+e.id)}
   </article>`).join("");
   applyEvFold();
 }
+/* ---------- AI 分析（每張大事卡、名人觀點；需在 Claude App 的版本才能用） ---------- */
+const AI_URL="https://claude.ai/artifact/RwoQxNPNwLLUQkoSwvLcWk";
+const AIK2="usm_ai2";let AI2={};try{AI2=JSON.parse(localStorage.getItem(AIK2)||"{}")||{}}catch(e){AI2={}}
+const ai2Open={},ai2Busy={},ai2Stream={};
+function ai2Save(){try{localStorage.setItem(AIK2,JSON.stringify(AI2))}catch(e){try{const ks=Object.keys(AI2).sort((a,b)=>(AI2[b].at||0)-(AI2[a].at||0)).slice(0,80);const o={};ks.forEach(x=>o[x]=AI2[x]);AI2=o;localStorage.setItem(AIK2,JSON.stringify(AI2))}catch(x){}}}
+function aiId(k){return "aip-"+k.replace(/[^A-Za-z0-9_-]/g,c=>"_"+c.charCodeAt(0))}
+function aiRisk(s){return s.replace(/影響程度[:：]\s*(高|中|低)/g,(m,l)=>`影響程度：<span class="risk ${l==="高"?"rH":l==="中"?"rM":"rL"}">${l}</span>`)}
+function aiMd(t){const L=esc(t).split("\n");let o="",ul=false;const cl=()=>{if(ul){o+="</ul>";ul=false}};
+ L.forEach(l=>{const s=l.trim().replace(/^#+\s*/,"");if(!s){cl();return}let m=s.match(/^【(.+?)】\s*(.*)$/);if(m){cl();o+=`<h5>${m[1]}</h5>`;if(m[2])o+=`<p>${aiRisk(m[2])}</p>`;return}
+  m=s.match(/^(?:[-•・*]|\d+[.、)])\s*(.*)$/);if(m){if(!ul){o+="<ul>";ul=true}o+=`<li>${aiRisk(m[1])}</li>`;return}cl();o+=`<p>${aiRisk(s)}</p>`});cl();return o.replace(/\*\*(.+?)\*\*/g,"<b>$1</b>")}
+function aiCtx(){const bs=typeof BOT_NOW!=="undefined"?BOT_NOW.reduce((a,b)=>a+b[0],0):null;
+ return `資料時間：${ASOF}（台北）\n各指數距歷史高點：${(IXG.length?IXG:[]).map(x=>x[0]+" −"+x[1]+"%").join("、")}\nVIX：${VIX_TXT}（${VIX_D}）${bs!=null?`\n底部訊號儀表板：${bs} / 8 分`:""}`}
+const AISYS2=`你是台灣投資人身邊的財經分析師，讀者不熟美股，用手機閱讀。請用繁體中文、台灣用語，白話精簡，每段 1–3 點，不要開場白與結語，不要表格。只根據下面提供的資料與一般常識分析；資料裡沒有的最新數字、日期不要編造，需要查證就直說要查什麼。不要給買賣建議，也不用另加免責聲明。`;
+const AIX={
+ e:{get:id=>EVENTS.find(x=>x.id===id),ver:o=>o.upd||o.date||"",title:o=>o.title,
+  facts:o=>`類別：${o.cat}　日期：${o.date}${o.upd?"　最後更新："+o.upd:""}\n標題：${o.title}\n摘要：${o.short||""}\n重點：${o.lead||""}\n為什麼重要：${o.why||""}\n數字：${(o.stats||[]).map(x=>x.filter(Boolean).join(" ")).join("；")}\n時間軸：${(o.tl||[]).slice(-10).map(x=>x[0]+" "+x[1]).join("；")}`,
+  ask:"以下是 App「美股大事圖解」裡的一張大事卡：",
+  secs:`【一句話】第一行寫「影響程度：高／中／低」，再用一句話說這件事是什麼。\n【對美股的影響】\n【對台股的影響】台股、台灣供應鏈、台幣或外資動向，沒有直接關係就說沒有。\n【偏多的看法】\n【偏空的看法】\n【接下來要盯】具體的日期、數字或訊號。`},
+ v:{get:n=>allViews().find(x=>x.n===n),ver:o=>(o.q[0]||[])[0]||"",title:o=>o.n,
+  facts:o=>`人物：${o.n}（${o.o}）\n立場：${ST[o.st]}\n標籤：${o.tag.join("、")}\n發言（新到舊）：\n${o.q.slice(0,6).map(q=>"・"+q[0]+" "+(Array.isArray(q[2])?q[1]+"“"+q[2][0]+"”"+(q[3]||""):q[1])).join("\n")}\n目前 App 收錄的觀點：${["bull","neu","bear"].map(k=>ST[k]+" "+allViews().filter(x=>x.st===k).length+" 位").join("、")}`,
+  ask:"以下是 App「美股大事圖解」名人觀點裡的一位：",
+  secs:`【他在說什麼】用白話重講重點。\n【論點強不強】支持的理由、可能的盲點或立場（例如他的機構在多空哪邊有利益）。\n【和其他人比】和目前多數看法相同還是相反。\n【對台灣投資人的意義】`}};
+function aiPrompt2(k,o){const X=AIX[k[0]];return `${AISYS2}\n\n${aiCtx()}\n\n${X.ask}\n${X.facts(o)}\n\n請嚴格依下列標題輸出（每個標題獨立一行，用【】包住）：\n${X.secs}`}
+function aiBody2(k){const a=AI2[k],X=AIX[k[0]],o=X&&X.get(k.slice(2));let h="";
+ if(ai2Stream[k]!=null)return ai2Stream[k]?aiMd(ai2Stream[k]):`<p class="wait">AI 分析中…</p>`;
+ if(a&&a.err)h+=`<p class="err">${esc(a.err)}</p>${a.nolink?"":""}`;
+ if(a&&a.t){if(o&&a.ver!==X.ver(o))h+=`<div class="stale">這張卡片之後有更新（${esc(X.ver(o))}），可按「重新分析」用最新內容再分析一次。</div>`;
+  h+=aiMd(a.t);if(a.qa&&a.qa.length)h+=`<div class="qa">${a.qa.map(x=>`<div class="q">${esc(x.q)}</div>${aiMd(x.a)}`).join("")}</div>`;
+  if(ai2Busy[k]==="ask")h+=`<p class="wait">AI 回答中…</p>`;
+  h+=`<div class="ask"><input placeholder="再問 AI，例如：這對台積電有什麼影響？" data-aiq2="${esc(k)}"><button data-aiqb2="${esc(k)}">問</button></div>`;
+  h+=`<div class="ameta">AI 產生 ${new Date(a.at).toLocaleString("zh-TW",{month:"numeric",day:"numeric",hour:"2-digit",minute:"2-digit"})}・僅供參考，不構成投資建議<span style="margin-left:auto"></span><button data-aicp2="${esc(k)}">複製</button><button data-aire2="${esc(k)}">重新分析</button></div>`}
+ else if(!(a&&a.err))h+=`<button class="aibtn2" data-aigo2="${esc(k)}">開始 AI 分析</button>`;else h+=`<div class="ameta"><button data-aire2="${esc(k)}">再試一次</button></div>`;
+ return h}
+function aiBtn(k){const has=!!(AI2[k]&&AI2[k].t);return `<button type="button" class="aibt${has?" has":""}" data-ai2="${esc(k)}">${ai2Open[k]?"收起 AI":has?"🤖 AI 分析 ✓":"🤖 AI 分析"}</button>`}
+function aiPanel(k){return ai2Open[k]?`<div class="aip2" id="${aiId(k)}">${aiBody2(k)}</div>`:""}
+function aiPaint2(k){const el=document.getElementById(aiId(k));if(el)el.innerHTML=aiBody2(k)}
+function aiToggleDom(k){document.querySelectorAll(".aibt").forEach(b=>{if(b.dataset.ai2!==k)return;const bar=b.closest(".aibar");b.outerHTML=aiBtn(k);if(!bar)return;let p=document.getElementById(aiId(k));if(ai2Open[k]){if(!p)bar.insertAdjacentHTML("afterend",aiPanel(k));else p.innerHTML=aiBody2(k)}else if(p)p.remove()})}
+async function aiSample(){try{if(window.claude&&claude.use)return await claude.use("sample")}catch(e){}return null}
+async function aiRun2(k){const X=AIX[k[0]],o=X&&X.get(k.slice(2));if(!o||ai2Busy[k])return;
+ const sample=await aiSample();
+ if(!sample){AI2[k]={err:"AI 分析只能在 Claude App 裡的版本使用。",at:Date.now()};aiPaint2(k);const el=document.getElementById(aiId(k));if(el&&AI_URL.indexOf("__")<0)el.insertAdjacentHTML("beforeend",`<p><a href="${AI_URL}" target="_blank" rel="noopener">在 Claude App 開啟美股大事圖解 ↗</a></p>`);delete AI2[k];return}
+ ai2Busy[k]="gen";ai2Stream[k]="";aiPaint2(k);
+ try{const res=await sample(aiPrompt2(k,o),{onText:({text})=>{ai2Stream[k]=text;aiPaint2(k)},modelTier:"default"});AI2[k]={t:res.text,at:Date.now(),ver:X.ver(o),qa:[]};ai2Save()}
+ catch(e){const m=e&&e.code==="rate_limited"?"AI 使用次數暫時到上限，請稍後再試。":e&&e.code==="not_granted"?"尚未允許此頁使用 AI。":"AI 分析失敗："+((e&&e.message)||"未知錯誤");if(!(AI2[k]&&AI2[k].t))AI2[k]={err:m,at:Date.now()};else toast(m)}
+ delete ai2Busy[k];delete ai2Stream[k];aiPaint2(k);if(AI2[k]&&AI2[k].err)delete AI2[k];aiToggleDom(k)}
+async function aiAsk2(k,q){const X=AIX[k[0]],o=X&&X.get(k.slice(2)),a=AI2[k];if(!o||!a||!q||ai2Busy[k])return;
+ const sample=await aiSample();if(!sample){toast("無法使用 AI");return}
+ ai2Busy[k]="ask";aiPaint2(k);const msgs=[{role:"user",content:aiPrompt2(k,o)},{role:"assistant",content:a.t}];(a.qa||[]).forEach(x=>msgs.push({role:"user",content:x.q},{role:"assistant",content:x.a}));
+ msgs.push({role:"user",content:q+"\n（請用繁體中文簡潔回答，可用條列，不要用【】標題；資料沒有的最新數字不要編造。）"});
+ try{const res=await sample(msgs,{cache:false,modelTier:"default"});(a.qa=a.qa||[]).push({q,a:res.text});ai2Save()}catch(e){toast(e&&e.code==="rate_limited"?"AI 使用次數暫時到上限":"提問失敗")}
+ delete ai2Busy[k];aiPaint2(k)}
+document.addEventListener("click",e=>{const t=e.target.closest&&e.target.closest("[data-ai2],[data-aigo2],[data-aire2],[data-aicp2],[data-aiqb2],.aip2");if(!t)return;
+ e.stopPropagation();if(t.classList.contains("aip2"))return;e.preventDefault();
+ const d=t.dataset;
+ if(d.ai2){const k=d.ai2;if(ai2Open[k]){delete ai2Open[k];aiToggleDom(k);return}ai2Open[k]=1;aiToggleDom(k);if(!AI2[k])aiRun2(k);return}
+ if(d.aigo2||d.aire2){aiRun2(d.aigo2||d.aire2);return}
+ if(d.aiqb2){const i=[...document.querySelectorAll("[data-aiq2]")].find(x=>x.dataset.aiq2===d.aiqb2);const q=i&&i.value.trim();if(q)aiAsk2(d.aiqb2,q);return}
+ if(d.aicp2){const k=d.aicp2,a=AI2[k],X=AIX[k[0]],o=X.get(k.slice(2));const txt=`【${o?X.title(o):""}】\n\n${a.t}${(a.qa||[]).map(x=>`\n\n問：${x.q}\n${x.a}`).join("")}`;
+  try{navigator.clipboard.writeText(txt).then(()=>toast("已複製 AI 分析"),()=>toast("無法複製"))}catch(x){toast("無法複製")}}},true);
+document.addEventListener("keydown",e=>{const i=e.target.closest&&e.target.closest("[data-aiq2]");if(i&&e.key==="Enter"&&!e.isComposing){const q=i.value.trim();if(q)aiAsk2(i.dataset.aiq2,q)}});
 /* ---------- 渲染：觀點 ---------- */
 let vwSt="all";
 let vwTag="全部";
@@ -1028,6 +1110,7 @@ function renderVw(){
     <div class="who"><div class="av">${esc(v.av)}</div><div><div class="n">${esc(v.n)}</div><div class="o">${esc(v.o)}</div></div><span class="stance ${v.st}">${ST[v.st]}</span></div>
     <ul class="q">${v.q.slice(0,1).map(q=>`<li><span class="d">${q[0]}</span>${Array.isArray(q[2])?esc(q[1])+`<span class="en">“${esc(q[2][0])}”</span>`+esc(q[3]||""):esc(q[1])}</li>`).join("")}</ul>${v.q.length>1?`<details class="more"><summary>更早 ${v.q.length-1} 則</summary><ul class="q">${v.q.slice(1).map(q=>`<li><span class="d">${q[0]}</span>${Array.isArray(q[2])?esc(q[1])+`<span class="en">“${esc(q[2][0])}”</span>`+esc(q[3]||""):esc(q[1])}</li>`).join("")}</ul></details>`:""}
     <div class="meta" style="margin-top:6px">${v.tag.map(t=>`<span class="tag">${t}</span>`).join("")}${v.src?`<a href="${esc(v.src)}" target="_blank" rel="noopener" style="margin-left:auto;color:var(--s1)">來源 ↗</a>`:""}</div>
+    <div class="aibar">${aiBtn("v:"+v.n)}</div>${aiPanel("v:"+v.n)}
   </article>`).join("");
 }
 /* ---------- 行事曆 ---------- */
@@ -1930,7 +2013,7 @@ function glBuild(){
   const asc=ks.filter(k=>/^[\x00-\x7f]+$/.test(k)).map(esc_),cjk=ks.filter(k=>!/^[\x00-\x7f]+$/.test(k)).map(esc_);
   GLRE=new RegExp(`((?<![A-Za-z0-9&\\-])(?:${asc.join("|")})(?![A-Za-z0-9\\-])|${cjk.join("|")})`,"g");
 }
-const GL_SKIP="svg,button,a,script,style,input,textarea,select,.chip,[data-gl],.gl-pop,summary,.ix,.day";
+const GL_SKIP="svg,button,a,script,style,input,textarea,select,.chip,[data-gl],.gl-pop,summary,.ix,.day,.aip2";
 /* 導覽員對白：打字完成後把名詞加底線（點了跳解釋，不會跳下一句） */
 function glLine(el){try{if(!el||typeof GL==="undefined")return;if(!GLRE)glBuild();const t=el.textContent,used=new Set();GLRE.lastIndex=0;let m,last=0,frag=null;
   while((m=GLRE.exec(t))){const key=GLMAP[m[0]];if(!key||used.has(key))continue;used.add(key);frag=frag||document.createDocumentFragment();

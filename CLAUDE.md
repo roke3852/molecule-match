@@ -13,3 +13,9 @@
 - 測試：播放清單是 `TS.L`（tourStart(i) 後連續 tourTap()／點選項到出現 `.tw-end`）；清空 localStorage 後依序看完各集，確認後一集相同 nk＋v 的段落出現「略過 N 則」卡片。
 - 名詞解釋（2026-11-25 起，Roke 的要求）：導覽員對白打完字後會自動把 GL 裡的名詞加底線、點了跳解釋。寫每日導覽時，對白裡出現的公司、人名、機構、代號與專有名詞（含台股籌碼用語），GL 沒有的一律補進 GL（含常見別名），不要只補大事卡片裡的。
 - 傍晚那次寫完前再查一次最新美股期貨、台指期夜盤與重點個股盤前，避免用到過時的盤前數字。
+
+## us-market：Claude App 版（AI 分析按鈕）（2026-11-26 起，Roke 的要求）
+
+- 每張大事卡與名人觀點下方有「🤖 AI 分析」按鈕（用 Claude Artifact 的 `sample` 能力），只有在 Claude App 版 https://claude.ai/artifact/RwoQxNPNwLLUQkoSwvLcWk 才能用；GitHub Pages 版按了會顯示「只能在 Claude App 裡的版本使用」並附連結。
+- 每次更新 us-market/index.html（含排程更新）推上 GitHub 之後，也要同步更新這個 Artifact：先用 Artifact 工具 `action:"read"`、`url` 為上面網址讀一次，再用 `url` 加 `file_path: us-market/index.html`、`files: {"en/index.html": "us-market/en/index.html"}` 發布（不要傳 capabilities，沿用 sample）。不要另外新建 Artifact。
+- 新增的大事卡、觀點不用另外寫 AI 內容；AI 分析由使用者按按鈕時即時產生，結果存在使用者瀏覽器裡（卡片 upd 變了會提示重新分析）。
