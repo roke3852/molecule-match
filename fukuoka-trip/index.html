@@ -774,7 +774,7 @@ html.dark .med-red b{color:#e07a6a}
 .zoo-pins{position:absolute;inset:0}.zoo-pin{position:absolute;transform:translate(-50%,-50%);width:26px;height:26px;border-radius:50%!important;min-height:0!important;box-sizing:border-box;border:2px solid #fff;font-size:13px;padding:0;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 3px rgba(0,0,0,.5);background:#c8442b}
 .zoo-pin.walk{background:#3f7d5c}.zoo-pin.svc{background:#2c6e8f}.zoo-pin.on{transform:translate(-50%,-50%) scale(1.35);z-index:2;outline:3px solid #f2c14e}
 .zoo-me{position:absolute;transform:translate(-50%,-50%);z-index:3;pointer-events:none;text-align:center}.zoo-me i{display:block;width:16px;height:16px;margin:auto;border-radius:50%;background:#1a73e8;border:3px solid #fff;box-shadow:0 0 0 6px rgba(26,115,232,.3);animation:zp 1.6s infinite}
-.zoo-me span{display:inline-block;margin-top:2px;font-size:10px;background:#1a73e8;color:#fff;padding:0 4px;white-space:nowrap}.zoo-me.out i{background:#999}@keyframes zp{50%{box-shadow:0 0 0 12px rgba(26,115,232,.1)}}
+.zoo-me span{display:inline-block;margin-top:2px;font-size:10px;background:#1a73e8;color:#fff;padding:0 4px;white-space:nowrap}.zoo-me.out i{background:#999}.zoo-hd{position:absolute;left:50%;top:8px;width:56px;height:56px;margin:-28px 0 0 -28px;transition:transform .15s linear}.zoo-hd svg{width:100%;height:100%;overflow:visible}.zoo-dir{margin:6px 0;padding:8px 10px;background:#e8f0fe;border:2px solid #1a73e8;font-size:14px;display:flex;align-items:center;gap:10px}.zoo-dir .za{font-size:30px;line-height:1;transition:transform .15s linear;display:inline-block;color:#1a73e8}@keyframes zp{50%{box-shadow:0 0 0 12px rgba(26,115,232,.1)}}
 .zoo-st{font-size:12.5px;margin:6px 0}.zoo-leg{display:flex;gap:6px;margin-bottom:6px;font-size:12px}.zoo-leg span,.zt{padding:1px 6px;color:#fff;background:#c8442b}.zoo-leg .walk,.zt.walk{background:#3f7d5c}.zoo-leg .svc,.zt.svc{background:#2c6e8f}
 .zoo-card{border:2px solid var(--px);padding:8px 10px;margin-top:6px}.zoo-card b{font-size:16px;margin-right:6px}.zoo-card .zt{font-size:11px}.zoo-card p{margin:6px 0 0;font-size:14px;line-height:1.6}
 .db-hint{font-size:12px;color:var(--sub);margin-top:6px}.db-sel{margin-top:6px;font-size:13px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}.db-sel button{margin-left:auto;font-size:12px;padding:3px 10px;border:1.5px solid var(--line);border-radius:999px;background:var(--card);color:var(--ink)}
@@ -1889,25 +1889,39 @@ const ZOO={img:'https://molecule-match-default-rtdb.asia-southeast1.firebasedata
  ['ticket',600,705,'🎫','自駕售票處','自駕車在這裡買票。','svc'],
  ['bus',730,655,'🚌','路線巴士站','往別府、宇佐的路線巴士。','svc'],
  ['park',870,480,'🅿️','大型停車場','包車停車處。','svc']]};
-let zooSel=null,zooWatch=null,zooPos=null,zooImg=null;
+let zooSel=null,zooWatch=null,zooPos=null,zooImg=null,zooHd=null,zooHdSrc='',zooRaf=0;
+const ZDIR=['北','東北','東','東南','南','西南','西','西北'];function zDirName(h){return ZDIR[Math.round(((h%360)+360)%360/45)%8]}
+function zooBear(x1,y1,x2,y2){return (Math.atan2(x2-x1,-(y2-y1))*180/Math.PI+360)%360}
+function zooRel(d){d=((d%360)+540)%360-180;const a=Math.abs(d);return a<25?'正前方':a>155?'正後方（轉身）':(d>0?'右':'左')+(a<70?'前方':a<110?'邊':'後方')}
+function zooHdApply(){zooRaf=0;const b=$('#zooBox');if(!b||zooHd==null)return;const h=b.querySelector('.zoo-hd');if(h)h.style.transform=`rotate(${zooHd}deg)`;
+ const t=b.querySelector('.zoo-face');if(t)t.textContent=`🧭 面向${zDirName(zooHd)}`;const da=b.querySelector('.zoo-dir .za');if(da&&da.dataset.b)da.style.transform=`rotate(${(+da.dataset.b-zooHd+360)%360}deg)`;
+ const dt=b.querySelector('.zoo-dir .zrel');if(dt&&da)dt.textContent=zooRel(+da.dataset.b-zooHd)}
+function zooOri(e){let h=null;if(e.webkitCompassHeading!=null)h=e.webkitCompassHeading;else if(e.absolute&&e.alpha!=null)h=360-e.alpha;if(h==null)return;
+ const so=(screen.orientation&&screen.orientation.angle)||window.orientation||0;zooHd=(h+so+360)%360;zooHdSrc='compass';if(!zooRaf)zooRaf=requestAnimationFrame(zooHdApply)}
+function zooCompassOn(){const add=()=>{window.addEventListener('deviceorientationabsolute',zooOri);window.addEventListener('deviceorientation',zooOri)};
+ if(window.DeviceOrientationEvent&&typeof DeviceOrientationEvent.requestPermission==='function')DeviceOrientationEvent.requestPermission().then(r=>{if(r==='granted')add();else toast('沒有允許方向感應，改用走路方向判斷')}).catch(()=>{});else if(window.DeviceOrientationEvent)add()}
+function zooCompassOff(){window.removeEventListener('deviceorientationabsolute',zooOri);window.removeEventListener('deviceorientation',zooOri)}
 function zooXY(la,lo){const A=ZOO.a,B=ZOO.b,s=(B.y-A.y)/(B.la-A.la),sx=Math.abs(s)*Math.cos(A.la*Math.PI/180);return [A.x+(lo-A.lo)*sx,A.y+(la-A.la)*s]}
 function zooDraw(){const el=$('#zooBox');if(!el)return;const sel=ZOO.P.find(p=>p[0]===zooSel);let me='',note='';
  if(zooPos){const [x,y]=zooXY(zooPos.la,zooPos.lo),inm=x>-30&&x<ZOO.W+30&&y>-30&&y<ZOO.H+30,cx=Math.max(12,Math.min(ZOO.W-12,x)),cy=Math.max(12,Math.min(ZOO.H-12,y));
-  me=`<div class="zoo-me${inm?'':' out'}" style="left:${cx/ZOO.W*100}%;top:${cy/ZOO.H*100}%"><i></i><span>我在這${inm?'':'（地圖外）'}</span></div>`;
+  me=`<div class="zoo-me${inm?'':' out'}" style="left:${cx/ZOO.W*100}%;top:${cy/ZOO.H*100}%">${zooHd!=null?`<div class="zoo-hd" style="transform:rotate(${zooHd}deg)"><svg viewBox="-28 -28 56 56"><defs><linearGradient id="zcone" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#1a73e8" stop-opacity=".55"/><stop offset="1" stop-color="#1a73e8" stop-opacity="0"/></linearGradient></defs><path d="M0 0 L-16 -26 A30 30 0 0 1 16 -26 Z" fill="url(#zcone)"/><path d="M0 -24 L8 -10 L0 -13 L-8 -10 Z" fill="#1a73e8" stroke="#fff" stroke-width="2"/></svg></div>`:''}<i></i><span>我在這${inm?'':'（地圖外）'}</span></div>`;
   let near=null,nd=1e9;ZOO.P.forEach(p=>{const d=Math.hypot(p[1]-x,p[2]-y);if(d<nd){nd=d;near=p}});
-  const km=llKm([zooPos.la,zooPos.lo],[ZOO.a.la,ZOO.a.lo]);note=`📍 ${inm?`最近：<b>${near[3]} ${near[4]}</b>`:'不在園區地圖範圍內'}・離資訊中心 ${kmTxt(km)}・精度 ±${Math.round(zooPos.acc)} m`}
+  const km=llKm([zooPos.la,zooPos.lo],[ZOO.a.la,ZOO.a.lo]);note=`${zooHd!=null?`<b class="zoo-face">🧭 面向${zDirName(zooHd)}</b>・`:'<span class="sub">（轉一下手機或走幾步就會出現方向箭頭）</span><br>'}📍 ${inm?`最近：<b>${near[3]} ${near[4]}</b>`:'不在園區地圖範圍內'}・離資訊中心 ${kmTxt(km)}・精度 ±${Math.round(zooPos.acc)} m`}
  el.querySelector('.zoo-pins').innerHTML=ZOO.P.map(p=>`<button class="zoo-pin ${p[6]}${zooSel===p[0]?' on':''}" data-zp="${p[0]}" style="left:${p[1]/ZOO.W*100}%;top:${p[2]/ZOO.H*100}%">${p[3]}</button>`).join('')+me;
  el.querySelector('.zoo-st').innerHTML=note||'按「📍 開始定位」顯示你現在的位置';
- el.querySelector('.zoo-info').innerHTML=sel?`<div class="zoo-card"><b>${sel[3]} ${sel[4]}</b><span class="zt ${sel[6]}">${{safari:'🚗 自駕／叢林巴士',walk:'🚶 步行區',svc:'🧭 設施'}[sel[6]]}</span><p>${sel[5]}</p></div>`:'<div class="hint">👆 點地圖上的圖示看介紹</div>'}
+ let dir='';if(sel&&zooPos){const [x,y]=zooXY(zooPos.la,zooPos.lo),b=zooBear(x,y,sel[1],sel[2]),sc=Math.abs((ZOO.b.y-ZOO.a.y)/((ZOO.b.la-ZOO.a.la)*111320)),m=Math.hypot(sel[1]-x,sel[2]-y)/sc;
+  dir=`<div class="zoo-dir"><span class="za" data-b="${b.toFixed(0)}" style="transform:rotate(${zooHd!=null?(b-zooHd+360)%360:b}deg)">⬆</span><div>往 <b>${sel[3]} ${sel[4]}</b>：${zooHd!=null?`在你的<b class="zrel">${zooRel(b-zooHd)}</b>`:`往<b>${zDirName(b)}</b>方`}，直線約 ${m<1000?Math.round(m/10)*10+' m':(m/1000).toFixed(1)+' km'}<br><span class="sub">箭頭跟著手機轉，箭頭朝上＝往前走</span></div></div>`}
+ el.querySelector('.zoo-info').innerHTML=(dir)+(sel?`<div class="zoo-card"><b>${sel[3]} ${sel[4]}</b><span class="zt ${sel[6]}">${{safari:'🚗 自駕／叢林巴士',walk:'🚶 步行區',svc:'🧭 設施'}[sel[6]]}</span><p>${sel[5]}</p></div>`:'<div class="hint">👆 點地圖上的圖示看介紹；定位時點目的地，會出現指路箭頭</div>')}
 function zooOpen(){let m=$('#zooModal');if(!m){m=document.createElement('div');m.className='cl-modal';m.id='zooModal';m.innerHTML=`<div class="cl-sheet sec"><div class="cl-mh"><h3>🗺️ 九州自然動物園 互動地圖</h3><button class="cl-x" data-zx="1">✕</button></div>
  <div class="zoo-leg"><span class="safari">🚗 自駕區</span><span class="walk">🚶 步行區</span><span class="svc">🧭 設施</span></div>
  <div id="zooBox"><div class="zoo-map"><img alt="園區地圖"><div class="zoo-pins"></div></div><div class="zoo-st"></div><div class="acts"><button class="btn pri" data-zg="1">📍 開始定位</button><a class="btn" href="${mapUrl('九州自然動物公園アフリカンサファリ')}" target="_blank" rel="noopener">Google 地圖</a></div><div class="zoo-info"></div>
  <div class="lg-f">園區圖是插畫、沒有照比例，GPS 點是用資訊中心和袋鼠森林兩點推算的大約位置，自駕區越遠誤差越大，看方向就好。</div></div></div>`;document.body.appendChild(m);
-  m.addEventListener('click',e=>{if(e.target===m||e.target.closest('[data-zx]')){m.classList.remove('on');document.body.classList.remove('cl-lock');return}
+  m.addEventListener('click',e=>{if(e.target===m||e.target.closest('[data-zx]')){if(zooWatch!=null){navigator.geolocation.clearWatch(zooWatch);zooWatch=null;zooCompassOff();zooHd=null;const gb=m.querySelector('[data-zg]');if(gb)gb.textContent='📍 開始定位'}m.classList.remove('on');document.body.classList.remove('cl-lock');return}
    const p=e.target.closest('[data-zp]');if(p){zooSel=zooSel===p.dataset.zp?null:p.dataset.zp;zooDraw();return}
-   const g=e.target.closest('[data-zg]');if(g){if(zooWatch!=null){navigator.geolocation.clearWatch(zooWatch);zooWatch=null;g.textContent='📍 開始定位';return}
+   const g=e.target.closest('[data-zg]');if(g){if(zooWatch!=null){navigator.geolocation.clearWatch(zooWatch);zooWatch=null;zooCompassOff();zooHd=null;g.textContent='📍 開始定位';zooDraw();return}
+    zooCompassOn();
     if(!navigator.geolocation){toast('這台手機不支援定位');return}g.textContent='⏹ 停止定位';$('#zooBox .zoo-st').textContent='定位中…第一次會跳出允許定位的視窗';
-    zooWatch=navigator.geolocation.watchPosition(ps=>{zooPos={la:ps.coords.latitude,lo:ps.coords.longitude,acc:ps.coords.accuracy};zooDraw()},er=>{$('#zooBox .zoo-st').textContent='無法定位：'+(er.code===1?'請在設定允許 Safari／瀏覽器使用位置':'訊號不好，稍後再試');g.textContent='📍 開始定位';zooWatch=null},{enableHighAccuracy:true,maximumAge:5000,timeout:20000})}});
+    zooWatch=navigator.geolocation.watchPosition(ps=>{const c=ps.coords;zooPos={la:c.latitude,lo:c.longitude,acc:c.accuracy};if(zooHdSrc!=='compass'&&c.heading!=null&&!isNaN(c.heading)&&(c.speed||0)>0.6){zooHd=c.heading;zooHdSrc='gps'}zooDraw()},er=>{$('#zooBox .zoo-st').textContent='無法定位：'+(er.code===1?'請在設定允許 Safari／瀏覽器使用位置':'訊號不好，稍後再試');g.textContent='📍 開始定位';zooWatch=null},{enableHighAccuracy:true,maximumAge:5000,timeout:20000})}});
   const im=m.querySelector('img');if(zooImg)im.src=zooImg;else{const c=(()=>{try{return localStorage.getItem('fuk26_zoomapimg')}catch(e){return null}})();if(c){zooImg=c;im.src=c}else fetch(ZOO.img).then(r=>r.json()).then(u=>{zooImg=u;im.src=u;try{localStorage.setItem('fuk26_zoomapimg',u)}catch(e){}}).catch(()=>toast('地圖載入失敗，請確認網路'))}}
  m.classList.add('on');document.body.classList.add('cl-lock');zooDraw()}
 document.addEventListener('click',e=>{if(e.target.closest('[data-zoo]'))zooOpen()});
