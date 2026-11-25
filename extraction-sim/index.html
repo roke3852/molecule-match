@@ -335,6 +335,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
 .bl-eyx{display:flex;justify-content:space-between;font-size:10.5px;color:var(--muted);margin-left:calc(6.5em + 8px);margin-right:calc(4em + 8px)}
 .bl-ch{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px}.bl-c{border:1px solid var(--line);border-radius:10px;padding:8px 10px}.bl-c p{margin:3px 0 0;font-size:12.5px;color:var(--muted)}.bl-c.done{border-color:var(--gold);background:rgba(201,144,0,.07)}.bl-c.now{box-shadow:0 0 0 2px var(--accent)}
 .bl-save{display:flex;gap:8px}.bl-save input{flex:1;min-width:0;font:inherit;padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:var(--panel);color:var(--ink)}
+.dz-ren input{width:100%;font:inherit;font-size:15px;padding:6px 8px;border:1px solid var(--accent);border-radius:8px;background:var(--panel);color:var(--ink);margin-bottom:3px}
 .bl-sv{display:flex;align-items:center;gap:6px;border-bottom:1px solid var(--line);padding:8px 0}.bl-sv>div{flex:1;min-width:0;display:grid}.bl-sv button{border:1px solid var(--line);background:transparent;border-radius:8px;color:var(--ink);font:inherit;font-size:13px;padding:4px 10px;cursor:pointer;white-space:nowrap}
 .dz .dz-g2{grid-template-columns:1fr 1fr}.dz .dz-g2 select{width:100%}.dz .dz-in input{width:100%;font:inherit;padding:6px 8px;border:1px solid var(--line);border-radius:8px;background:var(--panel);color:var(--ink)}
 .dz #dzTpl{max-width:100%;flex:1 1 220px}
@@ -1409,7 +1410,7 @@ window.BGM=(()=>{
     <div class="err" id="tErr"></div>
   </div>
   <button class="t-more" id="tMore" type="button" aria-label="咖啡宇宙：更多咖啡 App 與遊戲">咖啡宇宙</button>
-  <div class="t-foot">© 2026 Jim Lu　ver. 10.4</div>
+  <div class="t-foot">© 2026 Jim Lu　ver. 10.5</div>
 </div>
 <nav class="modes" aria-label="導覽"><div class="in">
   <button class="homebtn" id="homeBtn" type="button" hidden>‹ 主選單</button>
@@ -9627,7 +9628,12 @@ function setDzTab(t,quiet){D.tab=t;document.querySelectorAll('#dzTabs [data-t]')
   saveD();if(!quiet){const tb=$('dzTabs');if(tb&&tb.getBoundingClientRect().top<0)tb.scrollIntoView({block:'start'});}}
 window.__dzTab=setDzTab;
 function renderSaved(){let a=[];try{a=JSON.parse(localStorage.getItem(DSV)||'[]');}catch(e){}
-  $('dzSaved').innerHTML=a.length?a.map(x=>'<div class="bl-sv"><div><b>'+esc(x.name)+'</b><span class="label">'+esc(x.sum)+'</span></div><button type="button" data-ld="'+x.id+'">載入</button><button type="button" data-del="'+x.id+'" aria-label="刪除">✕</button></div>').join(''):'<p class="label">還沒有存過手法。</p>';}
+  $('dzSaved').innerHTML=a.length?a.map(x=>x.id===renId?'<div class="bl-sv dz-ren"><div><input type="text" maxlength="30" value="'+esc(x.name)+'" data-rin="'+x.id+'" aria-label="新名稱"><span class="label">'+esc(x.sum)+'</span></div><button type="button" data-rok="'+x.id+'" class="savebtn">好</button><button type="button" data-rno="1" aria-label="取消">取消</button></div>':
+    '<div class="bl-sv"><div><b>'+esc(x.name)+'</b><span class="label">'+esc(x.sum)+'</span></div><button type="button" data-ren="'+x.id+'" aria-label="改名稱">✏️</button><button type="button" data-ld="'+x.id+'">載入</button><button type="button" data-del="'+x.id+'" aria-label="刪除">✕</button></div>').join(''):'<p class="label">還沒有存過手法。</p>';
+  const ri=$('dzSaved').querySelector('[data-rin]');if(ri){ri.focus();ri.select();}}
+let renId=null;
+function renameDesign(id,nm){nm=(nm||'').trim();if(!nm){toastMsg('名稱不能空白');return;}let a=[];try{a=JSON.parse(localStorage.getItem(DSV)||'[]');}catch(e){}const x=a.find(y=>y.id===id);if(!x)return;x.name=nm.slice(0,30);
+  try{localStorage.setItem(DSV,JSON.stringify(a));}catch(e){}renId=null;renderSaved();renderQuick();renderCmp();const n=$('dzTplName');if(n)n.textContent=tplName();toastMsg('已改名：'+x.name);}
 function setTpl(id){const t=TPL.find(x=>x.id===id);if(!t)return;Object.assign(D,t.mk(),{tpl:id,tail:0,meas:[],sid:null,tname:null});sel=0;render();}
 function bind(){const v=$('designView');if(!v||v.dataset.b)return;v.dataset.b=1;
   $('dzTpl').innerHTML='<option value="">（自訂中）</option>'+TPL.map(t=>'<option value="'+t.id+'">'+esc(t.n)+'</option>').join('');
@@ -9656,8 +9662,12 @@ function bind(){const v=$('designView');if(!v||v.dataset.b)return;v.dataset.b=1;
   $('dzTab').addEventListener('change',e=>{const t=e.target;if(!t.classList.contains('dz-meas'))return;D.meas=D.meas||[];D.meas[+t.dataset.j]=t.value===''?null:+t.value;render();});
   $('dzSave').onclick=()=>{saveDesign(true,$('dzName').value.trim()||null);$('dzName').value='';};
   $('dzSaved').addEventListener('click',e=>{const t=e.target.closest('button');if(!t)return;let a=[];try{a=JSON.parse(localStorage.getItem(DSV)||'[]');}catch(er){}
+    if(t.dataset.ren){renId=t.dataset.ren;renderSaved();return;}
+    if(t.dataset.rno){renId=null;renderSaved();return;}
+    if(t.dataset.rok){renameDesign(t.dataset.rok,$('dzSaved').querySelector('[data-rin]').value);return;}
     if(t.dataset.ld){loadDesign(t.dataset.ld);setDzTab('set');$('dzSegsP').scrollIntoView({behavior:'smooth',block:'start'});}
     if(t.dataset.del){if(t.dataset.ok){try{localStorage.setItem(DSV,JSON.stringify(a.filter(y=>y.id!==t.dataset.del)));}catch(er){}if(D.sid===t.dataset.del)D.sid=null;renderSaved();renderQuick();renderCmp();}else{t.dataset.ok=1;t.textContent='確定？';setTimeout(()=>{t.dataset.ok='';t.textContent='✕';},2500);}}});
+  $('dzSaved').addEventListener('keydown',e=>{const i=e.target.closest('[data-rin]');if(!i)return;if(e.key==='Enter'){e.preventDefault();renameDesign(i.dataset.rin,i.value);}if(e.key==='Escape'){renId=null;renderSaved();}});
   $('dzToSim').onclick=()=>{if(!window.simApplyRecipe||!A)return;const p=A.p,sg=A.sg;
     simApplyRecipe({dripper:p.dripper,dose:p.dose,ratio:p.ratio,temp:p.temp,grind:p.grind,roast:p.roast,pattern:'pulse',plan:p.plan,planT:sg.map(g=>Math.round(g.s)),planD:sg.map(g=>Math.round(g.e-g.s)),planTemp:p.planTemp,planStyle:p.planStyle,beanId:D.bean,bypassMl:p.bypassMl,prePO:'none'});
     location.hash='#sim';toastMsg('已帶到模擬器');};}
