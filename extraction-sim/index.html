@@ -351,6 +351,16 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
 .dz-ctr.hd>span{font-family:inherit;font-weight:700;font-size:12.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.dz-ctr .best{color:#6fcf97;font-weight:700}.dz-ctr .best::after{content:" ★";font-size:10px}
 .dz-cmp-h{margin:16px 0 4px;font-size:15px}
 .dz-off{display:none!important}.dz-cv{flex-wrap:wrap;margin:10px 0 6px}.dz-cv button{flex:1 0 auto}.dz-cvb{min-height:200px}
+.dz-wb{display:flex;height:26px;border-radius:8px;overflow:hidden;margin:8px 0 2px;border:1px solid var(--line)}.dz-wb i{display:block;height:100%}
+.dz-wl{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:8px}
+.dz-cr{display:grid;grid-template-columns:6.4em 1fr 5em 3.6em;gap:6px;align-items:center;padding:6px 0;border-bottom:1px solid var(--line);font-size:13px}.dz-cr>*{min-width:0}
+.dz-cr .bar{height:10px;border-radius:5px;background:var(--line);overflow:hidden}.dz-cr .bar i{display:block;height:100%;border-radius:5px}
+.dz-cr b{font-family:var(--f-mono);font-weight:500;text-align:right;white-space:nowrap}.dz-cr small{font-family:var(--f-mono);color:var(--muted);text-align:right;font-size:11px}
+.dz-cr span:first-child{display:flex;align-items:center;gap:5px;line-height:1.2}.dz-cr span:first-child i{width:9px;height:9px;border-radius:2px;flex:0 0 auto}
+.dz-cr.w{border-bottom:2px solid var(--line)}.dz-cr.tot b{font-weight:700}
+.dz-cmat{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:6px 0}.dz-cmat table{border-collapse:collapse;font-size:12px;white-space:nowrap;min-width:100%}
+.dz-cmat th,.dz-cmat td{padding:5px 7px;text-align:right;border-bottom:1px solid var(--line);font-family:var(--f-mono);font-weight:400}.dz-cmat th{font-family:inherit;color:var(--muted);font-size:11px}
+.dz-cmat th:first-child,.dz-cmat td:first-child{text-align:left;position:sticky;left:0;background:var(--panel);font-family:inherit}.dz-cmat tr.on td{color:var(--accent)}.dz-cmat tr.sum td{font-weight:700;border-top:2px solid var(--line)}
 .dz-st{display:flex;align-items:center;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--panel)}
 .dz-st button{width:48px;height:42px;border:0;background:transparent;color:var(--accent);font-size:22px;font-weight:700;cursor:pointer;touch-action:manipulation;-webkit-user-select:none;user-select:none}
 .dz-st button:active{background:rgba(226,189,106,.15)}.dz-st b{flex:1;text-align:center;font-family:var(--f-mono);font-weight:500;font-size:16px;white-space:nowrap}
@@ -1373,7 +1383,7 @@ window.BGM=(()=>{
     <div class="err" id="tErr"></div>
   </div>
   <button class="t-more" id="tMore" type="button" aria-label="咖啡宇宙：更多咖啡 App 與遊戲">咖啡宇宙</button>
-  <div class="t-foot">© 2026 Jim Lu　ver. 9.5</div>
+  <div class="t-foot">© 2026 Jim Lu　ver. 9.6</div>
 </div>
 <nav class="modes" aria-label="導覽"><div class="in">
   <button class="homebtn" id="homeBtn" type="button" hidden>‹ 主選單</button>
@@ -1974,6 +1984,15 @@ window.BGM=(()=>{
     <div id="dzTab" class="dz-tab"></div>
     <div class="bl-dir" id="dzIns"></div>
     <p class="label">「依注水段」：每段開始到下一段開始之間滴下的液體算一份。滴濾有延遲，所以悶蒸那一份常常幾乎是空的。「等重分杯」：依杯中重量平均切成幾杯，和用 TDS 計做分杯實驗的方法一樣，可以填實測值對照。</p>
+  </section>
+  <section class="panel" id="dzCompP" data-dz="res">
+    <div class="bl-hd"><h2>每段的成分：溶質＋水</h2><div class="seg" id="dzCu" role="group" aria-label="單位"><button type="button" data-u="mg">毫克</button><button type="button" data-u="g">克</button><button type="button" data-u="mmol">毫莫耳</button></div></div>
+    <p class="label">選一段，看那一杯液體裡各種物質有多少，剩下的就是水。</p>
+    <div id="dzCsel" class="dz-chips"></div>
+    <div id="dzComp"></div>
+    <h3 class="dz-cmp-h">全部段一覽</h3>
+    <div id="dzCmat" class="dz-cmat"></div>
+    <p class="label">毫莫耳用代表分子的分子量換算：有機酸以檸檬酸（192）、咖啡因 194、糖以蔗糖（342）、綠原酸以 5-咖啡醯奎寧酸（354）、花果香以乙酸異戊酯（130）、烘焙香以 2-甲基吡嗪（94）計。苦味大分子（類黑素）是大小不一的聚合物，沒有固定分子量，所以不換算莫耳數。</p>
   </section>
   <section class="panel" id="dzPathP" data-dz="path">
     <h2>金杯圖上的萃取軌跡</h2>
@@ -9179,7 +9198,7 @@ function render(){const v=$('designView');if(!v||v.hidden)return;A=analyze(D);if
   const rows=EXP.filter(e=>!e.ok||e.ok(D)).map(e=>{const X=clone(D);e.f(X);const r=analyze(X,1);return {e,r};}).filter(x=>x.r);
   const dd=(v,dec,good)=>{const t=Math.abs(v)<Math.pow(10,-dec)/2?'<span class="z">0</span>':'<span class="'+(good==null?'':(good>0)===(v>0)?'ok':'bad')+'">'+(v>0?'+':'−')+Math.abs(v).toFixed(dec)+'</span>';return t;};
   $('dzExp').innerHTML='<div class="dz-e dz-h"><span>如果…</span><span>EY</span><span>TDS</span><span>甜</span><span>苦</span><span>分數</span><span></span></div>'+rows.map(({e,r})=>'<div class="dz-e"><span>'+e.n+'</span>'+dd(r.cup.ey-A.cup.ey,1)+dd(r.cup.tds-A.cup.tds,2)+dd((r.pf.sweet-A.pf.sweet)/2,1,1)+dd((r.pf.bitter-A.pf.bitter)/2,1,-1)+dd(r.score-A.score,0,1)+'<button type="button" class="dz-mini" data-e="'+e.id+'">試</button></div>').join('');
-  renderSaved();renderCmp();saveD();}
+  renderComp();renderSaved();renderCmp();saveD();}
 
 // ---- 分段注水：時間軸＋滑桿編輯（不用打字） ----
 let sel=0,drag=false,hold=false,mvA=true;
@@ -9332,6 +9351,35 @@ function renderCmp(){let a=[];try{a=JSON.parse(localStorage.getItem(DSV)||'[]');
 function bindCmp(){$('dzCmpOut').addEventListener('click',e=>{const b=e.target.closest('[data-cv]');if(!b)return;cv=b.dataset.cv;renderCmp();});$('dzCmpPick').addEventListener('click',e=>{const b=e.target.closest('[data-c]');if(!b)return;const id=b.dataset.c;
   const j=CS.indexOf(id);if(j>=0)CS.splice(j,1);else{if(CS.length>=4)return toastMsg('最多比較 4 套');CS.push(id);}saveCS();renderCmp();});}
 
+
+// ---- 每段的成分：溶質（克／毫克／毫莫耳）＋水 ----
+const MW=[192.1,194.2,342.3,354.3,null,130.2,94.1],CCL=['var(--acid)','var(--caf)','var(--sugar)','var(--cga)','var(--bitter)','#e87fb0','#c9905a'];
+let csel=-1,cu='mg';
+const cuv=(g,i)=>cu==='g'?g:cu==='mg'?g*1000:(MW[i]?g*1000/MW[i]:null);
+const cfmt=v=>{if(v==null)return '—';if(cu==='g')return v<.001?v.toExponential(1):v.toFixed(v<.01?4:v<1?3:2);if(cu==='mg')return v<1?v.toFixed(2):v<100?v.toFixed(1):Math.round(v);return v<.01?v.toFixed(4):v.toFixed(3);};
+const cun=()=>cu==='g'?'g':cu==='mg'?'mg':'mmol';
+function renderComp(){if(!A)return;const F=A.F;if(csel<0||csel>=F.length){csel=F.findIndex(f=>!f.byp&&f.v>=3);if(csel<0)csel=0;}
+  $('dzCu').querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.u===cu)));
+  $('dzCsel').innerHTML=F.map((f,j)=>'<button type="button" class="dz-chip'+(j===csel?' on':'')+(f.byp?' tail':'')+'" data-j="'+j+'" aria-pressed="'+(j===csel)+'"><b>'+(f.byp?'補':f.lab.replace(/第 | 段| 杯| 悶蒸/g,''))+'</b><span>'+Math.round(f.v)+'g</span><small>'+(f.byp?'水':f.v<3?'–':f.tds.toFixed(2)+'%')+'</small></button>').join('');
+  const f=F[csel],water=Math.max(0,f.v-f.tot),sp=f.v>0?f.tot/f.v*100:0,rows=CMP.map((c,i)=>({i,n:c.name,g:f.m[i]})),mx=Math.max(1e-9,...rows.map(r=>r.g));
+  $('dzComp').innerHTML='<div class="dz-wb" aria-hidden="true"><i style="width:'+Math.max(0,100-Math.max(sp,0))+'%;background:#7fb6e0;opacity:.55"></i><i style="width:'+Math.max(sp?1.5:0,sp)+'%;background:var(--accent)"></i></div>'+
+    '<div class="dz-wl"><span>💧 水 '+water.toFixed(1)+' g（'+(100-sp).toFixed(sp<1?2:1)+'%）</span><span>☕ 溶質 '+(f.tot*1000).toFixed(0)+' mg（'+sp.toFixed(2)+'%）</span></div>'+
+    '<p class="label">'+(f.byp?'補水：直接加進杯子的水，不含任何咖啡物質。':f.v<3?'這段時間幾乎沒有液體滴下來。':esc(f.lab)+'（'+fmt(f.t0)+'–'+fmt(f.t1)+'）共滴下 '+f.v.toFixed(1)+' g 液體，其中 '+water.toFixed(1)+' g 是水，'+(f.tot*1000).toFixed(0)+' mg 是溶出的物質。')+'</p>'+
+    '<div class="dz-cr dz-h"><span>物質</span><span></span><span style="text-align:right">'+cun()+'</span><span style="text-align:right">佔液體</span></div>'+
+    rows.map(r=>'<div class="dz-cr"><span><i style="background:'+CCL[r.i]+'"></i>'+r.n+'</span><span class="bar"><i style="width:'+(r.g/mx*100).toFixed(1)+'%;background:'+CCL[r.i]+'"></i></span><b>'+cfmt(cuv(r.g,r.i))+'</b><small>'+(f.v>0?(r.g/f.v*100).toFixed(r.g/f.v*100<.01?4:3)+'%':'—')+'</small></div>').join('')+
+    '<div class="dz-cr tot"><span>溶質合計</span><span></span><b>'+(cu==='mmol'?'—':cfmt(cu==='g'?f.tot:f.tot*1000))+'</b><small>'+sp.toFixed(2)+'%</small></div>'+
+    '<div class="dz-cr w"><span>💧 水</span><span class="bar"><i style="width:100%;background:#7fb6e0;opacity:.55"></i></span><b>'+(cu==='mg'?Math.round(water*1000).toLocaleString():cu==='g'?water.toFixed(1):(water/18.015*1000).toFixed(0))+'</b><small>'+(f.v>0?(100-sp).toFixed(2)+'%':'—')+'</small></div>'+
+    (cu==='mmol'?'<p class="label">水換成莫耳數：'+water.toFixed(1)+' g ÷ 18.0 = '+(water/18.015*1000).toFixed(0)+' 毫莫耳；有分子量的溶質加起來約 '+(()=>{const m=f.m.reduce((x,g,i)=>x+(MW[i]?g*1000/MW[i]:0),0);return m.toFixed(2)+' 毫莫耳，水分子大約是它的 '+(m>0?Math.round(water/18.015*1000/m).toLocaleString():'—')+' 倍';})()+'。</p>':'');
+  // 全部段一覽
+  const real=F,cols=CMP.map((c,i)=>({i,n:c.name.replace('糖與甜感','糖').replace('苦味大分子','苦味大分子')}));
+  const tot=Array(NC).fill(0);let tw=0,tv=0;
+  $('dzCmat').innerHTML='<table><thead><tr><th>段</th><th>液體 g</th><th>水 g</th>'+cols.map(c=>'<th>'+c.n+'<br>'+cun()+'</th>').join('')+'<th>TDS</th></tr></thead><tbody>'+
+    real.map((f,j)=>{const w=Math.max(0,f.v-f.tot);tw+=w;tv+=f.v;f.m.forEach((g,i)=>tot[i]+=g);
+      return '<tr class="'+(j===csel?'on':'')+'"><td>'+(f.byp?'補水':esc(f.lab))+'</td><td>'+f.v.toFixed(1)+'</td><td>'+w.toFixed(1)+'</td>'+cols.map(c=>'<td>'+(f.byp?'0':cfmt(cuv(f.m[c.i],c.i)))+'</td>').join('')+'<td>'+(f.byp?'0':f.v<3?'–':f.tds.toFixed(2)+'%')+'</td></tr>';}).join('')+
+    '<tr class="sum"><td>整杯</td><td>'+tv.toFixed(1)+'</td><td>'+tw.toFixed(1)+'</td>'+cols.map(c=>'<td>'+cfmt(cuv(tot[c.i],c.i))+'</td>').join('')+'<td>'+A.cup.tds.toFixed(2)+'%</td></tr></tbody></table>';}
+function bindComp(){$('dzCu').addEventListener('click',e=>{const b=e.target.closest('[data-u]');if(!b)return;cu=b.dataset.u;renderComp();});
+  $('dzCsel').addEventListener('click',e=>{const b=e.target.closest('[data-j]');if(!b)return;csel=+b.dataset.j;renderComp();});
+  $('dzCmat').addEventListener('click',e=>{const tr=e.target.closest('tbody tr');if(!tr||tr.classList.contains('sum'))return;csel=[...tr.parentNode.children].indexOf(tr);renderComp();});}
 // ---- 手法設計分頁 ----
 function setDzTab(t,quiet){D.tab=t;document.querySelectorAll('#dzTabs [data-t]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.t===t)));
   document.querySelectorAll('#designView [data-dz]').forEach(el=>el.classList.toggle('dz-off',!el.dataset.dz.split(' ').includes(t)));
@@ -9351,7 +9399,7 @@ function bind(){const v=$('designView');if(!v||v.dataset.b)return;v.dataset.b=1;
   $('dzDrip').onchange=e=>{D.dripper=e.target.value;mod();render();};
   $('dzRoast').oninput=e=>{D.roast=+e.target.value;mod();later();};
   $('dzGrind').oninput=e=>{D.grind=gum(+e.target.value);mod();later();};
-  bindSeg();bindCmp();
+  bindSeg();bindCmp();bindComp();
   $('dzTabs').addEventListener('click',e=>{const b=e.target.closest('[data-t]');if(!b)return;try{SFX.p('page')}catch(x){}setDzTab(b.dataset.t);});setDzTab(D.tab||'set',1);
 
   $('dzTail').onchange=e=>{D.tail=+e.target.value;mod();render();};
