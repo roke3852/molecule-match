@@ -1409,7 +1409,7 @@ window.BGM=(()=>{
     <div class="err" id="tErr"></div>
   </div>
   <button class="t-more" id="tMore" type="button" aria-label="咖啡宇宙：更多咖啡 App 與遊戲">咖啡宇宙</button>
-  <div class="t-foot">© 2026 Jim Lu　ver. 10.2</div>
+  <div class="t-foot">© 2026 Jim Lu　ver. 10.3</div>
 </div>
 <nav class="modes" aria-label="導覽"><div class="in">
   <button class="homebtn" id="homeBtn" type="button" hidden>‹ 主選單</button>
@@ -2023,9 +2023,9 @@ window.BGM=(()=>{
     <p class="label">毫莫耳用代表分子的分子量換算：有機酸以檸檬酸（192）、咖啡因 194、糖以蔗糖（342）、綠原酸以 5-咖啡醯奎寧酸（354）、花果香以乙酸異戊酯（130）、烘焙香以 2-甲基吡嗪（94）計。苦味大分子（類黑素）和多醣類都是大小不一的聚合物，沒有固定分子量，所以不換算莫耳數。多醣類原本算在苦味大分子這一大類裡，這裡把它拆出來，所以溶質總量不變。</p>
   </section>
   <section class="panel" id="dzPathP" data-dz="path">
-    <h2>金杯圖上的萃取軌跡</h2>
-    <div id="dzPath" class="cm-chart"></div>
-    <p class="label">數字 n 是「在第 n 份之後斷水，剩下的水改成補水」時這杯的位置，★ 是照完整手法沖完的結果。杯重相同，所以所有點都在同一條粉水比線上；每多一段，點就往右上推一點，越後面推得越少。灰色虛線是比較基準。</p>
+    <div class="bl-hd"><h2>金杯圖上的萃取軌跡</h2><div class="seg" id="dzPm" role="group" aria-label="軌跡"><button type="button" data-v="real">沖煮中的杯子</button><button type="button" data-v="cut">斷水＋補水</button></div></div>
+    <div id="dzPath" class="cm-chart"></div><p class="label" id="dzPathNote"></p>
+    
   </section>
   <section class="panel" id="dzCutP" data-dz="path">
     <h2>斷水點與味道</h2>
@@ -9190,6 +9190,33 @@ function pathSvg(A,Bx){const W=340,H=250,x0=34,y0=10,w=W-x0-10,h=H-y0-36,ex=[0,2
   const L=A.cut[A.cut.length-1];if(L)s+='<text x="'+(X(L.ey)+(X(L.ey)>x0+w*.7?-12:12))+'" y="'+(Y(L.tds)-8)+'" font-size="9.5" font-weight="700" text-anchor="'+(X(L.ey)>x0+w*.7?'end':'start')+'" fill="var(--ink)" paint-order="stroke" stroke="var(--panel)" stroke-width="3">'+L.ey.toFixed(1)+'%・'+L.tds.toFixed(2)+'%</text>';
   s+='<text x="'+(x0+w)+'" y="'+(H-4)+'" font-size="9" text-anchor="end" fill="var(--muted)">萃取率 EY % →</text><text x="'+x0+'" y="'+(H-4)+'" font-size="9" fill="var(--muted)">↑ TDS %</text>';
   return s+'</svg>';}
+
+// ---- 實際軌跡：沖煮中「杯子裡」的萃取率與濃度（每秒一點） ----
+function realTraj(A){const R=A.s.rec,L=R[R.length-1],o=[];R.forEach(r=>{const v=r===L?A.Vtot-A.byp:r.cupV;if(v<2)return;const m=core7(r.cupM).reduce((a,b)=>a+b,0);o.push({t:r.t,ey:m/A.dose*100,tds:m/v*100});});
+  const lastM=core7(L.cupM).reduce((a,b)=>a+b,0);return {pts:o,fin:{ey:lastM/A.dose*100,tds:lastM/A.Vtot*100},pre:o[o.length-1]};}
+const LOGT=[.5,12];
+function goldAxes(W,H,x0,y0,w,h,ex){const lo=Math.log(LOGT[0]),hi=Math.log(LOGT[1]);
+  const X=v=>x0+(Math.max(ex[0],Math.min(ex[1],v))-ex[0])/(ex[1]-ex[0])*w,Y=v=>y0+h-(Math.log(Math.max(LOGT[0],Math.min(LOGT[1],v)))-lo)/(hi-lo)*h;
+  let s='<rect x="'+X(18)+'" y="'+Y(1.45)+'" width="'+(X(22)-X(18))+'" height="'+(Y(1.15)-Y(1.45))+'" fill="rgba(226,189,106,.2)" stroke="var(--gold)" stroke-width="1.3"/>';
+  [0,5,10,15,18,22,26].filter(e=>e>=ex[0]).forEach(e=>s+='<line x1="'+X(e)+'" x2="'+X(e)+'" y1="'+y0+'" y2="'+(y0+h)+'" stroke="var(--line)" stroke-width=".5"/><text x="'+X(e)+'" y="'+(y0+h+11)+'" font-size="8" text-anchor="middle" fill="var(--muted)">'+e+'</text>');
+  [.5,.8,1.15,1.45,2,3,5,8,12].forEach(t=>s+='<line x1="'+x0+'" x2="'+(x0+w)+'" y1="'+Y(t)+'" y2="'+Y(t)+'" stroke="var(--line)" stroke-width="'+(t===1.15||t===1.45?0:.4)+'"/><text x="'+(x0-3)+'" y="'+(Y(t)+3)+'" font-size="8" text-anchor="end" fill="'+(t===1.15||t===1.45?'var(--gold)':'var(--muted)')+'">'+t+'</text>');
+  return {X,Y,s};}
+function realSvg(A,Bx){const W=340,H=260,x0=30,y0=8,w=W-x0-8,h=H-y0-34,G=goldAxes(W,H,x0,y0,w,h,[0,26]),X=G.X,Y=G.Y;
+  let s='<svg viewBox="0 0 '+W+' '+H+'" width="100%" role="img" aria-label="沖煮中杯子的萃取軌跡">'+G.s;
+  const line=(T,col,da,sw)=>'<path d="'+T.pts.map((q,i)=>(i?'L':'M')+X(q.ey).toFixed(1)+' '+Y(q.tds).toFixed(1)).join('')+'" fill="none" stroke="'+col+'" stroke-width="'+(sw||1.8)+'" stroke-linejoin="round"'+(da?' stroke-dasharray="'+da+'"':'')+'/>';
+  if(Bx&&Bx.s){const TB=realTraj(Bx);s+=line(TB,'var(--muted)','4 3',1.3);}
+  const T=realTraj(A);s+=line(T,'var(--accent)');
+  // 每段開始注水的位置
+  A.sg.forEach((g,i)=>{const q=T.pts.find(p=>p.t>=g.s);if(!q||i===0&&q.t-g.s>6)return;const cx=X(q.ey),cy=Y(q.tds);s+='<circle cx="'+cx+'" cy="'+cy+'" r="5" fill="var(--panel)" stroke="var(--accent)" stroke-width="1.3"/><text x="'+cx+'" y="'+(cy+2.6)+'" font-size="'+(i>=9?5.6:6.8)+'" font-weight="700" text-anchor="middle" fill="var(--ink)">'+(i+1)+'</text>';});
+  const P=T.pre,F=T.fin;
+  if(A.byp>0)s+='<line x1="'+X(P.ey)+'" y1="'+Y(P.tds)+'" x2="'+X(F.ey)+'" y2="'+Y(F.tds)+'" stroke="#7fb6e0" stroke-width="1.6" stroke-dasharray="3 2"/><text x="'+(X(F.ey)+6)+'" y="'+((Y(P.tds)+Y(F.tds))/2)+'" font-size="8.5" fill="#7fb6e0">補水</text>';
+  const cx=X(F.ey),cy=Y(F.tds);s+='<path d="'+[...Array(10)].map((_,q)=>{const a=-Math.PI/2+q*Math.PI/5,rr=q%2?4.5:10;return (q?'L':'M')+(cx+rr*Math.cos(a)).toFixed(1)+' '+(cy+rr*Math.sin(a)).toFixed(1);}).join('')+'Z" fill="var(--gold)" stroke="var(--ink)" stroke-width="1.1"/>';
+  s+='<text x="'+(cx>x0+w*.7?cx-12:cx+12)+'" y="'+(cy+16)+'" font-size="9.5" font-weight="700" text-anchor="'+(cx>x0+w*.7?'end':'start')+'" fill="var(--ink)" paint-order="stroke" stroke="var(--panel)" stroke-width="3">'+F.ey.toFixed(1)+'%・'+F.tds.toFixed(2)+'%</text>';
+  const f0=T.pts[0];if(f0)s+='<text x="'+(X(f0.ey)+7)+'" y="'+(Y(f0.tds)+3)+'" font-size="8.5" fill="var(--muted)">第一滴 '+fmt(f0.t)+'（'+f0.tds.toFixed(1)+'%）</text>';
+  return s+'<text x="'+(x0+w)+'" y="'+(H-4)+'" font-size="9" text-anchor="end" fill="var(--muted)">萃取率 EY % →</text><text x="'+x0+'" y="'+(H-4)+'" font-size="9" fill="var(--muted)">↑ 杯中 TDS %（對數刻度）</text></svg>';}
+let pmode='real';
+const PN_REAL='這是沖煮時杯子裡實際的變化（每秒一點）：第一滴非常濃、萃取率很低，在左上角；之後每注一次水，滴下的液體越來越淡，點就一路往右下走。每次注水、停頓的節奏不同，所以線會轉彎、有快有慢。圈圈數字是第幾段開始注水的位置，★ 是最後的杯子'+'（有補水時，藍色虛線是補水把點往下拉）。灰色虛線是比較基準。';
+const PN_CUT='另一種看法：如果在第 n 段之後就停止注水，剩下的水直接加進杯子（補水），杯子會在哪裡。因為杯重都一樣，這些點一定落在同一條粉水比斜線上，看的是「每多一段，萃取率多推了多少」。灰色線是比較基準。';
 function bestCut(A){if(!A.cut||A.cut.length<3)return null;let b=null;A.cut.forEach((c,i)=>{if(c&&i>=Math.floor(A.cut.length/2)&&(!b||c.score>b.score))b={k:i,score:c.score,ey:c.ey,tds:c.tds};});return b;}
 // ---- 圖：在第幾份斷水，味道怎麼變 ----
 function cutSvg(A){const C=A.cut,n=C.length,W=340,H=190,x0=28,y0=10,w=W-x0-30,h=H-y0-34,X=i=>x0+(n>1?i/(n-1):.5)*w,Y=v=>y0+h-Math.max(0,Math.min(5,v))/5*h,Ys=v=>y0+h-(Math.max(40,Math.min(100,v))-40)/60*h;
@@ -9249,7 +9276,7 @@ function render(){const v=$('designView');if(!v||v.hidden)return;A=analyze(D);if
   $('dzIns').innerHTML='<ul>'+ins.map(x=>'<li>'+x+'</li>').join('')+'</ul>';
   const ac=$('dzApplyCut');if(ac)ac.onclick=()=>{B=A;BL='斷水前（'+Math.round(A.score)+' 分）';D.tail=(D.tail||0)+(A.cut.length-1-bc.k);render();};
   // 金杯軌跡、斷水點
-  $('dzPath').innerHTML=pathSvg(A,B);$('dzCut').innerHTML=cutSvg(A);
+  $('dzPath').innerHTML=(pmode==='real'?realSvg(A,B):pathSvg(A,B));$('dzPm').querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',String(x.dataset.v===pmode)));$('dzPathNote').innerHTML=pmode==='real'?PN_REAL:PN_CUT;$('dzCut').innerHTML=cutSvg(A);
   // 調整實驗
   const rows=EXP.filter(e=>!e.ok||e.ok(D)).map(e=>{const X=clone(D);e.f(X);const r=analyze(X,1);return {e,r};}).filter(x=>x.r);
   const dd=(v,dec,good)=>{const t=Math.abs(v)<Math.pow(10,-dec)/2?'<span class="z">0</span>':'<span class="'+(good==null?'':(good>0)===(v>0)?'ok':'bad')+'">'+(v>0?'+':'−')+Math.abs(v).toFixed(dec)+'</span>';return t;};
@@ -9347,7 +9374,12 @@ function cmpList(){let a=[];try{a=JSON.parse(localStorage.getItem(DSV)||'[]');}c
     const key=JSON.stringify([X.bean,X.roast,X.dripper,X.dose,X.grind,X.segs,X.tail]);let R=ccache[key];if(!R){R=analyze(X);if(R)ccache[key]=R;}
     return {id,name:x.name,X,A:R,col:CCOL[j],L:CLET[j]};}).filter(c=>c.A);}
 function prog(A){const R=A.s.rec;return R.map(r=>({t:r.t,ey:r.cupM.reduce((a,b)=>a+b,0)/A.dose*100}));}
-function cmpGold(C){const W=340,H=240,x0=34,y0=10,w=W-x0-10,h=H-y0-34,ex=[8,26],tx=[0,1.8];
+function cmpGold(C){{const W=340,H=250,x0=30,y0=8,w=W-x0-8,h=H-y0-30,G=goldAxes(W,H,x0,y0,w,h,[0,26]),X=G.X,Y=G.Y;let s='<svg viewBox="0 0 '+W+' '+H+'" width="100%" role="img" aria-label="手法比較金杯軌跡">'+G.s;
+  C.forEach(c=>{const T=realTraj(c.A);s+='<path d="'+T.pts.map((q,i)=>(i?'L':'M')+X(q.ey).toFixed(1)+' '+Y(q.tds).toFixed(1)).join('')+'" fill="none" stroke="'+c.col+'" stroke-width="1.8" stroke-linejoin="round" opacity=".9"/>';
+    if(c.A.byp>0)s+='<line x1="'+X(T.pre.ey)+'" y1="'+Y(T.pre.tds)+'" x2="'+X(T.fin.ey)+'" y2="'+Y(T.fin.tds)+'" stroke="'+c.col+'" stroke-dasharray="3 2"/>';
+    s+='<circle cx="'+X(T.fin.ey)+'" cy="'+Y(T.fin.tds)+'" r="8" fill="'+c.col+'" stroke="var(--panel)" stroke-width="1.5"/><text x="'+X(T.fin.ey)+'" y="'+(Y(T.fin.tds)+3.5)+'" font-size="9.5" font-weight="700" text-anchor="middle" fill="#1b1714">'+c.L+'</text>';});
+  return s+'<text x="'+(x0+w)+'" y="'+(H-4)+'" font-size="9" text-anchor="end" fill="var(--muted)">萃取率 EY % →</text><text x="'+x0+'" y="'+(H-4)+'" font-size="9" fill="var(--muted)">↑ 杯中 TDS %（對數刻度）</text></svg>';}}
+function cmpGoldCut(C){const W=340,H=240,x0=34,y0=10,w=W-x0-10,h=H-y0-34,ex=[8,26],tx=[0,1.8];
   const X=v=>x0+(Math.max(ex[0],Math.min(ex[1],v))-ex[0])/(ex[1]-ex[0])*w,Y=v=>y0+h-(Math.max(tx[0],Math.min(tx[1],v))-tx[0])/(tx[1]-tx[0])*h;
   let s='<svg viewBox="0 0 '+W+' '+H+'" width="100%" role="img" aria-label="手法比較金杯圖"><rect x="'+X(18)+'" y="'+Y(1.45)+'" width="'+(X(22)-X(18))+'" height="'+(Y(1.15)-Y(1.45))+'" fill="rgba(226,189,106,.14)" stroke="var(--gold)" stroke-width="1.2"/>';
   [8,10,14,18,22,26].forEach(e=>s+='<line x1="'+X(e)+'" x2="'+X(e)+'" y1="'+y0+'" y2="'+(y0+h)+'" stroke="var(--line)" stroke-width=".5"/><text x="'+X(e)+'" y="'+(y0+h+11)+'" font-size="8" text-anchor="middle" fill="var(--muted)">'+e+'</text>');
@@ -9474,7 +9506,7 @@ function renderCmp(){let a=[];try{a=JSON.parse(localStorage.getItem(DSV)||'[]');
   $('dzCmpPick').innerHTML=opts.map(x=>{const j=CS.indexOf(x.id);return '<button type="button" data-c="'+x.id+'" class="'+(j>=0?'on':'')+'" aria-pressed="'+(j>=0)+'"><i style="'+(j>=0?'background:'+CCOL[j]:'')+'"></i>'+(j>=0?CLET[j]+' ':'')+esc(x.name)+'</button>';}).join('');
   const C=cmpList(),out=$('dzCmpOut');
   if(C.length<2){out.innerHTML='<p class="label">'+(a.length?'再勾一套就能開始比較。':'先用上面的「💾 存目前設定」存一套，改一改再存一套，就能在這裡比較。')+'</p>';return;}
-  const V={comp:()=>cmpComp(C),tab:()=>cmpTable(C),gold:()=>'<div class="cm-chart">'+cmpGold(C)+'</div><p class="label">大圓點是沖完的位置，小點是每段斷水的位置。軌跡越長，表示後段還在推進；擠在一起，表示後段幾乎沒加什麼。</p>',
+  const V={comp:()=>cmpComp(C),tab:()=>cmpTable(C),gold:()=>'<div class="cm-chart">'+cmpGold(C)+'</div><p class="label">每條線是沖煮時杯子裡實際的變化：從左上（第一滴很濃）一路往右下走，大圓點是最後的杯子。線在哪裡轉彎、走多快，就是兩套手法注水節奏不同的地方。</p>',
     prog:()=>'<div class="cm-chart">'+cmpProg(C)+'</div><p class="label">曲線越早往上衝，表示前段萃得越兇。兩條線分開的時間點，就是兩套手法真正不一樣的地方。</p>',
     tl:()=>'<div class="cm-chart">'+cmpTl(C)+'</div><p class="label">柱子越高水量越多，虛線是滴完的時間。</p>',mix:()=>'<div class="cm-chart">'+cmpMix(C)+'</div>'};
   if(!V[cv])cv='comp';
@@ -9614,6 +9646,7 @@ function bind(){const v=$('designView');if(!v||v.dataset.b)return;v.dataset.b=1;
   $('dzTail').onchange=e=>{D.tail=+e.target.value;mod();render();};
   $('dzFm').onclick=e=>{const x=e.target.closest('button');if(!x)return;D.fm=x.dataset.v;render();};
   $('dzNEven').onchange=e=>{D.nEven=Math.max(3,Math.min(12,+e.target.value||10));D.meas=[];render();};
+  $('dzPm').onclick=e=>{const x=e.target.closest('button');if(!x)return;pmode=x.dataset.v;render();};
   $('dzFmd').onclick=e=>{const x=e.target.closest('button');if(!x)return;fmode=x.dataset.v;render();};
   $('dzAdd').onclick=()=>{if(D.segs.length>=12)return toastMsg('最多 12 段');const L=D.segs[D.segs.length-1],P=D.segs[D.segs.length-2];D.segs.push({ml:L.ml,t:L.t+(P?Math.max(8,L.t-P.t):30),temp:L.temp,sty:L.sty,d:null});sel=D.segs.length-1;mod();render();};
   $('dzDel').onclick=()=>{if(D.segs.length<=2)return;D.segs.pop();sel=Math.min(sel,D.segs.length-1);D.tail=Math.min(D.tail||0,D.segs.length-2);mod();render();};
