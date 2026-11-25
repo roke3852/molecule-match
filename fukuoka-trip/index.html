@@ -770,6 +770,13 @@ html.dark .med-red b{color:#e07a6a}
 .lg-list{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}.lg-list button{font-size:12px;padding:4px 8px;border:1.5px solid var(--line);background:var(--card);color:var(--ink)}.lg-list button.on{border-color:var(--maple);background:color-mix(in srgb,var(--maple) 18%,var(--card))}
 .lg-rt{margin-top:10px;border:1.5px solid var(--line);padding:6px 8px}.lg-rt summary{font-family:var(--ff-b);font-weight:700;cursor:pointer}.lg-rt div{display:grid;grid-template-columns:44px 72px 1fr;gap:6px;font-size:12.5px;padding:3px 0;border-top:1px dashed var(--line)}.lg-rt em{font-style:normal;font-family:var(--ff-px);color:var(--maple)}.lg-rt span{color:var(--sub)}
 .lg-f{font-size:10.5px;color:var(--sub);margin-top:6px}
+.zoo-open{width:100%;margin:8px 0}.zoo-map{position:relative;border:2px solid var(--px)}.zoo-map img{width:100%;display:block;min-height:120px;background:var(--line)}
+.zoo-pins{position:absolute;inset:0}.zoo-pin{position:absolute;transform:translate(-50%,-50%);width:26px;height:26px;border-radius:50%!important;min-height:0!important;box-sizing:border-box;border:2px solid #fff;font-size:13px;padding:0;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 3px rgba(0,0,0,.5);background:#c8442b}
+.zoo-pin.walk{background:#3f7d5c}.zoo-pin.svc{background:#2c6e8f}.zoo-pin.on{transform:translate(-50%,-50%) scale(1.35);z-index:2;outline:3px solid #f2c14e}
+.zoo-me{position:absolute;transform:translate(-50%,-50%);z-index:3;pointer-events:none;text-align:center}.zoo-me i{display:block;width:16px;height:16px;margin:auto;border-radius:50%;background:#1a73e8;border:3px solid #fff;box-shadow:0 0 0 6px rgba(26,115,232,.3);animation:zp 1.6s infinite}
+.zoo-me span{display:inline-block;margin-top:2px;font-size:10px;background:#1a73e8;color:#fff;padding:0 4px;white-space:nowrap}.zoo-me.out i{background:#999}@keyframes zp{50%{box-shadow:0 0 0 12px rgba(26,115,232,.1)}}
+.zoo-st{font-size:12.5px;margin:6px 0}.zoo-leg{display:flex;gap:6px;margin-bottom:6px;font-size:12px}.zoo-leg span,.zt{padding:1px 6px;color:#fff;background:#c8442b}.zoo-leg .walk,.zt.walk{background:#3f7d5c}.zoo-leg .svc,.zt.svc{background:#2c6e8f}
+.zoo-card{border:2px solid var(--px);padding:8px 10px;margin-top:6px}.zoo-card b{font-size:16px;margin-right:6px}.zoo-card .zt{font-size:11px}.zoo-card p{margin:6px 0 0;font-size:14px;line-height:1.6}
 .db-hint{font-size:12px;color:var(--sub);margin-top:6px}.db-sel{margin-top:6px;font-size:13px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}.db-sel button{margin-left:auto;font-size:12px;padding:3px 10px;border:1.5px solid var(--line);border-radius:999px;background:var(--card);color:var(--ink)}
 .db-l li{cursor:pointer;padding:2px 4px}.db-l li.sel{background:color-mix(in srgb,var(--day) 18%,transparent);outline:1.5px solid var(--day)}
 .db-svg .riv{fill:none;stroke:color-mix(in srgb,var(--sea) 60%,var(--card));stroke-width:5;stroke-linejoin:round;shape-rendering:geometricPrecision}.db-svg .rivt{font-size:9px;fill:var(--sea);font-family:var(--ff-b)}
@@ -1857,6 +1864,53 @@ function lalaGuide(id){const g=S.get('gphoto',{}),ks=stopPhotoKeys(id).filter(k=
  <details class="lg-rt"><summary>🚶 建議逛法（15:00–18:30）</summary>${LALA.route.map(r=>`<div><em>${r[0]}</em><b>${r[1]}</b><span>${r[2]}</span></div>`).join('')}</details>
  <div class="lg-f">簡化示意圖：店的相對位置是照官網推薦路線和樓層說明大致排的，不是精確平面圖，以現場樓層圖為準。KidZania 也在館內，需另外購票預約。</div></div>`}
 document.addEventListener('click',e=>{const w=e.target.closest('.lg');if(!w)return;const sw=e.target.closest('[data-sayw]');if(sw){clSay(sw.dataset.sayw,'ja-JP');return}const f=e.target.closest('[data-lgf]'),sh=e.target.closest('[data-lgs]');if(f){lalaF=f.dataset.lgf;lalaS=null}else if(sh){lalaS=sh.dataset.lgs&&lalaS!==sh.dataset.lgs?sh.dataset.lgs:null}else return;w.outerHTML=lalaGuide(w.dataset.lgid)});
+
+const ZOO={img:'https://molecule-match-default-rtdb.asia-southeast1.firebasedatabase.app/trips/jve3pcfde3tnxhesp/p1a8uc6gsoo6584b.json',
+ a:{x:632,y:628,la:33.35093,lo:131.41377},b:{x:715,y:385,la:33.35236,lo:131.41385},W:1000,H:743,
+ P:[['lion',95,125,'🦁','獅子區','自駕／叢林巴士區。獅子常在路邊躺著，車窗一定要關好。','safari'],
+ ['herb',330,120,'🦏','食草動物區','犀牛、野牛、大象，體型最大的一區，車子會停很近。','safari'],
+ ['bear',255,215,'🐻','熊及山地動物區','黑熊、山羊；熊會站起來討食（叢林巴士）。','safari'],
+ ['giraffe',600,85,'🦒','長頸鹿','在羚羊區旁，叢林巴士可以從車窗餵長頸鹿。','safari'],
+ ['antelope',690,150,'🦌','羚羊區','黑羚羊、駱駝。','safari'],
+ ['tiger',720,60,'🐯','老虎區','老虎、斑馬。','safari'],
+ ['cheetah',950,180,'🐆','獵豹區','自駕路線最後段的獵豹。','safari'],
+ ['ram',85,365,'🐏','大角羊','山坡上的大角羊。','safari'],
+ ['arumu',495,265,'🏠','山中小屋 Arumu','步行區的休息小屋。','walk'],
+ ['ranch',560,285,'🐐','接觸式牧場','摸羊、餵羊，小孩最愛。','walk'],
+ ['monkey',620,200,'🐒','松鼠猴林','走進松鼠猴的森林，可以餵食。','walk'],
+ ['kanga',715,385,'🦘','袋鼠接觸式森林','袋鼠超親人，用胡蘿蔔餵；吃飽的袋鼠就不理人了。','walk'],
+ ['food',590,415,'🍽️','餐廳・商店（④⑤）','中央大屋，午餐、商店、洗手間都在這裡。','svc'],
+ ['dog',465,475,'🐶','狗狗沙龍','跟狗狗互動。','walk'],
+ ['cat',330,505,'🐱','貓貓沙龍（一樓）','跟貓咪互動。','walk'],
+ ['horse',500,560,'🐴','小馬・水豚','迷你馬、水豚，可以餵食。','walk'],
+ ['cute',640,548,'🐾','可愛動物入口','步行區入口，從這裡進去小動物區。','svc'],
+ ['info',632,628,'ℹ️','資訊中心・叢林巴士','叢林巴士 1 號站在旁邊；中文語音導覽機在這附近租。','svc'],
+ ['drive',255,655,'🚗','自駕遊園入口','包車從這裡開進猛獸區（My Car Lane）。','svc'],
+ ['ticket',600,705,'🎫','自駕售票處','自駕車在這裡買票。','svc'],
+ ['bus',730,655,'🚌','路線巴士站','往別府、宇佐的路線巴士。','svc'],
+ ['park',870,480,'🅿️','大型停車場','包車停車處。','svc']]};
+let zooSel=null,zooWatch=null,zooPos=null,zooImg=null;
+function zooXY(la,lo){const A=ZOO.a,B=ZOO.b,s=(B.y-A.y)/(B.la-A.la),sx=Math.abs(s)*Math.cos(A.la*Math.PI/180);return [A.x+(lo-A.lo)*sx,A.y+(la-A.la)*s]}
+function zooDraw(){const el=$('#zooBox');if(!el)return;const sel=ZOO.P.find(p=>p[0]===zooSel);let me='',note='';
+ if(zooPos){const [x,y]=zooXY(zooPos.la,zooPos.lo),inm=x>-30&&x<ZOO.W+30&&y>-30&&y<ZOO.H+30,cx=Math.max(12,Math.min(ZOO.W-12,x)),cy=Math.max(12,Math.min(ZOO.H-12,y));
+  me=`<div class="zoo-me${inm?'':' out'}" style="left:${cx/ZOO.W*100}%;top:${cy/ZOO.H*100}%"><i></i><span>我在這${inm?'':'（地圖外）'}</span></div>`;
+  let near=null,nd=1e9;ZOO.P.forEach(p=>{const d=Math.hypot(p[1]-x,p[2]-y);if(d<nd){nd=d;near=p}});
+  const km=llKm([zooPos.la,zooPos.lo],[ZOO.a.la,ZOO.a.lo]);note=`📍 ${inm?`最近：<b>${near[3]} ${near[4]}</b>`:'不在園區地圖範圍內'}・離資訊中心 ${kmTxt(km)}・精度 ±${Math.round(zooPos.acc)} m`}
+ el.querySelector('.zoo-pins').innerHTML=ZOO.P.map(p=>`<button class="zoo-pin ${p[6]}${zooSel===p[0]?' on':''}" data-zp="${p[0]}" style="left:${p[1]/ZOO.W*100}%;top:${p[2]/ZOO.H*100}%">${p[3]}</button>`).join('')+me;
+ el.querySelector('.zoo-st').innerHTML=note||'按「📍 開始定位」顯示你現在的位置';
+ el.querySelector('.zoo-info').innerHTML=sel?`<div class="zoo-card"><b>${sel[3]} ${sel[4]}</b><span class="zt ${sel[6]}">${{safari:'🚗 自駕／叢林巴士',walk:'🚶 步行區',svc:'🧭 設施'}[sel[6]]}</span><p>${sel[5]}</p></div>`:'<div class="hint">👆 點地圖上的圖示看介紹</div>'}
+function zooOpen(){let m=$('#zooModal');if(!m){m=document.createElement('div');m.className='cl-modal';m.id='zooModal';m.innerHTML=`<div class="cl-sheet sec"><div class="cl-mh"><h3>🗺️ 九州自然動物園 互動地圖</h3><button class="cl-x" data-zx="1">✕</button></div>
+ <div class="zoo-leg"><span class="safari">🚗 自駕區</span><span class="walk">🚶 步行區</span><span class="svc">🧭 設施</span></div>
+ <div id="zooBox"><div class="zoo-map"><img alt="園區地圖"><div class="zoo-pins"></div></div><div class="zoo-st"></div><div class="acts"><button class="btn pri" data-zg="1">📍 開始定位</button><a class="btn" href="${mapUrl('九州自然動物公園アフリカンサファリ')}" target="_blank" rel="noopener">Google 地圖</a></div><div class="zoo-info"></div>
+ <div class="lg-f">園區圖是插畫、沒有照比例，GPS 點是用資訊中心和袋鼠森林兩點推算的大約位置，自駕區越遠誤差越大，看方向就好。</div></div></div>`;document.body.appendChild(m);
+  m.addEventListener('click',e=>{if(e.target===m||e.target.closest('[data-zx]')){m.classList.remove('on');document.body.classList.remove('cl-lock');return}
+   const p=e.target.closest('[data-zp]');if(p){zooSel=zooSel===p.dataset.zp?null:p.dataset.zp;zooDraw();return}
+   const g=e.target.closest('[data-zg]');if(g){if(zooWatch!=null){navigator.geolocation.clearWatch(zooWatch);zooWatch=null;g.textContent='📍 開始定位';return}
+    if(!navigator.geolocation){toast('這台手機不支援定位');return}g.textContent='⏹ 停止定位';$('#zooBox .zoo-st').textContent='定位中…第一次會跳出允許定位的視窗';
+    zooWatch=navigator.geolocation.watchPosition(ps=>{zooPos={la:ps.coords.latitude,lo:ps.coords.longitude,acc:ps.coords.accuracy};zooDraw()},er=>{$('#zooBox .zoo-st').textContent='無法定位：'+(er.code===1?'請在設定允許 Safari／瀏覽器使用位置':'訊號不好，稍後再試');g.textContent='📍 開始定位';zooWatch=null},{enableHighAccuracy:true,maximumAge:5000,timeout:20000})}});
+  const im=m.querySelector('img');if(zooImg)im.src=zooImg;else{const c=(()=>{try{return localStorage.getItem('fuk26_zoomapimg')}catch(e){return null}})();if(c){zooImg=c;im.src=c}else fetch(ZOO.img).then(r=>r.json()).then(u=>{zooImg=u;im.src=u;try{localStorage.setItem('fuk26_zoomapimg',u)}catch(e){}}).catch(()=>toast('地圖載入失敗，請確認網路'))}}
+ m.classList.add('on');document.body.classList.add('cl-lock');zooDraw()}
+document.addEventListener('click',e=>{if(e.target.closest('[data-zoo]'))zooOpen()});
 function renderDay(keep){
  const opened=keep?[...document.querySelectorAll('.stop.open')].map(x=>x.dataset.id):[];
  const d=D(curDay);document.documentElement.style.setProperty('--day',d.c);document.documentElement.style.setProperty('--day-soft',soft(d.c));
@@ -1893,6 +1947,7 @@ function renderDay(keep){
     return (curDay>=6&&/機場|空港/.test(stopText(s))?`<a class="giftbox" href="#tax" style="background:#e9f4ec;border-color:#c5dccb"><b style="color:#2f6b4a">🧾 有買免稅品？託運行李「之前」要先辦免稅手續</b><span>新制要在機場掃護照做海關確認才會退稅，順序錯了就退不回來。</span><em>看退稅教學 ›</em></a>`:'')+`<a class="giftbox" href="#gift" data-gf=""${gs.map(g=>g.id).join(',')}" data-gl="${esc(s.n)}"><b>🎁 這一站買得到 ${gs.length} 款伴手禮${nw?`（其中 ${nw} 款在想買清單）`:''}</b><span>${gs.slice(0,8).map(g=>(gw[g.id]?'✓ ':'')+esc(gShort(g))).join('、')}${gs.length>8?'…':''}</span><em>看介紹 ›</em></a>`})():''}
    ${/海之中道海洋世界|海洋世界/.test(s.n)&&!/前往/.test(s.n)?mwShows():''}
    ${/LaLaport/.test(s.n)&&!/前往|返回/.test(s.n)?lalaGuide(s.id):''}
+   ${/九州自然動物園/.test(s.n)?`<button class="btn pri zoo-open" data-zoo="1">🗺️ 互動地圖＋📍GPS 定位</button>`:''}
    ${/九州自然動物園/.test(s.n)?`<div class="zmap"><div class="zmap-h">🗺️ 九州自然動物園 園區地圖</div><img src="zoo-map.webp" alt="九州自然動物園 園區地圖" data-mzoom="1" loading="lazy"><div class="zmap-f">點圖放大（可雙指縮放）・<a href="zoo-map.webp" target="_blank" rel="noopener">開原圖</a>・圖：波比看世界</div></div>`:''}
    ${photoBox(s.id,s.q||s.n)}
    <div class="acts"><a class="btn" href="${mapUrl(s.q||s.n)}" target="_blank" rel="noopener">📍 地圖導航</a>
