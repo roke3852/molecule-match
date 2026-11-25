@@ -369,6 +369,11 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
 .dz-tb .bar{height:9px;border-radius:5px;background:var(--line);overflow:hidden}.dz-tb .bar i{display:block;height:100%;border-radius:5px}.dz-tb b{font-family:var(--f-mono);font-weight:500;text-align:right}.dz-tb small{font-size:10.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .dz-tplbtn{display:grid;grid-template-columns:auto 1fr auto;grid-template-areas:"k n e" "m m m";gap:4px 8px;align-items:center;width:100%;text-align:left;border:1px solid var(--accent);background:rgba(226,189,106,.07);color:var(--ink);border-radius:14px;padding:10px 12px;margin:6px 0 10px;font:inherit;cursor:pointer}
 .dz-tplbtn .k{grid-area:k;font-size:12px;color:var(--muted)}.dz-tplbtn b{grid-area:n;font-size:15px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.dz-tplbtn em{grid-area:e;font-style:normal;font-size:12px;color:var(--accent);white-space:nowrap}.dz-tplbtn .mini{grid-area:m}
+.dz-drov{z-index:220}.dz-drov .bp-sh{max-height:88vh}
+.dz-drf{display:flex;flex:none;gap:6px;overflow-x:auto;padding:0 2px 8px;scrollbar-width:none}.dz-drf::-webkit-scrollbar{display:none}.dz-drf button{flex:none;border:1px solid var(--line);background:transparent;color:var(--ink);border-radius:999px;padding:6px 12px;font:inherit;font-size:13px;cursor:pointer;white-space:nowrap}.dz-drf button[aria-pressed=true]{border-color:var(--accent);color:var(--accent);font-weight:700;background:rgba(226,189,106,.12)}
+.dz-drls{grid-template-columns:repeat(auto-fill,minmax(140px,1fr))}.dz-drls h4{grid-column:1/-1;margin:6px 2px 0;font-size:13px;color:var(--muted);font-weight:600}
+.dz-drls .gcard .gspr{height:70px}.dz-mt2{display:grid;grid-template-columns:auto 1fr;gap:1px 6px;font-size:11px;color:var(--muted);width:100%}.dz-mt2 i{font-style:normal;color:var(--gold);letter-spacing:.04em}.dz-mt2 i u{text-decoration:none;color:var(--line)}
+.dz-drb{width:100%}
 .dz-modal{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.55);display:flex;align-items:flex-end;justify-content:center}.dz-modal[hidden]{display:none}
 .dz-sheet{background:var(--panel);color:var(--ink);width:100%;max-width:560px;max-height:88vh;border-radius:18px 18px 0 0;border:1px solid var(--line);display:flex;flex-direction:column;padding:12px 14px calc(14px + env(safe-area-inset-bottom));box-shadow:0 -10px 30px rgba(0,0,0,.4)}
 .dz-mh{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}.dz-mh b{font-size:17px}.dz-mh button{width:38px;height:38px;border-radius:50%;border:1px solid var(--line);background:transparent;color:var(--ink);font-size:16px;cursor:pointer}
@@ -1402,7 +1407,7 @@ window.BGM=(()=>{
     <div class="err" id="tErr"></div>
   </div>
   <button class="t-more" id="tMore" type="button" aria-label="咖啡宇宙：更多咖啡 App 與遊戲">咖啡宇宙</button>
-  <div class="t-foot">© 2026 Jim Lu　ver. 10.0</div>
+  <div class="t-foot">© 2026 Jim Lu　ver. 10.1</div>
 </div>
 <nav class="modes" aria-label="導覽"><div class="in">
   <button class="homebtn" id="homeBtn" type="button" hidden>‹ 主選單</button>
@@ -2054,6 +2059,7 @@ window.BGM=(()=>{
   <p class="fine" data-dz="res path exp how">用本 app 的擴散萃取模型計算。每段帶出的物質是依溶出速度推算的趨勢，不是實驗室量測；實際數字會因豆子、研磨與手法而不同。想知道你的豆子實際怎樣，可以用 TDS 計做等重分杯實驗，再填進表格對照。</p>
 </div>
 </section>
+<div class="bp-ov dz-drov" id="dzDrOv" hidden role="dialog" aria-modal="true" aria-label="選濾杯"><div class="bp-sh"><div class="bp-hd"><h3>選一個濾杯</h3><button type="button" id="dzDrX">關閉</button></div><div class="dz-drf" id="dzDrF" role="group" aria-label="濾杯形狀"></div><div class="gp-ls dz-drls" id="dzDrLs"></div></div></div>
 <div id="dzModal" class="dz-modal" hidden role="dialog" aria-modal="true" aria-labelledby="dzMh"><div class="dz-sheet">
   <div class="dz-mh"><b id="dzMh">選擇手法</b><button type="button" id="dzMx" aria-label="關閉">✕</button></div>
   <div class="seg dz-mt" id="dzMt" role="group" aria-label="手法來源"><button type="button" data-m="new">＋ 新手法</button><button type="button" data-m="tpl">🏆 冠軍範本</button><button type="button" data-m="my">💾 我的存檔</button></div>
@@ -9527,9 +9533,28 @@ function nbSegs(){const n=NB.n,W=NB.water,dose=NB.dose;let w;
   let acc=0;return w.map((x,i)=>{const ml=i<n-1?Math.round(W*x):Math.round(W-acc);acc+=ml;return {ml,t:i?NB.bloom+(i-1)*NB.gap:0,temp:NB.temp,sty:'r',d:null};}).map((q,i,a)=>{if(i){const p=a[i-1],m=p.t+autoDur(p.ml);if(q.t<m)q.t=m;}return q;});}
 const DIST=[['bloom','悶蒸 2 倍粉重＋平均'],['even','全部平均'],['46','4:6 型（前 40% 調味）'],['front','前多後少'],['back','前少後多']];
 function nbStep(key,lab,val,unit){return '<div class="row"><span class="label">'+lab+'</span><div class="dz-st" data-nb="'+key+'"><button type="button" data-d="-1" aria-label="'+lab+'減少">−</button><b>'+val+unit+'</b><button type="button" data-d="1" aria-label="'+lab+'增加">＋</button></div></div>';}
+// ---- 濾杯圖像化選擇（像素圖＋流速／均勻度，依形狀分組） ----
+const DR_SHAPE={cone:'cone',v60:'cone',origami_c:'cone',solo:'cone',kono:'cone',kasuya:'cone',mugen:'cone',flower:'cone',deep27:'cone',mountain:'cone',ufo:'cone',crystaleye:'cone',chemex:'cone',v60neo:'cone',
+  orea:'flat',origami_w:'flat',kalita:'flat',april:'flat',staggx:'flat',b75:'flat',december:'flat',orea_neg:'flat',kalita102:'trap',melitta:'trap',beehouse:'trap',tricolate:'tube',pulsar:'tube'};
+const DR_GRP=[['all','全部'],['cone','錐形'],['flat','平底'],['trap','梯形'],['tube','直筒無繞流']];
+const DR_GN={cone:'錐形：流速快、粉床中間深，風味明亮',flat:'平底：粉床平均、萃取均勻，甜感厚度好',trap:'梯形：小孔慢流，接近半浸泡',tube:'直筒無繞流：幾乎全部的水都穿過粉層',other:'其他'};
+let drGrp='all';
+const drSpr=(id,sz)=>{if(!window.labSpr)return '<span style="font-size:'+Math.round(sz*.6)+'px;line-height:1">☕</span>';return window.labSpr(id,0,sz)||window.labSpr({orea_neg:'orea',v60neo:'v60'}[id]||'cone',0,sz);};
+const drDots=(n,lab)=>{n=Math.max(1,Math.min(5,n));return '<span>'+lab+'</span><i>'+'●'.repeat(n)+'<u>'+'●'.repeat(5-n)+'</u></i>';};
+function drMeters(d){return '<span class="dz-mt2">'+drDots(Math.round((d.q-.5)/.25)+1,'流速')+drDots(Math.round((.78-(d.het??.5))/.13),'均勻')+'</span>';}
+function drBtnHtml(id){const d=DRIPPER[id]||DRIPPER.v60;return '<div class="gspr">'+drSpr(id,40)+'</div><div><b><span>'+esc(d.name)+'</span></b><small>'+esc(d.desc||'')+'</small>'+drMeters(d)+'</div><span class="label">▾</span>';}
+function renderDrSheet(){$('dzDrF').innerHTML=DR_GRP.map(([k,n])=>'<button type="button" data-g="'+k+'" aria-pressed="'+(drGrp===k)+'">'+n+'</button>').join('');
+  const ks=Object.keys(DRIPPER),gs=drGrp==='all'?['cone','flat','trap','tube','other']:[drGrp];
+  $('dzDrLs').innerHTML=gs.map(g=>{const a=ks.filter(k=>(DR_SHAPE[k]||'other')===g);if(!a.length)return '';
+    return '<h4>'+DR_GN[g]+'（'+a.length+'）</h4>'+a.map(k=>{const d=DRIPPER[k];return '<button type="button" class="gcard" data-dr="'+k+'" aria-pressed="'+(NB.dripper===k)+'"><div class="gspr">'+drSpr(k,60)+'</div><b>'+esc(d.name)+'</b><small>'+esc(d.desc||'')+'</small>'+drMeters(d)+'</button>';}).join('');}).join('');}
+function openDrSheet(){drGrp='all';renderDrSheet();$('dzDrOv').hidden=false;const on=$('dzDrLs').querySelector('[aria-pressed="true"]');$('dzDrLs').scrollTop=0;if(on)on.scrollIntoView({block:'center'});try{SFX.p('select')}catch(e){}}
+function bindDrSheet(){$('dzDrX').onclick=()=>{$('dzDrOv').hidden=true;};
+  $('dzDrOv').addEventListener('click',e=>{if(e.target.id==='dzDrOv'){$('dzDrOv').hidden=true;return;}
+    const g=e.target.closest('[data-g]');if(g){drGrp=g.dataset.g;renderDrSheet();$('dzDrLs').scrollTop=0;return;}
+    const c=e.target.closest('[data-dr]');if(c){NB.dripper=c.dataset.dr;saveNB();$('dzDrOv').hidden=true;renderModal();}});}
 function renderModal(){const b=$('dzMb');$('dzMt').querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',String(x.dataset.m===mtab)));
   if(mtab==='new'){const S=nbSegs(),W=S.reduce((a,q)=>a+q.ml,0);
-    b.innerHTML='<div class="dz-nb"><div class="dz-prev top">'+miniTl(S,0,320,52)+'<small>'+DRIPPER[NB.dripper].name+'・'+NB.n+' 段・'+NB.dose+' g／'+W+' g（1:'+(W/NB.dose).toFixed(1)+'）・'+NB.temp+'°C<br>'+S.map((q,i)=>(i?i+1:'悶')+'：'+q.ml+' g @'+fmt(q.t)).join('・')+'</small></div><div class="row"><span class="label">濾杯</span><div class="dz-chipset" data-nbk="dripper">'+Object.keys(DRIPPER).map(k=>'<button type="button" data-v="'+k+'" aria-pressed="'+(NB.dripper===k)+'">'+DRIPPER[k].name+'</button>').join('')+'</div></div>'+
+    b.innerHTML='<div class="dz-nb"><div class="dz-prev top">'+miniTl(S,0,320,52)+'<small>'+DRIPPER[NB.dripper].name+'・'+NB.n+' 段・'+NB.dose+' g／'+W+' g（1:'+(W/NB.dose).toFixed(1)+'）・'+NB.temp+'°C<br>'+S.map((q,i)=>(i?i+1:'悶')+'：'+q.ml+' g @'+fmt(q.t)).join('・')+'</small></div><div class="row"><span class="label">濾杯</span><button type="button" class="bpick gpick dz-drb" id="dzDrBtn" aria-haspopup="dialog">'+drBtnHtml(NB.dripper)+'</button></div>'+
       '<div class="row"><span class="label">段數（含悶蒸）</span><div class="dz-chipset" data-nbk="n">'+[2,3,4,5,6,7,8,10,12].map(k=>'<button type="button" data-v="'+k+'" aria-pressed="'+(NB.n===k)+'">'+k+' 段</button>').join('')+'</div></div>'+
       '<div class="row"><span class="label">水量怎麼分</span><div class="dz-chipset" data-nbk="dist">'+DIST.map(([k,n])=>'<button type="button" data-v="'+k+'" aria-pressed="'+(NB.dist===k)+'">'+n+'</button>').join('')+'</div></div>'+
       '<div class="g2">'+nbStep('dose','粉重',NB.dose,' g')+nbStep('water','總水量',NB.water,' g')+nbStep('temp','水溫',NB.temp,'°C')+nbStep('bloom','悶蒸',NB.bloom,' 秒')+nbStep('gap','之後每段間隔',NB.gap,' 秒')+'<div class="row"><span class="label">粉水比</span><div class="dz-prev" style="text-align:center"><b>1:'+(W/NB.dose).toFixed(1)+'</b></div></div></div>'+
@@ -9547,7 +9572,8 @@ function bindModal(){$('dzTplBtn').onclick=()=>openModal();$('dzMx').onclick=clo
   $('dzModal').addEventListener('click',e=>{if(e.target.id==='dzModal')closeModal();});
   $('dzMt').addEventListener('click',e=>{const x=e.target.closest('[data-m]');if(!x)return;mtab=x.dataset.m;renderModal();$('dzMb').scrollTop=0;});
   const mb=$('dzMb');
-  mb.addEventListener('click',e=>{const c=e.target.closest('[data-nbk] [data-v]');if(c){const k=c.parentNode.dataset.nbk;NB[k]=k==='n'?+c.dataset.v:c.dataset.v;saveNB();renderModal();return;}
+  bindDrSheet();
+  mb.addEventListener('click',e=>{if(e.target.closest('#dzDrBtn')){openDrSheet();return;}const c=e.target.closest('[data-nbk] [data-v]');if(c){const k=c.parentNode.dataset.nbk;NB[k]=k==='n'?+c.dataset.v:c.dataset.v;saveNB();renderModal();return;}
     const tp=e.target.closest('[data-tp]');if(tp){setTpl(tp.dataset.tp);closeModal();toastMsg('已載入範本');return;}
     const ld=e.target.closest('[data-ld]');if(ld){loadDesign(ld.dataset.ld);closeModal();return;}
     if(e.target.id==='dzMk'){const S=nbSegs();Object.assign(D,{tpl:'',sid:null,dripper:NB.dripper,dose:NB.dose,segs:S,tail:0,meas:[],bl:NB.bloom,gap:NB.gap,tname:DRIPPER[NB.dripper].name+'・'+NB.n+' 段・'+{bloom:'悶蒸＋平均',even:'平均分水','46':'4:6 型',front:'前多後少',back:'前少後多'}[NB.dist]});sel=0;
