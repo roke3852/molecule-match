@@ -266,6 +266,18 @@ textarea.f{min-height:80px;resize:vertical}
 .tw-stop.done .no{background:var(--s1);border-color:var(--s1);color:#fff}
 .tw-stop .ck{color:var(--faint);text-align:right}.tw-stop.done .ck{color:var(--bull);font-weight:700}
 .tw-stop:active{background:var(--grid)}
+.tw-info{border:2px solid var(--line);border-radius:12px;background:var(--panel);padding:12px;max-height:38vh;overflow:auto;-webkit-overflow-scrolling:touch}
+.tw-info.scn{padding:0;border:0;background:none;max-height:none}
+.tw-info.flash{animation:twf .35s ease}@keyframes twf{from{opacity:.25;transform:translateY(6px)}to{opacity:1;transform:none}}
+.tw-info h3{font-size:16.5px;line-height:1.4;margin:6px 0 4px}
+.tw-info .stats{grid-template-columns:repeat(2,1fr);margin:8px 0}
+.tw-info .fig{margin-top:8px}
+.tw-info .tw-ilink{width:100%;margin-top:10px}
+.tw-icap{font-weight:700;font-size:15px;margin-bottom:6px}
+.tw-irow{display:grid;grid-template-columns:96px 1fr 44px;align-items:center;gap:8px;font-size:13.5px;padding:3px 0}
+.tw-irow i{display:block;height:10px;border-radius:5px;background:var(--s1)}
+.tw-irow.b i{background:var(--bear)}.tw-irow b{text-align:right;font:600 12.5px var(--mono)}
+.tw-play{cursor:pointer}
 .tw-top{display:flex;align-items:center;gap:10px;margin-bottom:10px;font-weight:600;font-size:14px}
 .tw-top .btn{padding:5px 10px;font-size:13px}
 .tw-dlg{display:grid;grid-template-columns:64px 1fr;gap:10px;margin-top:12px;background:#10131c;color:#f0efec;border:3px solid #e2b23a;border-radius:6px;padding:12px;min-height:120px;cursor:pointer;box-shadow:0 4px 0 #8a6a18;user-select:none;-webkit-user-select:none}
@@ -1507,10 +1519,22 @@ function epList(){const lim=new Date(ASOF.slice(0,10)+"T00:00:00Z");lim.setUTCDa
 function epOld(){const r=new Set(epList().map(x=>x[1]));return T.map((x,i)=>[x,i]).filter(([x,i])=>x.ep&&!r.has(i))}
 function epNext(){const d=tourDone(),L=epList(),u=L.find(([x])=>!d[x.k]);return u?u[1]:(L.length?L[L.length-1][1]:-1)}
 function epExpand(S){if(!S.seg)return S.L;const sn=tourDone()[S.k]?{}:epSeen(),sk=[],body=[],out=[...(S.L0||[])];
-  S.seg.forEach(g=>{if(sn[g.nk]&&sn[g.nk]>=g.v){sk.push(g.t);return}body.push({mark:[g.nk,g.v]},...g.L)});
+  S.seg.forEach(g=>{if(sn[g.nk]&&sn[g.nk]>=g.v){sk.push(g.t);return}body.push({mark:[g.nk,g.v],go:segGo(g,S)},...g.L)});
   if(sk.length)out.push({card:{t:`！略過 ${sk.length} 則你看過、沒有更新的消息`,l:sk}});
   if(!body.length)out.push(["M","這一集的消息你都看過了，沒有新的進展。"]);
   return out.concat(body,S.L1||[])}
+const NKGO={jensen:["ev","jensen-back"],ant:["ev","ant-d2"],fed:["ev","fed-hike"],usd:["ev","usd-strong"],good:["ev","good-news"],hbs:["ev","hbs-ai"],tariff:["ev","tariff-301"],fcn:["ev","fcn-risk"],nsf:["ev","fi-1125"],"sea-rule":["ev","sea-halt"],cal:["cal"],dash:["dash"],signals:["signals"],plan:["ix"]};
+function segGo(g,S){return g.go||NKGO[g.nk]||S.go}
+function infoHTML(go){
+  const [t,id]=go||[];
+  if(t==="ev"){const e=EVENTS.find(x=>x.id===id);if(!e)return "";const c=(e.charts||[]).find(k=>CH[k]);let r=null;try{r=c?CH[c]():null}catch(x){}
+    return `<div class="meta"><span class="tag ${e.hot?"hot":""} ${/好消息|Good/.test(e.cat)?"good":""}">${e.hot?"🔥 ":""}${e.cat}</span><span>${e.date}</span></div><h3>${esc(e.title)}</h3>${e.stats?`<div class="stats">${e.stats.slice(0,4).map(s=>`<div class="stat"><div class="k">${s[0]}</div><div class="v">${s[1]}</div>${s[2]?`<div class="d">${s[2]}</div>`:""}</div>`).join("")}</div>`:""}${r?`<div class="fig"><div class="t">${r.t}</div>${r.b}</div>`:`<p class="lead short">${esc(e.short||evShort(e.lead))}</p>`}<button class="btn tw-ilink" data-tlink="ev|${id}">看完整卡片 ›</button>`}
+  if(t==="cal")return `<div class="tw-icap">📅 接下來要盯</div><ul class="tl">${CAL.slice(0,6).map(c=>`<li><span class="dt">${c[0]}</span>${esc(c[2])}</li>`).join("")}</ul><button class="btn tw-ilink" data-tlink="cal|">看完整行事曆 ›</button>`;
+  if(t==="dash"&&typeof BOT_NOW!=="undefined"){const sc=BOT_NOW.reduce((a,b)=>a+b[0],0);return `<div class="tw-icap">📊 底部訊號儀表板：${sc} / 8 分</div>${BOT_SH.map((n,i)=>`<div class="tw-irow"><span>${n}</span><i style="width:${BOT_NOW[i][0]*100}%;min-width:2px;background:${BOT_NOW[i][0]?"var(--bull)":"var(--line)"}"></i><b>${BOT_NOW[i][0]}</b></div>`).join("")}<button class="btn tw-ilink" data-tlink="bear|">看儀表板 ›</button>`}
+  if(t==="signals"&&typeof SIGNALS!=="undefined"){const n=k=>SIGNALS.filter(x=>x[2]===k).length,SC={bull:"✅",neu:"🟡",bear:"⬜"};return `<div class="tw-icap">🚦 止跌訊號：亮 ${n("bull")}・半亮 ${n("neu")}・未亮 ${n("bear")}</div>${SIGNALS.map(x=>`<div style="font-size:13.5px;padding:2px 0">${SC[x[2]]} ${esc(x[0])}</div>`).join("")}<button class="btn tw-ilink" data-tlink="bear|">看檢查表 ›</button>`}
+  if(t==="ix"&&typeof IXH!=="undefined"){return `<div class="tw-icap">📉 各指數距歷史高點</div>${["sp","nq","sox","tw","otc"].filter(k=>IXH[k]).map(k=>`<div class="tw-irow ${IXH[k].now>=20?"b":""}"><span>${IXH[k].nm}</span><i style="width:${Math.min(100,IXH[k].now*2)}%"></i><b>−${IXH[k].now}%</b></div>`).join("")}<button class="btn tw-ilink" data-tlink="bear|">看空頭史 ›</button>`}
+  return ""}
+function twInfo(go){const el=$("#twInfo");if(!el||!go)return;const k=go.join("|");if(el.dataset.k===k)return;const h=infoHTML(go);if(!h)return;el.dataset.k=k;el.className="tw-info";el.innerHTML=h;el.scrollTop=0;if(!TS.fast){void el.offsetWidth;el.classList.add("flash")}}
 function tourDone(){return LS.get("tour",{})}
 function renderTourMap(){
   const d=tourDone(),TM=T.filter(x=>!x.daily),n=TM.filter(x=>d[x.k]).length,nx=TM.find(x=>!d[x.k])||TM[0],EL=epList(),en=epNext();
@@ -1521,11 +1545,11 @@ function renderTourMap(){
   <div class="card"><h2>導覽路線</h2>${T.map((x,i)=>x.daily?"":`<div class="tw-stop ${d[x.k]?"done":""}" data-tgo="${i}"><span class="no">${stNo(i)?stNo(i):"序"}</span><span class="ic">${x.ic}</span><span class="nm">${x.n}</span><span class="ck">${d[x.k]?"✓":"›"}</span></div>`).join("")}
   ${n?`<button class="btn" style="margin-top:10px" id="tourReset">重設進度</button>`:""}</div>`;
 }
-function tourStart(i,keepLog){if(!keepLog||TS.Lst!==i){TS.L=epExpand(T[i]);TS.Lst=i}TS.st=i;TS.i=0;TS.choice=null;TS.pend=null;TS.again=null;TS.used=new Map();if(!keepLog)TS.log=[];clearInterval(TS.tm);$("#tourBox").innerHTML=`<div class="tw-play"><div class="tw-top"><button class="btn" id="tourBack">← 路線</button><span>${T[i].ic} ${T[i].ep?`${T[i].day} · 第 ${T[i].no} 集`:T[i].upd?T[i].day:T[i].daily?"每日導覽":stNo(i)?`第 ${stNo(i)} 站`:"序章"}・${T[i].n}</span></div><svg viewBox="0 0 96 40" shape-rendering="crispEdges" class="tw-scene">${SCN[T[i].sc]()}</svg><div id="twCards"></div><div class="tw-dlg" id="twDlg"><div class="tw-av" id="twAv"></div><div class="tw-tx"><b id="twWho"></b><div id="twText"></div><span class="tw-more" id="twMore">▼</span></div></div><div id="twOpts"></div></div>`;tourStep();}
+function tourStart(i,keepLog){if(!keepLog||TS.Lst!==i){TS.L=epExpand(T[i]);TS.Lst=i}TS.st=i;TS.i=0;TS.choice=null;TS.pend=null;TS.again=null;TS.used=new Map();if(!keepLog)TS.log=[];clearInterval(TS.tm);$("#tourBox").innerHTML=`<div class="tw-play"><div class="tw-top"><button class="btn" id="tourBack">← 路線</button><span>${T[i].ic} ${T[i].ep?`${T[i].day} · 第 ${T[i].no} 集`:T[i].upd?T[i].day:T[i].daily?"每日導覽":stNo(i)?`第 ${stNo(i)} 站`:"序章"}・${T[i].n}</span></div><div class="tw-info scn" id="twInfo"><svg viewBox="0 0 96 40" shape-rendering="crispEdges" class="tw-scene">${SCN[T[i].sc]()}</svg></div><div id="twCards"></div><div class="tw-dlg" id="twDlg"><div class="tw-av" id="twAv"></div><div class="tw-tx"><b id="twWho"></b><div id="twText"></div><span class="tw-more" id="twMore">▼</span></div></div><div id="twOpts"></div></div>`;twInfo(T[i].go);tourStep();}
 function tourType(who,text){
   $("#twAv").innerHTML=sprite(who,52);$("#twWho").textContent=WHO[who][0];
   const el=$("#twText");TS.full=text;clearInterval(TS.tm);if(TS.fast){el.textContent=text;TS.typing=0;$("#twMore").style.visibility="visible";return}TS.typing=1;let n=0;$("#twMore").style.visibility="hidden";
-  TS.tm=setInterval(()=>{n+=2;el.textContent=text.slice(0,n);if(n>=text.length){clearInterval(TS.tm);TS.typing=0;$("#twMore").style.visibility="visible"}},28);
+  const dl=$("#twDlg");if(dl){const r=dl.getBoundingClientRect();if(r.bottom>innerHeight-8)dl.scrollIntoView({block:"end",behavior:"smooth"})}TS.tm=setInterval(()=>{n+=2;el.textContent=text.slice(0,n);if(n>=text.length){clearInterval(TS.tm);TS.typing=0;$("#twMore").style.visibility="visible"}},28);
 }
 function tourStep(){
   const S=T[TS.st];$("#twOpts").innerHTML="";
@@ -1533,7 +1557,8 @@ function tourStep(){
   if(TS.again){const L=TS.again;TS.again=null;tourType(L.q[0],L.again||"還想知道什麼嗎？");TS.choice=L;return}
   if(TS.i>=TS.L.length){tourEnd();return}
   const L=TS.L[TS.i++];
-  if(L.mark){const sn=epSeen();if(!(sn[L.mark[0]]>=L.mark[1])){sn[L.mark[0]]=L.mark[1];LS.set("seen",sn)}tourStep();return}
+  if(L.mark){const sn=epSeen();if(!(sn[L.mark[0]]>=L.mark[1])){sn[L.mark[0]]=L.mark[1];LS.set("seen",sn)}if(L.go){const c=$("#twCards");if(c)c.innerHTML=""}twInfo(L.go);tourStep();return}
+  if(L.go&&!Array.isArray(L)&&!L.card&&!L.q){twInfo(L.go);tourStep();return}
   if(Array.isArray(L)){tourType(L[0],L[1]);return}
   if(L.card){$("#twCards").innerHTML=`<div class="tw-card"><b>${L.card.t}</b>${L.card.l.map(x=>`<div>${esc(x)}</div>`).join("")}</div>`;if(!TS.fast)$("#twCards").scrollIntoView({block:"nearest",behavior:"smooth"});tourStep();return}
   if(L.q){tourType(L.q[0],L.q[1]);TS.choice=L;return}
@@ -1568,8 +1593,11 @@ $("#tourBox").addEventListener("click",e=>{
   const g=t.closest("[data-tgo]");if(g){NAV.push({p:"tour",y:0,map:1});tourStart(+g.dataset.tgo);window.scrollTo(0,0);return}
   const o=t.closest("[data-topt]");if(o){TS.log.push(+o.dataset.topt);tourOpt(+o.dataset.topt);return}
   const lk=t.closest("[data-tlink]");if(lk){const [tab,ev]=lk.dataset.tlink.split("|");if(ev){evCat="全部";renderEv();go("ev");evUnfold(ev);setTimeout(()=>document.getElementById("ev-"+ev).scrollIntoView({behavior:"smooth"}),40)}else{go(tab);window.scrollTo(0,0)}return}
-  if(t.closest("#twDlg"))tourTap();
+  
 });
+document.addEventListener("click",e=>{const t=e.target;if(!t.isConnected||curTab()!=="tour")return;const p=document.querySelector("#tourBox .tw-play");if(!p||p.querySelector(".tw-end"))return;
+  if(t.closest("button,a,input,select,textarea,summary,details,nav,header,[data-gl],#glPop,#glBg,[data-tlink],[data-topt],[data-tgo],.tw-top,.gl-pop"))return;
+  if(TS.choice&&p.querySelector("[data-topt]"))return;tourTap()});
 renderTourMap();
 
 

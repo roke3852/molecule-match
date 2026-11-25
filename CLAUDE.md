@@ -6,7 +6,7 @@
 
 - 每次更新新增一集，加在 T 陣列最後一個 `ep:1` 集之後（依時間先後排列），不改寫、不刪除已有的集（Roke 要求：舊集數一律保留，之後可以回看）。App 上方列最近兩天的集，更早的收在「更早的集數」可展開回看。
 - 格式：`{"k":"ep-YYYY-MM-DD-序號","daily":1,"ep":1,"d":"YYYY-MM-DD","day":"M/D","t":"HH:MM","no":當天第幾集,"ic":"🌅"早/"🕛"中午/"🌆"傍晚/"🌙"晚間,"n":"早上：一句標題","sc":"studio","go":["ev","大事id"],"L0":[開場],"seg":[段落],"L1":[收尾],"sum":[3 句重點]}`
-- 段落：`{"nk":消息代號,"v":"YYYY-MM-DD HH:MM","t":"一句標題","L":[對白或卡片]}`。同一件事固定用同一個 nk（如 us-close、tw-close、jensen、ant、fed、dash、signals、usd、good、hbs、cal）；v 是該消息最後更新時間。App 會記住使用者看過的 nk＋v，看過且 v 沒變的段落下一集自動略過。有新進展才用新 v；沒更新但重要的（如 cal）可沿用舊 v 再放；絕不把沒更新的舊消息改成新 v。
+- 段落：`{"nk":消息代號,"v":"YYYY-MM-DD HH:MM","t":"一句標題","L":[對白或卡片]}`。段落可加 `"go":["ev","大事id"]`（或 `["cal"]`、`["dash"]`、`["signals"]`、`["ix"]`），播放到該段時畫面上方會顯示那張大事卡的重點數字與圖表（2026-11-25 起，Roke 的要求：上方要顯示正在講的資訊，不是固定的圖）；沒寫 go 時依 index.html 的 NKGO 對照表（jensen、ant、fed、usd、good、hbs、tariff、fcn、nsf、sea-rule、cal、dash、signals、plan），再沒有就用該集的 go。新的 nk 或要指到當天新卡片時，請在段落直接寫 go。導覽播放時點畫面任何空白處都會跳下一句。同一件事固定用同一個 nk（如 us-close、tw-close、jensen、ant、fed、dash、signals、usd、good、hbs、cal）；v 是該消息最後更新時間。App 會記住使用者看過的 nk＋v，看過且 v 沒變的段落下一集自動略過。有新進展才用新 v；沒更新但重要的（如 cal）可沿用舊 v 再放；絕不把沒更新的舊消息改成新 v。
 - 每集只講上一集之後新的或有更新的消息，3–6 段，最後一段放 cal；早上那集要有 us-close，傍晚那集要有 tw-close；儀表板分數變了要有 dash。全集最多一張「！」重點卡片、一個 `{q:...,more:1}` 選項題。
 - 英文版 us-market/en/index.html 同步新增同 k、同 nk/v 的英文集（card 標題不加「！」）。
 - TODAY 裡導覽員那項寫「導覽員：新增每日導覽第 N 集」；🆕 今日更新清單的「看每日導覽下一集」按鈕會自動接到下一集。
