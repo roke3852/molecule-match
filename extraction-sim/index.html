@@ -382,6 +382,8 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
 .dz-tc2.on{border-color:var(--accent);background:rgba(226,189,106,.08)}.dz-tc2 b{display:block;font-size:14.5px}.dz-tc2 small{display:block;font-size:11.5px;color:var(--muted);margin:2px 0 6px}
 .dz-nb{display:grid;gap:10px}.dz-nb .row{display:grid;gap:6px}.dz-nb .label{font-size:12.5px}
 .dz-chipset{display:flex;flex-wrap:wrap;gap:6px}.dz-chipset button{border:1px solid var(--line);background:transparent;color:var(--ink);border-radius:999px;padding:7px 12px;font:inherit;font-size:13px;cursor:pointer}.dz-chipset button[aria-pressed=true]{border-color:var(--accent);color:var(--accent);font-weight:700;background:rgba(226,189,106,.12)}
+.dz-nseg{display:grid!important;grid-template-columns:repeat(5,1fr);gap:6px}.dz-nseg button{display:flex;flex-direction:column;align-items:stretch;gap:3px;border-radius:12px!important;padding:7px 6px 6px!important;color:var(--muted)!important}.dz-nseg button b{color:var(--ink);font-size:12.5px;text-align:center}.dz-nseg button[aria-pressed=true]{color:var(--accent)!important}.dz-nseg button[aria-pressed=true] b{color:var(--accent)}
+.dz-dist{display:grid!important;grid-template-columns:repeat(3,1fr);gap:6px}.dz-dist button{display:flex;flex-direction:column;align-items:stretch;gap:3px;border-radius:12px!important;padding:8px 8px 7px!important;color:var(--muted)!important;text-align:center}.dz-dist button b{color:var(--ink);font-size:13px}.dz-dist button small{font-size:10px;line-height:1.25;color:var(--muted);font-weight:400}.dz-dist button[aria-pressed=true]{color:var(--accent)!important}.dz-dist button[aria-pressed=true] b{color:var(--accent)}
 .dz-nb .g2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .dz-prev.top{position:sticky;top:0;z-index:2;background:var(--panel)}.dz-prev{border:1px dashed var(--line);border-radius:12px;padding:8px 10px}.dz-prev small{display:block;font-size:11.5px;color:var(--muted);margin-top:4px}
 .dz-mk{position:sticky;bottom:0;box-shadow:0 -8px 14px var(--panel);width:100%;margin-top:4px;padding:12px;border-radius:12px;border:0;background:var(--accent);color:var(--accent-ink);font:inherit;font-weight:700;font-size:15px;cursor:pointer}
@@ -1407,7 +1409,7 @@ window.BGM=(()=>{
     <div class="err" id="tErr"></div>
   </div>
   <button class="t-more" id="tMore" type="button" aria-label="咖啡宇宙：更多咖啡 App 與遊戲">咖啡宇宙</button>
-  <div class="t-foot">© 2026 Jim Lu　ver. 10.1</div>
+  <div class="t-foot">© 2026 Jim Lu　ver. 10.2</div>
 </div>
 <nav class="modes" aria-label="導覽"><div class="in">
   <button class="homebtn" id="homeBtn" type="button" hidden>‹ 主選單</button>
@@ -9524,14 +9526,20 @@ function miniTl(segs,tail,W,H){W=W||320;H=H||42;const k=segs.length-(tail||0),dd
     const x=tl?X(tE-10+(i-k)*4):X(q.t),w=tl?3:Math.max(3,X(q.t+dd(q))-X(q.t));
     o+='<rect x="'+x.toFixed(1)+'" y="'+(H-1-bh).toFixed(1)+'" width="'+w.toFixed(1)+'" height="'+bh.toFixed(1)+'" rx="1.5" fill="'+(tl?'#7fb6e0':'rgb('+Math.round(120+hot*110)+','+Math.round(150-hot*10)+','+Math.round(200-hot*110)+')')+'"/>';});
   return o+'</svg>';}
-function nbSegs(){const n=NB.n,W=NB.water,dose=NB.dose;let w;
-  if(NB.dist==='even')w=Array(n).fill(1/n);
-  else if(NB.dist==='bloom'){const b=Math.min(W*.4,2*dose)/W;w=[b].concat(Array(n-1).fill((1-b)/(n-1)));}
-  else if(NB.dist==='46'){if(n<3)w=[.4,.6];else{const a=Math.min(2,n-1);w=Array(a).fill(.4/a).concat(Array(n-a).fill(.6/(n-a)));}}
-  else if(NB.dist==='front'){const t=n*(n+1)/2;w=[...Array(n)].map((_,i)=>(n-i)/t);}
+function nbW(dist){const n=NB.n,W=NB.water,dose=NB.dose;let w;
+  if(dist==='even')w=Array(n).fill(1/n);
+  else if(dist==='bloom'){const b=Math.min(W*.4,2*dose)/W;w=[b].concat(Array(n-1).fill((1-b)/(n-1)));}
+  else if(dist==='46'){if(n<3)w=[.4,.6];else{const a=Math.min(2,n-1);w=Array(a).fill(.4/a).concat(Array(n-a).fill(.6/(n-a)));}}
+  else if(dist==='front'){const t=n*(n+1)/2;w=[...Array(n)].map((_,i)=>(n-i)/t);}
   else {const t=n*(n+1)/2;w=[...Array(n)].map((_,i)=>(i+1)/t);}
+  return w;}
+function nIcon(n){const W=60,H=26,gap=n>8?1.2:2,bw=(W-gap*(n-1))/n;let o='<svg viewBox="0 0 '+W+' '+H+'" width="100%" height="26" aria-hidden="true">';
+  for(let i=0;i<n;i++){const h=i?H-6:H-14;o+='<rect x="'+(i*(bw+gap)).toFixed(1)+'" y="'+(H-h)+'" width="'+bw.toFixed(1)+'" height="'+h+'" rx="1.2" fill="'+(i?'currentColor':'#7fb6e0')+'"/>';}return o+'</svg>';}
+function distIcon(dist){const w=nbW(dist),n=w.length,mx=Math.max(...w),W=96,H=40,gap=n>8?1.5:3,bw=(W-gap*(n-1))/n;
+  return '<svg viewBox="0 0 '+W+' '+H+'" width="100%" height="40" aria-hidden="true">'+w.map((x,i)=>{const h=Math.max(3,x/mx*(H-4));return '<rect x="'+(i*(bw+gap)).toFixed(1)+'" y="'+(H-h).toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+h.toFixed(1)+'" rx="1.5" fill="'+(dist==='46'&&i<Math.min(2,n-1)?'#e0b040':i===0&&dist==='bloom'?'#7fb6e0':'currentColor')+'"/>';}).join('')+'</svg>';}
+function nbSegs(){const n=NB.n,W=NB.water,w=nbW(NB.dist);
   let acc=0;return w.map((x,i)=>{const ml=i<n-1?Math.round(W*x):Math.round(W-acc);acc+=ml;return {ml,t:i?NB.bloom+(i-1)*NB.gap:0,temp:NB.temp,sty:'r',d:null};}).map((q,i,a)=>{if(i){const p=a[i-1],m=p.t+autoDur(p.ml);if(q.t<m)q.t=m;}return q;});}
-const DIST=[['bloom','悶蒸 2 倍粉重＋平均'],['even','全部平均'],['46','4:6 型（前 40% 調味）'],['front','前多後少'],['back','前少後多']];
+const DIST=[['bloom','悶蒸＋平均','悶蒸 2 倍粉重，其餘平均'],['even','全部平均','每段一樣多'],['46','4:6 型','前 40% 調味、後 60% 調濃度'],['front','前多後少','前段大注、越後越少'],['back','前少後多','前段輕、越後越多']];
 function nbStep(key,lab,val,unit){return '<div class="row"><span class="label">'+lab+'</span><div class="dz-st" data-nb="'+key+'"><button type="button" data-d="-1" aria-label="'+lab+'減少">−</button><b>'+val+unit+'</b><button type="button" data-d="1" aria-label="'+lab+'增加">＋</button></div></div>';}
 // ---- 濾杯圖像化選擇（像素圖＋流速／均勻度，依形狀分組） ----
 const DR_SHAPE={cone:'cone',v60:'cone',origami_c:'cone',solo:'cone',kono:'cone',kasuya:'cone',mugen:'cone',flower:'cone',deep27:'cone',mountain:'cone',ufo:'cone',crystaleye:'cone',chemex:'cone',v60neo:'cone',
@@ -9555,8 +9563,8 @@ function bindDrSheet(){$('dzDrX').onclick=()=>{$('dzDrOv').hidden=true;};
 function renderModal(){const b=$('dzMb');$('dzMt').querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',String(x.dataset.m===mtab)));
   if(mtab==='new'){const S=nbSegs(),W=S.reduce((a,q)=>a+q.ml,0);
     b.innerHTML='<div class="dz-nb"><div class="dz-prev top">'+miniTl(S,0,320,52)+'<small>'+DRIPPER[NB.dripper].name+'・'+NB.n+' 段・'+NB.dose+' g／'+W+' g（1:'+(W/NB.dose).toFixed(1)+'）・'+NB.temp+'°C<br>'+S.map((q,i)=>(i?i+1:'悶')+'：'+q.ml+' g @'+fmt(q.t)).join('・')+'</small></div><div class="row"><span class="label">濾杯</span><button type="button" class="bpick gpick dz-drb" id="dzDrBtn" aria-haspopup="dialog">'+drBtnHtml(NB.dripper)+'</button></div>'+
-      '<div class="row"><span class="label">段數（含悶蒸）</span><div class="dz-chipset" data-nbk="n">'+[2,3,4,5,6,7,8,10,12].map(k=>'<button type="button" data-v="'+k+'" aria-pressed="'+(NB.n===k)+'">'+k+' 段</button>').join('')+'</div></div>'+
-      '<div class="row"><span class="label">水量怎麼分</span><div class="dz-chipset" data-nbk="dist">'+DIST.map(([k,n])=>'<button type="button" data-v="'+k+'" aria-pressed="'+(NB.dist===k)+'">'+n+'</button>').join('')+'</div></div>'+
+      '<div class="row"><span class="label">段數（含悶蒸，藍色是悶蒸）</span><div class="dz-chipset dz-nseg" data-nbk="n">'+[2,3,4,5,6,7,8,10,12].map(k=>'<button type="button" data-v="'+k+'" aria-pressed="'+(NB.n===k)+'">'+nIcon(k)+'<b>'+k+' 段</b></button>').join('')+'</div></div>'+
+      '<div class="row"><span class="label">水量怎麼分（'+NB.n+' 段的樣子）</span><div class="dz-chipset dz-dist" data-nbk="dist">'+DIST.map(([k,n,d])=>'<button type="button" data-v="'+k+'" aria-pressed="'+(NB.dist===k)+'">'+distIcon(k)+'<b>'+n+'</b><small>'+d+'</small></button>').join('')+'</div></div>'+
       '<div class="g2">'+nbStep('dose','粉重',NB.dose,' g')+nbStep('water','總水量',NB.water,' g')+nbStep('temp','水溫',NB.temp,'°C')+nbStep('bloom','悶蒸',NB.bloom,' 秒')+nbStep('gap','之後每段間隔',NB.gap,' 秒')+'<div class="row"><span class="label">粉水比</span><div class="dz-prev" style="text-align:center"><b>1:'+(W/NB.dose).toFixed(1)+'</b></div></div></div>'+
       '<p class="label">豆子、焙度、研磨和濾材沿用目前的設定，建立後都還能再一段一段調整。</p>'+
       '<button type="button" class="dz-mk" id="dzMk">建立這個手法</button></div>';}
