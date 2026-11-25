@@ -1551,8 +1551,8 @@ function renderTourMap(){
 function tourStart(i,keepLog){if(!keepLog||TS.Lst!==i){TS.L=epExpand(T[i]);TS.Lst=i}TS.st=i;TS.i=0;TS.choice=null;TS.pend=null;TS.again=null;TS.used=new Map();if(!keepLog)TS.log=[];clearInterval(TS.tm);$("#tourBox").innerHTML=`<div class="tw-play"><div class="tw-top"><button class="btn" id="tourBack">← 路線</button><span>${T[i].ic} ${T[i].ep?`${T[i].day} · 第 ${T[i].no} 集`:T[i].upd?T[i].day:T[i].daily?"每日導覽":stNo(i)?`第 ${stNo(i)} 站`:"序章"}・${T[i].n}</span></div><div class="tw-info scn" id="twInfo"><svg viewBox="0 0 96 40" shape-rendering="crispEdges" class="tw-scene">${SCN[T[i].sc]()}</svg></div><div id="twCards"></div><div class="tw-dlg" id="twDlg"><div class="tw-av" id="twAv"></div><div class="tw-tx"><b id="twWho"></b><div id="twText"></div><span class="tw-more" id="twMore">▼</span></div></div><div id="twOpts"></div></div>`;twInfo(T[i].go);tourStep();}
 function tourType(who,text){
   $("#twAv").innerHTML=sprite(who,52);$("#twWho").textContent=WHO[who][0];
-  const el=$("#twText");TS.full=text;clearInterval(TS.tm);if(TS.fast){el.textContent=text;TS.typing=0;$("#twMore").style.visibility="visible";return}TS.typing=1;let n=0;$("#twMore").style.visibility="hidden";
-  const dl=$("#twDlg");if(dl){const r=dl.getBoundingClientRect();if(r.bottom>innerHeight-8)dl.scrollIntoView({block:"end",behavior:"smooth"})}TS.tm=setInterval(()=>{n+=2;el.textContent=text.slice(0,n);if(n>=text.length){clearInterval(TS.tm);TS.typing=0;$("#twMore").style.visibility="visible"}},28);
+  const el=$("#twText");TS.full=text;clearInterval(TS.tm);if(TS.fast){el.textContent=text;TS.typing=0;$("#twMore").style.visibility="visible";glLine(el);return}TS.typing=1;let n=0;$("#twMore").style.visibility="hidden";
+  const dl=$("#twDlg");if(dl){const r=dl.getBoundingClientRect();if(r.bottom>innerHeight-8)dl.scrollIntoView({block:"end",behavior:"smooth"})}TS.tm=setInterval(()=>{n+=2;el.textContent=text.slice(0,n);if(n>=text.length){clearInterval(TS.tm);TS.typing=0;$("#twMore").style.visibility="visible";glLine(el)}},28);
 }
 function tourStep(){
   const S=T[TS.st];$("#twOpts").innerHTML="";
@@ -1578,7 +1578,7 @@ function tourBackStep(){
   TS.fast=0;
 }
 function tourTap(fromReplay){
-  if(TS.typing){clearInterval(TS.tm);$("#twText").textContent=TS.full;TS.typing=0;$("#twMore").style.visibility="visible";return}
+  if(TS.typing){clearInterval(TS.tm);$("#twText").textContent=TS.full;TS.typing=0;$("#twMore").style.visibility="visible";glLine($("#twText"));return}
   if(!fromReplay)TS.log.push("t");
   if(TS.choice){const L=TS.choice,u=(L.more&&TS.used.get(L))||new Set();$("#twMore").style.visibility="hidden";$("#twOpts").innerHTML=L.o.map((o,j)=>u.has(j)?"":`<button class="tw-opt" data-topt="${j}">${esc(o[0])}</button>`).join("")+(u.size?`<button class="tw-opt" data-topt="-1">沒有了，繼續 →</button>`:"");return}
   tourStep();
@@ -1704,6 +1704,44 @@ function renderBottom(){
 renderBottom();renderBotExtra();
 /* ===== 名詞解釋（點底線字跳出卡片） ===== */
 const GL={
+"外資":["org","外國機構投資人","外國法人在台灣買賣股票的資金（證交所統計叫「外資及陸資」）。台股成交與市值占比高，外資連續賣超時常伴隨台幣走貶。",["外資及陸資"]],
+"投信":["org","證券投資信託公司","發行與管理基金、ETF 的公司，是三大法人之一；買賣超反映國內基金與 ETF 資金的動向。",[]],
+"自營商":["org","證券商自營部門","券商用自己的錢買賣股票；因為要替發行的權證、期貨做避險，買賣超常跟著避險部位大幅變動。",[]],
+"三大法人":["term","外資、投信、自營商","證交所每天盤後公布這三類法人的買賣超金額，是看台股籌碼最常用的數字。",[]],
+"融資":["term","借錢買股票","向券商借錢買股，上市股票最多借六成。股價跌太多、維持率跌破門檻就會被追繳，不補錢就被賣掉（斷頭）。",["融資餘額"]],
+"融資維持率":["term","擔保品市值 ÷ 借款","融資買的股票市值除以借款金額。低於門檻就被追繳；證交所 11/24 起把門檻從 130% 降到 120%。",["擔保維持率","維持率"]],
+"追繳":["term","融資追繳","維持率跌破門檻時，券商通知投資人在期限內補錢或補擔保品；沒補足就會被強制賣出。",["追繳令","融資追繳"]],
+"斷頭":["term","強制處分","融資或融券被追繳後沒有補足，券商把股票強制賣掉。斷頭集中時會形成額外賣壓。",["強制處分"]],
+"處置股":["term","交易所處置的股票","成交量或漲跌異常的股票被列入處置，改成每 5 或 20 分鐘撮合一次，嚴重時要先付款才能買，用來降溫。",[]],
+"台指期":["term","臺股期貨","以台股加權指數為標的的期貨，大台一點 200 元。分日盤和夜盤，常被用來避險或押注台股方向。",["臺指期","台指期貨"]],
+"夜盤":["term","期貨盤後交易","期交所下午 3 點到隔天清晨 5 點的交易時段，會反映美股走勢，被當成隔天台股開盤的參考。",[]],
+"未平倉":["term","還沒結清的期貨部位","買進或賣出期貨後還沒反向沖銷的口數；看大戶未平倉可以知道他們押多還是押空。",[]],
+"淨空單":["term","空單減多單","外資台指期的淨空單＝空方口數減多方口數。數字越大，代表外資用期貨押跌或避險越多；回補空單會推升期貨。",["淨未平倉"]],
+"逆價差":["term","期貨低於現貨","期貨價格低於現貨指數叫逆價差，通常代表市場看淡；期貨高於現貨叫正價差。",["正價差"]],
+"國安基金":["org","國家金融安定基金","股市因重大事件大跌時由政府進場護盤，2000 年成立，可動用上限 5,000 億元，由委員會決定進場與退場。",[]],
+"限空令":["term","限制放空的措施","例如平盤以下禁止融券、借券賣出，或提高融券保證金，用來減輕空方賣壓；通常在大跌時由金管會宣布。",["禁空令"]],
+"美元指數":["term","DXY","美元對歐元、日圓、英鎊等六種主要貨幣的強弱指標。越高代表美元越強，資金常從台股等新興市場流出。",["DXY"]],
+"加權指數":["term","台股大盤","證交所編製的上市股票指數，按市值加權，台積電權重最大，所以常被台積電帶著走。",["加權","台股加權"]],
+"櫃買指數":["term","上櫃股票指數","櫃買中心編製，成分多是中小型股，比加權指數更能反映中小型股的漲跌。",["櫃買"]],
+"升一碼":["term","升息 0.25 個百分點","利率調整 0.25 個百分點叫一碼；升兩碼就是 0.5 個百分點。",["升兩碼","降一碼"]],
+"鷹派":["term","偏向升息","央行官員偏向升息、抑制通膨叫鷹派；偏向降息、支撐景氣叫鴿派。",["鴿派","放鴿","轉鴿"]],
+"MSCI":["org","明晟指數公司","編製全球股票指數的公司；很多被動基金照它的指數買股，所以被納入通常會帶來買盤。",[]],
+"空單回補":["term","放空的人買回","放空的人買回股票或期貨結清部位。大量回補會讓價格急漲，但不代表有新的長期買盤。",["空頭回補","軋空"]],
+"空頭反彈":["term","熊市中的急漲","空頭市場中途出現的短暫急漲，常由空單回補帶動，之後可能再跌。",[]],
+"跌停":["term","單日跌幅上限","台股單日漲跌幅上限是 10%，碰到下限叫跌停、上限叫漲停。",["漲停","跌停板"]],
+"庫藏股":["term","公司買回自家股票","公司用自己的錢買回股票、減少流通股數，市場常解讀為公司認為股價被低估。",[]],
+"財測":["term","公司財務預測","公司對未來營收、獲利的預估。上調代表公司對生意更有信心，下修常讓股價重挫。",["財務預測"]],
+"0050":["co","元大台灣50 ETF","追蹤台灣市值最大 50 家公司的 ETF，台積電占比最高；外資賣超常有一部分是調節這類 ETF。",[]],
+"承銷價":["term","新股上市前的賣價","IPO 時賣給投資人的價格；上市後跌破承銷價叫「破發」，常被當成市場對新股信心不足的訊號。",["破發"]],
+"閉鎖期":["term","上市後不能賣股的期間","IPO 後內部人與早期股東有一段時間不能賣股；期滿「解禁」後可賣的股票變多，可能出現賣壓。",["解禁"]],
+"非農就業":["term","美國每月就業報告","美國非農業部門新增的工作數，每月第一個週五公布，是 Fed 判斷景氣最重要的數據之一。",["非農"]],
+"耐久財":["term","耐久財訂單","企業和家庭購買機器、汽車、飛機等可用三年以上商品的訂單，用來觀察企業投資意願。",["耐久財訂單"]],
+"年線":["term","一年移動平均線","過去約 240 個交易日的平均價格；跌破年線常被視為長線轉弱。",[]],
+"期中選舉":["term","美國國會改選","在總統任期中間舉行的國會選舉；2026 年民主黨拿下參眾兩院，1 月新國會上任。",[]],
+"VR200":["term","輝達 Vera Rubin 平台","輝達接替 Blackwell 的下一代 AI 伺服器平台，台灣代工廠是主要組裝者。",["Vera Rubin"]],
+"遠端租用":["term","遠端使用算力","不把晶片運出去，而是讓外國公司透過雲端或海外資料中心租用美國先進晶片的算力；出口新規把這種方式也納入許可。",["遠端算力","遠程算力"]],
+"廣發證券":["org","中國大型券商","總部在廣州的證券公司，研究部門涵蓋海外電子與通訊產業。",["廣發"]],
+"Fundstrat":["org","美國獨立研究機構","Tom Lee 共同創辦的市場研究公司，以偏多的市場看法聞名。",[]],
 "黃樂":["ppl","Alice Huang｜中國女商人","Megaspeed 前高層。她和黃仁勳的婚外情、以及是否牽涉中國情報單位，是 FBI 與國會調查的焦點之一。",["Alice Huang"]],
 "Rob Bonta":["ppl","加州檢察長","11/19 對輝達發出調查傳票，查黃仁勳的婚外情是否讓公司違反加州法律。",["Bonta","邦塔"]],
 "Tim Teter":["ppl","Nvidia 法務長","黃仁勳回任後再度直屬他；12/2 要接受眾院閉門約談。",["Teter","泰德"]],
@@ -1716,7 +1754,7 @@ const GL={
 "消費者信心指數":["term","Conference Board 每月公布","調查美國家庭對現在與未來景氣、就業、收入的看法；1985 年＝100。消費占美國 GDP 約七成，常被當作景氣溫度計。",["消費者信心","Conference Board"]],
 "百思買":["co","BBY｜Best Buy","美國最大的 3C 家電連鎖零售商，財報常被當作美國消費電子需求的指標。",["Best Buy"]],
 "ODM":["term","原廠委託設計代工","替品牌或雲端大廠設計並組裝伺服器的代工廠，例如廣達、緯創、鴻海；客戶直接是 Google、微軟等雲端大廠。",["ODM 訂單"]],
-"OEM":["term","品牌伺服器廠","用自己品牌賣伺服器的公司，例如 Dell、HPE、美超微；客戶多是企業、新雲端業者與政府。",["二、三線 OEM"]],
+"OEM":["term","品牌伺服器廠","用自己品牌賣伺服器的公司，例如 Dell、HPE、美超微；客戶多是企業、新雲端業者與政府。",["二、三線 OEM","品牌伺服器廠"]],
 "Helios":["term","AMD 機櫃級 AI 系統","AMD 整櫃式的 AI 伺服器平台，對標輝達 NVL72 機櫃；廣發預估 2027 年第一季開始放量。",[]],
 "甲骨文":["co","ORCL｜Oracle","美國資料庫與雲端公司，近年大舉投資 AI 資料中心、出租算力。",["Oracle"]],
 "騰訊":["co","0700.HK｜Tencent","中國最大的網路公司之一，經營微信、遊戲與雲端服務。",["Tencent"]],
@@ -1876,6 +1914,11 @@ function glBuild(){
   GLRE=new RegExp(`((?<![A-Za-z0-9&\\-])(?:${asc.join("|")})(?![A-Za-z0-9\\-])|${cjk.join("|")})`,"g");
 }
 const GL_SKIP="svg,button,a,script,style,input,textarea,select,.chip,[data-gl],.gl-pop,summary,.ix,.day";
+/* 導覽員對白：打字完成後把名詞加底線（點了跳解釋，不會跳下一句） */
+function glLine(el){try{if(!el||typeof GL==="undefined")return;if(!GLRE)glBuild();const t=el.textContent,used=new Set();GLRE.lastIndex=0;let m,last=0,frag=null;
+  while((m=GLRE.exec(t))){const key=GLMAP[m[0]];if(!key||used.has(key))continue;used.add(key);frag=frag||document.createDocumentFragment();
+    frag.appendChild(document.createTextNode(t.slice(last,m.index)));const u=document.createElement("span");u.className="gl";u.dataset.gl=key;u.textContent=m[0];frag.appendChild(u);last=m.index+m[0].length}
+  if(frag){frag.appendChild(document.createTextNode(t.slice(last)));el.textContent="";el.appendChild(frag)}}catch(e){}}
 function glossify(root){
   if(!GLRE)glBuild();
   root.querySelectorAll(".card").forEach(card=>{
