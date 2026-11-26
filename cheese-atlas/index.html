@@ -222,7 +222,7 @@ nav a.on{background:#4a3828;color:#fff}nav a.on i{color:var(--rind)}
 <section class="view" id="v-proc"></section>
 <section class="view" id="v-taste"></section>
 <!-- Made by Jim Lu -->
-<div class="jl-sig">起司品飲圖鑑 v1.6・Made by <b style="font-weight:700">Jim Lu</b></div>
+<div class="jl-sig">起司品飲圖鑑 v1.7・Made by <b style="font-weight:700">Jim Lu</b></div>
 </main>
 <nav><a href="#learn" data-v="learn"><i>學</i>學習</a><a href="#guide" data-v="guide"><i>覽</i>導覽</a><a href="#cheese" data-v="cheese"><i>起</i>起司</a><a href="#items" data-v="items"><i>配</i>配角</a><a href="#pair" data-v="pair"><i>搭</i>搭配</a><a href="#proc" data-v="proc"><i>製</i>製程</a><a href="#taste" data-v="taste"><i>試</i>試吃</a></nav>
 <div id="toast"></div>
@@ -1202,9 +1202,24 @@ function renderTaste(){const v=$("#v-taste"),S=TSETS.find(x=>x.id===TSID);ST.tas
  v.querySelector("[data-tcopy]").onclick=()=>{const D2=ST.taste[S.id]||{};const txt=S.name+"\n"+S.L.map((c,i)=>{const d=D2[c.id]||{};return`${i+1}. ${c.n}（${c.jp}）${d.s?" "+"★".repeat(d.s):""}${d.tags&&d.tags.length?"｜"+d.tags.join("、"):""}${d.n?"\n   "+d.n:""}`}).join("\n");
   (navigator.clipboard?navigator.clipboard.writeText(txt):Promise.reject()).then(()=>toast("已複製，可以直接貼給 Claude"),()=>toast("無法複製"))}}
 
+
+/* ---------- 由左往右滑＝上一步 ---------- */
+const VHIST=[];
+(function(){let sx=0,sy=0,st=0,ok=false;
+ const vis=e=>e&&!e.disabled&&e.offsetParent!==null;
+ function back(){const z=$("#tsZoom");if(z&&z.classList.contains("on")){z.classList.remove("on");return 1}
+  if($("#sheet").classList.contains("on")){closeSheet();return 1}
+  const v=$("#v-"+VIEW);for(const q of["[data-lp]","#gp","#pp","[data-back]"]){const b=v&&v.querySelector(q);if(vis(b)){b.click();return 1}}
+  if(VHIST.length){const p=VHIST.pop();go(p,1);return 1}return 0}
+ document.addEventListener("touchstart",e=>{const t=e.touches[0];ok=e.touches.length===1&&!e.target.closest("textarea,input,select,.chips,.hscroll,[data-noswipe]");
+  let el=e.target;while(ok&&el&&el!==document.body){if(el.scrollWidth>el.clientWidth+4&&getComputedStyle(el).overflowX.match(/auto|scroll/)){ok=false;break}el=el.parentElement}
+  sx=t.clientX;sy=t.clientY;st=Date.now()},{passive:true});
+ document.addEventListener("touchend",e=>{if(!ok)return;const t=e.changedTouches[0],dx=t.clientX-sx,dy=t.clientY-sy;
+  if(dx>70&&Math.abs(dy)<Math.min(60,dx*.6)&&Date.now()-st<700){if(back())toast("↩ 上一步")}},{passive:true});
+ window.swipeBack=back})();
 /* ---------- 導航 ---------- */
 let VIEW="guide";const R={learn:renderLearn,guide:renderGuide,cheese:renderCheese,items:renderItems,pair:renderPair,proc:renderProc,taste:renderTaste};
-function go(v){if(v!=="proc")stopP();closeSheet();VIEW=v;$$("section.view").forEach(s=>s.classList.toggle("on",s.id==="v-"+v));$$("nav a").forEach(a=>a.classList.toggle("on",a.dataset.v===v));R[v]();window.scrollTo(0,0);try{history.replaceState(null,"","#"+v)}catch(e){}}
+function go(v,fromBack){if(!fromBack&&typeof VIEW!=='undefined'&&VIEW!==v&&$("#v-"+VIEW)&&$("#v-"+VIEW).classList.contains('on')){VHIST.push(VIEW);if(VHIST.length>20)VHIST.shift()}if(v!=="proc")stopP();closeSheet();VIEW=v;$$("section.view").forEach(s=>s.classList.toggle("on",s.id==="v-"+v));$$("nav a").forEach(a=>a.classList.toggle("on",a.dataset.v===v));R[v]();window.scrollTo(0,0);try{history.replaceState(null,"","#"+v)}catch(e){}}
 $$("nav a").forEach(a=>a.onclick=e=>{e.preventDefault();go(a.dataset.v)});
 $("#share").onclick=()=>{const u=location.href.split("#")[0];(navigator.clipboard?navigator.clipboard.writeText(u):Promise.reject()).then(()=>toast("已複製連結"),()=>toast("請從網址列複製"))};
 go(R[location.hash.slice(1)]?location.hash.slice(1):"learn");
