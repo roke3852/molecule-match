@@ -19,3 +19,8 @@
 - 每張大事卡與名人觀點下方有「🤖 AI 分析」按鈕（用 Claude Artifact 的 `sample` 能力），只有在 Claude App 版 https://claude.ai/artifact/RwoQxNPNwLLUQkoSwvLcWk 才能用；GitHub Pages 版按了會顯示「只能在 Claude App 裡的版本使用」並附連結。
 - 每次更新 us-market/index.html（含排程更新）推上 GitHub 之後，也要同步更新這個 Artifact：先用 Artifact 工具 `action:"read"`、`url` 為上面網址讀一次，再用 `url` 加 `file_path: us-market/index.html`、`files: {"en/index.html": "us-market/en/index.html"}` 發布（不要傳 capabilities，沿用 sample）。不要另外新建 Artifact。
 - 新增的大事卡、觀點不用另外寫 AI 內容；AI 分析由使用者按按鈕時即時產生，結果存在使用者瀏覽器裡（卡片 upd 變了會提示重新分析）。
+
+## extraction-sim（手沖咖啡實驗室）：Claude App 版（手法比較 AI 分析）（2026-11-26 起）
+
+- 手法設計 ⑤ 手法比較的「🤖 AI 分析」用 Claude Artifact 的 `sample` 能力，只有 Claude App 版 https://claude.ai/artifact/R6hnnAbRcCx5UppvcLw9Jc 能用；GitHub Pages 版改成提供「複製給 Claude 的提示詞」與連結。
+- 每次更新 extraction-sim/index.html 推上 GitHub 後，也要同步這個 Artifact（slug c3272f19-6d0e-4ec7-aea8-6d7685acbc5d）：用 publish_files 發布 extraction-sim/index.html 為 index.html（base_version 先用 get_artifact 取得），不要另外新建，也不要改掉已宣告的 sample。
