@@ -1443,7 +1443,7 @@ window.BGM=(()=>{
     <div class="err" id="tErr"></div>
   </div>
   <button class="t-more" id="tMore" type="button" aria-label="咖啡宇宙：更多咖啡 App 與遊戲">咖啡宇宙</button>
-  <div class="t-foot">© 2026 Jim Lu　ver. 11.6</div>
+  <div class="t-foot">© 2026 Jim Lu　ver. 11.7</div>
 </div>
 <nav class="modes" aria-label="導覽"><div class="in">
   <button class="homebtn" id="homeBtn" type="button" hidden>‹ 主選單</button>
@@ -9680,7 +9680,8 @@ async function onExport(k){const C=CUR_C;if(!C)return;const cp=async t=>{try{awa
 let cv='comp';
 function renderCmp(){let a=[];try{a=JSON.parse(localStorage.getItem(DSV)||'[]');}catch(e){}CS=CS.filter(id=>id==='__cur'||a.some(x=>x.id===id));
   const opts=[{id:'__cur',name:'目前設定'}].concat(a.slice(0,20));
-  const cmpRow=x=>{const j=CS.indexOf(x.id),d=x.id==='__cur'?D:x.d;return '<button type="button" data-c="'+x.id+'" class="dz-ck'+(j>=0?' on':'')+'" role="checkbox" aria-checked="'+(j>=0)+'"><span class="bx" style="'+(j>=0?'background:'+CCOL[j]+';border-color:'+CCOL[j]:'')+'">'+(j>=0?CLET[j]:'')+'</span><span><b>'+esc(x.name)+(x.id==='__cur'?'（正在調的這套）':'')+'</b>'+badge(d)+'<small>'+(x.id==='__cur'?esc(tplName().replace(/^\S+ /,'')):esc(x.sum||''))+'</small>'+(d&&d.segs?miniTl(d.segs,d.tail,320,22):'')+'</span></button>';};
+  const TLM0=tlMax(allSaved().map(x=>x.d).concat([D]));
+  const cmpRow=x=>{const j=CS.indexOf(x.id),d=x.id==='__cur'?D:x.d;return '<button type="button" data-c="'+x.id+'" class="dz-ck'+(j>=0?' on':'')+'" role="checkbox" aria-checked="'+(j>=0)+'"><span class="bx" style="'+(j>=0?'background:'+CCOL[j]+';border-color:'+CCOL[j]:'')+'">'+(j>=0?CLET[j]:'')+'</span><span><b>'+esc(x.name)+(x.id==='__cur'?'（正在調的這套）':'')+'</b>'+badge(d)+'<small>'+(x.id==='__cur'?esc(tplName().replace(/^\S+ /,'')):esc(x.sum||''))+'</small>'+(d&&d.segs?miniTl(d.segs,d.tail,320,22,undefined,TLM0):'')+'</span></button>';};
   $('dzCmpPick').innerHTML=cmpRow(opts[0])+(FL.length?FL.map(f=>{const v=opts.slice(1).filter(x=>x.folder===f);return v.length?'<div class="dz-fh">📁 '+esc(f)+' <small>'+v.length+'</small></div>'+v.map(cmpRow).join(''):'';}).join('')+(()=>{const v=opts.slice(1).filter(x=>!x.folder||!FL.includes(x.folder));return v.length?'<div class="dz-fh">未分類 <small>'+v.length+'</small></div>'+v.map(cmpRow).join(''):'';})():opts.slice(1).map(cmpRow).join(''));
   const C=cmpList(),out=$('dzCmpOut');
   if(C.length<2){out.innerHTML='<p class="label">'+(a.length?'再勾一套就能開始比較。':'先用上面的「💾 存檔」存一套，改一改再存一套，就能在這裡比較。')+'</p>';return;}
@@ -9769,14 +9770,17 @@ function uniqName(n,a){if(!a.some(x=>x.name===n))return n;let i=2;while(a.some(x
 const NB=(()=>{try{return Object.assign({valve:'none',dripper:'v60',n:4,dose:15,water:240,temp:93,bloom:35,gap:20,dist:'bloom'},JSON.parse(localStorage.getItem('brewlab-design-nb')||'{}'));}catch(e){return {dripper:'v60',n:4,dose:15,water:240,temp:93,bloom:35,gap:20,dist:'bloom'};}})();
 const saveNB=()=>{try{localStorage.setItem('brewlab-design-nb',JSON.stringify(NB));}catch(e){}};
 let mtab='new';
-function miniTl(segs,tail,W,H,cap){return miniTl0(segs,tail,W,H)+(cap===false?'':segCap(segs,tail));}
+// 清單裡共用時間軸，才對得齊
+function tlEnd(segs,tail){if(!segs||!segs.length)return 30;const k=segs.length-(tail||0),dd=q=>q.d??autoDur(q.ml);return Math.max(30,...segs.slice(0,k).map(q=>Math.max(q.t+dd(q),q.t+(q.hold||0))))+(tail?14:4);}
+const tlMax=a=>Math.max(30,...a.map(x=>x&&x.segs?tlEnd(x.segs,x.tail):30));
+function miniTl(segs,tail,W,H,cap,tm){return miniTl0(segs,tail,W,H,tm)+(cap===false?'':segCap(segs,tail));}
 // 每段的水溫、注法、浸泡／滴濾
 function segCap(segs,tail){const k=segs.length-(tail||0),P=segs.slice(0,k);if(!P.length)return '';
   const one=(q,i)=>'<span class="sc'+(q.hold>0?' im':'')+'"><b>'+(i?i+1:'悶')+'</b>'+Math.round(q.ml)+'g・'+q.temp+'°・'+(q.sty==='c'?'中心':'繞圈')+'・'+(q.hold>0?'浸泡'+q.hold+'s':'滴濾')+'</span>';
   if(P.length<=6)return '<div class="dz-sc">'+P.map(one).join('')+(tail?'<span class="sc tl">＋補水 '+Math.round(segs.slice(k).reduce((a,q)=>a+q.ml,0))+'g</span>':'')+'</div>';
   const t=P.map(q=>q.temp),mn=Math.min(...t),mx=Math.max(...t),nh=P.filter(q=>q.hold>0).length,nc=P.filter(q=>q.sty==='c').length;
   return '<div class="dz-sc"><span class="sc">🌡 '+(mn===mx?mn+'°C':t[0]+'→'+t[t.length-1]+'°C')+'</span><span class="sc">'+(nc===0?'🌀 全部繞圈':nc===P.length?'🎯 全部中心':'🌀 繞圈 '+(P.length-nc)+'・🎯 中心 '+nc)+'</span><span class="sc'+(nh?' im':'')+'">'+(nh===0?'💧 全部滴濾':nh===P.length?'🔒 全部浸泡':'🔒 浸泡 '+nh+' 段・💧 滴濾 '+(P.length-nh)+' 段')+'</span>'+(tail?'<span class="sc tl">＋補水 '+tail+' 段</span>':'')+'</div>';}
-function miniTl0(segs,tail,W,H){W=W||320;H=H||42;const k=segs.length-(tail||0),dd=q=>q.d??autoDur(q.ml);const tE=Math.max(30,...segs.slice(0,k).map(q=>Math.max(q.t+dd(q),q.t+(q.hold||0))))+(tail?14:4),X=t=>2+t/tE*(W-4),mx=Math.max(...segs.map(q=>q.ml),1);
+function miniTl0(segs,tail,W,H,tm){W=W||320;H=H||42;const k=segs.length-(tail||0),dd=q=>q.d??autoDur(q.ml);const tE=Math.max(tm||0,tlEnd(segs,tail)),X=t=>2+t/tE*(W-4),mx=Math.max(...segs.map(q=>q.ml),1);
   let o='<svg viewBox="0 0 '+W+' '+H+'" width="100%" height="'+H+'" preserveAspectRatio="none" aria-hidden="true"><line x1="0" x2="'+W+'" y1="'+(H-1)+'" y2="'+(H-1)+'" stroke="var(--line)"/>';
   segs.forEach((q,i)=>{if(i<k&&q.hold>0)o+='<rect x="'+X(q.t).toFixed(1)+'" y="0" width="'+Math.max(2,X(q.t+q.hold)-X(q.t)).toFixed(1)+'" height="'+H+'" fill="#e8b04a" opacity=".16"/><rect x="'+X(q.t).toFixed(1)+'" y="0" width="'+Math.max(2,X(q.t+q.hold)-X(q.t)).toFixed(1)+'" height="2" fill="#e8b04a"/>';});
   segs.forEach((q,i)=>{const bh=Math.max(3,q.ml/mx*(H-6)),hot=Math.max(0,Math.min(1,(q.temp-80)/20)),tl=i>=k;
@@ -9827,10 +9831,10 @@ function renderModal(){const b=$('dzMb');$('dzMt').querySelectorAll('button').fo
       '<div class="g2">'+nbStep('dose','粉重',NB.dose,' g')+nbStep('water','總水量',NB.water,' g')+nbStep('temp','水溫',NB.temp,'°C')+nbStep('bloom','悶蒸',NB.bloom,' 秒')+nbStep('gap','之後每段間隔',NB.gap,' 秒')+'<div class="row"><span class="label">粉水比</span><div class="dz-prev" style="text-align:center"><b>1:'+(W/NB.dose).toFixed(1)+'</b></div></div></div>'+
       '<p class="label">豆子、焙度、研磨和濾材沿用目前的設定，建立後都還能再一段一段調整。</p>'+
       '<button type="button" class="dz-mk" id="dzMk">建立這個手法</button></div>';}
-  else if(mtab==='tpl'){b.innerHTML=TPL.map(t=>{const X=t.mk(),W=X.segs.reduce((a,q)=>a+q.ml,0),ts=X.segs.map(q=>q.temp),r=ALL_RECIPES.find(x=>x.id===t.id);
-      return '<button type="button" class="dz-tc2'+(D.tpl===t.id?' on':'')+'" data-tp="'+t.id+'"><b>'+esc(t.n)+'</b><small>'+(DRIPPER[X.dripper]||DRIPPER.v60).name+'・'+X.dose+' g／'+Math.round(W)+' g（1:'+(W/X.dose).toFixed(1)+'）・'+(Math.min(...ts)===Math.max(...ts)?ts[0]+'°C':Math.min(...ts)+'–'+Math.max(...ts)+'°C')+'・C40 '+c40g(X.grind)+' 格'+(r&&r.country?'・'+r.country:'')+'</small>'+miniTl(X.segs,0,320,40)+'</button>';}).join('');}
+  else if(mtab==='tpl'){const TM=tlMax(TPL.map(t=>t.mk()));b.innerHTML=TPL.map(t=>{const X=t.mk(),W=X.segs.reduce((a,q)=>a+q.ml,0),ts=X.segs.map(q=>q.temp),r=ALL_RECIPES.find(x=>x.id===t.id);
+      return '<button type="button" class="dz-tc2'+(D.tpl===t.id?' on':'')+'" data-tp="'+t.id+'"><b>'+esc(t.n)+'</b><small>'+(DRIPPER[X.dripper]||DRIPPER.v60).name+'・'+X.dose+' g／'+Math.round(W)+' g（1:'+(W/X.dose).toFixed(1)+'）・'+(Math.min(...ts)===Math.max(...ts)?ts[0]+'°C':Math.min(...ts)+'–'+Math.max(...ts)+'°C')+'・C40 '+c40g(X.grind)+' 格'+(r&&r.country?'・'+r.country:'')+'</small>'+miniTl(X.segs,0,320,40,undefined,TM)+'</button>';}).join('');}
   else{const a=allSaved();
-    b.innerHTML=a.length?folderBar(a,'modal')+grouped(a,x=>'<button type="button" class="dz-tc2'+(D.sid===x.id?' on':'')+'" data-ld="'+x.id+'"><b>'+esc(x.name)+'</b>'+badge(x.d)+'<small>'+esc(x.sum)+'</small>'+(x.d&&x.d.segs?miniTl(x.d.segs,x.d.tail,320,40):'')+'</button>'):'<p class="label">還沒有存檔。調好手法後按「💾 存檔」，就會出現在這裡。</p>';}}
+    b.innerHTML=a.length?folderBar(a,'modal')+grouped(a,x=>'<button type="button" class="dz-tc2'+(D.sid===x.id?' on':'')+'" data-ld="'+x.id+'"><b>'+esc(x.name)+'</b>'+badge(x.d)+'<small>'+esc(x.sum)+'</small>'+(x.d&&x.d.segs?miniTl(x.d.segs,x.d.tail,320,40,undefined,tlMax(a.map(y=>y.d))):'')+'</button>'):'<p class="label">還沒有存檔。調好手法後按「💾 存檔」，就會出現在這裡。</p>';}}
 function openModal(t){mtab=t||'new';if(!t){mtab=D.sid?'my':D.tpl&&D.tpl!=='even10'?'tpl':'new';}$('dzModal').hidden=false;document.body.style.overflow='hidden';renderModal();}
 function closeModal(){$('dzModal').hidden=true;document.body.style.overflow='';}
 function tplName(){if(D.sid){let a=[];try{a=JSON.parse(localStorage.getItem(DSV)||'[]');}catch(e){}const x=a.find(y=>y.id===D.sid);if(x)return '💾 '+x.name;}
@@ -9874,10 +9878,11 @@ function renderReal(){const v=$('dzRList');if(!v)return;
   else $('dzRForm').innerHTML='';
   // 列表（新的在上）
   const sorted=RL.slice().sort((a,b)=>(a.date<b.date?1:-1));
+  const TLMS=tlMax(sorted.map(r=>r.d));
   v.innerHTML=sorted.length?sorted.map(r=>{const P=predict(r),C=CALP.map[r.d.dripper],Q=C?predict(r,C):null;const W=r.d.segs.reduce((a,q)=>a+q.ml,0);
     const e1=P?P.tds-r.tds:0,e2=Q?Q.tds-r.tds:0,ok=x=>Math.abs(x)<=.03?'ok':Math.abs(x)>.08?'bad':'';
     return '<div class="dz-rc"><div class="h"><b>'+esc(r.name)+'</b><small>'+r.date+(r.src?'・'+r.src:'')+'</small></div><div class="sub">'+(DRIPPER[r.d.dripper]||{name:r.d.dripper}).name+'・'+bOf(r.d.bean).name+'・C40 '+c40g(r.d.grind)+' 格・'+r.d.dose+' g／'+W+' g・'+r.d.segs.map(q=>q.ml).join('-')+(r.note?'<br>'+esc(r.note):'')+'</div>'+badge(r.d)+
-      miniTl(r.d.segs,r.d.tail,320,26)+
+      miniTl(r.d.segs,r.d.tail,320,26,undefined,TLMS)+
       '<div class="dz-rg"><span class="hd"></span><span class="hd">實測</span><span class="hd">模型</span><span class="hd">校正後</span>'+
       '<span class="l">TDS</span><span>'+r.tds.toFixed(2)+'</span><span class="'+ok(e1)+'">'+(P?P.tds.toFixed(2):'—')+'</span><span class="'+(Q?ok(e2):'')+'">'+(Q?Q.tds.toFixed(2):'—')+'</span>'+
       '<span class="l">時間</span><span>'+fmt(r.time)+'</span><span class="'+(P&&Math.abs(P.time-r.time)<=6?'ok':P&&Math.abs(P.time-r.time)>15?'bad':'')+'">'+(P?fmt(P.time):'—')+'</span><span class="'+(Q&&Math.abs(Q.time-r.time)<=6?'ok':'')+'">'+(Q?fmt(Q.time):'—')+'</span></div>'+
