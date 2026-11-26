@@ -1443,7 +1443,7 @@ window.BGM=(()=>{
     <div class="err" id="tErr"></div>
   </div>
   <button class="t-more" id="tMore" type="button" aria-label="咖啡宇宙：更多咖啡 App 與遊戲">咖啡宇宙</button>
-  <div class="t-foot">© 2026 Jim Lu　ver. 11.5</div>
+  <div class="t-foot">© 2026 Jim Lu　ver. 11.6</div>
 </div>
 <nav class="modes" aria-label="導覽"><div class="in">
   <button class="homebtn" id="homeBtn" type="button" hidden>‹ 主選單</button>
@@ -6225,7 +6225,7 @@ const BEANINFO={
 /* ---------- 生涯模式 v7：熟客、好感與忠誠、尋豆師、配方豆、零售、招牌咖啡、器材庫、比賽 ---------- */
 /* ---------- v8：商用磨豆機、手沖壺、小道具、水 ---------- */
 [{id:'nicecut',name:'Kalita Nice Cut G',type:'電動・61mm 平刀，小店常見',um:40,z:300,fines:.16},{id:'r220',name:'Fuji Royal R-220 小富士',type:'電動・鬼齒刀盤，日式咖啡店愛用',um:35,z:250,fines:.11},
- {id:'ditting',name:'Ditting 807 Lab Sweet',type:'電動・80mm 平刀，商用',um:12,z:200,fines:.075},{id:'zm',name:'Mazzer ZM',type:'電動・83mm 平刀，數位刻度',um:5,z:200,fines:.07},{id:'eg1',name:'Weber EG-1',type:'電動・80mm 平刀，無段，低轉速',um:null,fines:.062}
+ {id:'ditting',name:'Ditting 807 Lab Sweet',type:'電動・80mm 平刀，商用',um:12,z:200,fines:.075},{id:'zm',name:'Mazzer ZM',type:'電動・83mm 平刀，數位刻度',um:5,z:200,fines:.07},{id:'eg1',name:'Weber Workshops EG-1',type:'電動・80mm 平刀（CORE／ULTRA 低細粉刀盤），5 μm 一段，可調轉速，單劑量',um:null,fines:.062}
 ].forEach(g=>{if(!GRINDERS.find(x=>x.id===g.id))GRINDERS.push(g);});
 const KETTLES=[
  {id:'pot',name:'家用煮水壺',type:'寬口・1 L・不能控溫',cap:1000,stab:.5,temp:0,price:0,lore:'德叔留下的老茶壺。壺嘴又寬又短，水一倒就嘩啦啦，沒辦法倒小水流。'},
@@ -6244,6 +6244,8 @@ const TOOLS=[{id:'thermo',name:'探針溫度計',type:'插在壺裡，即時看�
  ['april','April Brewer','平底大孔，流速快又均勻',{het:.2,q:1.25,u:1,by:.012}],['staggx','Fellow Stagg [X]','雙層不鏽鋼平底，保溫好',{het:.22,q:1.0,u:.99,by:.01}],['b75','泰摩 冰瞳 B75','平底超大開孔，流速最快',{het:.25,q:1.6,u:.99,by:.02}],
  ['december','December Dripper','可調孔數的平底濾杯',{het:.2,q:1.0,u:1,by:.012}],['tricolate','Tricolate','直筒無繞流加分水盤，萃取率很高',{het:.1,q:.7,u:1,by:0}],['pulsar','NextLevel Pulsar','直筒無繞流，均勻度最好',{het:.12,q:.9,u:1,by:0}]
 ].forEach(([id,name,sub,d])=>{if(!DRIPPER[id]){DRIPPER[id]=Object.assign({name,desc:sub},d);G.BREWERS.push({id,name,sub});}});
+// Weber Workshops BIRD：全浸泡、無旁路，結束時把濾片往上旋拉分離（只在手法設計裡用；模型當成全程關閥浸泡、最後一次濾出）
+DRIPPER.bird={name:'Weber BIRD 反向濾壓',desc:'全浸泡無旁路，螺紋桿往上旋拉分離，可用濾紙或金屬網',het:.1,q:1.6,u:1,by:0,imm:1};
 [{id:'c2',name:'泰摩 栗子 C2',type:'手搖・38mm 錐刀，入門款',um:40,z:280,fines:.17},{id:'c3',name:'泰摩 栗子 C3 ESP Pro',type:'手搖・S2C 錐刀',um:25,z:260,fines:.15},{id:'q2',name:'1Zpresso Q2',type:'手搖・38mm 錐刀，旅行用',um:30,z:270,fines:.16},
  {id:'xultra',name:'1Zpresso X-Ultra',type:'手搖・40mm 錐刀，外調',um:12.5,z:240,dial:'num',rot:60,fines:.13},{id:'kinu',name:'Kinu M47 Classic',type:'手搖・47mm 錐刀，全金屬',um:10,z:240,fines:.12},{id:'x25',name:'Comandante X25 Trailmaster',type:'手搖・輕量旅行版',um:27.25,fines:.15},
  {id:'skerton',name:'Hario Skerton',type:'手搖・陶瓷錐刀，玻璃罐',um:60,z:300,fines:.22},{id:'porlex',name:'Porlex Mini',type:'手搖・陶瓷錐刀，可塞進愛樂壓',um:50,z:300,fines:.2},{id:'pietro',name:'Pietro',type:'手搖・58mm 平刀',um:10,z:230,fines:.09},{id:'s3',name:'泰摩 栗子 S3',type:'手搖・S2C890 錐刀，外調',um:15,z:240,fines:.12},
@@ -9195,10 +9197,11 @@ function baseOpts(){let a=[];try{a=JSON.parse(localStorage.getItem(DSV)||'[]');}
 function params(X){return params0(X);}
 function params0(X){const b=bOf(X.bean),k=Math.max(1,X.segs.length-(X.tail||0)),S=X.segs.slice(0,k),Tl=X.segs.slice(k);
   const Wp=S.reduce((a,s)=>a+s.ml,0),temps=S.map(s=>s.temp),same=temps.every(t=>t===temps[0]);
-  const VWd=S.map(s=>s.hold>0?[s.t,s.t+s.hold]:null).filter(Boolean);
+  let VWd=S.map(s=>s.hold>0?[s.t,s.t+s.hold]:null).filter(Boolean);
+  if((DRIPPER[X.dripper]||{}).imm){const le=Math.max(...S.map(s=>s.t+(s.d??autoDur(s.ml))));VWd=[[0,VWd.length?Math.max(le+5,...VWd.map(w=>w[1])):le+120]];}
   return Object.assign({dose:X.dose,ratio:Wp/X.dose,temp:temps[0],grind:X.grind,roast:X.roast??b.roast,bean:b.f,pattern:VWd.length?'switch':'pulse',dripper:X.dripper,
     plan:S.map(s=>s.ml),planT:S.map(s=>s.t),planD:S.map(s=>s.d??null),planTemp:same?null:temps,planStyle:S.some(s=>s.sty==='c')?S.map(s=>s.sty):null,
-    planHeight:null,stirPO:[],wdt:false,fines:X.fines??.14,valveWins:VWd.length?VWd:null,swMode:'closeFirst',swOpen:120,bypassMl:Tl.reduce((a,s)=>a+s.ml,0),filter:X.filter||'paper',xsp:[POLYT]},calOf(X,Wp/Math.max(1,k)));}
+    planHeight:null,stirPO:[],wdt:false,fines:X.fines??.14,valveWins:VWd.length?VWd:null,swMode:'closeFirst',swOpen:120,bypassMl:Tl.reduce((a,s)=>a+s.ml,0),filter:X.filter||'paper',xsp:[POLYT]},calOf(X,Wp/Math.max(1,k)),(DRIPPER[X.dripper]||{}).imm?{qMul:((calOf(X,1).qMul)||1)*4}:{});}
 // ---- 分析：分杯、累積、斷水點 ----
 function analyze(X,lite){const p=params(X),s=simulate('po',p),R=s.rec,L=R[R.length-1],byp=p.bypassMl||0;
   const Vtot=L.cupV,Vend=Vtot-byp,at=t=>R[Math.max(0,Math.min(R.length-1,Math.round(t)))];
@@ -9798,16 +9801,16 @@ const DIST=[['bloom','悶蒸＋平均','悶蒸 2 倍粉重，其餘平均'],['ev
 function nbStep(key,lab,val,unit){return '<div class="row"><span class="label">'+lab+'</span><div class="dz-st" data-nb="'+key+'"><button type="button" data-d="-1" aria-label="'+lab+'減少">−</button><b>'+val+unit+'</b><button type="button" data-d="1" aria-label="'+lab+'增加">＋</button></div></div>';}
 // ---- 濾杯圖像化選擇（像素圖＋流速／均勻度，依形狀分組） ----
 const DR_SHAPE={cone:'cone',v60:'cone',origami_c:'cone',solo:'cone',kono:'cone',kasuya:'cone',mugen:'cone',flower:'cone',deep27:'cone',mountain:'cone',ufo:'cone',crystaleye:'cone',chemex:'cone',v60neo:'cone',
-  orea:'flat',origami_w:'flat',kalita:'flat',april:'flat',staggx:'flat',b75:'flat',december:'flat',orea_neg:'flat',kalita102:'trap',melitta:'trap',beehouse:'trap',tricolate:'tube',pulsar:'tube'};
-const DR_GRP=[['all','全部'],['cone','錐形'],['flat','平底'],['trap','梯形'],['tube','直筒無繞流']];
-const DR_GN={cone:'錐形：流速快、粉床中間深，風味明亮',flat:'平底：粉床平均、萃取均勻，甜感厚度好',trap:'梯形：小孔慢流，接近半浸泡',tube:'直筒無繞流：幾乎全部的水都穿過粉層',other:'其他'};
+  orea:'flat',origami_w:'flat',kalita:'flat',april:'flat',staggx:'flat',b75:'flat',december:'flat',orea_neg:'flat',bird:'imm',kalita102:'trap',melitta:'trap',beehouse:'trap',tricolate:'tube',pulsar:'tube'};
+const DR_GRP=[['all','全部'],['cone','錐形'],['flat','平底'],['trap','梯形'],['tube','直筒無繞流'],['imm','浸泡式']];
+const DR_GN={cone:'錐形：流速快、粉床中間深，風味明亮',flat:'平底：粉床平均、萃取均勻，甜感厚度好',trap:'梯形：小孔慢流，接近半浸泡',tube:'直筒無繞流：幾乎全部的水都穿過粉層',imm:'浸泡式：注完水全程浸泡，最後一次濾出',other:'其他'};
 let drGrp='all';
-const drSpr=(id,sz)=>{if(!window.labSpr)return '<span style="font-size:'+Math.round(sz*.6)+'px;line-height:1">☕</span>';return window.labSpr(id,0,sz)||window.labSpr({orea_neg:'orea',v60neo:'v60'}[id]||'cone',0,sz);};
+const drSpr=(id,sz)=>{if(!window.labSpr)return '<span style="font-size:'+Math.round(sz*.6)+'px;line-height:1">☕</span>';return window.labSpr(id,0,sz)||window.labSpr({orea_neg:'orea',v60neo:'v60',bird:'press'}[id]||'cone',0,sz);};
 const drDots=(n,lab)=>{n=Math.max(1,Math.min(5,n));return '<span>'+lab+'</span><i>'+'●'.repeat(n)+'<u>'+'●'.repeat(5-n)+'</u></i>';};
 function drMeters(d){return '<span class="dz-mt2">'+drDots(Math.round((d.q-.5)/.25)+1,'流速')+drDots(Math.round((.78-(d.het??.5))/.13),'均勻')+'</span>';}
 function drBtnHtml(id){const d=DRIPPER[id]||DRIPPER.v60;return '<div class="gspr">'+drSpr(id,40)+'</div><div><b><span>'+esc(d.name)+'</span></b><small>'+esc(d.desc||'')+'</small>'+drMeters(d)+'</div><span class="label">▾</span>';}
 function renderDrSheet(){$('dzDrF').innerHTML=DR_GRP.map(([k,n])=>'<button type="button" data-g="'+k+'" aria-pressed="'+(drGrp===k)+'">'+n+'</button>').join('');
-  const ks=Object.keys(DRIPPER),gs=drGrp==='all'?['cone','flat','trap','tube','other']:[drGrp];
+  const ks=Object.keys(DRIPPER),gs=drGrp==='all'?['cone','flat','trap','tube','imm','other']:[drGrp];
   $('dzDrLs').innerHTML=gs.map(g=>{const a=ks.filter(k=>(DR_SHAPE[k]||'other')===g);if(!a.length)return '';
     return '<h4>'+DR_GN[g]+'（'+a.length+'）</h4>'+a.map(k=>{const d=DRIPPER[k];return '<button type="button" class="gcard" data-dr="'+k+'" aria-pressed="'+(NB.dripper===k)+'"><div class="gspr">'+drSpr(k,60)+'</div><b>'+esc(d.name)+'</b><small>'+esc(d.desc||'')+'</small>'+drMeters(d)+'</button>';}).join('');}).join('');}
 function openDrSheet(){drGrp='all';renderDrSheet();$('dzDrOv').hidden=false;const on=$('dzDrLs').querySelector('[aria-pressed="true"]');$('dzDrLs').scrollTop=0;if(on)on.scrollIntoView({block:'center'});try{SFX.p('select')}catch(e){}}
