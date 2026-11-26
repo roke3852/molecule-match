@@ -406,6 +406,13 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
 .dz-pick2{display:block}.dz-base{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:6px}.dz-base select{flex:1 1 160px;font:inherit;font-size:13px;padding:7px 8px;border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--ink)}
 .bg{display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin:3px 0}.bg-d{flex:0 0 auto}.bg-s{flex:0 0 auto}.bg-t{font-size:10.5px;font-weight:700;color:#1b1714;border-radius:6px;padding:1px 6px;white-space:nowrap}.bg-c{font-size:10.5px;color:var(--muted);border:1px solid var(--line);border-radius:6px;padding:0 5px;white-space:nowrap;font-family:var(--f-mono)}
 .bg-legend{font-size:10.5px;color:var(--muted);margin:2px 0 6px}
+#dzSaved .bl-sv{flex-wrap:wrap;justify-content:flex-end}#dzSaved .bl-sv>div{flex:1 1 100%}#dzSaved .bl-sv button{padding:5px 12px}
+.dz-fbar{display:flex;gap:6px;overflow-x:auto;padding:2px 0 8px;margin:6px 0 4px;-webkit-overflow-scrolling:touch}.dz-fbar button{flex:0 0 auto;border:1px solid var(--line);background:transparent;color:var(--ink);border-radius:999px;padding:6px 12px;font:inherit;font-size:13px;cursor:pointer;white-space:nowrap}.dz-fbar button small{color:var(--muted);font-size:11px}
+.dz-fbar button[aria-pressed=true]{border-color:var(--accent);color:var(--accent);font-weight:700;background:rgba(226,189,106,.12)}.dz-fbar .nf{border-style:dashed;color:var(--accent)}
+.dz-fnew{display:flex;gap:6px;margin:0 0 8px}.dz-fnew input{flex:1;min-width:0;font:inherit;padding:7px 9px;border:1px solid var(--accent);border-radius:8px;background:var(--panel);color:var(--ink)}.dz-fnew button{font:inherit;font-size:13px;border-radius:8px;padding:6px 10px;border:1px solid var(--line);background:transparent;color:var(--ink);cursor:pointer}
+.dz-fact{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin:0 0 6px}.dz-fact .label{flex:1 1 180px}.dz-fact button,.dz-mvto button{font:inherit;font-size:12.5px;border-radius:8px;padding:4px 9px;border:1px solid var(--line);background:transparent;color:var(--ink);cursor:pointer}
+.dz-mvto{display:flex;gap:6px;flex-wrap:wrap;align-items:center;padding:6px 0 10px;border-bottom:1px solid var(--line)}.dz-mvto button[aria-pressed=true]{border-color:var(--accent);color:var(--accent)}
+.dz-fh{font-size:13px;font-weight:700;color:var(--accent);margin:12px 0 4px;padding-bottom:3px;border-bottom:1px dashed var(--line)}.dz-fh small{color:var(--muted);font-weight:400}
 .dz-st{display:flex;align-items:center;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--panel)}
 .dz-st button{width:48px;height:42px;border:0;background:transparent;color:var(--accent);font-size:22px;font-weight:700;cursor:pointer;touch-action:manipulation;-webkit-user-select:none;user-select:none}
 .dz-st button:active{background:rgba(226,189,106,.15)}.dz-st b{flex:1;text-align:center;font-family:var(--f-mono);font-weight:500;font-size:16px;white-space:nowrap}
@@ -1428,7 +1435,7 @@ window.BGM=(()=>{
     <div class="err" id="tErr"></div>
   </div>
   <button class="t-more" id="tMore" type="button" aria-label="咖啡宇宙：更多咖啡 App 與遊戲">咖啡宇宙</button>
-  <div class="t-foot">© 2026 Jim Lu　ver. 11.1</div>
+  <div class="t-foot">© 2026 Jim Lu　ver. 11.2</div>
 </div>
 <nav class="modes" aria-label="導覽"><div class="in">
   <button class="homebtn" id="homeBtn" type="button" hidden>‹ 主選單</button>
@@ -5696,7 +5703,7 @@ addEventListener('hashchange',()=>setTimeout(upd,0));upd();setTimeout(upd,300);
 const $=id=>document.getElementById(id);
 const GCLIENT='267421312122-l2ggo7t35tqpf8ej5osqttt08ke30lr1.apps.googleusercontent.com';
 const GFILE='brewlab.json',GAPI='https://www.googleapis.com';
-const SYNC_KEYS=['brewLab.academy','brewsim-runs-v1','brewQuest.v1','brewsim-params-v1','brewLab.scoreStyle','brewCareer.v1','brewLab.player','brewLab.recipes','brewLab.prefBox','brewlab-design-st','brewlab-designs-v1','brewlab-design-cmp','brewlab-design-real','brewlab-design-cal'];
+const SYNC_KEYS=['brewLab.academy','brewsim-runs-v1','brewQuest.v1','brewsim-params-v1','brewLab.scoreStyle','brewCareer.v1','brewLab.player','brewLab.recipes','brewLab.prefBox','brewlab-design-st','brewlab-designs-v1','brewlab-design-cmp','brewlab-design-real','brewlab-design-cal','brewlab-design-folders'];
 const STAMP='brewLab.savedAt',GFLAG='brewLab.g',TOKK='brewLab.gtok';
 let gTok=null,gTokExp=0,gFileId=null,gClient=null,gOn=false,pushT=null;
 const raw=Storage.prototype.setItem;
@@ -9419,7 +9426,7 @@ function saveDesign(asNew,name){let a=[];try{a=JSON.parse(localStorage.getItem(D
   const sum=bOf(D.bean).name+'・'+D.dose+' g／'+W+' g・'+D.segs.length+' 段'+(D.tail?'（尾 '+D.tail+' 段補水）':'')+'・'+(A?Math.round(A.score)+' 分・EY '+A.cup.ey.toFixed(1)+'%':'');
   const cur=!asNew&&a.find(x=>x.id===D.sid);
   if(cur){if(cur.auto)cur.name=uniqName(autoName(D),a.filter(x=>x!==cur));cur.sum=sum;cur.d=clone(Object.assign({},D,{sid:cur.id}));cur.at=Date.now();a=[cur].concat(a.filter(x=>x!==cur));toastMsg('已更新：'+cur.name);}
-  else{const id='dz'+Date.now().toString(36),nm=name||uniqName(autoName(D),a);D.sid=id;a.unshift({id,name:nm,auto:!name,sum,d:clone(D),at:Date.now()});if(CS.length<4&&!CS.includes(id))CS.push(id);saveCS();toastMsg('已存：'+nm+'（可在下方 ✏️ 改名；下次按 📂 讀取就能載入）');}
+  else{const id='dz'+Date.now().toString(36),nm=name||uniqName(autoName(D),a);D.sid=id;a.unshift(Object.assign({id,name:nm,auto:!name,sum,d:clone(D),at:Date.now()},FL.includes(FCUR)?{folder:FCUR}:{}));if(CS.length<4&&!CS.includes(id))CS.push(id);saveCS();toastMsg('已存：'+nm+'（可在下方 ✏️ 改名；下次按 📂 讀取就能載入）');}
   try{localStorage.setItem(DSV,JSON.stringify(a.slice(0,40)));}catch(e){}saveD();renderSaved();renderQuick();renderCmp();}
 function loadDesign(id){let a=[];try{a=JSON.parse(localStorage.getItem(DSV)||'[]');}catch(e){}const x=a.find(y=>y.id===id);if(!x)return;D=Object.assign({bl:35,gap:15},clone(x.d),{tpl:'',sid:id});sel=0;render();toastMsg('已載入：'+x.name);}
 function bindSeg(){
@@ -9577,7 +9584,8 @@ function cmpComp(C){const S=SUBS(),un=cu==='g'?'g':cu==='mg'?'mg':'mmol';
 let cv='comp';
 function renderCmp(){let a=[];try{a=JSON.parse(localStorage.getItem(DSV)||'[]');}catch(e){}CS=CS.filter(id=>id==='__cur'||a.some(x=>x.id===id));
   const opts=[{id:'__cur',name:'目前設定'}].concat(a.slice(0,20));
-  $('dzCmpPick').innerHTML=opts.map(x=>{const j=CS.indexOf(x.id),d=x.id==='__cur'?D:x.d;return '<button type="button" data-c="'+x.id+'" class="dz-ck'+(j>=0?' on':'')+'" role="checkbox" aria-checked="'+(j>=0)+'"><span class="bx" style="'+(j>=0?'background:'+CCOL[j]+';border-color:'+CCOL[j]:'')+'">'+(j>=0?CLET[j]:'')+'</span><span><b>'+esc(x.name)+(x.id==='__cur'?'（正在調的這套）':'')+'</b>'+badge(d)+'<small>'+(x.id==='__cur'?esc(tplName().replace(/^\S+ /,'')):esc(x.sum||''))+'</small>'+(d&&d.segs?miniTl(d.segs,d.tail,320,22):'')+'</span></button>';}).join('');
+  const cmpRow=x=>{const j=CS.indexOf(x.id),d=x.id==='__cur'?D:x.d;return '<button type="button" data-c="'+x.id+'" class="dz-ck'+(j>=0?' on':'')+'" role="checkbox" aria-checked="'+(j>=0)+'"><span class="bx" style="'+(j>=0?'background:'+CCOL[j]+';border-color:'+CCOL[j]:'')+'">'+(j>=0?CLET[j]:'')+'</span><span><b>'+esc(x.name)+(x.id==='__cur'?'（正在調的這套）':'')+'</b>'+badge(d)+'<small>'+(x.id==='__cur'?esc(tplName().replace(/^\S+ /,'')):esc(x.sum||''))+'</small>'+(d&&d.segs?miniTl(d.segs,d.tail,320,22):'')+'</span></button>';};
+  $('dzCmpPick').innerHTML=cmpRow(opts[0])+(FL.length?FL.map(f=>{const v=opts.slice(1).filter(x=>x.folder===f);return v.length?'<div class="dz-fh">📁 '+esc(f)+' <small>'+v.length+'</small></div>'+v.map(cmpRow).join(''):'';}).join('')+(()=>{const v=opts.slice(1).filter(x=>!x.folder||!FL.includes(x.folder));return v.length?'<div class="dz-fh">未分類 <small>'+v.length+'</small></div>'+v.map(cmpRow).join(''):'';})():opts.slice(1).map(cmpRow).join(''));
   const C=cmpList(),out=$('dzCmpOut');
   if(C.length<2){out.innerHTML='<p class="label">'+(a.length?'再勾一套就能開始比較。':'先用上面的「💾 存檔」存一套，改一改再存一套，就能在這裡比較。')+'</p>';return;}
   const V={comp:()=>cmpComp(C),tab:()=>cmpTable(C),gold:()=>'<div class="cm-chart">'+cmpGold(C)+'</div><p class="label">每條線是沖煮時杯子裡實際的變化：從左上（第一滴很濃）一路往右下走，大圓點是最後的杯子。線在哪裡轉彎、走多快，就是兩套手法注水節奏不同的地方。</p>',
@@ -9725,8 +9733,8 @@ function renderModal(){const b=$('dzMb');$('dzMt').querySelectorAll('button').fo
       '<button type="button" class="dz-mk" id="dzMk">建立這個手法</button></div>';}
   else if(mtab==='tpl'){b.innerHTML=TPL.map(t=>{const X=t.mk(),W=X.segs.reduce((a,q)=>a+q.ml,0),ts=X.segs.map(q=>q.temp),r=ALL_RECIPES.find(x=>x.id===t.id);
       return '<button type="button" class="dz-tc2'+(D.tpl===t.id?' on':'')+'" data-tp="'+t.id+'"><b>'+esc(t.n)+'</b><small>'+(DRIPPER[X.dripper]||DRIPPER.v60).name+'・'+X.dose+' g／'+Math.round(W)+' g（1:'+(W/X.dose).toFixed(1)+'）・'+(Math.min(...ts)===Math.max(...ts)?ts[0]+'°C':Math.min(...ts)+'–'+Math.max(...ts)+'°C')+'・C40 '+c40g(X.grind)+' 格'+(r&&r.country?'・'+r.country:'')+'</small>'+miniTl(X.segs,0,320,40)+'</button>';}).join('');}
-  else{let a=[];try{a=JSON.parse(localStorage.getItem(DSV)||'[]');}catch(e){}
-    b.innerHTML=a.length?a.map(x=>'<button type="button" class="dz-tc2'+(D.sid===x.id?' on':'')+'" data-ld="'+x.id+'"><b>'+esc(x.name)+'</b>'+badge(x.d)+'<small>'+esc(x.sum)+'</small>'+(x.d&&x.d.segs?miniTl(x.d.segs,x.d.tail,320,40):'')+'</button>').join(''):'<p class="label">還沒有存檔。調好手法後按「💾 存檔」，就會出現在這裡。</p>';}}
+  else{const a=allSaved();
+    b.innerHTML=a.length?folderBar(a,'modal')+grouped(a,x=>'<button type="button" class="dz-tc2'+(D.sid===x.id?' on':'')+'" data-ld="'+x.id+'"><b>'+esc(x.name)+'</b>'+badge(x.d)+'<small>'+esc(x.sum)+'</small>'+(x.d&&x.d.segs?miniTl(x.d.segs,x.d.tail,320,40):'')+'</button>'):'<p class="label">還沒有存檔。調好手法後按「💾 存檔」，就會出現在這裡。</p>';}}
 function openModal(t){mtab=t||'new';if(!t){mtab=D.sid?'my':D.tpl&&D.tpl!=='even10'?'tpl':'new';}$('dzModal').hidden=false;document.body.style.overflow='hidden';renderModal();}
 function closeModal(){$('dzModal').hidden=true;document.body.style.overflow='';}
 function tplName(){if(D.sid){let a=[];try{a=JSON.parse(localStorage.getItem(DSV)||'[]');}catch(e){}const x=a.find(y=>y.id===D.sid);if(x)return '💾 '+x.name;}
@@ -9736,7 +9744,7 @@ function bindModal(){$('dzTplBtn').onclick=()=>openModal();$('dzMx').onclick=clo
   $('dzMt').addEventListener('click',e=>{const x=e.target.closest('[data-m]');if(!x)return;mtab=x.dataset.m;renderModal();$('dzMb').scrollTop=0;});
   const mb=$('dzMb');
   bindDrSheet();
-  mb.addEventListener('click',e=>{if(e.target.closest('#dzDrBtn')){openDrSheet();return;}const c=e.target.closest('[data-nbk] [data-v]');if(c){const k=c.parentNode.dataset.nbk;NB[k]=k==='n'?+c.dataset.v:c.dataset.v;saveNB();renderModal();return;}
+  mb.addEventListener('click',e=>{{const fb=e.target.closest('.dz-fbar button');if(fb){folderClick(fb);return;}}if(e.target.closest('#dzDrBtn')){openDrSheet();return;}const c=e.target.closest('[data-nbk] [data-v]');if(c){const k=c.parentNode.dataset.nbk;NB[k]=k==='n'?+c.dataset.v:c.dataset.v;saveNB();renderModal();return;}
     const tp=e.target.closest('[data-tp]');if(tp){setTpl(tp.dataset.tp);closeModal();toastMsg('已載入範本');return;}
     const ld=e.target.closest('[data-ld]');if(ld){loadDesign(ld.dataset.ld);closeModal();return;}
     if(e.target.id==='dzMk'){const S=nbSegs();Object.assign(D,{tpl:'',sid:null,dripper:NB.dripper,dose:NB.dose,segs:S,tail:0,meas:[],bl:NB.bloom,gap:NB.gap,tname:DRIPPER[NB.dripper].name+(NB.valve!=='none'?'＋Switch':'')+'・'+NB.n+' 段・'+{bloom:'悶蒸＋平均',even:'平均分水','46':'4:6 型',front:'前多後少',back:'前少後多'}[NB.dist]});sel=0;
@@ -9828,10 +9836,40 @@ function setDzTab(t,quiet){D.tab=t;if(t==='cal')setTimeout(renderReal,0);documen
   {const tb=$('dzTabs'),on=tb&&tb.querySelector('[aria-pressed="true"]');if(on)tb.scrollLeft=on.offsetLeft-(tb.clientWidth-on.offsetWidth)/2;}
   saveD();if(!quiet){const tb=$('dzTabs');if(tb&&tb.getBoundingClientRect().top<0)tb.scrollIntoView({block:'start'});}}
 window.__dzTab=setDzTab;
-function renderSaved(){let a=[];try{a=JSON.parse(localStorage.getItem(DSV)||'[]');}catch(e){}
-  $('dzSaved').innerHTML=a.length?a.map(x=>x.id===renId?'<div class="bl-sv dz-ren"><div><input type="text" maxlength="60" value="'+esc(x.name)+'" data-rin="'+x.id+'" aria-label="新名稱"><span class="label">'+esc(x.sum)+'</span></div><button type="button" data-rauto="'+x.id+'" title="用參數自動命名">🪄</button><button type="button" data-rok="'+x.id+'" class="savebtn">好</button><button type="button" data-rno="1" aria-label="取消">取消</button></div>':
-    '<div class="bl-sv"><div><b>'+esc(x.name)+'</b>'+badge(x.d)+'<span class="label">'+esc(x.sum)+'</span></div><button type="button" data-ren="'+x.id+'" aria-label="改名稱">✏️</button><button type="button" data-ld="'+x.id+'">載入</button><button type="button" data-del="'+x.id+'" aria-label="刪除">✕</button></div>').join(''):'<p class="label">還沒有存過手法。</p>';
-  const ri=$('dzSaved').querySelector('[data-rin]');if(ri){ri.focus();ri.select();}}
+// ---- 資料夾 ----
+const FK='brewlab-design-folders',FCK='brewlab-design-fcur';
+let FL=(()=>{try{const v=JSON.parse(localStorage.getItem(FK)||'[]');return Array.isArray(v)?v:[];}catch(e){return [];}})(),FCUR=(()=>{try{return localStorage.getItem(FCK)||'__all';}catch(e){return '__all';}})();
+let fNew=false,fRen=false,mvId=null;
+const saveFL=()=>{try{localStorage.setItem(FK,JSON.stringify(FL));localStorage.setItem(FCK,FCUR);}catch(e){}};
+function allSaved(){try{return JSON.parse(localStorage.getItem(DSV)||'[]');}catch(e){return [];}}
+function putSaved(a){try{localStorage.setItem(DSV,JSON.stringify(a));}catch(e){}}
+function inF(x,f){return f==='__all'||(f==='__none'?!x.folder||!FL.includes(x.folder):x.folder===f);}
+function folderBar(a,scope){const cnt=f=>a.filter(x=>inF(x,f)).length;
+  return '<div class="dz-fbar" data-scope="'+scope+'">'+[['__all','全部'],['__none','未分類']].concat(FL.map(f=>[f,'📁 '+f])).map(([k,n])=>'<button type="button" data-f="'+esc(k)+'" aria-pressed="'+(FCUR===k)+'">'+esc(n)+' <small>'+cnt(k)+'</small></button>').join('')+'<button type="button" class="nf" data-fnew="1">＋ 資料夾</button></div>'+
+    (fNew&&scope==='list'?'<div class="dz-fnew"><input type="text" maxlength="20" id="dzFnIn" placeholder="資料夾名稱，例如：OREA、Switch、比賽豆"><button type="button" class="savebtn" data-fok="1">建立</button><button type="button" data-fno="1">取消</button></div>':'')+
+    (fRen&&scope==='list'&&FL.includes(FCUR)?'<div class="dz-fnew"><input type="text" maxlength="20" id="dzFrIn" value="'+esc(FCUR)+'"><button type="button" class="savebtn" data-frok="1">改名</button><button type="button" data-fno="1">取消</button></div>':'')+
+    (scope==='list'&&FL.includes(FCUR)&&!fRen?'<div class="dz-fact"><span class="label">📁 '+esc(FCUR)+'：新存的手法會放進這個資料夾</span><button type="button" data-fren="1">✏️ 改名</button><button type="button" data-fdel="1">🗑 刪除資料夾</button></div>':'');}
+function svRow(x){if(x.id===renId)return '<div class="bl-sv dz-ren"><div><input type="text" maxlength="60" value="'+esc(x.name)+'" data-rin="'+x.id+'" aria-label="新名稱"><span class="label">'+esc(x.sum)+'</span></div><button type="button" data-rauto="'+x.id+'" title="用參數自動命名">🪄</button><button type="button" data-rok="'+x.id+'" class="savebtn">好</button><button type="button" data-rno="1" aria-label="取消">取消</button></div>';
+  return '<div class="bl-sv"><div><b>'+esc(x.name)+'</b>'+badge(x.d)+'<span class="label">'+esc(x.sum)+'</span></div><button type="button" data-mv="'+x.id+'" aria-label="移到資料夾">📁</button><button type="button" data-ren="'+x.id+'" aria-label="改名稱">✏️</button><button type="button" data-ld="'+x.id+'">載入</button><button type="button" data-del="'+x.id+'" aria-label="刪除">✕</button></div>'+
+    (mvId===x.id?'<div class="dz-mvto"><span class="label">移到：</span>'+[['','未分類']].concat(FL.map(f=>[f,'📁 '+f])).map(([k,n])=>'<button type="button" data-mvto="'+esc(k)+'" data-mid="'+x.id+'" aria-pressed="'+((x.folder||'')===k)+'">'+esc(n)+'</button>').join('')+(FL.length?'':'<span class="label">（先按上面「＋ 資料夾」建立）</span>')+'</div>':'');}
+function grouped(a,rowFn){if(FCUR!=='__all')return a.filter(x=>inF(x,FCUR)).map(rowFn).join('')||'<p class="label">這個資料夾還是空的。按每筆的 📁 可以移進來。</p>';
+  const g=FL.map(f=>[f,a.filter(x=>x.folder===f)]).concat([['',a.filter(x=>!x.folder||!FL.includes(x.folder))]]).filter(([,v])=>v.length);
+  return g.map(([f,v])=>(FL.length?'<div class="dz-fh">'+(f?'📁 '+esc(f):'未分類')+' <small>'+v.length+'</small></div>':'')+v.map(rowFn).join('')).join('');}
+function renderSaved(){const a=allSaved();
+  $('dzSaved').innerHTML=a.length||FL.length?folderBar(a,'list')+(a.length?grouped(a,svRow):'<p class="label">還沒有存過手法。</p>'):'<p class="label">還沒有存過手法。</p>';
+  const ri=$('dzSaved').querySelector('[data-rin],#dzFnIn,#dzFrIn');if(ri){ri.focus();ri.select&&ri.select();}}
+function folderClick(t){
+  if(t.dataset.f!==undefined){FCUR=t.dataset.f;fRen=false;saveFL();renderSaved();if(!$('dzModal').hidden)renderModal();return true;}
+  if(t.dataset.fnew){fNew=true;fRen=false;renderSaved();if(!$('dzModal').hidden){closeModal();}$('dzSaveP').scrollIntoView({behavior:'smooth',block:'start'});setTimeout(()=>{const i=$('dzFnIn');if(i)i.focus();},350);return true;}
+  if(t.dataset.fno){fNew=false;fRen=false;renderSaved();return true;}
+  if(t.dataset.fok){const n=($('dzFnIn').value||'').trim().slice(0,20);if(!n)return toastMsg('請輸入資料夾名稱'),true;if(n.startsWith('__')||FL.includes(n))return toastMsg('已經有這個資料夾'),true;FL.push(n);FCUR=n;fNew=false;saveFL();renderSaved();renderCmp();toastMsg('已建立資料夾：'+n);return true;}
+  if(t.dataset.fren){fRen=true;renderSaved();return true;}
+  if(t.dataset.frok){const n=($('dzFrIn').value||'').trim().slice(0,20),o=FCUR;if(!n||n.startsWith('__'))return true;if(n!==o&&FL.includes(n))return toastMsg('已經有這個資料夾'),true;FL[FL.indexOf(o)]=n;const a=allSaved();a.forEach(x=>{if(x.folder===o)x.folder=n;});putSaved(a);FCUR=n;fRen=false;saveFL();renderSaved();renderCmp();return true;}
+  if(t.dataset.fdel){if(!t.dataset.ok){t.dataset.ok=1;t.textContent='確定？手法會移到未分類';setTimeout(()=>{if(t.isConnected){t.dataset.ok='';t.textContent='🗑 刪除資料夾';}},3000);return true;}
+    const o=FCUR,a=allSaved();a.forEach(x=>{if(x.folder===o)delete x.folder;});putSaved(a);FL=FL.filter(f=>f!==o);FCUR='__all';saveFL();renderSaved();renderCmp();toastMsg('已刪除資料夾，裡面的手法移到未分類');return true;}
+  if(t.dataset.mv){mvId=mvId===t.dataset.mv?null:t.dataset.mv;renderSaved();return true;}
+  if(t.dataset.mvto!==undefined){const a=allSaved(),x=a.find(y=>y.id===t.dataset.mid);if(x){if(t.dataset.mvto)x.folder=t.dataset.mvto;else delete x.folder;putSaved(a);}mvId=null;renderSaved();renderCmp();toastMsg(t.dataset.mvto?'已移到 📁 '+t.dataset.mvto:'已移到未分類');return true;}
+  return false;}
 let renId=null;
 function renameDesign(id,nm){nm=(nm||'').trim();if(!nm){toastMsg('名稱不能空白');return;}let a=[];try{a=JSON.parse(localStorage.getItem(DSV)||'[]');}catch(e){}const x=a.find(y=>y.id===id);if(!x)return;x.name=nm.slice(0,60);x.auto=false;
   try{localStorage.setItem(DSV,JSON.stringify(a));}catch(e){}renId=null;renderSaved();renderQuick();renderCmp();const n=$('dzTplName');if(n)n.textContent=tplName();toastMsg('已改名：'+x.name);}
@@ -9862,14 +9900,14 @@ function bind(){const v=$('designView');if(!v||v.dataset.b)return;v.dataset.b=1;
   $('dzExp').addEventListener('click',e=>{const t=e.target.closest('[data-e]');if(!t)return;const x=EXP.find(q=>q.id===t.dataset.e);B=A;BSRC='__auto';BL='「'+x.n+'」之前（'+Math.round(A.score)+' 分）';x.f(D);mod();render();toastMsg('已套用：'+x.n+'，▲▼ 是和改之前比');$('designView').querySelector('#dzSumP').scrollIntoView({behavior:'smooth',block:'start'});});
   $('dzTab').addEventListener('change',e=>{const t=e.target;if(!t.classList.contains('dz-meas'))return;D.meas=D.meas||[];D.meas[+t.dataset.j]=t.value===''?null:+t.value;render();});
   $('dzSave').onclick=()=>{saveDesign(true,$('dzName').value.trim()||null);$('dzName').value='';};
-  $('dzSaved').addEventListener('click',e=>{const t=e.target.closest('button');if(!t)return;let a=[];try{a=JSON.parse(localStorage.getItem(DSV)||'[]');}catch(er){}
+  $('dzSaved').addEventListener('click',e=>{const t=e.target.closest('button');if(!t)return;if(folderClick(t))return;let a=[];try{a=JSON.parse(localStorage.getItem(DSV)||'[]');}catch(er){}
     if(t.dataset.ren){renId=t.dataset.ren;renderSaved();return;}
     if(t.dataset.rno){renId=null;renderSaved();return;}
     if(t.dataset.rauto){const x=a.find(y=>y.id===t.dataset.rauto);const i=$('dzSaved').querySelector('[data-rin]');if(x&&i){i.value=autoName(x.d);i.focus();}return;}
     if(t.dataset.rok){renameDesign(t.dataset.rok,$('dzSaved').querySelector('[data-rin]').value);return;}
     if(t.dataset.ld){loadDesign(t.dataset.ld);setDzTab('set');$('dzSegsP').scrollIntoView({behavior:'smooth',block:'start'});}
     if(t.dataset.del){if(t.dataset.ok){try{localStorage.setItem(DSV,JSON.stringify(a.filter(y=>y.id!==t.dataset.del)));}catch(er){}if(D.sid===t.dataset.del)D.sid=null;renderSaved();renderQuick();renderCmp();}else{t.dataset.ok=1;t.textContent='確定？';setTimeout(()=>{t.dataset.ok='';t.textContent='✕';},2500);}}});
-  $('dzSaved').addEventListener('keydown',e=>{const i=e.target.closest('[data-rin]');if(!i)return;if(e.key==='Enter'){e.preventDefault();renameDesign(i.dataset.rin,i.value);}if(e.key==='Escape'){renId=null;renderSaved();}});
+  $('dzSaved').addEventListener('keydown',e=>{if(e.key==='Enter'&&(e.target.id==='dzFnIn'||e.target.id==='dzFrIn')){e.preventDefault();folderClick($('dzSaved').querySelector(e.target.id==='dzFnIn'?'[data-fok]':'[data-frok]'));return;}const i=e.target.closest('[data-rin]');if(!i)return;if(e.key==='Enter'){e.preventDefault();renameDesign(i.dataset.rin,i.value);}if(e.key==='Escape'){renId=null;renderSaved();}});
   $('dzToSim').onclick=()=>{if(!window.simApplyRecipe||!A)return;const p=A.p,sg=A.sg;
     simApplyRecipe({dripper:p.dripper,dose:p.dose,ratio:p.ratio,temp:p.temp,grind:p.grind,roast:p.roast,pattern:'pulse',plan:p.plan,planT:sg.map(g=>Math.round(g.s)),planD:sg.map(g=>Math.round(g.e-g.s)),planTemp:p.planTemp,planStyle:p.planStyle,beanId:D.bean,bypassMl:p.bypassMl,prePO:'none'});
     location.hash='#sim';toastMsg('已帶到模擬器');};}
