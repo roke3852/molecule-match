@@ -1607,7 +1607,7 @@ const DAYS=[
  {t:'18:00~',n:'周邊自由晚餐',tr:'步行',d:'晚上在飯店周邊（天神／渡邊通）尋找親子友善、免排隊的餐廳（如迴轉壽司或家庭餐廳），輕鬆結束完美的一天。',q:'天神 回転寿司'}
 ]},
 {date:'11/26',wk:'四',c:'#b5651d',title:'太宰府與竈門神社極盛賞楓',pay:'西瓜卡',payNote:'平日順暢版',stops:[
- {t:'08:15-08:25',n:'前往西鐵藥院站',tr:'步行',d:'從福岡蒙特利飯店往南步行約 6～7 分鐘，沿途人行道平坦寬敞、車站動線單純（若希望全員坐在一起，可改於 08:10 步行至起點「西鐵天神站」上車）。',q:'西鉄薬院駅'},
+ {t:'08:15-08:25',n:'前往西鐵藥院站',tr:'步行',fr:'ホテルモントレ福岡',d:'從福岡蒙特利飯店往南步行約 6～7 分鐘，沿途人行道平坦寬敞、車站動線單純（若希望全員坐在一起，可改於 08:10 步行至起點「西鐵天神站」上車）。',q:'西鉄薬院駅'},
  {t:'08:30-09:05',n:'搭乘西鐵電車至太宰府',tr:'西鐵特急／急行',d:'週四適用「平日時刻表」，避開假日賞楓人潮品質大提升！刷西瓜卡進站（成人 480 日圓／兒童 240 日圓），於「西鐵二日市站」轉乘太宰府線。',q:'太宰府駅'},
  {t:'09:10-11:15',n:'先上山：竈門神社賞楓',tr:'2台計程車／Uber',d:'出站後直接分搭 2 台計程車上山（平日山路不塞車，車程僅 7～10 分鐘，每台約 1,000 日圓）。漫步 300 棵楓樹的紅葉隧道拍照、購買精緻結緣御守。',q:'竈門神社 太宰府'},
  {t:'11:15-11:30',n:'下山返回太宰府車站',tr:'2台計程車或社區巴士',d:'優先建議用 Uber／GO App 叫 2 台車下山；若想體驗社區巴士「まほろば號」下山亦可（成人 100 日圓／兒童 50 日圓，注意平日班次少，約每小時一班）。',q:'太宰府駅'},
@@ -1672,6 +1672,10 @@ const PHR=[
 const $=s=>document.querySelector(s);
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const mapUrl=q=>'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(q);
+function navMode(tr){tr=tr||'';return /計程車|包車|Uber|UBER|開車/.test(tr)&&!/步行/.test(tr)?'driving':/地鐵|JR|西鐵|電車|新幹線|船|巴士/.test(tr)?'transit':'walking'}
+function navUrl(s,stops,i){const leg=/^(前往|返回|啟程|搭乘|回)/.test(s.n);if(!leg)return mapUrl(s.q||s.n);
+ let fr=s.fr;if(!fr){for(let k=i-1;k>=0;k--){if(stops[k].q){fr=stops[k].q;break}}}if(!fr)fr='ホテルモントレ福岡';
+ return 'https://www.google.com/maps/dir/?api=1&origin='+encodeURIComponent(fr)+'&destination='+encodeURIComponent(s.q||s.n)+'&travelmode='+navMode(s.tr)}
 const toMin=s=>{const m=s.match(/(\d{1,2}):(\d{2})/);return m?+m[1]*60+ +m[2]:null};
 function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(toast._);toast._=setTimeout(()=>t.classList.remove('on'),1600)}
 function jstNow(){const d=new Date(Date.now()+9*3600e3);return {y:d.getUTCFullYear(),mo:d.getUTCMonth()+1,da:d.getUTCDate(),dow:(d.getUTCDay()+6)%7,min:d.getUTCHours()*60+d.getUTCMinutes()}}
@@ -1724,7 +1728,7 @@ if(ti>=0&&ti<8)curDay=ti;
 /* ---------- itinerary data (base + local edits) ---------- */
 const BASEV=2;   // 正式版版本號：Claude 每次發布新行程時 +1
 DAYS.forEach((d,i)=>d.stops.forEach((s,j)=>{if(!s.id)s.id=i+'-'+j}));
-const clean=s=>{const o={id:s.id,t:s.t,n:s.n,tr:s.tr,d:s.d,q:s.q};if(s.tip)o.tip=s.tip;if(s.jr)o.jr=true;return o};
+const clean=s=>{const o={id:s.id,t:s.t,n:s.n,tr:s.tr,d:s.d,q:s.q};if(s.tip)o.tip=s.tip;if(s.jr)o.jr=true;if(s.fr)o.fr=s.fr;return o};
 const baseDay=i=>({title:DAYS[i].title,stops:DAYS[i].stops.map(clean)});
 let ed=S.get('edits',null);
 function D(i){const b=DAYS[i];if(!ed)return b;return Object.assign({},b,{title:ed.days[i].title,stops:ed.days[i].stops})}
@@ -1964,7 +1968,7 @@ function renderDay(keep){
    ${/九州自然動物園/.test(s.n)?`<button class="btn pri zoo-open" data-zoo="1">🗺️ 互動地圖＋📍GPS 定位</button>`:''}
    ${/九州自然動物園/.test(s.n)?`<div class="zmap"><div class="zmap-h">🗺️ 九州自然動物園 園區地圖</div><img src="zoo-map.webp" alt="九州自然動物園 園區地圖" data-mzoom="1" loading="lazy"><div class="zmap-f">點圖放大（可雙指縮放）・<a href="zoo-map.webp" target="_blank" rel="noopener">開原圖</a>・圖：波比看世界</div></div>`:''}
    ${photoBox(s.id,s.q||s.n)}
-   <div class="acts"><a class="btn" href="${mapUrl(s.q||s.n)}" target="_blank" rel="noopener">📍 地圖導航</a>
+   <div class="acts"><a class="btn" href="${navUrl(s,d.stops,i)}" target="_blank" rel="noopener">📍 地圖導航</a>
    ${s.jr?'<a class="btn" href="#tools" data-act="jr" data-tt="help">🎫 買票小抄</a>':''}
    <button class="btn pri" data-act="done">${isD?'↺ 取消完成':'✓ 完成'}</button></div></div></div></div>`});
  if(!n)h+='<div class="empty">這天還沒有行程</div>';
