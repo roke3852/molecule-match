@@ -431,6 +431,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
 .dz-er input[type=range]{width:100%;height:30px}.dz-er.dis{opacity:.4}
 .dz-pm{height:38px;border:1px solid var(--line);border-radius:10px;background:transparent;color:var(--accent);font-size:20px;font-weight:700;cursor:pointer;touch-action:manipulation;-webkit-user-select:none;user-select:none}
 .dz-pm:active{background:rgba(226,189,106,.15)}.dz-ev{font-family:var(--f-mono);font-weight:500;text-align:right;white-space:nowrap}
+.dz-vck{display:grid;grid-template-columns:28px 1fr;gap:8px;align-items:center;width:100%;text-align:left;border:1px solid var(--line);background:transparent;color:var(--ink);border-radius:10px;padding:8px 10px;margin:8px 0 2px;font:inherit;cursor:pointer}.dz-vck .bx{width:24px;height:24px;border-radius:6px;border:2px solid var(--muted);display:flex;align-items:center;justify-content:center;font-weight:800;color:#1b1714}.dz-vck.on{border-color:#e8b04a;background:rgba(232,176,74,.08)}.dz-vck.on .bx{background:#e8b04a;border-color:#e8b04a}.dz-vck b{display:block;font-size:14px}.dz-vck small{display:block;font-size:11.5px;color:var(--muted)}
 .dz-edb{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}.dz-edb button{border:1px solid var(--line);background:transparent;color:var(--ink);border-radius:10px;padding:7px 10px;font:inherit;font-size:13px;cursor:pointer}
 .dz-edb button[aria-pressed=true]{border-color:var(--accent);color:var(--accent);font-weight:700;background:rgba(226,189,106,.12)}
 .dz-edn{font-size:12px;color:#7fb6e0;margin:4px 0}
@@ -1435,7 +1436,7 @@ window.BGM=(()=>{
     <div class="err" id="tErr"></div>
   </div>
   <button class="t-more" id="tMore" type="button" aria-label="咖啡宇宙：更多咖啡 App 與遊戲">咖啡宇宙</button>
-  <div class="t-foot">© 2026 Jim Lu　ver. 11.2</div>
+  <div class="t-foot">© 2026 Jim Lu　ver. 11.3</div>
 </div>
 <nav class="modes" aria-label="導覽"><div class="in">
   <button class="homebtn" id="homeBtn" type="button" hidden>‹ 主選單</button>
@@ -9380,17 +9381,18 @@ function tMin(i){if(!i)return 0;const p=D.segs[i-1];return p.t+Math.ceil(dur(p))
 function renderEd(){const S=D.segs;sel=clampN(sel,0,S.length-1);const x=S[sel],k=S.length-(D.tail||0),tail=sel>=k,i=sel;
   const mn=tMin(i);
   $('dzEd').innerHTML='<div class="dz-edh"><button type="button" data-nav="-1" aria-label="上一段"'+(i?'':' disabled')+'>◀</button><b>'+(i?'第 '+(i+1)+' 段':'第 1 段（悶蒸）')+(tail?'・補水':'')+'</b><button type="button" data-nav="1" aria-label="下一段"'+(i<S.length-1?'':' disabled')+'>▶</button></div>'+
-    (tail?'<div class="dz-edn">這段在「尾段處理」裡改成補水：只算水量，不經過咖啡粉。</div>':'<div class="dz-edn" style="color:var(--muted)">「關閥」是 Switch 閥門：從這段開始注水起關閥浸泡幾秒，0＝不關（滴濾）。</div>')+
+    (tail?'<div class="dz-edn">這段在「尾段處理」裡改成補水：只算水量，不經過咖啡粉。</div>':'')+
     edRow('ml','水量',x.ml,2,150,1,Math.round(x.ml)+' g')+
     edRow('t','開始',x.t,mn,mn+240,1,fmt(x.t),!i||tail)+
     edRow('temp','水溫',x.temp,80,100,1,x.temp+'°C',tail)+
-    edRow('hold','關閥',x.hold||0,0,240,1,x.hold?x.hold+' 秒':'不關',tail)+
+    (tail?'':'<button type="button" class="dz-vck'+(x.hold>0?' on':'')+'" data-vck="1" role="checkbox" aria-checked="'+(x.hold>0)+'"><span class="bx">'+(x.hold>0?'✓':'')+'</span><span><b>Switch 關閥浸泡</b><small>'+(x.hold>0?'這段注水後先關閥浸泡，時間到才開閥滴下':'沒勾＝開閥滴濾（一般手沖）')+'</small></span></button>')+
+    (!tail&&x.hold>0?edRow('hold','浸泡',x.hold,5,240,1,x.hold+' 秒'):'')+
     '<div class="dz-edb">'+(tail?'':'<button type="button" data-sty="r" aria-pressed="'+(x.sty!=='c')+'">繞圈注水</button><button type="button" data-sty="c" aria-pressed="'+(x.sty==='c')+'">中心注水</button>')+
     (i&&!tail?'<button type="button" data-mv aria-pressed="'+mvA+'">後面各段跟著移</button>':'')+
     '<button type="button" data-all="temp">水溫套到全部</button><button type="button" data-all="ml">水量套到後面各段</button></div>';}
 function updEdLabels(){const x=D.segs[sel];if(!x)return;const q=k=>$('dzEd').querySelector('[data-v="'+k+'"]'),r=k=>$('dzEd').querySelector('input[data-k="'+k+'"]');
-  q('ml').textContent=Math.round(x.ml)+' g';q('t').textContent=fmt(x.t);q('temp').textContent=x.temp+'°C';q('hold').textContent=x.hold?x.hold+' 秒':'不關';
-  if(!drag){r('ml').value=x.ml;r('temp').value=x.temp;r('hold').value=x.hold||0;const mn=tMin(sel);r('t').min=mn;r('t').max=mn+240;r('t').value=x.t;}}
+  q('ml').textContent=Math.round(x.ml)+' g';q('t').textContent=fmt(x.t);q('temp').textContent=x.temp+'°C';if(q('hold'))q('hold').textContent=x.hold+' 秒';
+  if(!drag){r('ml').value=x.ml;r('temp').value=x.temp;if(r('hold'))r('hold').value=x.hold||0;const mn=tMin(sel);r('t').min=mn;r('t').max=mn+240;r('t').value=x.t;}}
 function renderChips(){const S=D.segs,k=S.length-(D.tail||0);
   $('dzSegs').innerHTML=S.map((x,i)=>'<button type="button" class="dz-chip'+(i===sel?' on':'')+(i>=k?' tail':'')+'" data-i="'+i+'" aria-pressed="'+(i===sel)+'"><b>'+(i?i+1:'悶')+'</b><span>'+Math.round(x.ml)+'g</span><small>'+(i>=k?'補水':(x.hold?'🔒':'')+fmt(x.t)+'・'+x.temp+'°')+'</small></button>').join('');}
 function renderSeg(){$('dzTl').innerHTML=tlSvg();renderChips();if(drag||hold)updEdLabels();else renderEd();
@@ -9398,7 +9400,7 @@ function renderSeg(){$('dzTl').innerHTML=tlSvg();renderChips();if(drag||hold)upd
 function setSeg(key,v){const x=D.segs[sel];if(!x)return;
   if(key==='ml'){x.ml=clampN(Math.round(v),2,150);x.d=null;}
   if(key==='temp')x.temp=clampN(Math.round(v),80,100);
-  if(key==='hold')x.hold=clampN(Math.round(v),0,300);
+  if(key==='hold')x.hold=clampN(Math.round(v),5,300);
   if(key==='t'&&sel){const nv=Math.max(tMin(sel),Math.round(v)),dl=nv-x.t;x.t=nv;if(mvA)D.segs.forEach((q,j)=>{if(j>sel)q.t+=dl;});}
   normT();D.tpl='';}
 function step(st,d){const W=D.segs.reduce((a,x)=>a+x.ml,0);
@@ -9438,6 +9440,7 @@ function bindSeg(){
   holdable(ed,(b)=>{const key=b.dataset.k,x=D.segs[sel];setSeg(key,x[key]+(+b.dataset.d));});
   ed.addEventListener('click',e=>{const b=e.target.closest('button');if(!b||b.dataset.d)return;const x=D.segs[sel];
     if(b.dataset.nav){sel=clampN(sel+(+b.dataset.nav),0,D.segs.length-1);renderSeg();return;}
+    if(b.dataset.vck){if(x.hold>0)x.hold=0;else{const nx=D.segs[sel+1];x.hold=nx?Math.max(10,nx.t-x.t-5):60;}D.tpl='';render();return;}
     if(b.dataset.sty){x.sty=b.dataset.sty;D.tpl='';render();return;}
     if(b.hasAttribute('data-mv')){mvA=!mvA;renderEd();return;}
     if(b.dataset.all==='temp'){D.segs.forEach(q=>q.temp=x.temp);D.tpl='';render();toastMsg('全部改成 '+x.temp+'°C');}
@@ -9915,7 +9918,7 @@ window.designRender=()=>{bind();render();cardFor('design');};
 window.__design={analyze:X=>analyze(X||D),D:()=>D,set:o=>{Object.assign(D,o);render();},tpl:setTpl,exp:()=>EXP.map(e=>e.id)};
 TOURS.design={view:'designView',lead:'mu',title:'怎麼策略性地設計一套沖法',blurb:'一套沖法可以拆成好幾段：每段帶出的物質不一樣，在金杯圖上推動的距離也不一樣。我帶你拆開 10 段，看每段在做什麼、改了會怎樣。',steps:[
   {w:'mu',t:'我是沐師傅。設計沖法最有效的方法，是把它切成好幾段，看每一段在做什麼。上面的「手法」按鈕可以新增一套全新的手法（選濾杯、段數、怎麼分水），或載入冠軍範本、你的存檔。先用最單純的 10 等分當起點。',el:'#designView h1',go:()=>{setTpl('even10');}},
-  {w:'mu',t:'點時間軸上的柱子選一段，用滑桿或按住 −／＋ 調水量、開始時間和水溫。「尾段處理」可以讓最後幾段改成補水：水不經過粉，直接加進杯子。調好按「💾 存檔」，下次點名字就能載入。',el:'#dzSegsP'},
+  {w:'mu',t:'點時間軸上的柱子選一段，用滑桿或按住 −／＋ 調水量、開始時間和水溫；要用 Switch 浸泡就勾「關閥浸泡」再設秒數。「尾段處理」可以讓最後幾段改成補水：水不經過粉，直接加進杯子。調好按「💾 存檔」，下次點名字就能載入。',el:'#dzSegsP'},
   {w:'cui',t:'我是阿萃。這張圖是分杯實驗：每段時間內滴下的液體各接一杯，看裡面有什麼。最先出來的是有機酸、咖啡因，接著是糖，最後剩下溶得慢的苦味大分子。',el:'#dzFrac',go:()=>{fmode='g';render();}},
   {w:'cui',t:'切到「組成比例」更明顯：越後面，紫色和深紅色（澀、苦）佔的比例越高，橘色的糖越少。',el:'#dzFrac',go:()=>{fmode='pct';render();}},
   {w:'li',t:'那前面幾段的濃度好高！第一杯 TDS 好幾 %？'},
