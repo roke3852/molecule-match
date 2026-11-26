@@ -1381,6 +1381,12 @@ html.dark .ex-tot{background:var(--card)!important}
       <div class="hint">選人數、餐點和飲料的份數，自動組成一句日文；按 🔊 唸給店員聽，或全螢幕拿給店員看。先選店家（照看板拍的菜單），再點菜和飲料。manu coffee 大名店的價格是約 2025 年的資料，沒標價的點「✎」照現場菜單填。なかなかなか的日文菜名是照中文菜單翻的，聽不懂時直接指菜單。</div>
       <div id="ordBox"></div>
     </div>
+    <div class="sec" data-tt="help" id="pfSec">
+      <h3>🌸 香水試香發音器</h3>
+      <div class="hint">選誰要用、喜歡和不要的香調、容量和預算，自動組成一句日文；按 🔊 唸給店員聽，或全螢幕給店員看。下面有試香、購買常用句，試過的香水可以記在「📓 試香紀錄」，買了直接記帳。</div>
+      <style>.pf-tags{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0}.pf-t{border:2px solid var(--line);background:var(--card);color:var(--ink);padding:5px 9px;font-size:13px;line-height:1.3;text-align:left}.pf-t small{display:block;font-size:11px;color:var(--sub)}.pf-t.on{border-color:var(--maple);background:color-mix(in srgb,var(--maple) 18%,var(--card))}.pf-t.no.on{border-color:#7a7a7a;background:color-mix(in srgb,#7a7a7a 22%,var(--card))}.pf-sub{font-size:12px;color:var(--sub);margin:8px 0 2px}.pf-form{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:6px 0}.pf-form input{width:100%;padding:6px;border:2px solid var(--line);background:var(--card);color:var(--ink);font-size:14px;box-sizing:border-box}.pf-form .w{grid-column:1/-1}.pf-stars button{border:0;background:none;font-size:20px;padding:0 2px;color:var(--gold)}.pf-h .st{color:var(--gold)}#pfBox .od-out{position:static}.pf-end{margin-top:10px}</style>
+      <div id="pfBox"></div>
+    </div>
     <div class="sec" data-tt="help">
       <h3>🏨 我們的飯店</h3>
       <div class="hint"><b>福岡蒙特利飯店 Hotel Monterey Fukuoka</b><br>ホテルモントレ福岡<br>〒810-0004 福岡市中央区渡辺通3-4-13<br>☎ 092-734-7111　入住 15:00／退房 11:00<br>🚇 地下鐵七隈線「渡辺通站」走約 2 分鐘；空港線「天神站」走約 10 分鐘</div>
@@ -2795,6 +2801,59 @@ function clSay(t,lang,slow){try{if(!('speechSynthesis' in window)){toast('這台
   if(t.dataset.od==='clr'){Object.keys(st.q).forEach(k=>{if(k.startsWith(st.sh+'|')||k.startsWith('d|'))delete st.q[k]});st.ex={};save();draw();return}
   if(t.dataset.od==='big'){const o=document.createElement('div');o.className='med-big resv-big';const d=document.createElement('div');const pre=document.createElement('pre');pre.textContent=[[r.pj,r.pk],[r.oj,r.ok],[r.ej,r.ek]].filter(x=>x[0]).map(x=>x[0]+'\n（'+x[1]+'）').join('\n\n');const sm=document.createElement('small');sm.textContent=r.zh+'\n點任何地方關閉';d.append(pre,sm);o.append(d);o.onclick=()=>o.remove();document.body.appendChild(o)}});
  B.addEventListener('toggle',e=>{if(e.target.classList&&e.target.classList.contains('od-hist')){st.hopen=e.target.open?1:0;save()}},true);
+ try{reloaders.push(()=>draw())}catch(e){}
+ draw()})();
+
+(function(){const B=document.getElementById('pfBox');if(!B)return;
+ const WHO=[['me-m','自分用です。男性が使います。','じぶんようです。だんせいがつかいます。','自己用（男生）'],['me-f','自分用です。女性が使います。','じぶんようです。じょせいがつかいます。','自己用（女生）'],['gift-m','プレゼント用です。男性に贈ります。','プレゼントようです。だんせいにおくります。','送禮給男生'],['gift-f','プレゼント用です。女性に贈ります。','プレゼントようです。じょせいにおくります。','送禮給女生']];
+ const LIKE=[['🌸 花香',[['ジャスミン','ジャスミン','茉莉'],['ネロリ','ネロリ','橙花'],['ラベンダー','ラベンダー','薰衣草'],['アイリス','アイリス','鳶尾花'],['ローズ','ローズ','玫瑰']]],
+  ['🌲 木質',[['ウッディ','ウッディ','木質調'],['シダー','シダー','雪松（乾淨、像鉛筆木屑）'],['ベチバー','ベチバー','岩蘭草（泥土、微煙燻）'],['サンダルウッド','サンダルウッド','檀香（滑順、溫暖）'],['ヒノキ','ひのき','檜木']]],
+  ['🍵 清新',[['お茶の香り','おちゃのかおり','茶香'],['グリーン','グリーン','青草綠葉'],['シトラス','シトラス','柑橘'],['ベルガモット','ベルガモット','佛手柑'],['石けんっぽい香り','せっけんっぽいかおり','皂感']]],
+  ['🔥 個性',[['スパイシー','スパイシー','辛香（胡椒、小荳蔻）'],['スモーキー','スモーキー','煙燻'],['レザー','レザー','皮革'],['お香','おこう','焚香'],['ムスク','ムスク','麝香'],['アンバー','アンバー','琥珀']]]];
+ const AVOID=[['フルーティーな香り','フルーティーなかおり','果香'],['甘すぎる香り','あますぎるかおり','太甜'],['バニラ','バニラ','香草'],['パウダリーな香り','パウダリーなかおり','粉香'],['強すぎる香り','つよすぎるかおり','太濃'],['女性らしすぎる香り','じょせいらしすぎるかおり','太女性化']];
+ const STY=[['ユニセックスな香りがいいです。','ユニセックスなかおりがいいです。','中性'],['軽めの香りがいいです。','かるめのかおりがいいです。','清淡一點'],['しっかり香るものがいいです。','しっかりかおるものがいいです。','香味明顯'],['長持ちするものがいいです。','ながもちするものがいいです。','持久一點'],['普段使いしたいです。','ふだんづかいしたいです。','日常用'],['仕事でも使えるものがいいです。','しごとでもつかえるものがいいです。','上班也能用']];
+ const SIZE=[['8mL','はちミリ'],['30mL','さんじゅうミリ'],['50mL','ごじゅうミリ'],['100mL','ひゃくミリ']];
+ const BUD=[[5000,'5千円','ごせんえん'],[10000,'1万円','いちまんえん'],[15000,'1万5千円','いちまんごせんえん'],[20000,'2万円','にまんえん'],[30000,'3万円','さんまんえん']];
+ const PH=[['👃 試香',[['ムエットをください。','ムエットをください。','請給我試香紙'],['試してもいいですか？','ためしてもいいですか？','可以試聞嗎？'],['肌につけてみてもいいですか？','はだにつけてみてもいいですか？','可以噴在皮膚上試嗎？'],['この香りの香調を教えてください。','このかおりのこうちょうをおしえてください。','請告訴我這款的前中後調'],['似た香りはほかにありますか？','にたかおりはほかにありますか？','有類似的香味嗎？'],['もう少しウッディなものはありますか？','もうすこしウッディなものはありますか？','有再木質一點的嗎？'],['もう少し甘くないものはありますか？','もうすこしあまくないものはありますか？','有再不甜一點的嗎？'],['時間がたつとどう変わりますか？','じかんがたつとどうかわりますか？','時間久了味道會怎麼變？']]],
+  ['🛍️ 購買',[['サンプルはありますか？','サンプルはありますか？','有試用品嗎？'],['小さいサイズはありますか？','ちいさいサイズはありますか？','有小瓶的嗎？'],['免税できますか？','めんぜいできますか？','可以免稅嗎？'],['ギフト包装をお願いします。','ギフトほうそうをおねがいします。','請幫我禮物包裝'],['これにします。','これにします。','我要這個'],['少し考えます。ありがとうございます。','すこしかんがえます。ありがとうございます。','我再考慮一下，謝謝']]]];
+ const ALL_L=LIKE.flatMap(g=>g[1]);
+ let st=Object.assign({who:'me-m',lk:{},av:{},sy:{},sz:'',bd:0,f:{}},S.get('pfTool',{}));const save=()=>S.set('pfTool',st);
+ const RT=()=>+S.get('exRate',0.21)||0.21;const KJ=/[一-鿿々]/,KN=(t,k)=>KJ.test(t)?`<small class="od-k">${k}</small>`:'';
+ function sent(){const w=WHO.find(x=>x[0]===st.who)||WHO[0];const lk=ALL_L.filter(x=>st.lk[x[0]]),av=AVOID.filter(x=>st.av[x[0]]),sy=STY.filter(x=>st.sy[x[0]]),sz=SIZE.find(x=>x[0]===st.sz),bd=BUD.find(x=>x[0]===+st.bd);
+  const L=[['すみません、香水を探しています。','すみません、こうすいをさがしています。','我在找香水'],[w[1],w[2],w[3]]];
+  if(lk.length)L.push([lk.map(x=>x[0]).join('、')+'が好きです。',lk.map(x=>x[1]).join('、')+'がすきです。','喜歡：'+lk.map(x=>x[2].replace(/（.*?）/,'')).join('、')]);
+  if(av.length)L.push([av.map(x=>x[0]).join('、')+'は苦手です。',av.map(x=>x[1]).join('、')+'はにがてです。','不要：'+av.map(x=>x[2]).join('、')]);
+  sy.forEach(x=>L.push(x));if(sz)L.push([sz[0]+'くらいのサイズがいいです。',sz[1]+'くらいのサイズがいいです。','容量約 '+sz[0]]);if(bd)L.push([`予算は${bd[1]}くらいです。`,`よさんは${bd[2]}くらいです。`,`預算約 ¥${bd[0].toLocaleString()}`]);
+  L.push(['おすすめはありますか？','おすすめはありますか？','有推薦的嗎？']);return L}
+ const tag=(k,on,a,b,no)=>`<button class="pf-t${no?' no':''}${on?' on':''}" ${k}><b>${a}</b>${b?`<small>${b}</small>`:''}</button>`;
+ function draw(){const L=sent(),H=S.get('pfLog',{}),hk=Object.keys(H).sort((a,b)=>(H[b].o||0)-(H[a].o||0));
+  B.innerHTML=`<details class="od-hist"${st.hopen?' open':''}><summary>📓 試香紀錄（${hk.length}）</summary>
+  <div class="pf-form"><input class="w" data-pf="n" placeholder="品牌＋名稱（例：Aíam Chapter 29）" value="${esc(st.f.n||'')}"><input class="w" data-pf="t" placeholder="香調／感覺（例：茉莉＋雪松，不甜）" value="${esc(st.f.t||'')}"><input data-pf="p" inputmode="numeric" placeholder="價格 ¥" value="${esc(st.f.p||'')}"><input data-pf="s" placeholder="容量（例：8mL）" value="${esc(st.f.s||'')}"><div class="pf-stars w">喜歡程度 ${[1,2,3,4,5].map(i=>`<button data-pr="${i}">${i<=(st.f.r||0)?'★':'☆'}</button>`).join('')}</div></div><button class="btn od-save" data-pa="add">＋ 記下這支</button>
+  ${hk.length?hk.map(k=>{const h=H[k];return `<div class="od-h pf-h"><div class="od-hh"><b>${esc(h.n)}</b><span class="st">${'★'.repeat(h.r||0)}</span><span>${esc(h.d)}${h.s?'・'+esc(h.s):''}</span>${h.p?`<em>¥${h.p.toLocaleString()}<small> ≈NT$${Math.round(h.p*RT()).toLocaleString()}</small></em>`:''}</div>${h.t?`<div class="od-hi">${esc(h.t)}</div>`:''}<div class="od-ha"><button data-ph="ex" data-k="${k}"${h.ex?' class="done"':''}>${h.ex?'✅ 已記帳':'💰 買了，記帳'}</button><button data-ph="del" data-k="${k}" class="del">✕</button></div></div>`}).join(''):'<div class="od-e">還沒有紀錄。試聞喜歡的，填上面再按「＋ 記下這支」。</div>'}</details>
+  <div class="od-out">${L.map((x,i)=>`<div class="od-l"><button data-ps="${i}" class="od-sp">🔊</button><div><b>${x[0]}</b>${KN(x[0],x[1])}<span>${x[2]}</span></div></div>`).join('')}
+  <div class="acts"><button class="btn pri" data-pa="say">🔊 整句唸</button><button class="btn" data-pa="slow">🐢 慢慢唸</button><button class="btn" data-pa="big">⛶ 給店員看</button><button class="btn ghost" data-pa="clr">清空</button></div></div>
+  <div class="od-g">🙋 誰要用</div><div class="pf-tags">${WHO.map(x=>tag(`data-pw="${x[0]}"`,st.who===x[0],x[3])).join('')}</div>
+  <div class="od-g">💚 喜歡的香調（可複選）</div>${LIKE.map(g=>`<div class="pf-sub">${g[0]}</div><div class="pf-tags">${g[1].map(x=>tag(`data-pl="${esc(x[0])}"`,st.lk[x[0]],x[0],x[2])).join('')}</div>`).join('')}
+  <div class="od-g">🚫 不要的</div><div class="pf-tags">${AVOID.map(x=>tag(`data-pv="${esc(x[0])}"`,st.av[x[0]],x[2],x[0],1)).join('')}</div>
+  <div class="od-g">✨ 想要的感覺</div><div class="pf-tags">${STY.map(x=>tag(`data-py="${esc(x[0])}"`,st.sy[x[0]],x[2],x[0].replace(/がいいです。|したいです。/,''))).join('')}</div>
+  <div class="od-g">🧴 容量</div><div class="pf-tags">${SIZE.map(x=>tag(`data-pz="${x[0]}"`,st.sz===x[0],x[0])).join('')}</div>
+  <div class="od-g">💴 預算</div><div class="pf-tags">${BUD.map(x=>tag(`data-pb="${x[0]}"`,+st.bd===x[0],'¥'+x[0].toLocaleString(),'≈NT$'+Math.round(x[0]*RT()).toLocaleString())).join('')}</div>
+  <div class="acts pf-end"><button class="btn pri" data-pa="say">🔊 整句唸</button><button class="btn" data-pa="big">⛶ 給店員看</button></div>
+  ${PH.map(g=>`<div class="od-g">${g[0]}（點整列就唸）</div>`+g[1].map(x=>`<button class="od-pay" data-sayw="${esc(x[1])}"><i>🔊</i><div><b>${x[0]}</b>${KN(x[0],x[1])}<span>${x[2]}</span></div></button>`).join('')).join('')}`}
+ B.addEventListener('input',e=>{const k=e.target.dataset.pf;if(k){st.f[k]=e.target.value;save()}});
+ B.addEventListener('toggle',e=>{if(e.target.classList&&e.target.classList.contains('od-hist')){st.hopen=e.target.open?1:0;save()}},true);
+ B.addEventListener('click',e=>{const t=e.target.closest('button');if(!t)return;const d=t.dataset,L=sent();const tg=(o,k)=>{o[k]=o[k]?0:1;if(!o[k])delete o[k];save();draw()};
+  if(d.pw){st.who=d.pw;save();draw();return}if(d.pl){tg(st.lk,d.pl);return}if(d.pv){tg(st.av,d.pv);return}if(d.py){tg(st.sy,d.py);return}
+  if(d.pz){st.sz=st.sz===d.pz?'':d.pz;save();draw();return}if(d.pb){st.bd=+st.bd===+d.pb?0:+d.pb;save();draw();return}
+  if(d.ps!==undefined){clSay(L[+d.ps][1],'ja-JP');return}if(d.sayw){clSay(d.sayw,'ja-JP');return}
+  if(d.pa==='say'||d.pa==='slow'){clSay(L.map(x=>x[1]).join(''),'ja-JP',d.pa==='slow');return}
+  if(d.pa==='clr'){st.lk={};st.av={};st.sy={};st.sz='';st.bd=0;save();draw();return}
+  if(d.pa==='big'){const o=document.createElement('div');o.className='med-big resv-big';const v=document.createElement('div');const pre=document.createElement('pre');pre.textContent=L.map(x=>x[0]).join('\n');const sm=document.createElement('small');sm.textContent=L.map(x=>x[2]).join('；')+'\n點任何地方關閉';v.append(pre,sm);o.append(v);o.onclick=()=>o.remove();document.body.appendChild(o);return}
+  if(d.pr){st.f.r=+d.pr;save();draw();return}
+  if(d.pa==='add'){const n=(st.f.n||'').trim();if(!n){toast('先填品牌和名稱');return}const H=S.get('pfLog',{}),td=new Date(Date.now()+9*3600e3);H['p'+Date.now().toString(36)]={n,t:(st.f.t||'').trim(),p:Math.round(+String(st.f.p||'').replace(/[^\d.]/g,''))||0,s:(st.f.s||'').trim(),r:st.f.r||0,d:`${td.getUTCMonth()+1}/${td.getUTCDate()}`,o:Date.now()};S.set('pfLog',H);st.f={};st.hopen=1;save();draw();toast('已記到「📓 試香紀錄」');return}
+  if(d.ph){const H=S.get('pfLog',{}),h=H[d.k];if(!h)return;
+   if(d.ph==='ex'){if(h.ex){toast('這筆已經記過帳了');return}if(!h.p){toast('沒有價格，無法記帳');return}const E=S.get('exp',{}),id='e'+Date.now().toString(36)+Math.random().toString(36).slice(2,5);E[id]={d:h.d,c:'shop',t:('香水：'+h.n).slice(0,30),a:h.p,p:'cash',w:'',n:'香水試香發音器'+(h.s?' '+h.s:''),o:Date.now()};S.set('exp',E);h.ex=id;H[d.k]=h;S.set('pfLog',H);try{drawExp()}catch(e){}draw();toast('已記帳 ¥'+h.p.toLocaleString());return}
+   if(d.ph==='del'){if(!t.dataset.arm){t.dataset.arm=1;t.textContent='確定刪除？';setTimeout(()=>{if(t.isConnected){delete t.dataset.arm;t.textContent='✕'}},2500);return}delete H[d.k];S.set('pfLog',H);draw();return}}});
  try{reloaders.push(()=>draw())}catch(e){}
  draw()})();
 
