@@ -431,6 +431,8 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
 .dz-er input[type=range]{width:100%;height:30px}.dz-er.dis{opacity:.4}
 .dz-pm{height:38px;border:1px solid var(--line);border-radius:10px;background:transparent;color:var(--accent);font-size:20px;font-weight:700;cursor:pointer;touch-action:manipulation;-webkit-user-select:none;user-select:none}
 .dz-pm:active{background:rgba(226,189,106,.15)}.dz-ev{font-family:var(--f-mono);font-weight:500;text-align:right;white-space:nowrap}
+.dz-basebtn{flex:1 1 200px;display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:6px;text-align:left;border:1px solid var(--line);background:transparent;color:var(--ink);border-radius:10px;padding:8px 10px;font:inherit;cursor:pointer;min-width:0}.dz-basebtn b{font-size:13.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.dz-basebtn em{font-style:normal;font-size:12px;color:var(--accent);white-space:nowrap}
+.dz-baselist{max-height:60vh;overflow-y:auto;margin-top:8px;border:1px solid var(--line);border-radius:12px;padding:8px}.dz-rad .bx{border-radius:50%;color:#1b1714}.dz-rad.on .bx{background:var(--accent);border-color:var(--accent)}
 .dz-vck{display:grid;grid-template-columns:28px 1fr;gap:8px;align-items:center;width:100%;text-align:left;border:1px solid var(--line);background:transparent;color:var(--ink);border-radius:10px;padding:8px 10px;margin:8px 0 2px;font:inherit;cursor:pointer}.dz-vck .bx{width:24px;height:24px;border-radius:6px;border:2px solid var(--muted);display:flex;align-items:center;justify-content:center;font-weight:800;color:#1b1714}.dz-vck.on{border-color:#e8b04a;background:rgba(232,176,74,.08)}.dz-vck.on .bx{background:#e8b04a;border-color:#e8b04a}.dz-vck b{display:block;font-size:14px}.dz-vck small{display:block;font-size:11.5px;color:var(--muted)}
 .dz-edb{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}.dz-edb button{border:1px solid var(--line);background:transparent;color:var(--ink);border-radius:10px;padding:7px 10px;font:inherit;font-size:13px;cursor:pointer}
 .dz-edb button[aria-pressed=true]{border-color:var(--accent);color:var(--accent);font-weight:700;background:rgba(226,189,106,.12)}
@@ -1436,7 +1438,7 @@ window.BGM=(()=>{
     <div class="err" id="tErr"></div>
   </div>
   <button class="t-more" id="tMore" type="button" aria-label="咖啡宇宙：更多咖啡 App 與遊戲">咖啡宇宙</button>
-  <div class="t-foot">© 2026 Jim Lu　ver. 11.3</div>
+  <div class="t-foot">© 2026 Jim Lu　ver. 11.4</div>
 </div>
 <nav class="modes" aria-label="導覽"><div class="in">
   <button class="homebtn" id="homeBtn" type="button" hidden>‹ 主選單</button>
@@ -9172,6 +9174,16 @@ if(!D||!Array.isArray(D.segs)||!D.segs.length)D=Object.assign({tpl:'even10',tail
 D.bl=D.bl||35;D.gap=D.gap||15;
 const saveD=()=>{try{localStorage.setItem(DK,JSON.stringify(D));}catch(e){}};
 let B=null,BL='',BSRC='',PIN=null;
+function setBase(v){baseOpen=false;if(v==='__auto'){render();return;}BSRC=v;if(!v){B=null;}else if(v==='__pin'){B=PIN;BL='記下的版本（'+(PIN?Math.round(PIN.score):'')+' 分）';}else{let a=[];try{a=JSON.parse(localStorage.getItem(DSV)||'[]');}catch(er){}const x=a.find(y=>y.id===v);if(x){B=analyze(Object.assign(clone(x.d),{fm:D.fm,nEven:D.nEven}));BL='存檔「'+x.name+'」';}}render();}
+let baseOpen=false;
+function baseList(){const a=allSaved(),cur=BSRC||'';
+  const row=(v,name,d,extra)=>'<button type="button" class="dz-ck dz-rad'+(cur===v?' on':'')+'" data-bs="'+esc(v)+'" role="radio" aria-checked="'+(cur===v)+'"><span class="bx">'+(cur===v?'●':'')+'</span><span><b>'+name+'</b>'+(d?badge(d):'')+(extra?'<small>'+extra+'</small>':'')+'</span></button>';
+  let h=row('','不比較',null,'只看目前這套的數字');
+  if(PIN)h+=row('__pin','📌 記下的版本（'+Math.round(PIN.score)+' 分）',PIN.X||null,'按「記下目前這版」時存的');
+  if(cur==='__auto')h+=row('__auto',esc(BL),null,'調整前自動記下的版本');
+  const grp=FL.map(f=>[f,a.filter(x=>x.folder===f)]).concat([['',a.filter(x=>!x.folder||!FL.includes(x.folder))]]).filter(([,v])=>v.length);
+  grp.forEach(([f,v])=>{if(FL.length)h+='<div class="dz-fh">'+(f?'📁 '+esc(f):'未分類')+' <small>'+v.length+'</small></div>';v.forEach(x=>{h+=row(x.id,'💾 '+esc(x.name),x.d,esc(x.sum||''));});});
+  return h;}
 function baseOpts(){let a=[];try{a=JSON.parse(localStorage.getItem(DSV)||'[]');}catch(e){}
   const cur=BSRC||'';return '<option value=""'+(cur===''?' selected':'')+'>不比較</option>'+(PIN?'<option value="__pin"'+(cur==='__pin'?' selected':'')+'>📌 記下的版本（'+Math.round(PIN.score)+' 分）</option>':'')+(cur==='__auto'?'<option value="__auto" selected>'+esc(BL)+'</option>':'')+a.map(x=>'<option value="'+x.id+'"'+(cur===x.id?' selected':'')+'>💾 '+esc(x.name)+'</option>').join('');}   // 比較基準（上一版的分析結果）
 // ---- 模型參數 ----
@@ -9324,9 +9336,10 @@ function render(){const v=$('designView');if(!v||v.hidden)return;A=analyze(D);if
   const pf=A.pf,cB=B&&B.cup;
   $('dzSum').innerHTML='<div class="bl-vh"><span class="bl-ve">'+(A.cup.ey>=18&&A.cup.ey<=22&&A.cup.tds>=1.15&&A.cup.tds<=1.45?'🏆':A.score>=80?'👍':'🧪')+'</span><div><b>'+zoneOf(A.cup.ey,A.cup.tds)+'</b><span class="label">'+b.name+'・'+DRIPPER[D.dripper].name+'・'+D.dose+' g／'+Math.round(W)+' g・滴完 '+fmt(A.end)+'</span></div><div class="bl-sc"><b>'+Math.round(A.score)+'</b>'+dChip(0,A.score-(B?B.score:0),0,1)+'<span class="label">分數</span></div></div>'+
     '<div class="dz-kp">'+[['萃取率',A.cup.ey.toFixed(1)+'%',dChip(0,A.cup.ey-(cB?cB.ey:0),1)],['TDS',A.cup.tds.toFixed(2)+'%',dChip(0,A.cup.tds-(cB?cB.tds:0),2)],['甜',T5(pf.sweet),dChip(0,(pf.sweet-(B?B.pf.sweet:0))/2,1,1)],['酸',T5(pf.acid),dChip(0,(pf.acid-(B?B.pf.acid:0))/2,1)],['苦',T5(pf.bitter),dChip(0,(pf.bitter-(B?B.pf.bitter:0))/2,1,-1)],['澀',T5(pf.astr),dChip(0,(pf.astr-(B?B.pf.astr:0))/2,1,-1)],['黏稠',T5(A.tex.visc),dChip(0,(A.tex.visc-(B?B.tex.visc:0))/2,1,1)],['滑順',T5(A.tex.smooth),dChip(0,(A.tex.smooth-(B?B.tex.smooth:0))/2,1,1)],['厚度',T5(A.tex.full),dChip(0,(A.tex.full-(B?B.tex.full:0))/2,1,1)],['花果',T5(pf.fruity),dChip(0,(pf.fruity-(B?B.pf.fruity:0))/2,1)]].map(([a,x,d])=>'<div><b>'+x+d+'</b><span>'+a+'</span></div>').join('')+'</div>'+
-    (CALP.on&&CALP.map[D.dripper]?'<p class="label">🎯 已套用 '+DRIPPER[D.dripper].name+' 的實測校正（萃取 ×'+CALP.map[D.dripper].k.toFixed(2)+'、流速 ×'+CALP.map[D.dripper].q.toFixed(2)+'、每注大小 '+CALP.map[D.dripper].g.toFixed(1)+'）</p>':'')+'<div class="dz-cmp"><span class="label">▲▼ 要和誰比？</span></div><div class="dz-base"><select id="dzBaseSel" aria-label="比較對象">'+baseOpts()+'</select><button type="button" id="dzPin" class="dz-btn2" style="border-radius:8px;padding:7px 10px;font:inherit;font-size:13px">📌 記下目前這版</button></div>'+(B?'<p class="label">正在比較：'+esc(BL)+'</p>':'');
-  $('dzPin').onclick=()=>{B=A;BL='記下的版本（'+Math.round(A.score)+' 分）';BSRC='__pin';PIN=A;toastMsg('已記下這版，之後的調整都會和它比');render();};
-  $('dzBaseSel').onchange=e=>{const v=e.target.value;if(v==='__auto')return;BSRC=v;if(!v){B=null;}else if(v==='__pin'){B=PIN;BL='記下的版本（'+(PIN?Math.round(PIN.score):'')+' 分）';}else{let a=[];try{a=JSON.parse(localStorage.getItem(DSV)||'[]');}catch(er){}const x=a.find(y=>y.id===v);if(x){B=analyze(Object.assign(clone(x.d),{fm:D.fm,nEven:D.nEven}));BL='存檔「'+x.name+'」';}}render();};
+    (CALP.on&&CALP.map[D.dripper]?'<p class="label">🎯 已套用 '+DRIPPER[D.dripper].name+' 的實測校正（萃取 ×'+CALP.map[D.dripper].k.toFixed(2)+'、流速 ×'+CALP.map[D.dripper].q.toFixed(2)+'、每注大小 '+CALP.map[D.dripper].g.toFixed(1)+'）</p>':'')+'<div class="dz-base"><button type="button" id="dzBaseBtn" class="dz-basebtn" aria-expanded="'+baseOpen+'"><span class="label">▲▼ 和誰比</span><b>'+(B?esc(BL):'不比較')+'</b><em>'+(baseOpen?'收起 ▴':'選擇 ▾')+'</em></button><button type="button" id="dzPin" class="dz-btn2" style="border-radius:8px;padding:7px 10px;font:inherit;font-size:13px">📌 記下目前這版</button></div>'+(baseOpen?'<div class="dz-baselist" id="dzBaseList">'+baseList()+'</div>':'');
+  $('dzPin').onclick=()=>{A.X=clone(D);B=A;BL='記下的版本（'+Math.round(A.score)+' 分）';BSRC='__pin';PIN=A;toastMsg('已記下這版，之後的調整都會和它比');render();};
+  $('dzBaseBtn').onclick=()=>{baseOpen=!baseOpen;render();};
+  {const bl=$('dzBaseList');if(bl)bl.onclick=e=>{const t=e.target.closest('[data-bs]');if(!t)return;setBase(t.dataset.bs);};}
   // 每份
   $('dzFmd').querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',String(x.dataset.v===fmode)));
   $('dzFrac').innerHTML=fracSvg(A,B&&B.F&&B.F.length===A.F.length?B:null,fmode);
