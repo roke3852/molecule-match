@@ -71,11 +71,12 @@ button{font:inherit;color:inherit;touch-action:manipulation;cursor:pointer}
   <button class="mbtn pri" id="bStart">☕<div>開始故事<small id="sStart">序章：藥院的一杯咖啡</small></div></button>
   <button class="mbtn" id="bCont">▶<div>繼續<small id="sCont">從上次離開的地方</small></div></button>
   <button class="mbtn" id="bChap">📖<div>章節選擇<small>重看任何一章</small></div></button>
+  <button class="mbtn" id="bSide">🇹🇼<div>外傳：台灣的兩支得獎豆<small>鄒築園藝伎・珍5吉 SL34</small></div></button>
   <button class="mbtn" id="bItems">🎴<div>風味收集冊<small>故事裡收集到的風味卡</small></div></button>
   <button class="mbtn" id="bGloss">📚<div>咖啡小辭典<small>故事裡出現的名詞</small></div></button>
  </div>
- <div class="credit">故事根據 COFFEE COUNTY 的豆卡改編；人物對話為想像重現，生產者、產區、品種與風味描述依照店家卡片。<br>品飲紀錄：Roke，2026/11/27 於 COFFEE COUNTY Fukuoka</div>
- <div class="jl">嘆息之谷 v1.0・Made by <b>Jim Lu</b></div>
+ <div class="credit">故事根據 COFFEE COUNTY 的豆卡改編；人物對話為想像重現，生產者、產區、品種與風味描述依照店家卡片。<br>品飲紀錄：Roke，2026/11/27 於 COFFEE COUNTY Fukuoka<br>外傳依鄒築園、珍5吉咖啡莊園的公開報導與罐上標示改編。</div>
+ <div class="jl">嘆息之谷 v1.1・Made by <b>Jim Lu</b></div>
 </section>
 
 <section class="screen" id="game">
@@ -115,6 +116,19 @@ const GL={
  '杯測':'Cupping。用統一的研磨度、水溫和時間泡咖啡，一匙一匙嚐，評估香氣、酸質、甜感和乾淨度，是挑選生豆的標準方法。',
  'COFFEE COUNTY':'コーヒーカウンティ。從福岡縣久留米起家的自家烘焙咖啡店，到產地挑豆、直接購買，以淺焙單品為主；福岡店在藥院（高砂）。',
  '生豆':'還沒烘焙的咖啡豆，綠色、硬、沒有香氣。產地處理好的生豆會裝進麻袋或真空袋，飄洋過海運到消費國。',
+ 'BOT':'最佳臺灣咖啡公開賽（Best of Taiwan）。台灣的精品咖啡生豆競賽，得名的批次會拿去國際競標，名次越前面、價格越高。',
+ '總統獎':'台灣咖啡競賽中頒給頂尖名次的榮譽獎項；這罐鄒築園藝伎標示「BOT 第 2 名・總統獎」。',
+ '競標批次':'比賽得獎、拿去拍賣的那一批生豆，數量很少，通常一場拍賣後就買不到了。',
+ '藝伎':'Geisha／Gesha。源自衣索比亞 Gesha 山區的品種，在巴拿馬一戰成名，以茉莉花、柑橘、佛手柑般的香氣聞名，是精品咖啡裡的名貴品種。',
+ '鄒族':'台灣原住民族之一，主要生活在阿里山一帶。方政倫是鄒族人，「鄒築園」的鄒就是鄒族。',
+ '樂野村':'阿里山鄉的鄒族部落，鄒築園就在這裡，海拔約 1,200 公尺，雲霧多、日照剛好。',
+ '索恩娜':'So’ngna。方政倫在買進的藝伎樹苗中，發現長得不一樣的植株，送 DNA 鑑定後發現是衣索比亞原生種，用鄒族語「最好的」為它命名。',
+ '八八風災':'2009 年 8 月的莫拉克颱風，重創南台灣山區，阿里山的交通和觀光中斷很久。',
+ '十大神農':'台灣農業部門頒給傑出農民的獎項，方政倫在 2017 年獲獎。',
+ 'SL34':'1930 年代在肯亞由 Scott 實驗室（Scott Laboratories）選育出來的品種，名字的 SL 就是實驗室縮寫；酸質明亮、果汁感強，在阿里山一帶種得很多。',
+ '竹崎鄉':'嘉義縣的山區鄉鎮，緊鄰阿里山，珍5吉咖啡莊園在這裡海拔約 1,150 公尺的地方。',
+ 'COE':'Cup of Excellence 卓越盃。國際性的精品咖啡競賽與拍賣，台灣也有舉辦；珍5吉的 SL34 蜜處理曾在 2024 年台灣 COE 拿下第 12 名。',
+ '愛玉':'台灣特有的植物，種子搓洗後會凝成透明的愛玉凍。珍5吉也賣野生愛玉籽。',
  '乾淨度':'Clean cup。喝起來沒有雜味、沒有混濁感，每個味道清清楚楚。通常和處理是否細心、果實是否熟透有關。'
 };
 /* ============ 人物 ============ */
@@ -129,6 +143,11 @@ const PEOPLE={
  son:{n:'Axel 的兒子',sub:'未來的第七代',skin:'#c18d60',hair:'#1b1512',shirt:'#d9a441',pitch:680},
  abuelo:{n:'老 Palacios',sub:'1930 年代・家族第一代',skin:'#a87048',hair:'#d8d8d8',shirt:'#e9e4d6',hat:'#c9b27a',pitch:240},
  roaster:{n:'烘豆師',sub:'COFFEE COUNTY 久留米',skin:'#ecc49c',hair:'#151515',shirt:'#2d2d2d',apron:'#7a5a3a',pitch:420},
+ fang:{n:'方政倫',sub:'鄒築園園主・阿里山咖啡王子',skin:'#b98458',hair:'#151515',shirt:'#9b2b2b',hat:'#d84a3a',pitch:340},
+ fangdad:{n:'方爸爸',sub:'樂野村種茶三十年',skin:'#a87048',hair:'#bdbdbd',shirt:'#5d7547',pitch:250},
+ zhu:{n:'朱鵬吉',sub:'珍5吉咖啡莊園園主',skin:'#c18d60',hair:'#1b1512',shirt:'#3f6e9a',hat:'#e8e0cf',pitch:320},
+ zhen:{n:'王素珍',sub:'珍5吉咖啡莊園・園主的太太',skin:'#e7bf98',hair:'#2a1a12',shirt:'#c8363a',pitch:760},
+ booth:{n:'攤位店員',sub:'台灣咖啡・現場手沖體驗',skin:'#f0caa5',hair:'#2a2220',shirt:'#e9e0cf',apron:'#8a2a2a',pitch:700},
  nar:{n:'',sub:''}
 };
 /* ============ 風味卡 ============ */
@@ -142,7 +161,16 @@ const ITEMS={
  floral:['🌸','花香','放涼後越來越明顯、偏沉穩的花香'],
  brown:['🟫','黑糖','把酸包起來的圓潤甜感'],
  clean:['💧','乾淨','水洗與高海拔給的清透'],
- bergamot:['🍋','佛手柑','你在熱的時候喝到的一縷香氣']
+ bergamot:['🍋','佛手柑','你在熱的時候喝到的一縷香氣'],
+ jasmine:['🤍','茉莉花','鄒築園藝伎最先飄出來的白色花香'],
+ orangeblossom:['🌼','橙花','藝伎招牌的柑橘花香'],
+ peach:['🍑','桃子','日曬帶出的多汁果甜'],
+ lychee:['🔴','荔枝','尾韻甜得像台灣的夏天'],
+ lemontea:['🧋','檸檬茶','珍5吉 SL34 最先跳出來的清爽酸甜'],
+ plum:['🟣','李子','SL34 的紅色果實感'],
+ candied:['🍬','蜜餞','蜜處理留下的果乾甜'],
+ chestnut:['🌰','栗子','尾韻溫暖的栗子香'],
+ cane:['🎋','蔗糖','把酸包起來的乾淨甜感']
 };
 /* ============ 故事 ============ */
 const L=(s,t)=>({s,t}),N=t=>({s:'nar',t}),BG=(b,loc)=>({bg:b,loc}),G=k=>({get:k}),C=(q,o)=>({c:q,o});
@@ -285,7 +313,76 @@ const CHS=[
  L('me','原來如此。Los Suspiros——嘆息。'),
  N('杯底還留著一點點花香。'),
  N('—— 嘆息之谷・完 ——'),
- {end:1}]}
+ {end:1}]},
+{side:'zou',t:'外傳一',n:'阿里山的咖啡王子',sub:'鄒築園・藝伎・日曬',bg:'booth',bean:{name:'台灣 BOT 第 2 名・總統獎　競標批次　鄒築園　藝伎',fl:'茉莉花、橙花、柑橘、甜橙、檸檬、白柚、桃子、荔枝',proc:'日曬・淺焙',sc:{甜感:5,香氣:5,酸感:2,醇厚:2},price:'NT$5,980'},nodes:[
+ BG('booth','旅途中　台灣咖啡・現場手沖體驗'),
+ N('離開藥院之後，你在一個「現場手沖體驗」的攤位前停下來。架上排著紅色的罐子，上面寫著 WE LOVE COFFEE。'),
+ L('booth','這兩罐都是台灣豆，而且都是比賽得獎的競標批次喔。'),
+ L('me','台灣 BOT 第 2 名，總統獎……鄒築園，藝伎。標價五千九百八。'),
+ L('booth','鄒築園在阿里山，園主方政倫，大家都叫他「咖啡王子」。'),
+ BG('alishan','嘉義　阿里山鄉　樂野村　海拔約 1,200 m'),
+ N('阿里山的樂野村，是鄒族的部落。雲霧常常從山谷爬上來，又慢慢散開。'),
+ L('fangdad','我在這裡種茶種了三十年，也幫人催蘭花。家裡有一塊斜坡地空著，就隨手種了兩百棵咖啡樹，當作看的。'),
+ N('大約 2000 年，那些「看的」咖啡樹開始結果。獨生子方政倫退伍回家，開始拿這些豆子做實驗。'),
+ L('fang','沒有人教。我就自己烘、自己喝，烘壞了再來。'),
+ N('就這樣摸索了好幾年。29 歲那年，他帶著手工烘焙的豆子，打敗全國 76 組參賽者，拿下台灣咖啡評鑑的冠軍。'),
+ L('fangdad','兒子得獎以後，眼睛都亮了。茶跟蘭花我不做了，地讓給他種咖啡。'),
+ C('方爸爸本來把咖啡樹當成什麼？',[
+  {t:'種在空地上當景觀、好看用的',ok:1,r:'對。最早只是兩百棵「景觀樹」，沒想到後來長成阿里山精品咖啡的起點之一。'},
+  {t:'一開始就打算拿去比賽',ok:0,r:'其實一開始只是隨手種的，比賽是方政倫自己摸索了好多年之後的事。'}]),
+ N('2009 年 8 月 1 日，「鄒築園」開幕了。商標是方政倫穿著鄒族服飾的頭像。'),
+ N('但同一個月，八八風災來了。山路斷了，遊客上不來，店被迫長期停業。'),
+ L('fang','客人上不來，那我就下山。我帶著豆子跑遍各地去擺攤，一包一包賣。'),G('jasmine'),
+ BG('alishan','鄒築園　藝伎園區'),
+ L('fang','這邊是我的藝伎園。綁白布條的是短節間藝伎，灰色是長節間，特別有潛力的，我綁藍色。'),
+ L('fang','分開管理，每一種的風味才會一致。'),
+ N('他還把園裡的樹送去做基因鑑定，把混到別的品種的樹砍掉，讓藝伎更純。'),
+ L('fang','有一年，我從外面買進幾千棵藝伎樹苗，發現其中有一些長得不一樣。'),
+ L('fang','送去驗 DNA，結果是一個以前沒被發現的衣索比亞原生種。'),
+ C('方政倫怎麼替這個新發現的品種命名？',[
+  {t:'用鄒族語「最好的」，叫它索恩娜（So’ngna）',ok:1,r:'沒錯。他希望以後全世界的咖啡館介紹它時，都會說：這是來自台灣阿里山、名字是鄒族語「最好的」的咖啡。'},
+  {t:'直接叫它「阿里山藝伎」',ok:0,r:'它其實不是藝伎，是另一個衣索比亞原生種。方政倫刻意用鄒族語命名，讓咖啡成為台灣和鄒族被世界看見的方式。'}]),
+ L('fang','藝伎種得再好，也只是跟著別人走。我想要有一支代表台灣的咖啡。'),G('orangeblossom'),
+ N('2017 年，他拿到十大神農。鄒築園的獎牌多到放不下，聽說還堆滿了一整個房間。'),
+ BG('booth','旅途中　台灣咖啡・現場手沖體驗'),
+ L('booth','這罐是日曬處理的藝伎，淺焙。卡片上寫：茉莉花、橙花、柑橘、甜橙、檸檬、白柚、桃子、荔枝。'),
+ L('me','甜感五顆、香氣五顆，酸和醇厚各兩顆……是香氣和甜感取勝的豆子。'),G('peach'),
+ C('藝伎用日曬處理，通常會帶來什麼變化？',[
+  {t:'在花香之外，多了濃郁的熟果甜，像桃子、荔枝',ok:1,r:'對。日曬讓果實的糖分慢慢進到豆子裡，藝伎原本的茉莉、柑橘花香，會再疊上一層多汁的熟果甜。'},
+  {t:'花香會完全消失，只剩苦味',ok:0,r:'不會。處理得好的日曬藝伎，花香還在，只是多了果汁感和甜感。'}]),
+ L('me','從兩百棵景觀樹，到總統獎。'),G('lychee'),
+ N('—— 外傳一・阿里山的咖啡王子・完 ——')]},
+{side:'zhen',t:'外傳二',n:'珍與吉，還有 5',sub:'珍5吉咖啡莊園・SL34・蜜處理',bg:'booth',bean:{name:'2026 BOT 第 13 名　競標批次　珍5吉咖啡莊園　SL34',fl:'檸檬茶、柑橘、甜橙、葡萄柚、李子、蜜餞、栗子、蔗糖',proc:'蜜處理・淺焙',sc:{甜感:5,香氣:5,酸感:2,醇厚:2},price:'NT$1,980'},nodes:[
+ BG('booth','旅途中　台灣咖啡・現場手沖體驗'),
+ L('me','旁邊這罐呢？2026 BOT 第 13 名，珍5吉咖啡莊園，SL34。這個名字好特別。'),
+ L('booth','珍5吉，名字裡藏著一家人喔。'),
+ BG('alishan','嘉義縣　竹崎鄉　海拔約 1,150 m'),
+ N('嘉義縣竹崎鄉，緊鄰阿里山。平均溫度 15 到 24 度，日照充足。'),
+ L('zhu','我本來是種茶的。可是我自己太愛喝咖啡了，乾脆改種咖啡。'),
+ N('2020 年，莊園成立。面積只有 0.5 公頃，主要種 SL34，也種一些鐵比卡和藝伎。'),
+ L('zhen','名字是這樣來的：他的名字最後一個字「吉」，我的名字最後一個字「珍」。'),
+ L('zhu','中間那個「5」，是我們一家五口。'),
+ L('zhen','也是莊園的五樣農產品：咖啡、高山茶、有機紅茶、天然蜂蜜，還有野生愛玉籽。'),
+ C('「珍5吉」的「5」代表什麼？',[
+  {t:'一家五口，也代表莊園的五樣農產品',ok:1,r:'答對了。從田間管理、採收、後製、包裝到出杯，一條龍都是他們一家人自己來。'},
+  {t:'種了五種咖啡品種',ok:0,r:'不是喔。他們主要種 SL34，另外有鐵比卡和藝伎。5 是一家五口，也是五樣農產品。'}]),
+ L('zhu','我們主要種 SL34。這是很久以前在肯亞選育出來的品種，酸很亮、果汁感很強。'),G('lemontea'),
+ L('zhen','處理法我們三種都做：水洗、日曬、蜜處理。日曬賣得最好，有種葡萄酒的香氣。'),
+ L('zhu','但今年拿去比賽得獎的，是蜜處理的 SL34。'),
+ C('「蜜處理」是怎麼做的？',[
+  {t:'去掉果皮，但留下一部分黏黏的果膠一起曬乾',ok:1,r:'對。留下的果膠會讓豆子多一層甜感和厚度，風味介於水洗的乾淨和日曬的濃郁之間——像卡片寫的蜜餞、蔗糖。'},
+  {t:'在豆子上淋蜂蜜再曬乾',ok:0,r:'名字很容易讓人誤會，其實完全沒有加蜂蜜。「蜜」指的是留在豆子上、黏黏甜甜像蜂蜜的果膠。'}]),G('candied'),
+ N('小小的 0.5 公頃，卻一年一年得獎。'),
+ N('2023 年，嘉義縣優質五星咖啡莊園。2024 年，台灣 COE 卓越盃第 12 名——正是蜜處理的 SL34，被國外買家以每磅 40.5 美元標走。'),
+ N('然後是 2026 年，最佳臺灣咖啡公開賽，BOT 第 13 名。'),G('plum'),
+ L('zhen','「用心、堅持好品」，這是我們一開始做的時候就說好的。'),
+ BG('booth','旅途中　台灣咖啡・現場手沖體驗'),
+ L('booth','卡片寫：檸檬茶、柑橘、甜橙、葡萄柚、李子、蜜餞、栗子、蔗糖。甜感和香氣都是五顆。'),
+ L('me','一個是阿里山鄒族的咖啡王子，一個是竹崎一家五口的小莊園。'),G('chestnut'),
+ L('me','今天早上在福岡喝了一杯瓜地馬拉，現在又遇到兩支台灣的得獎豆。'),
+ L('booth','台灣的咖啡，也有很多故事喔。'),G('cane'),
+ N('—— 外傳二・珍與吉，還有 5・完 ——')]}
+
 ];
 /* ============ 狀態 ============ */
 const SK='suspiros_v1';let DB={ch:0,i:0,got:[],done:[],snd:1,mus:1};try{Object.assign(DB,JSON.parse(localStorage.getItem(SK))||{})}catch(e){}
@@ -339,6 +436,14 @@ const BGS={
  roast(g,t){sky(g,'#2a2420','#3a2e26');rect(g,'#4a3c30',0,72,W,36);rect(g,'#2e2a2a',60,30,46,42);rect(g,'#8a8a8a',66,24,34,8);rect(g,'#c9c9c9',72,44,22,16);rect(g,'#1a1a1a',76,48,14,8);
   const k=.5+.5*Math.sin(t*3);g.fillStyle=`rgba(255,${120+60*k|0},60,.8)`;g.fillRect(78,50,10,4);rect(g,'#555',80,8,6,22);steam(g,82,8,t);steam(g,84,10,t+.4);
   rect(g,'#c9c9c9',110,60,40,6);for(let i=0;i<5;i++)rect(g,'#6a4a30',114+i*7,58,4,2);person(g,140,104,PEOPLE.roaster,t,-1);rect(g,'#e9e0cf',20,52,18,20);rect(g,'#4f8a5b',22,58,14,3)},
+ alishan(g,t){sky(g,'#a9c8d6','#eef0e6');ridge(g,'#8fa8a0',46,16,21,7);mist(g,t,40,.5);ridge(g,'#6f9a7c',60,14,23,6);
+  for(let r=0;r<5;r++){const y=66+r*8;g.fillStyle=r%2?'#4f8a5b':'#5f9a63';g.fillRect(0,y,W,5);for(let i=0;i<24;i++)rect(g,'#3d7448',(i*8+r*3)%W,y,5,3)}// 茶園梯田
+  mist(g,t*1.2+30,58,.35);for(let i=0;i<6;i++)tree(g,14+i*34,106,1.5,t,1);
+  if(/竹崎/.test(curLoc)){person(g,80,104,PEOPLE.zhu,t,1);person(g,96,104,PEOPLE.zhen,t,-1)}else if(/藝伎/.test(curLoc)){person(g,90,104,PEOPLE.fang,t,1);rect(g,'#fff',60,92,4,1);rect(g,'#999',110,92,4,1);rect(g,'#3f6e9a',140,92,4,1)}else{person(g,84,104,PEOPLE.fangdad,t,1);person(g,102,104,PEOPLE.fang,t,-1)}},
+ booth(g,t){sky(g,'#e9e4da','#cfc8bb');rect(g,'#f3efe6',0,0,W,40);rect(g,'#b52b2b',130,6,52,26);rect(g,'#fff',134,10,44,14);for(let i=0;i<4;i++)rect(g,'#b52b2b',138+i*9,13,6,2);
+  rect(g,'#9aa0a6',0,60,W,48);rect(g,'#c9ced3',0,60,W,3);
+  for(let i=0;i<3;i++){const x=34+i*44;rect(g,'#c9c9c9',x+4,38,24,4);rect(g,'#eee',x,42,32,4);rect(g,'#8a1f22',x,46,32,12);rect(g,'#f3efe6',x+4,47,24,9);rect(g,'#8a1f22',x+8,49,16,1);rect(g,'#c8363a',x+6,52,20,1);rect(g,'#eee',x,58,32,3)}
+  person(g,170,98,PEOPLE.booth,t,-1);rect(g,'#ddd',16,30,10,30);steam(g,20,28,t)},
  cup(g,t){sky(g,'#3a322b','#2a2420');rect(g,'#6a5240',0,60,W,48);rect(g,'#7a5f4a',0,60,W,2);cupDraw(g,70,36,4);steam(g,80,32,t);steam(g,92,30,t+.5);steam(g,104,32,t+.2);
   rect(g,'#f3efe6',140,56,26,40);rect(g,'#d9d2c2',140,56,26,3);for(let i=0;i<6;i++)rect(g,'#9a948a',144,64+i*5,18-(i%3)*4,1);g.fillStyle='rgba(255,210,140,.15)';g.fillRect(0,0,W,H)}
 };
@@ -394,7 +499,13 @@ function showChoice(n){waiting=false;$('nxt').style.visibility='hidden';portrait
    box.innerHTML=`<div class="fb">⭕ ${linkify(o.r)}</div><button class="opt" id="goOn">繼續故事 ▶</button>`;$('goOn').onclick=ev=>{ev.stopPropagation();DB.i++;save();step()}}
   else{blip(220,.2,'sawtooth',.04);b.classList.add('bad');b.disabled=true;let f=box.querySelector('.fb');if(!f){f=document.createElement('div');box.appendChild(f)}f.className='fb no';f.innerHTML='🤔 '+linkify(o.r)+'<br><small style="color:var(--sub)">再選一次看看</small>'}})}
 function getItem(k){if(!DB.got.includes(k)){DB.got.push(k);save();const it=ITEMS[k];toast(`${it[0]} 獲得風味卡：${it[1]}`);blip(784,.1,'triangle',.06);setTimeout(()=>blip(1046,.18,'triangle',.06),110)}}
-function chapterDone(){if(!DB.done.includes(DB.ch))DB.done.push(DB.ch);save();const nx=DB.ch+1;
+function beanHTML(b){return`<div class="tasting"><b>🫘 ${esc(b.name)}</b><div class="sub" style="margin-top:4px">${esc(b.proc)}・售價 ${esc(b.price)}</div><div class="bars">${Object.entries(b.sc).map(([k,v])=>`<span>${k}</span><i><u style="width:${v*20}%"></u></i><b>${v}</b>`).join('')}</div><p class="sub">風味：${esc(b.fl)}</p></div>`}
+function sideCard(){openCard(`<h3>🇹🇼 外傳：台灣的兩支得獎豆</h3><p class="sub">在旅途中的台灣咖啡攤位遇到的兩罐競標批次。</p><div class="clist">${CHS.map((c,i)=>c.side?`<button class="ci ${DB.done.includes(i)?'done':''}" data-sd="${i}"><span class="n">${DB.done.includes(i)?'✓':'外'}</span><div style="text-align:left"><b>${esc(c.t)}・${esc(c.n)}</b><div class="sub">${esc(c.sub)}</div></div></button>`:'').join('')}</div>`);
+ document.querySelectorAll('[data-sd]').forEach(b=>b.onclick=()=>{closeCard();ac();startChapter(+b.dataset.sd)})}
+function chapterDone(){if(!DB.done.includes(DB.ch))DB.done.push(DB.ch);save();const nx=DB.ch+1;const cur=CHS[DB.ch];
+ if(cur.side){DB.ch=0;DB.i=0;save();blip(523,.2,'triangle',.07);setTimeout(()=>blip(784,.3,'triangle',.07),200);
+  openCard(`<h3>✔ ${esc(cur.t)}・${esc(cur.n)} 完成</h3>${beanHTML(cur.bean)}<p class="sub">風味卡 ${DB.got.length} / ${Object.keys(ITEMS).length}</p><div class="menu" style="max-width:none"><button class="mbtn pri" id="sMore">🇹🇼<div>看另一篇外傳</div></button><button class="mbtn" id="cHome">☰<div>回到標題</div></button></div>`);
+  $('sMore').onclick=()=>{closeCard();sideCard()};$('cHome').onclick=()=>{closeCard();toTitle()};return}
  if(nx<CHS.length){openCard(`<h3>✔ ${esc(CHS[DB.ch].t)}・${esc(CHS[DB.ch].n)} 完成</h3><p class="sub">風味卡 ${DB.got.length} / ${Object.keys(ITEMS).length}</p><div class="menu" style="max-width:none"><button class="mbtn pri" id="cNext">▶<div>下一章<small>${esc(CHS[nx].t)}：${esc(CHS[nx].n)}</small></div></button><button class="mbtn" id="cHome">☰<div>回到標題</div></button></div>`);
   $('cNext').onclick=()=>{closeCard();startChapter(nx)};$('cHome').onclick=()=>{closeCard();toTitle()};DB.ch=nx;DB.i=0;save()}}
 function finale(){if(!DB.done.includes(DB.ch))DB.done.push(DB.ch);DB.ch=0;DB.i=0;DB.fin=1;save();blip(523,.2,'triangle',.07);setTimeout(()=>blip(659,.2,'triangle',.07),200);setTimeout(()=>blip(784,.4,'triangle',.07),400);
@@ -413,13 +524,13 @@ function closeCard(){$('ov').classList.remove('on')}
 $('ov').onclick=e=>{if(e.target.id==='ov')closeCard()};
 function toTitle(){show('title');refreshTitle()}
 function refreshTitle(){const has=DB.i>0||DB.ch>0;$('bCont').disabled=!has;$('sCont').textContent=has?`${CHS[DB.ch].t}：${CHS[DB.ch].n}`:'還沒有進度';$('sStart').textContent=DB.fin?'已看完全篇・從序章重新開始':'序章：藥院的一杯咖啡'}
-function chapSel(){openCard(`<h3>📖 章節選擇</h3><div class="clist">${CHS.map((c,i)=>{const ok=i===0||DB.done.includes(i)||DB.done.includes(i-1)||DB.fin;return`<button class="ci ${DB.done.includes(i)?'done':''} ${ok?'':'lock'}" data-cs="${i}" ${ok?'':'disabled'}><span class="n">${DB.done.includes(i)?'✓':i}</span><div style="text-align:left"><b>${esc(c.t)}・${esc(c.n)}</b><div class="sub">${esc(c.sub)}</div></div></button>`}).join('')}</div><p class="sub">看完上一章，下一章就會解鎖。</p>`);
+function chapSel(){openCard(`<h3>📖 章節選擇</h3><div class="clist">${CHS.map((c,i)=>{if(c.side)return'';const ok=i===0||DB.done.includes(i)||DB.done.includes(i-1)||DB.fin;return`<button class="ci ${DB.done.includes(i)?'done':''} ${ok?'':'lock'}" data-cs="${i}" ${ok?'':'disabled'}><span class="n">${DB.done.includes(i)?'✓':i}</span><div style="text-align:left"><b>${esc(c.t)}・${esc(c.n)}</b><div class="sub">${esc(c.sub)}</div></div></button>`}).join('')}</div><p class="sub">看完上一章，下一章就會解鎖。</p>`);
  document.querySelectorAll('[data-cs]').forEach(b=>b.onclick=()=>{closeCard();ac();startChapter(+b.dataset.cs)})}
 function glossCard(){openCard(`<h3>📚 咖啡小辭典</h3><div class="gl">${Object.entries(GL).map(([k,v])=>`<div><b>${esc(k)}</b><br>${esc(v)}</div>`).join('')}</div>`)}
-function bagCard(){openCard(`<h3>🎴 風味收集冊 ${DB.got.length} / ${Object.keys(ITEMS).length}</h3><p class="sub">故事裡會一張一張收集到這支咖啡的風味。</p>${itemsHTML()}${DB.fin?tastingHTML():''}`)}
+function bagCard(){openCard(`<h3>🎴 風味收集冊 ${DB.got.length} / ${Object.keys(ITEMS).length}</h3><p class="sub">故事裡會一張一張收集到這支咖啡的風味。</p>${itemsHTML()}${DB.fin?tastingHTML():''}${CHS.filter((c,i)=>c.side&&DB.done.includes(i)).map(c=>beanHTML(c.bean)).join('')}`)}
 $('bStart').onclick=()=>{ac();DB.fin=DB.fin||0;startChapter(0,1)};
 $('bCont').onclick=()=>{ac();resume()};
-$('bChap').onclick=chapSel;$('bGloss').onclick=glossCard;$('bItems').onclick=bagCard;
+$('bChap').onclick=chapSel;$('bSide').onclick=sideCard;$('bGloss').onclick=glossCard;$('bItems').onclick=bagCard;
 $('bHome').onclick=e=>{e.stopPropagation();clearInterval(typing);typing=null;toTitle()};
 $('bBag').onclick=e=>{e.stopPropagation();bagCard()};
 function sndUI(){$('bSnd').textContent=DB.snd?'🔊':'🔇';$('bMus').style.opacity=DB.mus?1:.4}
