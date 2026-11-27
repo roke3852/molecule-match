@@ -10,7 +10,7 @@
 <style>
 :root{--ink:#101915;--ink2:#18251f;--ink3:#22342c;--leaf:#4f8a5b;--leafL:#8fc29a;--mist:#c9d8d4;--cream:#f1ead9;--cherry:#c8363a;--gold:#d9a441;--sub:#9fb3ab;--line:#2f453b}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{margin:0;height:100%;background:var(--ink);color:var(--cream);font-family:"Noto Sans TC","PingFang TC",system-ui,sans-serif;touch-action:manipulation;overscroll-behavior:none;-webkit-user-select:none;user-select:none}
+html,body{margin:0;height:100%;position:fixed;inset:0;width:100%;overflow:hidden;background:var(--ink);color:var(--cream);font-family:"Noto Sans TC","PingFang TC",system-ui,sans-serif;touch-action:manipulation;overscroll-behavior:none;-webkit-user-select:none;user-select:none}
 button{font:inherit;color:inherit;touch-action:manipulation;cursor:pointer}
 .screen{position:fixed;inset:0;display:none;flex-direction:column}.screen.on{display:flex}
 /* 標題 */
@@ -42,7 +42,9 @@ button{font:inherit;color:inherit;touch-action:manipulation;cursor:pointer}
 #txt{font-size:17px;line-height:1.85;margin:8px 2px 0;min-height:4.5em;white-space:pre-wrap}
 #txt.nar{color:var(--mist);font-style:normal}
 .nxt{align-self:flex-end;font-size:12px;color:var(--sub);margin-top:4px;animation:bl 1s infinite}@keyframes bl{50%{opacity:.25}}
-.term{color:var(--gold);border-bottom:1px dashed var(--gold);cursor:pointer}
+.term{color:var(--gold);border-bottom:1px dashed var(--gold);cursor:pointer;padding:4px 2px;margin:-4px -2px;border-radius:4px;-webkit-tap-highlight-color:rgba(214,178,94,.3)}
+#terms{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}#terms:empty{display:none}.tchip{border:1px solid var(--gold);background:rgba(214,178,94,.1);color:var(--gold);border-radius:16px;padding:6px 11px;font-size:13.5px;line-height:1.2}
+.ib:disabled{opacity:.35}
 .opts{display:grid;gap:8px;margin-top:10px}.opt{text-align:left;padding:11px 12px;border:2px solid var(--line);background:var(--ink2);border-radius:10px;font-size:15px;line-height:1.5}
 .opt:active{background:var(--ink3)}.opt.bad{border-color:#7a3b3b;opacity:.55}
 .fb{margin-top:8px;padding:10px 12px;border-radius:10px;background:var(--ink2);border-left:4px solid var(--leaf);font-size:14.5px;line-height:1.7}.fb.no{border-left-color:var(--cherry)}
@@ -76,15 +78,16 @@ button{font:inherit;color:inherit;touch-action:manipulation;cursor:pointer}
   <button class="mbtn" id="bGloss">📚<div>咖啡小辭典<small>故事裡出現的名詞</small></div></button>
  </div>
  <div class="credit">故事根據 COFFEE COUNTY 的豆卡改編；人物對話為想像重現，生產者、產區、品種與風味描述依照店家卡片。<br>品飲紀錄：Roke，2026/11/27 於 COFFEE COUNTY Fukuoka<br>外傳依鄒築園、珍5吉咖啡莊園的公開報導與罐上標示改編。</div>
- <div class="jl">嘆息之谷 v1.1・Made by <b>Jim Lu</b></div>
+ <div class="jl">嘆息之谷 v1.2・Made by <b>Jim Lu</b></div>
 </section>
 
 <section class="screen" id="game">
- <div class="top"><button class="ib" id="bHome">☰</button><div class="ch" id="chName"></div><button class="ib" id="bSnd">🔊</button><button class="ib" id="bMus">🎵</button><button class="ib" id="bBag">🎴</button></div>
+ <div class="top"><button class="ib" id="bHome">☰</button><button class="ib" id="bBack" aria-label="上一句">↶</button><div class="ch" id="chName"></div><button class="ib" id="bSnd">🔊</button><button class="ib" id="bMus">🎵</button><button class="ib" id="bBag">🎴</button></div>
  <div class="scene"><canvas id="sceneCv" width="192" height="108"></canvas><div id="loc"></div><div id="chapCard"></div></div>
  <div id="box">
   <div class="who"><canvas id="pf" width="16" height="16"></canvas><div id="nm"></div></div>
   <div id="txt"></div>
+  <div id="terms"></div>
   <div id="opts" class="opts"></div>
   <div class="nxt" id="nxt">▼ 點一下繼續</div>
  </div>
@@ -469,35 +472,40 @@ function musicStop(){if(MU){clearInterval(MU.timer);try{MU.g.disconnect()}catch(
 /* ============ 名詞連結 ============ */
 const GKEYS=Object.keys(GL).sort((a,b)=>b.length-a.length);
 const GRE=new RegExp(GKEYS.map(k=>k.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')).join('|'),'g');
+function termChips(s){const el=$('terms');if(!el)return;const seen=[];(s||'').replace(GRE,m=>{if(!seen.includes(m))seen.push(m);return m});el.innerHTML=seen.map(k=>`<button class="tchip" data-chip="${esc(k)}">📖 ${esc(k)}</button>`).join('')}
 function linkify(s){return esc(s).replace(GRE,m=>`<span class="term" data-g="${m}">${m}</span>`)}
 function popup(el,k){const pp=$('pop');pp.innerHTML=`<b>${esc(k)}</b>${esc(GL[k])}`;pp.style.display='block';const r=el.getBoundingClientRect();const w=Math.min(300,innerWidth-20);pp.style.maxWidth=w+'px';let x=Math.max(10,Math.min(innerWidth-w-10,r.left));pp.style.left=x+'px';const ph=pp.offsetHeight;pp.style.top=(r.top-ph-8>10?r.top-ph-8:r.bottom+8)+'px';blip(880,.06,'sine',.05)}
-document.addEventListener('click',e=>{const tm=e.target.closest('.term');if(tm){e.stopPropagation();popup(tm,tm.dataset.g);return}if(!e.target.closest('#pop'))$('pop').style.display='none'},true);
+document.addEventListener('click',e=>{const tm=e.target.closest('.term,[data-chip]');if(tm){e.stopPropagation();popup(tm,tm.dataset.g||tm.dataset.chip);return}if(!e.target.closest('#pop'))$('pop').style.display='none'},true);
 /* ============ 劇情引擎 ============ */
-let typing=null,waiting=false,busy=false,curText='',curSp='nar';
+let typing=null,waiting=false,busy=false,curText='',curSp='nar',hist=[];
+function mark(i){if(hist[hist.length-1]!==i)hist.push(i);const b=$('bBack');if(b)b.disabled=hist.length<2}
 function setBg(b,loc){curBg=b;curLoc=loc||'';$('loc').textContent=loc||'';}
 function chapterCard(ci,cb){const c=CHS[ci];const cc=$('chapCard');cc.innerHTML=`<b>${esc(c.t)}</b><h2>${esc(c.n)}</h2><p>${esc(c.sub)}</p>`;cc.classList.add('on');busy=true;blip(523,.15,'triangle',.06);setTimeout(()=>blip(784,.25,'triangle',.06),160);setTimeout(()=>{cc.classList.remove('on');busy=false;cb()},1900)}
-function startChapter(ci,fresh){DB.ch=ci;DB.i=0;save();show('game');musicStart();const c=CHS[ci];$('chName').textContent=c.t+'・'+c.n;setBg(c.bg,'');$('txt').innerHTML='';$('nm').innerHTML='';$('opts').innerHTML='';portrait($('pf'),'nar');chapterCard(ci,step)}
+function startChapter(ci,fresh){DB.ch=ci;DB.i=0;hist=[];$('bBack').disabled=true;save();$('terms').innerHTML='';show('game');musicStart();const c=CHS[ci];$('chName').textContent=c.t+'・'+c.n;setBg(c.bg,'');$('txt').innerHTML='';$('nm').innerHTML='';$('opts').innerHTML='';portrait($('pf'),'nar');chapterCard(ci,step)}
 function resume(){const c=CHS[DB.ch];show('game');musicStart();$('chName').textContent=c.t+'・'+c.n;let bg=c.bg,loc='';for(let k=0;k<DB.i;k++){const n=c.nodes[k];if(n.bg){bg=n.bg;loc=n.loc}}setBg(bg,loc);
  // 回到最近一句台詞
- let k=DB.i-1;while(k>=0&&!(c.nodes[k].t!==undefined))k--;DB.i=Math.max(0,k);step()}
+ let k=DB.i-1;while(k>=0&&!(c.nodes[k].t!==undefined))k--;DB.i=Math.max(0,k);hist=[];step()}
 function step(){const c=CHS[DB.ch];$('opts').innerHTML='';
  while(DB.i<c.nodes.length){const n=c.nodes[DB.i];
   if(n.bg){setBg(n.bg,n.loc);DB.i++;continue}
   if(n.get){DB.i++;getItem(n.get);continue}
   if(n.end){DB.i++;save();finale();return}
-  if(n.c){showChoice(n);return}
-  DB.i++;save();showLine(n);return}
+  if(n.c){mark(DB.i);showChoice(n);return}
+  mark(DB.i);DB.i++;save();showLine(n);return}
  chapterDone()}
 function showLine(n){const p=PEOPLE[n.s]||PEOPLE.nar;curSp=n.s;portrait($('pf'),n.s);$('nm').innerHTML=n.s==='nar'?'':`${esc(p.n)}<small>${esc(p.sub)}</small>`;
- const tx=$('txt');tx.className=n.s==='nar'?'nar':'';curText=n.t;let i=0;tx.textContent='';waiting=true;$('nxt').style.visibility='hidden';clearInterval(typing);
+ $('terms').innerHTML='';const tx=$('txt');tx.className=n.s==='nar'?'nar':'';curText=n.t;let i=0;tx.textContent='';waiting=true;$('nxt').style.visibility='hidden';clearInterval(typing);
  typing=setInterval(()=>{i++;tx.textContent=curText.slice(0,i);if(n.s!=='nar'&&/\S/.test(curText[i-1]||''))tick(n.s);if(i>=curText.length)finishType()},38)}
-function finishType(){clearInterval(typing);typing=null;$('txt').innerHTML=linkify(curText);$('nxt').style.visibility='visible'}
+function finishType(){clearInterval(typing);typing=null;$('txt').innerHTML=linkify(curText);termChips(curText);$('nxt').style.visibility='visible'}
+function goBack(){if(busy||$('game').classList.contains('on')===false)return;if(hist.length<2){toast('已經是這一章的第一句');return}
+ clearInterval(typing);typing=null;$('pop').style.display='none';hist.pop();const prev=hist.pop();const c=CHS[DB.ch];
+ let bg=c.bg,loc='';for(let k=0;k<prev;k++){const n=c.nodes[k];if(n.bg){bg=n.bg;loc=n.loc}}setBg(bg,loc);DB.i=prev;save();blip(440,.05,'sine',.04);step()}
 function advance(){if(busy)return;if(!waiting)return;if(typing){finishType();return}waiting=false;step()}
-function showChoice(n){waiting=false;$('nxt').style.visibility='hidden';portrait($('pf'),'me');$('nm').innerHTML=`${esc(PEOPLE.me.n)}<small>想一想</small>`;$('txt').className='';$('txt').innerHTML=linkify(n.c);
+function showChoice(n){waiting=false;$('nxt').style.visibility='hidden';portrait($('pf'),'me');$('nm').innerHTML=`${esc(PEOPLE.me.n)}<small>想一想</small>`;$('txt').className='';$('txt').innerHTML=linkify(n.c);termChips(n.c+' '+n.o.map(o=>o.t).join(' '));
  const box=$('opts');box.innerHTML=n.o.map((o,i)=>`<button class="opt" data-o="${i}">${esc(o.t)}</button>`).join('');
  box.querySelectorAll('[data-o]').forEach(b=>b.onclick=e=>{e.stopPropagation();const o=n.o[+b.dataset.o];if(o.ok){blip(660,.08,'triangle',.07);setTimeout(()=>blip(990,.14,'triangle',.07),90);
-   box.innerHTML=`<div class="fb">⭕ ${linkify(o.r)}</div><button class="opt" id="goOn">繼續故事 ▶</button>`;$('goOn').onclick=ev=>{ev.stopPropagation();DB.i++;save();step()}}
-  else{blip(220,.2,'sawtooth',.04);b.classList.add('bad');b.disabled=true;let f=box.querySelector('.fb');if(!f){f=document.createElement('div');box.appendChild(f)}f.className='fb no';f.innerHTML='🤔 '+linkify(o.r)+'<br><small style="color:var(--sub)">再選一次看看</small>'}})}
+   termChips(o.r);box.innerHTML=`<div class="fb">⭕ ${linkify(o.r)}</div><button class="opt" id="goOn">繼續故事 ▶</button>`;$('goOn').onclick=ev=>{ev.stopPropagation();DB.i++;save();step()}}
+  else{blip(220,.2,'sawtooth',.04);b.classList.add('bad');b.disabled=true;let f=box.querySelector('.fb');if(!f){f=document.createElement('div');box.appendChild(f)}termChips(o.r);f.className='fb no';f.innerHTML='🤔 '+linkify(o.r)+'<br><small style="color:var(--sub)">再選一次看看</small>'}})}
 function getItem(k){if(!DB.got.includes(k)){DB.got.push(k);save();const it=ITEMS[k];toast(`${it[0]} 獲得風味卡：${it[1]}`);blip(784,.1,'triangle',.06);setTimeout(()=>blip(1046,.18,'triangle',.06),110)}}
 function beanHTML(b){return`<div class="tasting"><b>🫘 ${esc(b.name)}</b><div class="sub" style="margin-top:4px">${esc(b.proc)}・售價 ${esc(b.price)}</div><div class="bars">${Object.entries(b.sc).map(([k,v])=>`<span>${k}</span><i><u style="width:${v*20}%"></u></i><b>${v}</b>`).join('')}</div><p class="sub">風味：${esc(b.fl)}</p></div>`}
 function sideCard(){openCard(`<h3>🇹🇼 外傳：台灣的兩支得獎豆</h3><p class="sub">在旅途中的台灣咖啡攤位遇到的兩罐競標批次。</p><div class="clist">${CHS.map((c,i)=>c.side?`<button class="ci ${DB.done.includes(i)?'done':''}" data-sd="${i}"><span class="n">${DB.done.includes(i)?'✓':'外'}</span><div style="text-align:left"><b>${esc(c.t)}・${esc(c.n)}</b><div class="sub">${esc(c.sub)}</div></div></button>`:'').join('')}</div>`);
@@ -536,6 +544,11 @@ $('bBag').onclick=e=>{e.stopPropagation();bagCard()};
 function sndUI(){$('bSnd').textContent=DB.snd?'🔊':'🔇';$('bMus').style.opacity=DB.mus?1:.4}
 $('bSnd').onclick=e=>{e.stopPropagation();DB.snd=DB.snd?0:1;save();sndUI()};
 $('bMus').onclick=e=>{e.stopPropagation();DB.mus=DB.mus?0:1;save();if(DB.mus)musicStart();else musicStop();sndUI()};
+$('bBack').onclick=e=>{e.stopPropagation();goBack()};
+(function(){let sx=0,sy=0,st=0,on=false;const g=$('game');
+ g.addEventListener('touchstart',e=>{if(e.touches.length!==1){on=false;return}const t=e.touches[0];sx=t.clientX;sy=t.clientY;st=Date.now();on=!e.target.closest('.top,#ov')},{passive:true});
+ g.addEventListener('touchend',e=>{if(!on)return;on=false;const t=e.changedTouches[0];const dx=t.clientX-sx,dy=t.clientY-sy;if(Date.now()-st>700||Math.abs(dx)<60||Math.abs(dy)>Math.abs(dx)*.6)return;if(dx>0)goBack();else if(!$('opts').children.length)advance()},{passive:true})})();
+const pin=()=>{if(window.scrollX||window.scrollY)window.scrollTo(0,0)};window.addEventListener('scroll',pin,{passive:true});if(window.visualViewport){visualViewport.addEventListener('resize',pin);visualViewport.addEventListener('scroll',pin)}
 $('box').addEventListener('click',e=>{if(e.target.closest('button,.term'))return;advance()});
 document.querySelector('.scene').addEventListener('click',e=>advance());
 document.addEventListener('dblclick',e=>e.preventDefault(),{passive:false});
