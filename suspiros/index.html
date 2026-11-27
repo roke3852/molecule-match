@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#14201b">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>嘆息之谷｜一杯咖啡的故事</title>
+<style>
+:root{--ink:#101915;--ink2:#18251f;--ink3:#22342c;--leaf:#4f8a5b;--leafL:#8fc29a;--mist:#c9d8d4;--cream:#f1ead9;--cherry:#c8363a;--gold:#d9a441;--sub:#9fb3ab;--line:#2f453b}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:var(--ink);color:var(--cream);font-family:"Noto Sans TC","PingFang TC",system-ui,sans-serif;touch-action:manipulation;overscroll-behavior:none;-webkit-user-select:none;user-select:none}
+button{font:inherit;color:inherit;touch-action:manipulation;cursor:pointer}
+.screen{position:fixed;inset:0;display:none;flex-direction:column}.screen.on{display:flex}
+/* 標題 */
+#title{align-items:center;justify-content:flex-start;overflow:auto;padding:calc(env(safe-area-inset-top) + 18px) 18px 30px}
+#titleCv{width:100%;max-width:520px;image-rendering:pixelated;border:2px solid var(--line);border-radius:6px}
+.tt{text-align:center;margin:16px 0 4px}.tt small{display:block;letter-spacing:.35em;color:var(--leafL);font-size:12px}
+.tt h1{margin:6px 0 2px;font-size:34px;letter-spacing:.18em;font-weight:900;text-shadow:0 2px 0 #000}
+.tt h1 span{color:var(--cherry)}.tt p{margin:4px 0;color:var(--sub);font-size:13.5px}
+.menu{width:100%;max-width:420px;display:grid;gap:10px;margin-top:14px}
+.mbtn{padding:14px;border:2px solid var(--line);background:var(--ink2);border-radius:10px;font-size:16px;font-weight:700;text-align:left;display:flex;gap:10px;align-items:center}
+.mbtn.pri{background:var(--leaf);border-color:var(--leafL);color:#0b130f}.mbtn small{display:block;font-weight:400;font-size:12px;opacity:.8}
+.mbtn:disabled{opacity:.4}
+.credit{margin-top:18px;font-size:11.5px;color:var(--sub);text-align:center;line-height:1.7;max-width:420px}
+/* 遊戲 */
+#game{background:#000}
+.top{display:flex;align-items:center;gap:8px;padding:calc(env(safe-area-inset-top) + 6px) 10px 6px;background:var(--ink2);border-bottom:2px solid var(--line);font-size:13px}
+.top .ch{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--leafL)}
+.ib{border:1px solid var(--line);background:var(--ink3);border-radius:8px;padding:4px 9px;font-size:13px}
+.scene{position:relative;flex:none;background:#000}
+#sceneCv{display:block;width:100%;image-rendering:pixelated}
+#loc{position:absolute;left:8px;top:8px;background:rgba(0,0,0,.55);border:1px solid rgba(255,255,255,.2);padding:3px 8px;border-radius:4px;font-size:12px}
+#chapCard{position:absolute;inset:0;display:none;align-items:center;justify-content:center;flex-direction:column;background:rgba(5,10,8,.82);text-align:center;padding:10px}
+#chapCard.on{display:flex;animation:fd .5s}#chapCard b{font-size:13px;letter-spacing:.3em;color:var(--leafL)}#chapCard h2{margin:6px 0;font-size:24px;letter-spacing:.12em}#chapCard p{margin:0;color:var(--sub);font-size:13px}
+@keyframes fd{from{opacity:0}to{opacity:1}}
+#box{flex:1;display:flex;flex-direction:column;background:var(--ink);border-top:3px solid var(--line);padding:10px 12px calc(env(safe-area-inset-bottom) + 10px);overflow:auto}
+.who{display:flex;align-items:center;gap:10px;min-height:52px}
+#pf{width:48px;height:48px;image-rendering:pixelated;border:2px solid var(--line);border-radius:6px;background:var(--ink2)}
+#nm{font-weight:800;font-size:15px}#nm small{display:block;font-weight:400;font-size:11.5px;color:var(--sub)}
+#txt{font-size:17px;line-height:1.85;margin:8px 2px 0;min-height:4.5em;white-space:pre-wrap}
+#txt.nar{color:var(--mist);font-style:normal}
+.nxt{align-self:flex-end;font-size:12px;color:var(--sub);margin-top:4px;animation:bl 1s infinite}@keyframes bl{50%{opacity:.25}}
+.term{color:var(--gold);border-bottom:1px dashed var(--gold);cursor:pointer}
+.opts{display:grid;gap:8px;margin-top:10px}.opt{text-align:left;padding:11px 12px;border:2px solid var(--line);background:var(--ink2);border-radius:10px;font-size:15px;line-height:1.5}
+.opt:active{background:var(--ink3)}.opt.bad{border-color:#7a3b3b;opacity:.55}
+.fb{margin-top:8px;padding:10px 12px;border-radius:10px;background:var(--ink2);border-left:4px solid var(--leaf);font-size:14.5px;line-height:1.7}.fb.no{border-left-color:var(--cherry)}
+/* 覆蓋卡片 */
+#ov{position:fixed;inset:0;background:rgba(0,0,0,.66);display:none;align-items:flex-end;justify-content:center;z-index:20}#ov.on{display:flex}
+.card{width:100%;max-width:560px;max-height:86vh;overflow:auto;background:var(--ink2);border:2px solid var(--line);border-bottom:0;border-radius:16px 16px 0 0;padding:16px 16px calc(env(safe-area-inset-bottom) + 18px);animation:up .25s}
+@keyframes up{from{transform:translateY(40px);opacity:0}}
+.card h3{margin:0 0 8px;font-size:19px}.card .x{float:right;border:0;background:none;font-size:20px;color:var(--sub)}
+.card p{line-height:1.75;font-size:15px;margin:6px 0}.card .sub{color:var(--sub);font-size:13px}
+.clist{display:grid;gap:8px;margin-top:8px}.ci{display:flex;gap:10px;align-items:center;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--ink)}
+.ci .n{width:30px;height:30px;border-radius:50%;background:var(--ink3);display:flex;align-items:center;justify-content:center;font-weight:800;flex:none}.ci.done .n{background:var(--leaf);color:#0b130f}.ci.lock{opacity:.4}
+.items{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px}.it{border:1px solid var(--line);border-radius:10px;padding:8px 4px;text-align:center;background:var(--ink);font-size:12.5px}.it b{display:block;font-size:24px;margin-bottom:2px}.it.no{opacity:.25}
+.gl{display:grid;gap:8px}.gl div{padding:9px 11px;border:1px solid var(--line);border-radius:10px;background:var(--ink)}.gl b{color:var(--gold)}
+#pop{position:fixed;z-index:30;display:none;max-width:300px;background:#f5eedd;color:#1b2520;border-radius:10px;padding:10px 12px;font-size:14px;line-height:1.65;box-shadow:0 6px 20px rgba(0,0,0,.5)}#pop b{display:block;margin-bottom:2px;color:#7b2a22}
+#toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 90px);transform:translateX(-50%);background:var(--leafL);color:#0b130f;padding:8px 14px;border-radius:20px;font-weight:700;font-size:14px;display:none;z-index:40;white-space:nowrap}
+.tasting{border:2px solid var(--gold);border-radius:12px;padding:12px;background:#1d2a23;margin-top:8px}
+.bars{display:grid;grid-template-columns:3em 1fr 2em;gap:6px 8px;align-items:center;font-size:13px;margin:8px 0}.bars i{display:block;height:9px;border-radius:5px;background:var(--line);overflow:hidden}.bars i u{display:block;height:100%;background:var(--gold)}
+.jl{font-size:11px;color:var(--sub);text-align:center;margin-top:12px}
+</style>
+</head>
+<body>
+<section class="screen on" id="title">
+ <canvas id="titleCv" width="192" height="108"></canvas>
+ <div class="tt"><small>LOS SUSPIROS ・ HUEHUETENANGO</small><h1>嘆息<span>之</span>谷</h1><p>一杯瓜地馬拉咖啡，從海拔 2,000 公尺的溪谷，來到福岡藥院的故事</p></div>
+ <div class="menu">
+  <button class="mbtn pri" id="bStart">☕<div>開始故事<small id="sStart">序章：藥院的一杯咖啡</small></div></button>
+  <button class="mbtn" id="bCont">▶<div>繼續<small id="sCont">從上次離開的地方</small></div></button>
+  <button class="mbtn" id="bChap">📖<div>章節選擇<small>重看任何一章</small></div></button>
+  <button class="mbtn" id="bItems">🎴<div>風味收集冊<small>故事裡收集到的風味卡</small></div></button>
+  <button class="mbtn" id="bGloss">📚<div>咖啡小辭典<small>故事裡出現的名詞</small></div></button>
+ </div>
+ <div class="credit">故事根據 COFFEE COUNTY 的豆卡改編；人物對話為想像重現，生產者、產區、品種與風味描述依照店家卡片。<br>品飲紀錄：Roke，2026/11/27 於 COFFEE COUNTY Fukuoka</div>
+ <div class="jl">嘆息之谷 v1.0・Made by <b>Jim Lu</b></div>
+</section>
+
+<section class="screen" id="game">
+ <div class="top"><button class="ib" id="bHome">☰</button><div class="ch" id="chName"></div><button class="ib" id="bSnd">🔊</button><button class="ib" id="bMus">🎵</button><button class="ib" id="bBag">🎴</button></div>
+ <div class="scene"><canvas id="sceneCv" width="192" height="108"></canvas><div id="loc"></div><div id="chapCard"></div></div>
+ <div id="box">
+  <div class="who"><canvas id="pf" width="16" height="16"></canvas><div id="nm"></div></div>
+  <div id="txt"></div>
+  <div id="opts" class="opts"></div>
+  <div class="nxt" id="nxt">▼ 點一下繼續</div>
+ </div>
+</section>
+<div id="ov"><div class="card" id="card"></div></div>
+<div id="pop"></div><div id="toast"></div>
+
+<script>
+/* ============ 名詞 ============ */
+const GL={
+ '薇薇特南果':'Huehuetenango（ウエウエテナンゴ）。瓜地馬拉西北部、靠近墨西哥邊境的省分，是瓜地馬拉最高、最乾燥的咖啡產區之一，以明亮的酸質和果香出名。',
+ '溪谷':'薇薇特南果多是深谷和高原。從墨西哥平原吹來的熱風讓這裡不容易結霜，咖啡才能種到海拔 2,000 公尺左右。',
+ '海拔':'海拔越高、氣溫越低，咖啡果實熟得越慢，豆子密度越高，糖分和酸質發展得更完整，喝起來通常更乾淨、更有層次。這支豆子種在 1,900–2,000 m。',
+ 'Villa Sarchi':'ヴィジャ・サルチ。阿拉比卡的一個品種，1950 年代在哥斯大黎加西部 Sarchí 被發現，是波旁（Bourbon）的自然突變矮株，以明亮細緻的酸質和花果香著稱。',
+ '波旁':'Bourbon。阿拉比卡的經典老品種，名字來自印度洋的波旁島（今留尼旺）。很多中南美的優秀品種都是它的後代。',
+ '水洗':'Washed（水洗式）。採收後先去掉果皮果肉，讓豆子在水槽裡發酵，把黏黏的果膠分解掉，再用清水洗淨、曬乾。味道最乾淨、酸質清楚，最能喝出產區和品種本來的樣子。',
+ '全水洗':'Fully Washed。完整走完去果肉、發酵、洗淨、乾燥的水洗流程，和只洗一部分的半水洗不同。',
+ '果膠':'包在咖啡豆外面、黏黏甜甜的一層（mucilage）。水洗就是靠發酵把它分解掉；蜜處理則是故意留下一部分果膠一起曬乾。',
+ '發酵槽':'水洗處理用的水泥或磁磚水槽。去完果肉的豆子在裡面放 12–48 小時，讓微生物把果膠分解，時間要靠經驗判斷。',
+ '日曬':'Natural。整顆咖啡果實直接曬乾再去殼，果香濃厚、帶發酵感。這家店的 KURUME 衣索比亞就是日曬。',
+ '蜜處理':'Honey Process。去掉果皮，但保留部分果膠一起乾燥，甜感和厚度介於水洗與日曬之間。',
+ '微批次':'Micro lot（マイクロロット）。把不同區塊、不同採收日、不同品種的咖啡分開處理和販售，讓每一批的個性能被看見；以前很多小農的咖啡都混在一起賣。',
+ '第六代':'Axel Palacios 是家族種咖啡的第 6 代。Palacios 家族從 1930 年左右開始種咖啡，Axel 的兩個兒子也一起投入，打算接手成為第 7 代。',
+ 'Xinabajul':'Xinabajul Project。薇薇特南果省內小規模生產者的合作計畫：各地區的鄰居組成小社群，一起改善、提升品質，目標是把高品質的薇薇特南果咖啡送到全世界。',
+ 'ROSMA':'ROSMA 農園。Morales 家族的農園，園主 Freddy（フレディ）是 Xinabajul Project 的帶領者。',
+ 'Los Suspiros':'ロス・ススピロス。西班牙文的「嘆息」。據說是取自看著這一帶壯闊的溪谷、深深吸一口新鮮空氣的樣子。',
+ 'Altamia':'Axel 管理的另一座農園。他目前管理 Altamia 和 Los Suspiros 兩座農園。',
+ '淺焙':'Light Roast（浅煎り）。烘得淺，保留豆子本身的酸質、花香和果香，苦味低。',
+ '杯測':'Cupping。用統一的研磨度、水溫和時間泡咖啡，一匙一匙嚐，評估香氣、酸質、甜感和乾淨度，是挑選生豆的標準方法。',
+ 'COFFEE COUNTY':'コーヒーカウンティ。從福岡縣久留米起家的自家烘焙咖啡店，到產地挑豆、直接購買，以淺焙單品為主；福岡店在藥院（高砂）。',
+ '生豆':'還沒烘焙的咖啡豆，綠色、硬、沒有香氣。產地處理好的生豆會裝進麻袋或真空袋，飄洋過海運到消費國。',
+ '乾淨度':'Clean cup。喝起來沒有雜味、沒有混濁感，每個味道清清楚楚。通常和處理是否細心、果實是否熟透有關。'
+};
+/* ============ 人物 ============ */
+const PEOPLE={
+ me:{n:'你',sub:'旅人・手沖愛好者',skin:'#e7c09a',hair:'#2a2220',shirt:'#3c5a7a',pitch:600},
+ staff:{n:'美咲',sub:'COFFEE COUNTY 店員',skin:'#f0caa5',hair:'#4a3326',shirt:'#e8e0cf',apron:'#4a3b30',pitch:820},
+ axel:{n:'Axel',sub:'Los Suspiros 園主・第六代',skin:'#b98458',hair:'#1b1512',shirt:'#3f6e9a',hat:'#d9c48a',pitch:300},
+ axelY:{n:'少年 Axel',sub:'高中時代',skin:'#c18d60',hair:'#1b1512',shirt:'#e9e4d6',pitch:520},
+ ale:{n:'Alejandro',sub:'Morales 家族・Axel 的高中同學',skin:'#b07a4e',hair:'#231a14',shirt:'#8a3d36',pitch:380},
+ aleY:{n:'少年 Alejandro',sub:'高中時代',skin:'#b98458',hair:'#231a14',shirt:'#e9e4d6',pitch:560},
+ freddy:{n:'Freddy',sub:'ROSMA 農園園主・Xinabajul 帶領者',skin:'#a87048',hair:'#3a3a3a',shirt:'#5d7547',hat:'#6b4a2a',pitch:260},
+ son:{n:'Axel 的兒子',sub:'未來的第七代',skin:'#c18d60',hair:'#1b1512',shirt:'#d9a441',pitch:680},
+ abuelo:{n:'老 Palacios',sub:'1930 年代・家族第一代',skin:'#a87048',hair:'#d8d8d8',shirt:'#e9e4d6',hat:'#c9b27a',pitch:240},
+ roaster:{n:'烘豆師',sub:'COFFEE COUNTY 久留米',skin:'#ecc49c',hair:'#151515',shirt:'#2d2d2d',apron:'#7a5a3a',pitch:420},
+ nar:{n:'',sub:''}
+};
+/* ============ 風味卡 ============ */
+const ITEMS={
+ kumquat:['🍊','金桔','熱的時候最先跳出來的明亮柑橘'],
+ loquat:['🟠','枇杷','溫和多汁的黃色果實甜'],
+ prune:['🫐','黑棗','深一層的熟果甜'],
+ cashew:['🥜','腰果','圓潤的堅果感'],
+ cacao:['🍫','可可','尾韻輕輕的可可'],
+ pear:['🍐','日本梨','放涼後才出現的清甜梨子汁'],
+ floral:['🌸','花香','放涼後越來越明顯、偏沉穩的花香'],
+ brown:['🟫','黑糖','把酸包起來的圓潤甜感'],
+ clean:['💧','乾淨','水洗與高海拔給的清透'],
+ bergamot:['🍋','佛手柑','你在熱的時候喝到的一縷香氣']
+};
+/* ============ 故事 ============ */
+const L=(s,t)=>({s,t}),N=t=>({s:'nar',t}),BG=(b,loc)=>({bg:b,loc}),G=k=>({get:k}),C=(q,o)=>({c:q,o});
+const CHS=[
+{t:'序章',n:'藥院的一杯咖啡',sub:'2026 年 11 月 27 日・福岡藥院',bg:'cafe',nodes:[
+ BG('cafe','福岡・藥院　COFFEE COUNTY'),
+ N('十一月底的福岡，風已經有點冷。你推開藥院巷子裡那扇門，烘豆的香氣先迎了上來。'),
+ L('staff','歡迎光臨。今天想喝點什麼呢？'),
+ L('me','我想喝手沖，淺焙的。……有沒有比較不一樣的？'),
+ L('staff','那推薦你這支瓜地馬拉，Los Suspiros。水洗的，品種是 Villa Sarchi。'),
+ N('熱水落在粉層上，冒起細細的泡。幾分鐘後，一杯淡琥珀色的咖啡放到你面前。'),
+ C('你會先怎麼喝這杯咖啡？',[
+  {t:'先聞香氣，再小口啜一口',ok:1,r:'好習慣。先聞乾香和濕香，再讓咖啡在舌頭上鋪開，熱、溫、涼三個溫度各嚐一次，味道會一直變。'},
+  {t:'直接加糖加奶',ok:0,r:'加糖加奶會蓋掉產區本來的味道。這支豆子的甜，已經在杯子裡了——先喝一口黑的試試看。'},
+  {t:'放到完全冷掉再喝',ok:0,r:'冷了有冷了的味道，但熱的時候的香氣最豐富。三個溫度都嚐，才看得到這杯咖啡的全貌。'}]),
+ L('me','……！這也太乾淨了。熱的時候就有果香，還有一點花香，酸裡面帶著甜。'),
+ L('me','我好像沒喝過熱的時候就這麼乾淨的咖啡。'),G('clean'),G('bergamot'),
+ L('staff','對吧？這支是今年我們很喜歡的豆子。這是它的卡片，背面寫著它的故事。'),
+ N('店員遞來一張半透明的卡片。正面寫著：Guatemala ／ Los Suspiros ／ Villa Sarchi ／ Washed。'),
+ L('staff','Los Suspiros 在西班牙文的意思是「嘆息」。'),
+ L('me','嘆息……？為什麼一座咖啡農園要叫嘆息？'),
+ L('staff','要說這個，得從很遠很遠的地方開始說起——'),
+ N('你翻過卡片。字句之間，彷彿有一陣山谷的風吹了過來。')]},
+{t:'第一章',n:'嘆息之谷',sub:'瓜地馬拉・薇薇特南果',bg:'valley',nodes:[
+ BG('valley','瓜地馬拉　薇薇特南果省　Palmira 村'),
+ N('瓜地馬拉西北，靠近墨西哥邊境的薇薇特南果。'),
+ N('這裡是山的國度。深深的溪谷一道接著一道，雲常常停在半山腰。'),
+ N('La Libertad 市的 Palmira 村，海拔 1,900 到 2,000 公尺。清晨的空氣冷得像薄荷。'),
+ L('axel','你第一次來？先別急著走進園子。站在這裡，看一下這片溪谷。'),
+ L('axel','吸一口氣——慢慢的。'),
+ N('你照做了。冰涼、乾淨的空氣灌進胸口，吐出來的時候，變成一聲長長的……'),
+ L('me','……哈啊。'),
+ L('axel','對，就是那一聲。Los Suspiros，嘆息。看著這片溪谷，吸一口新鮮的空氣，每個人都會這樣嘆一口氣。'),
+ L('axel','農園的名字，就是從這裡來的。'),
+ C('為什麼薇薇特南果可以把咖啡種到 2,000 公尺這麼高？',[
+  {t:'從墨西哥平原吹來的熱風，讓高山不容易結霜',ok:1,r:'沒錯。薇薇特南果是瓜地馬拉最高的產區之一，暖風讓高海拔也能避開霜害，咖啡才能種得這麼高。'},
+  {t:'因為這裡一年四季都很熱',ok:0,r:'其實高山上很涼，清晨甚至很冷。正是「冷」讓果實熟得慢——而暖風只是讓它不至於凍傷。'},
+  {t:'因為咖啡樹越高越好種',ok:0,r:'剛好相反，越高越難種：產量低、熟得慢。但慢，換來的是更紮實的味道。'}]),
+ L('axel','高的地方，果實要花更久才熟。慢慢熟，糖分和酸就慢慢長。'),
+ L('axel','所以你在杯子裡喝到的那種清楚、細緻的酸——是時間給的。'),G('kumquat'),
+ N('風從谷底升上來，咖啡樹的葉子沙沙作響。')]},
+{t:'第二章',n:'六代人的咖啡',sub:'Palacios 家族・從 1930 年開始',bg:'farm',nodes:[
+ BG('farm','Los Suspiros 農園　1930 年代'),
+ N('時間倒回將近一百年前。'),
+ L('abuelo','這座山，土是黑的、霧是濕的。在這裡種咖啡，孩子們就不會餓肚子。'),
+ N('大約 1930 年，Palacios 家族在這片山坡上種下第一批咖啡樹。'),
+ N('一代傳給一代。樹老了就再種，路壞了就再修。'),
+ BG('farm','Los Suspiros 農園　現在'),
+ L('axel','我是第六代。這些樹，有的比我爸爸年紀還大。'),
+ L('son','爸！這一排的果子全紅了，可以摘了嗎？'),
+ L('axel','先等等，教你們一件事。'),
+ C('採收咖啡果實時，應該摘哪一種？',[
+  {t:'只摘熟透、深紅色的果實',ok:1,r:'對。熟透的果實糖分最高；混進青的、過熟的，就會帶來澀味和雜味。這也是「乾淨」的第一步。'},
+  {t:'整枝一次全部擼下來，比較快',ok:0,r:'一次擼下來很快，但青果、熟果、過熟果全混在一起，味道就雜了。精品咖啡通常要一顆一顆挑、分好幾輪採。'},
+  {t:'挑還是綠色的，比較新鮮',ok:0,r:'綠色的果實還沒熟，糖分不夠，會帶來青澀、刺口的味道。'}]),
+ L('son','只摘深紅的，一顆一顆來。我知道了！'),
+ L('axel','我的兩個兒子都在幫忙。他們說，以後要接下去，當第七代。'),
+ L('son','對啊，第七代！'),
+ N('Axel 笑著搖搖頭，眼角的皺紋擠在一起。'),G('loquat')]},
+{t:'第三章',n:'高中同學',sub:'Axel 與 Alejandro',bg:'school',nodes:[
+ BG('school','薇薇特南果　某所高中　很多年前'),
+ L('aleY','Axel！放學要不要去我家？我爸說今年的咖啡收成不錯。'),
+ L('axelY','你家也種咖啡？我家也是！'),
+ N('兩個少年在操場邊認識了。一個姓 Palacios，一個姓 Morales。'),
+ BG('farm','Los Suspiros 農園　幾年前'),
+ N('很多年過去。Axel 接下家裡的農園，每年認真採收、處理、賣掉。'),
+ N('但有一件事，他一直沒有做——'),
+ L('axel','以前我的咖啡，都是整批混在一起賣的。好的、普通的，全部一起。'),
+ C('「全部混在一起賣」會有什麼問題？',[
+  {t:'最好的那一批，個性會被平均掉，賣不出應有的價值',ok:1,r:'正是如此。把區塊、品種、採收日分開處理的「微批次」，才能讓最好的那批被看見，也賣得到更好的價格。'},
+  {t:'沒問題，混在一起味道比較穩定',ok:0,r:'穩定沒錯，但也被「平均」了。像 Villa Sarchi 這樣有個性的品種，混在一起就看不出它的特色。'}]),
+ L('ale','Axel，好久不見。我們家在做一個計畫，你要不要一起來？'),
+ L('axel','計畫？'),
+ L('ale','把咖啡分開來做。每一塊地、每一個品種，都看清楚它到底是什麼味道。'),
+ N('因為是高中同學、彼此知根知底，Axel 加入了。從那天起，他開始專注在品質上種咖啡。'),G('cashew')]},
+{t:'第四章',n:'Xinabajul 計畫',sub:'小農們的社群',bg:'meeting',nodes:[
+ BG('meeting','Xinabajul Project　社區聚會'),
+ N('傍晚的木屋裡擠滿了人。每個人身上都有泥土和咖啡果實的味道。'),
+ L('freddy','大家好，我是 ROSMA 農園的 Freddy。'),
+ L('freddy','我們都是小農。一個人的力量很小，但如果鄰居們聚在一起，互相看彼此的園子、交換方法——'),
+ L('freddy','我們就能一起把品質往上推。'),
+ N('這就是 Xinabajul Project：薇薇特南果的小規模生產者，在各自的地區和鄰居組成小社群，一起改善、提升品質。'),
+ L('freddy','不只是為了我們自己。我想讓全世界的人，都喝得到好的薇薇特南果咖啡。'),
+ C('小農組成社群，最大的好處是什麼？',[
+  {t:'互相學習處理方法、一起把關品質，也更容易被國外買家看見',ok:1,r:'對。技術、經驗和銷售管道一起分享，小農也能做出被世界看見的微批次。'},
+  {t:'可以把大家的咖啡混在一起，數量比較多',ok:0,r:'數量確實變多了，但這個計畫的重點剛好相反——是讓每一家的好咖啡被分開看見。'}]),
+ L('axel','現在我管理兩座農園：Altamia，還有 Los Suspiros。'),
+ L('freddy','而今年，Los Suspiros 做出了一批很特別的 Villa Sarchi。'),G('prune')]},
+{t:'第五章',n:'水洗的一夜',sub:'Villa Sarchi・Fully Washed',bg:'wet',nodes:[
+ BG('wet','Los Suspiros　處理場'),
+ N('白天摘下的深紅果實，傍晚被送到處理場。'),
+ L('axel','這一批是 Villa Sarchi。它原本是哥斯大黎加 Sarchí 那邊發現的波旁變種，樹矮，酸很漂亮。'),
+ L('axel','我們用全水洗。來，你幫我想想順序。'),
+ C('水洗處理的第一步是什麼？',[
+  {t:'去掉果皮和果肉',ok:1,r:'沒錯，先用去果肉機把果皮果肉剝掉，留下外面包著黏滑果膠的豆子。'},
+  {t:'整顆果實直接攤在太陽下曬',ok:0,r:'那是「日曬處理」的做法，果香濃、帶發酵感。水洗要先把果肉去掉。'},
+  {t:'直接拿去烘焙',ok:0,r:'還早呢！要先處理、乾燥、去殼，變成生豆之後，才會漂洋過海到烘豆師手上。'}]),
+ N('去掉果肉的豆子，滑進了發酵槽。'),
+ C('豆子在發酵槽裡要做什麼？',[
+  {t:'讓微生物把黏黏的果膠分解掉，之後再用清水洗乾淨',ok:1,r:'對。發酵 12 到 48 小時，靠經驗判斷什麼時候果膠剛好分解完——太久會有酸臭味，太短又洗不乾淨。'},
+  {t:'泡在水裡讓它長芽',ok:0,r:'不是喔，咖啡豆是種子沒錯，但這裡不是要讓它發芽，而是要分解果膠。'}]),
+ L('axel','果膠洗掉之後，剩下的就是豆子本來的味道。沒有東西可以躲。'),
+ L('axel','所以水洗咖啡騙不了人：果實熟不熟、處理細不細心，全部會出現在杯子裡。'),
+ BG('dry','Los Suspiros　乾燥棚'),
+ N('洗淨的豆子攤在棚架上，在高原的陽光和風裡，慢慢乾燥好幾個星期。'),
+ L('son','爸，要一直翻嗎？'),
+ L('axel','要。翻得均勻，乾得均勻，味道才會乾淨。'),G('brown')]},
+{t:'第六章',n:'越過海洋',sub:'從瓜地馬拉到九州',bg:'sea',nodes:[
+ BG('sea','太平洋'),
+ N('乾燥、去殼、挑選之後，綠色的生豆被仔細封裝。'),
+ N('它們離開薇薇特南果的山谷，跨過太平洋，來到日本九州。'),
+ BG('roast','福岡縣久留米　COFFEE COUNTY 烘豆室'),
+ L('roaster','來了。今年的 Los Suspiros。'),
+ N('烘豆師先做杯測，一匙一匙地嚐。'),
+ L('roaster','……金桔、枇杷、黑棗。尾巴有腰果和一點可可。'),
+ C('這麼乾淨、花果香明顯的豆子，烘豆師最可能怎麼烘？',[
+  {t:'淺焙，保留產地的酸質和花果香',ok:1,r:'對。烘得淺，苦味低，金桔、花香這些細緻的味道才留得住。卡片上寫的正是 Light Roast（浅煎り）。'},
+  {t:'深焙，烘到出油、很苦才香',ok:0,r:'深焙會帶出巧克力和焦香，但這支豆子最珍貴的花果香和乾淨度，就會被烘焙味蓋掉了。'}]),
+ L('roaster','淺焙。讓它保持在山谷裡的樣子。'),G('cacao'),
+ BG('cafe','福岡・藥院　COFFEE COUNTY　前幾天'),
+ N('前幾天，有一位特別的客人走進了福岡店。'),
+ L('freddy','你好。我是從薇薇特南果來的，Freddy。'),
+ L('staff','！您就是 Xinabajul 的 Freddy 先生？'),
+ L('freddy','我想親眼看看，我們的咖啡最後到了哪裡、被誰喝下去。'),
+ N('他說了很多產地的故事：山谷、鄰居、還有那些一顆一顆摘下來的紅色果實。'),
+ L('staff','能把這麼用心的人做的咖啡交到客人手上——真的很開心。')]},
+{t:'終章',n:'你的一杯',sub:'2026 年 11 月 27 日・藥院',bg:'cup',nodes:[
+ BG('cup','福岡・藥院　COFFEE COUNTY　現在'),
+ N('你從卡片上抬起頭。杯子裡的咖啡，已經稍微涼了。'),
+ L('staff','卡片上寫著：冷掉之後，會慢慢出現日本梨和花香喔。'),
+ N('你再喝了一口。'),
+ L('me','……真的。是梨子汁的味道。'),G('pear'),
+ L('me','香氣變得好明顯——是花香，而且是比較沉、比較厚的那種。'),G('floral'),
+ L('staff','酸很柔和，甜像黑糖，口感圓圓的。卡片上說，這是一支「平衡很好的咖啡」。'),
+ L('me','山谷的空氣、六代人的樹、高中同學的計畫、Freddy 的社群、一整夜的水洗……'),
+ L('me','原來這麼乾淨的味道，是這麼多人一起做出來的。'),
+ N('你深深吸了一口氣，然後慢慢吐出來。'),
+ L('me','……哈啊。'),
+ L('staff','（笑）你剛剛，嘆了一口氣呢。'),
+ L('me','原來如此。Los Suspiros——嘆息。'),
+ N('杯底還留著一點點花香。'),
+ N('—— 嘆息之谷・完 ——'),
+ {end:1}]}
+];
+/* ============ 狀態 ============ */
+const SK='suspiros_v1';let DB={ch:0,i:0,got:[],done:[],snd:1,mus:1};try{Object.assign(DB,JSON.parse(localStorage.getItem(SK))||{})}catch(e){}
+function save(){try{localStorage.setItem(SK,JSON.stringify(DB))}catch(e){}}
+const $=id=>document.getElementById(id);
+function toast(m){const t=$('toast');t.textContent=m;t.style.display='block';clearTimeout(t._h);t._h=setTimeout(()=>t.style.display='none',1700)}
+function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('on',s.id===id))}
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+/* ============ 像素繪圖 ============ */
+const W=192,H=108;
+function rnd(seed){let s=seed>>>0;return()=>{s=(s*1664525+1013904223)>>>0;return s/4294967296}}
+function rect(g,c,x,y,w,h){g.fillStyle=c;g.fillRect(Math.round(x),Math.round(y),Math.round(w),Math.round(h))}
+function sky(g,top,bot){const gr=g.createLinearGradient(0,0,0,H);gr.addColorStop(0,top);gr.addColorStop(1,bot);g.fillStyle=gr;g.fillRect(0,0,W,H)}
+function ridge(g,c,base,amp,seed,step){const r=rnd(seed);g.fillStyle=c;g.beginPath();g.moveTo(0,H);let y=base;for(let x=0;x<=W;x+=step||6){y=base-amp*(.5+.5*Math.sin(x*.04+seed))-r()*amp*.4;g.lineTo(x,Math.round(y))}g.lineTo(W,H);g.fill()}
+function mist(g,t,y,a){for(let i=0;i<4;i++){const x=((t*4+i*60)%(W+80))-60;g.fillStyle=`rgba(230,240,238,${a})`;g.fillRect(Math.round(x),y+i%2*3,70,3);g.fillRect(Math.round(x)+10,y+i%2*3-2,46,2)}}
+function tree(g,x,y,s,t,ripe){rect(g,'#3b2a1e',x,y-2*s,1,3*s);g.fillStyle='#2f5e3a';for(let i=0;i<4;i++){const yy=y-2*s-i*s*1.3;rect(g,i%2?'#2f5e3a':'#3d7448',x-3*s+i*.5,yy,6*s-i,s*1.3)}
+ if(ripe){for(let i=0;i<6;i++){const rx=x-2*s+((i*7)%5)*s,ry=y-3*s-((i*3)%4)*s;rect(g,i%3?'#c8363a':'#e05a3c',rx,ry,1,1)}}}
+function person(g,x,y,p,t,face){const b=Math.round(Math.sin(t*2+x)*.6);rect(g,p.shirt||'#555',x-3,y-9+b,7,8);if(p.apron)rect(g,p.apron,x-2,y-6+b,5,6);rect(g,p.skin,x-2,y-15+b,5,6);rect(g,p.hair,x-2,y-16+b,5,2);if(p.hat){rect(g,p.hat,x-4,y-16+b,9,1);rect(g,p.hat,x-2,y-18+b,5,2)}rect(g,'#2a2a2a',x-2,y-1,2,1);rect(g,'#2a2a2a',x+1,y-1,2,1);rect(g,'#111',x+(face||0),y-13+b,1,1)}
+function steam(g,x,y,t){for(let i=0;i<3;i++){const k=((t*.7+i*.33)%1);g.fillStyle=`rgba(255,255,255,${.5*(1-k)})`;g.fillRect(Math.round(x+i*2+Math.sin(t*3+i)*1.5),Math.round(y-k*10),1,2)}}
+function cupDraw(g,x,y,s){rect(g,'#eee8dc',x,y,8*s,6*s);rect(g,'#8a5a33',x+s,y+s*.6,6*s,1.5*s);rect(g,'#eee8dc',x+8*s,y+s*1.5,2*s,s);rect(g,'#eee8dc',x+9*s,y+s*1.5,s,3*s);rect(g,'#d8d0c0',x-2*s,y+6*s,12*s,s)}
+const BGS={
+ cafe(g,t){sky(g,'#2b2622','#3a322b');rect(g,'#4a3f35',0,0,W,58);for(let i=0;i<6;i++)rect(g,'#3c332b',i*34+6,6,26,40);
+  rect(g,'#c9d8d4',140,10,42,34);rect(g,'#9fb3ab',140,10,42,4);for(let i=0;i<5;i++)rect(g,'#7a9a8a',146+i*7,22,3,16);// 窗外
+  for(let i=0;i<4;i++){rect(g,'#e9e0cf',12+i*28,16,16,20);rect(g,'#6a4a30',12+i*28,26,16,3)}// 豆袋
+  const glow=.25+.1*Math.sin(t*2);g.fillStyle=`rgba(255,210,140,${glow})`;g.fillRect(70,0,40,60);rect(g,'#d9a441',88,0,2,8);rect(g,'#f5d38a',85,8,8,3);
+  rect(g,'#5a4636',0,58,W,8);rect(g,'#2e2620',0,66,W,42);rect(g,'#7a5a3a',0,58,W,2);
+  rect(g,'#c9c9c9',40,48,6,10);rect(g,'#9a9a9a',39,46,8,3);rect(g,'#eee',100,50,4,8);steam(g,101,48,t);// 器具
+  person(g,64,58,PEOPLE.staff,t,1);cupDraw(g,118,51,1);steam(g,121,49,t)},
+ valley(g,t){sky(g,'#9cc3d3','#e7efe8');g.fillStyle='rgba(255,240,200,.8)';g.fillRect(150,14,10,10);ridge(g,'#8aa8a8',58,18,3,8);mist(g,t,52,.45);ridge(g,'#5f8a78',72,20,7,6);mist(g,t*1.3+40,66,.35);ridge(g,'#3d6b52',90,16,11,5);ridge(g,'#2a4d3a',104,10,17,4);
+  for(let i=0;i<9;i++)tree(g,8+i*22,104-(i%3)*3,1.4,t,i%2);for(let i=0;i<3;i++){const bx=(t*10+i*70)%(W+20)-10;rect(g,'#333',bx,24+i*5,2,1);rect(g,'#333',bx+2,23+i*5,1,1)}
+  person(g,40,100,PEOPLE.axel,t,1)},
+ farm(g,t){sky(g,'#bcd6dc','#eef3ea');ridge(g,'#7da08e',50,14,5,7);mist(g,t,44,.4);rect(g,'#5a7d4e',0,60,W,48);
+  for(let r=0;r<3;r++)for(let i=0;i<10;i++)tree(g,6+i*20+r*7,74+r*14,1.3+r*.2,t,1);rect(g,'#6b4a2a',0,104,W,4);
+  if(/1930/.test(curLoc)){person(g,70,104,PEOPLE.abuelo,t,1)}else{person(g,60,104,PEOPLE.axel,t,1);person(g,80,104,PEOPLE.son,t,-1)}rect(g,'#7a5a3a',88,96,8,7);rect(g,'#c8363a',89,96,6,2)},
+ school(g,t){sky(g,'#a9c9e0','#e8eef0');rect(g,'#d9cdb4',20,26,110,46);for(let i=0;i<6;i++)rect(g,'#7aa0b8',28+i*17,34,10,10);rect(g,'#b04a3a',16,22,118,6);rect(g,'#6b4a2a',66,52,14,20);
+  rect(g,'#8fae6a',0,72,W,36);rect(g,'#c9b27a',0,84,W,10);tree(g,160,80,2,t,0);person(g,90,96,PEOPLE.axelY,t,1);person(g,104,96,PEOPLE.aleY,t,-1);
+  const bx=(t*20)%W;rect(g,'#fff',bx,90,2,2)},
+ meeting(g,t){sky(g,'#40384a','#7a5a4a');ridge(g,'#3a3a44',60,12,9,8);rect(g,'#6b4a2a',30,40,130,50);rect(g,'#4a3020',24,34,142,8);rect(g,'#2a1e16',30,88,130,4);
+  const fl=.6+.2*Math.sin(t*9);g.fillStyle=`rgba(255,190,100,${fl})`;g.fillRect(84,48,22,18);rect(g,'#d9a441',94,44,2,4);
+  const ppl=[PEOPLE.freddy,PEOPLE.axel,PEOPLE.ale,PEOPLE.abuelo,PEOPLE.son];ppl.forEach((p,i)=>person(g,46+i*24,86,p,t,i%2?-1:1));rect(g,'#2a1e16',0,92,W,16)},
+ wet(g,t){sky(g,'#6d8aa0','#b8c8cc');rect(g,'#7a8a8a',0,56,W,52);rect(g,'#9aa8a8',14,62,70,22);rect(g,'#5a8aa0',18,66,62,14);
+  for(let i=0;i<5;i++){const k=(t*.8+i*.2)%1;rect(g,'rgba(255,255,255,.6)',22+i*12,66+Math.round(k*12),3,1)}
+  rect(g,'#9aa8a8',96,62,70,22);rect(g,'#c9b98a',100,66,62,14);for(let i=0;i<20;i++)rect(g,'#b4a070',102+(i*7)%58,67+(i*3)%11,2,1);
+  rect(g,'#555',170,40,14,30);rect(g,'#c8363a',172,36,10,6);person(g,140,100,PEOPLE.axel,t,-1)},
+ dry(g,t){sky(g,'#9cc8e0','#f2efe2');g.fillStyle='rgba(255,230,160,.9)';g.fillRect(24,10,12,12);ridge(g,'#7da08e',52,12,13,7);
+  for(let r=0;r<3;r++){const y=62+r*14;rect(g,'#6b4a2a',10,y+5,172,2);rect(g,'#d9c9a0',10,y,172,5);for(let i=0;i<40;i++)rect(g,'#b49a68',12+(i*4.3)%168,y+1+(i%2),2,1)}
+  person(g,60,104,PEOPLE.son,t,1);person(g,130,104,PEOPLE.axel,t,-1)},
+ sea(g,t){sky(g,'#2b4a6a','#7aa8c0');rect(g,'#1e4a6a',0,64,W,44);for(let i=0;i<12;i++){const x=((i*29-t*14)%W+W)%W;rect(g,'#7ab0c8',x,70+(i%4)*9,8,1)}
+  const sx=((t*8)%(W+60))-40,b=Math.round(Math.sin(t*2));rect(g,'#c8363a',sx,58+b,40,6);rect(g,'#eee',sx+6,50+b,26,8);for(let i=0;i<3;i++)rect(g,['#d9a441','#4f8a5b','#3f6e9a'][i],sx+8+i*8,52+b,6,5);
+  rect(g,'#eee',sx+28,44+b,3,6);g.fillStyle='rgba(255,255,255,.5)';g.fillRect(150,18,18,4);g.fillRect(146,22,26,3)},
+ roast(g,t){sky(g,'#2a2420','#3a2e26');rect(g,'#4a3c30',0,72,W,36);rect(g,'#2e2a2a',60,30,46,42);rect(g,'#8a8a8a',66,24,34,8);rect(g,'#c9c9c9',72,44,22,16);rect(g,'#1a1a1a',76,48,14,8);
+  const k=.5+.5*Math.sin(t*3);g.fillStyle=`rgba(255,${120+60*k|0},60,.8)`;g.fillRect(78,50,10,4);rect(g,'#555',80,8,6,22);steam(g,82,8,t);steam(g,84,10,t+.4);
+  rect(g,'#c9c9c9',110,60,40,6);for(let i=0;i<5;i++)rect(g,'#6a4a30',114+i*7,58,4,2);person(g,140,104,PEOPLE.roaster,t,-1);rect(g,'#e9e0cf',20,52,18,20);rect(g,'#4f8a5b',22,58,14,3)},
+ cup(g,t){sky(g,'#3a322b','#2a2420');rect(g,'#6a5240',0,60,W,48);rect(g,'#7a5f4a',0,60,W,2);cupDraw(g,70,36,4);steam(g,80,32,t);steam(g,92,30,t+.5);steam(g,104,32,t+.2);
+  rect(g,'#f3efe6',140,56,26,40);rect(g,'#d9d2c2',140,56,26,3);for(let i=0;i<6;i++)rect(g,'#9a948a',144,64+i*5,18-(i%3)*4,1);g.fillStyle='rgba(255,210,140,.15)';g.fillRect(0,0,W,H)}
+};
+const sceneCv=$('sceneCv'),sg=sceneCv.getContext('2d'),titleCv=$('titleCv'),tg=titleCv.getContext('2d');let curBg='cafe';var curLoc='';
+function loop(ts){const t=ts/1000;if($('game').classList.contains('on')){(BGS[curBg]||BGS.cafe)(sg,t)}else{BGS.valley(tg,t);tg.fillStyle='rgba(16,25,21,.0)';}requestAnimationFrame(loop)}
+requestAnimationFrame(loop);
+function portrait(cv,id){const p=PEOPLE[id],g=cv.getContext('2d');g.clearRect(0,0,16,16);if(!p||id==='nar'){g.fillStyle='#22342c';g.fillRect(0,0,16,16);g.fillStyle='#8fc29a';g.fillRect(6,5,4,1);g.fillRect(5,8,6,1);g.fillRect(6,11,4,1);return}
+ g.fillStyle='#22342c';g.fillRect(0,0,16,16);g.fillStyle=p.shirt;g.fillRect(2,12,12,4);if(p.apron){g.fillStyle=p.apron;g.fillRect(5,13,6,3)}g.fillStyle=p.skin;g.fillRect(4,4,8,8);g.fillRect(7,11,2,2);
+ g.fillStyle=p.hair;g.fillRect(4,3,8,2);g.fillRect(3,4,1,4);g.fillRect(12,4,1,4);if(id==='staff'){g.fillRect(3,4,1,7);g.fillRect(12,4,1,7)}if(p.hat){g.fillStyle=p.hat;g.fillRect(2,3,12,1);g.fillRect(4,1,8,2)}
+ g.fillStyle='#111';g.fillRect(6,7,1,1);g.fillRect(9,7,1,1);g.fillStyle='#a0524a';g.fillRect(7,10,2,1)}
+/* ============ 聲音 ============ */
+let AC=null,MU=null;
+function ac(){if(!AC){try{AC=new (window.AudioContext||window.webkitAudioContext)();}catch(e){return null}}if(AC.state==='suspended')AC.resume();return AC}
+function blip(f,d,type,v){if(!DB.snd)return;const a=ac();if(!a)return;const o=a.createOscillator(),g=a.createGain();o.type=type||'square';o.frequency.value=f;g.gain.setValueAtTime(v||.05,a.currentTime);g.gain.exponentialRampToValueAtTime(.0001,a.currentTime+d);o.connect(g).connect(a.destination);o.start();o.stop(a.currentTime+d+.02)}
+let lastTick=0;function tick(sp){const now=performance.now();if(now-lastTick<45)return;lastTick=now;const p=PEOPLE[sp]||{};blip((p.pitch||500)*(0.95+Math.random()*.1),.04,'square',.035)}
+const SCALE=[0,2,4,7,9,12,14];const THEME={cafe:[57,0.55],valley:[62,0.7],farm:[60,0.6],school:[64,0.5],meeting:[55,0.65],wet:[59,0.6],dry:[62,0.55],sea:[57,0.75],roast:[52,0.6],cup:[60,0.7]};
+function musicStart(){if(MU||!DB.mus)return;const a=ac();if(!a)return;const mg=a.createGain();mg.gain.value=.05;mg.connect(a.destination);let step=0;
+ MU={g:mg,timer:setInterval(()=>{if(!DB.mus)return;const th=THEME[curBg]||[60,.6];const base=th[0];const t=a.currentTime;const pat=[0,4,2,5,3,6,4,1];const n=base+SCALE[pat[step%8]];
+  const o=a.createOscillator(),g=a.createGain();o.type='triangle';o.frequency.value=440*Math.pow(2,(n-69)/12);g.gain.setValueAtTime(.0001,t);g.gain.linearRampToValueAtTime(1,t+.03);g.gain.exponentialRampToValueAtTime(.0001,t+th[1]*1.6);o.connect(g).connect(mg);o.start(t);o.stop(t+th[1]*1.7);
+  if(step%4===0){const b=a.createOscillator(),bg=a.createGain();b.type='sine';b.frequency.value=440*Math.pow(2,(base-12-69)/12);bg.gain.setValueAtTime(.0001,t);bg.gain.linearRampToValueAtTime(.8,t+.05);bg.gain.exponentialRampToValueAtTime(.0001,t+2);b.connect(bg).connect(mg);b.start(t);b.stop(t+2.1)}
+  step++},650)}}
+function musicStop(){if(MU){clearInterval(MU.timer);try{MU.g.disconnect()}catch(e){}MU=null}}
+/* ============ 名詞連結 ============ */
+const GKEYS=Object.keys(GL).sort((a,b)=>b.length-a.length);
+const GRE=new RegExp(GKEYS.map(k=>k.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')).join('|'),'g');
+function linkify(s){return esc(s).replace(GRE,m=>`<span class="term" data-g="${m}">${m}</span>`)}
+function popup(el,k){const pp=$('pop');pp.innerHTML=`<b>${esc(k)}</b>${esc(GL[k])}`;pp.style.display='block';const r=el.getBoundingClientRect();const w=Math.min(300,innerWidth-20);pp.style.maxWidth=w+'px';let x=Math.max(10,Math.min(innerWidth-w-10,r.left));pp.style.left=x+'px';const ph=pp.offsetHeight;pp.style.top=(r.top-ph-8>10?r.top-ph-8:r.bottom+8)+'px';blip(880,.06,'sine',.05)}
+document.addEventListener('click',e=>{const tm=e.target.closest('.term');if(tm){e.stopPropagation();popup(tm,tm.dataset.g);return}if(!e.target.closest('#pop'))$('pop').style.display='none'},true);
+/* ============ 劇情引擎 ============ */
+let typing=null,waiting=false,busy=false,curText='',curSp='nar';
+function setBg(b,loc){curBg=b;curLoc=loc||'';$('loc').textContent=loc||'';}
+function chapterCard(ci,cb){const c=CHS[ci];const cc=$('chapCard');cc.innerHTML=`<b>${esc(c.t)}</b><h2>${esc(c.n)}</h2><p>${esc(c.sub)}</p>`;cc.classList.add('on');busy=true;blip(523,.15,'triangle',.06);setTimeout(()=>blip(784,.25,'triangle',.06),160);setTimeout(()=>{cc.classList.remove('on');busy=false;cb()},1900)}
+function startChapter(ci,fresh){DB.ch=ci;DB.i=0;save();show('game');musicStart();const c=CHS[ci];$('chName').textContent=c.t+'・'+c.n;setBg(c.bg,'');$('txt').innerHTML='';$('nm').innerHTML='';$('opts').innerHTML='';portrait($('pf'),'nar');chapterCard(ci,step)}
+function resume(){const c=CHS[DB.ch];show('game');musicStart();$('chName').textContent=c.t+'・'+c.n;let bg=c.bg,loc='';for(let k=0;k<DB.i;k++){const n=c.nodes[k];if(n.bg){bg=n.bg;loc=n.loc}}setBg(bg,loc);
+ // 回到最近一句台詞
+ let k=DB.i-1;while(k>=0&&!(c.nodes[k].t!==undefined))k--;DB.i=Math.max(0,k);step()}
+function step(){const c=CHS[DB.ch];$('opts').innerHTML='';
+ while(DB.i<c.nodes.length){const n=c.nodes[DB.i];
+  if(n.bg){setBg(n.bg,n.loc);DB.i++;continue}
+  if(n.get){DB.i++;getItem(n.get);continue}
+  if(n.end){DB.i++;save();finale();return}
+  if(n.c){showChoice(n);return}
+  DB.i++;save();showLine(n);return}
+ chapterDone()}
+function showLine(n){const p=PEOPLE[n.s]||PEOPLE.nar;curSp=n.s;portrait($('pf'),n.s);$('nm').innerHTML=n.s==='nar'?'':`${esc(p.n)}<small>${esc(p.sub)}</small>`;
+ const tx=$('txt');tx.className=n.s==='nar'?'nar':'';curText=n.t;let i=0;tx.textContent='';waiting=true;$('nxt').style.visibility='hidden';clearInterval(typing);
+ typing=setInterval(()=>{i++;tx.textContent=curText.slice(0,i);if(n.s!=='nar'&&/\S/.test(curText[i-1]||''))tick(n.s);if(i>=curText.length)finishType()},38)}
+function finishType(){clearInterval(typing);typing=null;$('txt').innerHTML=linkify(curText);$('nxt').style.visibility='visible'}
+function advance(){if(busy)return;if(!waiting)return;if(typing){finishType();return}waiting=false;step()}
+function showChoice(n){waiting=false;$('nxt').style.visibility='hidden';portrait($('pf'),'me');$('nm').innerHTML=`${esc(PEOPLE.me.n)}<small>想一想</small>`;$('txt').className='';$('txt').innerHTML=linkify(n.c);
+ const box=$('opts');box.innerHTML=n.o.map((o,i)=>`<button class="opt" data-o="${i}">${esc(o.t)}</button>`).join('');
+ box.querySelectorAll('[data-o]').forEach(b=>b.onclick=e=>{e.stopPropagation();const o=n.o[+b.dataset.o];if(o.ok){blip(660,.08,'triangle',.07);setTimeout(()=>blip(990,.14,'triangle',.07),90);
+   box.innerHTML=`<div class="fb">⭕ ${linkify(o.r)}</div><button class="opt" id="goOn">繼續故事 ▶</button>`;$('goOn').onclick=ev=>{ev.stopPropagation();DB.i++;save();step()}}
+  else{blip(220,.2,'sawtooth',.04);b.classList.add('bad');b.disabled=true;let f=box.querySelector('.fb');if(!f){f=document.createElement('div');box.appendChild(f)}f.className='fb no';f.innerHTML='🤔 '+linkify(o.r)+'<br><small style="color:var(--sub)">再選一次看看</small>'}})}
+function getItem(k){if(!DB.got.includes(k)){DB.got.push(k);save();const it=ITEMS[k];toast(`${it[0]} 獲得風味卡：${it[1]}`);blip(784,.1,'triangle',.06);setTimeout(()=>blip(1046,.18,'triangle',.06),110)}}
+function chapterDone(){if(!DB.done.includes(DB.ch))DB.done.push(DB.ch);save();const nx=DB.ch+1;
+ if(nx<CHS.length){openCard(`<h3>✔ ${esc(CHS[DB.ch].t)}・${esc(CHS[DB.ch].n)} 完成</h3><p class="sub">風味卡 ${DB.got.length} / ${Object.keys(ITEMS).length}</p><div class="menu" style="max-width:none"><button class="mbtn pri" id="cNext">▶<div>下一章<small>${esc(CHS[nx].t)}：${esc(CHS[nx].n)}</small></div></button><button class="mbtn" id="cHome">☰<div>回到標題</div></button></div>`);
+  $('cNext').onclick=()=>{closeCard();startChapter(nx)};$('cHome').onclick=()=>{closeCard();toTitle()};DB.ch=nx;DB.i=0;save()}}
+function finale(){if(!DB.done.includes(DB.ch))DB.done.push(DB.ch);DB.ch=0;DB.i=0;DB.fin=1;save();blip(523,.2,'triangle',.07);setTimeout(()=>blip(659,.2,'triangle',.07),200);setTimeout(()=>blip(784,.4,'triangle',.07),400);
+ openCard(`<h3>🌄 嘆息之谷・完</h3><p>山谷的空氣、六代人的樹、高中同學、Xinabajul 的鄰居們、水洗的一夜、跨過太平洋的生豆，最後變成你手上的這一杯。</p>${tastingHTML()}<h3 style="margin-top:14px">🎴 風味收集冊 ${DB.got.length} / ${Object.keys(ITEMS).length}</h3>${itemsHTML()}<div class="menu" style="max-width:none"><button class="mbtn" id="fHome">☰<div>回到標題</div></button></div>`);
+ $('fHome').onclick=()=>{closeCard();toTitle()}}
+function tastingHTML(){const bar=(k,v)=>`<span>${k}</span><i><u style="width:${v*20}%"></u></i><b>${v}</b>`;
+ return `<div class="tasting"><b>☕ 你的品飲筆記</b><div class="sub">COFFEE COUNTY Fukuoka（藥院）・2026/11/27・手沖</div>
+ <div class="sub" style="margin-top:6px">Guatemala Los Suspiros・Villa Sarchi・Fully Washed・Light Roast<br>生產者 Axel Palacios・薇薇特南果 La Libertad Palmira・1,900–2,000 m</div>
+ <div class="bars">${bar('甜',4)}${bar('酸',3)}${bar('香氣',4)}</div>
+ <p><b>熱</b>：果香帶一點花香，非常乾淨，酸中帶甜；水感、茶感，一點烘焙香、一點佛手柑。「沒喝過熱的時候這麼乾淨的咖啡。」</p>
+ <p><b>放涼</b>：喝得到卡片寫的梨子汁味；花香非常明顯，偏沉、偏厚。</p>
+ <p class="sub">店家卡片：Kumquat, Loquat, Prune, Cashew, Cacao, Japanese Pear, Floral, Brown Sugar, Round Mouthfeel, Well Balanced</p></div>`}
+function itemsHTML(){return `<div class="items">${Object.entries(ITEMS).map(([k,v])=>{const h=DB.got.includes(k);return`<div class="it ${h?'':'no'}"><b>${h?v[0]:'？'}</b>${h?esc(v[1]):'未收集'}${h?`<div class="sub" style="font-size:11px;margin-top:2px">${esc(v[2])}</div>`:''}</div>`}).join('')}</div>`}
+function openCard(html){$('card').innerHTML=`<button class="x" onclick="closeCard()">✕</button>`+html;$('ov').classList.add('on')}
+function closeCard(){$('ov').classList.remove('on')}
+$('ov').onclick=e=>{if(e.target.id==='ov')closeCard()};
+function toTitle(){show('title');refreshTitle()}
+function refreshTitle(){const has=DB.i>0||DB.ch>0;$('bCont').disabled=!has;$('sCont').textContent=has?`${CHS[DB.ch].t}：${CHS[DB.ch].n}`:'還沒有進度';$('sStart').textContent=DB.fin?'已看完全篇・從序章重新開始':'序章：藥院的一杯咖啡'}
+function chapSel(){openCard(`<h3>📖 章節選擇</h3><div class="clist">${CHS.map((c,i)=>{const ok=i===0||DB.done.includes(i)||DB.done.includes(i-1)||DB.fin;return`<button class="ci ${DB.done.includes(i)?'done':''} ${ok?'':'lock'}" data-cs="${i}" ${ok?'':'disabled'}><span class="n">${DB.done.includes(i)?'✓':i}</span><div style="text-align:left"><b>${esc(c.t)}・${esc(c.n)}</b><div class="sub">${esc(c.sub)}</div></div></button>`}).join('')}</div><p class="sub">看完上一章，下一章就會解鎖。</p>`);
+ document.querySelectorAll('[data-cs]').forEach(b=>b.onclick=()=>{closeCard();ac();startChapter(+b.dataset.cs)})}
+function glossCard(){openCard(`<h3>📚 咖啡小辭典</h3><div class="gl">${Object.entries(GL).map(([k,v])=>`<div><b>${esc(k)}</b><br>${esc(v)}</div>`).join('')}</div>`)}
+function bagCard(){openCard(`<h3>🎴 風味收集冊 ${DB.got.length} / ${Object.keys(ITEMS).length}</h3><p class="sub">故事裡會一張一張收集到這支咖啡的風味。</p>${itemsHTML()}${DB.fin?tastingHTML():''}`)}
+$('bStart').onclick=()=>{ac();DB.fin=DB.fin||0;startChapter(0,1)};
+$('bCont').onclick=()=>{ac();resume()};
+$('bChap').onclick=chapSel;$('bGloss').onclick=glossCard;$('bItems').onclick=bagCard;
+$('bHome').onclick=e=>{e.stopPropagation();clearInterval(typing);typing=null;toTitle()};
+$('bBag').onclick=e=>{e.stopPropagation();bagCard()};
+function sndUI(){$('bSnd').textContent=DB.snd?'🔊':'🔇';$('bMus').style.opacity=DB.mus?1:.4}
+$('bSnd').onclick=e=>{e.stopPropagation();DB.snd=DB.snd?0:1;save();sndUI()};
+$('bMus').onclick=e=>{e.stopPropagation();DB.mus=DB.mus?0:1;save();if(DB.mus)musicStart();else musicStop();sndUI()};
+$('box').addEventListener('click',e=>{if(e.target.closest('button,.term'))return;advance()});
+document.querySelector('.scene').addEventListener('click',e=>advance());
+document.addEventListener('dblclick',e=>e.preventDefault(),{passive:false});
+sndUI();refreshTitle();
+</script>
+<script>if("serviceWorker"in navigator)navigator.serviceWorker.register("../sw.js",{scope:"../"}).catch(function(){});</script>
+</body>
+</html>
