@@ -1453,7 +1453,7 @@ window.BGM=(()=>{
     <div class="err" id="tErr"></div>
   </div>
   <button class="t-more" id="tMore" type="button" aria-label="咖啡宇宙：更多咖啡 App 與遊戲">咖啡宇宙</button>
-  <div class="t-foot">© 2026 Jim Lu　ver. 12.5</div>
+  <div class="t-foot">© 2026 Jim Lu　ver. 12.6</div>
 </div>
 <nav class="modes" aria-label="導覽"><div class="in">
   <button class="homebtn" id="homeBtn" type="button" hidden>‹ 主選單</button>
@@ -10365,6 +10365,7 @@ if(window.PREF){PREF.bar('gcPref',()=>$('gxChart'));PREF.on(()=>render());
 .cc-c{margin:8px 0}.cc-cl{display:flex;justify-content:space-between;font-size:14px}.cc-cl b{color:var(--accent)}.cc-cr{display:flex;align-items:center;gap:6px}.cc-cr input{flex:1}.cc-cr button,.cc-sty button{font:inherit;min-width:44px;min-height:40px;border-radius:10px;border:1px solid var(--line);background:transparent;color:var(--ink);font-size:18px;cursor:pointer}
 .cc-sty{display:flex;gap:6px;margin-top:4px}.cc-sty button{flex:1;font-size:14px}.cc-sty button[aria-pressed=true]{border-color:var(--accent);color:var(--accent);font-weight:700}.cc-ratio{margin:6px 0 2px}
 .cc-svb{border:1px dashed var(--accent);border-radius:12px;padding:10px;margin:6px 0 10px}.cc-svb label{font-size:13px;color:var(--muted)}.cc-svb input{width:100%;font:inherit;font-size:16px;padding:9px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink);margin:4px 0 8px}
+.cc-byp{border-style:dashed;border-color:#6fa8dc}.cc-byp .cc-sgh{flex-wrap:wrap}.cc-byp small{color:var(--muted);font-size:12px}
 .cc-tpl{border:1px dashed var(--accent);border-radius:12px;padding:4px 10px 10px;margin:6px 0 10px;max-height:60vh;overflow:auto}.cc-tp{display:block;width:100%;text-align:left;font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:7px 9px;margin:5px 0;cursor:pointer}.cc-tp b{font-size:14px}.cc-tp small{display:block;color:var(--muted);font-size:12px}
 .cc-sh{font-size:15px;margin:14px 0 6px}.cc-sh small{color:var(--muted);font-weight:400;font-size:12.5px;margin-left:6px}
 .cc-seg{border:1px solid var(--line);border-radius:12px;padding:7px 9px;margin:6px 0}.cc-sgh{display:flex;align-items:center;gap:8px}.cc-sgh>b{min-width:3.6em;font-size:14px}.cc-sgh .cc-sty{flex:1;margin:0}.cc-sgh .cc-sty button{min-height:34px;font-size:12.5px}
@@ -10423,9 +10424,10 @@ function mig(o){if(!o)return null;if(o.segs)return o;const bl=Math.round(o.dose*
   for(let i=0;i<k;i++)segs.push({ml:Math.round(rest/k),t:(o.bloomS||35)+i*(o.gap||30),temp:o.temp||93,sty:o.sty||'r'});return {dose:o.dose||15,clk:o.clk||24,segs};}
 const clone=o=>JSON.parse(JSON.stringify(o));
 const recOf=c=>clone(mig(ST.rec[c.b])||R0);
-const waterOf=r=>r.segs.reduce((a,q)=>a+q.ml,0);
+const waterOf=r=>r.segs.reduce((a,q)=>a+q.ml,0)+(r.byp||0),brewW=r=>r.segs.reduce((a,q)=>a+q.ml,0);
 const pd=ml=>Math.max(2,Math.round(ml/4));
-function design(c,r,d){return {bean:c.b,roast:null,dripper:d,dose:r.dose,grind:r.clk*CLICK,filter:'paper',tail:0,segs:r.segs.map(q=>({ml:q.ml,t:q.t,temp:q.temp,sty:q.sty,hold:0})),tpl:'',fm:'pour',nEven:10,meas:[]};}
+function design(c,r,d){const S=r.segs.map(q=>({ml:q.ml,t:q.t,temp:q.temp,sty:q.sty,hold:0})),L=S[S.length-1],by=r.byp||0;if(by>0)S.push({ml:by,t:L.t+pd(L.ml)+60,temp:L.temp,sty:'r',hold:0});
+  return {bean:c.b,roast:null,dripper:d,dose:r.dose,grind:r.clk*CLICK,filter:'paper',tail:by>0?1:0,segs:S,tpl:'',fm:'pour',nEven:10,meas:[]};}
 function brew(c,r,d){const A=window.__design.analyze(design(c,r,d));return {ey:A.cup.ey,tds:A.cup.tds,end:A.end,acid:A.pf.acid/2,sweet:A.pf.sweet/2,bitter:A.pf.bitter/2,fruity:A.pf.fruity/2};}
 const inBox=(c,x)=>x.ey>=c.ey[0]&&x.ey<=c.ey[1]&&x.tds>=c.tds[0]&&x.tds<=c.tds[1];
 const svOk=(c,x)=>{const [k,o,v]=c.sv;return o==='>='?x[k]>=v-1e-9:x[k]<=v+1e-9;};
@@ -10462,20 +10464,22 @@ function traits(b){const rk=roastAt(b.roast).k*(b.kx||1),sx=b.sx||1;
 function beanCard(c,blind){const b=B(c.b);
   if(blind)return '<div class="cc-bean"><b>🕶 神秘豆</b><p class="label">盲豆模式：看不到豆子的產地和特性。先沖一杯，從落點推敲它是好萃還是難萃。</p></div>';
   return '<div class="cc-bean"><b>'+esc(b.name)+'</b> <small>'+esc(b.sub)+'・'+ROAST_NAME(b.roast)+'</small><div class="btags">'+b.tags.map(t=>'<i>'+esc(t)+'</i>').join('')+'</div>'+traits(b)+'<p>'+c.why+'</p></div>';}
-function preview(r){const W=300,H=72,Bl=H-14,S=r.segs,tE=Math.max(60,...S.map(q=>q.t+pd(q.ml)))+40,X=t=>4+t/tE*(W-8),mx=Math.max(...S.map(q=>q.ml));
+function preview(r){const W=300,H=72,Bl=H-14,S=r.segs,tE=Math.max(60,...S.map(q=>q.t+pd(q.ml)))+(r.byp>0?70:40),X=t=>4+t/tE*(W-8),mx=Math.max(...S.map(q=>q.ml));
   let o='<svg viewBox="0 0 '+W+' '+H+'" width="100%" aria-hidden="true"><line x1="0" x2="'+W+'" y1="'+Bl+'" y2="'+Bl+'" stroke="var(--line)"/>',lx=-99;
   S.forEach((q,i)=>{const bh=Math.max(4,q.ml/mx*(Bl-28)),x=X(q.t),w=Math.max(4,X(q.t+pd(q.ml))-x),u=Math.max(0,Math.min(1,(q.temp-70)/26)),cx=x+w/2;
     o+='<rect x="'+x+'" y="'+(Bl-bh)+'" width="'+w+'" height="'+bh+'" rx="1.5" fill="rgb('+[127,182,224].map((v,j)=>Math.round(v+([232,150,74][j]-v)*u)).join(',')+')"/>';
     if(cx-lx>=18){lx=cx;o+=(q.sty==='c'?'<circle cx="'+cx+'" cy="'+(Bl-bh-7)+'" r="4.5" fill="none" stroke="var(--muted)" stroke-width=".9"/><circle cx="'+cx+'" cy="'+(Bl-bh-7)+'" r="2.2" fill="var(--ink)"/>':'<path transform="translate('+cx+' '+(Bl-bh-7)+') scale(1.25)" d="M.6 0a.9 .9 0 1 1 -1.6 .4a2.2 2.2 0 1 1 3.6 -1.7a3.6 3.6 0 1 1 -6.3 2.9" fill="none" stroke="var(--ink)" stroke-width=".9" stroke-linecap="round"/>')+
       '<text x="'+cx+'" y="'+(Bl-bh-15)+'" font-size="9.5" font-weight="700" text-anchor="middle" fill="var(--ink)">'+Math.round(q.ml)+'</text><text x="'+Math.max(x,10)+'" y="'+(H-2)+'" font-size="8.5" text-anchor="'+(i?'middle':'start')+'" fill="var(--muted)">'+Math.floor(q.t/60)+':'+String(q.t%60).padStart(2,'0')+'</text>';}});
+  if(r.byp>0){const L=S[S.length-1],x=X(L.t+pd(L.ml))+14,bh=Math.max(4,r.byp/mx*(Bl-28));o+='<rect x="'+x+'" y="'+(Bl-bh)+'" width="14" height="'+bh+'" rx="1.5" fill="#9fc8ea" stroke="#6fa8dc" stroke-dasharray="2 1.5"/><text x="'+(x+7)+'" y="'+(Bl-bh-3)+'" font-size="9.5" font-weight="700" text-anchor="middle" fill="#9fc8ea">+'+r.byp+'</text><text x="'+(x+7)+'" y="'+(H-2)+'" font-size="8.5" text-anchor="middle" fill="#9fc8ea">bypass</text>';}
   return o+'</svg>';}
 const CTRL=[['dose','粉量',10,20,.5,v=>v+' g'],['clk','C40 研磨',12,36,1,v=>v+' 格（約 '+Math.round(v*CLICK)+' μm）']];
 const SF=[['ml','水量',5,v=>v+' g'],['t','開始',5,v=>Math.floor(v/60)+':'+String(v%60).padStart(2,'0')],['temp','水溫',1,v=>v+'°']];
 function ctrls(r){const W=waterOf(r);
   return CTRL.map(([k,n,a,b,st,f])=>'<div class="cc-c"><div class="cc-cl"><span>'+n+'</span><b>'+f(r[k])+'</b></div><div class="cc-cr"><button type="button" data-st="'+k+':-1" aria-label="減少">−</button><input type="range" min="'+a+'" max="'+b+'" step="'+st+'" value="'+r[k]+'" data-k="'+k+'" aria-label="'+n+'"><button type="button" data-st="'+k+':1" aria-label="增加">＋</button></div></div>').join('')+
-  '<h4 class="cc-sh">每一注 <small>總水量 '+W+' g・粉水比 1:'+(W/r.dose).toFixed(1)+'</small></h4>'+
+  '<h4 class="cc-sh">每一注 <small>總水量 '+W+' g'+(r.byp?'（沖煮 '+brewW(r)+'＋bypass '+r.byp+'）':'')+'・粉水比 1:'+(W/r.dose).toFixed(1)+'</small></h4>'+
   r.segs.map((q,i)=>'<div class="cc-seg"><div class="cc-sgh"><b>'+(i?'第 '+i+' 注':'悶蒸')+'</b><div class="cc-sty">'+[['r','🌀 繞圈'],['c','◉ 中心']].map(([v,n])=>'<button type="button" data-ss="'+i+':'+v+'" aria-pressed="'+((q.sty==='c')===(v==='c'))+'">'+n+'</button>').join('')+'</div>'+(r.segs.length>1?'<button type="button" class="cc-del" data-sdel="'+i+'" aria-label="刪掉這一注">✕</button>':'')+'</div>'+
     '<div class="cc-sgf">'+SF.map(([k,n,st,f])=>'<div><small>'+n+'</small><div class="cc-stp"><button type="button" data-sg="'+i+':'+k+':-1" aria-label="'+n+'減少"'+(k==='t'&&i===0?' disabled':'')+'>−</button><b>'+f(q[k])+'</b><button type="button" data-sg="'+i+':'+k+':1" aria-label="'+n+'增加"'+(k==='t'&&i===0?' disabled':'')+'>＋</button></div></div>').join('')+'</div></div>').join('')+
+  '<div class="cc-seg cc-byp"><div class="cc-sgh"><b>💧 Bypass</b><small>沖完後直接加進杯子的水，不經過咖啡粉：只會變淡，不會多萃取</small></div><div class="cc-sgf" style="grid-template-columns:minmax(0,1fr)"><div class="cc-stp"><button type="button" data-byp="-1" aria-label="bypass 減少">−</button><b>'+(r.byp||0)+' g</b><button type="button" data-byp="1" aria-label="bypass 增加">＋</button></div></div></div>'+
   '<div class="cc-row"><button type="button" class="cc-hb" data-sadd="1"'+(r.segs.length>=12?' disabled':'')+'>＋ 新增一注</button><button type="button" class="cc-hb" data-sall="1">全部水溫 = 悶蒸水溫</button></div>'+preview(r);}
 // 預設配方：基本款＋冠軍配方（跟手法設計共用）＋我在手法設計存的手法
 const BASIC=[
@@ -10484,12 +10488,12 @@ const BASIC=[
  ['b5','五段等分（細水長流）',{dose:15,clk:22,segs:[[45,0],[50,40],[50,65],[50,90],[45,115]]}],
  ['b46','4:6 法（前 40% 調酸甜、後 60% 調濃淡）',{dose:20,clk:30,segs:[[50,0],[70,45],[60,90],[60,135],[60,180]]}],
  ['b1','一刀流（悶蒸後一次注完）',{dose:15,clk:26,segs:[[45,0],[195,40]]}]];
-function fromX(X,name){const rec={dose:Math.max(10,Math.min(20,Math.round((X.dose||15)*2)/2)),clk:Math.max(12,Math.min(36,Math.round((X.grind||654)/CLICK))),segs:(X.segs||[]).slice(0,X.segs.length-(X.tail||0)).map(q=>({ml:Math.max(5,Math.round(q.ml)),t:Math.round(q.t),temp:Math.round(q.temp||93),sty:q.sty==='c'?'c':'r'}))};
+function fromX(X,name){const tl=X.tail||0,rec={byp:tl?Math.round(X.segs.slice(X.segs.length-tl).reduce((a,q)=>a+q.ml,0)/5)*5:0,dose:Math.max(10,Math.min(20,Math.round((X.dose||15)*2)/2)),clk:Math.max(12,Math.min(36,Math.round((X.grind||654)/CLICK))),segs:(X.segs||[]).slice(0,X.segs.length-(X.tail||0)).map(q=>({ml:Math.max(5,Math.round(q.ml)),t:Math.round(q.t),temp:Math.round(q.temp||93),sty:q.sty==='c'?'c':'r'}))};
   if(!rec.segs.length)return null;rec.segs[0].t=0;return rec;}
 const ZMAP={v60:'v60',orea:'orea',origami_c:'origami',origami_w:'origami'};
 function presets(){const out=[],zk=ZMAP[ST.dr];
-  try{const Z=zk&&window.ZONESX&&ZONESX()[zk];if(Z)Z.recipes.forEach(x=>{if(x.ice||x.bypass)return;const segs=x.plan.map((ml,i)=>({ml:Math.round(ml),t:Math.round(x.planT[i]),temp:Math.round(x.planTemp?x.planTemp[i]:x.temp),sty:(x.style||[])[i]==='c'?'c':'r'}));
-    out.push({g:'⭐ '+drName(ST.dr)+' 官方建議',id:'z_'+x.id,n:x.n+(x.by?'（'+x.by+'）':''),r:{dose:Math.max(10,Math.min(20,x.dose)),clk:Math.max(12,Math.min(36,Math.round(x.grind/CLICK))),segs},hold:!!x.valveWins,d:x.d});});}catch(e){}
+  try{const Z=zk&&window.ZONESX&&ZONESX()[zk];if(Z)Z.recipes.forEach(x=>{if(x.ice)return;const segs=x.plan.map((ml,i)=>({ml:Math.round(ml),t:Math.round(x.planT[i]),temp:Math.round(x.planTemp?x.planTemp[i]:x.temp),sty:(x.style||[])[i]==='c'?'c':'r'}));
+    out.push({g:'⭐ '+drName(ST.dr)+' 官方建議',id:'z_'+x.id,n:x.n+(x.by?'（'+x.by+'）':''),r:{byp:x.bypass||0,dose:Math.max(10,Math.min(20,x.dose)),clk:Math.max(12,Math.min(36,Math.round(x.grind/CLICK))),segs},hold:!!x.valveWins,d:x.d});});}catch(e){}
   BASIC.forEach(([id,n,o])=>{const r=o.segs[0].ml!=null?clone(o):{dose:o.dose,clk:o.clk,segs:o.segs.map(([ml,t])=>({ml,t,temp:93,sty:'r'}))};out.push({g:'基本款',id,n,r});});
   try{window.__design.tpls().forEach(t=>{if(t.id==='even10')return;const r=fromX(t.X);if(r)out.push({g:'冠軍與名人配方',id:'t_'+t.id,n:t.n,r,hold:t.X.segs.some(q=>q.hold>0)});});}catch(e){}
   try{(JSON.parse(localStorage.getItem('brewlab-designs-v1')||'[]')||[]).forEach(x=>{const r=x&&x.d&&fromX(x.d);if(r)out.push({g:'我的手法存檔',id:'s_'+x.id,n:x.name,r,hold:x.d.segs.some(q=>q.hold>0)});});}catch(e){}
@@ -10505,19 +10509,19 @@ function saveRec(c,r,name){let a=[];try{a=JSON.parse(localStorage.getItem(DSV)||
   try{localStorage.setItem(DSV,JSON.stringify(a.slice(0,200)));let fl=JSON.parse(localStorage.getItem(DFL)||'[]')||[];if(!fl.includes(FOLD)){fl.push(FOLD);localStorage.setItem(DFL,JSON.stringify(fl));}}catch(e){return null;}
   return nm;}
 function tplList(cur){const P=presets(),gs=[...new Set(P.map(p=>p.g))];
-  return '<div class="cc-tpl"><p class="label">套用後只換掉粉量、研磨和每一注，之後還能自己改。冰咖啡和後加水的配方不列；Switch 的關閥浸泡在這裡不會用到。'+(ZMAP[ST.dr]?'':'這個濾杯沒有官方配方，可以先用基本款。')+'</p>'+gs.map(g=>'<h4 class="cc-sh">'+g+'</h4>'+P.filter(p=>p.g===g).map(p=>{const W=waterOf(p.r);return '<button type="button" class="cc-tp" data-tp="'+esc(p.id)+'"><b>'+esc(p.n)+'</b><small>'+p.r.dose+' g／'+W+' g（1:'+(W/p.r.dose).toFixed(1)+'）・C40 '+p.r.clk+' 格・'+p.r.segs.length+' 注'+(p.hold?'・原本有關閥浸泡':'')+'</small>'+(p.d?'<small>'+esc(p.d)+'</small>':'')+preview(p.r)+'</button>';}).join('')).join('')+'</div>';}
+  return '<div class="cc-tpl"><p class="label">套用後只換掉粉量、研磨和每一注，之後還能自己改。冰咖啡的配方不列；Switch 的關閥浸泡在這裡不會用到。'+(ZMAP[ST.dr]?'':'這個濾杯沒有官方配方，可以先用基本款。')+'</p>'+gs.map(g=>'<h4 class="cc-sh">'+g+'</h4>'+P.filter(p=>p.g===g).map(p=>{const W=waterOf(p.r);return '<button type="button" class="cc-tp" data-tp="'+esc(p.id)+'"><b>'+esc(p.n)+'</b><small>'+p.r.dose+' g／'+W+' g（1:'+(W/p.r.dose).toFixed(1)+'）・C40 '+p.r.clk+' 格・'+p.r.segs.length+' 注'+(p.r.byp?'＋bypass '+p.r.byp+' g':'')+(p.hold?'・原本有關閥浸泡':'')+'</small>'+(p.d?'<small>'+esc(p.d)+'</small>':'')+preview(p.r)+'</button>';}).join('')).join('')+'</div>';}
 function chart(c,lg){const pts=(lg||[]).map((x,i)=>({id:'a'+i,x:x.ey,y:x.tds,c:i===lg.length-1?'#f0c040':'#8a8079',on:i===lg.length-1,label:'第 '+(i+1)+' 杯'}));
   return window.goldChart(pts,{box:[c.ey[0],c.ey[1],c.tds[0],c.tds[1]],boxLabel:c.t});}
 function hintFor(c,r,d){const last=brew(c,r,d),cx=(c.ey[0]+c.ey[1])/2,cy=(c.tds[0]+c.tds[1])/2;
   const mod=f=>{const x=clone(r);f(x);return x;},n=r.segs.length,LS=r.segs[n-1];
   const opts=[['研磨調細 2 格',x=>x.clk-=2],['研磨調粗 2 格',x=>x.clk+=2],['每一注水溫都升 3°C',x=>x.segs.forEach(q=>q.temp=Math.min(100,q.temp+3))],['每一注水溫都降 3°C',x=>x.segs.forEach(q=>q.temp=Math.max(75,q.temp-3))],
     ['最後一注加 20 g',x=>x.segs[n-1].ml+=20],['最後一注減 20 g',x=>x.segs[n-1].ml=Math.max(10,LS.ml-20)],['粉量加 1 g',x=>x.dose=Math.min(20,x.dose+1)],['粉量減 1 g',x=>x.dose=Math.max(10,x.dose-1)],
-    ['悶蒸延長 10 秒',x=>x.segs.slice(1).forEach(q=>q.t+=10)],['把最後一注拆成兩注',x=>{if(LS.ml>=30){x.segs[n-1].ml=Math.round(LS.ml/2);x.segs.push({ml:LS.ml-Math.round(LS.ml/2),t:LS.t+25,temp:LS.temp,sty:LS.sty});}}],
+    ['bypass 加 20 g',x=>x.byp=Math.min(150,(x.byp||0)+20)],['bypass 減 20 g',x=>x.byp=Math.max(0,(x.byp||0)-20)],['悶蒸延長 10 秒',x=>x.segs.slice(1).forEach(q=>q.t+=10)],['把最後一注拆成兩注',x=>{if(LS.ml>=30){x.segs[n-1].ml=Math.round(LS.ml/2);x.segs.push({ml:LS.ml-Math.round(LS.ml/2),t:LS.t+25,temp:LS.temp,sty:LS.sty});}}],
     ['全部改成'+(r.segs[1]&&r.segs[1].sty==='c'?'繞圈':'中心')+'注水',x=>x.segs.forEach(q=>q.sty=r.segs[1]&&r.segs[1].sty==='c'?'r':'c')]].map(([n0,f])=>[n0,mod(f)]);
   const dist=x=>Math.hypot((x.ey-cx)/1,(x.tds-cy)/.08)+(inBox(c,x)&&!svOk(c,x)?.5:0);
   const best=opts.map(([n,o])=>[n,dist(brew(c,o,d))]).sort((a,b)=>a[1]-b[1]);
   const dir=[];if(last.ey<c.ey[0])dir.push('萃取不夠，要往右（磨細、升溫、多注幾次）');else if(last.ey>c.ey[1])dir.push('萃取過頭，要往左（磨粗、降溫、少注幾次）');
-  if(last.tds>c.tds[1])dir.push('太濃，要往下（多加水或少放粉）');else if(last.tds<c.tds[0])dir.push('太淡，要往上（少加水或多放粉）');
+  if(last.tds>c.tds[1])dir.push('太濃，要往下（多加水、加 bypass 或少放粉）');else if(last.tds<c.tds[0])dir.push('太淡，要往上（少加水或多放粉）');
   if(!dir.length&&!svOk(c,last))dir.push('已經在框裡，但'+FL[c.sv[0]]+'還沒達標（'+FL[c.sv[0]]+' '+last[c.sv[0]].toFixed(1)+'，銀杯要 '+svTxt(c)+'）');
   return '<b>💡 教練提示</b><p>'+dir.join('；')+'。</p><p>從你現在的配方出發，最有效的一步：<b>'+best[0][0]+'</b>，其次是「'+best[1][0]+'」。</p>';}
 function renderPlay(){const d=ST.dr,dp=dailyPick(),dk=today();
@@ -10546,7 +10550,7 @@ function renderBook(){const tot=CH.length*DR.length,got=Object.keys(ST.tr).lengt
   h+='</div><div id="ccBk"></div>';return h;}
 function bookDetail(k){const t=ST.tr[k];if(!t)return '';const [bid,d]=k.split('|'),c=CH.find(x=>x.b===bid),r=mig(t.rec);
   return '<div class="cc-panel"><div class="cc-row" style="justify-content:flex-start;gap:14px">'+cup(t.tier,64,t.blind)+'<div><b>'+tierName[t.tier]+'・'+esc(B(bid).name)+' × '+esc(drName(d))+'</b><p class="label">'+c.t+'・'+t.tries+' 杯拿到'+(t.blind?'・🕶 盲豆':'')+'・'+new Date(t.at).toLocaleDateString('zh-TW')+'</p></div></div>'+
-   '<p>得獎配方：粉 '+r.dose+' g、水 '+waterOf(r)+' g（1:'+(waterOf(r)/r.dose).toFixed(1)+'）、C40 '+r.clk+' 格、'+r.segs.length+' 次注水</p><p class="label">'+r.segs.map((q,i)=>(i?'第 '+i+' 注':'悶蒸')+' '+q.ml+' g@'+Math.floor(q.t/60)+':'+String(q.t%60).padStart(2,'0')+' '+q.temp+'° '+(q.sty==='c'?'中心':'繞圈')).join('・')+'</p>'+preview(r)+
+   '<p>得獎配方：粉 '+r.dose+' g、水 '+waterOf(r)+' g（1:'+(waterOf(r)/r.dose).toFixed(1)+'）、C40 '+r.clk+' 格、'+r.segs.length+' 次注水'+(r.byp?'＋bypass '+r.byp+' g':'')+'</p><p class="label">'+r.segs.map((q,i)=>(i?'第 '+i+' 注':'悶蒸')+' '+q.ml+' g@'+Math.floor(q.t/60)+':'+String(q.t%60).padStart(2,'0')+' '+q.temp+'° '+(q.sty==='c'?'中心':'繞圈')).join('・')+'</p>'+preview(r)+
    window.goldChart([{id:'w',x:t.ey,y:t.tds,c:TC[t.tier],on:true,label:tierName[t.tier]}],{box:[c.ey[0],c.ey[1],c.tds[0],c.tds[1]],boxLabel:c.t})+resultLine(c,t.x)+
    '<h4 class="cc-h">同一套配方換成其他豆子</h4><div class="cc-other">'+CH.filter(x=>x!==c).slice(0,14).map(x=>{const y=brew(x,r,d),ok=inBox(x,y);return '<span class="'+(ok?'ok':'')+'">'+esc(B(x.b).name)+'：'+y.ey.toFixed(1)+'%・'+y.tds.toFixed(2)+'%'+(ok?' ✓ 也進框':'')+'</span>';}).join('')+'</div>'+
    '<p class="label">大部分的豆子都會跑出各自的目標框：這就是每支豆要各自設計配方的原因。</p>'+
@@ -10592,6 +10596,7 @@ function bind(){if(bound)return;bound=true;
     else if(ds.svok){const c=CH.find(x=>x.b===ST.cur),nm=saveRec(c,recOf(c),$('ccSvN').value);svOpen=false;msg=nm?'💾 已儲存「'+esc(nm)+'」':'儲存失敗';const y=scrollY;render();scrollTo(0,y);}
     else if(ds.tpo){tplOpen=!tplOpen;const y=scrollY;render();scrollTo(0,y);}
     else if(ds.tp){const p=presets().find(x=>x.id===ds.tp),c=CH.find(x=>x.b===ST.cur);if(p&&c){tplOpen=false;putRec(c,clone(p.r));msg='';const el=document.querySelector('#ccPanel .cc-sh');if(el)el.scrollIntoView({block:'start',behavior:'smooth'});}}
+    else if(ds.byp){const c=CH.find(x=>x.b===ST.cur),r=recOf(c);r.byp=Math.max(0,Math.min(150,(r.byp||0)+(+ds.byp)*5));putRec(c,r);}
     else if(ds.sall){const c=CH.find(x=>x.b===ST.cur),r=recOf(c);r.segs.forEach(q=>q.temp=r.segs[0].temp);putRec(c,r);}
     else if(ds.brew)doBrew();
     else if(ds.buy){const c=CH.find(x=>x.b===ST.cur);if(pay(B(c.b).price)){ST.jar[c.b]=jar(c.b)+100;save();msg='補了 100 g。';}else msg='錢不夠了：去咖啡店賺一點，或先挑戰其他豆子拿獎金。';render();}
