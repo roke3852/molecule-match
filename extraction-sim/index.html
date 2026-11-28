@@ -1453,7 +1453,7 @@ window.BGM=(()=>{
     <div class="err" id="tErr"></div>
   </div>
   <button class="t-more" id="tMore" type="button" aria-label="咖啡宇宙：更多咖啡 App 與遊戲">咖啡宇宙</button>
-  <div class="t-foot">© 2026 Jim Lu　ver. 12.11</div>
+  <div class="t-foot">© 2026 Jim Lu　ver. 12.12</div>
 </div>
 <nav class="modes" aria-label="導覽"><div class="in">
   <button class="homebtn" id="homeBtn" type="button" hidden>‹ 主選單</button>
@@ -10381,7 +10381,7 @@ if(window.PREF){PREF.bar('gcPref',()=>$('gxChart'));PREF.on(()=>render());
 .cc-go{width:100%;font:inherit;font-size:17px;font-weight:800;padding:13px;border-radius:14px;border:0;background:var(--accent);color:#1a1512;cursor:pointer}.cc-go:disabled{opacity:.4}
 .cc-msg{margin:10px 0;padding:10px 12px;border-radius:12px;background:rgba(232,176,74,.12);font-weight:700;font-size:14.5px}
 .cc-res{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;font-size:13px;color:var(--muted);margin:6px 0}.cc-res b{color:var(--ink)}
-.cc-hint{border:1px dashed var(--accent);border-radius:12px;padding:8px 11px;margin:8px 0;font-size:14px}.cc-hint p{margin:4px 0}.cc-reset{border-color:var(--line);color:var(--muted);margin-top:8px}
+.cc-hint{border:1px dashed var(--accent);border-radius:12px;padding:8px 11px;margin:8px 0;font-size:14px}.cc-hint p{margin:4px 0}.cc-hs{border-top:1px dashed var(--line);margin-top:8px;padding-top:6px}.cc-hs i{font-style:normal;color:var(--accent);font-weight:700}.cc-hint .ok{color:#5ec98c;font-weight:700}.cc-reset{border-color:var(--line);color:var(--muted);margin-top:8px}
 .cc-prog{font-size:15px}.cc-book{display:grid;grid-template-columns:6.5em repeat(6,minmax(0,1fr));gap:4px;align-items:center}.cc-bh{display:flex;flex-direction:column;align-items:center;font-size:10px;color:var(--muted);text-align:center}.cc-bh svg{height:18px;width:auto}
 .cc-bn{font-size:12.5px;line-height:1.2}.cc-bn small{display:block;color:var(--muted);font-size:10.5px}.cc-cell{display:flex;justify-content:center;align-items:center;min-height:46px;border:1px solid var(--line);border-radius:8px;background:var(--panel);cursor:pointer;padding:0}.cc-cell:disabled{cursor:default;background:transparent}
 .cc-other{display:flex;flex-direction:column;gap:3px;font-size:13px;color:var(--muted)}.cc-other .ok{color:#5ec98c}
@@ -10525,18 +10525,43 @@ function tplList(cur){const P=presets(),gs=[...new Set(P.map(p=>p.g))];
   return '<div class="cc-tpl"><p class="label">套用後只換掉粉量、研磨和每一注，之後還能自己改。冰咖啡的配方不列；Switch 的關閥浸泡在這裡不會用到。'+(ZMAP[ST.dr]?'':'這個濾杯沒有官方配方，可以先用基本款。')+'</p>'+gs.map(g=>'<h4 class="cc-sh">'+g+'</h4>'+P.filter(p=>p.g===g).map(p=>{const W=waterOf(p.r);return '<button type="button" class="cc-tp" data-tp="'+esc(p.id)+'"><b>'+esc(p.n)+'</b><small>'+p.r.dose+' g／'+W+' g（1:'+(W/p.r.dose).toFixed(1)+'）・C40 '+p.r.clk+' 格・'+p.r.segs.length+' 注'+(p.r.byp?'＋bypass '+p.r.byp+' g':'')+(p.hold?'・原本有關閥浸泡':'')+'</small>'+(p.d?'<small>'+esc(p.d)+'</small>':'')+preview(p.r)+'</button>';}).join('')).join('')+'</div>';}
 function chart(c,lg){const sel=selA>=0&&selA<lg.length?selA:lg.length-1,pts=(lg||[]).map((x,i)=>({id:'a'+i,x:x.ey,y:x.tds,c:i===sel?'#f0c040':inBox(c,x)?'#5ec98c':'#8a8079',on:i===sel,label:'第 '+(x.no||i+1)+' 杯'}));
   return window.goldChart(pts,{box:[c.ey[0],c.ey[1],c.tds[0],c.tds[1]],boxLabel:c.t});}
+// 教練提示：方向＋最有效的一步＋原因（每一步都用模型試算過）
+const WHY={
+ fine:'粉粒變小，水走進粉粒中心的距離變短，可溶物出得更快；細粉也讓水流變慢、接觸時間變長，所以萃取率往上。磨太細時，慢溶出的苦澀物質也會跟著出來。',
+ coarse:'粉粒變大，物質要走更遠才出得來，水也流得比較快，所以萃取率往下。慢溶出的苦澀物質減少最多，酸和花香會相對突出。',
+ hot:'水溫高，物質溶解和擴散都更快，尤其是需要熱才溶得出來的糖類、苦味大分子，所以萃取率往上。',
+ cool:'水溫低，溶得慢的苦味大分子少很多；溶得快的有機酸、花香影響比較小，所以杯子變乾淨、酸和香氣相對明顯。',
+ more:'總水量變多，粉水比放大：整杯被稀釋，濃度往下；多出來的水也會再帶走一點可溶物，所以萃取率通常小幅上升。',
+ less:'總水量變少，粉水比縮小：濃度往上；少了一些水把可溶物帶出來，萃取率通常小幅下降。',
+ doseUp:'粉變多、水不變：溶出的總量變多，濃度往上；同樣的水分給更多粉，萃取率通常持平或小幅下降。主要是用來調濃淡。',
+ doseDn:'粉變少、水不變：溶出的總量變少，濃度往下；每克粉分到更多水，萃取率通常持平或小幅上升。主要是用來調濃淡。',
+ bypUp:'bypass 是沖完才加的水，不經過咖啡粉：萃取率完全不變，只把濃度往下拉。在圖上就是落點直直往下。',
+ bypDn:'少加一點 bypass，萃取率不變，濃度直直往上。',
+ bloom:'悶蒸久一點，粉裡的二氧化碳排得更乾淨、粉也吸飽了水，後面注水時水比較容易進到粉裡；整體接觸時間也變長，萃取率往上，甜感通常跟著出來。',
+ split:'多一次注水，就多一次攪動、多一次換上新的清水：粉和水之間的濃度差變大，萃取效率提高，萃取率往上。',
+ center:'中心注水水柱集中往下走、攪動小，粉層比較少被翻起：萃取慢一點、細粉和雜味少，杯子比較乾淨，萃取率略降。',
+ swirl:'繞圈注水會把粉層攪起來、讓水接觸到更多粉，萃取率往上，甜感和厚度通常比較好，但太激烈也會帶出苦澀。'};
+const FWHY={sweet:'甜感主要來自中段才溶出的糖類：萃得不夠，甜還沒出來；萃過頭，又被苦味蓋掉。濃度偏低一點時甜也比較容易喝出來（UC Davis 圖上甜味區在下方）。',
+ bitter:'苦味大分子溶得最慢，要靠高溫、細研磨、長時間才會大量出來；想降苦，就從水溫、研磨、總時間這三個下手。',
+ acid:'有機酸溶得最快，前段就出來了；萃取越多，酸被後面的甜和苦稀釋，感覺就越淡。'};
 function hintFor(c,r,d){const last=brew(c,r,d),cx=(c.ey[0]+c.ey[1])/2,cy=(c.tds[0]+c.tds[1])/2;
-  const mod=f=>{const x=clone(r);f(x);return x;},n=r.segs.length,LS=r.segs[n-1];
-  const opts=[['研磨調細 2 格',x=>x.clk-=2],['研磨調粗 2 格',x=>x.clk+=2],['每一注水溫都升 3°C',x=>x.segs.forEach(q=>q.temp=Math.min(100,q.temp+3))],['每一注水溫都降 3°C',x=>x.segs.forEach(q=>q.temp=Math.max(75,q.temp-3))],
-    ['最後一注加 20 g',x=>x.segs[n-1].ml+=20],['最後一注減 20 g',x=>x.segs[n-1].ml=Math.max(10,LS.ml-20)],['粉量加 1 g',x=>x.dose=Math.min(20,x.dose+1)],['粉量減 1 g',x=>x.dose=Math.max(10,x.dose-1)],
-    ['bypass 加 20 g',x=>x.byp=Math.min(150,(x.byp||0)+20)],['bypass 減 20 g',x=>x.byp=Math.max(0,(x.byp||0)-20)],['悶蒸延長 10 秒',x=>x.segs.slice(1).forEach(q=>q.t+=10)],['把最後一注拆成兩注',x=>{if(LS.ml>=30){x.segs[n-1].ml=Math.round(LS.ml/2);x.segs.push({ml:LS.ml-Math.round(LS.ml/2),t:LS.t+25,temp:LS.temp,sty:LS.sty});}}],
-    ['全部改成'+(r.segs[1]&&r.segs[1].sty==='c'?'繞圈':'中心')+'注水',x=>x.segs.forEach(q=>q.sty=r.segs[1]&&r.segs[1].sty==='c'?'r':'c')]].map(([n0,f])=>[n0,mod(f)]);
-  const dist=x=>Math.hypot((x.ey-cx)/1,(x.tds-cy)/.08)+(inBox(c,x)&&!svOk(c,x)?.5:0);
-  const best=opts.map(([n,o])=>[n,dist(brew(c,o,d))]).sort((a,b)=>a[1]-b[1]);
+  const mod=f=>{const x=clone(r);f(x);return x;},n=r.segs.length,LS=r.segs[n-1],ctr=r.segs[1]&&r.segs[1].sty==='c';
+  const opts=[['研磨調細 2 格',x=>x.clk-=2,'fine'],['研磨調粗 2 格',x=>x.clk+=2,'coarse'],['每一注水溫都升 3°C',x=>x.segs.forEach(q=>q.temp=Math.min(100,q.temp+3)),'hot'],['每一注水溫都降 3°C',x=>x.segs.forEach(q=>q.temp=Math.max(75,q.temp-3)),'cool'],
+    ['最後一注加 20 g',x=>x.segs[n-1].ml+=20,'more'],['最後一注減 20 g',x=>x.segs[n-1].ml=Math.max(10,LS.ml-20),'less'],['粉量加 1 g',x=>x.dose=Math.min(20,x.dose+1),'doseUp'],['粉量減 1 g',x=>x.dose=Math.max(10,x.dose-1),'doseDn'],
+    ['bypass 加 20 g',x=>x.byp=Math.min(150,(x.byp||0)+20),'bypUp'],['bypass 減 20 g',x=>x.byp=Math.max(0,(x.byp||0)-20),'bypDn'],['悶蒸延長 10 秒',x=>x.segs.slice(1).forEach(q=>q.t+=10),'bloom'],
+    ['把最後一注拆成兩注',x=>{if(LS.ml>=30){x.segs[n-1].ml=Math.round(LS.ml/2);x.segs.push({ml:LS.ml-Math.round(LS.ml/2),t:LS.t+25,temp:LS.temp,sty:LS.sty});}},'split'],
+    ['全部改成'+(ctr?'繞圈':'中心')+'注水',x=>x.segs.forEach(q=>q.sty=ctr?'r':'c'),ctr?'swirl':'center']].map(([n0,f,w])=>({n:n0,w,r:mod(f)}));
+  const dist=x=>Math.hypot((x.ey-cx)/1,(x.tds-cy)/.08)+(inBox(c,x)&&!svOk(c,x)?.5:0)+(inBox(c,x)?0:.6);
+  opts.forEach(o=>{o.x=brew(c,o.r,d);o.d=dist(o.x);});
+  const best=opts.filter(o=>JSON.stringify(o.r)!==JSON.stringify(r)).sort((a,b)=>a.d-b.d);
   const dir=[];if(last.ey<c.ey[0])dir.push('萃取不夠，要往右（磨細、升溫、多注幾次）');else if(last.ey>c.ey[1])dir.push('萃取過頭，要往左（磨粗、降溫、少注幾次）');
   if(last.tds>c.tds[1])dir.push('太濃，要往下（多加水、加 bypass 或少放粉）');else if(last.tds<c.tds[0])dir.push('太淡，要往上（少加水或多放粉）');
-  if(!dir.length&&!svOk(c,last))dir.push('已經在框裡，但'+FL[c.sv[0]]+'還沒達標（'+FL[c.sv[0]]+' '+last[c.sv[0]].toFixed(1)+'，銀杯要 '+svTxt(c)+'）');
-  return '<b>💡 教練提示</b><p>'+dir.join('；')+'。</p><p>從你現在的配方出發，最有效的一步：<b>'+best[0][0]+'</b>，其次是「'+best[1][0]+'」。</p>';}
+  const fk=c.sv[0],inb=inBox(c,last);
+  if(!dir.length&&!svOk(c,last))dir.push('已經在框裡，但'+FL[fk]+'還沒達標（'+FL[fk]+' '+last[fk].toFixed(1)+'，銀杯要 '+svTxt(c)+'）');
+  const chg=o=>{const x=o.x,a=[];a.push('萃取率 '+last.ey.toFixed(1)+' → <b>'+x.ey.toFixed(1)+'%</b>');a.push('濃度 '+last.tds.toFixed(2)+' → <b>'+x.tds.toFixed(2)+'%</b>');a.push(FL[fk]+' '+last[fk].toFixed(1)+' → <b>'+x[fk].toFixed(1)+'</b>');
+    return a.join('、')+(inBox(c,x)?(svOk(c,x)?'，<span class="ok">會進框、風味也達標</span>':'，<span class="ok">會在框裡</span>'):'，還在框外但更接近');};
+  const step=(o,i)=>'<div class="cc-hs"><b>'+(i?'其次：':'最有效：')+o.n+'</b><p>模型預估：'+chg(o)+'。</p><p><i>為什麼：</i>'+WHY[o.w]+'</p></div>';
+  return '<b>💡 教練提示</b><p>'+dir.join('；')+'。</p>'+(inb&&!svOk(c,last)?'<p class="label">'+FWHY[fk]+'</p>':'')+best.slice(0,2).map(step).join('')+'<p class="label">這只是從現在的配方「動一個地方」的試算，也可以兩個一起調。</p>';}
 function renderPlay(){const d=ST.dr,dp=dailyPick(),dk=today();
   let h='<h3 class="cc-h">① 選濾杯</h3><div class="cc-drs">'+DR.map(x=>'<button type="button" data-dr="'+x+'" aria-pressed="'+(x===d)+'">'+(window.dripSvg?window.dripSvg(x):'')+'<span>'+esc(drName(x))+'</span></button>').join('')+'</div>';
   const dDone=ST.daily[dk];
