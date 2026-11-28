@@ -242,11 +242,18 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:20px 0 30px}
     </div>
     <div class="note" id="nightCompare" style="margin-top:8px"></div>
   </div>
+  <div class="card" id="toCard">
+    <h2>各縣市投票率</h2>
+    <div class="note" id="toUpd"></div>
+    <div class="map" id="tomap" style="margin:10px 0"></div>
+    <div class="legend"><span><i style="background:#f3e3c8"></i>30% 左右</span><span><i style="background:#d9a55a"></i>40%</span><span><i style="background:#a8641c"></i>50% 以上</span><span><i style="background:#fff;border:1px dashed #ccc"></i>尚無資料</span></div>
+    <div id="toList"></div>
+    <div class="note" style="margin-top:6px">多數是選委會或媒體在投票途中報的估計值，時間點不同，不能直接比較；最終投票率以中選會公告為準。2022 年台北市長投票率 67.70%、新北 56.60%。</div>
+  </div>
   <div class="card">
-    <h2>台北市投票率・下午 2 點</h2>
-    <div class="note">全市選舉人 2,031,431 人，市長投票 1,108,873 人。資料為你提供的截圖。</div>
-    <div class="tally" style="margin:10px 0"><div style="background:#1d1f24"><b>54.59%</b>全市 2 點投票率</div></div>
-    <div id="turnout"></div>
+    <h2>台北市各區・下午 2 點</h2>
+    <div class="note">全市選舉人 2,031,431 人，市長投票 1,108,873 人（54.59%）。數字來自藍營內部回報（今日新聞報導），與你提供的截圖一致。</div>
+    <div id="turnout" style="margin-top:8px"></div>
   </div>
 </section>
 
@@ -267,7 +274,7 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:20px 0 30px}
   </div>
 </section>
 </main>
-<footer>2026 九合一選情圖鑑 v1.2・Made by <b>Jim Lu</b></footer>
+<footer>2026 九合一選情圖鑑 v1.3・Made by <b>Jim Lu</b></footer>
 
 <script>
 const P={K:{n:'國民黨',c:'var(--kmt)',l:'var(--kmt-l)'},D:{n:'民進黨',c:'var(--dpp)',l:'var(--dpp-l)'},T:{n:'民眾黨',c:'var(--tpp)',l:'var(--tpp-l)'},I:{n:'無黨籍',c:'var(--ind)',l:'var(--ind-l)'}};
@@ -624,6 +631,39 @@ function toast(t){const e=document.getElementById('toast');e.textContent=t;e.cla
 document.getElementById('share').onclick=()=>{const u=location.href.split('#')[0];(navigator.clipboard?navigator.clipboard.writeText(u):Promise.reject()).then(()=>toast('已複製連結'),()=>toast('請從網址列複製'))};
 
 
+
+// 各縣市投票率（投票日即時，定時更新）
+const TO_UPD='2026/11/28 15:20（台灣時間）';
+// [縣市, 時間, 數值, 上限(範圍時), 來源, 備註]
+const TO=[
+ ['台北','14:00',54.59,null,'https://tw.news.yahoo.com/%E5%8F%B0%E5%8C%97%E4%B8%AD%E5%8D%88%E6%8A%95%E7%A5%A8%E7%8E%87%E4%B8%8D%E5%8F%8A4%E6%88%90-%E9%80%99%E5%8D%80-%E5%83%8527-%E5%A2%8A%E5%BA%95-055153017.html','藍營內部回報；12:00 為 34.01%'],
+ ['新北','13:30',40,null,'https://news.tvbs.com.tw/politics/4057475','約略值；12:00 約 30–35%'],
+ ['台中','14:00',50,null,'https://udn.com/news/story/125076/9907622','報導稱破 5 成；12:00 為 39.55%'],
+ ['基隆','12:00',35,40,'https://ctinews.com/news/items/D0xd2q0BWY','各家報導 35%–40% 不一'],
+ ['新竹縣','12:30',37.77,null,'https://tw.news.yahoo.com/%E6%9C%89%E6%A9%9F%E6%9C%83%E7%AA%81%E7%A0%B4%E6%96%B0%E9%AB%98-%E6%96%B0%E7%AB%B9%E7%B8%A3%E4%B8%AD%E5%8D%88%E6%8A%95%E7%A5%A8%E7%8E%87%E5%87%BA%E7%88%90-%E6%9C%80%E6%96%B0%E6%95%B8%E5%AD%97%E6%9B%9D%E5%85%89-060837830.html','縣選委會'],
+ ['新竹市','12:00',40,null,'https://udn.com/news/story/125076/9907622','約 4 成'],
+ ['苗栗','12:00',38,null,'https://news.ebc.net.tw/news/politics/582892',''],
+ ['南投','12:00',40,null,'https://www.ftvnews.com.tw/news/detail/2026B28W0317','約 4 成'],
+ ['嘉義縣','12:00',39,null,'https://news.ebc.net.tw/news/politics/582892',''],
+ ['雲林','12:00',35.4,null,'https://www.ftvnews.com.tw/news/detail/2026B28W0317','縣選委會'],
+ ['彰化','12:00',35,null,'https://www.ftvnews.com.tw/news/detail/2026B28W0317','約略值'],
+ ['台南','12:00',35,null,'https://news.ebc.net.tw/news/politics/582892','約略值'],
+ ['高雄','12:00',35.13,null,'https://news.ebc.net.tw/news/politics/582892','市選委會'],
+ ['花蓮','12:00',35,null,'https://www.ettoday.net/news/20261128/3279990.htm','約略值，部分偏鄉未回報'],
+ ['嘉義市','12:00',33.88,null,'https://news.ebc.net.tw/news/politics/582892',''],
+ ['屏東','12:00',33.66,null,'https://news.ebc.net.tw/news/politics/582892',''],
+ ['澎湖','12:00',30,null,'https://ctinews.com/news/items/D0xd2q0BWY',''],
+ ['桃園','12:00',29.8,null,'https://ctinews.com/news/items/D0xd2q0BWY','民進黨桃園市黨部估算'],
+ ['台東','上午',40,null,'https://udn.com/news/story/124652/9907495','約 4 成']
+];
+function toColor(v){if(v==null)return '#fff';const t=Math.max(0,Math.min(1,(v-28)/24));const c0=[243,227,200],c1=[168,100,28];return `rgb(${c0.map((x,i)=>Math.round(x+(c1[i]-x)*t)).join(',')})`}
+function drawTO(){
+  document.getElementById('toUpd').textContent='資料更新：'+TO_UPD+'，每隔一段時間會自動更新';
+  const M={};TO.forEach(x=>M[x[0]]=x);
+  document.getElementById('tomap').innerHTML=C.map(c=>{const x=M[c[0]];return x?tileHTML(c,toColor(x[2]),x[2]>=45?'#fff':'#1d1f24',(x[3]?x[2]+'–'+x[3]:x[2])+'%',''):tileHTML(c,'#fff','#999','尚無資料','pending')}).join('');
+  document.getElementById('toList').innerHTML=TO.slice().sort((a,b)=>b[2]-a[2]).map(x=>`<div class="prow" style="grid-template-columns:48px 1fr 76px"><span>${x[0]}</span><div><div class="ptrack" style="height:12px"><div style="width:${x[2]/80*100}%;background:${toColor(x[2])}"></div></div><div class="note" style="font-size:10.5px">${x[1]}${x[5]?'・'+x[5]:''}・<a href="${x[4]}" target="_blank" rel="noopener">來源</a></div></div><span style="text-align:right">${x[3]?x[2]+'–'+x[3]:x[2]}%</span></div>`).join('');
+}
+drawTO();
 // 台北 2 點投票率
 (function(){const T=[['松山',152565,88177],['信義',171728,97198],['大安',227276,109547],['中山',179964,97060],['中正',114704,67280],['大同',97892,55247],['萬華',147258,77912],['文山',211750,106764],['南港',94704,50951],['內湖',219461,118606],['士林',217295,125009],['北投',196834,115122]];
  const avg=1108873/2031431*100;
