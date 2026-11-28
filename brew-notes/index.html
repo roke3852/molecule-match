@@ -706,6 +706,7 @@ function detail(id){
   openSheet(`<div class="sheet-head"><b>${when(b.ts)}</b><button class="btn sm" data-act="close">關閉</button></div><div class="sheet-body">
     <div class="between"><div><div class="title">${b.blend?'混豆：'+esc(b.blend.name):esc(bean?bean.name:'已刪除的豆子')}</div>${b.blend?`<div class="sub">${esc(b.blend.parts.map(p=>(p.beanId&&beanById(p.beanId)?beanById(p.beanId).name:p.name)+' '+p.pct+'%'+(has(p.g)?'（'+p.g+' g）':'')).join('＋'))}</div>`:''}<div class="sub">${has(b.restDay)?`養豆第 ${b.restDay} 天`:''}</div></div>${totBox(b)}</div>
     <fieldset><legend>參數</legend>${b.recName?`<div class="sub" style="margin-bottom:4px">配方：${esc(b.recName)}${b.preName?'（'+esc(b.preName)+'）':''}</div>`:''}<dl class="kv mono">${PARAMS.map(p=>`<dt>${p.l}</dt><dd>${esc(fmtP(p,b[p.k]))}</dd>`).join('')}<dt>TDS</dt><dd>${b.tds??'—'}</dd><dt>萃取率</dt><dd>${has(b.ey)?b.ey+'%':'—'}</dd></dl></fieldset>
+    ${brewCup(b)}
     ${disturbed(b)?`<fieldset class="condf"><legend>品飲狀態</legend><div>⚠ ${esc(condTxt(b))}${b.condN?'：'+esc(b.condN):''}</div><div class="sub">這杯的感受可能受干擾，分數僅供參考。用相同參數再沖一次，比較準。</div><div class="row" style="margin-top:6px"><button class="btn sm pri" data-act="retest" data-id="${esc(b.id)}">相同參數重測</button></div></fieldset>`:(b.cond||[]).includes('ok')?'<div class="sub" style="margin:4px 0">品飲狀態：正常</div>':''}
     ${b.target||b.met?`<fieldset><legend>測試目的</legend><div>${esc(b.target||'')}</div>${b.met?`<div><span class="pill ${b.met==='yes'?'good':b.met==='part'?'warn':'muted'}">${MET[b.met]}</span></div>`:''}</fieldset>`:''}
     ${(b.flavors||[]).length?`<fieldset><legend>風味</legend><div class="row">${flavHtml(b.flavors)}</div></fieldset>`:''}${temps}
@@ -1646,10 +1647,10 @@ const GCX=[13,27],GCY=[0.8,1.8];
 const GNAME=[['濃・萃取不足','濃','濃・過度萃取'],['萃取不足','金杯','過度萃取'],['淡・萃取不足','淡','淡・過度萃取']];
 const GTASTE=[['酸、鹹、刺','厚重','苦、厚重'],['酸、薄、青','平衡','苦、澀'],['水、酸','水、淡','水、苦澀']];
 const zoneOf=(ey,tds)=>GNAME[tds>1.45?0:tds<1.15?2:1][ey<18?0:ey>22?2:1];
-function libMap(L){const W=340,H=262,x0=36,y0=8,w=W-x0-8,h=H-y0-36;
+function cupGrid(lbl){const W=340,H=262,x0=36,y0=8,w=W-x0-8,h=H-y0-36;
   const cl=(v,a)=>Math.max(a[0],Math.min(a[1],v)),X=v=>x0+(cl(v,GCX)-GCX[0])/(GCX[1]-GCX[0])*w,Y=v=>y0+h-(cl(v,GCY)-GCY[0])/(GCY[1]-GCY[0])*h;
   const xs=[GCX[0],18,22,GCX[1]],ys=[GCY[1],1.45,1.15,GCY[0]];
-  let s=`<svg class="lmap" viewBox="0 0 ${W} ${H}" role="img" aria-label="金杯圖">`;
+  let s=`<svg class="lmap" viewBox="0 0 ${W} ${H}" role="img" aria-label="${lbl||'金杯圖'}">`;
   for(let i=0;i<3;i++)for(let j=0;j<3;j++){const gx=X(xs[j]),gy=Y(ys[i]),gw=X(xs[j+1])-gx,gh=Y(ys[i+1])-gy,c=i===1&&j===1;
     s+=`<rect x="${gx}" y="${gy}" width="${gw}" height="${gh}" fill="${c?'#e8b04a':j===0?'#7fb6e0':'#e8805a'}" opacity="${c?.2:j===1?.04:.08}" stroke="var(--line)" stroke-width=".6"/>`
      +`<text x="${gx+gw/2}" y="${gy+gh/2-2}" class="gz${c?' gc':''}" text-anchor="middle">${GNAME[i][j]}</text><text x="${gx+gw/2}" y="${gy+gh/2+9}" class="gt" text-anchor="middle">${GTASTE[i][j]}</text>`}
@@ -1657,11 +1658,33 @@ function libMap(L){const W=340,H=262,x0=36,y0=8,w=W-x0-8,h=H-y0-36;
   [13,15,18,20,22,25,27].forEach(e=>s+=`<text x="${X(e)}" y="${y0+h+11}" class="tk" text-anchor="middle">${e}%</text>`);
   [0.8,1.0,1.15,1.3,1.45,1.6,1.8].forEach(t=>s+=`<text x="${x0-3}" y="${Y(t)+3}" class="tk" text-anchor="end">${t.toFixed(t===1.15||t===1.45?2:1)}</text>`);
   s+=`<text x="${x0+w}" y="${y0+h+27}" class="tk" text-anchor="end">萃取率 EY →</text><text x="2" y="${y0+h+27}" class="tk">↑ 濃度 TDS %</text>`;
+  return {s,X,Y,x0,y0,w,h}}
+function libMap(L){const {s:s0,X,Y,x0,w}=cupGrid();let s=s0;
   const pts=L.filter(r=>has(r.ey)&&has(r.tds));
   pts.sort((a,b)=>(a.id===LIBSEL)-(b.id===LIBSEL)).forEach(r=>{const on=r.id===LIBSEL,c=RCOL[r.cat]||'#888',out=r.ey<GCX[0]||r.ey>GCX[1]||r.tds<GCY[0]||r.tds>GCY[1],cx=X(r.ey),cy=Y(r.tds);
     s+=`<g class="ld${on?' on':''}" data-act="libPick" data-id="${esc(r.id)}"><circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="12" fill="transparent"/>`+(out?`<path d="M${cx} ${cy-6}L${cx+5.5} ${cy+4}L${cx-5.5} ${cy+4}Z" fill="${c}" stroke="${on?'var(--ink)':'none'}" stroke-width="1.5"/>`:`<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="${on?6.5:4.8}" fill="${c}" fill-opacity="${on?1:.85}" stroke="${on?'var(--ink)':'var(--surface)'}" stroke-width="${on?2:1}"/>`)+'</g>';
     if(on){const right=cx<x0+w*.6;s+=`<text x="${(right?cx+10:cx-10).toFixed(1)}" y="${(cy+3).toFixed(1)}" class="tk lbl" text-anchor="${right?'start':'end'}">${esc(r.name)}${out?`（${r.ey}%・${r.tds}%）`:''}</text>`}});
   return s+'</svg>'}
+/* 單杯金杯圖：這杯＝大圓點，同支豆其他杯＝淡點，上一杯→這杯畫箭頭 */
+const CUPTIP={'萃取不足':'萃取率偏低：磨細一點、水溫高一點或拉長時間','過度萃取':'萃取率偏高：磨粗一點、水溫低一點或縮短時間','濃':'濃度偏高：粉水比放寬（多加水或少用粉）','淡':'濃度偏低：粉水比收緊（多用粉或少加水）'};
+function brewCup(b){
+  if(!has(b.ey)||!has(b.tds))return `<fieldset><legend>金杯圖</legend><div class="sub">填了 TDS 和萃取率（或 TDS＋液重＋粉重）就會畫出這杯在金杯圖的位置。</div></fieldset>`;
+  const {s:s0,X,Y,x0,w}=cupGrid('這杯的金杯圖');let s=s0;
+  const ok=x=>has(x.ey)&&has(x.tds),same=b.beanId&&!b.blend?brewsOf(b.beanId).filter(ok):[b];
+  const k=same.findIndex(x=>x.id===b.id),prev=k>0?same[k-1]:null;
+  const cl=(v,a)=>Math.max(a[0],Math.min(a[1],v)),P=x=>[X(cl(+x.ey,GCX)),Y(cl(+x.tds,GCY))];
+  s+=`<defs><marker id="cupar" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L8 4L0 8Z" fill="var(--muted)"/></marker></defs>`;
+  same.filter(x=>x.id!==b.id).forEach(x=>{const[cx,cy]=P(x);s+=`<g class="ld" data-act="detail" data-id="${esc(x.id)}"><circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="11" fill="transparent"/><circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="3.6" fill="var(--muted)" fill-opacity="${x===prev?.75:.35}"/></g>`});
+  const[cx,cy]=P(b);
+  if(prev){const[px,py]=P(prev),d=Math.hypot(cx-px,cy-py);if(d>12){const f=(d-9)/d;s+=`<line x1="${px.toFixed(1)}" y1="${py.toFixed(1)}" x2="${(px+(cx-px)*f).toFixed(1)}" y2="${(py+(cy-py)*f).toFixed(1)}" stroke="var(--muted)" stroke-width="1.3" stroke-dasharray="3 3" marker-end="url(#cupar)"/>`}}
+  const z=zoneOf(+b.ey,+b.tds),gold=z==='金杯',col=gold?'#e8b04a':'var(--accent)';
+  s+=`<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="7" fill="${col}" stroke="var(--ink)" stroke-width="2"/>`;
+  const right=cx<x0+w*.6;s+=`<text x="${(right?cx+11:cx-11).toFixed(1)}" y="${(cy+4).toFixed(1)}" class="tk lbl" text-anchor="${right?'start':'end'}">這杯 ${b.ey}%・${b.tds}</text></svg>`;
+  const r=+b.tds>1.45?0:+b.tds<1.15?2:1,c=+b.ey<18?0:+b.ey>22?2:1;
+  const tips=gold?['在金杯範圍內，接下來照味道微調就好']:[c===0?CUPTIP['萃取不足']:c===2?CUPTIP['過度萃取']:'',r===0?CUPTIP['濃']:r===2?CUPTIP['淡']:''].filter(Boolean);
+  let mv='';if(prev){const de=+b.ey-prev.ey,dt=+b.tds-prev.tds;mv=`<div class="sub">比上一杯（${when(prev.ts)}）：萃取率 ${de>=0?'+':''}${de.toFixed(2)}%、TDS ${dt>=0?'+':''}${dt.toFixed(2)}</div>`}
+  return `<fieldset class="lmapc"><legend>金杯圖</legend><div class="simz"><span class="zb ${gold?'zg':''}">${z}</span><span>預期口感：${GTASTE[r][c]}</span></div>${s}
+    ${tips.map(t=>`<div class="sub">→ ${t}</div>`).join('')}${mv}${same.length>1?`<div class="sub" style="font-size:11.5px">灰點＝這支豆的其他杯（點了可看），虛線箭頭＝上一杯到這杯。金框＝金杯 EY 18–22%、TDS 1.15–1.45%。</div>`:`<div class="sub" style="font-size:11.5px">金框＝金杯 EY 18–22%、TDS 1.15–1.45%。</div>`}</fieldset>`}
 function simLine(r){return has(r.ey)&&has(r.tds)?`<div class="simz"><span class="zb z${zoneOf(r.ey,r.tds)==='金杯'?'g':''}">${zoneOf(r.ey,r.tds)}</span><span class="mono">模擬 EY ${r.ey}%・TDS ${r.tds}%</span></div>`:''}
 /* 注水區塊：一塊＝一注，寬度＝這注的水量，顏色深淺＝水溫 */
 function blockCol(t){if(!has(t))return '#c99a6e';if(t<86){const k=Math.max(0,Math.min(1,(t-70)/16));return `hsl(205,${30+k*5}%,${72-k*6}%)`}const k=Math.max(0,Math.min(1,(t-86)/13));return `hsl(${30-k*12},${48+k*14}%,${68-k*14}%)`}
