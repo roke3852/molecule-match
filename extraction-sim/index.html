@@ -782,6 +782,13 @@ html.embed{--modesH:0px}
 .cm-pick button[aria-pressed=true]{border-color:var(--accent,#c9a66b);box-shadow:0 0 0 1px var(--accent,#c9a66b) inset}
 .cm-pick button.done em::after{content:" ✓"}
 .cm-pf{flex:none;width:36px;height:36px}.cm-pt{display:flex;flex-direction:column;min-width:0}.cm-pt small{font-size:11px;color:var(--muted)}.cm-pt b{font-size:13px;line-height:1.3}.cm-pt em{font-style:normal;font-size:11px;color:var(--muted)}
+.z-pick1,.zp-it{display:block;width:100%;text-align:left;font:inherit;color:var(--ink);background:var(--panel);border:1px solid var(--accent);border-radius:12px;padding:10px 12px;cursor:pointer}
+.zc-h{display:flex;align-items:baseline;gap:8px}.zc-h i{width:10px;height:10px;border-radius:50%;flex:none;align-self:center}.zc-h b{font-size:16px}.zc-h small{color:var(--muted)}
+.zc-tags{display:flex;flex-wrap:wrap;gap:5px;align-items:center;margin:6px 0 4px;font-size:12.5px}.zc-tags>span{border:1px solid var(--line);border-radius:8px;padding:2px 7px;display:inline-flex;align-items:center}.zc-tags svg{height:16px;width:auto}.zc-tags .zc-t{color:#1a1512;border:0;font-weight:700}
+.zc-r{display:block;font-size:12.5px;color:var(--muted);margin-top:3px}.zc-go{display:block;text-align:right;color:var(--accent);font-weight:700;font-size:14px;margin-top:4px}.zc-d{display:block;font-size:13px;color:var(--muted);margin-top:4px}
+.zp-ov{position:fixed;inset:0;z-index:80;background:rgba(0,0,0,.6);display:flex;align-items:flex-end;justify-content:center}.zp-ov[hidden]{display:none}
+.zp-box{background:var(--bg,#1b1714);width:min(640px,100%);max-height:88vh;overflow:auto;border-radius:16px 16px 0 0;padding:12px 14px 24px}.zp-hd{display:flex;justify-content:space-between;align-items:center;position:sticky;top:-12px;background:inherit;padding:6px 0;z-index:1}.zp-hd b{font-size:17px}.zp-hd button{font:inherit;font-size:18px;background:none;border:0;color:var(--ink);width:44px;height:44px;cursor:pointer}
+.zp-list{display:grid;gap:8px}.zp-it{border-color:var(--line)}.zp-it.on{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
 .cm-bar{display:flex;gap:3px;margin-top:12px}.cm-bar>div{min-width:22px;height:46px;border-radius:5px;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#1a1512;font-size:12px;line-height:1.1}
 .cm-bar>div.cl{background-image:repeating-linear-gradient(45deg,transparent 0 5px,rgba(0,0,0,.16) 5px 8px)!important}.cm-bar small{font-size:10px;opacity:.8}
 .cm-tl{display:flex;gap:3px;font-size:11px;color:var(--muted);margin:4px 0 6px}.cm-tl span{min-width:22px}
@@ -1443,7 +1450,7 @@ window.BGM=(()=>{
     <div class="err" id="tErr"></div>
   </div>
   <button class="t-more" id="tMore" type="button" aria-label="咖啡宇宙：更多咖啡 App 與遊戲">咖啡宇宙</button>
-  <div class="t-foot">© 2026 Jim Lu　ver. 11.7</div>
+  <div class="t-foot">© 2026 Jim Lu　ver. 11.8</div>
 </div>
 <nav class="modes" aria-label="導覽"><div class="in">
   <button class="homebtn" id="homeBtn" type="button" hidden>‹ 主選單</button>
@@ -8764,7 +8771,7 @@ function zScatter(z){const Z=ZONES[z],S=ZST[z];
 function zHTML(z){const Z=ZONES[z];return '<div class="cm-sec zone" data-m="'+z+'" hidden><div><div class="label">'+Z.label+'</div><h1>'+Z.h1+'</h1><p class="lede">'+Z.lede+'</p></div>'+
   '<section class="panel cm-why"><h2>'+Z.sciH+'</h2><p>'+Z.sciP+'</p><p class="label">點卡片標題展開說明</p><div class="cm-cards">'+Z.cards.map(([i,h,p])=>'<details><summary><span class="cm-ic">'+i+'</span><h3>'+h+'</h3></summary><p>'+p+'</p></details>').join('')+'</div>'+
    '<h3 class="cm-ch-h">'+Z.recipes.length+' 套配方在金杯圖上的位置</h3><div class="cm-chart z-sc"></div><p class="label">👆 直接點圖上的點就會選那套配方（畫面不會跳走），下面的配方卡、結果和比較表會跟著換。點太密的地方會選最近的那一點。中間金框是金杯，九宮格的每一格標出那一區喝起來的感覺。模型用每套配方「適合的豆子」來計算。</p></section>'+
-  '<section class="panel cm-lab"><h2>動手試：選配方、換'+Z.varH+'</h2><div class="params"><div class="param"><span class="label">配方</span><div class="seg wrapseg z-pick" role="group">'+Z.recipes.map(r=>'<button type="button" data-r="'+r.id+'">'+r.n+'</button>').join('')+'</div></div>'+
+  '<section class="panel cm-lab"><h2>動手試：選配方、換'+Z.varH+'</h2><div class="params"><div class="param"><span class="label">配方</span><button type="button" class="z-pick1" aria-haspopup="dialog"></button></div>'+
    '<div class="param"><span class="label">'+Z.varH+'</span><div class="seg wrapseg z-var" role="group"><button type="button" data-v="">配方原本的</button>'+Z.vars.map(v=>'<button type="button" data-v="'+v[0]+'">'+v[1]+'</button>').join('')+'</div></div></div>'+
    '<div class="orea-card"></div><div class="t46-res cm-res"></div><h3 class="cm-ch-h">調整後的金杯圖</h3><div class="cm-chart z-adj"></div><p class="label z-adj-note"></p><h3 class="cm-ch-h">時間曲線（實線＝原配方、虛線＝換'+Z.varH+'）</h3><div class="cm-chart z-curve"></div><p class="t46-note cm-note"></p><button class="savebtn cm-go" type="button">把這套配方帶到練習模擬器</button></section>'+
   '<section class="panel"><h2>'+Z.recipes.length+' 套配方一覽</h2><div class="param"><span class="label">比較用的豆子</span><div class="seg wrapseg z-tb" role="group"><button type="button" data-b="">各自適合的豆子</button><button type="button" data-b="geisha">全部用藝伎</button><button type="button" data-b="col">全部用哥倫比亞</button></div></div><div class="cm-cmp z-tab"></div><p class="label">每列名稱下面是那套配方換算成 C40 的研磨格數（原文只寫「中細」之類的，用典型粒徑換算成約略格數）、模擬用的粒徑、粉水量和水溫。研磨刻度以 Comandante C40 每格約 27 μm 換算，取範圍的中間值；只寫「中細」的配方用對應的典型粒徑。選「全部用同一支豆子」就能只比配方本身的差別。TDS 和萃取率是模型算的；「滴完」是原始配方寫的時間。點一列就切到那套配方。</p></section>'+
@@ -8781,8 +8788,28 @@ function zRobustNote(rows,inEY,inGold){const main=rows.filter(([n])=>!/極淺焙
 const c40L=x=>/格/.test(x.gl)&&!/Ode/.test(x.gl)?'C40 '+x.gl.replace(/^C40\s*/,''):'C40 約 '+Math.round(x.grind/27.25)+' 格'+(x.gl?'（原文：'+x.gl+'）':'');
 const c40N=um=>{const v=Math.round(um/27.25*2)/2;return '≈ C40 '+(v%1?v.toFixed(1):v)+' 格';};
 const styleN=x=>x==='c'?'中心':x==='h'?'繞＋中':'繞圈';
+
+// 配方：圖解卡片＋選擇頁
+const zEnd=(z,r)=>{const E=zParams(z,r,null),R=zRun(z,r);return Math.max(R.end||0,...E.plan.map((m,i)=>E.planT[i]+((E.planD&&E.planD[i])||m/5)))+6;};
+function zMini(z,r,W,H,tm){W=W||300;H=H||46;const E=zParams(z,r,null),R=zRun(z,r),tE=Math.max(tm||0,R.end||0,...E.plan.map((m,i)=>E.planT[i]+((E.planD&&E.planD[i])||m/5)))+6,X=t=>2+t/tE*(W-4),mx=Math.max(...E.plan),temps=E.planTemp||E.plan.map(()=>E.temp);
+  let o='<svg viewBox="0 0 '+W+' '+H+'" width="100%" height="'+H+'" preserveAspectRatio="none" aria-hidden="true"><line x1="0" x2="'+W+'" y1="'+(H-1)+'" y2="'+(H-1)+'" stroke="var(--line)"/>';
+  (E.valveWins||[]).forEach(([a,b])=>{o+='<rect x="'+X(a).toFixed(1)+'" y="0" width="'+Math.max(2,X(Math.min(b,tE))-X(a)).toFixed(1)+'" height="'+H+'" fill="#e8b04a" opacity=".16"/><rect x="'+X(a).toFixed(1)+'" y="0" width="'+Math.max(2,X(Math.min(b,tE))-X(a)).toFixed(1)+'" height="2" fill="#e8b04a"/>';});
+  E.plan.forEach((m,i)=>{const bh=Math.max(4,m/mx*(H-8)),x=X(E.planT[i]),w=Math.max(3,X(E.planT[i]+((E.planD&&E.planD[i])||m/5))-x),st=(r.style||[])[i];
+    o+='<rect x="'+x.toFixed(1)+'" y="'+(H-1-bh).toFixed(1)+'" width="'+w.toFixed(1)+'" height="'+bh.toFixed(1)+'" rx="1.5" fill="'+tempCol(temps[i])+'"/>'+(st==='c'?'<circle cx="'+(x+w/2).toFixed(1)+'" cy="'+(H-1-bh-4).toFixed(1)+'" r="2" fill="var(--ink)"/>':'');});
+  o+='<line x1="'+X(R.end)+'" x2="'+X(R.end)+'" y1="4" y2="'+(H-1)+'" stroke="var(--muted)" stroke-dasharray="2 2"/>';
+  return o+'</svg>';}
+function zCard(z,r,on,tm){const Z=ZONES[z],R=zRun(z,r),E=zParams(z,r,null),c=Z.color(r),tt=(r.planTemp?r.planTemp[0]+'→'+r.planTemp[r.planTemp.length-1]:r.temp)+'°';
+  return '<span class="zc-h"><i style="background:'+c+'"></i><b>'+r.n+'</b>'+(r.by?'<small>'+r.by+'</small>':'')+'</span>'+
+   '<span class="zc-tags"><span>'+(window.dripSvg?window.dripSvg(E.dripper,!!E.valveWins):'')+(DRIPPER[E.dripper]||{name:''}).name.replace(/（.*$/,'')+(E.valveWins?'＋Switch':'')+'</span><span class="zc-t" style="background:'+tempCol(r.planTemp?r.planTemp[0]:r.temp)+'">'+tt+'</span><span>'+r.dose+'/'+r.water+'g'+(r.ice?'＋冰':'')+(r.bypass?'＋水':'')+'</span><span>'+r.plan.length+' 注</span><span>⏱'+r.done+'</span></span>'+
+   zMini(z,r,300,on?40:34,tm)+'<span class="zc-r">'+zoneOf(R.ey,R.tds)+'・EY '+R.ey.toFixed(1)+'%・TDS '+R.tds.toFixed(2)+'%</span>';}
+function zOpenPick(z){const Z=ZONES[z],S=ZST[z];let ov=document.getElementById('zPickOv');if(!ov){ov=document.createElement('div');ov.id='zPickOv';ov.className='zp-ov';ov.setAttribute('role','dialog');ov.setAttribute('aria-modal','true');document.body.appendChild(ov);
+    ov.addEventListener('click',e=>{if(e.target===ov||e.target.closest('[data-zx]')){ov.hidden=true;document.body.style.overflow='';return;}const b=e.target.closest('[data-zr]');if(b){ov.hidden=true;document.body.style.overflow='';zPick(ov.dataset.z,b.dataset.zr);}});}
+  ov.dataset.z=z;const TM=Math.max(...Z.recipes.map(r=>zEnd(z,r)));
+  ov.innerHTML='<div class="zp-box"><div class="zp-hd"><b>選一套配方</b><button type="button" data-zx="1" aria-label="關閉">✕</button></div><p class="label">柱子＝每一注（寬＝注水時間、高＝水量、顏色＝水溫，上方黑點＝中心注水）；黃色底＝關閥浸泡；虛線＝模型滴完。所有配方用同一個時間比例。</p><div class="cm-leg">'+Z.legend.map(([c,l])=>'<span><i style="border-color:'+c+'"></i>'+l+'</span>').join('')+'</div><div class="zp-list">'+
+   Z.recipes.map(r=>'<button type="button" class="zp-it'+(r.id===S.cur?' on':'')+'" data-zr="'+r.id+'">'+zCard(z,r,0,TM)+'<span class="zc-d">'+r.d+'</span></button>').join('')+'</div></div>';
+  ov.hidden=false;document.body.style.overflow='hidden';const cur=ov.querySelector('.zp-it.on');if(cur)cur.scrollIntoView({block:'center'});}
 function zRender(z){const sec=document.querySelector('.cm-sec[data-m="'+z+'"]');if(!sec)return;const Z=ZONES[z],S=ZST[z],r=Z.recipes.find(x=>x.id===S.cur)||Z.recipes[0],R=zRun(z,r);
-  sec.querySelectorAll('.z-pick button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.r===r.id));
+  sec.querySelector('.z-pick1').innerHTML=zCard(z,r,1)+'<span class="zc-go">換配方（共 '+Z.recipes.length+' 套）›</span>';
   sec.querySelectorAll('.z-var button').forEach(b=>b.setAttribute('aria-pressed',(b.dataset.v||null)===S.v));
   sec.querySelector('.z-sc').innerHTML=zScatter(z);
   const E=zParams(z,r,S.v),B0=S.v?zRun(z,r,S.v):null,Rv=B0||R,vName=S.v?Z.vars.find(v=>v[0]===S.v)[1]:'';
@@ -8812,7 +8839,7 @@ function zBind(z){const sec=document.querySelector('.cm-sec[data-m="'+z+'"]'),S=
   sec.querySelector('.z-sc').addEventListener('click',e=>{const svg=e.currentTarget.querySelector('svg');if(!svg)return;const pt=svg.createSVGPoint();pt.x=e.clientX;pt.y=e.clientY;const q=pt.matrixTransform(svg.getScreenCTM().inverse());
     let best=null,bd=1e9;svg.querySelectorAll('.orea-dot').forEach(g=>{const c=g.querySelector('circle');const d=Math.hypot(+c.getAttribute('cx')-q.x,+c.getAttribute('cy')-q.y);if(d<bd){bd=d;best=g.dataset.r;}});
     if(best&&bd<=18)zPick(z,best);});
-  sec.querySelectorAll('.z-pick button').forEach(b=>b.onclick=()=>{S.cur=b.dataset.r;S.v=null;zRender(z);});
+  sec.querySelector('.z-pick1').onclick=()=>zOpenPick(z);
   sec.querySelectorAll('.z-var button').forEach(b=>b.onclick=()=>{S.v=b.dataset.v||null;zRender(z);});
   sec.querySelectorAll('.z-tb button').forEach(b=>b.onclick=()=>{S.tb=b.dataset.b||null;zRender(z);});
   sec.querySelector('.cm-go').onclick=()=>{const r=Z.recipes.find(x=>x.id===S.cur),p=zParams(z,r,S.v);if(!window.simApplyRecipe)return;
@@ -9732,6 +9759,7 @@ function bindComp(){$('dzCu').addEventListener('click',e=>{const b=e.target.clos
 // ---- 圖示名牌：濾杯形狀、每段色塊（顏色＝水溫、斜線＝浸泡、白點＝中心注水）、研磨、粉水 ----
 const tcol=t=>{const u=Math.max(0,Math.min(1,(t-70)/26)),a=[127,182,224],b=[232,150,74];return 'rgb('+a.map((v,i)=>Math.round(v+(b[i]-v)*u)).join(',')+')';};
 let bgN=0;
+window.dripSvg=(k,sw)=>dripSvg(k,sw);
 function dripSvg(key,sw){const k=key||'v60',flat=/orea|kalita|wave|flat|april/i.test(k),org=/origami/i.test(k);
   const body=flat?'<path d="M3 5h16l-3 9H6z"/>':org?'<path d="M2 5h18l-9 10z"/><path d="M5 5l2 3M9 5l1 3M13 5l-1 3M17 5l-2 3" stroke="var(--panel)" stroke-width="1"/>':'<path d="M2 5h18l-7 9h-4z"/>';
   return '<svg class="bg-d" viewBox="0 0 22 22" width="22" height="22" aria-hidden="true"><g fill="var(--muted)">'+body+'<rect x="1" y="3" width="20" height="2" rx="1"/>'+(sw?'<rect x="7" y="15" width="8" height="4" rx="1.5" fill="#e8b04a"/>':'<rect x="9" y="15" width="4" height="2" rx="1"/>')+'</g></svg>';}
