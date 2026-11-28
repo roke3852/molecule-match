@@ -26,6 +26,14 @@ nav button{flex:none;border:0;background:transparent;padding:7px 11px;border-rad
 nav button.on{background:var(--ink);color:#fff}
 main{max-width:760px;margin:0 auto;padding:12px 12px 40px}
 section{display:none}section.on{display:block}
+nav button.big{flex:1 1 100%;order:-1;font-size:19px;font-weight:800;padding:12px 14px;margin-bottom:4px;border-radius:14px;background:#fff;color:#b42318;border:2px solid #b42318;letter-spacing:.04em}
+nav button.big.on{background:#b42318;color:#fff;box-shadow:0 4px 14px rgba(180,35,24,.3)}
+nav button.big .live{display:inline-block;width:10px;height:10px;border-radius:50%;background:currentColor;margin-right:8px;vertical-align:1px;animation:blink 1.2s infinite}
+@keyframes blink{50%{opacity:.25}}
+.sub-tabs{display:flex;gap:4px;background:#ebe8e1;border-radius:12px;padding:4px;margin:0 0 12px;position:sticky;top:var(--navh,96px);z-index:4}
+.sub-tabs button{flex:1;border:0;background:transparent;padding:9px 4px;border-radius:9px;font-size:14px;color:var(--muted);font-family:inherit}
+.sub-tabs button.on{background:#fff;color:#b42318;font-weight:700;box-shadow:0 1px 3px rgba(0,0,0,.1)}
+#night .card[data-g]{display:none}#night .card[data-g].show{display:block}
 .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px}
 h2{font-size:17px;margin:4px 0 10px}
 h3{font-size:15px;margin:0 0 8px}
@@ -137,18 +145,18 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:20px 0 30px}
 <div class="toast" id="toast"></div>
 <div id="sheet"><div class="sh-body"><button class="sh-x">✕</button><div class="sh-body-in"></div></div></div>
 <nav><div class="in" id="tabs">
-  <button data-t="map" class="on">藍綠版圖</button>
+  <button data-t="night" class="on big"><i class="live"></i>開票夜・即時開票</button>
+  <button data-t="map">藍綠版圖</button>
   <button data-t="six">六都政見</button>
   <button data-t="pop">人口結構</button>
   <!--POLL--><button data-t="poll">封關民調</button><!--/POLL-->
   <button data-t="mine">我的選票</button>
-  <button data-t="night">開票夜</button>
   <button data-t="src">資料來源</button>
 </div></nav>
 
 <main>
 <!-- 版圖 -->
-<section id="map" class="on">
+<section id="map">
   <div class="card">
     <h2>22 縣市長版圖</h2>
     <div class="seg" id="yearSeg">
@@ -245,8 +253,14 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:20px 0 30px}
 </section>
 
 <!-- 開票夜 -->
-<section id="night">
-  <div class="card">
+<section id="night" class="on">
+  <div class="sub-tabs" id="ntabs">
+    <button data-n="res" class="on">即時票數</button>
+    <button data-n="board">計分板</button>
+    <button data-n="key">關鍵開票所</button>
+    <button data-n="to">投票率</button>
+  </div>
+  <div class="card" data-g="board">
     <h2>開票夜計分板</h2>
     <div class="note">11/28 晚上點縣市方塊，依序切換 藍 → 綠 → 白 → 無黨籍 → 未定，記下各縣市當選黨籍。紀錄只存在這支手機。</div>
     <div class="tally" id="tally"></div>
@@ -256,7 +270,7 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:20px 0 30px}
     </div>
     <div class="note" id="nightCompare" style="margin-top:8px"></div>
   </div>
-  <div class="card" id="keyCard">
+  <div class="card" id="keyCard" data-g="key">
     <h2>關鍵開票所怎麼看（雙北）</h2>
     <div class="note" style="margin-bottom:8px">三種要盯的地方：🐙 指標里（歷屆結果跟全市很接近）、🏦 大票倉（人多，開完會大幅改變差距）、🔵🟢 傳統票倉（媒體常稱的藍營或綠營強區，晚開出來時差距會被拉回）。點方塊可以自己標「開票中→已開完」，紀錄只存在這支手機。</div>
     <div class="legend"><span>⬜ 未開</span><span>🟨 開票中</span><span>✅ 已開完</span></div>
@@ -267,13 +281,13 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:20px 0 30px}
     <div class="note" id="kNote" style="margin-top:8px"></div>
     <div class="note" style="margin-top:6px">我沒辦法即時抓到每個開票所的完成狀態，看各區開票進度可以開：<a href="https://www.cw.com.tw/graphics/2026-taiwan-local-elections/county/65000/" target="_blank" rel="noopener">天下雜誌・新北各區開票</a>・<a href="https://udn.com/news/story/124652/9874224" target="_blank" rel="noopener">聯合報開票地圖</a></div>
   </div>
-  <div class="card" id="resCard">
+  <div class="card" id="resCard" data-g="res">
     <h2>即時票數</h2>
     <div class="note" id="resUpd"></div>
     <div id="resList" style="margin-top:8px"></div>
     <div class="note" style="margin-top:8px">票數來自媒體報票，各家速度不同，會有落差；最終結果以中選會公告為準。地圖上淺色＝暫時領先，深色＝確定當選。看最即時的票數：<a href="https://udn.com/news/story/124652/9874224" target="_blank" rel="noopener">聯合報即時開票</a>・<a href="https://www.nownews.com/news/6896211" target="_blank" rel="noopener">今日新聞 22 縣市</a></div>
   </div>
-  <div class="card" id="toCard">
+  <div class="card" id="toCard" data-g="to">
     <h2>各縣市投票率</h2>
     <div class="note" id="toUpd"></div>
     <div class="map" id="tomap" style="margin:10px 0"></div>
@@ -281,12 +295,12 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:20px 0 30px}
     <div id="toList"></div>
     <div class="note" style="margin-top:6px">多數是選委會或媒體在投票途中報的估計值，時間點不同，不能直接比較；最終投票率以中選會公告為準。2022 年台北市長投票率 67.70%、新北 56.60%。</div>
   </div>
-  <div class="card">
+  <div class="card" data-g="to">
     <h2>台北市長選舉・歷屆投票率</h2>
     <div id="tpHist"></div>
     <div class="note">最高是 1998 年 80.89%，最低是 2006 年 64.52%。2022 年是 67.70%，不是最低。2026 年最終投票率出來後會補上。</div>
   </div>
-  <div class="card">
+  <div class="card" data-g="to">
     <h2>台北市各區・下午 2 點</h2>
     <div class="note">全市選舉人 2,031,431 人，市長投票 1,108,873 人（54.59%）。數字來自藍營內部回報（今日新聞報導），與你提供的截圖一致。</div>
     <div id="turnout" style="margin-top:8px"></div>
@@ -316,7 +330,7 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:20px 0 30px}
   </div>
 </section>
 </main>
-<footer>2026 九合一選情圖鑑 v2.2・Made by <b>Jim Lu</b></footer>
+<footer>2026 九合一選情圖鑑 v2.3・Made by <b>Jim Lu</b></footer>
 
 <script>
 const P={K:{n:'國民黨',c:'var(--kmt)',l:'var(--kmt-l)'},D:{n:'民進黨',c:'var(--dpp)',l:'var(--dpp-l)'},T:{n:'民眾黨',c:'var(--tpp)',l:'var(--tpp-l)'},I:{n:'無黨籍',c:'var(--ind)',l:'var(--ind-l)'}};
@@ -825,6 +839,16 @@ function go(t){
 }
 document.querySelectorAll('#tabs button').forEach(b=>b.onclick=()=>{go(b.dataset.t);try{history.replaceState(null,'','#'+b.dataset.t)}catch(e){}});
 if(location.hash&&document.getElementById(location.hash.slice(1)))go(location.hash.slice(1));
+// 開票夜小分頁
+function gon(n){
+  document.querySelectorAll('#ntabs button').forEach(b=>b.classList.toggle('on',b.dataset.n===n));
+  document.querySelectorAll('#night .card[data-g]').forEach(c=>c.classList.toggle('show',c.dataset.g===n));
+  try{localStorage.setItem('elec_nt',n)}catch(e){}
+}
+document.querySelectorAll('#ntabs button').forEach(b=>b.onclick=()=>{gon(b.dataset.n);window.scrollTo(0,0)});
+(function(){let n='res';try{n=localStorage.getItem('elec_nt')||'res'}catch(e){}gon(document.querySelector('#ntabs [data-n="'+n+'"]')?n:'res')})();
+function navH(){const h=document.querySelector('nav').offsetHeight;document.documentElement.style.setProperty('--navh',h+'px')}
+navH();addEventListener('resize',navH);
 
 // 倒數
 (function(){const end=new Date('2026-11-28T08:00:00+08:00');const d=Math.ceil((end-new Date())/86400000);
