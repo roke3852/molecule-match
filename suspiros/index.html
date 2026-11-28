@@ -79,6 +79,10 @@ button{font:inherit;color:inherit;touch-action:manipulation;cursor:pointer}
 .plist{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.plist button{border:1px solid var(--line);background:var(--ink3);border-radius:8px;padding:4px 8px;font-size:12.5px}
 .prof{width:100%;height:auto;display:block;margin-top:8px;background:#0e1a1f;border:1px solid var(--line);border-radius:10px}.prof text{font-size:9px;fill:var(--cream)}.prof .ax{font-size:8px;fill:var(--sub)}
 @media (prefers-reduced-motion:reduce){.mapsvg .ping{animation:none}}
+.spk{display:inline-flex;align-items:center;gap:6px;margin-top:6px;border:1px solid #7b2a22;background:#fff7e6;color:#7b2a22;border-radius:16px;padding:5px 11px;font-size:14px;font-weight:700;line-height:1.3}
+.spk small{font-weight:400;color:#6a5a4a;font-size:12px}.spk i{font-style:normal;font-weight:400;font-size:11px;border:1px solid #c9b98a;border-radius:8px;padding:0 5px;color:#6a5a4a}
+.card .spk{background:var(--ink3);border-color:var(--gold);color:var(--gold)}.card .spk small,.card .spk i{color:var(--sub);border-color:var(--line)}
+.tchip.sy{border-color:var(--leafL);color:var(--leafL);background:rgba(143,194,154,.1)}
 </style>
 </head>
 <body>
@@ -95,7 +99,7 @@ button{font:inherit;color:inherit;touch-action:manipulation;cursor:pointer}
   <button class="mbtn" id="bGloss">📚<div>咖啡小辭典<small>故事裡出現的名詞</small></div></button>
  </div>
  <div class="credit">故事根據 COFFEE COUNTY 的豆卡改編；人物對話為想像重現，生產者、產區、品種與風味描述依照店家卡片。<br>品飲紀錄：Roke，2026/11/27 於 COFFEE COUNTY Fukuoka<br>外傳依鄒築園、珍5吉咖啡莊園的公開報導與罐上標示改編。<br>外傳三依 Rufous Chelbesa 豆袋標示與你的沖煮筆記改編；阿貝貝、緹吉絲特、達維特為想像人物。<br>外傳四依 93 Coffee 商品頁與藝伎品種的公開史料改編；凱貝德、評審、瑟蘭為想像人物。</div>
- <div class="jl">嘆息之谷 v1.5・Made by <b>Jim Lu</b></div>
+ <div class="jl">嘆息之谷 v1.6・Made by <b>Jim Lu</b></div>
 </section>
 
 <section class="screen" id="game">
@@ -168,6 +172,8 @@ const GL={
  '班奇馬吉':'Bench Maji。衣索比亞西南角的舊行政區名，靠近南蘇丹邊境，多雨、多森林。行政區後來改制拆分，但咖啡界仍習慣沿用這個名字。藝伎品種的原鄉 Gori Gesha 森林就在這一帶。',
  '飛雀':'Fair Trade Station 的中文譯名，取「Fair Trade」的諧音。93 Coffee 的商品頁只寫了處理站名稱，沒有公開它的確切位置和海拔。',
  'Gori Gesha':'Gori Gesha 森林。衣索比亞西南部的原始森林，被認為是藝伎品種的發源地，野生咖啡樹至今還長在大樹底下。',
+ 'Adam Overton':'Gesha Village 的共同創辦人，美國紀錄片導演、攝影師。2007 年為了拍攝衣索比亞咖啡的紀錄片來到這裡，後來和太太 Rachel Samuel 一起在班奇馬吉找地、進森林採種，2011 年創立莊園。',
+ 'Rachel Samuel':'Gesha Village 的共同創辦人，在衣索比亞出生的攝影師，Adam Overton 的太太。兩人一起把藝伎種回它的故鄉。',
  'Gesha Village':'瑰夏村莊園。2011 年由 Adam Overton 與 Rachel Samuel 創立，約 475 公頃，離 Gori Gesha 森林約 20 公里。他們進森林採集種子，把藝伎重新種回它的故鄉。',
  'Gesha':'藝伎品種名字的來源：衣索比亞西南部的地名。1930 年代英國人把它記成 Geisha，後來就跟日文的「藝伎」撞了字。衣索比亞的豆子多半拼成 Gesha，巴拿馬等地則沿用 Geisha。',
  'G1':'Grade 1。衣索比亞生豆分級中瑕疵最少的最高等級。',
@@ -713,7 +719,7 @@ let MAPCTX=null;
 function openMap(keys,start,onDone){MAPCTX={keys,cur:start||keys[0],sel:null,onDone};renderMap();blip(660,.08,'triangle',.05)}
 function renderMap(){const c=MAPCTX,m=MAPS[c.cur];if(!c.sel||!m.pins.includes(c.sel))c.sel=m.focus||m.pins[0];const p=PINS[c.sel];
  openCard(`<h3>🗺️ ${esc(m.t)}</h3>${c.keys.length>1?`<div class="mtabs">${c.keys.map(k=>`<button class="mtab ${k===c.cur?'on':''}" data-mt="${k}">${esc(MAPS[k].t.split('：')[0].split('・')[0])}</button>`).join('')}</div>`:''}
- <div class="mapw">${mapSVG(c.cur,c.sel)}</div><div class="pinfo"><b>📍 ${esc(p[0])}</b><br>${linkify(p[6])}</div>
+ <div class="mapw">${mapSVG(c.cur,c.sel)}</div><div class="pinfo"><b>📍 ${esc(p[0])}</b><br>${linkify(p[6])}${PSAY[c.sel]?'<br>'+spkBtn(PSAY[c.sel]):''}</div>
  <div class="plist">${m.pins.map(id=>`<button data-pl="${id}">${esc(PINS[id][0])}</button>`).join('')}</div>
  ${m.prof?profSVG(m.prof):''}<p class="sub" style="line-height:1.7;margin-top:10px">${linkify(m.note)}</p>
  ${c.onDone?`<div class="menu" style="max-width:none"><button class="mbtn pri" id="mGo">▶<div>繼續故事</div></button></div>`:''}`,()=>{const f=MAPCTX&&MAPCTX.onDone;MAPCTX=null;if(f)f()});
@@ -837,13 +843,57 @@ function musicStart(){if(MU||!DB.mus)return;const a=ac();if(!a)return;const mg=a
   if(step%4===0){const b=a.createOscillator(),bg=a.createGain();b.type='sine';b.frequency.value=440*Math.pow(2,(base-12-69)/12);bg.gain.setValueAtTime(.0001,t);bg.gain.linearRampToValueAtTime(.8,t+.05);bg.gain.exponentialRampToValueAtTime(.0001,t+2);b.connect(bg).connect(mg);b.start(t);b.stop(t+2.1)}
   step++},650)}}
 function musicStop(){if(MU){clearInterval(MU.timer);try{MU.g.disconnect()}catch(e){}MU=null}}
+
+/* ============ 發音（瀏覽器語音合成） ============ */
+// 名詞: [原文, 語言, 唸法提示, 實際送去朗讀的字（可省略）]
+const ES='es-MX',EN='en-US',JA='ja-JP';
+const SAY={
+ '薇薇特南果':['Huehuetenango',ES,'weh-weh-teh-NAN-go'],'溪谷':['Valley',EN,'VA-lee'],'海拔':['Altitude',EN,'AL-tih-tood'],
+ 'Villa Sarchi':['Villa Sarchí',ES,'BEE-ya sar-CHEE'],'波旁':['Bourbon',EN,'bor-BOHN','Bor-bone'],'水洗':['Washed',EN,'wosht'],'全水洗':['Fully Washed',EN,'FUL-ee wosht'],
+ '果膠':['Mucilage',EN,'MYOO-sih-lij'],'發酵槽':['Fermentation tank',EN,'fur-men-TAY-shun tank'],'日曬':['Natural',EN,'NA-chuh-rul'],'蜜處理':['Honey Process',EN,'HUH-nee PRAH-ses'],
+ '微批次':['Micro lot',EN,'MY-kro lot'],'第六代':['Sixth generation',EN,'siksth jen-uh-RAY-shun'],'Xinabajul':['Xinabajul',ES,'shee-na-ba-HOOL','Shinabajul'],'ROSMA':['Rosma',ES,'ROS-ma'],
+ 'Los Suspiros':['Los Suspiros',ES,'los soos-PEE-ros'],'Altamia':['Altamia',ES,'al-ta-MEE-a'],'淺焙':['Light Roast',EN,'lite rohst'],'杯測':['Cupping',EN,'KUH-ping'],
+ 'COFFEE COUNTY':['Coffee County',EN,'KAW-fee KOWN-tee'],'生豆':['Green coffee',EN,'green KAW-fee'],'BOT':['Best of Taiwan',EN,''],'總統獎':['Presidential Award',EN,'prez-ih-DEN-shul uh-WARD'],
+ '競標批次':['Auction lot',EN,'AWK-shun lot'],'藝伎':['Geisha / Gesha',EN,'GAY-sha／GEH-sha','Geisha. Gesha.'],'鄒族':['Tsou',EN,'tsoh','Tsoh'],'八八風災':['Typhoon Morakot',EN,'ty-FOON mo-ra-KOT'],
+ 'SL34':['SL34',EN,'S-L thirty-four','S L thirty four'],'COE':['Cup of Excellence',EN,'kup uv EK-suh-lens'],'愛玉':['Aiyu jelly',EN,'eye-YOO JEL-ee','Eye-yoo jelly'],
+ 'Chelbesa':['Chelbesa',EN,'chell-BEH-sa'],'Gedeb':['Gedeb',EN,'GEH-deb'],'Gedeo':['Gedeo',EN,'geh-DEH-oh'],'象腿蕉':['Enset',EN,'EN-set'],'庭院咖啡':['Garden coffee',EN,'GAR-dn KAW-fee'],
+ '原生種':['Landrace / Heirloom',EN,'LAND-race／AIR-loom','Landrace. Heirloom.'],'Kurumi':['Kurumi',EN,'koo-ROO-mee'],'74112':['74112',EN,'seven-four-one-one-two','seven four one one two'],
+ 'JARC':['Jimma Agricultural Research Center',EN,'JIM-ma …'],'咖啡果病':['Coffee Berry Disease',EN,'KAW-fee BEH-ree dih-ZEEZ'],'處理站':['Washing Station',EN,'WOSH-ing STAY-shun'],
+ '高架棚':['Raised bed / African bed',EN,'rayzd bed','Raised bed. African bed.'],'ECX':['Ethiopia Commodity Exchange',EN,'ee-thee-OH-pee-a kuh-MAH-dih-tee'],'咖啡儀式':['Buna',EN,'BOO-na','Boona'],
+ 'Agtron':['Agtron',EN,'AG-tron'],'養豆':['Resting / Degassing',EN,'REST-ing／dee-GAS-ing','Resting. Degassing.'],'班奇馬吉':['Bench Maji',EN,'bench MAH-jee','Bench Mahjee'],
+ '飛雀':['Fair Trade Station',EN,'fair trayd STAY-shun'],'Gori Gesha':['Gori Gesha',EN,'GOH-ree GEH-sha'],'Gesha Village':['Gesha Village',EN,'GEH-sha VIL-ij'],'Gesha':['Gesha',EN,'GEH-sha'],
+ 'G1':['Grade One',EN,'grayd wun'],'葉鏽病':['Coffee Leaf Rust',EN,'KAW-fee leef rust'],'CATIE':['CATIE',ES,'KA-tee-eh','Catie'],'T2722':['T2722',EN,'T two-seven-two-two','T two seven two two'],
+ '翡翠莊園':['Hacienda La Esmeralda',ES,'ah-SYEN-da la es-meh-RAL-da'],'Best of Panama':['Best of Panama',EN,'best uv PAN-uh-mah'],'波奎特':['Boquete',ES,'bo-KEH-teh'],
+ '佛手柑':['Bergamot',EN,'BUR-guh-mot'],'Loring':['Loring',EN,'LOR-ing'],'乾淨度':['Clean cup',EN,'kleen kup'],
+ // 以下只有發音、沒有辭典條目
+ 'Axel':['Axel',ES,'AK-sel'],'Palacios':['Palacios',ES,'pa-LA-syos'],'Alejandro':['Alejandro',ES,'a-leh-HAN-dro'],'Freddy':['Freddy',ES,'FREH-dee'],'Morales':['Morales',ES,'mo-RA-les'],
+ 'Palmira':['Palmira',ES,'pal-MEE-ra'],'La Libertad':['La Libertad',ES,'la lee-ber-TAD'],'Rufous':['Rufous',EN,'ROO-fus'],'耶加雪菲':['Yirgacheffe',EN,'yir-ga-CHEF-ay','Yirgacheffay'],
+ '阿迪斯阿貝巴':['Addis Ababa',EN,'AD-is AB-uh-ba'],'吉布地':['Djibouti',EN,'jih-BOO-tee'],'Lyamungu':['Lyamungu',EN,'lya-MOON-goo'],'Geisha':['Geisha',EN,'GAY-sha'],
+ 'Richard Whalley':['Richard Whalley',EN,'RICH-urd WAH-lee'],'Whalley':['Whalley',EN,'WAH-lee'],'Adam Overton':['Adam Overton',EN,'AD-um OH-ver-tun'],'Rachel Samuel':['Rachel Samuel',EN,'RAY-chul SAM-yoo-ul'],'Peterson':['Peterson',EN,'PEE-ter-sun'],'久留米':['久留米（Kurume）',JA,'ku-ru-me','久留米'],'藥院':['薬院（Yakuin）',JA,'ya-ku-in','薬院'],'美咲':['美咲（Misaki）',JA,'mi-sa-ki','みさき'],
+ 'Light Roast':['Light Roast',EN,'lite rohst'],'Washed':['Washed',EN,'wosht'],'Guatemala':['Guatemala',ES,'gwa-teh-MA-la'],'Jebena':['Jebena',EN,'JEH-beh-na']
+};
+const PSAY={huehue:'薇薇特南果',cuchu:['Sierra de los Cuchumatanes',ES,'SYEH-ra de los koo-choo-ma-TA-nes'],guacity:['Ciudad de Guatemala',ES,'syoo-DAD de gwa-teh-MA-la'],quetzal:['Puerto Quetzal',ES,'PWER-to ket-SAL'],
+ fuk:'藥院',kur:'久留米',sus:'Los Suspiros',gedeb:'Chelbesa',yirga:'耶加雪菲',dilla:['Dilla',EN,'DIL-la'],hawassa:['Hawassa',EN,'ha-WAH-sa'],addis:'阿迪斯阿貝巴',jimma:['Jimma',EN,'JIM-ma'],djib:'吉布地',
+ gori:'Gori Gesha',gv:'Gesha Village',maji:['Maji',EN,'MAH-jee','Mahjee'],mizan:['Mizan Teferi',EN,'mee-ZAN teh-FEH-ree'],tepi:['Tepi',EN,'TEH-pee'],bonga:['Bonga',EN,'BON-ga'],lya:'Lyamungu',catie:'CATIE',boq:'波奎特'};
+const LANGN={[ES]:'西語',[EN]:'英語',[JA]:'日語'};
+const sayOf=k=>typeof k==='string'?SAY[k]:k;
+let SAYQ=[];
+function speak(e){e=sayOf(e);if(!e)return;if(!('speechSynthesis' in window)){toast('這個瀏覽器不支援朗讀');return}
+ try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(e[3]||e[0]);u.lang=e[1];u.rate=.78;const pre=e[1].slice(0,2),vs=speechSynthesis.getVoices();
+  const v=vs.find(x=>x.lang.replace('_','-')===e[1])||vs.find(x=>x.lang.slice(0,2)===pre);if(v)u.voice=v;else if(vs.length&&pre!=='en')toast('手機沒有'+LANGN[e[1]]+'語音，用預設語音朗讀');
+  speechSynthesis.speak(u)}catch(err){toast('朗讀失敗')}}
+if('speechSynthesis' in window){try{speechSynthesis.getVoices()}catch(e){}}
+function spkBtn(e){e=sayOf(e);if(!e)return'';const i=SAYQ.push(e)-1;return `<button class="spk" data-speak="${i}">🔊 ${esc(e[0])} <i>${LANGN[e[1]]}</i>${e[2]?` <small>${esc(e[2])}</small>`:''}</button>`}
 /* ============ 名詞連結 ============ */
 const GKEYS=Object.keys(GL).sort((a,b)=>b.length-a.length);
 const GRE=new RegExp(GKEYS.map(k=>k.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')).join('|'),'g');
-function termChips(s){const el=$('terms');if(!el)return;const seen=[];(s||'').replace(GRE,m=>{if(!seen.includes(m))seen.push(m);return m});el.innerHTML=seen.map(k=>`<button class="tchip" data-chip="${esc(k)}">📖 ${esc(k)}</button>`).join('')}
+const SKEYS=Object.keys(SAY).filter(k=>!GL[k]).sort((a,b)=>b.length-a.length);
+const SRE=new RegExp(SKEYS.map(k=>k.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')).join('|'),'g');
+function termChips(s){const el=$('terms');if(!el)return;const seen=[],sy=[];const rest=(s||'').replace(GRE,m=>{if(!seen.includes(m))seen.push(m);return ' '});const r2=rest.replace(SRE,m=>{if(!sy.includes(m))sy.push(m);return ' '});r2.replace(/[A-Za-zÀ-ÿ][A-Za-zÀ-ÿ’'-]{2,}(?: [A-Za-zÀ-ÿ][A-Za-zÀ-ÿ’'-]+)*/g,m=>{if(!SAY[m])SAY[m]=[m,EN,''];if(!sy.includes(m))sy.push(m);return m});
+ el.innerHTML=seen.map(k=>`<button class="tchip" data-chip="${esc(k)}">📖 ${esc(k)}</button>`).join('')+sy.map(k=>`<button class="tchip sy" data-chip="${esc(k)}" data-sy="1">🔊 ${esc(k)}</button>`).join('')}
 function linkify(s){return esc(s).replace(GRE,m=>`<span class="term" data-g="${m}">${m}</span>`)}
-function popup(el,k){const pp=$('pop');pp.innerHTML=`<b>${esc(k)}</b>${esc(GL[k])}`;pp.style.display='block';const r=el.getBoundingClientRect();const w=Math.min(300,innerWidth-20);pp.style.maxWidth=w+'px';let x=Math.max(10,Math.min(innerWidth-w-10,r.left));pp.style.left=x+'px';const ph=pp.offsetHeight;pp.style.top=(r.top-ph-8>10?r.top-ph-8:r.bottom+8)+'px';blip(880,.06,'sine',.05)}
-document.addEventListener('click',e=>{const tm=e.target.closest('.term,[data-chip]');if(tm){e.stopPropagation();popup(tm,tm.dataset.g||tm.dataset.chip);return}if(!e.target.closest('#pop'))$('pop').style.display='none'},true);
+function popup(el,k){const pp=$('pop');SAYQ=SAYQ.slice(-40);pp.innerHTML=`<b>${esc(k)}</b>${GL[k]?esc(GL[k]):''}${SAY[k]?`<div>${spkBtn(k)}</div>`:''}`;if(!GL[k]&&SAY[k])speak(k);pp.style.display='block';const r=el.getBoundingClientRect();const w=Math.min(300,innerWidth-20);pp.style.maxWidth=w+'px';let x=Math.max(10,Math.min(innerWidth-w-10,r.left));pp.style.left=x+'px';const ph=pp.offsetHeight;pp.style.top=(r.top-ph-8>10?r.top-ph-8:r.bottom+8)+'px';blip(880,.06,'sine',.05)}
+document.addEventListener('click',e=>{const sp=e.target.closest('[data-speak]');if(sp){e.stopPropagation();e.preventDefault();speak(SAYQ[+sp.dataset.speak]);return}const tm=e.target.closest('.term,[data-chip]');if(tm){e.stopPropagation();popup(tm,tm.dataset.g||tm.dataset.chip);return}if(!e.target.closest('#pop'))$('pop').style.display='none'},true);
 /* ============ 劇情引擎 ============ */
 let typing=null,waiting=false,busy=false,curText='',curSp='nar',hist=[];
 function mark(i){if(hist[hist.length-1]!==i)hist.push(i);const b=$('bBack');if(b)b.disabled=hist.length<2}
@@ -906,7 +956,7 @@ function toTitle(){show('title');refreshTitle()}
 function refreshTitle(){const has=DB.i>0||DB.ch>0;$('bCont').disabled=!has;$('sCont').textContent=has?`${CHS[DB.ch].t}：${CHS[DB.ch].n}`:'還沒有進度';$('sStart').textContent=DB.fin?'已看完全篇・從序章重新開始':'序章：藥院的一杯咖啡'}
 function chapSel(){openCard(`<h3>📖 章節選擇</h3><div class="clist">${CHS.map((c,i)=>{if(c.side)return'';const ok=i===0||DB.done.includes(i)||DB.done.includes(i-1)||DB.fin;return`<button class="ci ${DB.done.includes(i)?'done':''} ${ok?'':'lock'}" data-cs="${i}" ${ok?'':'disabled'}><span class="n">${DB.done.includes(i)?'✓':i}</span><div style="text-align:left"><b>${esc(c.t)}・${esc(c.n)}</b><div class="sub">${esc(c.sub)}</div></div></button>`}).join('')}</div><p class="sub">看完上一章，下一章就會解鎖。</p>`);
  document.querySelectorAll('[data-cs]').forEach(b=>b.onclick=()=>{closeCard();ac();startChapter(+b.dataset.cs)})}
-function glossCard(){openCard(`<h3>📚 咖啡小辭典</h3><div class="gl">${Object.entries(GL).map(([k,v])=>`<div><b>${esc(k)}</b><br>${esc(v)}</div>`).join('')}</div>`)}
+function glossCard(){SAYQ=[];openCard(`<h3>📚 咖啡小辭典</h3><p class="sub">按 🔊 聽原文發音（英語／西語／日語）。</p><div class="gl">${Object.entries(GL).map(([k,v])=>`<div><b>${esc(k)}</b><br>${esc(v)}${SAY[k]?'<br>'+spkBtn(k):''}</div>`).join('')}</div>`)}
 function bagCard(){openCard(`<h3>🎴 風味收集冊 ${DB.got.length} / ${Object.keys(ITEMS).length}</h3><p class="sub">故事裡會一張一張收集到這支咖啡的風味。</p>${itemsHTML()}${DB.fin?tastingHTML():''}${CHS.filter((c,i)=>c.side&&DB.done.includes(i)).map(c=>beanHTML(c.bean)).join('')}`)}
 $('bStart').onclick=()=>{ac();DB.fin=DB.fin||0;startChapter(0,1)};
 $('bCont').onclick=()=>{ac();resume()};
