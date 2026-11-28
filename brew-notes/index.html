@@ -119,6 +119,13 @@ label.f input.mono{font-family:var(--mono)}
 .rlib details .psvg{margin:6px 0 2px}
 .simz{display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--muted);margin:0 0 6px}.zb{font-size:11px;padding:1px 7px;border-radius:99px;background:var(--sunken);color:var(--ink)}.zb.zg{background:#e8b04a33;color:#a8741a;font-weight:600}.lmap .lbl{fill:var(--ink);font-family:var(--body);font-size:11px;font-weight:600;paint-order:stroke;stroke:var(--surface);stroke-width:3px}
 .lmapc{padding-bottom:6px}
+.seg .chip{white-space:nowrap}.lgc .bc-name{white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}.bc.lgc{display:flex;flex-direction:row;gap:10px;align-items:center}.lgc .cupmini{flex:none}.lgn{display:flex;align-items:center;gap:6px;margin:2px 0;font-size:13px}.lgn b{font-size:20px;font-family:var(--mono)}
+.lmap .ldn{font-size:9px;font-weight:700;fill:#1c1a17;font-family:var(--mono);pointer-events:none}
+.lfr{display:flex;gap:8px;align-items:center;margin:4px 0}.lfr>.sub{flex:none;font-size:12px}
+.lnums{display:flex;flex-wrap:wrap;gap:6px}.lnb{width:38px;height:38px;border-radius:50%;border:1px solid var(--line);background:var(--surface);color:var(--ink);font-family:var(--mono);font-size:14px}
+.lnb.hi{border-color:#5fae7a;color:#5fae7a}.lnb.nc{border-style:dashed;opacity:.7}.lnb.on{background:#e8b04a;border-color:#e8b04a;color:#1c1a17;font-weight:700;opacity:1}
+.lsel{border-color:#e8b04a}.lrow{display:flex;gap:12px;align-items:center;margin:6px 0;font-size:13.5px;flex-wrap:wrap}
+
 .tkey{display:flex;align-items:center;gap:4px;font-size:10.5px;color:var(--muted);margin-top:2px}.tkey i{display:inline-block;width:14px;height:4px;border-radius:2px}.tkey span{margin-right:4px}
 .fit{margin:8px 0 2px;display:grid;gap:4px}.fitr{display:flex;flex-wrap:wrap;align-items:center;gap:4px}.fh{font-size:11px;color:var(--muted);width:3.4em}
 .fp{font-size:11.5px;padding:1px 8px;border-radius:99px;border:1px solid var(--line);color:var(--muted)}
@@ -318,7 +325,7 @@ const TEMPS=[['hot','高溫'],['warm','中溫'],['room','常溫']];
 const WHEEL={'花香':['茉莉','玫瑰','洋甘菊','橙花','紅茶'],'莓果':['草莓','藍莓','覆盆莓','黑莓','蔓越莓'],'柑橘':['檸檬','葡萄柚','柳橙','萊姆','佛手柑'],'核果熱帶':['水蜜桃','杏桃','芒果','鳳梨','荔枝','百香果'],'其他水果':['蘋果','葡萄','梨','櫻桃','李子'],'果乾':['葡萄乾','蜜棗','無花果'],'發酵':['酒香','威士忌','蘭姆','過度發酵'],'甜感':['蜂蜜','焦糖','黑糖','楓糖','香草'],'堅果可可':['杏仁','榛果','花生','牛奶巧克力','黑巧克力'],'香料':['肉桂','丁香','胡椒'],'烘焙':['穀物','烤麵包','煙燻','焦苦'],'草本':['青草','生豆味','草本','茶感']};
 
 /* ---------- state + storage ---------- */
-const S={beans:[],brews:[],gear:[],loaded:{beans:false,brews:false,gear:false},view:'log',cloud:false,aBean:null,cmpA:null,cmpB:null,canPhoto:false};
+const S={beans:[],brews:[],gear:[],loaded:{beans:false,brews:false,gear:false},view:'log',logMode:(()=>{try{return localStorage.getItem('bn-logmode')||'bean'}catch(e){return 'bean'}})(),cloud:false,aBean:null,cmpA:null,cmpB:null,canPhoto:false};
 let store=null,sampleFn=null,DLS=null;
 const clean=o=>JSON.parse(JSON.stringify(o,(k,v)=>k.startsWith('_')||k==='id'?undefined:v));
 function localStore(){
@@ -506,8 +513,57 @@ function vLog(){
   const wk=bs.filter(b=>b.ts>Date.now()-7*DAY),top=wk.map(rk).filter(x=>x!=null).sort((a,b)=>b-a)[0];
   const dr=draftGet();
   return demoBanner()+(dr?`<div class="draftbar"><span>📝 有一杯還沒記完<br><small>${esc(draftLabel(dr))}</small></span><button class="btn sm" data-act="draftDrop">捨棄</button><button class="btn sm pri" data-act="draftGo">接著記</button></div>`:'')+`<div class="tiles"><div class="tile"><b>${wk.length}</b><span>近 7 天杯數</span></div><div class="tile"><b>${top??'—'}</b><span>近 7 天最佳總評</span></div><div class="tile"><b>${ready.length}</b><span>適飲期的豆子</span></div></div>
-  <h2>沖煮紀錄</h2>${bs.length?bs.map(brewCard).join(''):'<div class="card sub">還沒有紀錄。按下方「＋ 記一杯」開始。</div>'}`;
+  <div class="between" style="margin-top:6px"><h2 style="margin:0">沖煮紀錄</h2><div class="seg" style="flex-wrap:nowrap">${[['bean','依豆子'],['list','時間列表']].map(([k,l])=>`<button class="chip ${(S.logMode||'bean')===k?'on':''}" data-act="logMode" data-v="${k}">${l}</button>`).join('')}</div></div>
+  ${!bs.length?'<div class="card sub">還沒有紀錄。按下方「＋ 記一杯」開始。</div>':S.logMode==='list'?bs.map(brewCard).join(''):logGroups(bs)}`;
 }
+/* ---------- 依豆子：一支豆一張金杯圖，點點看那杯參數 ---------- */
+const logKey=b=>b.blend?'blend:'+b.blend.name:b.beanId||'none';
+function logName(k,b){if(k.startsWith('blend:'))return '🫘 '+k.slice(6);const bean=beanById(k);return bean?shortBean(bean):'已刪除的豆子'}
+const hasCup=x=>has(x.ey)&&has(x.tds);
+function cupMini(L){const W=120,H=78,cx=[13,27],cy=[0.8,1.8],X=v=>4+(Math.max(cx[0],Math.min(cx[1],v))-cx[0])/(cx[1]-cx[0])*(W-8),Y=v=>H-4-(Math.max(cy[0],Math.min(cy[1],v))-cy[0])/(cy[1]-cy[0])*(H-8);
+  let s=`<svg viewBox="0 0 ${W} ${H}" class="cupmini" style="width:${W}px;height:${H}px" aria-hidden="true"><rect x="0.5" y="0.5" width="${W-1}" height="${H-1}" rx="6" fill="var(--sunken)" stroke="var(--line)"/><rect x="${X(18)}" y="${Y(1.45)}" width="${X(22)-X(18)}" height="${Y(1.15)-Y(1.45)}" fill="#e8b04a22" stroke="#e8b04a" stroke-width="1"/>`;
+  const P=L.filter(hasCup);P.forEach((x,i)=>{const last=i===P.length-1;s+=`<circle cx="${X(+x.ey).toFixed(1)}" cy="${Y(+x.tds).toFixed(1)}" r="${last?3.6:2.6}" fill="${last?'var(--accent)':'var(--muted)'}" fill-opacity="${last?1:.6}"/>`});
+  if(!P.length)s+=`<text x="${W/2}" y="${H/2+3}" text-anchor="middle" font-size="9" fill="var(--muted)">還沒量 TDS</text>`;
+  return s+'</svg>'}
+function logGroups(bs){const G=new Map();bs.forEach(b=>{const k=logKey(b);if(!G.has(k))G.set(k,[]);G.get(k).push(b)});
+  if(S.logBean&&G.has(S.logBean))return logBean(S.logBean,G.get(S.logBean).slice().reverse());
+  S.logBean=null;
+  return [...G].map(([k,L])=>{const old=L.slice().reverse(),last=L[0],sc=L.map(rk).filter(x=>x!=null),best=sc.length?Math.max(...sc):null,gold=old.filter(x=>hasCup(x)&&zoneOf(+x.ey,+x.tds)==='金杯').length;
+    return `<button class="card bc lgc" data-act="logBean" data-id="${esc(k)}"><div style="min-width:0;flex:1"><div class="title bc-name">${esc(logName(k,last))}</div>
+      <div class="lgn"><b>${L.length}</b> 杯${gold?`<span class="pill" style="border-color:#e8b04a;color:#c8902a">金杯 ${gold}</span>`:''}</div>
+      <div class="bc-meta">最近 ${when(last.ts)}${has(last.restDay)?` · 養豆第 ${last.restDay} 天`:''}</div>${best!=null?`<div class="bc-meta">最高總評 ${best}</div>`:''}</div>${cupMini(old)}</button>`}).join('')}
+function logBean(k,all){const F0=S.logF||{};const opts=f=>[...new Set(all.map(x=>x[f]).filter(Boolean))];
+  const fd=opts('dripper'),fg=opts('grinder');if(F0.k!==k){S.logF={k};}const lf=S.logF;
+  const L=all.filter(x=>(!lf.dripper||x.dripper===lf.dripper)&&(!lf.grinder||x.grinder===lf.grinder));
+  const num=new Map(all.map((x,i)=>[x.id,i+1]));
+  let sel=L.find(x=>x.id===S.logSel)||L[L.length-1];S.logSel=sel?sel.id:null;
+  const chips=(f,lab,O)=>O.length>1?`<div class="lfr"><span class="sub">${lab}</span><div class="chips">${[['','全部']].concat(O.map(o=>[o,o])).map(([v,l])=>`<button class="chip ${(lf[f]||'')===v?'on':''}" data-act="logF" data-f="${f}" data-v="${esc(v)}">${esc(l)}</button>`).join('')}</div></div>`:'';
+  const P=L.filter(hasCup),miss=L.length-P.length;
+  let chart='';
+  if(P.length){const {s:s0,X,Y,x0,w}=cupGrid('這支豆的金杯圖');let s=s0;const cl=(v,a)=>Math.max(a[0],Math.min(a[1],v)),seen={},XY=new Map(P.map(x=>{const k=x.ey+'|'+x.tds,n=seen[k]=(seen[k]||0)+1,a=(n-1)*2.1;return [x,[X(cl(+x.ey,GCX))+(n>1?Math.cos(a)*9:0),Y(cl(+x.tds,GCY))+(n>1?Math.sin(a)*9:0)]]})),xy=x=>XY.get(x);
+    if(P.length>1)s+=`<polyline points="${P.map(x=>xy(x).map(v=>v.toFixed(1)).join(',')).join(' ')}" fill="none" stroke="var(--muted)" stroke-width="1" stroke-dasharray="3 3" opacity=".55"/>`;
+    P.filter(x=>x!==sel).concat(P.includes(sel)?[sel]:[]).forEach(x=>{const[cx,cy]=xy(x),on=x===sel,r=rk(x),c=on?'#e8b04a':r==null?'var(--muted)':r>=65?'#5fae7a':r<50?'#c0605a':'var(--accent)';
+      s+=`<g class="ld" data-act="logPick" data-id="${esc(x.id)}"><circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="13" fill="transparent"/><circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="${on?9:7.5}" fill="${c}" stroke="${on?'var(--ink)':'var(--surface)'}" stroke-width="${on?2:1}"/><text x="${cx.toFixed(1)}" y="${(cy+3.2).toFixed(1)}" text-anchor="middle" class="ldn">${num.get(x.id)}</text></g>`;
+      if(on){const right=cx<x0+w*.6;s+=`<text x="${(right?cx+13:cx-13).toFixed(1)}" y="${(cy+4).toFixed(1)}" class="tk lbl" text-anchor="${right?'start':'end'}">第 ${num.get(x.id)} 杯</text>`}});
+    chart=s+'</svg>'}
+  else chart='<div class="sub" style="padding:18px 4px;text-align:center">這些杯都還沒填 TDS／萃取率，填了就會變成金杯圖上的點。</div>';
+  const nums=`<div class="lnums">${L.map(x=>{const n=num.get(x.id),r=rk(x),on=x===sel;return `<button class="lnb ${on?'on':''} ${hasCup(x)?'':'nc'} ${r!=null&&r>=65?'hi':''}" data-act="logPick" data-id="${esc(x.id)}">${n}</button>`}).join('')}</div>`;
+  return `<div class="row" style="justify-content:space-between;align-items:center;margin-top:2px"><button class="btn sm" data-act="logBack">‹ 全部豆子</button><span class="sub">${all.length} 杯${L.length!==all.length?`（篩出 ${L.length}）`:''}</span></div>
+    <div class="title" style="margin:2px 0">${esc(logName(k,all[0]))}</div>
+    ${chips('dripper','濾杯',fd)}${chips('grinder','磨豆機',fg)}
+    <div class="card lmapc">${chart}<div class="sub" style="font-size:11.5px;margin-top:4px">點圓點或下面的杯數看那杯參數・數字＝第幾杯・虛線＝沖煮順序・<span style="color:#5fae7a">●</span> 總評 65 以上 <span style="color:#c0605a">●</span> 50 以下・金框＝金杯${miss?`・另有 ${miss} 杯沒量 TDS（虛框數字）`:''}</div></div>
+    ${nums}${sel?logSelCard(sel,num.get(sel.id),all):''}`}
+function logSelCard(b,n,all){const prev=b.baseId?brewById(b.baseId):all[n-2]||null,d=prev?diff(prev,b).filter(x=>has(x.to)):[],ef=prev?effect(prev,b):[],z=hasCup(b)?zoneOf(+b.ey,+b.tds):null,fl=allFlavors(b);
+  const kv=[['磨豆機',b.grinder],['刻度',b.grind],['濾杯',b.dripper],['濾紙',b.paper],['水溫',has(b.temp)?b.temp+'°C':''],['粉水',has(b.dose)&&has(b.water)?`${b.dose}g : ${b.water}g（1:${r1(b.water/b.dose)}）`:''],['手法',b.method],['時間',has(b.time)?fmtTime(b.time):'']].filter(x=>has(x[1])&&x[1]!=='');
+  return `<div class="card lsel"><div class="between" style="align-items:flex-start"><div><div class="title">第 ${n} 杯${n===all.length?'（最新）':''}</div><div class="bc-meta">${when(b.ts)}${has(b.restDay)?` · 養豆第 ${b.restDay} 天`:''}</div></div>${totBox(b)}</div>
+    <div class="lrow">${hasCup(b)?`<span>萃取率 <b>${b.ey}%</b></span><span>TDS <b>${b.tds}</b></span><span class="zb ${z==='金杯'?'zg':''}">${z}</span>`:`<span class="sub">${has(b.tds)?'TDS '+b.tds+'（缺萃取率）':'沒量 TDS'}</span>`}</div>
+    <dl class="kv mono">${kv.map(([l,v])=>`<dt>${l}</dt><dd>${esc(String(v))}</dd>`).join('')}${has(b.pours)?`<dt>注水段</dt><dd>${esc(String(b.pours).split('\n').join(' / '))}</dd>`:''}</dl>
+    ${d.length?`<div class="bc-l"><span class="bc-k">變因</span><span>${esc(d.slice(0,4).map(chgTxt).join('、'))}${d.length>4?` 等 ${d.length} 項`:''}</span></div>`:''}
+    ${ef.length?`<div class="bc-l"><span class="bc-k">結果</span><span>${ef.map(x=>`${x.l}<b class="${x.d>0?'up':'dn'}">${x.t}</b>`).join('　')}</span></div>`:''}
+    ${b.target?`<div class="bc-l"><span class="bc-k">目的</span><span>${esc(b.target)}</span></div>`:''}
+    ${fl.length?`<div class="row bc-tags">${flavHtml(fl.slice(0,6))}</div>`:''}
+    ${b.next?`<div class="bc-next" style="white-space:pre-line;overflow:visible">下次 → ${esc(b.next)}</div>`:''}
+    <div class="row" style="margin-top:10px;gap:6px"><button class="btn sm" data-act="detail" data-id="${esc(b.id)}">完整紀錄</button><button class="btn sm pri" data-act="new" data-base="${esc(b.id)}">以此再沖一杯</button></div></div>`}
 /* ---------- 風味曲線：養豆期往上爬、高峰、之後慢慢下滑 ---------- */
 function flavorAt(d,ws,we){const pc=ws+(we-ws)*0.35;const s=d<=pc?Math.max(2,pc/2.2):Math.max(4,(we-pc)/1.2);return Math.exp(-0.5*((d-pc)/s)**2)}
 const peakDay=b=>{const ws=b.winStart??7,we=b.winEnd??30;return Math.round(ws+(we-ws)*0.35)};
@@ -2172,6 +2228,11 @@ document.addEventListener('click',async ev=>{
   else if(a==='draftDrop'){draftClear();render();toast('已捨棄暫存的紀錄')}
   else if(a==='draftNew'){draftClear();startBrew(JSON.parse(el.dataset.o||'{}'),true)}
   else if(a==='detail')detail(id);
+  else if(a==='logMode'){S.logMode=v;S.logBean=null;try{localStorage.setItem('bn-logmode',v)}catch(e){}render()}
+  else if(a==='logBean'){S.logBean=id;S.logSel=null;S.logF=null;render();$('#main').scrollTop=0}
+  else if(a==='logBack'){S.logBean=null;render();$('#main').scrollTop=0}
+  else if(a==='logPick'){S.logSel=id;render()}
+  else if(a==='logF'){S.logF[el.dataset.f]=v||null;S.logSel=null;render()}
   else if(a==='new')startBrew({baseId:el.dataset.base,beanId:el.dataset.bean});
   else if(a==='retest'){const b0=brewById(id);startBrew({baseId:id});if(F&&b0&&F.baseId===id){F.target=`重測：${when(b0.ts)} 那杯品飲時${condTxt(b0)}，用相同參數再確認一次`;drawForm()}}
   else if(a==='editBrew'){if(!demoBlock())startBrew({editId:id})}
