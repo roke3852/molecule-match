@@ -251,6 +251,11 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:20px 0 30px}
     <div class="note" style="margin-top:6px">多數是選委會或媒體在投票途中報的估計值，時間點不同，不能直接比較；最終投票率以中選會公告為準。2022 年台北市長投票率 67.70%、新北 56.60%。</div>
   </div>
   <div class="card">
+    <h2>台北市長選舉・歷屆投票率</h2>
+    <div id="tpHist"></div>
+    <div class="note">最高是 1998 年 80.89%，最低是 2006 年 64.52%。2022 年是 67.70%，不是最低。2026 年最終投票率出來後會補上。</div>
+  </div>
+  <div class="card">
     <h2>台北市各區・下午 2 點</h2>
     <div class="note">全市選舉人 2,031,431 人，市長投票 1,108,873 人（54.59%）。數字來自藍營內部回報（今日新聞報導），與你提供的截圖一致。</div>
     <div id="turnout" style="margin-top:8px"></div>
@@ -267,6 +272,7 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:20px 0 30px}
       <li>號次：<a href="https://news.tvbs.com.tw/politics/4041834" target="_blank">TVBS 號次抽籤整理</a></li>
       
       <li>政見：<a href="https://www.nownews.com/news/6892013" target="_blank">李四川</a>・<a href="https://www.nownews.com/news/6892005" target="_blank">蘇巧慧</a>・<a href="https://city.gvm.com.tw/article/134190" target="_blank">台北辯論</a>・<a href="https://www.thenewslens.com/article/271210" target="_blank">桃中南政見會</a>・<a href="https://www.gvm.com.tw/article/134579" target="_blank">桃園</a>・<a href="https://newtalk.tw/news/view/2026-11-17/1071683" target="_blank">陳亭妃</a>・<a href="https://cna.com.tw/news/aipl/202611010168.aspx" target="_blank">謝龍介</a>・<a href="https://www.setn.com/news/1940181" target="_blank">高雄</a>・<a href="https://udn.com/news/story/124652/9400321" target="_blank">柯志恩</a>・<a href="https://newtalk.tw/plan/view/1206" target="_blank">賴瑞隆</a></li>
+      <li>台北歷屆投票率：<a href="https://zh.wikipedia.org/zh-tw/%E4%B8%AD%E8%8F%AF%E6%B0%91%E5%9C%8B%E6%AD%B7%E4%BB%BB%E7%9B%B4%E8%BD%84%E5%B8%82%E9%95%B7%E5%BE%97%E7%A5%A8%E7%8E%87" target="_blank">維基百科・歷任直轄市長得票率</a>・<a href="https://www.cna.com.tw/news/aipl/202211265007.aspx" target="_blank">中央社（2022 年 67.7%）</a></li>
       <li>人口：<a href="https://ca.gov.taipei/News_Content.aspx?n=8693DC9620A1AABF&sms=D19E9582624D83CB&s=78DC4B104D9D374E" target="_blank">臺北市民政局（114 年底，按性別年齡）</a>・<a href="https://www.ca.ntpc.gov.tw/userfiles/1011000/files/%E6%96%B0%E5%8C%97%E5%B8%82%E6%94%BF%E5%BA%9C%E6%B0%91%E6%94%BF%E5%B1%80114%E5%B9%B4%E7%B5%B1%E8%A8%88%E5%B9%B4%E5%A0%B1(1).pdf" target="_blank">新北市民政局 114 年統計年報 表 3</a></li>
       <li>永和議員：<a href="https://news.ltn.com.tw/news/NewTaipei/breakingnews/5435223" target="_blank">自由時報（國民黨初選）</a>・<a href="https://www.ettoday.net/news/20260711/3196773.htm" target="_blank">ETtoday（民進黨提名）</a></li>
     </ul>
@@ -274,7 +280,7 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:20px 0 30px}
   </div>
 </section>
 </main>
-<footer>2026 九合一選情圖鑑 v1.3・Made by <b>Jim Lu</b></footer>
+<footer>2026 九合一選情圖鑑 v1.4・Made by <b>Jim Lu</b></footer>
 
 <script>
 const P={K:{n:'國民黨',c:'var(--kmt)',l:'var(--kmt-l)'},D:{n:'民進黨',c:'var(--dpp)',l:'var(--dpp-l)'},T:{n:'民眾黨',c:'var(--tpp)',l:'var(--tpp-l)'},I:{n:'無黨籍',c:'var(--ind)',l:'var(--ind-l)'}};
@@ -664,6 +670,17 @@ function drawTO(){
   document.getElementById('toList').innerHTML=TO.slice().sort((a,b)=>b[2]-a[2]).map(x=>`<div class="prow" style="grid-template-columns:48px 1fr 76px"><span>${x[0]}</span><div><div class="ptrack" style="height:12px"><div style="width:${x[2]/80*100}%;background:${toColor(x[2])}"></div></div><div class="note" style="font-size:10.5px">${x[1]}${x[5]?'・'+x[5]:''}・<a href="${x[4]}" target="_blank" rel="noopener">來源</a></div></div><span style="text-align:right">${x[3]?x[2]+'–'+x[3]:x[2]}%</span></div>`).join('');
 }
 drawTO();
+
+// 台北市長歷屆投票率（中選會）
+const TPH=[[1994,78.53],[1998,80.89],[2002,70.61],[2006,64.52],[2010,70.65],[2014,70.46],[2018,65.95],[2022,67.70],[2026,null]];
+(function(){const W=340,H=170,l=30,r=22,t=18,b=24,mn=55,mx=85;const xs=i=>l+i*(W-l-r)/(TPH.length-1),ys=v=>t+(mx-v)/(mx-mn)*(H-t-b);
+ let g='';[60,70,80].forEach(v=>g+=`<line x1="${l}" x2="${W-r}" y1="${ys(v)}" y2="${ys(v)}" stroke="#e8e5dd"/><text x="${l-4}" y="${ys(v)+3}" font-size="9" text-anchor="end" fill="#888">${v}%</text>`);
+ const pts=TPH.filter(x=>x[1]!=null).map((x,i)=>`${xs(i)},${ys(x[1])}`).join(' ');
+ g+=`<polyline points="${pts}" fill="none" stroke="#7a4f9e" stroke-width="2.5"/>`;
+ TPH.forEach((x,i)=>{g+=`<text x="${xs(i)}" y="${H-8}" font-size="9" text-anchor="middle" fill="#666">${x[0]}</text>`;
+  if(x[1]!=null){const hi=x[1]===80.89,lo=x[1]===64.52;g+=`<circle cx="${xs(i)}" cy="${ys(x[1])}" r="${hi||lo?5:3.5}" fill="${hi?'#c9862b':lo?'#6b7078':'#7a4f9e'}"/><text x="${xs(i)}" y="${ys(x[1])-8}" font-size="9.5" text-anchor="middle" font-weight="600">${x[1]}</text>`}
+  else g+=`<circle cx="${xs(i)}" cy="${ys(70)}" r="5" fill="#fff" stroke="#7a4f9e" stroke-dasharray="2 2"/><text x="${xs(i)}" y="${ys(70)-9}" font-size="9" text-anchor="middle" fill="#888">待公布</text>`;});
+ document.getElementById('tpHist').innerHTML=`<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto">${g}</svg>`;})();
 // 台北 2 點投票率
 (function(){const T=[['松山',152565,88177],['信義',171728,97198],['大安',227276,109547],['中山',179964,97060],['中正',114704,67280],['大同',97892,55247],['萬華',147258,77912],['文山',211750,106764],['南港',94704,50951],['內湖',219461,118606],['士林',217295,125009],['北投',196834,115122]];
  const avg=1108873/2031431*100;
