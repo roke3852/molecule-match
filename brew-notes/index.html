@@ -551,7 +551,7 @@ function logBean(k,all){const F0=S.logF||{};const opts=f=>[...new Set(all.map(x=
   return `<div class="row" style="justify-content:space-between;align-items:center;margin-top:2px"><button class="btn sm" data-act="logBack">‹ 全部豆子</button><span class="sub">${all.length} 杯${L.length!==all.length?`（篩出 ${L.length}）`:''}</span></div>
     <div class="title" style="margin:2px 0">${esc(logName(k,all[0]))}</div>
     ${chips('dripper','濾杯',fd)}${chips('grinder','磨豆機',fg)}
-    <div class="card lmapc">${chart}<div class="sub" style="font-size:11.5px;margin-top:4px">點圓點或下面的杯數看那杯參數・數字＝第幾杯・虛線＝沖煮順序・<span style="color:#5fae7a">●</span> 總評 65 以上 <span style="color:#c0605a">●</span> 50 以下・金框＝金杯${miss?`・另有 ${miss} 杯沒量 TDS（虛框數字）`:''}</div></div>
+    <div class="card lmapc">${chart}<div class="sub" style="font-size:11.5px;margin-top:4px">點圓點或下面的杯數看那杯參數・往右滑回全部豆子・數字＝第幾杯・虛線＝沖煮順序・<span style="color:#5fae7a">●</span> 總評 65 以上 <span style="color:#c0605a">●</span> 50 以下・金框＝金杯${miss?`・另有 ${miss} 杯沒量 TDS（虛框數字）`:''}</div></div>
     ${nums}${sel?logSelCard(sel,num.get(sel.id),all):''}`}
 function logSelCard(b,n,all){const prev=b.baseId?brewById(b.baseId):all[n-2]||null,d=prev?diff(prev,b).filter(x=>has(x.to)):[],ef=prev?effect(prev,b):[],z=hasCup(b)?zoneOf(+b.ey,+b.tds):null,fl=allFlavors(b);
   const kv=[['磨豆機',b.grinder],['刻度',b.grind],['濾杯',b.dripper],['濾紙',b.paper],['水溫',has(b.temp)?b.temp+'°C':''],['粉水',has(b.dose)&&has(b.water)?`${b.dose}g : ${b.water}g（1:${r1(b.water/b.dose)}）`:''],['手法',b.method],['時間',has(b.time)?fmtTime(b.time):'']].filter(x=>has(x[1])&&x[1]!=='');
@@ -2364,6 +2364,7 @@ window.addEventListener('hashchange',route);
     if(TOUR){if(TOUR.i>0){TOUR.i--;drawTour()}else closeSheet();return}
     if(VW){if(REC){try{REC.stop()}catch(e){}REC=null}if(VW.i>0){VW.i--;drawVoice()}else{F={...VW.prev};VW=null;drawForm()}return}
     if($('#sheet').classList.contains('on')){if((F||BF||GF)&&Date.now()-armed>2500){armed=Date.now();toast('再往右滑一次關閉（未存的內容會不見）');return}armed=0;closeSheet();return}
+    if(S.view==='log'&&S.logBean){S.logBean=null;render();$('#main').scrollTop=0;return}
     const v=VSTACK.pop();if(v){route._back=1;location.hash=v}};
 })();
 route();initStore();
