@@ -58,7 +58,7 @@ button{font:inherit;color:inherit;touch-action:manipulation;cursor:pointer}
 .ci .n{width:30px;height:30px;border-radius:50%;background:var(--ink3);display:flex;align-items:center;justify-content:center;font-weight:800;flex:none}.ci.done .n{background:var(--leaf);color:#0b130f}.ci.lock{opacity:.4}
 .items{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px}.it{border:1px solid var(--line);border-radius:10px;padding:8px 4px;text-align:center;background:var(--ink);font-size:12.5px}.it b{display:block;font-size:24px;margin-bottom:2px}.it.no{opacity:.25}
 .gl{display:grid;gap:8px}.gl div{padding:9px 11px;border:1px solid var(--line);border-radius:10px;background:var(--ink)}.gl b{color:var(--gold)}
-#pop{position:fixed;z-index:30;display:none;max-width:300px;background:#f5eedd;color:#1b2520;border-radius:10px;padding:10px 12px;font-size:14px;line-height:1.65;box-shadow:0 6px 20px rgba(0,0,0,.5)}#pop b{display:block;margin-bottom:2px;color:#7b2a22}
+#pop{position:fixed;z-index:30;display:none;max-width:300px;background:#f5eedd;color:#1b2520;border-radius:10px;padding:10px 12px;font-size:14px;line-height:1.65;box-shadow:0 6px 20px rgba(0,0,0,.5)}#pop b{display:block;margin-bottom:2px;color:#7b2a22;padding-right:30px}#popX{position:absolute;top:4px;right:4px;width:32px;height:32px;border:0;background:transparent;color:#7b2a22;font-size:18px;line-height:1;border-radius:8px}#popX:active{background:rgba(123,42,34,.12)}
 #toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 90px);transform:translateX(-50%);background:var(--leafL);color:#0b130f;padding:8px 14px;border-radius:20px;font-weight:700;font-size:14px;display:none;z-index:40;white-space:nowrap}
 .tasting{border:2px solid var(--gold);border-radius:12px;padding:12px;background:#1d2a23;margin-top:8px}
 .bars{display:grid;grid-template-columns:3em 1fr 2em;gap:6px 8px;align-items:center;font-size:13px;margin:8px 0}.bars i{display:block;height:9px;border-radius:5px;background:var(--line);overflow:hidden}.bars i u{display:block;height:100%;background:var(--gold)}
@@ -99,7 +99,7 @@ button{font:inherit;color:inherit;touch-action:manipulation;cursor:pointer}
   <button class="mbtn" id="bGloss">📚<div>咖啡小辭典<small>故事裡出現的名詞</small></div></button>
  </div>
  <div class="credit">故事根據 COFFEE COUNTY 的豆卡改編；人物對話為想像重現，生產者、產區、品種與風味描述依照店家卡片。<br>品飲紀錄：Roke，2026/11/27 於 COFFEE COUNTY Fukuoka<br>外傳依鄒築園、珍5吉咖啡莊園的公開報導與罐上標示改編。<br>外傳三依 Rufous Chelbesa 豆袋標示與你的沖煮筆記改編；阿貝貝、緹吉絲特、達維特為想像人物。<br>外傳四依 93 Coffee 商品頁與藝伎品種的公開史料改編；凱貝德、評審、瑟蘭為想像人物。<br>外傳五至十二依各豆袋標示、店家資料、你的沖煮筆記與公開報導改編；標示「想像人物」的角色與對話皆為虛構。</div>
- <div class="jl">嘆息之谷 v1.8・Made by <b>Jim Lu</b></div>
+ <div class="jl">嘆息之谷 v1.9・Made by <b>Jim Lu</b></div>
 </section>
 
 <section class="screen" id="game">
@@ -1206,8 +1206,8 @@ const SRE=new RegExp(SKEYS.map(k=>k.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')).join(
 function termChips(s){const el=$('terms');if(!el)return;const seen=[],sy=[];const rest=(s||'').replace(GRE,m=>{if(!seen.includes(m))seen.push(m);return ' '});const r2=rest.replace(SRE,m=>{if(!sy.includes(m))sy.push(m);return ' '});r2.replace(/[A-Za-zÀ-ÿ][A-Za-zÀ-ÿ’'-]{2,}(?: [A-Za-zÀ-ÿ][A-Za-zÀ-ÿ’'-]+)*/g,m=>{if(!SAY[m])SAY[m]=[m,EN,''];if(!sy.includes(m))sy.push(m);return m});
  el.innerHTML=seen.map(k=>`<button class="tchip" data-chip="${esc(k)}">📖 ${esc(k)}</button>`).join('')+sy.map(k=>`<button class="tchip sy" data-chip="${esc(k)}" data-sy="1">🔊 ${esc(k)}</button>`).join('')}
 function linkify(s){return esc(s).replace(GRE,m=>`<span class="term" data-g="${m}">${m}</span>`)}
-function popup(el,k){const pp=$('pop');SAYQ=SAYQ.slice(-40);pp.innerHTML=`<b>${esc(k)}</b>${GL[k]?esc(GL[k]):''}${SAY[k]?`<div>${spkBtn(k)}</div>`:''}`;if(!GL[k]&&SAY[k])speak(k);pp.style.display='block';const r=el.getBoundingClientRect();const w=Math.min(300,innerWidth-20);pp.style.maxWidth=w+'px';let x=Math.max(10,Math.min(innerWidth-w-10,r.left));pp.style.left=x+'px';const ph=pp.offsetHeight;pp.style.top=(r.top-ph-8>10?r.top-ph-8:r.bottom+8)+'px';blip(880,.06,'sine',.05)}
-document.addEventListener('click',e=>{const sp=e.target.closest('[data-speak]');if(sp){e.stopPropagation();e.preventDefault();speak(SAYQ[+sp.dataset.speak]);return}const tm=e.target.closest('.term,[data-chip]');if(tm){e.stopPropagation();popup(tm,tm.dataset.g||tm.dataset.chip);return}if(!e.target.closest('#pop'))$('pop').style.display='none'},true);
+function popup(el,k){const pp=$('pop');SAYQ=SAYQ.slice(-40);pp.innerHTML=`<button id="popX" aria-label="關閉">✕</button><b>${esc(k)}</b>${GL[k]?esc(GL[k]):''}${SAY[k]?`<div>${spkBtn(k)}</div>`:''}`;if(!GL[k]&&SAY[k])speak(k);pp.style.display='block';const r=el.getBoundingClientRect();const w=Math.min(300,innerWidth-20);pp.style.maxWidth=w+'px';let x=Math.max(10,Math.min(innerWidth-w-10,r.left));pp.style.left=x+'px';const ph=pp.offsetHeight;pp.style.top=(r.top-ph-8>10?r.top-ph-8:r.bottom+8)+'px';blip(880,.06,'sine',.05)}
+document.addEventListener('click',e=>{const sp=e.target.closest('[data-speak]');if(sp){e.stopPropagation();e.preventDefault();speak(SAYQ[+sp.dataset.speak]);return}const tm=e.target.closest('.term,[data-chip]');if(tm){e.stopPropagation();popup(tm,tm.dataset.g||tm.dataset.chip);return}const pp=$('pop');if(e.target.closest('#popX')){e.stopPropagation();e.preventDefault();pp.style.display='none';return}if(!e.target.closest('#pop')&&pp.style.display==='block'){pp.style.display='none';e.stopPropagation();e.preventDefault()}},true);
 /* ============ 劇情引擎 ============ */
 let typing=null,waiting=false,busy=false,curText='',curSp='nar',hist=[];
 function mark(i){if(hist[hist.length-1]!==i)hist.push(i);const b=$('bBack');if(b)b.disabled=hist.length<2}
