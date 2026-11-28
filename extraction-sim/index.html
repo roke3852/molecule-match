@@ -1453,7 +1453,7 @@ window.BGM=(()=>{
     <div class="err" id="tErr"></div>
   </div>
   <button class="t-more" id="tMore" type="button" aria-label="咖啡宇宙：更多咖啡 App 與遊戲">咖啡宇宙</button>
-  <div class="t-foot">© 2026 Jim Lu　ver. 12.6</div>
+  <div class="t-foot">© 2026 Jim Lu　ver. 12.7</div>
 </div>
 <nav class="modes" aria-label="導覽"><div class="in">
   <button class="homebtn" id="homeBtn" type="button" hidden>‹ 主選單</button>
@@ -10610,7 +10610,10 @@ function bind(){if(bound)return;bound=true;
   $('ccBody').addEventListener('change',e=>{const t=e.target;if(t.dataset.k)setRec(t.dataset.k,+t.value);});
   // 錢包在別的地方變了
   addEventListener('focus',()=>render());}
-window.cupRender=()=>{bind();render();};
+window.cupRender=()=>{bind();try{render();}catch(e){console.error(e);ST.cur=null;tplOpen=false;svOpen=false;try{render();}catch(e2){$('ccBody').innerHTML='<p class="label">金杯挑戰載入失敗，請重新整理頁面。</p>';}}};
+// 直接開在 #cup（重新整理、從主選單回來）時，分頁已經顯示了但這段程式還沒載入：載入完補畫一次
+if($('cupView')&&!$('cupView').hidden)window.cupRender();
+new MutationObserver(()=>{const v=$('cupView');if(v&&!v.hidden&&!$('ccBody').innerHTML)window.cupRender();}).observe($('cupView'),{attributes:true,attributeFilter:['hidden']});
 (window.GCR=window.GCR||[]).push(()=>{const y=scrollY;render();scrollTo(0,y);const bk=$('ccBk');});
 })();
 </script>
