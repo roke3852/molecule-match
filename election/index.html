@@ -405,7 +405,7 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:20px 0 30px}
   </div>
 </section>
 </main>
-<footer>2026 九合一選情圖鑑 v2.13・Made by <b>Jim Lu</b></footer>
+<footer>2026 九合一選情圖鑑 v2.14・Made by <b>Jim Lu</b></footer>
 
 <script>
 const P={K:{n:'國民黨',c:'var(--kmt)',l:'var(--kmt-l)'},D:{n:'民進黨',c:'var(--dpp)',l:'var(--dpp-l)'},T:{n:'民眾黨',c:'var(--tpp)',l:'var(--tpp-l)'},I:{n:'無黨籍',c:'var(--ind)',l:'var(--ind-l)'}};
@@ -824,10 +824,10 @@ function drawKey(){
 }
 drawKey();
 // 即時票數（開票夜，定時更新）
-const RES_UPD='2026/11/28 18:27 更新（新北 17:46 三立；高雄、桃園約 17:45；台北 17:41 約略值；台中 17:32；台南 17:18；網路報導比電視慢約 20–30 分鐘。金門、連江、苗栗（18:12 鍾東錦）、基隆（謝國樑）已自行宣布當選；其他縣市網路上只查到領先者票數，暫維持早期數字）';
+const RES_UPD='2026/11/28 18:32 更新（台北約 18:00 三立；新北 17:46 三立；高雄、桃園約 17:45；台中 17:32；台南 17:18；網路報導比電視慢約 20–30 分鐘。金門、連江、苗栗（18:12 鍾東錦）、基隆（謝國樑）已自行宣布當選；其他縣市網路上只查到領先者票數，暫維持早期數字）';
 // 縣市: {t:時間, src:來源, st:'lead'|'won', v:{候選人:票數}}
 const RES={
- '台北':{t:'17:41（約略值）',src:'https://udn.com/news/story/124652/9874224',v:{'蔣萬安':380000,'沈伯洋':330000}},
+ '台北':{t:'約18:00（三立，自由時報整理）',src:'https://news.ltn.com.tw/news/politics/breakingnews/5656377',v:{'蔣萬安':379705,'沈伯洋':358291}},
  '新北':{t:'17:46（三立）',src:'https://news.ltn.com.tw/news/politics/breakingnews/5656383',v:{'蘇巧慧':551870,'李四川':550716}},
  '桃園':{t:'約17:44',src:'https://tw.news.yahoo.com/%E5%8F%B0%E5%8D%97%E9%AB%98%E9%9B%84%E9%96%8B%E7%A5%A8-%E9%99%B3%E4%BA%AD%E5%A6%83%E9%A0%98%E5%85%882%E8%90%AC%E5%A4%9A%E7%A5%A8-%E8%B3%B4%E7%91%9E%E9%9A%86%E8%B6%85%E5%89%8D4%E8%90%AC%E5%A4%9A%E7%A5%A8-094400193.html',v:{'張善政':278666,'黃世杰':222915}},
  '台中':{t:'17:32',src:'https://ettoday.net/news/20261128/3279795.htm',v:{'何欣純':379901,'江啟臣':360441}},
@@ -855,7 +855,7 @@ function resLeader(city){const r=RES[city];if(!r)return null;const e=Object.entr
 // 預估總票數：中選會 11/24 公告選舉人數 × 投票率（有 15 點後的 2026 投票率就用，沒有就假設 60%）
 const ELEC={'台北':2031431,'新北':3434625,'桃園':1943537,'台中':2376502,'台南':1568248,'高雄':2307917,'新竹縣':479908,'苗栗':446401,'彰化':1013875,'南投':400204,'雲林':551747,'嘉義縣':413028,'屏東':670027,'宜蘭':380310,'花蓮':264472,'台東':176528,'澎湖':92310,'金門':121150,'連江':11679,'基隆':310951,'新竹市':363638,'嘉義市':217540};
 const DEF_TO=60;
-function estOf(c){const e=ELEC[c];if(!e)return null;let TL=[];try{TL=TO}catch(e){}const t=TL.find(x=>x[0]===c&&/^1[5-9]|^2/.test(x[1]));
+function estOf(c){const e=ELEC[c];if(!e)return null;let TL=[];try{TL=TO}catch(e){}const t=TL.find(x=>x[0]===c&&/^1[5-9]|^2|最終/.test(x[1]));
   const rate=t?(t[3]?(t[2]+t[3])/2:t[2]):DEF_TO;const est=Math.round(e*rate/100);
   const r=RES[c];const tot=r&&r.st!=='won'?Object.values(r.v).reduce((a,b)=>a+b,0):null;
   return {e,rate,est,basis:t?`${t[1]} 投票率 ${rate}%`:`假設投票率 ${DEF_TO}%`,tot,prog:tot!=null?Math.min(100,tot/est*100):null};}
