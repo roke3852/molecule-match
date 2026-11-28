@@ -789,6 +789,8 @@ html.embed{--modesH:0px}
 .zp-ov{position:fixed;inset:0;z-index:80;background:rgba(0,0,0,.6);display:flex;align-items:flex-end;justify-content:center}.zp-ov[hidden]{display:none}
 .zp-box{background:var(--bg,#1b1714);width:min(640px,100%);max-height:88vh;overflow:auto;border-radius:16px 16px 0 0;padding:12px 14px 24px}.zp-hd{display:flex;justify-content:space-between;align-items:center;position:sticky;top:-12px;background:inherit;padding:6px 0;z-index:1}.zp-hd b{font-size:17px}.zp-hd button{font:inherit;font-size:18px;background:none;border:0;color:var(--ink);width:44px;height:44px;cursor:pointer}
 .zp-list{display:grid;gap:8px}.zp-it{border-color:var(--line)}.zp-it.on{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.z-mis{border:1px dashed var(--accent);border-radius:10px;padding:8px 11px;margin:8px 0;font-size:13.5px}.z-mis p{margin:5px 0}
+.gs-bar{display:flex;gap:6px;justify-content:center;margin:6px 0 2px}.gs-bar button{font:inherit;font-size:12.5px;border:1px solid var(--line);background:transparent;color:var(--muted);border-radius:999px;padding:5px 11px;cursor:pointer}.gs-bar button[aria-pressed="true"]{border-color:var(--accent);color:var(--accent);font-weight:700}.gs-cap{font-size:12px}
 .cm-bar{display:flex;gap:3px;margin-top:12px}.cm-bar>div{min-width:22px;height:46px;border-radius:5px;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#1a1512;font-size:12px;line-height:1.1}
 .cm-bar>div.cl{background-image:repeating-linear-gradient(45deg,transparent 0 5px,rgba(0,0,0,.16) 5px 8px)!important}.cm-bar small{font-size:10px;opacity:.8}
 .cm-tl{display:flex;gap:3px;font-size:11px;color:var(--muted);margin:4px 0 6px}.cm-tl span{min-width:22px}
@@ -1450,7 +1452,7 @@ window.BGM=(()=>{
     <div class="err" id="tErr"></div>
   </div>
   <button class="t-more" id="tMore" type="button" aria-label="咖啡宇宙：更多咖啡 App 與遊戲">咖啡宇宙</button>
-  <div class="t-foot">© 2026 Jim Lu　ver. 11.8</div>
+  <div class="t-foot">© 2026 Jim Lu　ver. 11.9</div>
 </div>
 <nav class="modes" aria-label="導覽"><div class="in">
   <button class="homebtn" id="homeBtn" type="button" hidden>‹ 主選單</button>
@@ -8596,7 +8598,7 @@ function champPt(id){if(CHAMP_PT[id])return CHAMP_PT[id];let R;
   else{const m=CMM.find(x=>x.id===id);R=cmRun(m,0);}
   return CHAMP_PT[id]={tds:R.tds,ey:R.ey};}
 let champCur=null;
-function champScRender(){const box=document.querySelector('#cmPick .champ-sc');if(!box)return;
+(window.GCR=window.GCR||[]).push(()=>champScRender());function champScRender(){const box=document.querySelector('#cmPick .champ-sc');if(!box)return;
   const L=CM_ALL.filter(x=>(x.grp||'champ')==='champ').map(x=>Object.assign({x},champPt(x.id)));
   box.innerHTML=goldChart(L.map(v=>({id:v.x.id,x:v.ey,y:v.tds,c:WHO[v.x.g].c,on:v.x.id===champCur,label:v.x.year+' '+v.x.title})))+
    '<div class="champ-leg">'+L.map(v=>'<button type="button" data-m="'+v.x.id+'"'+(v.x.id===champCur?' class="on"':'')+'><i style="background:'+WHO[v.x.g].c+'"></i>'+v.x.year+' '+v.x.who+'<small>'+v.ey.toFixed(1)+'%・'+v.tds.toFixed(2)+'%・'+zoneOf(v.ey,v.tds)+'</small></button>').join('')+'</div>';}
@@ -8808,6 +8810,20 @@ function zOpenPick(z){const Z=ZONES[z],S=ZST[z];let ov=document.getElementById('
   ov.innerHTML='<div class="zp-box"><div class="zp-hd"><b>選一套配方</b><button type="button" data-zx="1" aria-label="關閉">✕</button></div><p class="label">柱子＝每一注（寬＝注水時間、高＝水量、顏色＝水溫，上方黑點＝中心注水）；黃色底＝關閥浸泡；虛線＝模型滴完。所有配方用同一個時間比例。</p><div class="cm-leg">'+Z.legend.map(([c,l])=>'<span><i style="border-color:'+c+'"></i>'+l+'</span>').join('')+'</div><div class="zp-list">'+
    Z.recipes.map(r=>'<button type="button" class="zp-it'+(r.id===S.cur?' on':'')+'" data-zr="'+r.id+'">'+zCard(z,r,0,TM)+'<span class="zc-d">'+r.d+'</span></button>').join('')+'</div></div>';
   ov.hidden=false;document.body.style.overflow='hidden';const cur=ov.querySelector('.zp-it.on');if(cur)cur.scrollIntoView({block:'center'});}
+
+// 官方描述和模型落點對不上時，說清楚原因
+function zMismatch(z,r,R){const txt=(r.d||'')+(r.beans||''),zn=zoneOf(R.ey,R.tds);
+  const light=/明亮|輕|清爽|乾淨|透亮/.test(txt)&&!/厚實|醇厚/.test(r.d||''),heavy=/厚實|醇厚|濃郁|甜感重|厚度/.test(r.d||'')&&!/較輕/.test(r.d||'');
+  let bad='';if(light&&/過度/.test(zn))bad='over';else if(heavy&&/(不足|淡)/.test(zn))bad='under';if(!bad)return '';
+  const alt=(k,mod)=>{const r2=Object.assign({},r,{id:r.id+'~'+k});mod(r2);return zRun(z,r2);};
+  const G=alt('g2',x=>x.grind=r.grind+(bad==='over'?54.5:-54.5)),T=alt('t3',x=>{x.temp=r.temp+(bad==='over'?-3:3);if(r.planTemp)x.planTemp=r.planTemp.map(v=>v+(bad==='over'?-3:3));});
+  const gC=Math.round(r.grind/27.25),tt=r.planTemp?r.planTemp[0]:r.temp,ratio=(r.water/r.dose).toFixed(1),pf=R.pf;
+  const why=bad==='over'?'模型用 '+tt+'°C、C40 約 '+gC+' 格、1:'+ratio+' 去算（豆子用「'+cmBean(r.bean||'geisha').name+'」），萃取率被推到 '+R.ey.toFixed(1)+'%，所以點落在「'+zn+'」。':
+    '模型用 '+tt+'°C、C40 約 '+gC+' 格、1:'+ratio+' 去算，萃取率只有 '+R.ey.toFixed(1)+'%，所以點落在「'+zn+'」。';
+  const taste=bad==='over'?'但這不代表喝起來會很苦：模型的味道是酸 '+T5(pf.acid)+'、甜 '+T5(pf.sweet)+'、苦 '+T5(pf.bitter)+'，'+(pf.acid>=pf.bitter&&pf.acid>=pf.sweet?'酸還是最突出、甜感偏薄，跟官方描述的明亮、輕盈其實是同一個方向，只是尾段可能多一點苦澀。':'苦味已經跟上來，這點和官方描述的明亮確實不同，可能是模型萃取偏高。')+'九宮格的格子名稱是一般化的說法，不是這杯一定的味道。':
+    '模型的味道是酸 '+T5(pf.acid)+'、甜 '+T5(pf.sweet)+'、苦 '+T5(pf.bitter)+'。';
+  const fix=(bad==='over'?'想讓模型落點更接近官方描述：研磨調粗 2 格 → 萃取率 '+G.ey.toFixed(1)+'%（'+zoneOf(G.ey,G.tds)+'）；或水溫降 3°C → '+T.ey.toFixed(1)+'%（'+zoneOf(T.ey,T.tds)+'）。':'想往官方描述靠：研磨調細 2 格 → 萃取率 '+G.ey.toFixed(1)+'%（'+zoneOf(G.ey,G.tds)+'）；或水溫升 3°C → '+T.ey.toFixed(1)+'%（'+zoneOf(T.ey,T.tds)+'）。');
+  return '<div class="z-mis"><b>🤔 官方描述和模型落點看起來不一樣？</b><p>'+why+taste+'</p><p>'+fix+'實際以你的豆子和磨豆機為準，官方的研磨範圍是 '+r.gl+'。</p></div>';}
 function zRender(z){const sec=document.querySelector('.cm-sec[data-m="'+z+'"]');if(!sec)return;const Z=ZONES[z],S=ZST[z],r=Z.recipes.find(x=>x.id===S.cur)||Z.recipes[0],R=zRun(z,r);
   sec.querySelector('.z-pick1').innerHTML=zCard(z,r,1)+'<span class="zc-go">換配方（共 '+Z.recipes.length+' 套）›</span>';
   sec.querySelectorAll('.z-var button').forEach(b=>b.setAttribute('aria-pressed',(b.dataset.v||null)===S.v));
@@ -8819,7 +8835,7 @@ function zRender(z){const sec=document.querySelector('.cm-sec[data-m="'+z+'"]');
    (S.v?'<p class="z-adjtag">🔧 目前顯示的是調整後：'+vName+'</p>':'')+'<div class="cm-bar">'+E.plan.map((ml,i)=>'<div style="flex:'+ml+';background:'+tempCol(temps[i])+'"'+(inV(E.planT[i])?' class="cl"':'')+'><b>'+Math.round(ml)+'</b><small>'+(r.style?styleN((r.style||[])[i])+' '+temps[i]+'°':temps[i]+'°')+'</small></div>').join('')+(r.ice?'<div style="flex:'+r.ice+';background:#dff1fb"><b>冰 '+r.ice+'</b><small>公杯</small></div>':'')+(r.bypass?'<div style="flex:'+r.bypass+';background:#f3d9b0"><b>+'+r.bypass+'</b><small>滴完後加</small></div>':'')+'</div>'+
    '<div class="cm-tl">'+r.plan.map((ml,i)=>'<span style="flex:'+ml+'">'+cmFmt(r.planT[i])+'</span>').join('')+(r.ice?'<span style="flex:'+r.ice+'"></span>':'')+(r.bypass?'<span style="flex:'+r.bypass+'"></span>':'')+'</div>'+
    '<p class="label">濾杯：'+DRIPPER[E.dripper].name+(E.dripper!==r.dripper?'（原配方 '+DRIPPER[r.dripper].name+'）':'')+(vw?'＋Switch 閥門（斜線格＝關閥浸泡）':'')+'・原始配方滴完 '+r.done+(r.est?'・估計：'+r.est:'')+'</p>'+
-   '<p class="label">模型落點'+(S.v?'（調整後）':'')+'：<b>'+zoneOf(Rv.ey,Rv.tds)+'</b>（萃取率 '+Rv.ey.toFixed(1)+'%、濃度 '+Rv.tds.toFixed(2)+'%）'+(S.v?'；原配方：'+zoneOf(R.ey,R.tds)+'（'+R.ey.toFixed(1)+'%、'+R.tds.toFixed(2)+'%）':'')+'</p><div class="z-beans"><b>☕ 適合的豆子</b><p>'+r.beans+'</p><small>模擬用：'+bn.name+'</small></div>'+(r.robust?zRobust(z,r):'');
+   '<p class="label">模型落點'+(S.v?'（調整後）':'')+'：<b>'+zoneOf(Rv.ey,Rv.tds)+'</b>（萃取率 '+Rv.ey.toFixed(1)+'%、濃度 '+Rv.tds.toFixed(2)+'%）'+(S.v?'；原配方：'+zoneOf(R.ey,R.tds)+'（'+R.ey.toFixed(1)+'%、'+R.tds.toFixed(2)+'%）':'')+'</p>'+(S.v?'':zMismatch(z,r,R))+'<div class="z-beans"><b>☕ 適合的豆子</b><p>'+r.beans+'</p><small>模擬用：'+bn.name+'</small></div>'+(r.robust?zRobust(z,r):'');
   const B=S.v?zRun(z,r,S.v):null,X=B||R;
   sec.querySelector('.cm-res').innerHTML=[['濃度 TDS',X.tds.toFixed(2)+'%'],['萃取率',X.ey.toFixed(1)+'%'],['甜',T5(X.pf.sweet)],['酸',T5(X.pf.acid)],['苦',T5(X.pf.bitter)],['模型滴完',cmFmt(X.end)]].map(([k,v])=>'<div><b>'+v+'</b><span>'+k+'</span></div>').join('');
   {const c=Z.color(r),pts=[{id:'o',x:R.ey,y:R.tds,c:S.v?'#8a8278':c,on:!S.v,label:'原配方'}];if(B0)pts.push({id:'a',x:B0.ey,y:B0.tds,c,on:true,label:vName});
@@ -8850,19 +8866,44 @@ Object.keys(ZONES).forEach(z=>{const Z=ZONES[z];TOURS['cm_'+z]={view:'learnView'
 // ---------- 九宮格金杯圖（SCA 沖煮控制圖） ----------
 // 中心方格是金杯；EY 18–22%、TDS 1.15–1.45% 把圖切成 9 區。軸固定以金杯為中心，超出範圍的點貼在邊上並標出數值。
 const GC={ex:[13,27],tx:[0.8,1.8]};
-function goldChart(pts,opt){const W=320,H=250,x0=34,y0=8,w=W-x0-8,h=H-y0-34,ex=GC.ex,tx=GC.tx;
+window.GCR=window.GCR||[];let GSTY=(()=>{try{return localStorage.getItem('brewlab-gstyle')||'ucd';}catch(e){return 'ucd';}})();
+document.addEventListener('click',e=>{const b=e.target.closest('[data-gs]');if(!b)return;GSTY=b.dataset.gs;try{localStorage.setItem('brewlab-gstyle',GSTY);}catch(_){}
+  document.querySelectorAll('.cm-sec.zone:not([hidden])').forEach(x=>{try{zRender(x.dataset.m);}catch(_){}});GCR.forEach(f=>{try{f();}catch(_){}});});
+// UC Davis 感官圖底圖（Frost 等人 2023，照原圖描的示意）
+function ucdBg(X,Y,x0,y0,w,h){const cr=pts=>{const P=pts.map(p=>[X(p[0]),Y(p[1])]);let d='M'+P[0][0].toFixed(1)+' '+P[0][1].toFixed(1);for(let i=0;i<P.length-1;i++){const p0=P[i-1]||P[i],p1=P[i],p2=P[i+1],p3=P[i+2]||p2;
+    d+=' C'+(p1[0]+(p2[0]-p0[0])/6).toFixed(1)+' '+(p1[1]+(p2[1]-p0[1])/6).toFixed(1)+' '+(p2[0]-(p3[0]-p1[0])/6).toFixed(1)+' '+(p2[1]-(p3[1]-p1[1])/6).toFixed(1)+' '+p2[0].toFixed(1)+' '+p2[1].toFixed(1);}return d;};
+  const ln=(pts,c,wd,da)=>'<path d="'+cr(pts)+'" fill="none" stroke="'+c+'" stroke-width="'+wd+'" stroke-linecap="round"'+(da?' stroke-dasharray="5 4"':'')+' opacity=".85"/>',SW='#d9625e',AC='#4f8fd6';
+  let s='<defs><clipPath id="ucdClip"><rect x="'+x0+'" y="'+y0+'" width="'+w+'" height="'+h+'"/></clipPath></defs><rect x="'+x0+'" y="'+y0+'" width="'+w+'" height="'+h+'" fill="var(--bg)" stroke="var(--line)"/>';
+  for(let e=14;e<=26;e++)s+='<line x1="'+X(e)+'" x2="'+X(e)+'" y1="'+y0+'" y2="'+(y0+h)+'" stroke="var(--line)" stroke-width=".5" opacity="'+(e%2?.5:1)+'"/>';
+  for(let v=.8;v<=1.601;v+=.1)s+='<line x1="'+x0+'" x2="'+(x0+w)+'" y1="'+Y(v)+'" y2="'+Y(v)+'" stroke="var(--line)" stroke-width=".5"/>';
+  s+='<g clip-path="url(#ucdClip)">';
+  [40,45,50,55,60,65,70,75,80,85,90].forEach(gl=>{const sl=gl/1000;let xa=14,ya=14*sl,xb=26,yb=26*sl;if(yb>1.6){yb=1.6;xb=1.6/sl;}if(ya<.8){ya=.8;xa=.8/sl;}if(xa<xb)s+='<line x1="'+X(xa)+'" y1="'+Y(ya)+'" x2="'+X(xb)+'" y2="'+Y(yb)+'" stroke="var(--muted)" stroke-width=".5" opacity=".3"/>';});
+  s+=ln([[15.9,.82],[16.8,.87],[18.2,.9],[19.1,.88],[19.6,.82]],SW,5)+ln([[14.5,.82],[16.5,.95],[18.2,1.04],[19.2,1.06],[20.3,1.0],[21,.82]],SW,2.6)+ln([[14,.87],[16.5,1.08],[18.6,1.2],[19.8,1.245],[20.6,1.24],[21.6,1.13],[22,.8]],SW,1.6,1)+
+     ln([[14.2,1.6],[14.9,1.47],[15.2,1.35],[15,1.22],[14.3,1.13]],AC,4.5)+ln([[15.4,1.6],[16.4,1.5],[16.8,1.35],[16.6,1.2],[16,1.1],[14.2,1.03]],AC,2,1)+
+     ln([[25.8,1.25],[25.4,1.12],[25.4,.98],[25.8,.88]],AC,5)+ln([[25.8,1.43],[24.8,1.3],[24,1.1],[24.4,.95],[25.5,.82]],AC,2.6)+ln([[25.8,1.58],[24.2,1.45],[22.9,1.32],[22.4,1.2],[22.6,1.05],[23.6,.92],[25,.8]],AC,1.8,1)+'</g>';
+  const t=(x,y,tx,c,sz)=>'<text x="'+X(x)+'" y="'+Y(y)+'" font-size="'+sz+'" font-weight="800" text-anchor="middle" fill="'+c+'" opacity=".8">'+tx+'</text>';
+  s+=t(16.2,1.53,'酸澀味','#d9a33a',10)+t(16.4,1.45,'柑橘味','#e2a92f',10)+t(15.4,1.33,'漿果味','#d9625e',8.5)+t(17.7,1.35,'草本味','#5f9e5a',8.5)+t(17.6,1.26,'乾果味','#c4513a',8.5)+
+     t(20.2,1.53,'香料味','#b04a5a',9)+t(20.3,1.45,'化學味','#9aa3ad',9)+t(23.6,1.53,'苦味','#8a9a96',11)+t(23.8,1.45,'烘焙味','#b35a3a',10)+t(23,1.36,'焦味','#a77a48',8.5)+t(22.7,1.27,'土壤味','#9a8a4a',8.5)+
+     t(15.6,.86,'甜味','#d9625e',9)+t(24,.86,'黑茶味','#8a5a6a',8.5);
+  s+='<rect x="'+X(18)+'" y="'+Y(1.45)+'" width="'+(X(22)-X(18))+'" height="'+(Y(1.15)-Y(1.45))+'" fill="rgba(232,176,74,.08)" stroke="#e8b04a" stroke-width="1" stroke-dasharray="4 3"/>';
+  [14,16,18,20,22,24,26].forEach(e=>{s+='<text x="'+X(e)+'" y="'+(y0+h+11)+'" font-size="8" text-anchor="middle" fill="var(--muted)">'+e+'%</text>';});
+  [0.8,1.0,1.15,1.2,1.4,1.45,1.6].filter(v=>v!==1.2&&v!==1.4).forEach(v=>{s+='<text x="'+(x0-3)+'" y="'+(Y(v)+3)+'" font-size="8" text-anchor="end" fill="'+(v===1.15||v===1.45?'#e8b04a':'var(--muted)')+'">'+(v===1.15||v===1.45?v.toFixed(2):v.toFixed(1))+'</text>';});
+  return s;}
+const gsBar=()=>'<div class="gs-bar" role="group" aria-label="圖的樣式"><button type="button" data-gs="ucd" aria-pressed="'+(GSTY==='ucd')+'">UC Davis 感官圖</button><button type="button" data-gs="classic" aria-pressed="'+(GSTY!=='ucd')+'">經典九宮格</button></div>';
+function goldChart(pts,opt){const U=GSTY==='ucd',W=320,H=250,x0=34,y0=8,w=W-x0-8,h=H-y0-34,ex=U?[14,26]:GC.ex,tx=U?[.8,1.6]:GC.tx;
   const X=v=>x0+(v-ex[0])/(ex[1]-ex[0])*w,Y=v=>y0+h-(v-tx[0])/(tx[1]-tx[0])*h,cl=(v,a)=>Math.max(a[0],Math.min(a[1],v));
   const xs=[ex[0],18,22,ex[1]],ys=[tx[1],1.45,1.15,tx[0]];
   const NAME=[['濃・萃取不足','濃','濃・過度萃取'],['萃取不足','金杯','過度萃取'],['淡・萃取不足','淡','淡・過度萃取']];
   const TASTE=[['酸、鹹、刺','厚重','苦、厚重'],['酸、薄、青','平衡','苦、澀'],['水、酸','水、淡','水、苦澀']];
   let s='<svg viewBox="0 0 '+W+' '+H+'" width="100%">';
+  if(U)s+=ucdBg(X,Y,x0,y0,w,h);else{
   for(let i=0;i<3;i++)for(let j=0;j<3;j++){const gx=X(xs[j]),gy=Y(ys[i]),gw=X(xs[j+1])-gx,gh=Y(ys[i+1])-gy,center=i===1&&j===1;
     s+='<rect x="'+gx+'" y="'+gy+'" width="'+gw+'" height="'+gh+'" fill="'+(center?'#e8b04a':['#7fb6e0','#e8805a'][j===0?0:1])+'" opacity="'+(center?.2:j===1?.03:.07)+'" stroke="var(--line)" stroke-width=".6"/>';
     s+='<text x="'+(gx+gw/2)+'" y="'+(gy+gh/2-2)+'" font-size="'+(center?9:7.5)+'" text-anchor="middle" fill="'+(center?'#e8b04a':'var(--muted)')+'" opacity="'+(center?1:.75)+'" font-weight="'+(center?700:400)+'">'+NAME[i][j]+'</text>';
     s+='<text x="'+(gx+gw/2)+'" y="'+(gy+gh/2+8)+'" font-size="6.5" text-anchor="middle" fill="var(--muted)" opacity=".55">'+TASTE[i][j]+'</text>';}
   s+='<rect x="'+X(18)+'" y="'+Y(1.45)+'" width="'+(X(22)-X(18))+'" height="'+(Y(1.15)-Y(1.45))+'" fill="none" stroke="#e8b04a" stroke-width="1.4"/>';
   [13,15,18,20,22,25,27].forEach(e=>{s+='<text x="'+X(e)+'" y="'+(y0+h+11)+'" font-size="8" text-anchor="middle" fill="var(--muted)">'+e+'%</text>';});
-  [0.8,1.0,1.15,1.3,1.45,1.6,1.8].forEach(t=>{s+='<text x="'+(x0-3)+'" y="'+(Y(t)+3)+'" font-size="8" text-anchor="end" fill="var(--muted)">'+t.toFixed(t===1.15||t===1.45?2:1)+'</text>';});
+  [0.8,1.0,1.15,1.3,1.45,1.6,1.8].forEach(t=>{s+='<text x="'+(x0-3)+'" y="'+(Y(t)+3)+'" font-size="8" text-anchor="end" fill="var(--muted)">'+t.toFixed(t===1.15||t===1.45?2:1)+'</text>';});}
   s+='<text x="'+(x0+w)+'" y="'+(y0+h+26)+'" font-size="9" text-anchor="end" fill="var(--muted)">萃取率 EY →</text><text x="'+(x0-30)+'" y="'+(y0+h+26)+'" font-size="9" fill="var(--muted)">↑ 濃度 TDS %</text>';
   if(opt&&opt.arrow){const [a,b]=opt.arrow,ax=X(cl(a.ey,ex)),ay=Y(cl(a.tds,tx)),bx=X(cl(b.ey,ex)),by=Y(cl(b.tds,tx)),L=Math.hypot(bx-ax,by-ay)||1,ux=(bx-ax)/L,uy=(by-ay)/L,ex2=bx-ux*8,ey2=by-uy*8;
     s+='<line x1="'+ax+'" y1="'+ay+'" x2="'+ex2+'" y2="'+ey2+'" stroke="var(--ink)" stroke-width="1.4" stroke-dasharray="3 2"/><path d="M'+ex2+' '+ey2+'L'+(ex2-ux*6-uy*4)+' '+(ey2-uy*6+ux*4)+'L'+(ex2-ux*6+uy*4)+' '+(ey2-uy*6-ux*4)+'Z" fill="var(--ink)"/>';}
@@ -8870,7 +8911,7 @@ function goldChart(pts,opt){const W=320,H=250,x0=34,y0=8,w=W-x0-8,h=H-y0-34,ex=G
   pts.slice().sort((a,b)=>a.on-b.on).forEach(p=>{const out=p.x<ex[0]||p.x>ex[1]||p.y<tx[0]||p.y>tx[1],cx=X(cl(p.x,ex)),cy=Y(cl(p.y,tx));
     s+='<g class="orea-dot" data-r="'+p.id+'"><circle cx="'+cx+'" cy="'+cy+'" r="11" fill="transparent"/>'+(out?'<path d="M'+cx+' '+(cy-6)+'L'+(cx+5.5)+' '+(cy+4)+'L'+(cx-5.5)+' '+(cy+4)+'Z" fill="'+p.c+'" stroke="'+(p.on?'var(--ink)':'none')+'" stroke-width="1.5"/>':'<circle cx="'+cx+'" cy="'+cy+'" r="'+(p.on?6:4.5)+'" fill="'+p.c+'" stroke="'+(p.on?'var(--ink)':'none')+'" stroke-width="1.5"/>')+'</g>';
     if(p.on){const right=cx<x0+w*0.62;s+='<text x="'+(right?cx+9:cx-9)+'" y="'+(cy+3)+'" font-size="9" font-weight="700" text-anchor="'+(right?'start':'end')+'" fill="var(--ink)" paint-order="stroke" stroke="var(--panel)" stroke-width="3">'+p.label+(out?'（'+p.x.toFixed(1)+'%・'+p.y.toFixed(2)+'%）':'')+'</text>';}});
-  return s+'</svg>';}
+  return s+'</svg>'+gsBar()+(U?'<p class="label gs-cap">UC Davis 感官圖（Frost 等人，2023）：紅線是甜味、左邊藍線是酸味、右邊藍線是苦味的等強度線，越粗越強；虛線框是金杯，灰色斜線是每公升水用幾 g 粉。線條照原圖描繪，看方向用。</p>':'');}
 function zoneOf(ey,tds){const c=ey<18?0:ey>22?2:1,r=tds>1.45?0:tds<1.15?2:1;return [['濃・萃取不足','濃','濃・過度萃取'],['萃取不足','金杯','過度萃取'],['淡・萃取不足','淡','淡・過度萃取']][r][c];}
 
 // ---------- 對外：配方資料庫（給沖煮筆記用，由 build/gen-recipes.js 匯出） ----------
@@ -9083,7 +9124,7 @@ function verdictOf(c){const s=c.J.score,bestSingle=Math.max(...c.R.map(r=>r.scor
   if(c.R.length>1&&s>bestSingle+1)return {e:'🤝',t:'1＋1＞2，互補成功',cls:'good'};
   if(s>=80)return {e:'👍',t:'順口好喝',cls:'good'};if(s>=70)return {e:'🙂',t:'中規中矩',cls:''};return {e:'🤔',t:'還差一點',cls:''};}
 let C=null,tmr=0;
-function render(){const v=$('blendView');if(!v||v.hidden)return;const c=C=calc();
+(window.GCR=window.GCR||[]).push(()=>render());function render(){const v=$('blendView');if(!v||v.hidden)return;const c=C=calc();
   $('blMethod').value=S.m;$('blTemp').value=c.T;$('blTempV').textContent=c.T+'°C';$('blGrind').value=c.C;$('blGrindV').textContent='C40 '+c.C+' 格（'+Math.round(gum(c.C))+' μm）';
   $('blSep').querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(+b.dataset.v===S.sep)));
   $('blList').innerHTML=S.parts.map((p,i)=>{const b=bOf(p.id)||beans()[0],r=c.R[i],ro=p.roast??b.roast,[role,rd]=roleOf(r);
