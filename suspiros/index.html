@@ -63,6 +63,22 @@ button{font:inherit;color:inherit;touch-action:manipulation;cursor:pointer}
 .tasting{border:2px solid var(--gold);border-radius:12px;padding:12px;background:#1d2a23;margin-top:8px}
 .bars{display:grid;grid-template-columns:3em 1fr 2em;gap:6px 8px;align-items:center;font-size:13px;margin:8px 0}.bars i{display:block;height:9px;border-radius:5px;background:var(--line);overflow:hidden}.bars i u{display:block;height:100%;background:var(--gold)}
 .jl{font-size:11px;color:var(--sub);text-align:center;margin-top:12px}
+.mapw{margin-top:6px}.mapsvg{width:100%;height:auto;display:block;background:#0e1a1f;border:1px solid var(--line);border-radius:10px}
+.mapsvg .land{fill:#26362e}.mapsvg .hl{fill:#3d6b52;stroke:var(--leafL);stroke-width:.8}.mapsvg .lake{fill:#0e1a1f;stroke:#4a7a8a;stroke-width:.5}
+.mapsvg .belt{fill:var(--gold);opacity:.07}.mapsvg .beltl{stroke:var(--gold);stroke-width:.5;stroke-dasharray:3 3;opacity:.5}
+.mapsvg text{font-family:inherit;font-size:10px;fill:var(--cream);paint-order:stroke;stroke:#0e1a1f;stroke-width:2.6px;stroke-linejoin:round}
+.mapsvg .cap{font-size:8px;fill:var(--gold);letter-spacing:.12em}.mapsvg .geo{font-size:9px;fill:var(--sub);font-style:italic}
+.mapsvg .route{fill:none;stroke:var(--cherry);stroke-width:1.6;stroke-dasharray:5 4;stroke-linecap:round}
+.mapsvg .rift{fill:none;stroke:#b07a4a;stroke-width:1;stroke-dasharray:2 3;opacity:.8}
+.mapsvg .pin{stroke:#0e1a1f;stroke-width:1.2}.mapsvg .pin.farm{fill:var(--gold)}.mapsvg .pin.city{fill:var(--mist)}.mapsvg .pin.port{fill:#6fb0d0}.mapsvg .pin.lab{fill:var(--leafL)}.mapsvg .pin.home{fill:var(--cherry)}
+.mapsvg .ping{fill:none;stroke:var(--gold);stroke-width:1.2;animation:ping 1.8s ease-out infinite;transform-box:fill-box;transform-origin:center}
+.mapsvg g[data-pin]{cursor:pointer}.mapsvg g.on text{fill:var(--gold);font-weight:700}
+@keyframes ping{0%{transform:scale(.6);opacity:1}100%{transform:scale(2.4);opacity:0}}
+.mtabs{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}.mtab{border:1px solid var(--line);background:var(--ink);border-radius:16px;padding:5px 11px;font-size:13px}.mtab.on{background:var(--gold);color:#1b1408;border-color:var(--gold);font-weight:700}
+.pinfo{margin-top:8px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--ink);font-size:14px;line-height:1.7;min-height:52px}.pinfo b{color:var(--gold)}
+.plist{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.plist button{border:1px solid var(--line);background:var(--ink3);border-radius:8px;padding:4px 8px;font-size:12.5px}
+.prof{width:100%;height:auto;display:block;margin-top:8px;background:#0e1a1f;border:1px solid var(--line);border-radius:10px}.prof text{font-size:9px;fill:var(--cream)}.prof .ax{font-size:8px;fill:var(--sub)}
+@media (prefers-reduced-motion:reduce){.mapsvg .ping{animation:none}}
 </style>
 </head>
 <body>
@@ -74,15 +90,16 @@ button{font:inherit;color:inherit;touch-action:manipulation;cursor:pointer}
   <button class="mbtn" id="bCont">▶<div>繼續<small id="sCont">從上次離開的地方</small></div></button>
   <button class="mbtn" id="bChap">📖<div>章節選擇<small>重看任何一章</small></div></button>
   <button class="mbtn" id="bSide">🫘<div>外傳：更多咖啡的故事<small>鄒築園藝伎・珍5吉 SL34・🆕 Chelbesa 水洗</small></div></button>
+  <button class="mbtn" id="bMapT">🗺️<div>咖啡地圖<small>瓜地馬拉・衣索比亞・台灣・九州，產地在哪裡、有多高</small></div></button>
   <button class="mbtn" id="bItems">🎴<div>風味收集冊<small>故事裡收集到的風味卡</small></div></button>
   <button class="mbtn" id="bGloss">📚<div>咖啡小辭典<small>故事裡出現的名詞</small></div></button>
  </div>
  <div class="credit">故事根據 COFFEE COUNTY 的豆卡改編；人物對話為想像重現，生產者、產區、品種與風味描述依照店家卡片。<br>品飲紀錄：Roke，2026/11/27 於 COFFEE COUNTY Fukuoka<br>外傳依鄒築園、珍5吉咖啡莊園的公開報導與罐上標示改編。<br>外傳三依 Rufous Chelbesa 豆袋標示與你的沖煮筆記改編；阿貝貝、緹吉絲特、達維特為想像人物。</div>
- <div class="jl">嘆息之谷 v1.3・Made by <b>Jim Lu</b></div>
+ <div class="jl">嘆息之谷 v1.4・Made by <b>Jim Lu</b></div>
 </section>
 
 <section class="screen" id="game">
- <div class="top"><button class="ib" id="bHome">☰</button><button class="ib" id="bBack" aria-label="上一句">↶</button><div class="ch" id="chName"></div><button class="ib" id="bSnd">🔊</button><button class="ib" id="bMus">🎵</button><button class="ib" id="bBag">🎴</button></div>
+ <div class="top"><button class="ib" id="bHome">☰</button><button class="ib" id="bBack" aria-label="上一句">↶</button><div class="ch" id="chName"></div><button class="ib" id="bSnd">🔊</button><button class="ib" id="bMus">🎵</button><button class="ib" id="bMap" aria-label="地圖">🗺️</button><button class="ib" id="bBag">🎴</button></div>
  <div class="scene"><canvas id="sceneCv" width="192" height="108"></canvas><div id="loc"></div><div id="chapCard"></div></div>
  <div id="box">
   <div class="who"><canvas id="pf" width="16" height="16"></canvas><div id="nm"></div></div>
@@ -198,7 +215,7 @@ const ITEMS={
  blacktea:['🫖','紅茶','水洗衣索比亞招牌的茶感尾韻']
 };
 /* ============ 故事 ============ */
-const L=(s,t)=>({s,t}),N=t=>({s:'nar',t}),BG=(b,loc)=>({bg:b,loc}),G=k=>({get:k}),C=(q,o)=>({c:q,o});
+const M=(k)=>({map:k}),L=(s,t)=>({s,t}),N=t=>({s:'nar',t}),BG=(b,loc)=>({bg:b,loc}),G=k=>({get:k}),C=(q,o)=>({c:q,o});
 const CHS=[
 {t:'序章',n:'藥院的一杯咖啡',sub:'2026 年 11 月 27 日・福岡藥院',bg:'cafe',nodes:[
  BG('cafe','福岡・藥院　COFFEE COUNTY'),
@@ -221,7 +238,7 @@ const CHS=[
  N('你翻過卡片。字句之間，彷彿有一陣山谷的風吹了過來。')]},
 {t:'第一章',n:'嘆息之谷',sub:'瓜地馬拉・薇薇特南果',bg:'valley',nodes:[
  BG('valley','瓜地馬拉　薇薇特南果省　Palmira 村'),
- N('瓜地馬拉西北，靠近墨西哥邊境的薇薇特南果。'),
+ N('瓜地馬拉西北，靠近墨西哥邊境的薇薇特南果。'),M('gua'),
  N('這裡是山的國度。深深的溪谷一道接著一道，雲常常停在半山腰。'),
  N('La Libertad 市的 Palmira 村，海拔 1,900 到 2,000 公尺。清晨的空氣冷得像薄荷。'),
  L('axel','你第一次來？先別急著走進園子。站在這裡，看一下這片溪谷。'),
@@ -306,7 +323,7 @@ const CHS=[
 {t:'第六章',n:'越過海洋',sub:'從瓜地馬拉到九州',bg:'sea',nodes:[
  BG('sea','太平洋'),
  N('乾燥、去殼、挑選之後，綠色的生豆被仔細封裝。'),
- N('它們離開薇薇特南果的山谷，跨過太平洋，來到日本九州。'),
+ N('它們離開薇薇特南果的山谷，跨過太平洋，來到日本九州。'),M('gua-w'),
  BG('roast','福岡縣久留米　COFFEE COUNTY 烘豆室'),
  L('roaster','來了。今年的 Los Suspiros。'),
  N('烘豆師先做杯測，一匙一匙地嚐。'),
@@ -346,7 +363,7 @@ const CHS=[
  L('me','台灣 BOT 第 2 名，總統獎……鄒築園，藝伎。標價五千九百八。'),
  L('booth','鄒築園在阿里山，園主方政倫，大家都叫他「咖啡王子」。'),
  BG('alishan','嘉義　阿里山鄉　樂野村　海拔約 1,200 m'),
- N('阿里山的樂野村，是鄒族的部落。雲霧常常從山谷爬上來，又慢慢散開。'),
+ N('阿里山的樂野村，是鄒族的部落。雲霧常常從山谷爬上來，又慢慢散開。'),M('tw'),
  L('fangdad','我在這裡種茶種了三十年，也幫人催蘭花。家裡有一塊斜坡地空著，就隨手種了兩百棵咖啡樹，當作看的。'),
  N('大約 2000 年，那些「看的」咖啡樹開始結果。獨生子方政倫退伍回家，開始拿這些豆子做實驗。'),
  L('fang','沒有人教。我就自己烘、自己喝，烘壞了再來。'),
@@ -382,7 +399,7 @@ const CHS=[
  L('me','旁邊這罐呢？2026 BOT 第 13 名，珍5吉咖啡莊園，SL34。這個名字好特別。'),
  L('booth','珍5吉，名字裡藏著一家人喔。'),
  BG('alishan','嘉義縣　竹崎鄉　海拔約 1,150 m'),
- N('嘉義縣竹崎鄉，緊鄰阿里山。平均溫度 15 到 24 度，日照充足。'),
+ N('嘉義縣竹崎鄉，緊鄰阿里山。平均溫度 15 到 24 度，日照充足。'),M('tw'),
  L('zhu','我本來是種茶的。可是我自己太愛喝咖啡了，乾脆改種咖啡。'),
  N('2020 年，莊園成立。面積只有 0.5 公頃，主要種 SL34，也種一些鐵比卡和藝伎。'),
  L('zhen','名字是這樣來的：他的名字最後一個字「吉」，我的名字最後一個字「珍」。'),
@@ -419,9 +436,11 @@ const CHS=[
   {t:'放越久越好喝，香氣會越來越強',ok:0,r:'剛好相反。排氣完成之後，香氣會隨著氧化一點一點流失。'}]),
  N('你看著袋子背面的字：Gediyo，Chelbesa，Kurumi、74112，水洗。'),
  L('me','在福岡喝到一杯有故事的瓜地馬拉……那這支呢？它又是從哪裡來的？'),
+ N('你打開地圖。從台灣往西南，越過印度洋，一直到非洲之角。'),M('eth-w'),
  N('熱水落下。紅色果實的酸先跳了出來。'),G('redplum'),
  BG('gedeb','衣索比亞　Gedeo　Gedeb　Chelbesa　海拔約 2,200 m'),
  N('衣索比亞南部，Gedeo 的高原。往南走到耶加雪菲的盡頭，就是 Gedeb。'),
+ N('東非大裂谷從北到南把高原切開。Gedeo 在裂谷東邊的山坡上——從湖邊往上爬一千多公尺，才到這裡。'),M('gedeo'),
  N('這裡沒有一排一排的咖啡園。咖啡樹長在大樹和象腿蕉底下，跟房子、菜園、牛羊混在一起，像一座有人住的森林。'),
  L('abebe','歡迎。這些樹，是我爺爺的爺爺種的。'),
  L('abebe','我們家只有這一小片，幾百棵樹。Chelbesa 這一帶，像我這樣的人家有上千戶。'),
@@ -457,6 +476,7 @@ const CHS=[
  L('tigist','中午太陽太大，要蓋起來；晚上會冷，也要蓋起來。大概十天，豆子就乾了。'),
  L('tigist','爺爺說，以前這些豆子賣出去以後，就只會寫「耶加雪菲」，沒有人知道是 Chelbesa。'),
  L('dawit','2008 年交易所成立，豆子進去以後只剩大產區的名字。後來規定改了，國外的烘豆師才終於能指名買「Chelbesa」。'),
+ L('dawit','曬好的豆子要先坐卡車到首都分級、杯測，再往東北開一千多公里，到吉布地的港口上船。我們國家沒有海。'),M('eth-r'),
  L('tigist','所以現在，台灣的人也知道我們的名字了？'),
  L('me','……嗯。印在袋子上了。'),G('apricot'),
  BG('ceremony','阿貝貝的家　咖啡儀式'),
@@ -478,6 +498,128 @@ const CHS=[
  N('—— 外傳三・兩千公尺的紅茶・完 ——')]}
 
 ];
+
+/* ============ 地圖（參考咖啡尋豆師的世界地圖） ============ */
+const LAND=[
+ [[-125,47],[-124,40],[-117,33],[-110,23],[-105,20],[-97,16],[-92,15],[-88,13],[-84,10],[-80,8],[-77,8],[-80,10],[-83,12],[-83,15],[-88,16],[-87,21],[-90,21],[-97,22],[-97,28],[-90,30],[-84,30],[-81,25],[-80,31],[-76,35],[-70,42],[-66,45],[-64,47]],
+ [[-77,8],[-72,12],[-62,10],[-52,5],[-50,0],[-35,-6],[-39,-15],[-48,-25],[-57,-36],[-65,-40],[-73,-40],[-71,-30],[-70,-18],[-76,-14],[-81,-5],[-78,2]],
+ [[-85,22],[-80,23],[-74,20],[-78,20]],[[-74,19.5],[-68.5,19],[-71,18]],
+ [[-17,15],[-16,21],[-10,29],[-6,35],[10,37],[11,33],[20,31],[32,31],[35,24],[39,15],[43,11],[51,12],[47,3],[40,-4],[40,-15],[35,-24],[30,-31],[20,-35],[18,-30],[12,-17],[13,-8],[9,1],[9,4],[-4,5],[-8,4],[-13,8]],
+ [[44,-16],[50,-15],[47,-25],[44,-23]],
+ [[-9,47],[-9,37],[-5,36],[0,39],[3,43],[8,44],[16,38],[18,40],[13,45],[20,40],[23,36.5],[27,37],[36,36],[35,31],[34,28],[43,13],[52,16],[59,22],[56,26],[50,30],[57,25.5],[67,25],[72,21],[77,8],[80,15],[87,22],[92,22],[94,16],[98,9],[103,1.5],[104,9],[109,12],[106,20],[110,21],[122,30],[121,38],[126,35],[129,36],[130,43],[135,47]],
+ [[130,32],[131,34],[136,35],[140,36],[141,40],[140,45],[142,45],[142,39],[140,35],[135,33]],
+ [[95,5.5],[98,4],[104,-2],[106,-6],[102,-4],[98,1]],[[105,-6.5],[114,-7.5],[114,-8.5],[106,-7.5]],
+ [[109,1],[113,3],[117,7],[119,1],[116,-4],[110,-3]],[[120,18],[122,18],[124,13],[126,7],[122,7],[120,14]],
+ [[131,-1],[141,-3],[147,-6],[150,-10],[141,-9],[138,-7],[132,-4]],
+ [[114,-22],[122,-17],[130,-12],[136,-12],[137,-16],[142,-11],[146,-19],[150,-23],[153,-28],[150,-37],[144,-38],[138,-34],[131,-31.5],[124,-33],[115,-34]],
+ [[79.9,9.8],[81.8,7.5],[81.2,6.1],[80.1,6.2]]
+];
+const SHAPE={
+ gua:[[-92.2,14.5],[-91.4,13.9],[-90.1,13.7],[-89.3,14.4],[-88.6,15.0],[-88.2,15.7],[-88.9,15.9],[-89.2,17.8],[-90.98,17.8],[-90.98,17.25],[-91.4,17.25],[-90.4,16.4],[-91.7,16.1],[-92.2,15.25]],
+ eth:[[36.5,14.3],[37.9,14.9],[39.0,14.6],[40.0,14.4],[41.5,13.4],[42.4,12.5],[41.8,11.6],[42.9,11.0],[43.4,10.0],[44.0,9.0],[45.5,8.0],[47.9,8.0],[45.0,5.0],[44.0,4.9],[43.0,4.6],[42.0,4.0],[41.0,4.0],[39.8,3.5],[39.0,3.5],[38.0,3.6],[36.9,4.4],[36.0,4.5],[35.3,5.4],[34.7,6.6],[33.0,8.0],[33.5,8.5],[34.1,8.6],[34.3,10.5],[34.9,11.2],[35.6,12.6],[36.1,12.7]],
+ tw:[[121.0,25.3],[121.6,25.3],[122.0,25.0],[121.9,24.6],[121.6,24.0],[121.4,23.1],[120.9,22.0],[120.7,22.3],[120.3,22.6],[120.1,23.0],[120.1,23.7],[120.4,24.4],[120.7,24.8],[121.0,25.1]],
+ kyu:[[129.75,33.35],[130.05,33.55],[130.25,33.6],[130.4,33.62],[130.5,33.78],[130.7,33.92],[130.9,33.95],[131.05,33.85],[131.0,33.65],[131.3,33.55],[131.65,33.65],[131.75,33.4],[131.65,33.1],[131.9,32.75],[131.7,32.3],[131.45,31.6],[131.15,31.4],[130.8,31.05],[130.65,31.4],[130.25,31.3],[130.2,31.75],[130.4,32.15],[130.6,32.6],[130.45,32.9],[130.2,33.1],[130.3,32.75],[130.15,32.6],[129.95,32.75],[129.75,32.85],[129.6,33.15]]
+};
+// 圖釘：[名稱, 經度, 緯度, 標籤 dx, dy, 種類, 說明]
+const PINS={
+ sus:['Los Suspiros',-91.86,15.51,-8,-9,'farm','Axel Palacios 的農園，在薇薇特南果省 La Libertad 市 Palmira 村。海拔 1,900–2,000 m，從墨西哥平原吹來的暖風讓高山不容易結霜。'],
+ huehue:['薇薇特南果市',-91.47,15.32,6,12,'city','薇薇特南果省的省會，海拔約 1,900 m。省內多是深谷與高原，北邊是庫丘馬塔內斯山脈。'],
+ cuchu:['庫丘馬塔內斯山脈',-91.25,15.7,6,-6,'lab','Sierra de los Cuchumatanes。中美洲最高的非火山山脈，最高約 3,800 m；薇薇特南果的咖啡長在它的山腰和溪谷裡。'],
+ guacity:['瓜地馬拉市',-90.51,14.63,6,4,'city','瓜地馬拉的首都，海拔約 1,500 m。'],
+ quetzal:['太平洋岸港口',-90.78,13.92,6,10,'port','瓜地馬拉往亞洲的貨櫃多從太平洋岸出發（例如 Puerto Quetzal）。實際走哪個港口店家沒有寫，這裡是示意。'],
+ fuk:['福岡・藥院',130.395,33.582,7,-4,'home','COFFEE COUNTY 福岡店，你在 2026/11/27 喝到 Los Suspiros 的地方。'],
+ kur:['久留米',130.508,33.319,7,8,'city','COFFEE COUNTY 起家的城市，豆子在這裡烘焙。和福岡市區相距約 35 km，電車大約半小時。'],
+ gedeb:['Chelbesa・Gedeb',38.30,5.95,7,8,'farm','Chelbesa 是 Gedeb 的一個咖啡社區（位置為約略）。耶加雪菲最南、最高的一帶，豆袋標示海拔 2,100–2,350 m。'],
+ yirga:['耶加雪菲',38.20,6.16,-46,-2,'city','Yirgacheffe。世界上最有名的水洗咖啡產區之一，海拔約 1,900 m。Chelbesa 在它南方，常被歸在「廣義的耶加雪菲」。'],
+ dilla:['迪拉',38.31,6.41,7,-3,'city','Dilla，Gedeo 區的首府，海拔約 1,570 m。從這裡往南、往高處，就是耶加雪菲和 Gedeb。'],
+ hawassa:['阿瓦薩',38.48,7.06,7,0,'city','Hawassa，Sidama 的首府，在大裂谷的湖邊。咖啡卡車往北去首都會經過這裡。'],
+ addis:['阿迪斯阿貝巴',38.75,9.03,7,-4,'city','首都 Addis Ababa，海拔約 2,350 m。衣索比亞商品交易所（ECX）、出口商與杯測實驗室都在這裡，生豆在這裡做最後的分級和裝袋。'],
+ jimma:['吉馬（JARC）',36.83,7.67,-62,-6,'lab','Jimma。吉馬農業研究中心在這裡，1970 年代選出抗咖啡果病的 74112。西南邊的 Kaffa 森林，被認為是阿拉比卡咖啡的原鄉之一。'],
+ djib:['吉布地港',43.15,11.6,6,-6,'port','Djibouti。衣索比亞是內陸國，沒有自己的海港；咖啡多半用卡車或鐵路運到鄰國吉布地，再裝上貨櫃船出海。'],
+ tw:['台灣',121.0,24.2,7,4,'home','你的家。從福岡回來的隔天早上，你在這裡沖了 Chelbesa。'],
+ kao:['高雄港',120.28,22.61,-44,10,'port','台灣最大的貨櫃港之一。從吉布地出發的生豆，經印度洋、麻六甲海峽和南海來到台灣（航線為示意）。'],
+ tyn:['桃園機場',121.23,25.08,7,-2,'home','從福岡飛回台灣降落的地方。'],
+ zou:['鄒築園（樂野村）',120.735,23.44,7,8,'farm','阿里山鄉樂野村，鄒族部落，海拔約 1,200 m。方政倫的鄒築園就在這裡。'],
+ zhen:['珍5吉（竹崎鄉）',120.60,23.52,-84,-6,'farm','嘉義縣竹崎鄉，緊鄰阿里山，海拔約 1,150 m。朱鵬吉、王素珍一家的 0.5 公頃莊園。'],
+ chiayi:['嘉義市',120.45,23.48,-40,10,'city','嘉義市，海拔不到 50 m。從平地開上阿里山，一個多小時就爬升一千多公尺。'],
+ ali:['阿里山',120.80,23.51,7,-6,'lab','阿里山森林遊樂區，海拔約 2,200 m。雲霧常常從山谷爬上來，是台灣咖啡最集中的山區之一。']
+};
+// 航線（經緯度折線）
+const RT={
+ guaSea:[[-91.86,15.51],[-91.47,15.32],[-90.51,14.63],[-90.78,13.92],[-105,14],[-126,22]],
+ guaSea2:[[150,30],[136,31.5],[130.9,33.0],[130.508,33.319],[130.395,33.582]],
+ ethLand:[[38.30,5.95],[38.31,6.41],[38.48,7.06],[38.75,9.03],[40.4,9.6],[41.85,9.6],[43.15,11.6]],
+ ethSea:[[43.15,11.6],[46,12.2],[52,12.5],[60,11],[72,7],[80.5,5.2],[90,5.5],[97,5.6],[100,3.2],[103.8,1.2],[106,3],[110,8],[115,15],[119,20.5],[120.28,22.61]],
+ guaLand:[[-91.86,15.51],[-91.47,15.32],[-90.51,14.63],[-90.78,13.92]]
+};
+const MAPS={
+ all:{t:'世界：這些咖啡從哪裡來',kind:'w',box:[-126,150,-38,47],pins:['sus','fuk','gedeb','djib','zou','kao'],hl:['gua','eth','tw'],routes:['guaSea','guaSea2','ethSea'],belt:1,
+  note:'咖啡只長在南北回歸線之間的「咖啡帶」。瓜地馬拉和衣索比亞都在帶子裡；台灣剛好卡在北回歸線上，所以阿里山也種得出好咖啡。九州在帶子外面——那裡是喝咖啡、烘咖啡的地方。'},
+ 'gua-w':{t:'瓜地馬拉 → 九州',kind:'w',box:[-126,150,-38,47],pins:['sus','fuk'],hl:['gua'],routes:['guaSea','guaSea2'],belt:1,focus:'sus',
+  note:'生豆從瓜地馬拉的太平洋岸上船，一路往西橫越太平洋（地圖從左邊出去、右邊回來），抵達九州，再到久留米烘焙。'},
+ gua:{t:'瓜地馬拉・薇薇特南果',kind:'r',box:[-93,-87.8,13.4,18.2],shape:'gua',pins:['sus','huehue','cuchu','guacity','quetzal'],routes:['guaLand'],focus:'sus',
+  geo:[['墨 西 哥',-92.6,17.2],['太 平 洋',-91.8,13.75],['宏都拉斯',-88.7,14.6],['貝里斯',-88.6,17.4]],
+  prof:[['太平洋岸',0],['瓜地馬拉市',1500],['薇薇特南果市',1900],['Los Suspiros',2000,'1,900–2,000'],['庫丘馬塔內斯最高點',3800]],
+  note:'薇薇特南果在瓜地馬拉西北角，緊貼墨西哥邊境。北邊的庫丘馬塔內斯山脈擋出一道道深谷——Los Suspiros 就在這些溪谷之間。'},
+ jp:{t:'九州・福岡與久留米',kind:'r',box:[129.7,131.2,32.85,34.05],shape:'kyu',pins:['fuk','kur'],routes:[],focus:'fuk',
+  geo:[['玄 界 灘',130.0,33.85],['有明海',130.27,32.98],['筑後川',130.8,33.2]],note:'豆子在久留米烘好，送到福岡藥院的店裡，變成你手上的那一杯。'},
+ tw:{t:'台灣・嘉義阿里山',kind:'r',box:[119.95,121.15,23.12,23.78],shape:'tw',pins:['zou','zhen','chiayi','ali'],routes:[],focus:'zou',
+  geo:[['台灣海峽',120.02,23.7],['北回歸線 23.5°N',120.33,23.40],['阿里山山脈',120.9,23.25],['嘉南平原',120.3,23.25]],tropic:1,
+  prof:[['嘉義市',30],['竹崎・珍5吉',1150],['樂野・鄒築園',1200],['阿里山',2200]],
+  note:'鄒築園和珍5吉都在嘉義的阿里山山區，海拔一千出頭。北回歸線剛好從嘉義穿過——台灣是咖啡帶的最北邊。'},
+ 'eth-w':{t:'衣索比亞 → 台灣',kind:'w',box:[-126,150,-38,47],pins:['gedeb','djib','kao'],hl:['eth','tw'],routes:['ethSea'],belt:1,focus:'gedeb',
+  note:'Chelbesa 在東非的衣索比亞南部。生豆從吉布地港出海，經過印度洋、斯里蘭卡南邊、麻六甲海峽和南海，抵達台灣（航線為示意）。'},
+ gedeo:{t:'Gedeo・耶加雪菲到 Gedeb',kind:'r',box:[37.3,39.3,5.55,7.25],shape:'eth',pins:['gedeb','yirga','dilla','hawassa'],routes:[],rift:1,focus:'gedeb',
+  lakes:[[37.85,6.35,.28,.42],[37.58,5.85,.18,.22],[38.45,7.05,.08,.09]],
+  geo:[['阿巴亞湖',37.85,6.35],['恰莫湖',37.58,5.82],['大裂谷谷底',37.55,6.95],['Gedeo 區',38.75,6.2],['Sidama',38.85,6.85],['往 Guji →',38.95,5.65]],
+  prof:[['阿巴亞湖',1170],['迪拉',1570],['耶加雪菲',1900],['Chelbesa',2230,'2,100–2,350'],['阿迪斯阿貝巴',2350]],
+  note:'大裂谷的湖泊在西邊低處，Gedeo 在東邊的山坡上。從阿巴亞湖的 1,170 m 往東爬，經過迪拉、耶加雪菲，到 Gedeb 已經超過 2,000 m——高、涼，果實熟得慢，杯子才會這麼清透。'},
+ eth:{t:'衣索比亞全圖',kind:'r',box:[33,46,3.2,15.2],shape:'eth',pins:['gedeb','hawassa','addis','jimma','djib'],routes:[],rift:1,focus:'gedeb',
+  lakes:[[37.85,6.35,.28,.42],[37.58,5.85,.18,.22],[38.48,7.05,.12,.13],[37.3,12.0,.45,.55]],
+  geo:[['蘇 丹',33.6,10.5],['南蘇丹',33.4,6.0],['肯 亞',38.6,3.5],['索馬利亞',44.6,6.3],['厄利垂亞',38.4,15.0],['大裂谷',39.6,8.0],['塔納湖',36.3,12.1],['阿巴亞湖',36.95,6.6]],
+  prof:[['阿巴亞湖',1170],['迪拉',1570],['耶加雪菲',1900],['Chelbesa',2230,'2,100–2,350'],['阿迪斯阿貝巴',2350]],
+  note:'東非大裂谷把衣索比亞高原切成兩半。Gedeo 在裂谷東側的山坡上：從湖邊的 1,170 m 往東爬，經過迪拉、耶加雪菲，到 Gedeb 已經超過 2,000 m。'},
+ 'eth-r':{t:'Chelbesa → 吉布地港',kind:'r',box:[33,46,3.2,15.2],shape:'eth',pins:['gedeb','dilla','hawassa','addis','djib'],routes:['ethLand'],rift:1,focus:'addis',
+  lakes:[[37.85,6.35,.28,.42],[37.58,5.85,.18,.22],[38.48,7.05,.12,.13],[37.3,12.0,.45,.55]],
+  geo:[['索馬利亞',44.6,6.3],['肯 亞',38.6,3.5],['紅 海',40.2,14.6],['亞丁灣',45.2,12.3]],
+  note:'曬好的豆子先運到首都阿迪斯阿貝巴分級、杯測、裝袋，再北上東行一千多公里到吉布地港。衣索比亞沒有海港，每一袋咖啡都要借鄰國的港口出海。'}
+};
+const MAPSETS={main:['gua','gua-w','jp','all'],zou:['tw','all'],zhen:['tw','all'],chel:['eth-w','eth','gedeo','eth-r','all'],
+ title:['all','gua','eth','gedeo','tw','jp']};
+function projector(m){const [x0,x1,y0,y1]=m.box,W=400;let H,PX,PY;
+ if(m.kind==='w'){H=Math.round((y1-y0)*W/(x1-x0)*1.5);PX=l=>(l-x0)/(x1-x0)*W;PY=a=>(y1-a)/(y1-y0)*H}
+ else{const k=Math.cos((y0+y1)/2*Math.PI/180);H=Math.round((y1-y0)/((x1-x0)*k)*W);PX=l=>(l-x0)/(x1-x0)*W;PY=a=>(y1-a)/(y1-y0)*H}
+ return{W,H,PX,PY}}
+function mapSVG(key,sel){const m=MAPS[key],{W,H,PX,PY}=projector(m),pt=([a,b])=>PX(a).toFixed(1)+','+PY(b).toFixed(1);
+ const poly=(ps,c)=>`<polygon class="${c}" points="${ps.map(pt).join(' ')}"/>`;
+ let o=LAND.map(p=>poly(p,'land')).join('');
+ if(m.belt)o=`<rect class="belt" x="0" y="${PY(23.5)}" width="${W}" height="${PY(-23.5)-PY(23.5)}"/><line class="beltl" x1="0" x2="${W}" y1="${PY(23.5)}" y2="${PY(23.5)}"/><line class="beltl" x1="0" x2="${W}" y1="${PY(-23.5)}" y2="${PY(-23.5)}"/>`+o+`<text class="cap" x="${PX(-60)}" y="${PY(-23.5)-4}">咖啡帶　南北回歸線之間</text>`;
+ if(m.kind==='w')o+=(m.hl||[]).map(k=>poly(SHAPE[k==='tw'?'tw':k],'hl')).join('')+`<polygon class="hl" points="${SHAPE.kyu.map(pt).join(' ')}" style="opacity:.6"/>`;
+ else o+=Object.keys(SHAPE).filter(k=>k!==m.shape).map(k=>poly(SHAPE[k],'land')).join('')+poly(SHAPE[m.shape],'hl');
+ if(m.tropic)o+=`<line class="beltl" x1="0" x2="${W}" y1="${PY(23.44)}" y2="${PY(23.44)}" style="opacity:.9"/>`;
+ (m.lakes||[]).forEach(([a,b,rx,ry])=>{o+=`<ellipse class="lake" cx="${PX(a)}" cy="${PY(b)}" rx="${Math.abs(PX(a+rx)-PX(a))}" ry="${Math.abs(PY(b+ry)-PY(b))}"/>`});
+ if(m.rift)o+=`<path class="rift" d="M${pt([40.6,14.2])} L${pt([41.0,11.6])} L${pt([39.9,9.6])} L${pt([38.7,7.8])} L${pt([37.9,6.4])} L${pt([37.4,4.6])} L${pt([36.6,3.4])}"/>`;
+ (m.geo||[]).forEach(([t,a,b])=>{o+=`<text class="geo" x="${PX(a)}" y="${PY(b)}" text-anchor="middle">${t}</text>`});
+ (m.routes||[]).forEach(r=>{const d='M'+RT[r].map(pt).join(' L');o+=`<path class="route" d="${d}"/><circle r="3.2" fill="var(--cherry)" stroke="#fff" stroke-width=".8"><animateMotion dur="${Math.max(3,RT[r].length*.6)}s" repeatCount="indefinite" path="${d}"/></circle>`});
+ o+=m.pins.map(id=>{const p=PINS[id],x=PX(p[1]),y=PY(p[2]),on=sel===id,anc=p[3]<0?'end':'start',tx=p[3]<0?x-4:x+p[3];
+  return `<g data-pin="${id}" class="${on?'on':''}">${on?`<circle class="ping" cx="${x}" cy="${y}" r="6"/>`:''}<circle class="pin ${p[5]}" cx="${x}" cy="${y}" r="${p[5]==='farm'?4.6:3.6}"/><text x="${tx}" y="${y+p[4]}" text-anchor="${anc}">${p[0]}</text><circle cx="${x}" cy="${y}" r="12" fill="transparent"/></g>`}).join('');
+ return `<svg class="mapsvg" viewBox="0 0 ${W} ${H}" role="group" aria-label="${esc(m.t)}">${o}</svg>`}
+function profSVG(pr){const W=400,H=120,max=Math.max(...pr.map(p=>p[1]))*1.15,n=pr.length,X=i=>30+i*(W-60)/(n-1),Y=a=>H-22-(a/max)*(H-40);
+ const pts=pr.map((p,i)=>[X(i),Y(p[1])]);const d=`M${X(0)} ${H-22} `+pts.map(p=>`L${p[0].toFixed(1)} ${p[1].toFixed(1)}`).join(' ')+` L${X(n-1)} ${H-22} Z`;
+ let g=[1000,2000,3000].filter(v=>v<max).map(v=>`<line x1="24" x2="${W-6}" y1="${Y(v)}" y2="${Y(v)}" stroke="#2f453b" stroke-dasharray="2 3"/><text class="ax" x="4" y="${Y(v)+3}">${v/1000}k</text>`).join('');
+ return `<svg class="prof" viewBox="0 0 ${W} ${H}" role="img" aria-label="海拔剖面">${g}<path d="${d}" fill="#3d6b52" stroke="var(--leafL)" stroke-width="1"/>${pts.map((p,i)=>`<circle cx="${p[0]}" cy="${p[1]}" r="3" fill="${/Suspiros|Chelbesa|珍5吉|鄒築園/.test(pr[i][0])?'var(--gold)':'var(--mist)'}"/><text x="${p[0]}" y="${p[1]-6}" text-anchor="middle">${(pr[i][2]||pr[i][1].toLocaleString())} m</text><text x="${p[0]}" y="${H-8}" text-anchor="middle" class="ax">${pr[i][0]}</text>`).join('')}<text class="ax" x="${W-6}" y="12" text-anchor="end">海拔剖面（示意）</text></svg>`}
+let MAPCTX=null;
+function openMap(keys,start,onDone){MAPCTX={keys,cur:start||keys[0],sel:null,onDone};renderMap();blip(660,.08,'triangle',.05)}
+function renderMap(){const c=MAPCTX,m=MAPS[c.cur];if(!c.sel||!m.pins.includes(c.sel))c.sel=m.focus||m.pins[0];const p=PINS[c.sel];
+ openCard(`<h3>🗺️ ${esc(m.t)}</h3>${c.keys.length>1?`<div class="mtabs">${c.keys.map(k=>`<button class="mtab ${k===c.cur?'on':''}" data-mt="${k}">${esc(MAPS[k].t.split('：')[0].split('・')[0])}</button>`).join('')}</div>`:''}
+ <div class="mapw">${mapSVG(c.cur,c.sel)}</div><div class="pinfo"><b>📍 ${esc(p[0])}</b><br>${linkify(p[6])}</div>
+ <div class="plist">${m.pins.map(id=>`<button data-pl="${id}">${esc(PINS[id][0])}</button>`).join('')}</div>
+ ${m.prof?profSVG(m.prof):''}<p class="sub" style="line-height:1.7;margin-top:10px">${linkify(m.note)}</p>
+ ${c.onDone?`<div class="menu" style="max-width:none"><button class="mbtn pri" id="mGo">▶<div>繼續故事</div></button></div>`:''}`,()=>{const f=MAPCTX&&MAPCTX.onDone;MAPCTX=null;if(f)f()});
+ document.querySelectorAll('[data-mt]').forEach(b=>b.onclick=e=>{e.stopPropagation();MAPCTX.cur=b.dataset.mt;MAPCTX.sel=null;blip(880,.05,'sine',.04);renderMap()});
+ document.querySelectorAll('[data-pin],[data-pl]').forEach(b=>b.onclick=e=>{e.stopPropagation();MAPCTX.sel=b.dataset.pin||b.dataset.pl;blip(990,.05,'sine',.04);renderMap()});
+ const g=$('mGo');if(g)g.onclick=()=>closeCard()}
+function mapSetOf(ci){const c=CHS[ci];return MAPSETS[c.side||'main']}
 /* ============ 狀態 ============ */
 const SK='suspiros_v1';let DB={ch:0,i:0,got:[],done:[],snd:1,mus:1};try{Object.assign(DB,JSON.parse(localStorage.getItem(SK))||{})}catch(e){}
 function save(){try{localStorage.setItem(SK,JSON.stringify(DB))}catch(e){}}
@@ -605,6 +747,7 @@ function step(){const c=CHS[DB.ch];$('opts').innerHTML='';
  while(DB.i<c.nodes.length){const n=c.nodes[DB.i];
   if(n.bg){setBg(n.bg,n.loc);DB.i++;continue}
   if(n.get){DB.i++;getItem(n.get);continue}
+  if(n.map){DB.i++;save();waiting=false;const ks=mapSetOf(DB.ch);openMap(ks,n.map,()=>step());return}
   if(n.end){DB.i++;save();finale();return}
   if(n.c){mark(DB.i);showChoice(n);return}
   mark(DB.i);DB.i++;save();showLine(n);return}
@@ -645,8 +788,9 @@ function tastingHTML(){const bar=(k,v)=>`<span>${k}</span><i><u style="width:${v
  <p><b>放涼</b>：喝得到卡片寫的梨子汁味；花香非常明顯，偏沉、偏厚。</p>
  <p class="sub">店家卡片：Kumquat, Loquat, Prune, Cashew, Cacao, Japanese Pear, Floral, Brown Sugar, Round Mouthfeel, Well Balanced</p></div>`}
 function itemsHTML(){return `<div class="items">${Object.entries(ITEMS).map(([k,v])=>{const h=DB.got.includes(k);return`<div class="it ${h?'':'no'}"><b>${h?v[0]:'？'}</b>${h?esc(v[1]):'未收集'}${h?`<div class="sub" style="font-size:11px;margin-top:2px">${esc(v[2])}</div>`:''}</div>`}).join('')}</div>`}
-function openCard(html){$('card').innerHTML=`<button class="x" onclick="closeCard()">✕</button>`+html;$('ov').classList.add('on')}
-function closeCard(){$('ov').classList.remove('on')}
+let cardClose=null;
+function openCard(html,onClose){cardClose=onClose||null;$('card').innerHTML=`<button class="x" onclick="closeCard()">✕</button>`+html;$('ov').classList.add('on')}
+function closeCard(){$('ov').classList.remove('on');const f=cardClose;cardClose=null;if(f)f()}
 $('ov').onclick=e=>{if(e.target.id==='ov')closeCard()};
 function toTitle(){show('title');refreshTitle()}
 function refreshTitle(){const has=DB.i>0||DB.ch>0;$('bCont').disabled=!has;$('sCont').textContent=has?`${CHS[DB.ch].t}：${CHS[DB.ch].n}`:'還沒有進度';$('sStart').textContent=DB.fin?'已看完全篇・從序章重新開始':'序章：藥院的一杯咖啡'}
@@ -659,6 +803,8 @@ $('bCont').onclick=()=>{ac();resume()};
 $('bChap').onclick=chapSel;$('bSide').onclick=sideCard;$('bGloss').onclick=glossCard;$('bItems').onclick=bagCard;
 $('bHome').onclick=e=>{e.stopPropagation();clearInterval(typing);typing=null;toTitle()};
 $('bBag').onclick=e=>{e.stopPropagation();bagCard()};
+$('bMap').onclick=e=>{e.stopPropagation();const ks=mapSetOf(DB.ch);openMap(ks,ks[0])};
+$('bMapT').onclick=()=>openMap(MAPSETS.title,'all');
 function sndUI(){$('bSnd').textContent=DB.snd?'🔊':'🔇';$('bMus').style.opacity=DB.mus?1:.4}
 $('bSnd').onclick=e=>{e.stopPropagation();DB.snd=DB.snd?0:1;save();sndUI()};
 $('bMus').onclick=e=>{e.stopPropagation();DB.mus=DB.mus?0:1;save();if(DB.mus)musicStart();else musicStop();sndUI()};
