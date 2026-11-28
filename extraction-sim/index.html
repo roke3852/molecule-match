@@ -1453,7 +1453,7 @@ window.BGM=(()=>{
     <div class="err" id="tErr"></div>
   </div>
   <button class="t-more" id="tMore" type="button" aria-label="咖啡宇宙：更多咖啡 App 與遊戲">咖啡宇宙</button>
-  <div class="t-foot">© 2026 Jim Lu　ver. 12.3</div>
+  <div class="t-foot">© 2026 Jim Lu　ver. 12.4</div>
 </div>
 <nav class="modes" aria-label="導覽"><div class="in">
   <button class="homebtn" id="homeBtn" type="button" hidden>‹ 主選單</button>
@@ -10364,6 +10364,7 @@ if(window.PREF){PREF.bar('gcPref',()=>$('gxChart'));PREF.on(()=>render());
 .cc-goal{display:flex;flex-direction:column;gap:3px;border:1px solid #5ec98c;border-radius:12px;padding:9px 11px;margin:10px 0;font-size:13.5px}.cc-goal b{color:#5ec98c}.cc-goal svg{vertical-align:middle}
 .cc-c{margin:8px 0}.cc-cl{display:flex;justify-content:space-between;font-size:14px}.cc-cl b{color:var(--accent)}.cc-cr{display:flex;align-items:center;gap:6px}.cc-cr input{flex:1}.cc-cr button,.cc-sty button{font:inherit;min-width:44px;min-height:40px;border-radius:10px;border:1px solid var(--line);background:transparent;color:var(--ink);font-size:18px;cursor:pointer}
 .cc-sty{display:flex;gap:6px;margin-top:4px}.cc-sty button{flex:1;font-size:14px}.cc-sty button[aria-pressed=true]{border-color:var(--accent);color:var(--accent);font-weight:700}.cc-ratio{margin:6px 0 2px}
+.cc-svb{border:1px dashed var(--accent);border-radius:12px;padding:10px;margin:6px 0 10px}.cc-svb label{font-size:13px;color:var(--muted)}.cc-svb input{width:100%;font:inherit;font-size:16px;padding:9px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink);margin:4px 0 8px}
 .cc-tpl{border:1px dashed var(--accent);border-radius:12px;padding:4px 10px 10px;margin:6px 0 10px;max-height:60vh;overflow:auto}.cc-tp{display:block;width:100%;text-align:left;font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:7px 9px;margin:5px 0;cursor:pointer}.cc-tp b{font-size:14px}.cc-tp small{display:block;color:var(--muted);font-size:12px}
 .cc-sh{font-size:15px;margin:14px 0 6px}.cc-sh small{color:var(--muted);font-weight:400;font-size:12.5px;margin-left:6px}
 .cc-seg{border:1px solid var(--line);border-radius:12px;padding:7px 9px;margin:6px 0}.cc-sgh{display:flex;align-items:center;gap:8px}.cc-sgh>b{min-width:3.6em;font-size:14px}.cc-sgh .cc-sty{flex:1;margin:0}.cc-sgh .cc-sty button{min-height:34px;font-size:12.5px}
@@ -10406,7 +10407,7 @@ const REW=[0,150,300,600],HINT=80;
 let ST=(()=>{try{return JSON.parse(localStorage.getItem(CK)||'null')||{};}catch(e){return {};}})();
 ST=Object.assign({dr:'v60',cur:null,jar:{},coin:1500,tr:{},tries:{},blind:false,daily:{},rec:{},log:{},hint:{}},ST);
 const save=()=>{try{localStorage.setItem(CK,JSON.stringify(ST));}catch(e){}};
-let tab='play',msg='',busy=false,tplOpen=false;
+let tab='play',msg='',busy=false,tplOpen=false,svOpen=false;
 const B=id=>BEANS.find(b=>b.id===id),K=(c,d)=>c.b+'|'+d,drName=d=>(DRIPPER[d]||{name:d}).name.replace(/（.*$/,'');
 const today=()=>{const d=new Date();return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();};
 function dailyPick(){const s=today();let h=0;for(const c of s)h=(h*31+c.charCodeAt(0))>>>0;return {c:CH[h%CH.length],d:DR[(h>>4)%DR.length]};}
@@ -10493,6 +10494,16 @@ function presets(){const out=[],zk=ZMAP[ST.dr];
   try{window.__design.tpls().forEach(t=>{if(t.id==='even10')return;const r=fromX(t.X);if(r)out.push({g:'冠軍與名人配方',id:'t_'+t.id,n:t.n,r,hold:t.X.segs.some(q=>q.hold>0)});});}catch(e){}
   try{(JSON.parse(localStorage.getItem('brewlab-designs-v1')||'[]')||[]).forEach(x=>{const r=x&&x.d&&fromX(x.d);if(r)out.push({g:'我的手法存檔',id:'s_'+x.id,n:x.name,r,hold:x.d.segs.some(q=>q.hold>0)});});}catch(e){}
   return out;}
+// 存成手法：跟「手法設計」共用同一個存檔清單，放在「金杯挑戰」資料夾
+const DSV='brewlab-designs-v1',DFL='brewlab-design-folders',FOLD='金杯挑戰';
+const autoNm=(c,r)=>B(c.b).name+'・'+drName(ST.dr)+'・'+r.segs.length+' 注 '+r.dose+'g/'+waterOf(r)+'g・C40 '+r.clk+'格';
+function saveBox(c,r){return '<div class="cc-svb"><label for="ccSvN">手法名稱</label><input id="ccSvN" type="text" maxlength="60" value="'+esc(autoNm(c,r))+'"><div class="cc-row"><button type="button" class="cc-go" style="flex:1" data-svok="1">儲存</button><button type="button" class="cc-hb" data-svo="1">取消</button></div><p class="label">存到「手法設計」的存檔清單（📁 '+FOLD+'），兩邊都看得到；之後在「預設配方 → 我的手法存檔」也能套回來。</p></div>';}
+function saveRec(c,r,name){let a=[];try{a=JSON.parse(localStorage.getItem(DSV)||'[]')||[];}catch(e){}
+  let nm=(name||'').trim()||autoNm(c,r),n=2;const base=nm;while(a.some(x=>x.name===nm))nm=base+'（'+(n++)+'）';
+  const X=design(c,r,ST.dr);let A=null;try{A=window.__design.analyze(X);}catch(e){}
+  a.unshift({id:'dz'+Date.now().toString(36),name:nm,auto:false,folder:FOLD,sum:B(c.b).name+'・'+r.dose+' g／'+waterOf(r)+' g・'+r.segs.length+' 段'+(A?'・'+Math.round(A.score)+' 分・EY '+A.cup.ey.toFixed(1)+'%':''),d:Object.assign({tpl:'',fm:'pour',nEven:10,meas:[]},X),at:Date.now()});
+  try{localStorage.setItem(DSV,JSON.stringify(a.slice(0,200)));let fl=JSON.parse(localStorage.getItem(DFL)||'[]')||[];if(!fl.includes(FOLD)){fl.push(FOLD);localStorage.setItem(DFL,JSON.stringify(fl));}}catch(e){return null;}
+  return nm;}
 function tplList(cur){const P=presets(),gs=[...new Set(P.map(p=>p.g))];
   return '<div class="cc-tpl"><p class="label">套用後只換掉粉量、研磨和每一注，之後還能自己改。冰咖啡和後加水的配方不列；Switch 的關閥浸泡在這裡不會用到。'+(ZMAP[ST.dr]?'':'這個濾杯沒有官方配方，可以先用基本款。')+'</p>'+gs.map(g=>'<h4 class="cc-sh">'+g+'</h4>'+P.filter(p=>p.g===g).map(p=>{const W=waterOf(p.r);return '<button type="button" class="cc-tp" data-tp="'+esc(p.id)+'"><b>'+esc(p.n)+'</b><small>'+p.r.dose+' g／'+W+' g（1:'+(W/p.r.dose).toFixed(1)+'）・C40 '+p.r.clk+' 格・'+p.r.segs.length+' 注'+(p.hold?'・原本有關閥浸泡':'')+'</small>'+(p.d?'<small>'+esc(p.d)+'</small>':'')+preview(p.r)+'</button>';}).join('')).join('')+'</div>';}
 function chart(c,lg){const pts=(lg||[]).map((x,i)=>({id:'a'+i,x:x.ey,y:x.tds,c:i===lg.length-1?'#f0c040':'#8a8079',on:i===lg.length-1,label:'第 '+(i+1)+' 杯'}));
@@ -10519,7 +10530,7 @@ function renderPlay(){const d=ST.dr,dp=dailyPick(),dk=today();
   if(c){const r=recOf(c),k=K(c,d),t=ST.tr[k],lg=ST.log[k]||[],bl=ST.blind&&!t,tries=ST.tries[k]||0,fails=lg.length&&!inBox(c,lg[lg.length-1])||lg.length&&!svOk(c,lg[lg.length-1])?(ST.fail&&ST.fail[k])||0:0;
     h+='<div class="cc-panel" id="ccPanel"><h3 class="cc-h">③ 讀豆子、看目標</h3>'+beanCard(c,bl)+
      '<div class="cc-goal"><b>🎯 目標：'+c.t+'</b><span>萃取率 '+c.ey[0]+'–'+c.ey[1]+'%、濃度 '+c.tds[0].toFixed(2)+'–'+c.tds[1].toFixed(2)+'%</span><span>'+cup(1,18)+'進框 '+cup(2,18)+'進框且'+svTxt(c)+' '+cup(3,18)+'3 杯內拿到銀杯</span>'+(t?'<span>目前：'+cup(t.tier,18)+tierName[t.tier]+'（'+t.tries+' 杯）</span>':'')+'</div>'+
-     '<div class="cc-row"><h3 class="cc-h">④ 設計配方</h3><button type="button" class="cc-hb" data-tpo="1" aria-expanded="'+tplOpen+'">📋 '+(tplOpen?'收起預設配方':'套用預設配方')+'</button></div>'+(tplOpen?tplList(r):'')+ctrls(r)+
+     '<div class="cc-row"><h3 class="cc-h">④ 設計配方</h3><span class="cc-row" style="gap:6px"><button type="button" class="cc-hb" data-tpo="1" aria-expanded="'+tplOpen+'">📋 '+(tplOpen?'收起':'預設配方')+'</button><button type="button" class="cc-hb" data-svo="1" aria-expanded="'+svOpen+'">💾 儲存手法</button></span></div>'+(svOpen?saveBox(c,r):'')+(tplOpen?tplList(r):'')+ctrls(r)+
      '<div class="cc-jar">豆罐剩 <b>'+jar(c.b)+' g</b>'+(jar(c.b)<r.dose?'<button type="button" data-buy="1">補豆 100 g・'+NT(B(c.b).price)+'</button>':'')+'<span>這次用 '+r.dose+' g・第 '+(tries+1)+' 杯</span></div>'+
      '<button type="button" class="cc-go" data-brew="1"'+(jar(c.b)<r.dose?' disabled':'')+'>☕ 沖煮</button>'+
      (msg?'<div class="cc-msg">'+msg+'</div>':'')+
@@ -10577,6 +10588,8 @@ function bind(){if(bound)return;bound=true;
     else if(ds.ss){const [i,v]=ds.ss.split(':'),c=CH.find(x=>x.b===ST.cur),r=recOf(c);r.segs[+i].sty=v;putRec(c,r);}
     else if(ds.sdel){const c=CH.find(x=>x.b===ST.cur),r=recOf(c);r.segs.splice(+ds.sdel,1);r.segs[0].t=0;putRec(c,r);}
     else if(ds.sadd){const c=CH.find(x=>x.b===ST.cur),r=recOf(c),L=r.segs[r.segs.length-1];r.segs.push({ml:Math.max(20,Math.round(L.ml/5)*5),t:Math.ceil((L.t+pd(L.ml)+20)/5)*5,temp:L.temp,sty:L.sty});putRec(c,r);}
+    else if(ds.svo){svOpen=!svOpen;tplOpen=false;const y=scrollY;render();scrollTo(0,y);const i=$('ccSvN');if(i)i.focus();}
+    else if(ds.svok){const c=CH.find(x=>x.b===ST.cur),nm=saveRec(c,recOf(c),$('ccSvN').value);svOpen=false;msg=nm?'💾 已儲存「'+esc(nm)+'」':'儲存失敗';const y=scrollY;render();scrollTo(0,y);}
     else if(ds.tpo){tplOpen=!tplOpen;const y=scrollY;render();scrollTo(0,y);}
     else if(ds.tp){const p=presets().find(x=>x.id===ds.tp),c=CH.find(x=>x.b===ST.cur);if(p&&c){tplOpen=false;putRec(c,clone(p.r));msg='';const el=document.querySelector('#ccPanel .cc-sh');if(el)el.scrollIntoView({block:'start',behavior:'smooth'});}}
     else if(ds.sall){const c=CH.find(x=>x.b===ST.cur),r=recOf(c);r.segs.forEach(q=>q.temp=r.segs[0].temp);putRec(c,r);}
