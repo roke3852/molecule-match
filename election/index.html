@@ -91,6 +91,33 @@ a{color:#1f5fbf}
 header{position:relative}
 .toast{position:fixed;left:50%;bottom:30px;transform:translateX(-50%);background:#1d1f24;color:#fff;padding:8px 16px;border-radius:99px;font-size:13px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:20}
 .toast.on{opacity:1}
+.pc .pch{display:flex;gap:10px;align-items:flex-start;margin-bottom:10px}
+.slg{font-weight:600;margin-top:2px}
+.tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:10px}
+.ct{border-radius:9px;padding:6px 4px;text-align:center;font-size:11px;line-height:1.3}
+.ct span{display:block;font-size:18px}.ct b{display:block;font-weight:600}.ct i{font-style:normal;font-size:9px;letter-spacing:1px;color:#555}
+.ct.off{background:#f3f2ee;color:#aaa}.ct.off span{filter:grayscale(1);opacity:.5}
+.hl div{font-size:13px;padding:4px 0;border-bottom:1px dashed var(--line)}.hl div:last-child{border:0}.hl span{margin-right:6px}
+.more{width:100%;margin-top:10px;border:0;background:#1d1f24;color:#fff;border-radius:10px;padding:10px;font-size:14px;font-family:inherit}
+.cmp-head{display:grid;grid-template-columns:1fr 0 1fr;gap:8px;font-weight:700;margin-bottom:6px}.cmp-head .num{margin-right:5px;display:inline-flex}
+.cmp-row{border-top:1px solid var(--line);padding:8px 0}
+.cmp-cat{font-size:13px;font-weight:700;margin-bottom:5px;display:flex;align-items:center;justify-content:space-between}
+.cmpbar{display:flex;gap:3px}.cmpbar i{display:block;height:8px;border-radius:4px}
+.cmp-cols{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.ci{font-size:12.5px;padding:3px 0 3px 7px;margin-bottom:4px;line-height:1.4}
+.ci.none{color:#aaa;border-left:3px solid #e5e3dd}
+#sheet{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:30;display:none;align-items:flex-end;justify-content:center}
+#sheet.on{display:flex}
+.sh-body{background:#fff;width:100%;max-width:640px;max-height:86vh;overflow:auto;border-radius:18px 18px 0 0;padding:14px 16px calc(20px + env(safe-area-inset-bottom));position:relative}
+.sh-x{position:sticky;top:0;float:right;border:0;background:#efede7;border-radius:99px;width:30px;height:30px;font-size:15px;z-index:2}
+.sh-top{display:flex;gap:10px;align-items:flex-start;padding-bottom:10px;margin-bottom:6px}
+.sh-cat{font-weight:700;font-size:14px;margin:12px 0 4px}.sh-cat.off{color:#aaa;font-weight:500}
+.sh-it{background:#f7f6f2;border-radius:10px;padding:8px 10px;margin-bottom:6px}
+.sh-it p{margin:2px 0;font-size:13px;color:#444}.sh-it a{font-size:12px}
+.hm{display:grid;grid-template-columns:70px repeat(7,minmax(0,1fr));gap:3px;font-size:11px}
+.hmh{text-align:center;font-size:10px;line-height:1.25;color:var(--muted)}
+.hmn{display:flex;align-items:center;gap:4px;cursor:pointer;white-space:nowrap}.hmn i{width:7px;height:7px;border-radius:50%;flex:none}.hmn small{display:none}
+.hmc{border-radius:5px;height:24px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700}
 footer{text-align:center;color:var(--muted);font-size:12px;padding:20px 0 30px}
 </style>
 </head>
@@ -102,6 +129,7 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:20px 0 30px}
   <button class="share" id="share">🔗 分享</button>
 </header>
 <div class="toast" id="toast"></div>
+<div id="sheet"><div class="sh-body"><button class="sh-x">✕</button><div class="sh-body-in"></div></div></div>
 <nav><div class="in" id="tabs">
   <button data-t="map" class="on">藍綠版圖</button>
   <button data-t="six">六都政見</button>
@@ -141,8 +169,17 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:20px 0 30px}
 
 <!-- 六都 -->
 <section id="six">
-  <div class="note" style="margin:0 2px 10px">候選人依選票號次排列；政見摘自公辦政見會、辯論會及競選記者會報導，完整內容請看選舉公報。</div>
+  <div class="card">
+    <h2>議題熱度圖</h2>
+    <div class="note" style="margin-bottom:8px">12 位主要候選人在各議題整理到幾項政見（顏色越深越多）。點名字跳到他的政見。</div>
+    <div id="heat" style="overflow-x:auto"></div>
+  </div>
+  <div class="seg" id="sixCity">
+    <button data-c="台北">台北</button><button data-c="新北">新北</button><button data-c="桃園">桃園</button><button data-c="台中">台中</button><button data-c="台南">台南</button><button data-c="高雄">高雄</button>
+  </div>
+  <div class="seg" id="sixView"><button data-v="card">📇 政見圖卡</button><button data-v="cmp">⚖️ 議題比較</button></div>
   <div id="sixList"></div>
+  <div class="note" style="margin:4px 2px">候選人依選票號次排列；政見整理自競選記者會、政見會與媒體報導，完整內容請看選舉公報。</div>
 </section>
 
 <!-- 人口 -->
@@ -205,6 +242,12 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:20px 0 30px}
     </div>
     <div class="note" id="nightCompare" style="margin-top:8px"></div>
   </div>
+  <div class="card">
+    <h2>台北市投票率・下午 2 點</h2>
+    <div class="note">全市選舉人 2,031,431 人，市長投票 1,108,873 人。資料為你提供的截圖。</div>
+    <div class="tally" style="margin:10px 0"><div style="background:#1d1f24"><b>54.59%</b>全市 2 點投票率</div></div>
+    <div id="turnout"></div>
+  </div>
 </section>
 
 <!-- 來源 -->
@@ -224,7 +267,7 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:20px 0 30px}
   </div>
 </section>
 </main>
-<footer>2026 九合一選情圖鑑 v1.1・Made by <b>Jim Lu</b></footer>
+<footer>2026 九合一選情圖鑑 v1.2・Made by <b>Jim Lu</b></footer>
 
 <script>
 const P={K:{n:'國民黨',c:'var(--kmt)',l:'var(--kmt-l)'},D:{n:'民進黨',c:'var(--dpp)',l:'var(--dpp-l)'},T:{n:'民眾黨',c:'var(--tpp)',l:'var(--tpp-l)'},I:{n:'無黨籍',c:'var(--ind)',l:'var(--ind-l)'}};
@@ -321,33 +364,185 @@ function seats(){
   document.getElementById('seatBars').innerHTML=h;
 }
 
-// 六都政見
+// 六都政見（圖解＋詳細＋比較）
+const CAT=[
+ {k:'tr',n:'交通',i:'🚇'},{k:'ho',n:'住宅都更',i:'🏠'},{k:'ec',n:'產業經濟',i:'🏭'},
+ {k:'ki',n:'育兒',i:'👶'},{k:'el',n:'長者照顧',i:'👴'},{k:'he',n:'健康醫療',i:'🩺'},{k:'go',n:'治理與其他',i:'🏛️'}
+];
+const U={
+ nn1:'https://www.nownews.com/news/6864870',setn1:'https://www.setn.com/news/1887550',nn2:'https://www.nownews.com/news/6892324',ltn1:'https://news.ltn.com.tw/news/politics/breakingnews/5640766',mm1:'https://www.mirrormedia.mg/story/20260622inv001',nn3:'https://www.nownews.com/news/6862942',cna1:'https://cna.com.tw/news/aloc/202610310116.aspx',bt1:'https://www.businesstoday.com.tw/article/category/183027/post/202610310006/',
+ udnm1:'https://money.udn.com/money/story/124921/9885183',nn4:'https://www.nownews.com/news/6892347',pts1:'https://news.pts.org.tw/article/834975',
+ nn5:'https://www.nownews.com/news/6892005',udn1:'https://udn.com/vote2026/story/124652/9510599',tn1:'https://www.taiwannews.com.tw/zh/news/6363353',
+ nn6:'https://www.nownews.com/news/6892013',udn2:'https://udn.com/news/story/7323/9654476',udn3:'https://udn.com/news/story/124652/9403297',nn7:'https://www.nownews.com/news/6891651',udn4:'https://udn.com/news/story/124652/9661847',
+ udn5:'https://udn.com/news/story/124652/9653215',udn6:'https://udn.com/news/story/124652/9654414',nn8:'https://www.nownews.com/news/6893018',tnl1:'https://www.thenewslens.com/article/271210',udn7:'https://udn.com/news/story/124652/9646537',
+ nn9:'https://www.nownews.com/news/6893013',udn8:'https://udn.com/news/story/124652/9548684',
+ ltn2:'https://news.ltn.com.tw/news/politics/breakingnews/5493208',nn10:'https://www.nownews.com/news/6863282',ltn3:'https://news.ltn.com.tw/news/Taichung/breakingnews/5608967',cna2:'https://cna.com.tw/news/aipl/202608050221.aspx',udn9:'https://udn.com/news/story/124652/9493262',bt2:'https://www.businesstoday.com.tw/article/category/183027/post/202609240033/',udn10:'https://udn.com/news/story/124652/9417615',
+ cna3:'https://cna.com.tw/news/aloc/202610160324.aspx',gvm1:'https://www.gvm.com.tw/article/134433',
+ tvbs1:'https://news.tvbs.com.tw/politics/3137603',ltn4:'https://news.ltn.com.tw/news/politics/breakingnews/5630528',cna4:'https://cna.com.tw/news/aipl/202611010168.aspx',gvm2:'https://city.gvm.com.tw/article/134541',
+ ltn5:'https://news.ltn.com.tw/amp/news/politics/breakingnews/5582214',gvm3:'https://city.gvm.com.tw/article/133973',nt1:'https://newtalk.tw/news/view/2026-09-30/1062644',nt2:'https://newtalk.tw/news/view/2026-11-17/1071683',cna5:'https://cna.com.tw/news/aipl/202609010168.aspx',line1:'https://today.line.me/tw/v3/article/x2WR208',
+ udn11:'https://udn.com/news/story/124652/9656831',storm1:'https://www.storm.mg/article/11148044',udn12:'https://udn.com/news/story/124652/9543695',yam1:'https://n.yam.com/Article/20260324779710',nn11:'https://www.nownews.com/news/6876202',setn2:'https://www.setn.com/news/1940181',udn13:'https://udn.com/news/story/124652/9400321',
+ nt3:'https://newtalk.tw/plan/view/1206',udn14:'https://udn.com/news/story/124652/9242715',udn15:'https://udn.com/news/story/124652/9655147',bt3:'https://www.businesstoday.com.tw/article/category/183027/post/202610210080/',nn12:'https://www.nownews.com/news/6771872',twr1:'https://www.twreporter.org/a/2026-local-elections-kaohsiung-mayoral-televised-debate'
+};
+// 每項：[分類, 標題, 說明, 來源]
 const SIX=[
  {c:'台北',cands:[
-   {n:'沈伯洋',no:3,p:'D',pts:['上任 100 天內：把被砍的樹種回來、處理兒虐防治、改善營養午餐','用 AI 分析市政問題','持續辦「市長，你給我聽好了！」，開放市府讓市民參與','對松山機場遷移規劃提出質疑']},
-   {n:'蔣萬安',no:5,p:'K',pts:['以大巨蛋、輝達進駐北士科、育兒補助（鮮奶等）為任內成績','再提松山機場遷建構想','目標把台北打造成「AI 之都」','延續社宅、好孕專車等政策']}]},
+  {n:'沈伯洋',no:3,p:'D',slogan:'台北順起來',core:'五大主軸 HEART：空間、培力、陪伴、韌性、時間',it:[
+   ['tr','TPASS 納入共享機車','串起自行車通勤路網，補足最後一哩路、縮短轉乘時間。','setn1'],
+   ['tr','捷運總體檢、公車路線重規劃','並規劃通學路網，讓市民空出時間。','cna1'],
+   ['ho','婚育宅、青年宅','H（空間）主軸的第一項。','setn1'],
+   ['ho','老宅延壽、無限都更','老公寓加裝電梯申請太複雜，主張與中央合作、成立行動服務團到宅協助。','nn1'],
+   ['ec','北士科設 AI 研究院','台北要有長期產業規劃。','nn3'],
+   ['ki','家庭一站通','每區設家庭教育中心據點當「育兒總機」，學齡前孩子每週 4 小時免費臨托。','mm1'],
+   ['ki','親子同行卡每月 600 點','公辦政見會提出。','nn2'],
+   ['el','健身小巴、敬老卡升級、社區共照據點擴大','搭配親子同行卡，讓長輩有動機出門、有人作伴。','nn1'],
+   ['he','15–65 歲每年 6 次心理諮商','腸病毒疫苗 0–6 歲免費；50 歲以上帶狀疱疹疫苗補助一劑。','ltn1'],
+   ['go','上任 100 天三件事','把樹種回來、處理兒虐防治、改善營養午餐。','bt1'],
+   ['go','綠地、河岸與山徑','增加綠蔭與公園、兩河流域親水、台北山徑計畫、城市文化徑。','setn1']]},
+  {n:'蔣萬安',no:5,p:'K',slogan:'台北安可・說到做到',core:'延續四年施政，主打 AI 之都',it:[
+   ['tr','雙北公車 399 定期票','公辦政見會提出。','nn4'],
+   ['tr','自駕交通示範城市','屬智慧治理政見。','udnm1'],
+   ['ho','公辦都更 5099','第一階段住戶同意門檻從 75% 降到 50%；近捷運或水岸、3,000 平方公尺以上基地，基準容積率 225% 提高到 300%。','udnm1'],
+   ['ho','幸福住宅','育兒家庭優先入住社宅，可住到孩子國小畢業。','cna1'],
+   ['ec','松山機場遷建＋台北 AI 園區','100 公頃 AI 聚落、90 公頃住宅、110 公頃公園綠地；市府估產值 12 兆元。','udnm1'],
+   ['ec','AI 算力站、AI 旗艦創業基金','串聯北士科、內科、南港，打造 AI 與生技創新中心。','udnm1'],
+   ['ki','育兒減工時不減薪、校校有公托','公托、準公托第 2 胎免費已上路，目標 4 年後校校有公托。','cna1'],
+   ['ki','好孕專車加碼','從懷孕到產後一年都能用，乘車補助提高到 1 萬元。','pts1'],
+   ['el','敬老卡點數可累計','可在超市、農會、超商使用。','cna1'],
+   ['go','市府 AI 數位助理、AI 政策秘書','智慧治理。','udnm1'],
+   ['go','各區第 2 座運動中心','辯論會描述的四年後藍圖。','cna1']]}]},
  {c:'新北',cands:[
-   {n:'蘇巧慧',no:1,p:'D',pts:['「區域均衡、城市認同」，29 區各自發展特色','都市更新、擴大公辦都更；智慧交通；九大產業園區；青年創業','6 大福利：免費營養午餐、兒童醫療補助、敬老卡提高到每月 1000 點、假牙補助最高 5 萬','照顧者津貼：照服員、教保員、保母加發夜間與緊急津貼']},
-   {n:'李四川',no:3,p:'K',pts:['成立都更推動委員會、檢討基準容積率、推防災型都更','AI 高科技廊帶、「南有巨蛋城、北有科學城」、淡北快線','「軌道 123」與三連通，雙北 30 分鐘生活圈','育嬰留停補助提高到 100%、公辦動物醫院、青創貸款 200 萬提高到 500 萬','老公寓加裝電梯：提供一樓住戶附近專屬車位當誘因']}]},
+  {n:'蘇巧慧',no:1,p:'D',slogan:'讓每一個人都被看見',core:'區域均衡、城市認同，29 區各有特色',it:[
+   ['tr','智慧交通','政見會列為主要方向之一。','nn5'],
+   ['ho','加速都更、擴大公辦都更','不能只是拆除重建。','udn1'],
+   ['ec','九大產業園區、青年創業','打造「夢想之都、希望之城」。','nn5'],
+   ['ki','免費營養午餐、兒童醫療補助','6 大福利政見的一部分。','nn5'],
+   ['ki','照顧者支持','照服員、教保員、保母加發夜間與緊急津貼；獎勵企業延長產假、顧老假。','tn1'],
+   ['el','敬老卡每月 1,000 點、假牙補助最高 5 萬','6 大福利政見的一部分。','nn5'],
+   ['go','地方觀光、29 區特色發展','「讓新北再漂亮一次」。','udn1']]},
+  {n:'李四川',no:3,p:'K',slogan:'事情交給我',core:'40 多年工程與市政經驗',it:[
+   ['tr','軌道 123、三連通','政見會提出的軌道建設主軸。','nn6'],
+   ['tr','淡北快線、大漢溪捷運縱貫線','樹林鐵路地下化延伸到鶯歌；淡北快線目標 15 分鐘到北士科。','udn2'],
+   ['tr','雙北 30 分鐘生活圈','與台北市在交通、文化、教育、環保更緊密合作。','tn1'],
+   ['ho','都更推動委員會、防災型都更','檢討基準容積率，提高民眾參與意願。','nn6'],
+   ['ho','老公寓加裝電梯','提供一樓住戶附近專屬車位，提高同意意願。','udn3'],
+   ['ec','AI 高科技廊帶、南巨蛋城北科學城','北士科到淡海的 AI 科技走廊。','udn2'],
+   ['ec','青創貸款 200 萬提高到 500 萬','降低申請資格、加上創業導師陪跑。','udn4'],
+   ['ki','育嬰留停補助提高到 100%','聚焦年輕家庭需求。','nn7'],
+   ['el','敬老卡 300 點轉悠遊卡功能','偏鄉長輩可用在看診、領藥等日常支出。','tn1'],
+   ['go','公辦動物醫院','減輕毛小孩家庭負擔。','nn7']]}]},
  {c:'桃園',cands:[
-   {n:'黃世杰',no:1,p:'D',pts:['補上過去落後與未完成的建設，不再錯過產業黃金期','政見會聚焦公車與產業議題']},
-   {n:'張善政',no:2,p:'K',pts:['強調 4 年已打下基礎，下一任影響桃園未來 20、30 年','政見會聚焦公車與產業議題']}]},
+  {n:'黃世杰',no:1,p:'D',slogan:'心桃園動起來',core:'智慧、友善、共榮',it:[
+   ['tr','公車改革','市府負責公共運輸總規畫、依生活圈重整路網、績效導向補助，必要時市府直營；用 AI 分析交通數據。','udn5'],
+   ['tr','檢討科技執法','六大政見之一。','udn6'],
+   ['ho','社宅與婚育宅','2034 年前中央與地方合計至少 2 萬戶社宅；4 年內至少 2,000 戶婚育宅；試辦育兒家庭租期 20 年。','tnl1'],
+   ['ec','爭取台積電進駐龍科三期','估每年 5,500 億元產值、4,500 個就業機會；布局無人機產業。','nn8'],
+   ['ki','補助 0–12 歲健保費、增加公托名額','減輕年輕家庭負擔。','udn7'],
+   ['el','敬老卡每月 1,200 點、年底不歸零','可用在超商、超市、農漁會、特約醫院、健保藥局；補助 65 歲以上健保費。','udn7'],
+   ['he','重新啟動清大醫院 BOT','醫療建設三大面向之一。','nn8'],
+   ['go','垃圾隨袋徵收要先凝聚共識','六大政見之一。','udn6']]},
+  {n:'張善政',no:2,p:'K',slogan:'交通、工作、安家',core:'工程師治理，延續四年建設',it:[
+   ['tr','公車改善','駕駛薪資補貼、汰換老舊公車、加強裁罰、引進外地業者打破寡占、9 人座「桃小巴」。','nn9'],
+   ['tr','捷運綠線、橘線','綠線北段 7 站做通車前測試；推動捷運橘線與周邊道路拓寬。','nn9'],
+   ['ho','社宅與可負擔住宅','市府說明 2030 年社宅目標一萬戶，並推可負擔住宅。','udn8'],
+   ['ec','AI 與半導體供應鏈基地','與中央合作推動龍科三期。','nn9'],
+   ['ki','托育擴充','任內托育覆蓋率從 4 成提高到 6 成（施政成績）。','tnl1'],
+   ['he','醫療建設','政見會列為施政說明項目之一。','nn9'],
+   ['go','工程品質與消防安全','建立制度，讓建設經得起長期檢驗。','nn9']]}]},
  {c:'台中',cands:[
-   {n:'何欣純',no:1,p:'D',pts:['施政以交通為第一優先，「捷運不能拖延」','辯論中以社福為另一主軸']},
-   {n:'江啟臣',no:3,p:'K',pts:['「12345，台中更幸福」：國際化、智慧化、永續化','成立國際合作發展委員會，發展會展經濟','山線、海線、屯區、市區、烏日高鐵區 5 大「20 分鐘生活圈」','優先打造城市智慧安全網（治安、勞安、救災）']}]},
+  {n:'何欣純',no:1,p:'D',slogan:'台中首都格局、台中大進擊',core:'六星市政、三個第一',it:[
+   ['tr','捷運效率第一','藍線儘速動工、橘線加速規劃；綠線延伸大坑第一任內動工。','nn10'],
+   ['tr','公車與快速道路、台中大機場計畫','公車路網服務品質、快速道路串聯、台中機場升級。','ltn3'],
+   ['ec','無人載具產業聚落','中科特定區開發、會展中心二期。','cna2'],
+   ['ki','生育補助加倍','第一胎 4 萬、第二胎 6 萬、第三胎 8 萬；0–2 歲公托名額倍增；6 歲以下免門診部分負擔、補助腸病毒疫苗。','udn9'],
+   ['el','老人健保、敬老卡放寬使用','全齡照顧政見。','cna2'],
+   ['go','普發現金一萬元','在財政許可與市議會支持下追加預算。','bt2'],
+   ['go','超巨蛋接手但重新評估','容納人數、選址到營運都要重新檢驗。','udn10']]},
+  {n:'江啟臣',no:3,p:'K',slogan:'12345 台中更幸福',core:'國際化、智慧化、永續化的旗艦城市',it:[
+   ['tr','捷運藍線早日完工、市民公車免費','橘線與延伸線加速、海線雙軌高架化；「4 環 1 線」路網。','cna3'],
+   ['tr','清泉崗機場上看 1,000 萬人次','搭配台中港形成「國際雙港」。','cna3'],
+   ['ec','會展經濟推動辦公室','整合交通、住宿、餐飲、觀光，打造旗艦城市。','gvm1'],
+   ['ki','育兒五支柱','準公托加碼 3,000–7,000 元、育兒津貼加 1,000 元、育嬰留停逐年到全薪、當天預約臨托、企業共托。','udn9'],
+   ['ki','親子車位 4 小時免費','比照身心障礙車位。','bt2'],
+   ['el','長者帶狀疱疹疫苗補助','依風險族群分年分批。','bt2'],
+   ['go','城市智慧安全網','串聯治安、勞安、救災；毒駕酒駕零容忍。','cna3']]}]},
  {c:'台南',cands:[
-   {n:'謝龍介',no:2,p:'K',pts:['當選只做一任，全力徹查市府弊案','清除烏山頭水庫光電板','與民眾黨合作，訴求政黨輪替']},
-   {n:'陳亭妃',no:3,p:'D',pts:['道路交通、防災整備','處理烏山頭水庫光電議題','市府工程採購廉政改革','「5 大觀光軸」']}]},
+  {n:'謝龍介',no:2,p:'K',slogan:'翻轉大台南',core:'只做一任、清廉治理',it:[
+   ['ho','婚育宅','讓願意生養的家庭有安定居所。','ltn4'],
+   ['ki','0–15 歲每月加碼 5,000 元','財源用新版財劃法增加的 163 億中約 123 億元。','tvbs1'],
+   ['el','敬老福利升級','政見網站主要項目之一。','ltn4'],
+   ['go','只做一任、徹查弊案','當選後只做 4 年。','cna4'],
+   ['go','清除烏山頭水庫光電板','競總成立大會宣示。','cna4'],
+   ['go','重用事務官、改革用人','批評政治人事安排。','gvm2']]},
+  {n:'陳亭妃',no:3,p:'D',slogan:'福利六都齊',core:'市民約定書 7 大面向',it:[
+   ['tr','交通七彩行','四橫三縱快速道路、鐵路地下化與立體化、捷運路網、觀光輕軌、糖鐵五分車、自行車道。','ltn5'],
+   ['tr','鐵路地下化延到南科、捷運接高雄','深綠線串南科、藍線延伸到高鐵站、紅線往南接高雄捷運。','gvm3'],
+   ['ec','科技三軸','農業科技、半導體與 AI、醫療科技。','gvm3'],
+   ['ec','單一窗口加速設廠、要求稅留台南','用行政效率吸引投資，換取稅收留在台南。','nt1'],
+   ['ec','5 大觀光軸','大新營、曾文南科、濱海藍帶、大目降、府城新豐。','cna5'],
+   ['ki','福利六都齊','從兒童到長者，比不上其他五都的都補齊。','line1'],
+   ['go','工程採購納入廉政平台','所有工程招標納入法務部廉政平台監督。','nt2'],
+   ['go','烏山頭光電公開監測、治水','拿出科學數據並建立民眾監督機制；治水預算一次到位。','nt2']]}]},
  {c:'高雄',cands:[
-   {n:'柯志恩',no:3,p:'K',pts:['市府、議會遷到亞洲新灣區 205 兵工廠用地','半導體與 AI 帶動產業轉型','大型售票活動保留市民優先購票','質疑光電與環境開發問題']},
-   {n:'賴瑞隆',no:5,p:'D',pts:['延續謝長廷、陳菊、陳其邁的路線，提出「三個第一」願景','主打《財劃法》修法後南北分配差距擴大','涵蓋均衡發展、產業、交通、社福、觀光的 12 場市政願景']}]}
+  {n:'柯志恩',no:3,p:'K',slogan:'13579 幸福會長久',core:'高高平等、五區均衡、陸空大進擊',it:[
+   ['tr','機車解嚴','檢討兩段式左轉，2030 年前強制待轉路口降到 5% 以下；AI 智慧號誌；YouBike 前 30 分鐘免費、擴到 1,800 站。','udn11'],
+   ['tr','大南方機場推動委員會','教育、產業、大交通三箭之一。','storm1'],
+   ['ho','青年友善住宅','讓青年「買得起、租得起、住得安心」。','yam1'],
+   ['ec','半導體高雄隊、五區均衡','38 區分五大戰略區各有發展方向。','yam1'],
+   ['ec','市府、議會遷 205 兵工廠','亞洲新灣區。','udn13'],
+   ['ki','臨托 60 處、喘息券','2030 年前臨托據點增至 60 處；0–6 歲家庭每年 48 小時喘息券。','nn11'],
+   ['el','活躍老化、照顧者喘息','全齡友善空間與智慧醫療。','yam1'],
+   ['go','職場霸凌防治條例、市民優先購票','上任百日推地方職場霸凌防治條例；大型售票活動保留市民優先購票。','storm1']]},
+  {n:'賴瑞隆',no:5,p:'D',slogan:'產業第一、國際門戶第一、幸福第一',core:'接棒謝長廷、陳菊、陳其邁',it:[
+   ['tr','24 小時海上新機場','加速捷運、國道與高屏交通建設；高鐵延伸進高雄車站。','nt3'],
+   ['tr','人本交通','普及實體人行道、劃設校園通學安全區。','udn15'],
+   ['ho','大亞灣計畫','205 兵工廠 58 公頃做大眾運輸導向開發，規劃大巨蛋、15 公頃森林公園、企業總部。','udn14'],
+   ['ec','產業升級基金','推動半導體、AI 應用、人才中心，與民間成立產業升級基金。','nt3'],
+   ['ec','勞工七星級守護行動','轉型、職訓、職安、工會、青年。','bt3'],
+   ['ki','生育補助 5 萬、0–6 歲每月加碼 1,000 元','擴充公托與延托服務。','nt3'],
+   ['el','敬老卡 15,000 點、擴充長照','擴大使用範圍，支持在地安老。','nn12'],
+   ['go','財劃法爭取公平分配','主打修法後南北分配差距擴大。','twr1']]}]}
 ];
-document.getElementById('sixList').innerHTML=SIX.map(r=>{
-  const inc=R[2022][r.c];
-  return `<div class="card"><div class="race-head"><h2 style="margin:0">${r.c}市長</h2><span class="pill">現任：${inc[1]}（${P[inc[0]].n}）</span></div>
-  <div class="cols">${r.cands.map(c=>`<div class="pf" style="border-top:4px solid ${P[c.p].c}"><h4><span class="num">${c.no}</span>${c.n}<span class="pill">${P[c.p].n}</span></h4><ul>${c.pts.map(x=>`<li>${x}</li>`).join('')}</ul></div>`).join('')}</div>
-  <div class="note" style="margin-top:6px">其他候選人：${N[r.c].filter(x=>!r.cands.some(c=>c.n===x[1])).map(x=>x[0]+'號 '+x[1]).join('、')}</div></div>`;
-}).join('');
+const cnt=(c,k)=>c.it.filter(x=>x[0]===k).length;
+let sixCity='台北',sixView='card';
+function sixRender(){
+  const r=SIX.find(x=>x.c===sixCity),inc=R[2022][r.c];
+  document.querySelectorAll('#sixCity button').forEach(b=>b.classList.toggle('on',b.dataset.c===sixCity));
+  document.querySelectorAll('#sixView button').forEach(b=>b.classList.toggle('on',b.dataset.v===sixView));
+  let h=`<div class="note" style="margin:0 2px 8px">現任：${inc[1]}（${P[inc[0]].n}）・其他候選人：${N[r.c].filter(x=>!r.cands.some(c=>c.n===x[1])).map(x=>x[0]+'號 '+x[1]).join('、')}</div>`;
+  if(sixView==='card'){
+    h+=r.cands.map((c,ci)=>`<div class="card pc" style="border-top:5px solid ${P[c.p].c}">
+      <div class="pch"><span class="num">${c.no}</span><div style="flex:1"><b style="font-size:17px">${c.n}</b> <span class="pill">${P[c.p].n}</span><div class="slg">「${c.slogan}」</div><div class="note">${c.core}</div></div></div>
+      <div class="tiles">${CAT.map(k=>{const n=cnt(c,k.k);return `<div class="ct ${n?'':'off'}" style="${n?`background:${P[c.p].l}`:''}"><span>${k.i}</span><b>${k.n}</b><i>${n?('●'.repeat(n)):'—'}</i></div>`}).join('')}</div>
+      <div class="hl">${c.it.slice(0,3).map(x=>`<div><span>${CAT.find(k=>k.k===x[0]).i}</span>${x[1]}</div>`).join('')}</div>
+      <button class="more" data-ci="${ci}">看詳細政見（${c.it.length} 項）›</button></div>`).join('');
+  }else{
+    const [a,b]=r.cands;
+    h+=`<div class="card"><div class="cmp-head"><div style="color:${P[a.p].c}"><span class="num">${a.no}</span>${a.n}</div><div></div><div style="color:${P[b.p].c}"><span class="num">${b.no}</span>${b.n}</div></div>`+
+    CAT.map(k=>{const A=a.it.filter(x=>x[0]===k.k),B=b.it.filter(x=>x[0]===k.k);if(!A.length&&!B.length)return '';
+      const cell=(L,c)=>L.length?L.map(x=>`<div class="ci" style="border-left:3px solid ${P[c.p].c}">${x[1]}</div>`).join(''):'<div class="ci none">未查到具體政見</div>';
+      return `<div class="cmp-row"><div class="cmp-cat">${k.i} ${k.n}<span class="cmpbar"><i style="width:${A.length*14}px;background:${P[a.p].c}"></i><i style="width:${B.length*14}px;background:${P[b.p].c}"></i></span></div><div class="cmp-cols"><div>${cell(A,a)}</div><div>${cell(B,b)}</div></div></div>`}).join('')+
+    `<div class="note" style="margin-top:8px">點數只代表報導中整理到的項目多寡，不代表政見好壞或可行性。</div></div>`;
+  }
+  document.getElementById('sixList').innerHTML=h;
+  document.querySelectorAll('#sixList .more').forEach(btn=>btn.onclick=()=>openSheet(r.cands[+btn.dataset.ci],r.c));
+}
+function openSheet(c,city){
+  const s=document.getElementById('sheet');
+  s.querySelector('.sh-body-in').innerHTML=`<div class="sh-top" style="border-bottom:4px solid ${P[c.p].c}"><span class="num">${c.no}</span><div><b style="font-size:18px">${c.n}</b> <span class="pill">${city}市長・${P[c.p].n}</span><div class="slg">「${c.slogan}」</div></div></div>`+
+   CAT.map(k=>{const L=c.it.filter(x=>x[0]===k.k);if(!L.length)return `<div class="sh-cat off">${k.i} ${k.n}<span class="note">　未查到具體政見</span></div>`;
+     return `<div class="sh-cat">${k.i} ${k.n}</div>`+L.map(x=>`<div class="sh-it"><b>${x[1]}</b><p>${x[2]}</p><a href="${U[x[3]]}" target="_blank" rel="noopener">來源 ›</a></div>`).join('')}).join('')+
+   `<div class="note" style="margin:12px 0 4px">整理自競選記者會、政見會與媒體報導；完整政見以中選會選舉公報為準。</div>`;
+  s.classList.add('on');s.querySelector('.sh-body').scrollTop=0;
+}
+document.getElementById('sheet').onclick=e=>{if(e.target.id==='sheet'||e.target.classList.contains('sh-x'))e.currentTarget.classList.remove('on')};
+document.querySelectorAll('#sixCity button').forEach(b=>b.onclick=()=>{sixCity=b.dataset.c;sixRender()});
+document.querySelectorAll('#sixView button').forEach(b=>b.onclick=()=>{sixView=b.dataset.v;sixRender()});
+// 議題熱度圖
+document.getElementById('heat').innerHTML=`<div class="hm"><div></div>${CAT.map(k=>`<div class="hmh">${k.i}<br>${k.n}</div>`).join('')}`+
+ SIX.map(r=>r.cands.map(c=>`<div class="hmn"><i style="background:${P[c.p].c}"></i>${c.n}<small>${r.c}</small></div>`+CAT.map(k=>{const n=cnt(c,k.k);return `<div class="hmc" style="background:${n?P[c.p].c:'#f0eee8'};opacity:${n?0.3+0.23*Math.min(n,3):1}">${n||''}</div>`}).join('')).join('')).join('')+'</div>';
+document.querySelectorAll('#heat .hmn').forEach(el=>el.onclick=()=>{const name=el.childNodes[1].textContent;const r=SIX.find(x=>x.cands.some(c=>c.n===name));sixCity=r.c;sixView='card';sixRender();document.getElementById('sixList').scrollIntoView({behavior:'smooth'})});
+sixRender();
+
 
 // 我的選票
 document.getElementById('ntpBallot').innerHTML=N['新北'].map(x=>`<div class="cand"><span class="num">${x[0]}</span><span class="dot" style="background:${P[x[2]].c}"></span><span style="flex:1">${x[1]}</span><span class="pill">${P[x[2]].n}</span></div>`).join('');
@@ -428,6 +623,12 @@ drawPop('tp');
 function toast(t){const e=document.getElementById('toast');e.textContent=t;e.classList.add('on');setTimeout(()=>e.classList.remove('on'),1600)}
 document.getElementById('share').onclick=()=>{const u=location.href.split('#')[0];(navigator.clipboard?navigator.clipboard.writeText(u):Promise.reject()).then(()=>toast('已複製連結'),()=>toast('請從網址列複製'))};
 
+
+// 台北 2 點投票率
+(function(){const T=[['松山',152565,88177],['信義',171728,97198],['大安',227276,109547],['中山',179964,97060],['中正',114704,67280],['大同',97892,55247],['萬華',147258,77912],['文山',211750,106764],['南港',94704,50951],['內湖',219461,118606],['士林',217295,125009],['北投',196834,115122]];
+ const avg=1108873/2031431*100;
+ document.getElementById('turnout').innerHTML=T.map(x=>[x[0],x[2]/x[1]*100,x[2]]).sort((a,b)=>b[1]-a[1]).map(x=>`<div class="prow" style="grid-template-columns:40px 1fr 54px"><span>${x[0]}</span><div class="ptrack" style="height:14px;position:relative"><div style="width:${x[1]/70*100}%;background:${x[1]>=avg?'#c9862b':'#9a96a8'}"></div><i style="position:absolute;left:${avg/70*100}%;top:-2px;bottom:-2px;border-left:2px dashed #1d1f24"></i></div><span style="text-align:right">${x[1].toFixed(2)}%</span></div>`).join('')+'<div class="note" style="margin-top:6px">虛線＝全市 54.59%；橘色高於全市、灰色低於全市。</div>';
+})();
 // 分頁
 function go(t){
   document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('on',b.dataset.t===t));
