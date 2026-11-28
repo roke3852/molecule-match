@@ -785,6 +785,7 @@ html.embed{--modesH:0px}
 .z-pick1,.zp-it{display:block;width:100%;text-align:left;font:inherit;color:var(--ink);background:var(--panel);border:1px solid var(--accent);border-radius:12px;padding:10px 12px;cursor:pointer}
 .zc-h{display:flex;align-items:baseline;gap:8px}.zc-h i{width:10px;height:10px;border-radius:50%;flex:none;align-self:center}.zc-h b{font-size:16px}.zc-h small{color:var(--muted)}
 .zc-tags{display:flex;flex-wrap:wrap;gap:5px;align-items:center;margin:6px 0 4px;font-size:12.5px}.zc-tags>span{border:1px solid var(--line);border-radius:8px;padding:2px 7px;display:inline-flex;align-items:center}.zc-tags svg{height:16px;width:auto}.zc-tags .zc-t{color:#1a1512;border:0;font-weight:700}
+.zc-tags .zc-ratio{gap:5px}.zc-ratio b{font-size:13.5px}.zc-ratio small{color:var(--muted);font-size:11.5px}
 .zc-r{display:block;font-size:12.5px;color:var(--muted);margin-top:3px}.zc-go{display:block;text-align:right;color:var(--accent);font-weight:700;font-size:14px;margin-top:4px}.zc-d{display:block;font-size:13px;color:var(--muted);margin-top:4px}
 .zp-ov{position:fixed;inset:0;z-index:80;background:rgba(0,0,0,.6);display:flex;align-items:flex-end;justify-content:center}.zp-ov[hidden]{display:none}
 .zp-box{background:var(--bg,#1b1714);width:min(640px,100%);max-height:88vh;overflow:auto;border-radius:16px 16px 0 0;padding:12px 14px 24px}.zp-hd{display:flex;justify-content:space-between;align-items:center;position:sticky;top:-12px;background:inherit;padding:6px 0;z-index:1}.zp-hd b{font-size:17px}.zp-hd button{font:inherit;font-size:18px;background:none;border:0;color:var(--ink);width:44px;height:44px;cursor:pointer}
@@ -1452,7 +1453,7 @@ window.BGM=(()=>{
     <div class="err" id="tErr"></div>
   </div>
   <button class="t-more" id="tMore" type="button" aria-label="咖啡宇宙：更多咖啡 App 與遊戲">咖啡宇宙</button>
-  <div class="t-foot">© 2026 Jim Lu　ver. 11.11</div>
+  <div class="t-foot">© 2026 Jim Lu　ver. 11.12</div>
 </div>
 <nav class="modes" aria-label="導覽"><div class="in">
   <button class="homebtn" id="homeBtn" type="button" hidden>‹ 主選單</button>
@@ -8802,14 +8803,18 @@ function zMini(z,r,W,H,tm){W=W||300;H=(H||46)+26;const Bl=H-14,E=zParams(z,r,nul
     if(x-tx>=24){tx=x;o+='<line x1="'+x.toFixed(1)+'" x2="'+x.toFixed(1)+'" y1="'+Bl+'" y2="'+(Bl+3)+'" stroke="var(--muted)"/><text x="'+Math.max(x,9).toFixed(1)+'" y="'+(H-2)+'" font-size="9" text-anchor="'+(i?'middle':'start')+'" fill="var(--muted)">'+cmFmt(E.planT[i])+'</text>';}});
   const ex=X(R.end);o+='<line x1="'+ex+'" x2="'+ex+'" y1="4" y2="'+Bl+'" stroke="var(--muted)" stroke-dasharray="2 2"/>'+(ex-tx>=30?'<text x="'+Math.min(ex,W-2).toFixed(1)+'" y="'+(H-2)+'" font-size="9" font-weight="700" text-anchor="'+(ex>W-20?'end':'middle')+'" fill="var(--ink)">'+cmFmt(R.end)+' 滴完</text>':'');
   return o+'</svg>';}
+// 粉水比圖示：咖啡色＝粉、藍色＝水（冰／bypass 另色），長度照比例
+function zRatio(r){const tot=r.water+(r.ice||0)+(r.bypass||0),u=4.2,dw=u,ww=u*r.water/r.dose,iw=u*(r.ice||0)/r.dose,bw=u*(r.bypass||0)/r.dose,W=dw+ww+iw+bw+2;
+  return '<svg viewBox="0 0 '+W.toFixed(1)+' 12" width="'+W.toFixed(0)+'" height="12" aria-hidden="true"><rect x="0" y="1" width="'+dw.toFixed(1)+'" height="10" rx="2" fill="#7a4a2a"/><rect x="'+(dw+1).toFixed(1)+'" y="1" width="'+ww.toFixed(1)+'" height="10" rx="2" fill="#6fa8dc"/>'+(iw?'<rect x="'+(dw+1+ww).toFixed(1)+'" y="1" width="'+iw.toFixed(1)+'" height="10" rx="2" fill="#dff1fb"/>':'')+(bw?'<rect x="'+(dw+1+ww+iw).toFixed(1)+'" y="1" width="'+bw.toFixed(1)+'" height="10" rx="2" fill="#9fc8ea"/>':'')+'</svg>'+
+   '<b>1:'+(+(tot/r.dose).toFixed(1))+'</b><small>'+r.dose+'g／'+r.water+'g'+(r.ice?'＋冰'+r.ice:'')+(r.bypass?'＋水'+r.bypass:'')+'</small>';}
 function zCard(z,r,on,tm){const Z=ZONES[z],R=zRun(z,r),E=zParams(z,r,null),c=Z.color(r),tt=(r.planTemp?r.planTemp[0]+'→'+r.planTemp[r.planTemp.length-1]:r.temp)+'°';
   return '<span class="zc-h"><i style="background:'+c+'"></i><b>'+r.n+'</b>'+(r.by?'<small>'+r.by+'</small>':'')+'</span>'+
-   '<span class="zc-tags"><span>'+(window.dripSvg?window.dripSvg(E.dripper,!!E.valveWins):'')+(DRIPPER[E.dripper]||{name:''}).name.replace(/（.*$/,'')+(E.valveWins?'＋Switch':'')+'</span><span class="zc-t" style="background:'+tempCol(r.planTemp?r.planTemp[0]:r.temp)+'">'+tt+'</span><span>'+r.dose+'/'+r.water+'g'+(r.ice?'＋冰':'')+(r.bypass?'＋水':'')+'</span><span>'+r.plan.length+' 注</span><span>⏱'+r.done+'</span></span>'+
+   '<span class="zc-tags"><span>'+(window.dripSvg?window.dripSvg(E.dripper,!!E.valveWins):'')+(DRIPPER[E.dripper]||{name:''}).name.replace(/（.*$/,'')+(E.valveWins?'＋Switch':'')+'</span><span class="zc-t" style="background:'+tempCol(r.planTemp?r.planTemp[0]:r.temp)+'">'+tt+'</span><span class="zc-ratio">'+zRatio(r)+'</span><span>'+r.plan.length+' 注</span><span>⏱'+r.done+'</span></span>'+
    zMini(z,r,300,on?40:34,tm)+'<span class="zc-r">'+zoneOf(R.ey,R.tds)+'・EY '+R.ey.toFixed(1)+'%・TDS '+R.tds.toFixed(2)+'%</span>';}
 function zOpenPick(z){const Z=ZONES[z],S=ZST[z];let ov=document.getElementById('zPickOv');if(!ov){ov=document.createElement('div');ov.id='zPickOv';ov.className='zp-ov';ov.setAttribute('role','dialog');ov.setAttribute('aria-modal','true');document.body.appendChild(ov);
     ov.addEventListener('click',e=>{if(e.target===ov||e.target.closest('[data-zx]')){ov.hidden=true;document.body.style.overflow='';return;}const b=e.target.closest('[data-zr]');if(b){ov.hidden=true;document.body.style.overflow='';zPick(ov.dataset.z,b.dataset.zr);}});}
   ov.dataset.z=z;const TM=Math.max(...Z.recipes.map(r=>zEnd(z,r)));
-  ov.innerHTML='<div class="zp-box"><div class="zp-hd"><b>選一套配方</b><button type="button" data-zx="1" aria-label="關閉">✕</button></div><p class="label">柱子＝每一注（上面是克數、下面是開始注水的時間；寬＝注水時間、高＝水量、顏色＝水溫，上方黑點＝中心注水）；黃色底＝關閥浸泡；虛線＝模型滴完。所有配方用同一個時間比例。</p><div class="cm-leg">'+Z.legend.map(([c,l])=>'<span><i style="border-color:'+c+'"></i>'+l+'</span>').join('')+'</div><div class="zp-list">'+
+  ov.innerHTML='<div class="zp-box"><div class="zp-hd"><b>選一套配方</b><button type="button" data-zx="1" aria-label="關閉">✕</button></div><p class="label">柱子＝每一注（上面是克數、下面是開始注水的時間；寬＝注水時間、高＝水量、顏色＝水溫，上方黑點＝中心注水）；黃色底＝關閥浸泡；虛線＝模型滴完。所有配方用同一個時間比例。粉水比條：咖啡色＝粉、藍色＝水、淺藍＝冰或後加的水，條越長水越多。</p><div class="cm-leg">'+Z.legend.map(([c,l])=>'<span><i style="border-color:'+c+'"></i>'+l+'</span>').join('')+'</div><div class="zp-list">'+
    Z.recipes.map(r=>'<button type="button" class="zp-it'+(r.id===S.cur?' on':'')+'" data-zr="'+r.id+'">'+zCard(z,r,0,TM)+'<span class="zc-d">'+r.d+'</span></button>').join('')+'</div></div>';
   ov.hidden=false;document.body.style.overflow='hidden';const cur=ov.querySelector('.zp-it.on');if(cur)cur.scrollIntoView({block:'center'});}
 
