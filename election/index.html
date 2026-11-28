@@ -300,7 +300,7 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:20px 0 30px}
   </div>
 </section>
 </main>
-<footer>2026 九合一選情圖鑑 v1.9・Made by <b>Jim Lu</b></footer>
+<footer>2026 九合一選情圖鑑 v2.0・Made by <b>Jim Lu</b></footer>
 
 <script>
 const P={K:{n:'國民黨',c:'var(--kmt)',l:'var(--kmt-l)'},D:{n:'民進黨',c:'var(--dpp)',l:'var(--dpp-l)'},T:{n:'民眾黨',c:'var(--tpp)',l:'var(--tpp-l)'},I:{n:'無黨籍',c:'var(--ind)',l:'var(--ind-l)'}};
@@ -692,15 +692,15 @@ document.getElementById('share').onclick=()=>{const u=location.href.split('#')[0
 
 
 // 即時票數（開票夜，定時更新）
-const RES_UPD='2026/11/28 17:05 更新（六都中台北、新北、桃園、台中為 16:40–16:50 報票，其餘縣市仍是 16:14 早期數字；網路報導比電視慢約 20 分鐘）';
+const RES_UPD='2026/11/28 17:25 更新（六都為 16:55–17:00 報票，金門、連江已自行宣布當選；其餘縣市仍是 16:14 早期數字）';
 // 縣市: {t:時間, src:來源, st:'lead'|'won', v:{候選人:票數}}
 const RES={
- '台北':{t:'16:42',src:'https://news.tvbs.com.tw/politics/4057627',v:{'蔣萬安':184530,'沈伯洋':154805}},
- '新北':{t:'約16:45',src:'https://www.ftnn.com.tw/news/600485',v:{'李四川':338154,'蘇巧慧':321057}},
- '桃園':{t:'約16:50（約略值）',src:'https://udn.com/news/story/124652/9874224',v:{'張善政':150000,'黃世杰':110000}},
- '台中':{t:'約16:50',src:'https://news.tvbs.com.tw/politics/4055204',v:{'何欣純':131214,'江啟臣':123807}},
- '台南':{t:'16:14',src:'https://www.nownews.com/news/6896211',v:{'陳亭妃':2996,'謝龍介':2930}},
- '高雄':{t:'16:14',src:'https://www.nownews.com/news/6896211',v:{'賴瑞隆':8755,'柯志恩':7655}},
+ '台北':{t:'17:00（東森）',src:'https://www.ctee.com.tw/news/20261128700501-430104',v:{'蔣萬安':310036,'沈伯洋':261003}},
+ '新北':{t:'約16:55',src:'https://tw.news.yahoo.com/%E6%96%B0%E5%8C%97%E5%B8%82%E9%95%B7%E9%96%8B%E7%A5%A8-%E6%9D%8E%E5%9B%9B%E5%B7%9D%E6%9A%AB%E6%8B%BF42%E8%90%AC%E7%A5%A8-%E9%A0%98%E5%85%88%E8%98%87%E5%B7%A7%E6%85%A7%E9%80%BE2-8%E8%90%AC%E7%A5%A8-%E6%9C%80%E6%96%B0%E7%A5%A8%E6%95%B8%E6%8C%81%E7%BA%8C%E6%8F%AD%E6%9B%89-085500388.html',v:{'李四川':426428,'蘇巧慧':398324}},
+ '桃園':{t:'16:55（民視）',src:'https://www.ctee.com.tw/news/20261128700501-430104',v:{'張善政':206626,'黃世杰':160760}},
+ '台中':{t:'約16:55（東森）',src:'https://www.ctee.com.tw/news/20261128700501-430104',v:{'何欣純':207612,'江啟臣':190323}},
+ '台南':{t:'17:00（東森）',src:'https://www.ctee.com.tw/news/20261128700501-430104',v:{'陳亭妃':185129,'謝龍介':169331}},
+ '高雄':{t:'16:55（TVBS）',src:'https://www.ctee.com.tw/news/20261128700501-430104',v:{'賴瑞隆':237286,'柯志恩':209596}},
  '新竹縣':{t:'16:14',src:'https://www.nownews.com/news/6896211',v:{'鄭朝方':151,'徐欣瑩':135}},
  '苗栗':{t:'16:14',src:'https://www.nownews.com/news/6896211',v:{'鍾東錦':14,'陳品安':8}},
  '彰化':{t:'16:14',src:'https://www.nownews.com/news/6896211',v:{'陳素月':946,'魏平政':820}},
@@ -715,7 +715,8 @@ const RES={
  '基隆':{t:'16:14',src:'https://www.nownews.com/news/6896211',v:{'謝國樑':317,'童子瑋':308}},
  '新竹市':{t:'16:14',src:'https://www.nownews.com/news/6896211',v:{'高虹安':970,'莊競程':693}},
  '嘉義市':{t:'16:14',src:'https://www.nownews.com/news/6896211',v:{'王美惠':425,'張啓楷':331}},
- '金門':{t:'16:14',src:'https://www.nownews.com/news/6896211',v:{'陳玉珍':32}}
+ '金門':{t:'自行宣布當選',src:'https://www.cna.com.tw/news/aipl/202611285005.aspx',st:'won',v:{'陳玉珍':1}},
+ '連江':{t:'自行宣布當選',src:'https://www.cna.com.tw/news/aipl/202611285005.aspx',st:'won',v:{'王忠銘':1}}
 };
 function partyOf(city,name){const x=(N[city]||[]).find(c=>c[1]===name);return x?x[2]:'I'}
 function resLeader(city){const r=RES[city];if(!r)return null;const e=Object.entries(r.v).sort((a,b)=>b[1]-a[1]);return {name:e[0][0],p:partyOf(city,e[0][0]),st:r.st||'lead',e}}
@@ -724,7 +725,7 @@ function drawRes(){
   const order=['台北','新北','桃園','台中','台南','高雄'].concat(C.map(c=>c[0]).filter(c=>!['台北','新北','桃園','台中','台南','高雄'].includes(c)));
   document.getElementById('resList').innerHTML=order.filter(c=>RES[c]).map(c=>{const L=resLeader(c),tot=L.e.reduce((a,x)=>a+x[1],0)||1;
     return `<div style="margin-bottom:10px"><div style="display:flex;justify-content:space-between;font-size:13px"><b>${c}${L.st==='won'?' <span class="pill" style="background:'+P[L.p].c+';color:#fff">'+L.name+' 當選</span>':''}</b><span class="note">${RES[c].t}・<a href="${RES[c].src}" target="_blank" rel="noopener">來源</a></span></div>
-    <div class="bar" style="height:22px;position:relative">${L.e.map(([n,v])=>`<div style="flex:${v};background:${P[partyOf(c,n)].c}">${n} ${v.toLocaleString()}</div>`).join('')}<i class="half"></i></div></div>`}).join('');
+    <div class="bar" style="height:22px;position:relative">${L.e.map(([n,v])=>`<div style="flex:${v};background:${P[partyOf(c,n)].c}">${n} ${v>1?v.toLocaleString():''}</div>`).join('')}<i class="half"></i></div></div>`}).join('');
 }
 drawRes();
 // 各縣市投票率（投票日即時，定時更新）
