@@ -119,6 +119,11 @@ header{position:relative}
 .hmn{display:flex;align-items:center;gap:4px;cursor:pointer;white-space:nowrap}.hmn i{width:7px;height:7px;border-radius:50%;flex:none}.hmn small{display:none}
 .hmc{border-radius:5px;height:24px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700}
 .half{position:absolute;left:50%;top:-4px;bottom:-4px;border-left:2px dashed #1d1f24;pointer-events:none}
+.kgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.kt{border:1.5px solid var(--line);border-radius:10px;padding:7px 8px;font-size:12px;cursor:pointer;background:#fff;position:relative}
+.kt b{font-size:14px}.kt .tg{font-size:13px;letter-spacing:1px}.kt .sm{color:var(--muted);font-size:10.5px;line-height:1.3;margin-top:2px}
+.kt.s1{background:#fff6d6;border-color:#e8c55a}.kt.s2{background:#e3f3e6;border-color:#7cbf8a}
+.kt .st{position:absolute;top:5px;right:7px;font-size:12px}
 footer{text-align:center;color:var(--muted);font-size:12px;padding:20px 0 30px}
 </style>
 </head>
@@ -251,6 +256,17 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:20px 0 30px}
     </div>
     <div class="note" id="nightCompare" style="margin-top:8px"></div>
   </div>
+  <div class="card" id="keyCard">
+    <h2>關鍵開票所怎麼看（雙北）</h2>
+    <div class="note" style="margin-bottom:8px">三種要盯的地方：🐙 指標里（歷屆結果跟全市很接近）、🏦 大票倉（人多，開完會大幅改變差距）、🔵🟢 傳統票倉（媒體常稱的藍營或綠營強區，晚開出來時差距會被拉回）。點方塊可以自己標「開票中→已開完」，紀錄只存在這支手機。</div>
+    <div class="legend"><span>⬜ 未開</span><span>🟨 開票中</span><span>✅ 已開完</span></div>
+    <h3 style="margin-top:6px">台北市 12 區</h3>
+    <div class="kgrid" id="kTP"></div>
+    <h3 style="margin-top:12px">新北市・要盯的區與里</h3>
+    <div class="kgrid" id="kNTP"></div>
+    <div class="note" id="kNote" style="margin-top:8px"></div>
+    <div class="note" style="margin-top:6px">我沒辦法即時抓到每個開票所的完成狀態，看各區開票進度可以開：<a href="https://www.cw.com.tw/graphics/2026-taiwan-local-elections/county/65000/" target="_blank" rel="noopener">天下雜誌・新北各區開票</a>・<a href="https://udn.com/news/story/124652/9874224" target="_blank" rel="noopener">聯合報開票地圖</a></div>
+  </div>
   <div class="card" id="resCard">
     <h2>即時票數</h2>
     <div class="note" id="resUpd"></div>
@@ -300,7 +316,7 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:20px 0 30px}
   </div>
 </section>
 </main>
-<footer>2026 九合一選情圖鑑 v2.1・Made by <b>Jim Lu</b></footer>
+<footer>2026 九合一選情圖鑑 v2.2・Made by <b>Jim Lu</b></footer>
 
 <script>
 const P={K:{n:'國民黨',c:'var(--kmt)',l:'var(--kmt-l)'},D:{n:'民進黨',c:'var(--dpp)',l:'var(--dpp-l)'},T:{n:'民眾黨',c:'var(--tpp)',l:'var(--tpp-l)'},I:{n:'無黨籍',c:'var(--ind)',l:'var(--ind-l)'}};
@@ -691,6 +707,31 @@ document.getElementById('share').onclick=()=>{const u=location.href.split('#')[0
 
 
 
+
+// 關鍵開票所（雙北）
+const KTP=[
+ ['士林','🐙🏦','天玉里 6 個投開票所（天母國小）是「章魚里」：2022 年蔣萬安在這裡 41.37%，全市 42.29%','https://udn.com/vote2026/story/125078/9907689'],
+ ['北投','',''],['內湖','🏦','選舉人 21.9 萬，第 2 多'],
+ ['大同','🟢','1994–2010 五屆市長選舉民進黨平均得票最高的區','https://www.airitilibrary.com/Article/Detail/U0001-2008201418534800'],
+ ['中山',''],['松山',''],
+ ['萬華',''],['中正',''],['信義',''],
+ ['大安','🏦🔵','選舉人 22.7 萬全市最多；媒體稱藍營票倉','https://udn.com/news/story/124652/9907622'],
+ ['文山','🏦','選舉人 21.2 萬'],['南港','']
+];
+const KNTP=[
+ ['鶯歌建德里','🐙','新北「章魚哥里」，已開完：蘇巧慧 203、李四川 131','https://tw.news.yahoo.com/%E6%96%B0%E5%8C%97%E5%B8%82%E9%95%B7%E6%BF%80%E6%88%B0-%E7%AB%A0%E9%AD%9A%E5%93%A5-%E5%BB%BA%E5%BE%B7%E9%87%8C%E9%96%8B%E5%AE%8C%E8%98%87%E5%B7%A7%E6%85%A7203%E7%A5%A8%E9%A0%98%E5%85%88%E6%9D%8E131%E7%A5%A8-085358613.html',2],
+ ['板橋','🏦','人口最多的區'],['新莊','🏦','人口第 2 多'],['中和','🏦','人口第 3 多'],['三重','🏦','人口第 4 多'],
+ ['永和','📍','你的選區']
+];
+const KKEY='election2026-key';let KS={};try{KS=JSON.parse(localStorage.getItem(KKEY)||'{}')}catch(e){}
+function drawKey(){
+  const mk=(id,L,pre)=>{document.getElementById(id).innerHTML=L.map(x=>{const k=pre+x[0];const st=KS[k]!=null?KS[k]:(x[4]||0);
+    return `<div class="kt s${st}" data-k="${k}"><span class="st">${['⬜','🟨','✅'][st]}</span><b>${x[0]}</b><div class="tg">${x[1]||'&nbsp;'}</div>${x[2]?`<div class="sm">${x[2]}${x[3]?` <a href="${x[3]}" target="_blank" rel="noopener" onclick="event.stopPropagation()">來源</a>`:''}</div>`:''}</div>`}).join('');};
+  mk('kTP',KTP,'tp-');mk('kNTP',KNTP,'ntp-');
+  document.querySelectorAll('#keyCard .kt').forEach(el=>el.onclick=()=>{const k=el.dataset.k;const cur=+(el.className.match(/s(\d)/)||[0,0])[1];KS[k]=(cur+1)%3;try{localStorage.setItem(KKEY,JSON.stringify(KS))}catch(e){};drawKey();});
+  document.getElementById('kNote').textContent='判讀方式：指標里開完先看方向；大票倉的開票進度決定差距還會不會大幅變動；落後的一方要看自己的傳統票倉還剩多少沒開。新北選委會預計晚間 9 點前開完全市 2,728 個投開票所。';
+}
+drawKey();
 // 即時票數（開票夜，定時更新）
 const RES_UPD='2026/11/28 17:25 更新（六都為 16:55–17:00 報票，金門、連江已自行宣布當選；其餘縣市仍是 16:14 早期數字）';
 // 縣市: {t:時間, src:來源, st:'lead'|'won', v:{候選人:票數}}
