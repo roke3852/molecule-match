@@ -118,6 +118,7 @@ header{position:relative}
 .hmh{text-align:center;font-size:10px;line-height:1.25;color:var(--muted)}
 .hmn{display:flex;align-items:center;gap:4px;cursor:pointer;white-space:nowrap}.hmn i{width:7px;height:7px;border-radius:50%;flex:none}.hmn small{display:none}
 .hmc{border-radius:5px;height:24px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700}
+.half{position:absolute;left:50%;top:-4px;bottom:-4px;border-left:2px dashed #1d1f24;pointer-events:none}
 footer{text-align:center;color:var(--muted);font-size:12px;padding:20px 0 30px}
 </style>
 </head>
@@ -299,7 +300,7 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:20px 0 30px}
   </div>
 </section>
 </main>
-<footer>2026 九合一選情圖鑑 v1.8・Made by <b>Jim Lu</b></footer>
+<footer>2026 九合一選情圖鑑 v1.9・Made by <b>Jim Lu</b></footer>
 
 <script>
 const P={K:{n:'國民黨',c:'var(--kmt)',l:'var(--kmt-l)'},D:{n:'民進黨',c:'var(--dpp)',l:'var(--dpp-l)'},T:{n:'民眾黨',c:'var(--tpp)',l:'var(--tpp-l)'},I:{n:'無黨籍',c:'var(--ind)',l:'var(--ind-l)'}};
@@ -719,11 +720,11 @@ const RES={
 function partyOf(city,name){const x=(N[city]||[]).find(c=>c[1]===name);return x?x[2]:'I'}
 function resLeader(city){const r=RES[city];if(!r)return null;const e=Object.entries(r.v).sort((a,b)=>b[1]-a[1]);return {name:e[0][0],p:partyOf(city,e[0][0]),st:r.st||'lead',e}}
 function drawRes(){
-  document.getElementById('resUpd').textContent='資料時間：'+RES_UPD+'。開票夜會定時更新。';
+  document.getElementById('resUpd').textContent='資料時間：'+RES_UPD+'。開票夜會定時更新。中間虛線＝50%（以圖上列出的候選人合計計算）。';
   const order=['台北','新北','桃園','台中','台南','高雄'].concat(C.map(c=>c[0]).filter(c=>!['台北','新北','桃園','台中','台南','高雄'].includes(c)));
   document.getElementById('resList').innerHTML=order.filter(c=>RES[c]).map(c=>{const L=resLeader(c),tot=L.e.reduce((a,x)=>a+x[1],0)||1;
     return `<div style="margin-bottom:10px"><div style="display:flex;justify-content:space-between;font-size:13px"><b>${c}${L.st==='won'?' <span class="pill" style="background:'+P[L.p].c+';color:#fff">'+L.name+' 當選</span>':''}</b><span class="note">${RES[c].t}・<a href="${RES[c].src}" target="_blank" rel="noopener">來源</a></span></div>
-    <div class="bar" style="height:22px">${L.e.map(([n,v])=>`<div style="flex:${v};background:${P[partyOf(c,n)].c}">${n} ${v.toLocaleString()}</div>`).join('')}</div></div>`}).join('');
+    <div class="bar" style="height:22px;position:relative">${L.e.map(([n,v])=>`<div style="flex:${v};background:${P[partyOf(c,n)].c}">${n} ${v.toLocaleString()}</div>`).join('')}<i class="half"></i></div></div>`}).join('');
 }
 drawRes();
 // 各縣市投票率（投票日即時，定時更新）
