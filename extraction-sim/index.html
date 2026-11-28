@@ -1453,7 +1453,7 @@ window.BGM=(()=>{
     <div class="err" id="tErr"></div>
   </div>
   <button class="t-more" id="tMore" type="button" aria-label="咖啡宇宙：更多咖啡 App 與遊戲">咖啡宇宙</button>
-  <div class="t-foot">© 2026 Jim Lu　ver. 12.8</div>
+  <div class="t-foot">© 2026 Jim Lu　ver. 12.9</div>
 </div>
 <nav class="modes" aria-label="導覽"><div class="in">
   <button class="homebtn" id="homeBtn" type="button" hidden>‹ 主選單</button>
@@ -10374,6 +10374,7 @@ if(window.PREF){PREF.bar('gcPref',()=>$('gxChart'));PREF.on(()=>render());
 .cc-del{font:inherit;min-width:36px;min-height:34px;border-radius:8px;border:1px solid var(--line);background:transparent;color:var(--muted);cursor:pointer}
 .cc-sgf{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-top:6px}.cc-sgf small{display:block;color:var(--muted);font-size:11.5px;text-align:center}
 .cc-stp{display:flex;align-items:center;justify-content:space-between;border:1px solid var(--line);border-radius:10px}.cc-stp button{font:inherit;font-size:17px;min-width:34px;min-height:38px;border:0;background:transparent;color:var(--ink);cursor:pointer}.cc-stp button:disabled{opacity:.25}.cc-stp b{font-size:13.5px;color:var(--accent);white-space:nowrap}
+.cc-jt{display:flex;flex-direction:column;gap:2px}.cc-jt>b{font-size:16px}.cc-cups{display:flex;gap:2px;align-items:center;flex-wrap:wrap}.cc-ch svg{flex:none}.cc-ch .cc-jarsvg{margin-left:auto}
 .cc-jar{display:flex;flex-wrap:wrap;align-items:center;gap:8px;font-size:13.5px;margin:10px 0 6px}.cc-jar span{color:var(--muted)}.cc-jar button,.cc-hb,.cc-reset{font:inherit;font-size:13.5px;padding:8px 12px;border-radius:10px;border:1px solid var(--accent);background:transparent;color:var(--accent);cursor:pointer}
 .cc-go{width:100%;font:inherit;font-size:17px;font-weight:800;padding:13px;border-radius:14px;border:0;background:var(--accent);color:#1a1512;cursor:pointer}.cc-go:disabled{opacity:.4}
 .cc-msg{margin:10px 0;padding:10px 12px;border-radius:12px;background:rgba(232,176,74,.12);font-weight:700;font-size:14.5px}
@@ -10463,6 +10464,14 @@ function traits(b){const rk=roastAt(b.roast).k*(b.kx||1),sx=b.sx||1;
   const bar=(v,lo,hi)=>Math.max(4,Math.min(100,(v-lo)/(hi-lo)*100));
   return '<div class="cc-tr"><span>好萃程度</span><i><b style="width:'+bar(rk,.3,1.9)+'%"></b></i><small>'+(rk<.7?'很難萃':rk<.95?'偏難萃':rk<1.15?'一般':rk<1.4?'好萃':'超好萃')+'</small></div>'+
    '<div class="cc-tr"><span>可溶物</span><i><b style="width:'+bar(sx,.7,1.4)+'%"></b></i><small>'+(sx<.9?'偏少':sx>1.15?'很多':'一般')+'</small></div>';}
+// 豆罐圖示：玻璃罐裡的豆子高度＝剩下幾克（滿罐 100 g，超過顯示滿＋數字）
+function jarSvg(g,sz){const f=Math.max(0,Math.min(1,g/100)),H=40,top=10,bot=36,y=bot-(bot-top)*f,col=g<15?'#d9625e':g<40?'#e8b04a':'#8a5a33',id='jg'+Math.round(g*10)+'_'+sz;
+  let beans='';if(f>0)for(let yy=bot-3;yy>y+1;yy-=4.2)for(let xx=(Math.round(yy)%2?10:12);xx<=27;xx+=4.6)beans+='<ellipse cx="'+xx.toFixed(1)+'" cy="'+yy.toFixed(1)+'" rx="2.1" ry="1.5" fill="'+col+'" transform="rotate(-25 '+xx.toFixed(1)+' '+yy.toFixed(1)+')"/>';
+  return '<svg class="cc-jarsvg" viewBox="0 0 36 '+H+'" width="'+sz+'" height="'+Math.round(sz*H/36)+'" aria-hidden="true"><defs><clipPath id="'+id+'"><rect x="7" y="'+y.toFixed(1)+'" width="22" height="'+(bot-y+.5).toFixed(1)+'" rx="2"/></clipPath></defs>'+
+   '<rect x="10" y="3" width="16" height="5" rx="1.5" fill="#6b4527"/><path d="M8 8h20a2 2 0 0 1 2 2v25a3 3 0 0 1-3 3H9a3 3 0 0 1-3-3V10a2 2 0 0 1 2-2z" fill="rgba(200,220,235,.08)" stroke="var(--muted)" stroke-width="1.2"/>'+
+   (f>0?'<rect x="7" y="'+y.toFixed(1)+'" width="22" height="'+(bot-y+.5).toFixed(1)+'" rx="2" fill="'+col+'" opacity=".35"/><g clip-path="url(#'+id+')">'+beans+'</g>':'')+
+   '<path d="M10 12v18" stroke="#fff" stroke-width="1.2" opacity=".25" stroke-linecap="round"/></svg>';}
+function cupsRow(g,dose){const n=Math.floor(g/dose),m=Math.min(n,8);let o='<span class="cc-cups" aria-hidden="true">';for(let i=0;i<m;i++)o+='<svg viewBox="0 0 16 14" width="15" height="13"><path d="M2 3h10v5a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4z" fill="#c8955a"/><path d="M12 5h1.5a2 2 0 0 1 0 4H12" fill="none" stroke="#c8955a" stroke-width="1.3"/></svg>';if(n>8)o+='<small>＋'+(n-8)+'</small>';if(!n)o+='<small style="color:#d9625e">豆子不夠沖一杯了</small>';return o+'</span>';}
 function beanCard(c,blind){const b=B(c.b);
   if(blind)return '<div class="cc-bean"><b>🕶 神秘豆</b><p class="label">盲豆模式：看不到豆子的產地和特性。先沖一杯，從落點推敲它是好萃還是難萃。</p></div>';
   return '<div class="cc-bean"><b>'+esc(b.name)+'</b> <small>'+esc(b.sub)+'・'+ROAST_NAME(b.roast)+'</small><div class="btags">'+b.tags.map(t=>'<i>'+esc(t)+'</i>').join('')+'</div>'+traits(b)+'<p>'+c.why+'</p></div>';}
@@ -10531,13 +10540,13 @@ function renderPlay(){const d=ST.dr,dp=dailyPick(),dk=today();
   const dDone=ST.daily[dk];
   h+='<button type="button" class="cc-daily'+(dDone?' done':'')+'" data-daily="1"><b>📅 今日挑戰</b><span>'+(ST.blind?'神秘豆':esc(B(dp.c.b).name))+' × '+esc(drName(dp.d))+'：'+dp.c.t+'</span><small>'+(dDone?'✓ 今天完成了':'第一次進框加碼 '+NT(500))+'</small></button>';
   h+='<div class="cc-row"><h3 class="cc-h">② 選豆子</h3><label class="cc-blind"><input type="checkbox" id="ccBlind"'+(ST.blind?' checked':'')+'> 🕶 盲豆模式（獎金 ×1.5）</label></div><div class="cc-list">'+
-   CH.map(c=>{const t=ST.tr[K(c,d)],b=B(c.b),bl=ST.blind&&!t;return '<button type="button" class="cc-ch'+(ST.cur===c.b?' on':'')+'" data-ch="'+c.b+'">'+cup(t&&t.tier,30,t&&t.blind)+'<span><b>'+(bl?'🕶 神秘豆 #'+(CH.indexOf(c)+1):esc(b.name))+'</b><small>'+c.t+(b.lab?'・🔥 難':'')+'</small></span></button>';}).join('')+'</div>';
+   CH.map(c=>{const t=ST.tr[K(c,d)],b=B(c.b),bl=ST.blind&&!t;return '<button type="button" class="cc-ch'+(ST.cur===c.b?' on':'')+'" data-ch="'+c.b+'">'+cup(t&&t.tier,30,t&&t.blind)+'<span><b>'+(bl?'🕶 神秘豆 #'+(CH.indexOf(c)+1):esc(b.name))+'</b><small>'+c.t+(b.lab?'・🔥 難':'')+'</small></span>'+jarSvg(jar(c.b),22)+'</button>';}).join('')+'</div>';
   const c=CH.find(x=>x.b===ST.cur);
   if(c){const r=recOf(c),k=K(c,d),t=ST.tr[k],lg=ST.log[k]||[],bl=ST.blind&&!t,tries=ST.tries[k]||0,fails=lg.length&&!inBox(c,lg[lg.length-1])||lg.length&&!svOk(c,lg[lg.length-1])?(ST.fail&&ST.fail[k])||0:0;
     h+='<div class="cc-panel" id="ccPanel"><h3 class="cc-h">③ 讀豆子、看目標</h3>'+beanCard(c,bl)+
      '<div class="cc-goal"><b>🎯 目標：'+c.t+'</b><span>萃取率 '+c.ey[0]+'–'+c.ey[1]+'%、濃度 '+c.tds[0].toFixed(2)+'–'+c.tds[1].toFixed(2)+'%</span><span>'+cup(1,18)+'進框 '+cup(2,18)+'進框且'+svTxt(c)+' '+cup(3,18)+'3 杯內拿到銀杯</span>'+(t?'<span>目前：'+cup(t.tier,18)+tierName[t.tier]+'（'+t.tries+' 杯）</span>':'')+'</div>'+
      '<div class="cc-row"><h3 class="cc-h">④ 設計配方</h3><span class="cc-row" style="gap:6px"><button type="button" class="cc-hb" data-tpo="1" aria-expanded="'+tplOpen+'">📋 '+(tplOpen?'收起':'預設配方')+'</button><button type="button" class="cc-hb" data-svo="1" aria-expanded="'+svOpen+'">💾 儲存手法</button></span></div>'+(svOpen?saveBox(c,r):'')+(tplOpen?tplList(r):'')+ctrls(r)+
-     '<div class="cc-jar">豆罐剩 <b>'+jar(c.b)+' g</b>'+(jar(c.b)<r.dose?'<button type="button" data-buy="1">補豆 100 g・'+NT(B(c.b).price)+'</button>':'')+'<span>這次用 '+r.dose+' g・第 '+(tries+1)+' 杯</span></div>'+
+     '<div class="cc-jar">'+jarSvg(jar(c.b),56)+'<div class="cc-jt"><b>'+jar(c.b)+' g</b><span>還能沖 <b>'+Math.floor(jar(c.b)/r.dose)+'</b> 杯</span>'+cupsRow(jar(c.b),r.dose)+'</div>'+(jar(c.b)<r.dose*2?'<button type="button" data-buy="1">補豆 100 g・'+NT(B(c.b).price)+'</button>':'')+'<span>這次用 '+r.dose+' g・第 '+(tries+1)+' 杯</span></div>'+
      '<button type="button" class="cc-go" data-brew="1"'+(jar(c.b)<r.dose?' disabled':'')+'>☕ 沖煮</button>'+
      (msg?'<div class="cc-msg">'+msg+'</div>':'')+
      (lg.length?'<h3 class="cc-h">⑤ 落點</h3>'+chart(c,lg,bl)+resultLine(c,lg[lg.length-1]):'')+
