@@ -1453,7 +1453,7 @@ window.BGM=(()=>{
     <div class="err" id="tErr"></div>
   </div>
   <button class="t-more" id="tMore" type="button" aria-label="咖啡宇宙：更多咖啡 App 與遊戲">咖啡宇宙</button>
-  <div class="t-foot">© 2026 Jim Lu　ver. 12.9</div>
+  <div class="t-foot">© 2026 Jim Lu　ver. 12.10</div>
 </div>
 <nav class="modes" aria-label="導覽"><div class="in">
   <button class="homebtn" id="homeBtn" type="button" hidden>‹ 主選單</button>
@@ -10374,6 +10374,8 @@ if(window.PREF){PREF.bar('gcPref',()=>$('gxChart'));PREF.on(()=>render());
 .cc-del{font:inherit;min-width:36px;min-height:34px;border-radius:8px;border:1px solid var(--line);background:transparent;color:var(--muted);cursor:pointer}
 .cc-sgf{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-top:6px}.cc-sgf small{display:block;color:var(--muted);font-size:11.5px;text-align:center}
 .cc-stp{display:flex;align-items:center;justify-content:space-between;border:1px solid var(--line);border-radius:10px}.cc-stp button{font:inherit;font-size:17px;min-width:34px;min-height:38px;border:0;background:transparent;color:var(--ink);cursor:pointer}.cc-stp button:disabled{opacity:.25}.cc-stp b{font-size:13.5px;color:var(--accent);white-space:nowrap}
+.cc-tip{font-size:12px;color:var(--muted);font-weight:400}.cc-chart .orea-dot{cursor:pointer}.cc-att{border:1px solid #f0c040;border-radius:12px;padding:8px 11px;margin:6px 0}.cc-att .ok{color:#5ec98c;font-weight:700;font-size:13px}.cc-att .ng{color:#d9625e;font-weight:700;font-size:13px}.cc-ap{margin:4px 0;font-size:14px}
+.cc-atl{display:flex;flex-wrap:wrap;gap:5px;margin:6px 0}.cc-atl button{font:inherit;font-size:13px;min-width:38px;min-height:36px;border-radius:999px;border:1px solid var(--line);background:transparent;color:var(--muted);cursor:pointer}.cc-atl button.bx{border-color:#5ec98c;color:#5ec98c}.cc-atl button.sv{border-color:#5ec98c;background:rgba(94,201,140,.18);color:#5ec98c;font-weight:700}.cc-atl button[aria-pressed=true]{border-color:#f0c040;background:#f0c040;color:#2a1d08;font-weight:800}
 .cc-jt{display:flex;flex-direction:column;gap:2px}.cc-jt>b{font-size:16px}.cc-cups{display:flex;gap:2px;align-items:center;flex-wrap:wrap}.cc-ch svg{flex:none}.cc-ch .cc-jarsvg{margin-left:auto}
 .cc-jar{display:flex;flex-wrap:wrap;align-items:center;gap:8px;font-size:13.5px;margin:10px 0 6px}.cc-jar span{color:var(--muted)}.cc-jar button,.cc-hb,.cc-reset{font:inherit;font-size:13.5px;padding:8px 12px;border-radius:10px;border:1px solid var(--accent);background:transparent;color:var(--accent);cursor:pointer}
 .cc-go{width:100%;font:inherit;font-size:17px;font-weight:800;padding:13px;border-radius:14px;border:0;background:var(--accent);color:#1a1512;cursor:pointer}.cc-go:disabled{opacity:.4}
@@ -10411,7 +10413,7 @@ const REW=[0,150,300,600],HINT=80;
 let ST=(()=>{try{return JSON.parse(localStorage.getItem(CK)||'null')||{};}catch(e){return {};}})();
 ST=Object.assign({dr:'v60',cur:null,jar:{},coin:1500,tr:{},tries:{},blind:false,daily:{},rec:{},log:{},hint:{}},ST);
 const save=()=>{try{localStorage.setItem(CK,JSON.stringify(ST));}catch(e){}};
-let tab='play',msg='',busy=false,tplOpen=false,svOpen=false;
+let tab='play',msg='',busy=false,tplOpen=false,svOpen=false,selA=-1,attSv=false;
 const B=id=>BEANS.find(b=>b.id===id),K=(c,d)=>c.b+'|'+d,drName=d=>(DRIPPER[d]||{name:d}).name.replace(/（.*$/,'');
 const today=()=>{const d=new Date();return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();};
 function dailyPick(){const s=today();let h=0;for(const c of s)h=(h*31+c.charCodeAt(0))>>>0;return {c:CH[h%CH.length],d:DR[(h>>4)%DR.length]};}
@@ -10521,7 +10523,7 @@ function saveRec(c,r,name){let a=[];try{a=JSON.parse(localStorage.getItem(DSV)||
   return nm;}
 function tplList(cur){const P=presets(),gs=[...new Set(P.map(p=>p.g))];
   return '<div class="cc-tpl"><p class="label">套用後只換掉粉量、研磨和每一注，之後還能自己改。冰咖啡的配方不列；Switch 的關閥浸泡在這裡不會用到。'+(ZMAP[ST.dr]?'':'這個濾杯沒有官方配方，可以先用基本款。')+'</p>'+gs.map(g=>'<h4 class="cc-sh">'+g+'</h4>'+P.filter(p=>p.g===g).map(p=>{const W=waterOf(p.r);return '<button type="button" class="cc-tp" data-tp="'+esc(p.id)+'"><b>'+esc(p.n)+'</b><small>'+p.r.dose+' g／'+W+' g（1:'+(W/p.r.dose).toFixed(1)+'）・C40 '+p.r.clk+' 格・'+p.r.segs.length+' 注'+(p.r.byp?'＋bypass '+p.r.byp+' g':'')+(p.hold?'・原本有關閥浸泡':'')+'</small>'+(p.d?'<small>'+esc(p.d)+'</small>':'')+preview(p.r)+'</button>';}).join('')).join('')+'</div>';}
-function chart(c,lg){const pts=(lg||[]).map((x,i)=>({id:'a'+i,x:x.ey,y:x.tds,c:i===lg.length-1?'#f0c040':'#8a8079',on:i===lg.length-1,label:'第 '+(i+1)+' 杯'}));
+function chart(c,lg){const sel=selA>=0&&selA<lg.length?selA:lg.length-1,pts=(lg||[]).map((x,i)=>({id:'a'+i,x:x.ey,y:x.tds,c:i===sel?'#f0c040':inBox(c,x)?'#5ec98c':'#8a8079',on:i===sel,label:'第 '+(x.no||i+1)+' 杯'}));
   return window.goldChart(pts,{box:[c.ey[0],c.ey[1],c.tds[0],c.tds[1]],boxLabel:c.t});}
 function hintFor(c,r,d){const last=brew(c,r,d),cx=(c.ey[0]+c.ey[1])/2,cy=(c.tds[0]+c.tds[1])/2;
   const mod=f=>{const x=clone(r);f(x);return x;},n=r.segs.length,LS=r.segs[n-1];
@@ -10549,11 +10551,23 @@ function renderPlay(){const d=ST.dr,dp=dailyPick(),dk=today();
      '<div class="cc-jar">'+jarSvg(jar(c.b),56)+'<div class="cc-jt"><b>'+jar(c.b)+' g</b><span>還能沖 <b>'+Math.floor(jar(c.b)/r.dose)+'</b> 杯</span>'+cupsRow(jar(c.b),r.dose)+'</div>'+(jar(c.b)<r.dose*2?'<button type="button" data-buy="1">補豆 100 g・'+NT(B(c.b).price)+'</button>':'')+'<span>這次用 '+r.dose+' g・第 '+(tries+1)+' 杯</span></div>'+
      '<button type="button" class="cc-go" data-brew="1"'+(jar(c.b)<r.dose?' disabled':'')+'>☕ 沖煮</button>'+
      (msg?'<div class="cc-msg">'+msg+'</div>':'')+
-     (lg.length?'<h3 class="cc-h">⑤ 落點</h3>'+chart(c,lg,bl)+resultLine(c,lg[lg.length-1]):'')+
+     (lg.length?'<h3 class="cc-h">⑤ 沖煮紀錄 <small class="cc-tip">點圖上的點或下面的杯數，看那一杯的配方</small></h3><div class="cc-chart">'+chart(c,lg)+'</div>'+attList(c,lg)+attDetail(c,lg):'')+
      ((ST.fail&&ST.fail[k]||0)>=2&&!(t&&t.tier>=2)?(ST.hint[k]?'<div class="cc-hint">'+ST.hint[k]+'</div>':'<button type="button" class="cc-hb" data-hint="1">💡 買教練提示・'+NT(HINT)+'</button>'):'')+
-     (lg.length?'<button type="button" class="cc-reset" data-clr="1">清掉落點紀錄</button>':'')+'</div>';}
+     (lg.length?'<button type="button" class="cc-reset" data-clr="1">清掉沖煮紀錄</button>':'')+'</div>';}
   else h+='<p class="label">選一支豆子開始。🔥 是金杯挑戰豆：照一般配方一定進不了框。</p>';
   return h;}
+function attList(c,lg){const sel=selA>=0&&selA<lg.length?selA:lg.length-1;return '<div class="cc-atl">'+lg.map((x,i)=>'<button type="button" data-att="'+i+'" aria-pressed="'+(i===sel)+'" class="'+(inBox(c,x)?(svOk(c,x)?'sv':'bx'):'')+'">'+(x.no||i+1)+'</button>').join('')+'</div>';}
+function attDetail(c,lg){const i=selA>=0&&selA<lg.length?selA:lg.length-1,x=lg[i],r=x.rec,no=x.no||i+1,tag=inBox(c,x)?(svOk(c,x)?'<span class="ok">進框＋風味達標</span>':'<span class="ok">進框</span>'):'<span class="ng">沒進框</span>';
+  let h='<div class="cc-att"><div class="cc-row"><b>第 '+no+' 杯'+(i===lg.length-1?'（最新）':'')+(x.at?' <small class="cc-tip">'+new Date(x.at).toLocaleString('zh-TW',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'})+'</small>':'')+'</b>'+tag+'</div>'+resultLine(c,x);
+  if(r){const W=waterOf(r);h+='<p class="cc-ap">粉 '+r.dose+' g・水 '+W+' g（1:'+(W/r.dose).toFixed(1)+'）・C40 '+r.clk+' 格'+(r.byp?'・bypass '+r.byp+' g':'')+'</p><p class="label">'+r.segs.map((q,j)=>(j?'第 '+j+' 注':'悶蒸')+' '+q.ml+' g@'+Math.floor(q.t/60)+':'+String(q.t%60).padStart(2,'0')+' '+q.temp+'° '+(q.sty==='c'?'中心':'繞圈')).join('・')+'</p>'+preview(r);
+    const cur=recOf(c),same=JSON.stringify(cur)===JSON.stringify(r);
+    if(!same){const df=[];if(cur.dose!==r.dose)df.push('粉 '+r.dose+'→'+cur.dose+' g');if(cur.clk!==r.clk)df.push('研磨 '+r.clk+'→'+cur.clk+' 格');if((cur.byp||0)!==(r.byp||0))df.push('bypass '+(r.byp||0)+'→'+(cur.byp||0)+' g');if(waterOf(cur)!==W)df.push('總水量 '+W+'→'+waterOf(cur)+' g');if(cur.segs.length!==r.segs.length)df.push('注數 '+r.segs.length+'→'+cur.segs.length);else if(JSON.stringify(cur.segs)!==JSON.stringify(r.segs))df.push('注水細節不同');
+      h+='<p class="label">跟現在的配方比：'+(df.join('、')||'有些地方不同')+'</p>';}
+    else h+='<p class="label">就是現在的配方。</p>';
+    h+='<div class="cc-row" style="justify-content:flex-start;gap:6px">'+(same?'':'<button type="button" class="cc-hb" data-useatt="'+i+'">↩ 套回這一杯</button>')+'<button type="button" class="cc-hb" data-svatt="'+i+'">💾 存成手法</button></div>';
+    if(attSv)h+='<div class="cc-svb"><label for="ccAtN">手法名稱</label><input id="ccAtN" type="text" maxlength="60" value="'+esc(autoNm(c,r)+'・第'+no+'杯')+'"><div class="cc-row"><button type="button" class="cc-go" style="flex:1" data-svattok="'+i+'">儲存</button><button type="button" class="cc-hb" data-svatt="'+i+'">取消</button></div></div>';}
+  else h+='<p class="label">這一杯是舊版紀錄，沒有存配方。</p>';
+  return h+'</div>';}
 function resultLine(c,x){return '<div class="cc-res"><span>萃取率 <b>'+x.ey.toFixed(1)+'%</b></span><span>濃度 <b>'+x.tds.toFixed(2)+'%</b></span><span>酸 <b>'+x.acid.toFixed(1)+'</b></span><span>甜 <b>'+x.sweet.toFixed(1)+'</b></span><span>苦 <b>'+x.bitter.toFixed(1)+'</b></span><span>滴完 <b>'+Math.floor(x.end/60)+':'+String(Math.round(x.end%60)).padStart(2,'0')+'</b></span></div>';}
 function renderBook(){const tot=CH.length*DR.length,got=Object.keys(ST.tr).length,g3=Object.values(ST.tr).filter(t=>t.tier===3).length;
   let h='<p class="cc-prog">已收集 <b>'+got+'</b> / '+tot+' 座・金杯 '+g3+' 座</p><div class="cc-book"><div></div>'+DR.map(d=>'<div class="cc-bh">'+(window.dripSvg?window.dripSvg(d):'')+'<small>'+esc(drName(d))+'</small></div>').join('');
@@ -10569,9 +10583,9 @@ function bookDetail(k){const t=ST.tr[k];if(!t)return '';const [bid,d]=k.split('|
 function render(){const v=$('cupView');if(!v||v.hidden)return;$('ccWal').innerHTML='<b>'+NT(money())+'</b><small>'+(window.WALLET&&WALLET.who()?esc(WALLET.who())+' 的錢包':'挑戰零用金')+'</small>';
   document.querySelectorAll('[data-cct]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.cct===tab));
   $('ccBody').innerHTML=tab==='book'?renderBook():renderPlay();}
-function doBrew(){const c=CH.find(x=>x.b===ST.cur);if(!c||busy)return;const d=ST.dr,r=recOf(c),k=K(c,d);if(jar(c.b)<r.dose)return;
+function doBrew(){selA=-1;attSv=false;const c=CH.find(x=>x.b===ST.cur);if(!c||busy)return;const d=ST.dr,r=recOf(c),k=K(c,d);if(jar(c.b)<r.dose)return;
   ST.jar[c.b]=Math.round((jar(c.b)-r.dose)*10)/10;ST.tries[k]=(ST.tries[k]||0)+1;
-  const x=brew(c,r,d),lg=ST.log[k]=(ST.log[k]||[]).concat([x]).slice(-12),box=inBox(c,x),sv=box&&svOk(c,x),tries=ST.tries[k];
+  const x=Object.assign(brew(c,r,d),{rec:clone(r),no:ST.tries[k],at:Date.now()}),lg=ST.log[k]=(ST.log[k]||[]).concat([x]).slice(-30),box=inBox(c,x),sv=box&&svOk(c,x),tries=ST.tries[k];
   const tier=sv?(tries<=3?3:2):box?1:0,old=ST.tr[k],bl=ST.blind&&!old,dp=dailyPick(),isDaily=dp.c===c&&dp.d===d;
   ST.fail=ST.fail||{};
   if(!tier){ST.fail[k]=(ST.fail[k]||0)+1;msg='沒進框：落在 '+x.ey.toFixed(1)+'%、'+x.tds.toFixed(2)+'%。'+((ST.fail[k]||0)>=2?'失敗兩次了，可以買教練提示。':'看看圖上的落點，想想要往哪個方向調。');if(window.SFX&&SFX.play)try{SFX.play('bad');}catch(e){}}
@@ -10594,10 +10608,11 @@ function segEdit(i,k,dir){const c=CH.find(x=>x.b===ST.cur),r=recOf(c),S=r.segs,q
 let bound=false;
 function bind(){if(bound)return;bound=true;
   document.querySelectorAll('[data-cct]').forEach(b=>b.onclick=()=>{tab=b.dataset.cct;render();});
-  $('ccBody').addEventListener('click',e=>{const t=e.target.closest('button,input');if(!t)return;const ds=t.dataset;
+  $('ccBody').addEventListener('click',e=>{const dot=e.target.closest('.cc-chart .orea-dot');if(dot){selA=+dot.dataset.r.slice(1);attSv=false;const y=scrollY;render();scrollTo(0,y);const a=document.querySelector('.cc-att');if(a)a.scrollIntoView({block:'nearest',behavior:'smooth'});return;}
+    const t=e.target.closest('button,input');if(!t)return;const ds=t.dataset;
     if(ds.dr){ST.dr=ds.dr;msg='';save();render();}
     else if(ds.daily){const dp=dailyPick();ST.dr=dp.d;ST.cur=dp.c.b;msg='';save();render();const p=$('ccPanel');if(p)p.scrollIntoView({behavior:'smooth'});}
-    else if(ds.ch){ST.cur=ds.ch;msg='';save();render();const p=$('ccPanel');if(p)p.scrollIntoView({behavior:'smooth'});}
+    else if(ds.ch){selA=-1;attSv=false;ST.cur=ds.ch;msg='';save();render();const p=$('ccPanel');if(p)p.scrollIntoView({behavior:'smooth'});}
     else if(ds.st){const [k,s]=ds.st.split(':'),cf=CTRL.find(x=>x[0]===k),c=CH.find(x=>x.b===ST.cur);setRec(k,recOf(c)[k]+(+s)*cf[4]);}
     else if(ds.sg){const [i,k,d]=ds.sg.split(':');segEdit(+i,k,+d);}
     else if(ds.ss){const [i,v]=ds.ss.split(':'),c=CH.find(x=>x.b===ST.cur),r=recOf(c);r.segs[+i].sty=v;putRec(c,r);}
@@ -10608,6 +10623,10 @@ function bind(){if(bound)return;bound=true;
     else if(ds.tpo){tplOpen=!tplOpen;const y=scrollY;render();scrollTo(0,y);}
     else if(ds.tp){const p=presets().find(x=>x.id===ds.tp),c=CH.find(x=>x.b===ST.cur);if(p&&c){tplOpen=false;putRec(c,clone(p.r));msg='';const el=document.querySelector('#ccPanel .cc-sh');if(el)el.scrollIntoView({block:'start',behavior:'smooth'});}}
     else if(ds.byp){const c=CH.find(x=>x.b===ST.cur),r=recOf(c);r.byp=Math.max(0,Math.min(150,(r.byp||0)+(+ds.byp)*5));putRec(c,r);}
+    else if(ds.att){selA=+ds.att;attSv=false;const y=scrollY;render();scrollTo(0,y);}
+    else if(ds.useatt){const c=CH.find(x=>x.b===ST.cur),lg=ST.log[K(c,ST.dr)]||[],x=lg[+ds.useatt];if(x&&x.rec){ST.rec[c.b]=clone(x.rec);save();msg='↩ 已套回第 '+(x.no||+ds.useatt+1)+' 杯的配方';const y=scrollY;render();scrollTo(0,y);}}
+    else if(ds.svatt){attSv=!attSv;const y=scrollY;render();scrollTo(0,y);const n=$('ccAtN');if(n)n.focus();}
+    else if(ds.svattok){const c=CH.find(x=>x.b===ST.cur),lg=ST.log[K(c,ST.dr)]||[],x=lg[+ds.svattok];if(x&&x.rec){const nm=saveRec(c,x.rec,$('ccAtN').value);attSv=false;msg=nm?'💾 已儲存「'+esc(nm)+'」，在手法設計的 📁 金杯挑戰 資料夾':'儲存失敗';const y=scrollY;render();scrollTo(0,y);}}
     else if(ds.sall){const c=CH.find(x=>x.b===ST.cur),r=recOf(c);r.segs.forEach(q=>q.temp=r.segs[0].temp);putRec(c,r);}
     else if(ds.brew)doBrew();
     else if(ds.buy){const c=CH.find(x=>x.b===ST.cur);if(pay(B(c.b).price)){ST.jar[c.b]=jar(c.b)+100;save();msg='補了 100 g。';}else msg='錢不夠了：去咖啡店賺一點，或先挑戰其他豆子拿獎金。';render();}
