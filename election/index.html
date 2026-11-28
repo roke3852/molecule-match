@@ -161,6 +161,8 @@ header{position:relative}
 .kt b{font-size:14px}.kt .tg{font-size:13px;letter-spacing:1px}.kt .sm{color:var(--muted);font-size:10.5px;line-height:1.3;margin-top:2px}
 .kt.s1{background:#fff6d6;border-color:#e8c55a}.kt.s2{background:#e3f3e6;border-color:#7cbf8a}
 .kt .st{position:absolute;top:5px;right:7px;font-size:12px}
+.inc{display:inline-block;width:10px;height:14px;border-radius:3px;margin-right:6px;vertical-align:-2px}
+.flipb{font-size:10.5px;background:#c2410c;color:#fff;border-radius:5px;padding:1px 5px;margin-right:6px;vertical-align:1px;font-weight:600}
 footer{text-align:center;color:var(--muted);font-size:12px;padding:20px 0 30px}
 </style>
 </head>
@@ -403,7 +405,7 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:20px 0 30px}
   </div>
 </section>
 </main>
-<footer>2026 九合一選情圖鑑 v2.6・Made by <b>Jim Lu</b></footer>
+<footer>2026 九合一選情圖鑑 v2.7・Made by <b>Jim Lu</b></footer>
 
 <script>
 const P={K:{n:'國民黨',c:'var(--kmt)',l:'var(--kmt-l)'},D:{n:'民進黨',c:'var(--dpp)',l:'var(--dpp-l)'},T:{n:'民眾黨',c:'var(--tpp)',l:'var(--tpp-l)'},I:{n:'無黨籍',c:'var(--ind)',l:'var(--ind-l)'}};
@@ -857,11 +859,13 @@ function estOf(c){const e=ELEC[c];if(!e)return null;let TL=[];try{TL=TO}catch(e)
   const rate=t?(t[3]?(t[2]+t[3])/2:t[2]):DEF_TO;const est=Math.round(e*rate/100);
   const r=RES[c];const tot=r&&r.st!=='won'?Object.values(r.v).reduce((a,b)=>a+b,0):null;
   return {e,rate,est,basis:t?`${t[1]} 投票率 ${rate}%`:`假設投票率 ${DEF_TO}%`,tot,prog:tot!=null?Math.min(100,tot/est*100):null};}
+function incTag(c,L){const i=R[2022][c];if(!i)return '';const same=L&&L.name===i[1];const flip=L&&L.p!==i[0]&&!same;const early=/^16:1/.test((RES[c]||{}).t||'');
+  return `<span class="inc" style="background:${P[i[0]].c}" title="現任：${i[1]}（${P[i[0]].n}）"></span>`+(flip?(early?'<span class="flipb" style="background:#9a96a8">早期・待觀察</span>':'<span class="flipb">翻轉跡象</span>'):'');}
 function drawRes(){
-  document.getElementById('resUpd').textContent='資料時間：'+RES_UPD+'。開票夜會定時更新。中間虛線＝50%（以圖上列出的候選人合計計算）。預估總票數＝中選會公告選舉人數 × 投票率（15 點後的 2026 投票率；沒有就假設 60%，2022 全國約 6 成），只是估計；已開比例只算圖上列出的候選人，會略為低估。';
+  document.getElementById('resUpd').textContent='資料時間：'+RES_UPD+'。開票夜會定時更新。中間虛線＝50%（以圖上列出的候選人合計計算）。縣市名前的色塊＝目前執政黨（2022 當選者），領先者跟現任不同黨會標「翻轉跡象」（同一人換黨籍不算；16:14 的早期數字只標「待觀察」）。預估總票數＝中選會公告選舉人數 × 投票率（15 點後的 2026 投票率；沒有就假設 60%，2022 全國約 6 成），只是估計；已開比例只算圖上列出的候選人，會略為低估。';
   const order=['台北','新北','桃園','台中','台南','高雄'].concat(C.map(c=>c[0]).filter(c=>!['台北','新北','桃園','台中','台南','高雄'].includes(c)));
   document.getElementById('resList').innerHTML=order.filter(c=>RES[c]).map(c=>{const L=resLeader(c),tot=L.e.reduce((a,x)=>a+x[1],0)||1;
-    return `<div style="margin-bottom:10px"><div style="display:flex;justify-content:space-between;font-size:13px"><b>${c}${L.st==='won'?' <span class="pill" style="background:'+P[L.p].c+';color:#fff">'+L.name+' 當選</span>':''}</b><span class="note">${RES[c].t}・<a href="${RES[c].src}" target="_blank" rel="noopener">來源</a></span></div>
+    return `<div style="margin-bottom:10px"><div style="display:flex;justify-content:space-between;font-size:13px"><b>${incTag(c,L)}${c}${L.st==='won'?' <span class="pill" style="background:'+P[L.p].c+';color:#fff">'+L.name+' 當選</span>':''}</b><span class="note">${RES[c].t}・<a href="${RES[c].src}" target="_blank" rel="noopener">來源</a></span></div>
     <div class="bar" style="height:22px;position:relative">${L.e.map(([n,v])=>`<div style="flex:${v};background:${P[partyOf(c,n)].c}">${n} ${v>1?v.toLocaleString():''}</div>`).join('')}<i class="half"></i></div>${estHTML(c)}</div>`}).join('');
 }
 function estHTML(c){const x=estOf(c);if(!x)return '';const w=x.est>=1e4?(x.est/1e4).toFixed(x.est>=1e5?0:1)+' 萬':x.est.toLocaleString();
